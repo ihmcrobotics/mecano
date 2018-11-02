@@ -156,7 +156,7 @@ public class SpatialInertia implements SpatialInertiaBasics, GeometryObject<Spat
     *
     * @param other the other spatial inertia to copy. Not modified.
     */
-   public SpatialInertia(SpatialInertia other)
+   public SpatialInertia(SpatialInertiaReadOnly other)
    {
       setIncludingFrame(other);
    }
