@@ -21,15 +21,15 @@ public class MomentumCalculator
 
    public void computeAndPack(Momentum momentum)
    {
-      momentum.setAngularPart(zero);
-      momentum.setLinearPart(zero);
+      momentum.getAngularPart().set(zero);
+      momentum.getLinearPart().set(zero);
 
       for (RigidBody rigidBody : rigidBodiesInOrders)
       {
          RigidBodyInertia inertia = rigidBody.getInertia();
          rigidBody.getBodyFixedFrame().getTwistOfFrame(tempTwist);
          tempMomentum.compute(inertia, tempTwist);
-         tempMomentum.changeFrame(momentum.getExpressedInFrame());
+         tempMomentum.changeFrame(momentum.getReferenceFrame());
          momentum.add(tempMomentum);
       }
    }
