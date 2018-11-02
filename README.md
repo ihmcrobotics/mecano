@@ -68,9 +68,11 @@ repositories {
 }
 ```
 
-Here is an example for adding the dependency to Euclid Core using your build script:
+Here is an example for adding the dependency to Mecano using your build script:
+
 ```gradle
 dependencies {
-   compile group: "us.ihmc", name: "mecano", version: [ ![mecano](https://api.bintray.com/packages/ihmcrobotics/maven-release/mecano/images/download.svg) ](https://bintray.com/ihmcrobotics/maven-release/mecano/_latestVersion)
+   compile group: "us.ihmc", name: "mecano", version: "x.x"
 }
 ```
+[ ![mecano](https://api.bintray.com/packages/ihmcrobotics/maven-release/mecano/images/download.svg) ](https://bintray.com/ihmcrobotics/maven-release/mecano/_latestVersion)
