@@ -1,6 +1,9 @@
 package us.ihmc.robotics.screwTheory;
 
 import us.ihmc.euclid.tuple3D.Vector3D;
+import us.ihmc.mecano.spatial.Momentum;
+import us.ihmc.mecano.spatial.Twist;
+import us.ihmc.mecano.spatial.interfaces.SpatialInertiaBasics;
 
 public class MomentumCalculator
 {
@@ -26,8 +29,9 @@ public class MomentumCalculator
 
       for (RigidBody rigidBody : rigidBodiesInOrders)
       {
-         RigidBodyInertia inertia = rigidBody.getInertia();
+         SpatialInertiaBasics inertia = rigidBody.getInertia();
          rigidBody.getBodyFixedFrame().getTwistOfFrame(tempTwist);
+         tempMomentum.setReferenceFrame(inertia.getReferenceFrame());
          tempMomentum.compute(inertia, tempTwist);
          tempMomentum.changeFrame(momentum.getReferenceFrame());
          momentum.add(tempMomentum);

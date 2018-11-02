@@ -7,6 +7,9 @@ import org.ejml.data.DenseMatrix64F;
 import org.ejml.ops.CommonOps;
 
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
+import us.ihmc.mecano.spatial.SpatialAcceleration;
+import us.ihmc.mecano.spatial.SpatialForce;
+import us.ihmc.mecano.spatial.Wrench;
 import us.ihmc.robotics.linearAlgebra.MatrixTools;
 
 /**
@@ -28,7 +31,7 @@ public class DifferentialIDMassMatrixCalculator implements MassMatrixCalculator
    public DifferentialIDMassMatrixCalculator(ReferenceFrame inertialFrame, RigidBody rootBody)
    {
       ArrayList<InverseDynamicsJoint> zeroJointToIgnore = new ArrayList<InverseDynamicsJoint>();
-      SpatialAccelerationVector zeroRootAcceleration = ScrewTools.createGravitationalSpatialAcceleration(rootBody, 0.0);
+      SpatialAcceleration zeroRootAcceleration = ScrewTools.createGravitationalSpatialAcceleration(rootBody, 0.0);
       
       idCalculator = new InverseDynamicsCalculator(rootBody, zeroRootAcceleration, zeroJointToIgnore, false, true);
       jointsInOrder = ScrewTools.computeSubtreeJoints(rootBody);
@@ -89,7 +92,7 @@ public class DifferentialIDMassMatrixCalculator implements MassMatrixCalculator
       {
          DenseMatrix64F tauMatrix = new DenseMatrix64F(joint.getDegreesOfFreedom(), 1);
          joint.getTauMatrix(tauMatrix);
-         DenseMatrix64F spatialForce = new DenseMatrix64F(SpatialForceVector.SIZE, 1);
+         DenseMatrix64F spatialForce = new DenseMatrix64F(SpatialForce.SIZE, 1);
          CommonOps.mult(joint.getMotionSubspace().getJacobianMatrix(), tauMatrix, spatialForce);
          Wrench jointWrench = storedJointWrenches.get(joint);
          jointWrench.setIncludingFrame(joint.getFrameAfterJoint(), spatialForce);
