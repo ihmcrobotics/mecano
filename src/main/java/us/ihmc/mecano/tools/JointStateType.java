@@ -23,5 +23,5 @@ public enum JointStateType
    /**
     * Refers to the moment and/or force of a joint.
     */
-   TAU
+   EFFORT
 }

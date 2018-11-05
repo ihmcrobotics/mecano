@@ -4,14 +4,14 @@ buildscript {
       mavenLocal()
    }
    dependencies {
-      classpath "us.ihmc:ihmc-build:0.13.3"
+      classpath "us.ihmc:ihmc-build:0.15.3"
    }
 }
 apply plugin: "us.ihmc.ihmc-build"
 
 ihmc {
    group = "us.ihmc"
-   version = "0.0.1"
+   version = "0.0.2"
    vcsUrl = "https://github.com/ihmcrobotics/mecano"
    openSource = true
 
@@ -23,7 +23,7 @@ mainDependencies {
    compile group: "org.ejml", name: "dense64", version: "0.30"
 
    compile group: "us.ihmc", name: "euclid-core", version: "0.6.1"
-   compile group: "us.ihmc", name: "euclid", version: "0.9.2"
+   compile group: "us.ihmc", name: "euclid", version: "0.9.3"
 }
 
 testDependencies {

@@ -59,7 +59,7 @@ public class MultiBodySystemRandomTools
          joint.setJointAngularAcceleration(EuclidCoreRandomTools.nextVector3D(random));
          joint.setJointLinearAcceleration(EuclidCoreRandomTools.nextVector3D(random));
          break;
-      case TAU:
+      case EFFORT:
          joint.setJointTorque(EuclidCoreRandomTools.nextVector3D(random));
          joint.setJointForce(EuclidCoreRandomTools.nextVector3D(random));
          break;
@@ -115,7 +115,7 @@ public class MultiBodySystemRandomTools
       case ACCELERATION:
          joint.setQdd(EuclidCoreRandomTools.nextDouble(random, min, max));
          break;
-      case TAU:
+      case EFFORT:
          joint.setTau(EuclidCoreRandomTools.nextDouble(random, min, max));
          break;
       default:
@@ -148,7 +148,7 @@ public class MultiBodySystemRandomTools
       case VELOCITY:
          joint.setQd(EuclidCoreRandomTools.nextDouble(random, joint.getVelocityLimitLower(), joint.getVelocityLimitUpper()));
          break;
-      case TAU:
+      case EFFORT:
          joint.setTau(EuclidCoreRandomTools.nextDouble(random, joint.getEffortLimitLower(), joint.getEffortLimitUpper()));
          break;
       default:

@@ -80,7 +80,7 @@ public class SpatialForce implements SpatialForceBasics, GeometryObject<SpatialF
     * @param angularPart the vector holding the values for the angular part. Not modified.
     * @param linearPart the vector holding the values for the linear part. Not modified.
     */
-   public SpatialForce(ReferenceFrame expressedInFrame, Vector3DReadOnly linearPart, Vector3DReadOnly angularPart)
+   public SpatialForce(ReferenceFrame expressedInFrame, Vector3DReadOnly angularPart, Vector3DReadOnly linearPart)
    {
       setIncludingFrame(expressedInFrame, angularPart, linearPart);
    }
