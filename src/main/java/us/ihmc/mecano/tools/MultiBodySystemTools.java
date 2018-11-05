@@ -493,7 +493,7 @@ public class MultiBodySystemTools
       case ACCELERATION:
          copyJointsAcceleration(source, destination);
          return;
-      case TAU:
+      case EFFORT:
          copyJointsTau(source, destination);
          return;
       default:
@@ -562,7 +562,7 @@ public class MultiBodySystemTools
          return extractJointsVelocity(joints, 0, matrixToPack);
       case ACCELERATION:
          return extractJointsAcceleration(joints, 0, matrixToPack);
-      case TAU:
+      case EFFORT:
          return extractJointsTau(joints, 0, matrixToPack);
       default:
          throw new RuntimeException("Unexpected value for stateSelection: " + stateSelection);
@@ -634,7 +634,7 @@ public class MultiBodySystemTools
          return extractJointsVelocity(joints, 0, matrixToPack);
       case ACCELERATION:
          return extractJointsAcceleration(joints, 0, matrixToPack);
-      case TAU:
+      case EFFORT:
          return extractJointsTau(joints, 0, matrixToPack);
       default:
          throw new RuntimeException("Unexpected value for stateSelection: " + stateSelection);
@@ -707,7 +707,7 @@ public class MultiBodySystemTools
          return insertJointsVelocity(joints, 0, matrix);
       case ACCELERATION:
          return insertJointsAcceleration(joints, 0, matrix);
-      case TAU:
+      case EFFORT:
          return insertJointsTau(joints, 0, matrix);
       default:
          throw new RuntimeException("Unexpected value for stateSelection: " + stateSelection);
@@ -780,7 +780,7 @@ public class MultiBodySystemTools
          return insertJointsVelocity(joints, 0, matrix);
       case ACCELERATION:
          return insertJointsAcceleration(joints, 0, matrix);
-      case TAU:
+      case EFFORT:
          return insertJointsTau(joints, 0, matrix);
       default:
          throw new RuntimeException("Unexpected value for stateSelection: " + stateSelection);

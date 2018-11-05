@@ -275,7 +275,7 @@ public class ForwardDynamicsCalculator
       else
       {
          List<? extends JointReadOnly> indexedJointsInOrder = input.getJointMatrixIndexProvider().getIndexedJointsInOrder();
-         MultiBodySystemTools.extractJointsState(indexedJointsInOrder, JointStateType.TAU, this.jointTauMatrix);
+         MultiBodySystemTools.extractJointsState(indexedJointsInOrder, JointStateType.EFFORT, this.jointTauMatrix);
       }
 
       initialRecursionStep.passOne();

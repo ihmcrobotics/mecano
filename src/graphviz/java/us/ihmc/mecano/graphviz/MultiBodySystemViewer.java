@@ -335,7 +335,7 @@ public class MultiBodySystemViewer
          return "linear acceleration = " + EuclidCoreIOTools.getTuple3DString(jointAcceleration.getLinearPart()) + "\nangular acceleration = "
                + EuclidCoreIOTools.getTuple3DString(jointAcceleration.getAngularPart());
 
-      case TAU:
+      case EFFORT:
          WrenchReadOnly jointWrench = joint.getJointWrench();
          return "force = " + EuclidCoreIOTools.getTuple3DString(jointWrench.getLinearPart()) + "\nmoment = "
                + EuclidCoreIOTools.getTuple3DString(jointWrench.getAngularPart());
@@ -364,7 +364,7 @@ public class MultiBodySystemViewer
          return "linear acceleration = " + ReferenceFrameTreeViewer.getLabelOf(jointAcceleration.getLinearPartX(), jointAcceleration.getLinearPartZ())
                + "\nangular acceleration = " + ReferenceFrameTreeViewer.getLabelOf(jointAcceleration.getAngularPartY());
 
-      case TAU:
+      case EFFORT:
          WrenchReadOnly jointWrench = joint.getJointWrench();
          return "force = " + ReferenceFrameTreeViewer.getLabelOf(jointWrench.getLinearPartX(), jointWrench.getLinearPartZ()) + "\nmoment = "
                + ReferenceFrameTreeViewer.getLabelOf(jointWrench.getAngularPartY());
@@ -387,7 +387,7 @@ public class MultiBodySystemViewer
       case ACCELERATION:
          return "angular acceleration = " + EuclidCoreIOTools.getTuple3DString(joint.getJointAngularAcceleration());
 
-      case TAU:
+      case EFFORT:
          return "moment = " + EuclidCoreIOTools.getTuple3DString(joint.getJointTorque());
 
       default:
@@ -408,7 +408,7 @@ public class MultiBodySystemViewer
       case ACCELERATION:
          return "qdd = " + ReferenceFrameTreeViewer.getLabelOf(joint.getQdd());
 
-      case TAU:
+      case EFFORT:
          return "tau = " + ReferenceFrameTreeViewer.getLabelOf(joint.getTau());
 
       default:
@@ -553,7 +553,7 @@ public class MultiBodySystemViewer
          MultiBodySystemRandomTools.nextState(random, stateToRandomize, joints);
 
       new MultiBodySystemViewer(rootBody).showJointType().showOneDoFJointAxis().showRigidBodyMass().showRigidBodyCenterOfMass().showRigidBodyInertia()
-            .showJointStates(JointStateType.CONFIGURATION, JointStateType.VELOCITY, JointStateType.ACCELERATION, JointStateType.TAU).setDisplay(Display.BOTH)
+            .showJointStates(JointStateType.CONFIGURATION, JointStateType.VELOCITY, JointStateType.ACCELERATION, JointStateType.EFFORT).setDisplay(Display.BOTH)
             .view("MultiBodySystemViewExample");
    }
 }
