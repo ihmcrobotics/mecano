@@ -3,7 +3,6 @@ package us.ihmc.mecano.yoVariables.spatial;
 import us.ihmc.euclid.interfaces.GeometryObject;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.referenceFrame.exceptions.ReferenceFrameMismatchException;
-import us.ihmc.euclid.referenceFrame.interfaces.FixedFrameVector3DBasics;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.transform.interfaces.Transform;
 import us.ihmc.euclid.tuple3D.Point3D;
@@ -125,14 +124,14 @@ public class YoFixedFrameSpatialForce implements FixedFrameSpatialForceBasics, G
 
    /** {@inheritDoc} */
    @Override
-   public FixedFrameVector3DBasics getAngularPart()
+   public YoFrameVector3D getAngularPart()
    {
       return spatialVector.getAngularPart();
    }
 
    /** {@inheritDoc} */
    @Override
-   public FixedFrameVector3DBasics getLinearPart()
+   public YoFrameVector3D getLinearPart()
    {
       return spatialVector.getLinearPart();
    }

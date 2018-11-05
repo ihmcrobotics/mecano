@@ -3,7 +3,6 @@ package us.ihmc.mecano.yoVariables.spatial;
 import us.ihmc.euclid.interfaces.GeometryObject;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.referenceFrame.exceptions.ReferenceFrameMismatchException;
-import us.ihmc.euclid.referenceFrame.interfaces.FixedFrameVector3DBasics;
 import us.ihmc.euclid.transform.interfaces.Transform;
 import us.ihmc.euclid.tuple3D.interfaces.Vector3DReadOnly;
 import us.ihmc.mecano.spatial.SpatialForce;
@@ -142,14 +141,14 @@ public class YoFixedFrameWrench implements FixedFrameWrenchBasics, GeometryObjec
 
    /** {@inheritDoc} */
    @Override
-   public FixedFrameVector3DBasics getAngularPart()
+   public YoFrameVector3D getAngularPart()
    {
       return spatialForceVector.getAngularPart();
    }
 
    /** {@inheritDoc} */
    @Override
-   public FixedFrameVector3DBasics getLinearPart()
+   public YoFrameVector3D getLinearPart()
    {
       return spatialForceVector.getLinearPart();
    }
