@@ -492,7 +492,7 @@ public class CompositeRigidBodyMassMatrixCalculator
             coriolisBodyAcceleration.changeFrame(getBodyFixedFrame(), intermediateTwist, parent.getBodyFixedFrame().getTwistOfFrame());
             coriolisBodyAcceleration.setBodyFrame(getBodyFixedFrame());
 
-            inertia.computeDynamicWrench(coriolisBodyAcceleration, getBodyFixedFrame().getTwistOfFrame(), netCoriolisBodyWrench);
+            inertia.computeDynamicWrenchFast(coriolisBodyAcceleration, getBodyFixedFrame().getTwistOfFrame(), netCoriolisBodyWrench);
             netCoriolisBodyWrench.changeFrame(centroidalMomentumFrame);
             centroidalConvectiveTerm.add(netCoriolisBodyWrench);
          }

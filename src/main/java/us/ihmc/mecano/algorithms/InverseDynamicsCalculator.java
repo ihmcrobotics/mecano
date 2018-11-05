@@ -578,7 +578,7 @@ public class InverseDynamicsCalculator
                rigidBodyAcceleration.add(localJointAcceleration);
             }
 
-            rigidBody.getInertia().computeDynamicWrench(rigidBodyAcceleration, bodyTwistToUse, jointWrench);
+            rigidBody.getInertia().computeDynamicWrenchFast(rigidBodyAcceleration, bodyTwistToUse, jointWrench);
          }
 
          for (int childIndex = 0; childIndex < children.size(); childIndex++)

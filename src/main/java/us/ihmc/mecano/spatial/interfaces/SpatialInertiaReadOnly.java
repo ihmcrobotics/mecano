@@ -191,7 +191,7 @@ public interface SpatialInertiaReadOnly extends ReferenceFrameHolder
     * @throws ReferenceFrameMismatchException if either the given twist or acceleration
     *            "expressed-in-frame" is not the same as {@code this.expressedInFrame}.
     */
-   default void computeDynamicWrench(SpatialAccelerationReadOnly acceleration, TwistReadOnly twist, WrenchBasics dynamicWrenchToPack)
+   default void computeDynamicWrenchFast(SpatialAccelerationReadOnly acceleration, TwistReadOnly twist, WrenchBasics dynamicWrenchToPack)
    {
       checkIfCenterOfMassOffsetIsZero(); // otherwise this operation would be a lot less efficient
 

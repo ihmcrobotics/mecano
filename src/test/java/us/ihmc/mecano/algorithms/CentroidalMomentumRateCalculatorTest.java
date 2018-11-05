@@ -233,7 +233,7 @@ public class CentroidalMomentumRateCalculatorTest
          bodyAcceleration.setIncludingFrame(spatialAccelerationCalculator.getAccelerationOfBody(rigidBody));
          TwistReadOnly bodyTwist = rigidBody.getBodyFixedFrame().getTwistOfFrame();
 
-         inertia.computeDynamicWrench(bodyAcceleration, bodyTwist, bodyDynamicWrench);
+         inertia.computeDynamicWrenchFast(bodyAcceleration, bodyTwist, bodyDynamicWrench);
 
          bodyDynamicWrench.changeFrame(referenceFrame);
          momentumRate.add(bodyDynamicWrench);
