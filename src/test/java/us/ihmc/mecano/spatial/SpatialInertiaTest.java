@@ -105,7 +105,7 @@ public class SpatialInertiaTest
    }
 
    @Test
-   public void testComputeDynamicWrench() throws Exception
+   public void testComputeDynamicWrenchFast() throws Exception
    {
       Random random = new Random(345346);
       ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();

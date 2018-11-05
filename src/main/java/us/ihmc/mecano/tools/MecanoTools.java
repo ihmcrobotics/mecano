@@ -390,8 +390,8 @@ public class MecanoTools
     * @param momentOfInertia the moment of inertia of the rigid body expressed at its center of mass.
     *           Not modified.
     * @param angularAcceleration the angular acceleration of the rigid-body with respect to an inertial
-    *           frame and expressed in the same frame as the inertia matrix. @cod Can be {@code null}.
-    *           Not modified.
+    *           frame and expressed in the same frame as the inertia matrix. Can be {@code null}. Not
+    *           modified.
     * @param angularVelocity the angular velocity of the rigid-body with respect to an inertial frame
     *           and expressed in the same frame as the inertia matrix. Can be {@code null}. Not
     *           modified.
@@ -436,21 +436,27 @@ public class MecanoTools
     * Besides the requirement that all arguments should be expressed the same frame, this method does
     * not make other assumption regarding the said frame.
     * </p>
+    * <p>
+    * If the given {@code angularAcceleration}, {@code linearAcceleration}, {@code angularVelocity}, or
+    * {@code linearVelocity} is {@code null}, it is assumed to be equal to zero.
+    * </p>
     * 
     * @param momentOfInertia the moment of inertia of the rigid body. Not modified.
     * @param mass the rigid body mass.
     * @param centerOfMassOffset the offset of the center of mass position with respect to the origin of
     *           the frame in which the inertia is expressed. Not modified.
     * @param angularAcceleration the angular acceleration of the rigid-body with respect to an inertial
-    *           frame and expressed in the same frame as the inertia matrix. Not modified.
+    *           frame and expressed in the same frame as the inertia matrix. Can be {@code null}. Not
+    *           modified.
     * @param linearAcceleration the linear acceleration of the origin of the frame in which the inertia
     *           is expressed with respect to an inertial frame and expressed in the same frame as the
-    *           inertia matrix. Not modified.
+    *           inertia matrix. Can be {@code null}. Not modified.
     * @param angularVelocity the angular velocity of the rigid-body with respect to an inertial frame
-    *           and expressed in the same frame as the inertia matrix. Not modified.
+    *           and expressed in the same frame as the inertia matrix. Can be {@code null}. Not
+    *           modified.
     * @param linearVelocity the linear velocity of the origin of the frame in which the inertia is
     *           expressed with respect to an inertial frame and expressed in the same frame as the
-    *           inertia matrix. Not modified.
+    *           inertia matrix. Can be {@code null}. Not modified.
     * @param dynamicMomentToPack vector used to store the net moment at the origin of the frame in
     *           which the inertia is expressed. Modified.
     */
@@ -461,38 +467,64 @@ public class MecanoTools
       // Temporary variables to store intermediate results.
       double mx, my, mz;
 
-      // w . c
-      double omega_dot_c = angularVelocity.dot(centerOfMassOffset);
-      // v . c
-      double v_dot_c = linearVelocity.dot(centerOfMassOffset);
+      if (linearAcceleration == null)
+      {
+         dynamicMomentToPack.setToZero();
+      }
+      else
+      {
+         // c x a
+         dynamicMomentToPack.cross(centerOfMassOffset, linearAcceleration);
+      }
 
-      // c x a
-      dynamicMomentToPack.cross(centerOfMassOffset, linearAcceleration);
+      if (angularVelocity != null)
+      {
+         if (linearVelocity != null)
+         {
+            // w . c
+            double omega_dot_c = angularVelocity.dot(centerOfMassOffset);
+            // v . c
+            double v_dot_c = linearVelocity.dot(centerOfMassOffset);
 
-      // c x a + w (v . c) - v (w . c)
-      dynamicMomentToPack.addX(angularVelocity.getX() * v_dot_c - linearVelocity.getX() * omega_dot_c);
-      dynamicMomentToPack.addY(angularVelocity.getY() * v_dot_c - linearVelocity.getY() * omega_dot_c);
-      dynamicMomentToPack.addZ(angularVelocity.getZ() * v_dot_c - linearVelocity.getZ() * omega_dot_c);
-      // m ( c x a + w (v . c) - v (w . c) )
-      dynamicMomentToPack.scale(mass);
-      mx = dynamicMomentToPack.getX();
-      my = dynamicMomentToPack.getY();
-      mz = dynamicMomentToPack.getZ();
+            // c x a + w (v . c) - v (w . c)
+            dynamicMomentToPack.addX(angularVelocity.getX() * v_dot_c - linearVelocity.getX() * omega_dot_c);
+            dynamicMomentToPack.addY(angularVelocity.getY() * v_dot_c - linearVelocity.getY() * omega_dot_c);
+            dynamicMomentToPack.addZ(angularVelocity.getZ() * v_dot_c - linearVelocity.getZ() * omega_dot_c);
+            // m ( c x a + w (v . c) - v (w . c) )
+            dynamicMomentToPack.scale(mass);
+         }
 
-      // J w
-      momentOfInertia.transform(angularVelocity, dynamicMomentToPack);
-      // w x J w
-      dynamicMomentToPack.cross(angularVelocity, dynamicMomentToPack);
-      // w x J w + m ( c x a + w (v . c) - v (w . c) )
-      mx += dynamicMomentToPack.getX();
-      my += dynamicMomentToPack.getY();
-      mz += dynamicMomentToPack.getZ();
+         mx = dynamicMomentToPack.getX();
+         my = dynamicMomentToPack.getY();
+         mz = dynamicMomentToPack.getZ();
 
-      // J wDot
-      momentOfInertia.transform(angularAcceleration, dynamicMomentToPack);
-      // J wDot + w x J w + m ( c x a + w (v . c) - v (w . c) )
-      dynamicMomentToPack.add(mx, my, mz);
+         // J w
+         momentOfInertia.transform(angularVelocity, dynamicMomentToPack);
+         // w x J w
+         dynamicMomentToPack.cross(angularVelocity, dynamicMomentToPack);
+         // w x J w + m ( c x a + w (v . c) - v (w . c) )
+         mx += dynamicMomentToPack.getX();
+         my += dynamicMomentToPack.getY();
+         mz += dynamicMomentToPack.getZ();
+      }
+      else
+      {
+         mx = dynamicMomentToPack.getX();
+         my = dynamicMomentToPack.getY();
+         mz = dynamicMomentToPack.getZ();
+      }
 
+      if (angularAcceleration != null)
+      {
+         // J wDot
+         momentOfInertia.transform(angularAcceleration, dynamicMomentToPack);
+         // J wDot + w x J w + m ( c x a + w (v . c) - v (w . c) )
+         dynamicMomentToPack.add(mx, my, mz);
+      }
+      else
+      {
+         dynamicMomentToPack.set(mx, my, mz);
+      }
    }
 
    /**
@@ -549,20 +581,26 @@ public class MecanoTools
     * Besides the requirement that all arguments should be expressed the same frame, this method does
     * not make other assumption regarding the said frame.
     * </p>
+    * <p>
+    * If the given {@code angularAcceleration}, {@code linearAcceleration}, {@code angularVelocity}, or
+    * {@code linearVelocity} is {@code null}, it is assumed to be equal to zero.
+    * </p>
     * 
     * @param mass the rigid body mass.
     * @param centerOfMassOffset the offset of the center of mass position with respect to the origin of
     *           the frame in which the inertia is expressed. Not modified.
     * @param angularAcceleration the angular acceleration of the rigid-body with respect to an inertial
-    *           frame and expressed in the same frame as the inertia matrix. Not modified.
+    *           frame and expressed in the same frame as the inertia matrix. Can be {@code null}. Not
+    *           modified.
     * @param linearAcceleration the linear acceleration of the origin of the frame in which the inertia
     *           is expressed with respect to an inertial frame and expressed in the same frame as the
-    *           inertia matrix. Not modified.
+    *           inertia matrix. Can be {@code null}. Not modified.
     * @param angularVelocity the angular velocity of the rigid-body with respect to an inertial frame
-    *           and expressed in the same frame as the inertia matrix. Not modified.
+    *           and expressed in the same frame as the inertia matrix. Can be {@code null}. Not
+    *           modified.
     * @param linearVelocity the linear velocity of the origin of the frame in which the inertia is
     *           expressed with respect to an inertial frame and expressed in the same frame as the
-    *           inertia matrix. Not modified.
+    *           inertia matrix. Can be {@code null}. Not modified.
     * @param dynamicForceToPack vector used to store the net force at the origin of the frame in which
     *           the inertia is expressed. Modified.
     */
@@ -570,16 +608,34 @@ public class MecanoTools
                                           Vector3DReadOnly linearAcceleration, Vector3DReadOnly angularVelocity, Vector3DReadOnly linearVelocity,
                                           Vector3DBasics dynamicForceToPack)
    {
-      // w x (c x w - v)
-      dynamicForceToPack.cross(centerOfMassOffset, angularVelocity);
-      dynamicForceToPack.sub(linearVelocity);
-      dynamicForceToPack.cross(angularVelocity, dynamicForceToPack);
-      // c x wDot + w x (c x w - v)
-      addCrossToVector(centerOfMassOffset, angularAcceleration, dynamicForceToPack);
+      if (angularVelocity != null)
+      {
+         // w x (c x w - v)
+         dynamicForceToPack.cross(centerOfMassOffset, angularVelocity);
+         if (linearVelocity != null)
+            dynamicForceToPack.sub(linearVelocity);
+         dynamicForceToPack.cross(angularVelocity, dynamicForceToPack);
+      }
+      else
+      {
+         dynamicForceToPack.setToZero();
+      }
+
+      if (angularAcceleration != null)
+      {
+         // c x wDot + w x (c x w - v)
+         addCrossToVector(centerOfMassOffset, angularAcceleration, dynamicForceToPack);
+      }
+
       // - c x wDot - w x (c x w - v)
       dynamicForceToPack.negate();
-      // a - c x wDot - w x (c x w - v)
-      dynamicForceToPack.add(linearAcceleration);
+
+      if (linearAcceleration != null)
+      {
+         // a - c x wDot - w x (c x w - v)
+         dynamicForceToPack.add(linearAcceleration);
+      }
+
       dynamicForceToPack.scale(mass);
    }
 
