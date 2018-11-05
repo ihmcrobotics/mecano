@@ -1,4 +1,4 @@
-# Mecano
+# Mecano [ ![mecano](https://api.bintray.com/packages/ihmcrobotics/maven-release/mecano/images/download.svg) ](https://bintray.com/ihmcrobotics/maven-release/mecano/_latestVersion)
 
 ## Minutiae
 
