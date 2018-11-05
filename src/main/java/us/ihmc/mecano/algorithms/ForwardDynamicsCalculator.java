@@ -711,7 +711,7 @@ public class ForwardDynamicsCalculator
             else
                frameAfterJoint.getTransformToDesiredFrame(transformToParentJointFrame, parent.getFrameAfterJoint());
 
-            rigidBody.getInertia().computeDynamicWrench(null, getBodyTwist(), biasWrench);
+            rigidBody.getInertia().computeDynamicWrenchFast(null, getBodyTwist(), biasWrench);
             biasWrench.sub(externalWrench);
             biasWrench.changeFrame(frameAfterJoint);
 

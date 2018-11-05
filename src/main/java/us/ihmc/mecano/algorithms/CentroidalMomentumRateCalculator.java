@@ -596,7 +596,7 @@ public class CentroidalMomentumRateCalculator implements ReferenceFrameHolder
          coriolisBodyAcceleration.changeFrame(getBodyFixedFrame(), intermediateTwist, parent.getBodyFixedFrame().getTwistOfFrame());
          coriolisBodyAcceleration.setBodyFrame(getBodyFixedFrame());
 
-         inertia.computeDynamicWrench(coriolisBodyAcceleration, getBodyFixedFrame().getTwistOfFrame(), netCoriolisBodyWrench);
+         inertia.computeDynamicWrenchFast(coriolisBodyAcceleration, getBodyFixedFrame().getTwistOfFrame(), netCoriolisBodyWrench);
          netCoriolisBodyWrench.applyInverseTransform(matrixFrameToBodyFixedFrameTransform);
          netCoriolisBodyWrench.setReferenceFrame(matrixFrame);
          biasSpatialForce.add(netCoriolisBodyWrench);

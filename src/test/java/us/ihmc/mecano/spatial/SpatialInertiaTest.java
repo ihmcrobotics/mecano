@@ -105,7 +105,7 @@ public class SpatialInertiaTest
    }
 
    @Test
-   public void testComputeDynamicWrench() throws Exception
+   public void testComputeDynamicWrenchFast() throws Exception
    {
       Random random = new Random(345346);
       ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
@@ -125,7 +125,7 @@ public class SpatialInertiaTest
                                                         expected.getLinearPart());
 
          Wrench actual = new Wrench(worldFrame, worldFrame);
-         inertia.computeDynamicWrench(acceleration, twist, actual);
+         inertia.computeDynamicWrenchFast(acceleration, twist, actual);
 
          MecanoTestTools.assertWrenchEquals(expected, actual, EPSILON);
       }
@@ -146,49 +146,49 @@ public class SpatialInertiaTest
          Twist twist = MecanoRandomTools.nextTwist(random, bodyFrame, worldFrame, bodyFrame);
 
          Wrench wrench = new Wrench(worldFrame, worldFrame);
-         MecanoTestTools.assertExceptionIsThrown(() -> inertia.computeDynamicWrench(acceleration, twist, wrench), RuntimeException.class);
+         MecanoTestTools.assertExceptionIsThrown(() -> inertia.computeDynamicWrenchFast(acceleration, twist, wrench), RuntimeException.class);
          inertia.getCenterOfMassOffset().setToZero();
-         inertia.computeDynamicWrench(acceleration, twist, wrench);
+         inertia.computeDynamicWrenchFast(acceleration, twist, wrench);
 
          inertia.setReferenceFrame(anotherFrame);
-         MecanoTestTools.assertExceptionIsThrown(() -> inertia.computeDynamicWrench(acceleration, twist, wrench),
+         MecanoTestTools.assertExceptionIsThrown(() -> inertia.computeDynamicWrenchFast(acceleration, twist, wrench),
                                                             ReferenceFrameMismatchException.class);
          inertia.setReferenceFrame(bodyFrame);
-         inertia.computeDynamicWrench(acceleration, twist, wrench);
+         inertia.computeDynamicWrenchFast(acceleration, twist, wrench);
 
          twist.setBaseFrame(nonStationaryFrame);
-         MecanoTestTools.assertExceptionIsThrown(() -> inertia.computeDynamicWrench(acceleration, twist, wrench), RuntimeException.class);
+         MecanoTestTools.assertExceptionIsThrown(() -> inertia.computeDynamicWrenchFast(acceleration, twist, wrench), RuntimeException.class);
          twist.setBaseFrame(worldFrame);
-         inertia.computeDynamicWrench(acceleration, twist, wrench);
+         inertia.computeDynamicWrenchFast(acceleration, twist, wrench);
 
          acceleration.setBaseFrame(nonStationaryFrame);
-         MecanoTestTools.assertExceptionIsThrown(() -> inertia.computeDynamicWrench(acceleration, twist, wrench), RuntimeException.class);
+         MecanoTestTools.assertExceptionIsThrown(() -> inertia.computeDynamicWrenchFast(acceleration, twist, wrench), RuntimeException.class);
          acceleration.setBaseFrame(worldFrame);
-         inertia.computeDynamicWrench(acceleration, twist, wrench);
+         inertia.computeDynamicWrenchFast(acceleration, twist, wrench);
 
          twist.setReferenceFrame(anotherFrame);
-         MecanoTestTools.assertExceptionIsThrown(() -> inertia.computeDynamicWrench(acceleration, twist, wrench),
+         MecanoTestTools.assertExceptionIsThrown(() -> inertia.computeDynamicWrenchFast(acceleration, twist, wrench),
                                                             ReferenceFrameMismatchException.class);
          twist.setReferenceFrame(bodyFrame);
-         inertia.computeDynamicWrench(acceleration, twist, wrench);
+         inertia.computeDynamicWrenchFast(acceleration, twist, wrench);
 
          acceleration.setReferenceFrame(anotherFrame);
-         MecanoTestTools.assertExceptionIsThrown(() -> inertia.computeDynamicWrench(acceleration, twist, wrench),
+         MecanoTestTools.assertExceptionIsThrown(() -> inertia.computeDynamicWrenchFast(acceleration, twist, wrench),
                                                             ReferenceFrameMismatchException.class);
          acceleration.setReferenceFrame(bodyFrame);
-         inertia.computeDynamicWrench(acceleration, twist, wrench);
+         inertia.computeDynamicWrenchFast(acceleration, twist, wrench);
 
          twist.setBodyFrame(anotherFrame);
-         MecanoTestTools.assertExceptionIsThrown(() -> inertia.computeDynamicWrench(acceleration, twist, wrench),
+         MecanoTestTools.assertExceptionIsThrown(() -> inertia.computeDynamicWrenchFast(acceleration, twist, wrench),
                                                             ReferenceFrameMismatchException.class);
          twist.setBodyFrame(bodyFrame);
-         inertia.computeDynamicWrench(acceleration, twist, wrench);
+         inertia.computeDynamicWrenchFast(acceleration, twist, wrench);
 
          acceleration.setBodyFrame(anotherFrame);
-         MecanoTestTools.assertExceptionIsThrown(() -> inertia.computeDynamicWrench(acceleration, twist, wrench),
+         MecanoTestTools.assertExceptionIsThrown(() -> inertia.computeDynamicWrenchFast(acceleration, twist, wrench),
                                                             ReferenceFrameMismatchException.class);
          acceleration.setBodyFrame(bodyFrame);
-         inertia.computeDynamicWrench(acceleration, twist, wrench);
+         inertia.computeDynamicWrenchFast(acceleration, twist, wrench);
       }
    }
 
