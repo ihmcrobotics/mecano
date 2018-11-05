@@ -151,13 +151,12 @@ public interface FixedFrameSpatialVectorBasics extends SpatialVectorReadOnly, Cl
    }
 
    /**
-    * Selects a component of this spatial vector based on {@code index} and sets it to
-    * {@code value}.
+    * Selects a component of this spatial vector based on {@code index} and sets it to {@code value}.
     * <ul>
-    * <li>For an {@code index} &in; [0, 2], the corresponding components are {@code x}, {@code y},
-    * and {@code z} of this vector's angular part.
-    * <li>For an {@code index} &in; [3, 5], the corresponding components are {@code x}, {@code y},
-    * and {@code z} of this vector's linear part.
+    * <li>For an {@code index} &in; [0, 2], the corresponding components are {@code x}, {@code y}, and
+    * {@code z} of this vector's angular part.
+    * <li>For an {@code index} &in; [3, 5], the corresponding components are {@code x}, {@code y}, and
+    * {@code z} of this vector's linear part.
     * </ul>
     *
     * @param index the index of the component to set.
@@ -285,8 +284,8 @@ public interface FixedFrameSpatialVectorBasics extends SpatialVectorReadOnly, Cl
    }
 
    /**
-    * Sets this vector's components from the given column vector starting to read from
-    * {@code startRow} at the column index {@code column}.
+    * Sets this vector's components from the given column vector starting to read from {@code startRow}
+    * at the column index {@code column}.
     * <p>
     * The components are read in the following order: {@code angularPartX}, {@code angularPartY},
     * {@code angularPartZ}, {@code linearPartX}, {@code linearPartY}, {@code linearPartZ}.
@@ -319,8 +318,8 @@ public interface FixedFrameSpatialVectorBasics extends SpatialVectorReadOnly, Cl
     * Sets this vector to {@code other}.
     *
     * @param other the other vector to copy. Not modified.
-    * @throws ReferenceFrameMismatchException if {@code other} is not expressed in the same
-    *            reference frame as {@code this}.
+    * @throws ReferenceFrameMismatchException if {@code other} is not expressed in the same reference
+    *            frame as {@code this}.
     */
    default void set(SpatialVectorReadOnly other)
    {
@@ -334,8 +333,8 @@ public interface FixedFrameSpatialVectorBasics extends SpatialVectorReadOnly, Cl
     * {@link #set(SpatialVectorReadOnly)}.
     * </p>
     * <p>
-    * If {@code other} is expressed in a different frame than {@code this}, then {@code this} is set
-    * to {@code other} once transformed to be expressed in {@code this.getReferenceFrame()}.
+    * If {@code other} is expressed in a different frame than {@code this}, then {@code this} is set to
+    * {@code other} once transformed to be expressed in {@code this.getReferenceFrame()}.
     * </p>
     *
     * @param other the other vector to copy. Not modified.
@@ -345,6 +344,31 @@ public interface FixedFrameSpatialVectorBasics extends SpatialVectorReadOnly, Cl
       getAngularPart().set((Vector3DReadOnly) other.getAngularPart());
       getLinearPart().set((Vector3DReadOnly) other.getLinearPart());
       other.getReferenceFrame().transformFromThisToDesiredFrame(getReferenceFrame(), this);
+   }
+
+   /**
+    * Sets this vector given an angular part and linear part.
+    * <p>
+    * If the arguments are expressed in the frame as {@code this}, then this method is equivalent to
+    * {@link #set(SpatialVectorReadOnly)}.
+    * </p>
+    * <p>
+    * If the arguments are expressed in a different frame than {@code this}, then {@code this} is set
+    * to {@code angularPart} and {@code linearPart} once transformed to be expressed in
+    * {@code this.getReferenceFrame()}.
+    * </p>
+    *
+    * @param angularPart the vector holding the new values for the angular part. Not modified.
+    * @param linearPart the vector holding the new values for the linear part. Not modified.
+    * @throws ReferenceFrameMismatchException if the arguments are not expressed in the same reference
+    *            frame.
+    */
+   default void setMatchingFrame(FrameVector3DReadOnly angularPart, FrameVector3DReadOnly linearPart)
+   {
+      angularPart.checkReferenceFrameMatch(linearPart);
+      getAngularPart().set((Vector3DReadOnly) angularPart);
+      getLinearPart().set((Vector3DReadOnly) linearPart);
+      angularPart.getReferenceFrame().transformFromThisToDesiredFrame(getReferenceFrame(), this);
    }
 
    /**
@@ -367,8 +391,8 @@ public interface FixedFrameSpatialVectorBasics extends SpatialVectorReadOnly, Cl
     * @param expressedInFrame the reference frame in which the vectors are expressed.
     * @param angularPart the vector holding the new values for the angular part. Not modified.
     * @param linearPart the vector holding the new values for the linear part. Not modified.
-    * @throws ReferenceFrameMismatchException if {@code expressedInFrame} is not equal to the frame
-    *            in which this spatial vector is currently expressed.
+    * @throws ReferenceFrameMismatchException if {@code expressedInFrame} is not equal to the frame in
+    *            which this spatial vector is currently expressed.
     */
    default void set(ReferenceFrame expressedInFrame, Vector3DReadOnly angularPart, Vector3DReadOnly linearPart)
    {
@@ -415,8 +439,8 @@ public interface FixedFrameSpatialVectorBasics extends SpatialVectorReadOnly, Cl
     * </p>
     *
     * @param other the other vector to add to this vector. Not modified.
-    * @throws ReferenceFrameMismatchException if {@code other} is not expressed in the same
-    *            reference frame as {@code this}.
+    * @throws ReferenceFrameMismatchException if {@code other} is not expressed in the same reference
+    *            frame as {@code this}.
     */
    default void add(SpatialVectorReadOnly other)
    {
@@ -465,8 +489,8 @@ public interface FixedFrameSpatialVectorBasics extends SpatialVectorReadOnly, Cl
     * </p>
     *
     * @param other the other vector to subtract to this vector. Not modified.
-    * @throws ReferenceFrameMismatchException if {@code other} is not expressed in the same
-    *            reference frame as {@code this}.
+    * @throws ReferenceFrameMismatchException if {@code other} is not expressed in the same reference
+    *            frame as {@code this}.
     */
    default void sub(SpatialVectorReadOnly other)
    {
