@@ -39,8 +39,8 @@ public interface RigidBodyReadOnly
     * Gets the reference to this rigid-body's body-fixed frame.
     * <p>
     * The main property of the body-fixed-frame is that it is rigidly attached to this rigid-body.
-    * Unless it has been changed at runtime, the body-fixed frame is also centered at this
-    * rigid-body's center of mass position.
+    * Unless it has been changed at runtime, the body-fixed frame is also centered at this rigid-body's
+    * center of mass position.
     * </p>
     *
     * @return the reference frame attached to this rigid-body.
@@ -50,8 +50,8 @@ public interface RigidBodyReadOnly
    /**
     * Gets the reference to the parent joint of this rigid-body.
     * <p>
-    * The parent joint is the joint directed connected to this rigid-body and located between this
-    * and the root body of the robot.
+    * The parent joint is the joint directed connected to this rigid-body and located between this and
+    * the root body of the robot.
     * </p>
     *
     * @return the reference to the parent joint or {@code null} if this rigid-body is a root body.
@@ -85,8 +85,8 @@ public interface RigidBodyReadOnly
    /**
     * Verifies whether this rigid-body is the root body of a robot.
     * <p>
-    * Internally, this verifies if this rigid-body has a parent joint. By definition, the root body
-    * of a robot does not have any parent joint.
+    * Internally, this verifies if this rigid-body has a parent joint. By definition, the root body of
+    * a robot does not have any parent joint.
     * </p>
     *
     * @return {@code true} if this is the root body, {@code false} otherwise.
@@ -110,14 +110,14 @@ public interface RigidBodyReadOnly
     * Packs this rigid-body's center of mass coordinates in the given argument.
     * <p>
     * Note that unless modified in runtime, this method outputs {@code (0, 0, 0)} in the
-    * body-fixed-frame. This is due to the fact that by default the body-fixed-frame is centered at
-    * this rigid-body's center of mass position.
+    * body-fixed-frame. The body-fixed-frame is centered at this rigid-body's center of mass position
+    * by default.
     * </p>
     *
-    * @param centerOfMassToPack the {@code FramePoint} in which the center of mass position is
-    *           stored. Modified.
+    * @param centerOfMassToPack the {@code FramePoint} in which the center of mass position is stored.
+    *           Modified.
     */
-   default void getCenterOfMassOffset(FramePoint3DBasics centerOfMassToPack)
+   default void getCenterOfMass(FramePoint3DBasics centerOfMassToPack)
    {
       centerOfMassToPack.setIncludingFrame(getInertia().getCenterOfMassOffset());
    }
@@ -157,8 +157,8 @@ public interface RigidBodyReadOnly
    }
 
    /**
-    * Gets a new stream to go through all the rigid-bodies, including {@code this}, of the subtree
-    * that starts at this rigid-body.
+    * Gets a new stream to go through all the rigid-bodies, including {@code this}, of the subtree that
+    * starts at this rigid-body.
     * <p>
     * A subtree is defined by a start rigid-body and is the set of all the rigid-body for which the
     * start rigid-body is an ancestor.
