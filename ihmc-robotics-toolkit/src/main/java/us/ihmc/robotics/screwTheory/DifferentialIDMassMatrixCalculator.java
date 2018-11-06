@@ -64,7 +64,7 @@ public class DifferentialIDMassMatrixCalculator implements MassMatrixCalculator
       for (int i = 0 ; i < totalNumberOfDoFs; i++)
       {
          tmpDesiredJointAccelerationsMatrix.set(i, 0, 1.0);
-         ScrewTools.setDesiredAccelerations(jointsInOrder, tmpDesiredJointAccelerationsMatrix);
+         ScrewTools.setJointAccelerations(jointsInOrder, tmpDesiredJointAccelerationsMatrix);
          
          idCalculator.compute();
          tmpTauMatrix.set(ScrewTools.getTauMatrix(jointsInOrder));
@@ -81,14 +81,14 @@ public class DifferentialIDMassMatrixCalculator implements MassMatrixCalculator
    {
       for (JointBasics joint : jointsInOrder)
       {
-         joint.setDesiredAccelerationToZero();
+         joint.setJointAccelerationToZero();
          joint.setJointVelocity(0, new DenseMatrix64F(joint.getDegreesOfFreedom(), 1));
       }
    }
 
    private void storeJointState()
    {
-      ScrewTools.getDesiredJointAccelerationsMatrix(jointsInOrder, storedJointDesiredAccelerations);
+      ScrewTools.getJointAccelerationsMatrix(jointsInOrder, storedJointDesiredAccelerations);
       ScrewTools.getJointVelocitiesMatrix(jointsInOrder, storedJointVelocities);
       for (JointBasics joint : jointsInOrder)
       {
@@ -106,7 +106,7 @@ public class DifferentialIDMassMatrixCalculator implements MassMatrixCalculator
    
    private void restoreJointState()
    {
-      ScrewTools.setDesiredAccelerations(jointsInOrder, storedJointDesiredAccelerations);
+      ScrewTools.setJointAccelerations(jointsInOrder, storedJointDesiredAccelerations);
       ScrewTools.setVelocities(jointsInOrder, storedJointVelocities);
       
       for (JointBasics joint : jointsInOrder)
