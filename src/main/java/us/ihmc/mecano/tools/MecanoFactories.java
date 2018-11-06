@@ -36,6 +36,7 @@ import us.ihmc.mecano.spatial.interfaces.FixedFrameSpatialAccelerationBasics;
 import us.ihmc.mecano.spatial.interfaces.FixedFrameTwistBasics;
 import us.ihmc.mecano.spatial.interfaces.FixedFrameWrenchBasics;
 import us.ihmc.mecano.spatial.interfaces.SpatialAccelerationReadOnly;
+import us.ihmc.mecano.spatial.interfaces.SpatialImpulseReadOnly;
 import us.ihmc.mecano.spatial.interfaces.TwistReadOnly;
 import us.ihmc.mecano.spatial.interfaces.WrenchReadOnly;
 
@@ -1038,6 +1039,45 @@ public class MecanoFactories
          public String toString()
          {
             return MecanoIOTools.getWrenchString(this);
+         }
+      };
+   }
+
+   public static SpatialImpulseReadOnly newSpatialImpulseReadOnly(DoubleSupplier scaleSupplier, SpatialImpulseReadOnly referenceSpatialImpulse)
+   {
+      return new SpatialImpulseReadOnly()
+      {
+         private final FrameVector3DReadOnly angularPart = newFrameVector3DReadOnly(scaleSupplier, referenceSpatialImpulse.getAngularPart());
+         private final FrameVector3DReadOnly linearPart = newFrameVector3DReadOnly(scaleSupplier, referenceSpatialImpulse.getLinearPart());
+
+         @Override
+         public ReferenceFrame getBodyFrame()
+         {
+            return referenceSpatialImpulse.getBodyFrame();
+         }
+
+         @Override
+         public ReferenceFrame getReferenceFrame()
+         {
+            return referenceSpatialImpulse.getReferenceFrame();
+         }
+
+         @Override
+         public FrameVector3DReadOnly getAngularPart()
+         {
+            return angularPart;
+         }
+
+         @Override
+         public FrameVector3DReadOnly getLinearPart()
+         {
+            return linearPart;
+         }
+
+         @Override
+         public String toString()
+         {
+            return MecanoIOTools.getSpatialImpulseString(this);
          }
       };
    }

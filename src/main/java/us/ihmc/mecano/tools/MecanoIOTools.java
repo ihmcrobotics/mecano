@@ -11,6 +11,7 @@ import us.ihmc.euclid.tuple3D.interfaces.Vector3DReadOnly;
 import us.ihmc.mecano.spatial.interfaces.MomentumReadOnly;
 import us.ihmc.mecano.spatial.interfaces.SpatialAccelerationReadOnly;
 import us.ihmc.mecano.spatial.interfaces.SpatialForceReadOnly;
+import us.ihmc.mecano.spatial.interfaces.SpatialImpulseReadOnly;
 import us.ihmc.mecano.spatial.interfaces.SpatialInertiaReadOnly;
 import us.ihmc.mecano.spatial.interfaces.SpatialVectorReadOnly;
 import us.ihmc.mecano.spatial.interfaces.TwistReadOnly;
@@ -214,6 +215,30 @@ public class MecanoIOTools
    {
       return "Wrench exerted on " + bodyFrame + ": [angular = " + getTuple3DString(format, angularPart) + ", linear = " + getTuple3DString(format, linearPart)
             + "] - " + expressedInFrame;
+   }
+
+   public static String getSpatialImpulseString(SpatialImpulseReadOnly spatialImpulse)
+   {
+      return getSpatialImpulseString(DEFAULT_FORMAT, spatialImpulse);
+   }
+
+   public static String getSpatialImpulseString(String format, SpatialImpulseReadOnly spatialImpulse)
+   {
+      if (spatialImpulse == null)
+         return "null";
+      else
+         return getSpatialImpulseString(format,
+                                        spatialImpulse.getBodyFrame(),
+                                        spatialImpulse.getReferenceFrame(),
+                                        spatialImpulse.getAngularPart(),
+                                        spatialImpulse.getLinearPart());
+   }
+
+   public static String getSpatialImpulseString(String format, ReferenceFrame bodyFrame, ReferenceFrame expressedInFrame, Vector3DReadOnly angularPart,
+                                                Vector3DReadOnly linearPart)
+   {
+      return "Spatial impulse exerted on " + bodyFrame + ": [angular = " + getTuple3DString(format, angularPart) + ", linear = "
+            + getTuple3DString(format, linearPart) + "] - " + expressedInFrame;
    }
 
    /**
