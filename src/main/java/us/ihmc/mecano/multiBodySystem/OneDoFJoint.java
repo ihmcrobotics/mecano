@@ -254,25 +254,43 @@ public abstract class OneDoFJoint extends Joint implements OneDoFJointBasics
 
    /** {@inheritDoc} */
    @Override
-   public void setJointLimits(double jointLimitLower, double jointLimitUpper)
+   public void setJointLimitLower(double jointLimitLower)
    {
       this.jointLimitLower = jointLimitLower;
+   }
+
+   /** {@inheritDoc} */
+   @Override
+   public void setJointLimitUpper(double jointLimitUpper)
+   {
       this.jointLimitUpper = jointLimitUpper;
    }
 
    /** {@inheritDoc} */
    @Override
-   public void setVelocityLimits(double velocityLimitLower, double velocityLimitUpper)
+   public void setVelocityLimitLower(double velocityLimitLower)
    {
       this.velocityLimitLower = velocityLimitLower;
+   }
+
+   /** {@inheritDoc} */
+   @Override
+   public void setVelocityLimitUpper(double velocityLimitUpper)
+   {
       this.velocityLimitUpper = velocityLimitUpper;
    }
 
    /** {@inheritDoc} */
    @Override
-   public void setEffortLimits(double effortLimitLower, double effortLimitUpper)
+   public void setEffortLimitLower(double effortLimitLower)
    {
       this.effortLimitLower = effortLimitLower;
+   }
+
+   /** {@inheritDoc} */
+   @Override
+   public void setEffortLimitUpper(double effortLimitUpper)
+   {
       this.effortLimitUpper = effortLimitUpper;
    }
 

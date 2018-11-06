@@ -179,6 +179,28 @@ public interface OneDoFJointBasics extends OneDoFJointReadOnly, JointBasics
    }
 
    /**
+    * Sets the lower limit of this joint range of motion:
+    * 
+    * <pre>
+    * this.q &in; [jointLimitLower; jointLimitUpper]
+    * </pre>
+    * 
+    * @param jointLimitLower the lower position/angle limit for this joint.
+    */
+   void setJointLimitLower(double jointLimitLower);
+
+   /**
+    * Sets the upper limit of this joint range of motion:
+    * 
+    * <pre>
+    * this.q &in; [jointLimitLower; jointLimitUpper]
+    * </pre>
+    * 
+    * @param jointLimitUpper the upper position/angle limit for this joint.
+    */
+   void setJointLimitUpper(double jointLimitUpper);
+
+   /**
     * Sets the lower and upper limits of this joint range of motion:
     * 
     * <pre>
@@ -188,7 +210,33 @@ public interface OneDoFJointBasics extends OneDoFJointReadOnly, JointBasics
     * @param jointLimitLower the lower position/angle limit for this joint.
     * @param jointLimitUpper the upper position/angle limit for this joint.
     */
-   void setJointLimits(double jointLimitLower, double jointLimitUpper);
+   default void setJointLimits(double jointLimitLower, double jointLimitUpper)
+   {
+      setJointLimitLower(jointLimitLower);
+      setJointLimitUpper(jointLimitUpper);
+   }
+
+   /**
+    * Sets the lower limit of this joint velocity:
+    * 
+    * <pre>
+    * this.q &in; [jointLimitLower; jointLimitUpper]
+    * </pre>
+    * 
+    * @param velocityLimitLower the lower velocity limit for this joint.
+    */
+   void setVelocityLimitLower(double velocityLimitLower);
+
+   /**
+    * Sets the upper limit of this joint velocity:
+    * 
+    * <pre>
+    * this.q &in; [jointLimitLower; jointLimitUpper]
+    * </pre>
+    * 
+    * @param velocityLimitUpper the upper velocity limit for this joint.
+    */
+   void setVelocityLimitUpper(double velocityLimitUpper);
 
    /**
     * Sets the lower and upper limits of this joint velocity:
@@ -200,7 +248,11 @@ public interface OneDoFJointBasics extends OneDoFJointReadOnly, JointBasics
     * @param velocityLimitLower the lower velocity limit for this joint.
     * @param velocityLimitUpper the upper velocity limit for this joint.
     */
-   void setVelocityLimits(double velocityLimitLower, double velocityLimitUpper);
+   default void setVelocityLimits(double velocityLimitLower, double velocityLimitUpper)
+   {
+      setVelocityLimitLower(velocityLimitLower);
+      setVelocityLimitUpper(velocityLimitUpper);
+   }
 
    /**
     * Sets the absolute limit of this joint velocity:
@@ -217,6 +269,28 @@ public interface OneDoFJointBasics extends OneDoFJointReadOnly, JointBasics
    }
 
    /**
+    * Sets the lower limit of this joint force/torque:
+    * 
+    * <pre>
+    * this.tau &in; [effortLimitLower; effortLimitUpper]
+    * </pre>
+    * 
+    * @param effortLimitLower the lower force/torque limit for this joint.
+    */
+   void setEffortLimitLower(double effortLimitLower);
+
+   /**
+    * Sets the upper limit of this joint force/torque:
+    * 
+    * <pre>
+    * this.tau &in; [effortLimitLower; effortLimitUpper]
+    * </pre>
+    * 
+    * @param effortLimitUpper the upper force/torque limit for this joint.
+    */
+   void setEffortLimitUpper(double effortLimitUpper);
+
+   /**
     * Sets the lower and upper limits of this joint force/torque:
     * 
     * <pre>
@@ -226,7 +300,11 @@ public interface OneDoFJointBasics extends OneDoFJointReadOnly, JointBasics
     * @param effortLimitLower the lower force/torque limit for this joint.
     * @param effortLimitUpper the upper force/torque limit for this joint.
     */
-   void setEffortLimits(double effortLimitLower, double effortLimitUpper);
+   default void setEffortLimits(double effortLimitLower, double effortLimitUpper)
+   {
+      setEffortLimitLower(effortLimitLower);
+      setEffortLimitUpper(effortLimitUpper);
+   }
 
    /**
     * Sets the absolute limit of this joint force/torque:
