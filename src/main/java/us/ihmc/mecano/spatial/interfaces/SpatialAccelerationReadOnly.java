@@ -4,7 +4,6 @@ import us.ihmc.euclid.referenceFrame.exceptions.ReferenceFrameMismatchException;
 import us.ihmc.euclid.referenceFrame.interfaces.FramePoint3DReadOnly;
 import us.ihmc.euclid.referenceFrame.interfaces.FrameVector3DBasics;
 import us.ihmc.euclid.tuple3D.interfaces.Vector3DReadOnly;
-import us.ihmc.mecano.spatial.Twist;
 import us.ihmc.mecano.tools.MecanoTools;
 
 /**
@@ -140,7 +139,7 @@ public interface SpatialAccelerationReadOnly extends SpatialMotionReadOnly
     *            reference frames as {@code this}, or if this spatial acceleration is not expressed
     *            in the body frame.
     */
-   default void getLinearAccelerationAtBodyOrigin(Twist bodyTwist, FrameVector3DBasics linearAccelerationToPack)
+   default void getLinearAccelerationAtBodyOrigin(TwistReadOnly bodyTwist, FrameVector3DBasics linearAccelerationToPack)
    {
       getBodyFrame().checkReferenceFrameMatch(getReferenceFrame());
       checkReferenceFrameMatch(bodyTwist);
