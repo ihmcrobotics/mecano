@@ -124,6 +124,47 @@ public class MultiBodySystemRandomTools
    }
 
    /**
+    * Generates a random state and update the given {@code joints} with it.
+    * <p>
+    * The random state is guaranteed to be within the joint limits. For instance, a random
+    * configuration is constrained to be in: [{@code joint.getJointLimitLower()},
+    * {@code joint.getJointLimitUpper()}].
+    * </p>
+    * 
+    * @param random the random generator to use.
+    * @param stateToRandomize the joint state that is to be randomized. As no limits are imposed on the
+    *           joint accelerations, the state to randomize cannot be the acceleration. For generating
+    *           random acceleration, please see
+    *           {@link #nextState(Random, JointStateType, double, double, OneDoFJointBasics)}.
+    * @param joints the joints to set the state of. Modified.
+    */
+   public static void nextStateWithinJointLimits(Random random, JointStateType stateToRandomize, OneDoFJointBasics[] joints)
+   {
+      for (OneDoFJointBasics joint : joints)
+         nextStateWithinJointLimits(random, stateToRandomize, joint);
+   }
+
+   /**
+    * Generates a random state and update the given {@code joints} with it.
+    * <p>
+    * The random state is guaranteed to be within the joint limits. For instance, a random
+    * configuration is constrained to be in: [{@code joint.getJointLimitLower()},
+    * {@code joint.getJointLimitUpper()}].
+    * </p>
+    * 
+    * @param random the random generator to use.
+    * @param stateToRandomize the joint state that is to be randomized. As no limits are imposed on the
+    *           joint accelerations, the state to randomize cannot be the acceleration. For generating
+    *           random acceleration, please see
+    *           {@link #nextState(Random, JointStateType, double, double, OneDoFJointBasics)}.
+    * @param joints the joints to set the state of. Modified.
+    */
+   public static void nextStateWithinJointLimits(Random random, JointStateType stateToRandomize, Iterable<? extends OneDoFJointBasics> joints)
+   {
+      joints.forEach(joint -> nextStateWithinJointLimits(random, stateToRandomize, joint));
+   }
+
+   /**
     * Generates a random state and update the given {@code joint} with it.
     * <p>
     * The random state is guaranteed to be within the joint limits. For instance, a random
