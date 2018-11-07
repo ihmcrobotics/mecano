@@ -1,5 +1,7 @@
 package us.ihmc.mecano.yoVariables.multiBodySystem;
 
+import us.ihmc.euclid.referenceFrame.FrameVector3D;
+import us.ihmc.euclid.referenceFrame.interfaces.FrameVector3DBasics;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple3D.interfaces.Tuple3DReadOnly;
@@ -8,7 +10,6 @@ import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.mecano.multiBodySystem.interfaces.PrismaticJointBasics;
 import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
-import us.ihmc.yoVariables.variable.YoFrameVector3D;
 
 /**
  * A {@code YoPrismaticJoint} is a joint has 1 degree of freedom of translation and has its state
@@ -19,7 +20,7 @@ import us.ihmc.yoVariables.variable.YoFrameVector3D;
 public class YoPrismaticJoint extends YoOneDoFJoint implements PrismaticJointBasics
 {
    /** The axis along which this joint can translate. */
-   private final YoFrameVector3D jointAxis;
+   private final FrameVector3D jointAxis;
 
    /**
     * Creates a new prismatic joint which has only a translation offset with respect to its parent
@@ -50,13 +51,12 @@ public class YoPrismaticJoint extends YoOneDoFJoint implements PrismaticJointBas
          YoVariableRegistry registry)
    {
       super(name, predecessor, new Vector3D(), jointAxis, transformToParent, registry);
-      this.jointAxis = new YoFrameVector3D(name + "Axis", beforeJointFrame, registry);
-      this.jointAxis.set(jointAxis);
+      this.jointAxis = new FrameVector3D(beforeJointFrame, jointAxis);
    }
 
    /** {@inheritDoc} */
    @Override
-   public YoFrameVector3D getJointAxis()
+   public FrameVector3DBasics getJointAxis()
    {
       return jointAxis;
    }

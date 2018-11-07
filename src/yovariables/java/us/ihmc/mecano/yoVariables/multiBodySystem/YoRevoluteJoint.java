@@ -1,6 +1,8 @@
 package us.ihmc.mecano.yoVariables.multiBodySystem;
 
 import us.ihmc.euclid.orientation.interfaces.Orientation3DReadOnly;
+import us.ihmc.euclid.referenceFrame.FrameVector3D;
+import us.ihmc.euclid.referenceFrame.interfaces.FrameVector3DBasics;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple3D.interfaces.Tuple3DReadOnly;
@@ -11,7 +13,6 @@ import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
 import us.ihmc.mecano.tools.MecanoFactories;
 import us.ihmc.mecano.tools.MecanoFactories.RevoluteJointTransformUpdater;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
-import us.ihmc.yoVariables.variable.YoFrameVector3D;
 
 /**
  * A {@code YoRevoluteJoint} is a joint has 1 degree of freedom of rotation and has its state backed
@@ -22,7 +23,7 @@ import us.ihmc.yoVariables.variable.YoFrameVector3D;
 public class YoRevoluteJoint extends YoOneDoFJoint implements RevoluteJointBasics
 {
    /** The axis around which this joint can rotate. */
-   private final YoFrameVector3D jointAxis;
+   private final FrameVector3D jointAxis;
    /** Variable to store intermediate results for garbage-free operations. */
    private final Vector3D rotationVector = new Vector3D();
    /** Local transform updater for optimizing the transform update based on this joint axis. */
@@ -73,8 +74,7 @@ public class YoRevoluteJoint extends YoOneDoFJoint implements RevoluteJointBasic
          YoVariableRegistry registry)
    {
       super(name, predecessor, jointAxis, new Vector3D(), transformToParent, registry);
-      this.jointAxis = new YoFrameVector3D(name + "Axis", beforeJointFrame, registry);
-      this.jointAxis.set(jointAxis);
+      this.jointAxis = new FrameVector3D(beforeJointFrame, jointAxis);
       jointTransformUpdater = MecanoFactories.newRevoluteJointTransformUpdater(this);
    }
 
@@ -95,7 +95,7 @@ public class YoRevoluteJoint extends YoOneDoFJoint implements RevoluteJointBasic
 
    /** {@inheritDoc} */
    @Override
-   public YoFrameVector3D getJointAxis()
+   public FrameVector3DBasics getJointAxis()
    {
       return jointAxis;
    }
