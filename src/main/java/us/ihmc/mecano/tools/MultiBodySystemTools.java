@@ -10,11 +10,13 @@ import java.util.stream.Stream;
 
 import org.ejml.data.DenseMatrix64F;
 
+import us.ihmc.mecano.frames.MovingReferenceFrame;
 import us.ihmc.mecano.multiBodySystem.interfaces.JointBasics;
 import us.ihmc.mecano.multiBodySystem.interfaces.JointReadOnly;
 import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointBasics;
 import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
 import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyReadOnly;
+import us.ihmc.mecano.spatial.SpatialInertia;
 
 /**
  * This class provides a variety of tools to facilitate operations that need to navigate through a
@@ -23,6 +25,48 @@ import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyReadOnly;
  */
 public class MultiBodySystemTools
 {
+   /**
+    * Sums the inertia of all the rigid-bodies composing the subtree that originates at {@code joint}
+    * including {@code joint.getSuccessor()}.
+    * <p>
+    * WARNING: This method generates garbage.
+    * </p>
+    * 
+    * @param joint the root of the subtree.
+    * @return the subtree total inertia.
+    */
+   public static SpatialInertia computeSubtreeInertia(JointReadOnly joint)
+   {
+      return computeSubtreeInertia(joint.getSuccessor());
+   }
+
+   /**
+    * Sums the inertia of all the rigid-bodies composing the subtree that originates at
+    * {@code rootBody} including {@code rootBody}.
+    * <p>
+    * WARNING: This method generates garbage.
+    * </p>
+    * 
+    * @param rootBody the root of the subtree.
+    * @return the subtree total inertia.
+    */
+   public static SpatialInertia computeSubtreeInertia(RigidBodyReadOnly rootBody)
+   {
+      MovingReferenceFrame bodyFixedFrame = rootBody.getBodyFixedFrame();
+
+      SpatialInertia subtreeInertia = new SpatialInertia(bodyFixedFrame, bodyFixedFrame);
+      SpatialInertia bodyInertia = new SpatialInertia();
+
+      for (RigidBodyReadOnly subtreeBody : rootBody.subtreeList())
+      {
+         bodyInertia.setIncludingFrame(subtreeBody.getInertia());
+         bodyInertia.changeFrame(bodyFixedFrame);
+         subtreeInertia.add(bodyInertia);
+      }
+
+      return subtreeInertia;
+   }
+
    /**
     * Retrieves and gets the root body of the multi-body system the given {@code body} belongs to.
     *
@@ -91,7 +135,7 @@ public class MultiBodySystemTools
     */
    public static JointBasics[] createJointPath(RigidBodyBasics start, RigidBodyBasics end)
    {
-      return filterJoints(createJointPath(start, end), JointBasics.class);
+      return filterJoints(createJointPath((RigidBodyReadOnly) start, (RigidBodyReadOnly) end), JointBasics.class);
    }
 
    /**

@@ -21,6 +21,7 @@ import us.ihmc.mecano.multiBodySystem.interfaces.MultiBodySystemReadOnly;
 import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyReadOnly;
 import us.ihmc.mecano.spatial.SpatialAcceleration;
 import us.ihmc.mecano.spatial.SpatialForce;
+import us.ihmc.mecano.spatial.SpatialInertia;
 import us.ihmc.mecano.spatial.Twist;
 import us.ihmc.mecano.spatial.Wrench;
 import us.ihmc.mecano.spatial.interfaces.FixedFrameWrenchBasics;
@@ -127,12 +128,59 @@ public class InverseDynamicsCalculator
     * </p>
     * 
     * @param input the definition of the system to be evaluated by this calculator.
+    * @param considerIgnoredSubtreesInertia whether the inertia of the ignored part(s) of the given
+    *           multi-body system should be considered. When {@code true}, this provides more accurate
+    *           joint torques as they compensate for instance for the gravity acting on the ignored
+    *           rigid-bodies, i.e. bodies which have an ancestor joint that is ignored as specified in
+    *           the given {@code input}. When {@code false}, the resulting joint torques may be less
+    *           accurate and this calculator may gain slight performance improvement.
+    */
+   public InverseDynamicsCalculator(MultiBodySystemReadOnly input, boolean considerIgnoredSubtreesInertia)
+   {
+      this(input, true, true, considerIgnoredSubtreesInertia);
+   }
+
+   /**
+    * Creates a calculator for computing the joint efforts for system defined by the given
+    * {@code input}.
+    * <p>
+    * Do not forgot to set the gravitational acceleration so this calculator can properly account for
+    * it.
+    * </p>
+    * 
+    * @param input the definition of the system to be evaluated by this calculator.
     * @param considerCoriolisAndCentrifugalForces whether the effort resulting from the Coriolis and
     *           centrifugal forces should be considered.
     * @param considerJointAccelerations whether the effort resulting from the joint accelerations
     *           should be considered.
     */
    public InverseDynamicsCalculator(MultiBodySystemReadOnly input, boolean considerCoriolisAndCentrifugalForces, boolean considerJointAccelerations)
+   {
+      this(input, considerCoriolisAndCentrifugalForces, considerJointAccelerations, true);
+   }
+
+   /**
+    * Creates a calculator for computing the joint efforts for system defined by the given
+    * {@code input}.
+    * <p>
+    * Do not forgot to set the gravitational acceleration so this calculator can properly account for
+    * it.
+    * </p>
+    * 
+    * @param input the definition of the system to be evaluated by this calculator.
+    * @param considerCoriolisAndCentrifugalForces whether the effort resulting from the Coriolis and
+    *           centrifugal forces should be considered.
+    * @param considerJointAccelerations whether the effort resulting from the joint accelerations
+    *           should be considered.
+    * @param considerIgnoredSubtreesInertia whether the inertia of the ignored part(s) of the given
+    *           multi-body system should be considered. When {@code true}, this provides more accurate
+    *           joint torques as they compensate for instance for the gravity acting on the ignored
+    *           rigid-bodies, i.e. bodies which have an ancestor joint that is ignored as specified in
+    *           the given {@code input}. When {@code false}, the resulting joint torques may be less
+    *           accurate and this calculator may gain slight performance improvement.
+    */
+   public InverseDynamicsCalculator(MultiBodySystemReadOnly input, boolean considerCoriolisAndCentrifugalForces, boolean considerJointAccelerations,
+                                    boolean considerIgnoredSubtreesInertia)
    {
       this.input = input;
       this.considerJointAccelerations = considerJointAccelerations;
@@ -142,6 +190,9 @@ public class InverseDynamicsCalculator
       initialRecursionStep = new RecursionStep(rootBody, null, null);
       rigidBodyToRecursionStepMap.put(rootBody, initialRecursionStep);
       buildMultiBodyTree(initialRecursionStep, input.getJointsToIgnore());
+
+      if (considerJointAccelerations)
+         initialRecursionStep.includeIgnoredSubtreeInertia();
 
       int nDoFs = MultiBodySystemTools.computeDegreesOfFreedom(input.getJointsToConsider());
       jointAccelerationMatrix = new DenseMatrix64F(nDoFs, 1);
@@ -452,6 +503,12 @@ public class InverseDynamicsCalculator
        */
       private final RigidBodyReadOnly rigidBody;
       /**
+       * Body inertia: usually equal to {@code rigidBody.getInertial()}. However, if at least one child of
+       * {@code rigidBody} is ignored, it is equal to this rigid-body inertia and the subtree inertia
+       * attached to the ignored joint.
+       */
+      private final SpatialInertia bodyInertia;
+      /**
        * The recursion step holding onto the direct predecessor of this recursion step's rigid-body.
        */
       private final RecursionStep parent;
@@ -515,6 +572,7 @@ public class InverseDynamicsCalculator
 
          if (isRoot())
          {
+            bodyInertia = null;
             jointWrench = null;
             externalWrench = null;
             S = null;
@@ -528,6 +586,7 @@ public class InverseDynamicsCalculator
             parent.children.add(this);
             int nDoFs = getJoint().getDegreesOfFreedom();
 
+            bodyInertia = new SpatialInertia(rigidBody.getInertia());
             jointWrench = new Wrench();
             externalWrench = new Wrench(getBodyFixedFrame(), getBodyFixedFrame());
             S = new DenseMatrix64F(SpatialVectorReadOnly.SIZE, nDoFs);
@@ -537,6 +596,25 @@ public class InverseDynamicsCalculator
             jointWrenchMatrix = new DenseMatrix64F(SpatialVectorReadOnly.SIZE, 1);
             getJoint().getMotionSubspace(S);
          }
+      }
+
+      public void includeIgnoredSubtreeInertia()
+      {
+         if (!isRoot() && children.size() != rigidBody.getChildrenJoints().size())
+         {
+            for (JointReadOnly childJoint : rigidBody.getChildrenJoints())
+            {
+               if (input.getJointsToIgnore().contains(childJoint))
+               {
+                  SpatialInertia subtreeIneria = MultiBodySystemTools.computeSubtreeInertia(childJoint);
+                  subtreeIneria.changeFrame(getBodyFixedFrame());
+                  bodyInertia.add(subtreeIneria);
+               }
+            }
+         }
+
+         for (int childIndex = 0; childIndex < children.size(); childIndex++)
+            children.get(childIndex).includeIgnoredSubtreeInertia();
       }
 
       /**
@@ -582,7 +660,7 @@ public class InverseDynamicsCalculator
                rigidBodyAcceleration.setBodyFrame(getBodyFixedFrame());
             }
 
-            rigidBody.getInertia().computeDynamicWrenchFast(rigidBodyAcceleration, bodyTwistToUse, jointWrench);
+            bodyInertia.computeDynamicWrench(rigidBodyAcceleration, bodyTwistToUse, jointWrench);
          }
 
          for (int childIndex = 0; childIndex < children.size(); childIndex++)
