@@ -101,9 +101,9 @@ public class MultiBodySystemFactories
     * @param originalJoints the kinematic chain to clone. Not modified.
     * @return the clone kinematic chain.
     */
-   public static OneDoFJoint[] cloneOneDoFJointKinematicChain(OneDoFJoint[] originalJoints)
+   public static OneDoFJointBasics[] cloneOneDoFJointKinematicChain(OneDoFJointBasics[] originalJoints)
    {
-      return cloneKinematicChainAndFilter(originalJoints, OneDoFJoint.class);
+      return cloneKinematicChainAndFilter(originalJoints, OneDoFJointBasics.class);
    }
 
    /**

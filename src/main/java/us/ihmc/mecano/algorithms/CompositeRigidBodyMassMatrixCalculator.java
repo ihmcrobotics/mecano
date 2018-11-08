@@ -509,7 +509,7 @@ public class CompositeRigidBodyMassMatrixCalculator
 
       private boolean isRoot()
       {
-         return rigidBody.isRootBody();
+         return parent == null;
       }
 
       public int getNumberOfDoFs()

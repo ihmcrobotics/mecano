@@ -1,6 +1,7 @@
 package us.ihmc.mecano.algorithms;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
 
 import java.util.Arrays;
 import java.util.List;
@@ -26,6 +27,7 @@ import us.ihmc.mecano.multiBodySystem.PrismaticJoint;
 import us.ihmc.mecano.multiBodySystem.RevoluteJoint;
 import us.ihmc.mecano.multiBodySystem.SixDoFJoint;
 import us.ihmc.mecano.multiBodySystem.interfaces.JointBasics;
+import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointBasics;
 import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
 import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyReadOnly;
 import us.ihmc.mecano.spatial.SpatialAcceleration;
@@ -227,7 +229,7 @@ public class SpatialAccelerationCalculatorTest
 
       int numberOfJoints = 10;
       List<OneDoFJoint> joints = MultiBodySystemRandomTools.nextOneDoFJointChain(random, numberOfJoints);
-      List<OneDoFJoint> jointsInFuture = Arrays.asList(MultiBodySystemFactories.cloneOneDoFJointKinematicChain(joints.toArray(new OneDoFJoint[numberOfJoints])));
+      List<OneDoFJointBasics> jointsInFuture = Arrays.asList(MultiBodySystemFactories.cloneOneDoFJointKinematicChain(joints.toArray(new OneDoFJoint[numberOfJoints])));
 
       RigidBodyBasics randomBody = joints.get(random.nextInt(joints.size())).getPredecessor();
       RigidBodyBasics rootBody = MultiBodySystemTools.getRootBody(randomBody);

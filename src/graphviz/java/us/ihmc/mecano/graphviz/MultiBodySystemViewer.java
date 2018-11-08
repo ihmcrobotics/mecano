@@ -1,6 +1,7 @@
 package us.ihmc.mecano.graphviz;
 
-import static guru.nidi.graphviz.model.Factory.*;
+import static guru.nidi.graphviz.model.Factory.mutGraph;
+import static guru.nidi.graphviz.model.Factory.mutNode;
 
 import java.io.File;
 import java.io.IOException;
@@ -17,6 +18,7 @@ import us.ihmc.euclid.geometry.interfaces.Pose3DReadOnly;
 import us.ihmc.euclid.matrix.interfaces.Matrix3DReadOnly;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.tools.EuclidCoreIOTools;
+import us.ihmc.mecano.multiBodySystem.interfaces.FixedJointReadOnly;
 import us.ihmc.mecano.multiBodySystem.interfaces.JointBasics;
 import us.ihmc.mecano.multiBodySystem.interfaces.JointReadOnly;
 import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointReadOnly;
@@ -313,6 +315,8 @@ public class MultiBodySystemViewer
          return getPlanarJointStateAsString((PlanarJointReadOnly) joint, state);
       else if (joint instanceof SphericalJointReadOnly)
          return getSphericalJointStateAsString((SphericalJointReadOnly) joint, state);
+      else if (joint instanceof FixedJointReadOnly)
+         return getFixedJointStateAsString((FixedJointReadOnly) joint);
       else
          throw new UnsupportedOperationException("Unsupported joint type: " + joint.getClass().getName());
    }
@@ -414,6 +418,11 @@ public class MultiBodySystemViewer
       default:
          throw new UnsupportedOperationException("Unsupported value of JointStateType: " + state);
       }
+   }
+
+   private static String getFixedJointStateAsString(FixedJointReadOnly joint)
+   {
+      return null;
    }
 
    private static String getMatrixLabel(Matrix3DReadOnly matrix)

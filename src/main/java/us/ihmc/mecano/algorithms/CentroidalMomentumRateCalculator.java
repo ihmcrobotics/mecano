@@ -673,7 +673,7 @@ public class CentroidalMomentumRateCalculator implements ReferenceFrameHolder
 
       public boolean isRoot()
       {
-         return rigidBody.isRootBody();
+         return parent == null;
       }
 
       public JointReadOnly getJoint()
