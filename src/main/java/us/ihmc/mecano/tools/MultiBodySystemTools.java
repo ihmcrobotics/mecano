@@ -89,6 +89,23 @@ public class MultiBodySystemTools
     * @return the array of joints representing the path from {@code start} to {@code end}, or
     *         {@code null} if the given rigid-bodies are not part of the same multi-body system.
     */
+   public static JointBasics[] createJointPath(RigidBodyBasics start, RigidBodyBasics end)
+   {
+      return filterJoints(createJointPath(start, end), JointBasics.class);
+   }
+
+   /**
+    * Travels the multi-body system from {@code start} to {@code end} and stores in order the joints
+    * that are in between and return them as an array.
+    * <p>
+    * WARNING: This method generates garbage.
+    * </p>
+    *
+    * @param start the rigid-body from where to begin the collection of joints.
+    * @param end the rigid-body where to stop the collection of joints.
+    * @return the array of joints representing the path from {@code start} to {@code end}, or
+    *         {@code null} if the given rigid-bodies are not part of the same multi-body system.
+    */
    public static JointReadOnly[] createJointPath(RigidBodyReadOnly start, RigidBodyReadOnly end)
    {
       boolean flip = false;
