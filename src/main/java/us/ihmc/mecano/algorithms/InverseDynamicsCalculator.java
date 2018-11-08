@@ -577,6 +577,10 @@ public class InverseDynamicsCalculator
                localJointAcceleration.setBaseFrame(parent.getBodyFixedFrame());
                rigidBodyAcceleration.add(localJointAcceleration);
             }
+            else
+            {
+               rigidBodyAcceleration.setBodyFrame(getBodyFixedFrame());
+            }
 
             rigidBody.getInertia().computeDynamicWrenchFast(rigidBodyAcceleration, bodyTwistToUse, jointWrench);
          }
