@@ -95,12 +95,35 @@ public class ForwardDynamicsCalculator
     */
    public ForwardDynamicsCalculator(MultiBodySystemReadOnly input)
    {
+      this(input, true);
+   }
+
+   /**
+    * Creates a calculator for computing the joint accelerations for system defined by the given
+    * {@code input}.
+    * <p>
+    * Do not forgot to set the gravitational acceleration so this calculator can properly account for
+    * it.
+    * </p>
+    * 
+    * @param input the definition of the system to be evaluated by this calculator.
+    * @param considerIgnoredSubtreesInertia whether the inertia of the ignored part(s) of the given
+    *           multi-body system should be considered. When {@code true}, this provides more accurate
+    *           joint accelerations as they account for instance for the gravity acting on the ignored
+    *           rigid-bodies, i.e. bodies which have an ancestor joint that is ignored as specified in
+    *           the given {@code input}. When {@code false}, the resulting joint accelerations may be
+    *           less accurate and this calculator may gain slight performance improvement.
+    */
+   public ForwardDynamicsCalculator(MultiBodySystemReadOnly input, boolean considerIgnoredSubtreesInertia)
+   {
       this.input = input;
 
       RigidBodyReadOnly rootBody = input.getRootBody();
       initialRecursionStep = new ArticulatedBodyRecursionStep(rootBody, null, null);
       rigidBodyToRecursionStepMap.put(rootBody, initialRecursionStep);
       buildMultiBodyTree(initialRecursionStep, input.getJointsToIgnore());
+      if (considerIgnoredSubtreesInertia)
+         initialRecursionStep.includeIgnoredSubtreeInertia();
 
       int nDoFs = MultiBodySystemTools.computeDegreesOfFreedom(input.getJointsToConsider());
       jointTauMatrix = new DenseMatrix64F(nDoFs, 1);
@@ -392,6 +415,12 @@ public class ForwardDynamicsCalculator
        */
       final RigidBodyReadOnly rigidBody;
       /**
+       * Body inertia: usually equal to {@code rigidBody.getInertial()}. However, if at least one child of
+       * {@code rigidBody} is ignored, it is equal to this rigid-body inertia and the subtree inertia
+       * attached to the ignored joint.
+       */
+      final SpatialInertia bodyInertia;
+      /**
        * User input: external wrench to be applied to this body.
        */
       final Wrench externalWrench;
@@ -629,6 +658,7 @@ public class ForwardDynamicsCalculator
 
          if (parent == null)
          {
+            bodyInertia = null;
             biasAcceleration = null;
             biasWrench = null;
             spatialInertia = null;
@@ -664,6 +694,7 @@ public class ForwardDynamicsCalculator
             parent.children.add(this);
             int nDoFs = getJoint().getDegreesOfFreedom();
 
+            bodyInertia = new SpatialInertia(rigidBody.getInertia());
             biasAcceleration = new SpatialAcceleration();
             biasWrench = new Wrench();
             spatialInertia = new SpatialInertia();
@@ -696,6 +727,25 @@ public class ForwardDynamicsCalculator
          }
       }
 
+      public void includeIgnoredSubtreeInertia()
+      {
+         if (!isRoot() && children.size() != rigidBody.getChildrenJoints().size())
+         {
+            for (JointReadOnly childJoint : rigidBody.getChildrenJoints())
+            {
+               if (input.getJointsToIgnore().contains(childJoint))
+               {
+                  SpatialInertia subtreeIneria = MultiBodySystemTools.computeSubtreeInertia(childJoint);
+                  subtreeIneria.changeFrame(getBodyFixedFrame());
+                  bodyInertia.add(subtreeIneria);
+               }
+            }
+         }
+
+         for (int childIndex = 0; childIndex < children.size(); childIndex++)
+            children.get(childIndex).includeIgnoredSubtreeInertia();
+      }
+
       /**
        * The first pass consists in calculating the bias wrench resulting from external and Coriolis
        * forces, and the bias acceleration resulting from the Coriolis acceleration.
@@ -711,7 +761,7 @@ public class ForwardDynamicsCalculator
             else
                frameAfterJoint.getTransformToDesiredFrame(transformToParentJointFrame, parent.getFrameAfterJoint());
 
-            rigidBody.getInertia().computeDynamicWrenchFast(null, getBodyTwist(), biasWrench);
+            bodyInertia.computeDynamicWrench(null, getBodyTwist(), biasWrench);
             biasWrench.sub(externalWrench);
             biasWrench.changeFrame(frameAfterJoint);
 
@@ -741,7 +791,7 @@ public class ForwardDynamicsCalculator
 
          MovingReferenceFrame frameAfterJoint = getFrameAfterJoint();
 
-         spatialInertia.setIncludingFrame(rigidBody.getInertia());
+         spatialInertia.setIncludingFrame(bodyInertia);
          spatialInertia.changeFrame(frameAfterJoint);
          articulatedInertia.setIncludingFrame(spatialInertia);
 

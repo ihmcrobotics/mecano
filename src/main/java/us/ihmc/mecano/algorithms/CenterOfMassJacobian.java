@@ -22,8 +22,8 @@ import us.ihmc.mecano.multiBodySystem.interfaces.JointMatrixIndexProvider;
 import us.ihmc.mecano.multiBodySystem.interfaces.JointReadOnly;
 import us.ihmc.mecano.multiBodySystem.interfaces.MultiBodySystemReadOnly;
 import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyReadOnly;
+import us.ihmc.mecano.spatial.SpatialInertia;
 import us.ihmc.mecano.spatial.Twist;
-import us.ihmc.mecano.spatial.interfaces.SpatialInertiaReadOnly;
 import us.ihmc.mecano.tools.JointStateType;
 import us.ihmc.mecano.tools.MecanoFactories;
 import us.ihmc.mecano.tools.MultiBodySystemTools;
@@ -37,8 +37,7 @@ import us.ihmc.mecano.tools.MultiBodySystemTools;
 public class CenterOfMassJacobian implements ReferenceFrameHolder
 {
    /**
-    * Whether the Jacobian is to be expressed in the center of mass frame that is updated
-    * internally.
+    * Whether the Jacobian is to be expressed in the center of mass frame that is updated internally.
     */
    private final boolean isJacobianFrameAtCenterOfMass;
    /**
@@ -49,8 +48,8 @@ public class CenterOfMassJacobian implements ReferenceFrameHolder
     */
    private final ReferenceFrame jacobianFrame;
    /**
-    * The root frame to which all the robot frames are attached to. It is used for when the Jacobian
-    * is expressed in the center of mass frame.
+    * The root frame to which all the robot frames are attached to. It is used for when the Jacobian is
+    * expressed in the center of mass frame.
     */
    private final ReferenceFrame rootFrame;
    /** Defines the multi-body system to use with this calculator. */
@@ -58,8 +57,8 @@ public class CenterOfMassJacobian implements ReferenceFrameHolder
    /** The root of the internal recursive algorithm. */
    private final RecursionStep initialRecursionStep;
    /**
-    * Only the first pass of this algorithm has to be recursive, the two other passes can be
-    * iterative which can provide a slight performance improvement.
+    * Only the first pass of this algorithm has to be recursive, the two other passes can be iterative
+    * which can provide a slight performance improvement.
     */
    private final RecursionStep[] recursionSteps;
    /** Map to quickly retrieve information for each rigid-body. */
@@ -95,8 +94,8 @@ public class CenterOfMassJacobian implements ReferenceFrameHolder
     * {@link #getReferenceFrame()}.
     * </p>
     *
-    * @param rootBody the start of subtree for which the center of mass Jacobian is to be computed.
-    *           Not modified.
+    * @param rootBody the start of subtree for which the center of mass Jacobian is to be computed. Not
+    *           modified.
     * @param centerOfMassFrameName the name for the new frame at the center of mass.
     */
    public CenterOfMassJacobian(RigidBodyReadOnly rootBody, String centerOfMassFrameName)
@@ -107,8 +106,8 @@ public class CenterOfMassJacobian implements ReferenceFrameHolder
    /**
     * Creates a new calculator for the subtree that starts off the given {@code rootBody}.
     * 
-    * @param rootBody the start of subtree for which the center of mass Jacobian is to be computed.
-    *           Not modified.
+    * @param rootBody the start of subtree for which the center of mass Jacobian is to be computed. Not
+    *           modified.
     * @param jacobianFrame the frame in which the center of mass Jacobian is to be expressed.
     */
    public CenterOfMassJacobian(RigidBodyReadOnly rootBody, ReferenceFrame jacobianFrame)
@@ -129,7 +128,7 @@ public class CenterOfMassJacobian implements ReferenceFrameHolder
     */
    public CenterOfMassJacobian(MultiBodySystemReadOnly input, String centerOfMassFrameName)
    {
-      this(input, null, centerOfMassFrameName);
+      this(input, null, centerOfMassFrameName, true);
    }
 
    /**
@@ -140,10 +139,11 @@ public class CenterOfMassJacobian implements ReferenceFrameHolder
     */
    public CenterOfMassJacobian(MultiBodySystemReadOnly input, ReferenceFrame jacobianFrame)
    {
-      this(input, jacobianFrame, null);
+      this(input, jacobianFrame, null, true);
    }
 
-   private CenterOfMassJacobian(MultiBodySystemReadOnly input, ReferenceFrame jacobianFrame, String centerOfMassFrameName)
+   private CenterOfMassJacobian(MultiBodySystemReadOnly input, ReferenceFrame jacobianFrame, String centerOfMassFrameName,
+                                boolean considerIgnoredSubtreesInertia)
    {
       this.input = input;
       isJacobianFrameAtCenterOfMass = jacobianFrame == null;
@@ -167,8 +167,9 @@ public class CenterOfMassJacobian implements ReferenceFrameHolder
 
       initialRecursionStep = new RecursionStep(rootBody, null);
       rigidBodyToRecursionStepMap.put(rootBody, initialRecursionStep);
-
       buildMultiBodyTree(initialRecursionStep, input.getJointsToIgnore());
+      if (considerIgnoredSubtreesInertia)
+         initialRecursionStep.includeIgnoredSubtreeInertia();
       recursionSteps = rigidBodyToRecursionStepMap.values().toArray(new RecursionStep[0]);
 
       jacobianColumn = new FrameVector3D(this.jacobianFrame);
@@ -325,8 +326,8 @@ public class CenterOfMassJacobian implements ReferenceFrameHolder
     * </p>
     * 
     * @param jointVelocityMatrix the matrix containing the joint velocities to use. Not modified.
-    * @param centerOfMassVelocityToPack the vector used to stored the computed center of mass
-    *           velocity. Modified.
+    * @param centerOfMassVelocityToPack the vector used to stored the computed center of mass velocity.
+    *           Modified.
     */
    public void getCenterOfMassVelocity(DenseMatrix64F jointVelocityMatrix, FrameVector3DBasics centerOfMassVelocityToPack)
    {
@@ -338,10 +339,10 @@ public class CenterOfMassJacobian implements ReferenceFrameHolder
     * Gets the N-by-3 center of mass Jacobian, where N is the number of degrees of freedom of the
     * multi-body system.
     * <p>
-    * The center of mass Jacobian maps from joint velocity space to center of mass Cartesian
-    * velocity space and is expressed in the frame {@link #getReferenceFrame()}. The latter implies
-    * that when multiplied to the joint velocity matrix, the result is the center of mass velocity
-    * expressed in {@link #getReferenceFrame()}.
+    * The center of mass Jacobian maps from joint velocity space to center of mass Cartesian velocity
+    * space and is expressed in the frame {@link #getReferenceFrame()}. The latter implies that when
+    * multiplied to the joint velocity matrix, the result is the center of mass velocity expressed in
+    * {@link #getReferenceFrame()}.
     * </p>
     * 
     * @return the center of mass Jacobian.
@@ -374,14 +375,20 @@ public class CenterOfMassJacobian implements ReferenceFrameHolder
        * The rigid-body for which this recursion is.
        */
       private final RigidBodyReadOnly rigidBody;
+      /**
+       * Body inertia: usually equal to {@code rigidBody.getInertial()}. However, if at least one child of
+       * {@code rigidBody} is ignored, it is equal to this rigid-body inertia and the subtree inertia
+       * attached to the ignored joint.
+       */
+      private final SpatialInertia bodyInertia;
 
       /**
        * The total mass of this rigid-body and all its descendant.
        */
       private double subTreeMass;
       /**
-       * Represents the sum of the center of mass of each rigid-body in the current sub-tree scaled
-       * by their respective mass.
+       * Represents the sum of the center of mass of each rigid-body in the current sub-tree scaled by
+       * their respective mass.
        */
       private final FramePoint3D centerOfMassTimesMass = new FramePoint3D();
       /**
@@ -397,8 +404,7 @@ public class CenterOfMassJacobian implements ReferenceFrameHolder
        */
       private final List<RecursionStep> children = new ArrayList<>();
       /**
-       * Joint indices for storing {@code jacobianJointBlock} in the main matrix
-       * {@code jacobianMatrix}.
+       * Joint indices for storing {@code jacobianJointBlock} in the main matrix {@code jacobianMatrix}.
        */
       private final int[] jointIndices;
 
@@ -409,12 +415,33 @@ public class CenterOfMassJacobian implements ReferenceFrameHolder
 
          if (isRoot())
          {
+            bodyInertia = null;
             jacobianJointBlock = null;
          }
          else
          {
+            bodyInertia = new SpatialInertia(rigidBody.getInertia());
             jacobianJointBlock = new DenseMatrix64F(3, getJoint().getDegreesOfFreedom());
          }
+      }
+
+      public void includeIgnoredSubtreeInertia()
+      {
+         if (!isRoot() && children.size() != rigidBody.getChildrenJoints().size())
+         {
+            for (JointReadOnly childJoint : rigidBody.getChildrenJoints())
+            {
+               if (input.getJointsToIgnore().contains(childJoint))
+               {
+                  SpatialInertia subtreeIneria = MultiBodySystemTools.computeSubtreeInertia(childJoint);
+                  subtreeIneria.changeFrame(rigidBody.getBodyFixedFrame());
+                  bodyInertia.add(subtreeIneria);
+               }
+            }
+         }
+
+         for (int childIndex = 0; childIndex < children.size(); childIndex++)
+            children.get(childIndex).includeIgnoredSubtreeInertia();
       }
 
       /**
@@ -425,27 +452,25 @@ public class CenterOfMassJacobian implements ReferenceFrameHolder
        */
       public void passOne()
       {
-         SpatialInertiaReadOnly inertia = rigidBody.getInertia();
-
          ReferenceFrame frameToUse = isJacobianFrameAtCenterOfMass ? rootFrame : jacobianFrame;
 
          if (isRoot())
          {
             // Update the total mass
-            subTreeMass = inertia == null ? 0.0 : inertia.getMass();
+            subTreeMass = bodyInertia == null ? 0.0 : bodyInertia.getMass();
             for (int i = 0; i < children.size(); i++)
                subTreeMass += children.get(i).subTreeMass;
 
             // The centerOfMassTimesMass can be used to obtain the overall center of mass position.
-            if (inertia == null)
+            if (bodyInertia == null)
             {
                centerOfMassTimesMass.setToZero(frameToUse);
             }
             else
             {
-               centerOfMassTimesMass.setIncludingFrame(inertia.getCenterOfMassOffset());
+               centerOfMassTimesMass.setIncludingFrame(bodyInertia.getCenterOfMassOffset());
                centerOfMassTimesMass.changeFrame(frameToUse);
-               centerOfMassTimesMass.scale(inertia.getMass());
+               centerOfMassTimesMass.scale(bodyInertia.getMass());
             }
 
             for (int i = 0; i < children.size(); i++)
@@ -456,14 +481,14 @@ public class CenterOfMassJacobian implements ReferenceFrameHolder
          else
          {
             // Update the sub-tree mass
-            subTreeMass = inertia.getMass();
+            subTreeMass = bodyInertia.getMass();
             for (int i = 0; i < children.size(); i++)
                subTreeMass += children.get(i).subTreeMass;
 
             // Update the sub-tree center of mass
-            centerOfMassTimesMass.setIncludingFrame(inertia.getCenterOfMassOffset());
+            centerOfMassTimesMass.setIncludingFrame(bodyInertia.getCenterOfMassOffset());
             centerOfMassTimesMass.changeFrame(frameToUse);
-            centerOfMassTimesMass.scale(inertia.getMass());
+            centerOfMassTimesMass.scale(bodyInertia.getMass());
 
             for (int i = 0; i < children.size(); i++)
             {
@@ -478,10 +503,9 @@ public class CenterOfMassJacobian implements ReferenceFrameHolder
       /**
        * Second pass that can be done iteratively and each iteration is independent.
        * <p>
-       * This pass is only needed when the {@code jacobianFrame} is at the center of mass and that
-       * this calculator has to update. It recomputes the intermediate variable
-       * {@link #centerOfMassTimesMass} at the center of mass frame so it can be used in the next
-       * and last pass.
+       * This pass is only needed when the {@code jacobianFrame} is at the center of mass and that this
+       * calculator has to update. It recomputes the intermediate variable {@link #centerOfMassTimesMass}
+       * at the center of mass frame so it can be used in the next and last pass.
        * </p>
        */
       public void passTwo()

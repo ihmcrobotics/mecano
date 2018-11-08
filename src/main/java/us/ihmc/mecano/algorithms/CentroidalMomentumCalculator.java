@@ -21,11 +21,11 @@ import us.ihmc.mecano.multiBodySystem.interfaces.JointReadOnly;
 import us.ihmc.mecano.multiBodySystem.interfaces.MultiBodySystemReadOnly;
 import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyReadOnly;
 import us.ihmc.mecano.spatial.Momentum;
+import us.ihmc.mecano.spatial.SpatialInertia;
 import us.ihmc.mecano.spatial.Twist;
 import us.ihmc.mecano.spatial.interfaces.FixedFrameMomentumBasics;
 import us.ihmc.mecano.spatial.interfaces.MomentumBasics;
 import us.ihmc.mecano.spatial.interfaces.MomentumReadOnly;
-import us.ihmc.mecano.spatial.interfaces.SpatialInertiaReadOnly;
 import us.ihmc.mecano.spatial.interfaces.TwistReadOnly;
 import us.ihmc.mecano.tools.JointStateType;
 import us.ihmc.mecano.tools.MultiBodySystemTools;
@@ -72,8 +72,7 @@ public class CentroidalMomentumCalculator implements ReferenceFrameHolder
    private double totalMass = 0.0;
 
    /**
-    * Whether the centroidal momentum matrix has been updated since the last call to
-    * {@link #reset()}.
+    * Whether the centroidal momentum matrix has been updated since the last call to {@link #reset()}.
     */
    private boolean isCentroidalMomentumUpToDate = false;
    /**
@@ -92,8 +91,8 @@ public class CentroidalMomentumCalculator implements ReferenceFrameHolder
    /**
     * Creates a new calculator for the subtree that starts off the given {@code rootBody}.
     * 
-    * @param rootBody the start of subtree for which the centroidal momentum matrix is to be
-    *           computed. Not modified.
+    * @param rootBody the start of subtree for which the centroidal momentum matrix is to be computed.
+    *           Not modified.
     * @param matrixFrame the frame in which the centroidal momentum matrix is to be expressed.
     */
    public CentroidalMomentumCalculator(RigidBodyReadOnly rootBody, ReferenceFrame matrixFrame)
@@ -109,12 +108,29 @@ public class CentroidalMomentumCalculator implements ReferenceFrameHolder
     */
    public CentroidalMomentumCalculator(MultiBodySystemReadOnly input, ReferenceFrame matrixFrame)
    {
+      this(input, matrixFrame, true);
+   }
+
+   /**
+    * Creates a new calculator for the given {@code input}.
+    *
+    * @param input the definition of the system to be evaluated by this calculator.
+    * @param matrixFrame the frame in which the centroidal momentum matrix is to be expressed.
+    * @param considerIgnoredSubtreesInertia whether the inertia of the ignored part(s) of the given
+    *           multi-body system should be considered. When {@code true}, this provides a more
+    *           accurate centroidal momentum matrix, while when {@code false}, this calculator may gain
+    *           slight performance improvement.
+    */
+   public CentroidalMomentumCalculator(MultiBodySystemReadOnly input, ReferenceFrame matrixFrame, boolean considerIgnoredSubtreesInertia)
+   {
       this.input = input;
       this.matrixFrame = matrixFrame;
 
       RigidBodyReadOnly rootBody = input.getRootBody();
       IterativeStep initialIterativeStep = new IterativeStep(rootBody, null);
       rigidBodyToIterativeStepMap.put(rootBody, initialIterativeStep);
+      if (considerIgnoredSubtreesInertia)
+         initialIterativeStep.includeIgnoredSubtreeInertia();
 
       buildMultiBodyTree(initialIterativeStep, input.getJointsToIgnore());
       iterativeSteps = rigidBodyToIterativeStepMap.values().toArray(new IterativeStep[0]);
@@ -260,8 +276,8 @@ public class CentroidalMomentumCalculator implements ReferenceFrameHolder
     * </p>
     * 
     * @param jointVelocityMatrix the matrix containing the joint velocities to use. Not modified.
-    * @param centerOfMassVelocityToPack the vector used to stored the computed center of mass
-    *           velocity. Modified.
+    * @param centerOfMassVelocityToPack the vector used to stored the computed center of mass velocity.
+    *           Modified.
     */
    public void getCenterOfMassVelocity(DenseMatrix64F jointVelocityMatrix, FrameVector3DBasics centerOfMassVelocityToPack)
    {
@@ -306,10 +322,9 @@ public class CentroidalMomentumCalculator implements ReferenceFrameHolder
     * Gets the N-by-6 centroidal momentum matrix, where N is the number of degrees of freedom of the
     * multi-body system.
     * <p>
-    * The centroidal momentum matrix maps from joint velocity space to momentum space and is
-    * expressed in the frame {@link #getReferenceFrame()}. The latter implies that when multiplied
-    * to the joint velocity matrix, the result is the momentum expressed in
-    * {@link #getReferenceFrame()}.
+    * The centroidal momentum matrix maps from joint velocity space to momentum space and is expressed
+    * in the frame {@link #getReferenceFrame()}. The latter implies that when multiplied to the joint
+    * velocity matrix, the result is the momentum expressed in {@link #getReferenceFrame()}.
     * </p>
     * 
     * @return the centroidal momentum matrix.
@@ -343,13 +358,19 @@ public class CentroidalMomentumCalculator implements ReferenceFrameHolder
        */
       private final RigidBodyReadOnly rigidBody;
       /**
-       * Result of this recursion step: the matrix block of the centroidal momentum matrix for the
-       * parent joint.
+       * Body inertia: usually equal to {@code rigidBody.getInertial()}. However, if at least one child of
+       * {@code rigidBody} is ignored, it is equal to this rigid-body inertia and the subtree inertia
+       * attached to the ignored joint.
+       */
+      private final SpatialInertia bodyInertia;
+      /**
+       * Result of this recursion step: the matrix block of the centroidal momentum matrix for the parent
+       * joint.
        */
       private final DenseMatrix64F centroidalMomentumMatrixBlock;
       /**
-       * Intermediate variable to prevent repetitive calculation of a transform between this
-       * rigid-body's body-fixed frame and the matrix frame.
+       * Intermediate variable to prevent repetitive calculation of a transform between this rigid-body's
+       * body-fixed frame and the matrix frame.
        */
       private final RigidBodyTransform matrixFrameToBodyFixedFrameTransform;
       /**
@@ -369,21 +390,41 @@ public class CentroidalMomentumCalculator implements ReferenceFrameHolder
 
          if (isRoot())
          {
+            bodyInertia = null;
             centroidalMomentumMatrixBlock = null;
             matrixFrameToBodyFixedFrameTransform = null;
          }
          else
          {
+            bodyInertia = new SpatialInertia(rigidBody.getInertia());
             centroidalMomentumMatrixBlock = new DenseMatrix64F(6, getJoint().getDegreesOfFreedom());
             matrixFrameToBodyFixedFrameTransform = new RigidBodyTransform();
          }
       }
 
+      public void includeIgnoredSubtreeInertia()
+      {
+         if (!isRoot() && children.size() != rigidBody.getChildrenJoints().size())
+         {
+            for (JointReadOnly childJoint : rigidBody.getChildrenJoints())
+            {
+               if (input.getJointsToIgnore().contains(childJoint))
+               {
+                  SpatialInertia subtreeIneria = MultiBodySystemTools.computeSubtreeInertia(childJoint);
+                  subtreeIneria.changeFrame(rigidBody.getBodyFixedFrame());
+                  bodyInertia.add(subtreeIneria);
+               }
+            }
+         }
+
+         for (int childIndex = 0; childIndex < children.size(); childIndex++)
+            children.get(childIndex).includeIgnoredSubtreeInertia();
+      }
+
       /**
        * First pass that can be done iteratively and each iteration is independent.
        * <p>
-       * Computes and stores the transform from the matrix frame to this rigid-body's body-fixed
-       * frame.
+       * Computes and stores the transform from the matrix frame to this rigid-body's body-fixed frame.
        * </p>
        */
       public void passOne()
@@ -391,7 +432,7 @@ public class CentroidalMomentumCalculator implements ReferenceFrameHolder
          if (isRoot())
             return;
 
-         ReferenceFrame inertiaFrame = rigidBody.getInertia().getReferenceFrame();
+         ReferenceFrame inertiaFrame = bodyInertia.getReferenceFrame();
          matrixFrame.getTransformToDesiredFrame(matrixFrameToBodyFixedFrameTransform, inertiaFrame);
       }
 
@@ -423,40 +464,37 @@ public class CentroidalMomentumCalculator implements ReferenceFrameHolder
       }
 
       /**
-       * Builds up recursively the {@code unitMomentumToAddTo} to account for the whole subtree
-       * inertia.
+       * Builds up recursively the {@code unitMomentumToAddTo} to account for the whole subtree inertia.
        * <p>
-       * Theoretically, the inertia corresponding to the subtree should be computed to then compute
-       * the unit-momentum (left-hand side of the equation below), but this approach (right-hand
-       * side of the equation below) is equivalent and much cheaper. The left-hand side formula
-       * requires to change the frame of each spatial inertia matrix which results in heavy
-       * computation, the right-hand side only requires to change the frame of the unit-twist.
+       * Theoretically, the inertia corresponding to the subtree should be computed to then compute the
+       * unit-momentum (left-hand side of the equation below), but this approach (right-hand side of the
+       * equation below) is equivalent and much cheaper. The left-hand side formula requires to change the
+       * frame of each spatial inertia matrix which results in heavy computation, the right-hand side only
+       * requires to change the frame of the unit-twist.
        * </p>
        * 
        * <pre>
        * h = (&sum;<sub>i=0:n</sub> I<sub>i</sub>) * T &equiv; &sum;<sub>i=0:n</sub> (I<sub>i</sub> * T)
        * </pre>
        * 
-       * where <tt>h</tt> is the resulting unit-momentum, <tt>I<sub>i</sub></tt> is the spatial
-       * inertia of the i<sup>th</sup> body, and <tt>T</tt> is the unit-twist.
+       * where <tt>h</tt> is the resulting unit-momentum, <tt>I<sub>i</sub></tt> is the spatial inertia of
+       * the i<sup>th</sup> body, and <tt>T</tt> is the unit-twist.
        * 
        * 
-       * @param ancestorUnitTwist the unit-twist to use for computing a the unit-momentum for this
-       *           body that is then added to {@code unitMomentumToAddTo}. Not modified.
+       * @param ancestorUnitTwist the unit-twist to use for computing a the unit-momentum for this body
+       *           that is then added to {@code unitMomentumToAddTo}. Not modified.
        * @param unitMomentumToAddTo the unit-momentum to build up. Modified.
        */
       private void addToUnitMomentumRecursively(TwistReadOnly ancestorUnitTwist, FixedFrameMomentumBasics unitMomentumToAddTo)
       {
-         SpatialInertiaReadOnly inertia = rigidBody.getInertia();
-
-         ReferenceFrame inertiaFrame = inertia.getReferenceFrame();
+         ReferenceFrame inertiaFrame = bodyInertia.getReferenceFrame();
 
          intermediateUnitTwist.setIncludingFrame(ancestorUnitTwist);
          intermediateUnitTwist.applyTransform(matrixFrameToBodyFixedFrameTransform);
          intermediateUnitTwist.setReferenceFrame(inertiaFrame);
 
          intermediateMomentum.setReferenceFrame(inertiaFrame);
-         intermediateMomentum.compute(inertia, intermediateUnitTwist);
+         intermediateMomentum.compute(bodyInertia, intermediateUnitTwist);
          intermediateMomentum.applyInverseTransform(matrixFrameToBodyFixedFrameTransform);
          intermediateMomentum.setReferenceFrame(matrixFrame);
 
