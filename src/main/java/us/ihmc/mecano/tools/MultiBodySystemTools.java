@@ -26,8 +26,8 @@ public class MultiBodySystemTools
    /**
     * Retrieves and gets the root body of the multi-body system the given {@code body} belongs to.
     *
-    * @param body an arbitrary body that belongs to the multi-body system that this method is to
-    *           find the root.
+    * @param body an arbitrary body that belongs to the multi-body system that this method is to find
+    *           the root.
     * @return the root body.
     */
    public static RigidBodyReadOnly getRootBody(RigidBodyReadOnly body)
@@ -45,8 +45,8 @@ public class MultiBodySystemTools
    /**
     * Retrieves and gets the root body of the multi-body system the given {@code body} belongs to.
     *
-    * @param body an arbitrary body that belongs to the multi-body system that this method is to
-    *           find the root.
+    * @param body an arbitrary body that belongs to the multi-body system that this method is to find
+    *           the root.
     * @return the root body.
     */
    public static RigidBodyBasics getRootBody(RigidBodyBasics body)
@@ -124,13 +124,13 @@ public class MultiBodySystemTools
    }
 
    /**
-    * Traverses up the kinematic chain from the candidate descendant towards the root body, checking
-    * to see if each parent body is the ancestor in question.
+    * Traverses up the kinematic chain from the candidate descendant towards the root body, checking to
+    * see if each parent body is the ancestor in question.
     * 
     * @param candidateDescendant the query for the descendant. A rigid-body is the descendant of
     *           another rigid-body if it is between the other rigid-body and an end-effector.
-    * @param ancestor the query for the ancestor. A rigid-body is the ancestor of another rigid-body
-    *           if it is between the other rigid-body and the root body.
+    * @param ancestor the query for the ancestor. A rigid-body is the ancestor of another rigid-body if
+    *           it is between the other rigid-body and the root body.
     * @return {@code true} if {@code candidateDescendant} is a descendant of {@code ancestor},
     *         {@code false} otherwise.
     */
@@ -152,16 +152,16 @@ public class MultiBodySystemTools
    /**
     * Computes the number of joints that separates the {@code descendant} from its {@code ancestor}.
     * <p>
-    * The {@code ancestor} is expected to be located between the root body and the
-    * {@code descendant}, if not this method returns {@code -1}.
+    * The {@code ancestor} is expected to be located between the root body and the {@code descendant},
+    * if not this method returns {@code -1}.
     * </p>
     *
     * @param descendant the descendant, often it is the end-effector.
     * @param ancestor the ancestor of the descendant, often it is the root body.
-    * @return the distance in number of joints between the {@code descendant} and the
-    *         {@code ancestor}. This method returns {@code 0} if the two rigid-bodies are the same.
-    *         This method returns {@code -1} if the given {@code ancestor} is not located between
-    *         the {@code descendant} and the root body.
+    * @return the distance in number of joints between the {@code descendant} and the {@code ancestor}.
+    *         This method returns {@code 0} if the two rigid-bodies are the same. This method returns
+    *         {@code -1} if the given {@code ancestor} is not located between the {@code descendant}
+    *         and the root body.
     */
    public static int computeDistanceToAncestor(RigidBodyReadOnly descendant, RigidBodyReadOnly ancestor)
    {
@@ -189,8 +189,8 @@ public class MultiBodySystemTools
     * @return the number of degrees of freedom.
     * @throws RuntimeException if the given ancestor and descendant are swapped, or if the do not
     *            belong to the same system.
-    * @throws RuntimeException this method does not support in kinematic trees to go through
-    *            different branches.
+    * @throws RuntimeException this method does not support in kinematic trees to go through different
+    *            branches.
     */
    public static int computeDegreesOfFreedom(RigidBodyReadOnly ancestor, RigidBodyReadOnly descendant)
    {
@@ -263,6 +263,21 @@ public class MultiBodySystemTools
    }
 
    /**
+    * Collects any rigid-body that composes any of the subtrees originating at the given
+    * {@code joints}.
+    * <p>
+    * WARNING: This method generates garbage.
+    * </p>
+    * 
+    * @param joints the joints indicating the start of each subtree to collect.
+    * @return the array containing all the rigid-bodies composing the subtrees.
+    */
+   public static RigidBodyBasics[] collectSubtreeSuccessors(JointBasics... joints)
+   {
+      return Stream.of(joints).map(JointBasics::getSuccessor).flatMap(RigidBodyBasics::subtreeStream).distinct().toArray(RigidBodyBasics[]::new);
+   }
+
+   /**
     * Collects for each rigid-body all their support joints, i.e. the joints that are between the
     * rigid-body and the root body, and returns an array containing no duplicate elements.
     * <p>
@@ -307,8 +322,7 @@ public class MultiBodySystemTools
     * Collects only the joints from {@code source} that are instances of the given {@code clazz} and
     * stores them in {@code destination}.
     * <p>
-    * The filtered joints are added to the end of {@code destination} using
-    * {@link List#add(Object)}.
+    * The filtered joints are added to the end of {@code destination} using {@link List#add(Object)}.
     * </p>
     *
     * @param source the original collection of joints to filter. Not modified.
@@ -393,8 +407,8 @@ public class MultiBodySystemTools
     * multi-body system they belong.
     * <li>the last joint of the array should be the closest or equal to one of the leaves or
     * end-effectors of the multi-body system they belong.
-    * <li>the continuity test asserts that each pair of successive joints in the given array are
-    * also successive in the kinematic chain:
+    * <li>the continuity test asserts that each pair of successive joints in the given array are also
+    * successive in the kinematic chain:
     * {@code joints[i] == joints[i+1].getPredecessor().getParentJoint()} &forall; i &in; [0;
     * {@code joints.length - 1}].
     * </ul>
@@ -421,8 +435,8 @@ public class MultiBodySystemTools
     * <p>
     * More precisely:
     * <ul>
-    * <li>the first joint of the list should be the closest or equal to the root body of the
-    * multi-body system they belong.
+    * <li>the first joint of the list should be the closest or equal to the root body of the multi-body
+    * system they belong.
     * <li>the last joint of the list should be the closest or equal to one of the leaves or
     * end-effectors of the multi-body system they belong.
     * <li>the continuity test asserts that each pair of successive joints in the given list are also
@@ -542,13 +556,12 @@ public class MultiBodySystemTools
    }
 
    /**
-    * Iterates through the given {@code joints}, extract the requested state {@code stateSelection}
-    * for each joint, and finally stores the states in order in the given matrix
-    * {@code matrixToPack}.
+    * Iterates through the given {@code joints}, extract the requested state {@code stateSelection} for
+    * each joint, and finally stores the states in order in the given matrix {@code matrixToPack}.
     * 
     * @param joints the joints to extract the state of. Not modified.
-    * @param stateSelection indicates what state is to be extract, i.e. it can be either
-    *           configuration, velocity, acceleration, or tau (or effort).
+    * @param stateSelection indicates what state is to be extract, i.e. it can be either configuration,
+    *           velocity, acceleration, or tau (or effort).
     * @param matrixToPack the matrix in which the state of the joints is to be stored. Modified.
     * @return the number of rows used to store the information in the matrix.
     */
@@ -614,13 +627,12 @@ public class MultiBodySystemTools
    }
 
    /**
-    * Iterates through the given {@code joints}, extract the requested state {@code stateSelection}
-    * for each joint, and finally stores the states in order in the given matrix
-    * {@code matrixToPack}.
+    * Iterates through the given {@code joints}, extract the requested state {@code stateSelection} for
+    * each joint, and finally stores the states in order in the given matrix {@code matrixToPack}.
     * 
     * @param joints the joints to extract the state of. Not modified.
-    * @param stateSelection indicates what state is to be extract, i.e. it can be either
-    *           configuration, velocity, acceleration, or tau (or effort).
+    * @param stateSelection indicates what state is to be extract, i.e. it can be either configuration,
+    *           velocity, acceleration, or tau (or effort).
     * @param matrixToPack the matrix in which the state of the joints is to be stored. Modified.
     * @return the number of rows used to store the information in the matrix.
     */
@@ -691,10 +703,10 @@ public class MultiBodySystemTools
     * stored in the proper order.
     * 
     * @param joints the joints to update the state of. Modified.
-    * @param stateSelection indicates what state is to be updated, i.e. it can be either
-    *           configuration, velocity, acceleration, or tau (or effort).
-    * @param matrix the matrix in which the new state of the joints is stored. The data is expected
-    *           to be stored as a column vector starting at the first row. Modified.
+    * @param stateSelection indicates what state is to be updated, i.e. it can be either configuration,
+    *           velocity, acceleration, or tau (or effort).
+    * @param matrix the matrix in which the new state of the joints is stored. The data is expected to
+    *           be stored as a column vector starting at the first row. Modified.
     * @return the number of rows that were used from the matrix.
     */
    public static int insertJointsState(List<? extends JointBasics> joints, JointStateType stateSelection, DenseMatrix64F matrix)
@@ -764,10 +776,10 @@ public class MultiBodySystemTools
     * stored in the proper order.
     * 
     * @param joints the joints to update the state of. Modified.
-    * @param stateSelection indicates what state is to be updated, i.e. it can be either
-    *           configuration, velocity, acceleration, or tau (or effort).
-    * @param matrix the matrix in which the new state of the joints is stored. The data is expected
-    *           to be stored as a column vector starting at the first row. Modified.
+    * @param stateSelection indicates what state is to be updated, i.e. it can be either configuration,
+    *           velocity, acceleration, or tau (or effort).
+    * @param matrix the matrix in which the new state of the joints is stored. The data is expected to
+    *           be stored as a column vector starting at the first row. Modified.
     * @return the number of rows that were used from the matrix.
     */
    public static int insertJointsState(JointBasics[] joints, JointStateType stateSelection, DenseMatrix64F matrix)
