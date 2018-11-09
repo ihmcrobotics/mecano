@@ -495,8 +495,9 @@ public class MultiBodySystemTools
     */
    public static JointBasics[] collectSupportAndSubtreeJoints(RigidBodyBasics rigidBody)
    {
-      List<JointBasics> supportAndSubtreeJoints = SubtreeStreams.fromChildren(rigidBody).collect(Collectors.toList());
-      supportAndSubtreeJoints.addAll(Arrays.asList(collectSupportJoints(rigidBody)));
+      List<JointBasics> supportAndSubtreeJoints = new ArrayList<>();
+      Stream.of(collectSupportJoints(rigidBody)).forEach(supportAndSubtreeJoints::add);
+      rigidBody.childrenSubtreeIterable().forEach(supportAndSubtreeJoints::add);
       return supportAndSubtreeJoints.toArray(new JointBasics[supportAndSubtreeJoints.size()]);
    }
 
