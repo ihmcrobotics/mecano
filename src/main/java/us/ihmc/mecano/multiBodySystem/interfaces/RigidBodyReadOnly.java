@@ -126,11 +126,11 @@ public interface RigidBodyReadOnly
     * Gets a new iterable to iterate through all the rigid-bodies, including {@code this}, of the
     * subtree that starts at this rigid-body.
     * <p>
-    * This method generates garbage.
-    * </p>
-    * <p>
     * A subtree is defined by a start rigid-body and is the set of all the rigid-body for which the
     * start rigid-body is an ancestor.
+    * </p>
+    * <p>
+    * This method generates garbage.
     * </p>
     * 
     * @return the new subtree iterable.
@@ -163,6 +163,9 @@ public interface RigidBodyReadOnly
     * A subtree is defined by a start rigid-body and is the set of all the rigid-body for which the
     * start rigid-body is an ancestor.
     * </p>
+    * <p>
+    * This method generates garbage.
+    * </p>
     * 
     * @return the new subtree stream.
     * @see SubtreeStreams
@@ -179,12 +182,33 @@ public interface RigidBodyReadOnly
     * A subtree is defined by a start rigid-body and is the set of all the rigid-body for which the
     * start rigid-body is an ancestor.
     * </p>
+    * <p>
+    * This method generates garbage.
+    * </p>
     * 
     * @return the new subtree list.
     */
    default List<? extends RigidBodyReadOnly> subtreeList()
    {
       return subtreeStream().collect(Collectors.toList());
+   }
+
+   /**
+    * Gets an array that contains all the rigid-bodies, including {@code this}, of the subtree that
+    * starts at this rigid-body.
+    * <p>
+    * A subtree is defined by a start rigid-body and is the set of all the rigid-body for which the
+    * start rigid-body is an ancestor.
+    * </p>
+    * <p>
+    * This method generates garbage.
+    * </p>
+    * 
+    * @return the new subtree array.
+    */
+   default RigidBodyReadOnly[] subtreeArray()
+   {
+      return subtreeStream().toArray(RigidBodyReadOnly[]::new);
    }
 
    /**
