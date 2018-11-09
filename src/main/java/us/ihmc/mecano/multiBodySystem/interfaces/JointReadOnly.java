@@ -379,10 +379,6 @@ public interface JointReadOnly
     * <p>
     * This method generates garbage.
     * </p>
-    * <p>
-    * A subtree is defined by a start joint and is the set of all the joint for which the start
-    * joint is an ancestor.
-    * </p>
     * 
     * @return the new subtree iterable.
     * @see JointIterable
@@ -398,6 +394,9 @@ public interface JointReadOnly
     * <p>
     * A subtree is defined by a start joint and is the set of all the joint for which the start
     * joint is an ancestor.
+    * </p>
+    * <p>
+    * This method generates garbage.
     * </p>
     * 
     * @return the new subtree stream.
@@ -415,12 +414,33 @@ public interface JointReadOnly
     * A subtree is defined by a start joint and is the set of all the joint for which the start
     * joint is an ancestor.
     * </p>
+    * <p>
+    * This method generates garbage.
+    * </p>
     * 
     * @return the new subtree list.
     */
    default List<? extends JointReadOnly> subtreeList()
    {
       return subtreeStream().collect(Collectors.toList());
+   }
+
+   /**
+    * Gets an array that contains all the joints, including {@code this}, of the subtree that starts at
+    * this joint.
+    * <p>
+    * A subtree is defined by a start joint and is the set of all the joint for which the start joint
+    * is an ancestor.
+    * </p>
+    * <p>
+    * This method generates garbage.
+    * </p>
+    * 
+    * @return the new subtree array.
+    */
+   default JointReadOnly[] subtreeArray()
+   {
+      return subtreeStream().toArray(JointReadOnly[]::new);
    }
 
    /**

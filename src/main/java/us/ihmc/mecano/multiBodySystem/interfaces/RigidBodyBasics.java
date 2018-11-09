@@ -119,4 +119,10 @@ public interface RigidBodyBasics extends RigidBodyReadOnly
    {
       return subtreeStream().collect(Collectors.toList());
    }
+
+   @Override
+   default RigidBodyBasics[] subtreeArray()
+   {
+      return subtreeStream().toArray(RigidBodyBasics[]::new);
+   }
 }

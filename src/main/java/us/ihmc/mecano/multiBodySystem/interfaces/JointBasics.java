@@ -720,6 +720,12 @@ public interface JointBasics extends JointReadOnly
       return subtreeStream().collect(Collectors.toList());
    }
 
+   @Override
+   default JointBasics[] subtreeArray()
+   {
+      return subtreeStream().toArray(JointBasics[]::new);
+   }
+
    /**
     * Updates {@code afterJointFrame} of this joint to take into consideration the new joint
     * configuration. Then calls {@link RigidBody#updateFramesRecursively()} which in its turn updates
