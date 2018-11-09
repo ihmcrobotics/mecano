@@ -1002,7 +1002,7 @@ public class MultiBodySystemRandomTools
     */
    public static List<OneDoFJoint> nextOneDoFJointTree(Random random, String prefix, RigidBodyBasics rootBody, int numberOfJoints)
    {
-      List<OneDoFJoint> revoluteJoints = new ArrayList<>();
+      List<OneDoFJoint> oneDoFJoints = new ArrayList<>();
 
       RigidBodyBasics predecessor = rootBody;
 
@@ -1010,8 +1010,8 @@ public class MultiBodySystemRandomTools
       {
          OneDoFJoint joint = nextOneDoFJoint(random, prefix + "Joint" + i, predecessor);
          nextRigidBody(random, prefix + "Body" + i, joint);
-         revoluteJoints.add(joint);
-         predecessor = revoluteJoints.get(random.nextInt(revoluteJoints.size())).getSuccessor();
+         oneDoFJoints.add(joint);
+         predecessor = oneDoFJoints.get(random.nextInt(oneDoFJoints.size())).getSuccessor();
       }
 
       return SubtreeStreams.from(OneDoFJoint.class, rootBody.getChildrenJoints()).collect(Collectors.toList());
@@ -1170,7 +1170,7 @@ public class MultiBodySystemRandomTools
     */
    public static RevoluteJoint nextRevoluteJoint(Random random, String name, RigidBodyBasics predecessor)
    {
-      Vector3D jointAxis = new Vector3D(random.nextDouble(), random.nextDouble(), random.nextDouble());
+      Vector3D jointAxis = EuclidCoreRandomTools.nextVector3DWithFixedLength(random, 1.0);
       return nextRevoluteJoint(random, name, jointAxis, predecessor);
    }
 
