@@ -3,9 +3,8 @@ package us.ihmc.mecano.tools;
 import java.lang.reflect.Array;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.LinkedHashSet;
 import java.util.List;
-import java.util.Set;
+import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import org.ejml.data.DenseMatrix64F;
@@ -16,6 +15,7 @@ import us.ihmc.mecano.multiBodySystem.interfaces.JointReadOnly;
 import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointBasics;
 import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
 import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyReadOnly;
+import us.ihmc.mecano.multiBodySystem.iterators.SubtreeStreams;
 import us.ihmc.mecano.spatial.SpatialInertia;
 
 /**
@@ -318,9 +318,38 @@ public class MultiBodySystemTools
     * @param joints the joints to collect the successors of.
     * @return the array containing in order the successor of each joint.
     */
+   public static RigidBodyReadOnly[] collectSuccessors(JointReadOnly... joints)
+   {
+      return Stream.of(joints).map(JointReadOnly::getSuccessor).toArray(RigidBodyReadOnly[]::new);
+   }
+
+   /**
+    * Collects in order the successor of each joint, i.e. {@link JointReadOnly#getSuccessor()}.
+    * <p>
+    * WARNING: This method generates garbage.
+    * </p>
+    *
+    * @param joints the joints to collect the successors of.
+    * @return the array containing in order the successor of each joint.
+    */
    public static RigidBodyBasics[] collectSuccessors(JointBasics... joints)
    {
       return Stream.of(joints).map(JointBasics::getSuccessor).toArray(RigidBodyBasics[]::new);
+   }
+
+   /**
+    * Collects any rigid-body that composes any of the subtrees originating at the given
+    * {@code joints}.
+    * <p>
+    * WARNING: This method generates garbage.
+    * </p>
+    * 
+    * @param joints the joints indicating the start of each subtree to collect.
+    * @return the array containing all the rigid-bodies composing the subtrees.
+    */
+   public static RigidBodyReadOnly[] collectSubtreeSuccessors(JointReadOnly... joints)
+   {
+      return Stream.of(joints).map(JointReadOnly::getSuccessor).flatMap(RigidBodyReadOnly::subtreeStream).distinct().toArray(RigidBodyReadOnly[]::new);
    }
 
    /**
@@ -339,6 +368,36 @@ public class MultiBodySystemTools
    }
 
    /**
+    * Collects and returns all the joints located between the given {@code rigidBody} and the root
+    * body.
+    * <p>
+    * WARNING: This method generates garbage.
+    * </p>
+    * 
+    * @param rigidBody the rigid-body to collect the support joints of.
+    * @return the array containing the support joints of the given rigid-body.
+    */
+   public static JointReadOnly[] collectSupportJoints(RigidBodyReadOnly rigidBody)
+   {
+      return createJointPath(getRootBody(rigidBody), rigidBody);
+   }
+
+   /**
+    * Collects and returns all the joints located between the given {@code rigidBody} and the root
+    * body.
+    * <p>
+    * WARNING: This method generates garbage.
+    * </p>
+    * 
+    * @param rigidBody the rigid-body to collect the support joints of.
+    * @return the array containing the support joints of the given rigid-body.
+    */
+   public static JointBasics[] collectSupportJoints(RigidBodyBasics rigidBody)
+   {
+      return createJointPath(getRootBody(rigidBody), rigidBody);
+   }
+
+   /**
     * Collects for each rigid-body all their support joints, i.e. the joints that are between the
     * rigid-body and the root body, and returns an array containing no duplicate elements.
     * <p>
@@ -350,15 +409,121 @@ public class MultiBodySystemTools
     */
    public static JointReadOnly[] collectSupportJoints(RigidBodyReadOnly... rigidBodies)
    {
-      Set<JointReadOnly> supportSet = new LinkedHashSet<>();
-      for (RigidBodyReadOnly rigidBody : rigidBodies)
-      {
-         RigidBodyReadOnly rootBody = getRootBody(rigidBody);
-         JointReadOnly[] jointPath = createJointPath(rootBody, rigidBody);
-         supportSet.addAll(Arrays.asList(jointPath));
-      }
+      return Stream.of(rigidBodies).map(MultiBodySystemTools::collectSupportJoints).flatMap(Stream::of).distinct().toArray(JointReadOnly[]::new);
+   }
 
-      return supportSet.toArray(new JointReadOnly[supportSet.size()]);
+   /**
+    * Collects for each rigid-body all their support joints, i.e. the joints that are between the
+    * rigid-body and the root body, and returns an array containing no duplicate elements.
+    * <p>
+    * WARNING: This method generates garbage.
+    * </p>
+    * 
+    * @param rigidBodies the rigid-bodies to collect the support joints of.
+    * @return the array containing the support joints of all the given rigid-bodies.
+    */
+   public static JointBasics[] collectSupportJoints(RigidBodyBasics... rigidBodies)
+   {
+      return Stream.of(rigidBodies).map(MultiBodySystemTools::collectSupportJoints).flatMap(Stream::of).distinct().toArray(JointBasics[]::new);
+   }
+
+   /**
+    * Collects all the joints that are part of any of the subtrees originating from the given
+    * {@code rootBodies}, and returns an array containing no duplicate elements.
+    * <p>
+    * WARNING: This method generates garbage.
+    * </p>
+    * 
+    * @param rootBodies the rigid-bodies from which the subtree to collect start off.
+    * @return the array containing all the joint composing the subtrees.
+    */
+   public static JointReadOnly[] collectSubtreeJoints(RigidBodyReadOnly... rootBodies)
+   {
+      return Stream.of(rootBodies).flatMap(SubtreeStreams::fromChildren).distinct().toArray(JointReadOnly[]::new);
+   }
+
+   /**
+    * Collects all the joints that are part of any of the subtrees originating from the given
+    * {@code rootBodies}, and returns an array containing no duplicate elements.
+    * <p>
+    * WARNING: This method generates garbage.
+    * </p>
+    * 
+    * @param rootBodies the rigid-bodies from which the subtree to collect start off.
+    * @return the array containing all the joint composing the subtrees.
+    */
+   public static JointBasics[] collectSubtreeJoints(RigidBodyBasics... rootBodies)
+   {
+      return Stream.of(rootBodies).flatMap(SubtreeStreams::fromChildren).distinct().toArray(JointBasics[]::new);
+   }
+
+   /**
+    * Collects all the joints that are part of any of the subtrees originating from the given
+    * {@code rootBodies}, and returns an array containing no duplicate elements.
+    * <p>
+    * WARNING: This method generates garbage.
+    * </p>
+    * 
+    * @param rootBodies the rigid-bodies from which the subtree to collect start off.
+    * @return the array containing all the joint composing the subtrees.
+    */
+   public static JointReadOnly[] collectSubtreeJoints(List<? extends RigidBodyReadOnly> rootBodies)
+   {
+      return rootBodies.stream().flatMap(SubtreeStreams::fromChildren).distinct().toArray(JointReadOnly[]::new);
+   }
+
+   /**
+    * Combines {@link #collectSupportJoints(RigidBodyReadOnly)} with
+    * {@link #collectSubtreeJoints(RigidBodyReadOnly...)}.
+    * 
+    * @param rigidBody the rigid-body to collect the support and subtree joints of.
+    * @return the array containing the support and subtree joints.
+    */
+   public static JointReadOnly[] collectSupportAndSubtreeJoints(RigidBodyReadOnly rigidBody)
+   {
+      List<JointReadOnly> supportAndSubtreeJoints = SubtreeStreams.fromChildren(rigidBody).collect(Collectors.toList());
+      supportAndSubtreeJoints.addAll(Arrays.asList(collectSupportJoints(rigidBody)));
+      return supportAndSubtreeJoints.toArray(new JointReadOnly[supportAndSubtreeJoints.size()]);
+   }
+
+   /**
+    * Combines {@link #collectSupportJoints(RigidBodyBasics)} with
+    * {@link #collectSubtreeJoints(RigidBodyBasics...)}.
+    * 
+    * @param rigidBody the rigid-body to collect the support and subtree joints of.
+    * @return the array containing the support and subtree joints.
+    */
+   public static JointBasics[] collectSupportAndSubtreeJoints(RigidBodyBasics rigidBody)
+   {
+      List<JointBasics> supportAndSubtreeJoints = SubtreeStreams.fromChildren(rigidBody).collect(Collectors.toList());
+      supportAndSubtreeJoints.addAll(Arrays.asList(collectSupportJoints(rigidBody)));
+      return supportAndSubtreeJoints.toArray(new JointBasics[supportAndSubtreeJoints.size()]);
+   }
+
+   /**
+    * Combines {@link #collectSupportJoints(RigidBodyReadOnly...)} with
+    * {@link #collectSubtreeJoints(RigidBodyReadOnly...)}, and returns an array containing no duplicate
+    * elements.
+    * 
+    * @param rigidBodies the rigid-bodies to collect the support and subtree joints of.
+    * @return the array containing the support and subtree joints.
+    */
+   public static JointReadOnly[] collectSupportAndSubtreeJoints(RigidBodyReadOnly... rigidBodies)
+   {
+      return Stream.of(rigidBodies).map(MultiBodySystemTools::collectSupportAndSubtreeJoints).flatMap(Stream::of).distinct().toArray(JointReadOnly[]::new);
+   }
+
+   /**
+    * Combines {@link #collectSupportJoints(RigidBodyBasics...)} with
+    * {@link #collectSubtreeJoints(RigidBodyBasics...)}, and returns an array containing no duplicate
+    * elements.
+    * 
+    * @param rigidBodies the rigid-bodies to collect the support and subtree joints of.
+    * @return the array containing the support and subtree joints.
+    */
+   public static JointBasics[] collectSupportAndSubtreeJoints(RigidBodyBasics... rigidBodies)
+   {
+      return Stream.of(rigidBodies).map(MultiBodySystemTools::collectSupportAndSubtreeJoints).flatMap(Stream::of).distinct().toArray(JointBasics[]::new);
    }
 
    /**
