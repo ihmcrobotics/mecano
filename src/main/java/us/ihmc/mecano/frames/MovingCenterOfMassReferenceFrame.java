@@ -68,6 +68,6 @@ public class MovingCenterOfMassReferenceFrame extends MovingReferenceFrame
    protected void updateTwistRelativeToParent(Twist twistRelativeToParentToPack)
    {
       twistRelativeToParentToPack.setToZero(this, getParent(), this);
-      twistRelativeToParentToPack.getLinearPart().set(centerOfMassJacobian.getCenterOfMassVelocity());
+      twistRelativeToParentToPack.getLinearPart().setMatchingFrame(centerOfMassJacobian.getCenterOfMassVelocity());
    }
 }
