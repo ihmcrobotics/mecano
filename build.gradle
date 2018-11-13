@@ -11,7 +11,7 @@ apply plugin: "us.ihmc.ihmc-build"
 
 ihmc {
    group = "us.ihmc"
-   version = "0.0.11"
+   version = "0.0.12"
    vcsUrl = "https://github.com/ihmcrobotics/mecano"
    openSource = true
 
