@@ -65,7 +65,7 @@ public interface SpatialVectorReadOnly extends ReferenceFrameHolder
     *
     * @return {@code true} if this vector contains a {@link Double#NaN}, {@code false} otherwise.
     */
-   default boolean containNaN()
+   default boolean containsNaN()
    {
       return getAngularPart().containsNaN() || getLinearPart().containsNaN();
    }
