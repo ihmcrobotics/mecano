@@ -22,8 +22,8 @@ ihmc {
 mainDependencies {
    compile group: "org.ejml", name: "dense64", version: "0.30"
 
-   compile group: "us.ihmc", name: "euclid-core", version: "0.6.1"
-   compile group: "us.ihmc", name: "euclid", version: "0.9.3"
+   compile group: "us.ihmc", name: "euclid-core", version: "0.7.0"
+   compile group: "us.ihmc", name: "euclid", version: "0.10.0"
 }
 
 testDependencies {
