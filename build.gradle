@@ -11,7 +11,7 @@ apply plugin: "us.ihmc.ihmc-build"
 
 ihmc {
    group = "us.ihmc"
-   version = "0.0.12"
+   version = "0.0.13"
    vcsUrl = "https://github.com/ihmcrobotics/mecano"
    openSource = true
 
@@ -22,8 +22,8 @@ ihmc {
 mainDependencies {
    compile group: "org.ejml", name: "dense64", version: "0.30"
 
-   compile group: "us.ihmc", name: "euclid-core", version: "0.6.1"
-   compile group: "us.ihmc", name: "euclid", version: "0.9.3"
+   compile group: "us.ihmc", name: "euclid-core", version: "0.7.0"
+   compile group: "us.ihmc", name: "euclid", version: "0.10.0"
 }
 
 testDependencies {
@@ -40,5 +40,5 @@ graphvizDependencies {
 yovariablesDependencies {
    compile ihmc.sourceSetProject("main")
 
-   compile group: "us.ihmc", name: "ihmc-yovariables", version: "0.3.5"
+   compile group: "us.ihmc", name: "ihmc-yovariables", version: "0.3.6"
 }

@@ -87,7 +87,7 @@ public interface FixedFrameSpatialVectorBasics extends SpatialVectorReadOnly, Cl
    @Override
    default boolean containsNaN()
    {
-      return SpatialVectorReadOnly.super.containNaN();
+      return SpatialVectorReadOnly.super.containsNaN();
    }
 
    /**
