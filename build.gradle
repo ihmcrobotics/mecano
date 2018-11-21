@@ -11,7 +11,7 @@ apply plugin: "us.ihmc.ihmc-build"
 
 ihmc {
    group = "us.ihmc"
-   version = "0.0.14"
+   version = "0.0.15"
    vcsUrl = "https://github.com/ihmcrobotics/mecano"
    openSource = true
 
@@ -41,5 +41,5 @@ graphvizDependencies {
 yovariablesDependencies {
    compile ihmc.sourceSetProject("main")
 
-   compile group: "us.ihmc", name: "ihmc-yovariables", version: "0.3.6"
+   compile group: "us.ihmc", name: "ihmc-yovariables", version: "0.3.7"
 }
