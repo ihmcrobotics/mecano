@@ -19,7 +19,7 @@ This library is under the license Apache 2.0. Consult the license file for more 
 This library is compatible with Java 8+ and Gradle 4.10+.
 
 ### Dependency
-This library main source depends on the matrix library EJML [here](http://ejml.org/), Euclid Core [here](https://github.com/ihmcrobotics/euclid-core), and Euclid [here](https://github.com/ihmcrobotics/euclid).
+This library main source depends on the matrix library EJML [here](http://ejml.org/) and Euclid [here](https://github.com/ihmcrobotics/euclid).
 
 ## What is Mecano?
 Mecano provides algorithms for rigid-body dynamics and a framework to define multi-body systems articulated with joints.
