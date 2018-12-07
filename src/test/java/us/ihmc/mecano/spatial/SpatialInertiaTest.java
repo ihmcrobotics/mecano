@@ -1,6 +1,6 @@
 package us.ihmc.mecano.spatial;
 
-import static org.junit.Assert.*;
+import static us.ihmc.robotics.Assert.*;
 
 import java.util.Arrays;
 import java.util.Random;
@@ -11,7 +11,7 @@ import org.ejml.interfaces.decomposition.EigenDecomposition;
 import org.ejml.ops.CommonOps;
 import org.ejml.ops.MatrixFeatures;
 import org.ejml.simple.SimpleMatrix;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import us.ihmc.euclid.matrix.Matrix3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;

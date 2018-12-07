@@ -1,6 +1,6 @@
 package us.ihmc.mecano.spatial;
 
-import static org.junit.Assert.*;
+import static us.ihmc.robotics.Assert.*;
 
 import java.util.Random;
 
@@ -8,12 +8,11 @@ import org.ejml.data.DenseMatrix64F;
 import org.ejml.ops.CommonOps;
 import org.ejml.ops.EjmlUnitTests;
 import org.ejml.ops.RandomMatrices;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
-import us.ihmc.euclid.referenceFrame.exceptions.ReferenceFrameMismatchException;
 import us.ihmc.euclid.referenceFrame.tools.ReferenceFrameTools;
 import us.ihmc.euclid.tools.EuclidCoreRandomTools;
 import us.ihmc.euclid.tools.EuclidCoreTestTools;
@@ -111,7 +110,7 @@ public class TwistTest extends SpatialMotionTest<Twist>
       assertArrayEquals(array, arrayBack, 0.0);
    }
 
-   @Test(expected = RuntimeException.class)
+   @Test// expected = RuntimeException.class
    public void testConstructUsingArrayTooSmall()
    {
       double[] array = new double[Twist.SIZE - 1];
@@ -168,13 +167,13 @@ public class TwistTest extends SpatialMotionTest<Twist>
       WrenchTest.testDotProduct(frameA, frameB, frameC);
    }
 
-   @Test(expected = RuntimeException.class)
+   @Test// expected = RuntimeException.class
    public void testDotProductNotAllowed1()
    {
       WrenchTest.testDotProductNotAllowed1(frameA, frameB, frameC);
    }
 
-   @Test(expected = RuntimeException.class)
+   @Test// expected = RuntimeException.class
    public void testDotProductNotAllowed2()
    {
       WrenchTest.testDotProductNotAllowed2(frameA, frameB, frameC);
@@ -184,7 +183,7 @@ public class TwistTest extends SpatialMotionTest<Twist>
     * You shouldn't be able to add two twists expressed in different frames
     */
 
-   @Test(expected = ReferenceFrameMismatchException.class)
+   @Test// expected = ReferenceFrameMismatchException.class
    public void testAddExpressedInDifferentFrames()
    {
       Twist twist1 = createSpatialMotionVector(frameB, frameA, frameC, new Vector3D(), new Vector3D());
@@ -197,7 +196,7 @@ public class TwistTest extends SpatialMotionTest<Twist>
     * You shouldn't be able to add two twists if the second is not relative to the first
     */
 
-   @Test(expected = ReferenceFrameMismatchException.class)
+   @Test// expected = ReferenceFrameMismatchException.class
    public void testAddNotRelative()
    {
       Twist twist1 = createSpatialMotionVector(frameB, frameA, frameC, new Vector3D(), new Vector3D());
@@ -283,7 +282,7 @@ public class TwistTest extends SpatialMotionTest<Twist>
       MecanoTestTools.assertTwistEquals(twist1, twist1Back, epsilon);
    }
 
-   @Test(expected = RuntimeException.class)
+   @Test// expected = RuntimeException.class
    public void testSubWrongExpressedInFrame()
    {
       Twist twist1 = new Twist(frameB, frameA, frameD);
@@ -291,7 +290,7 @@ public class TwistTest extends SpatialMotionTest<Twist>
       twist1.sub(twist2);
    }
 
-   @Test(expected = RuntimeException.class)
+   @Test// expected = RuntimeException.class
    public void testSubFramesDontMatchUp()
    {
       Twist twist1 = new Twist(frameD, frameA, frameC);

@@ -1,14 +1,14 @@
 package us.ihmc.mecano.spatial.interfaces;
 
-import static org.junit.Assert.*;
+import static us.ihmc.robotics.Assert.*;
 
 import java.util.Random;
 
 import org.ejml.data.DenseMatrix64F;
 import org.ejml.ops.EjmlUnitTests;
 import org.ejml.ops.RandomMatrices;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.referenceFrame.tools.ReferenceFrameTools;
@@ -32,7 +32,7 @@ public abstract class SpatialMotionTest<T extends SpatialMotionBasics>
 
    public abstract T createSpatialMotionVector(ReferenceFrame bodyFrame, ReferenceFrame baseFrame, ReferenceFrame expressedInFrame, DenseMatrix64F matrix);
 
-   @Before
+   @BeforeEach
    public void setUp() throws Exception
    {
       frameA = ReferenceFrameTools.constructARootFrame("A");
@@ -115,7 +115,7 @@ public abstract class SpatialMotionTest<T extends SpatialMotionBasics>
       EjmlUnitTests.assertEquals(matrix, matrixBack, 0.0);
    }
 
-   @Test(expected = RuntimeException.class)
+   @Test// expected = RuntimeException.class
    public void testConstructUsingMatrixTooSmall()
    {
       DenseMatrix64F matrix = new DenseMatrix64F(SpatialVectorReadOnly.SIZE - 1, 1);

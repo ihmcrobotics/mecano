@@ -1,6 +1,6 @@
 package us.ihmc.mecano.spatial;
 
-import static org.junit.Assert.*;
+import static us.ihmc.robotics.Assert.*;
 
 import java.util.Random;
 
@@ -9,8 +9,8 @@ import org.ejml.ops.CommonOps;
 import org.ejml.ops.EjmlUnitTests;
 import org.ejml.ops.NormOps;
 import org.ejml.ops.RandomMatrices;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.referenceFrame.tools.ReferenceFrameTools;
@@ -30,7 +30,7 @@ public class WrenchTest
    private ReferenceFrame frameB;
    private ReferenceFrame frameC;
 
-   @Before
+   @BeforeEach
    public void setUp() throws Exception
    {
       frameA = ReferenceFrameTools.constructARootFrame("A");
@@ -135,7 +135,7 @@ public class WrenchTest
       EuclidCoreTestTools.assertTuple3DEquals(force, wrench.getLinearPart(), 0.0);
    }
 
-   @Test(expected = RuntimeException.class)
+   @Test// expected = RuntimeException.class
    public void testConstructUsingMatrixTooSmall()
    {
       Random random = new Random(12342L);
@@ -168,13 +168,13 @@ public class WrenchTest
       EuclidCoreTestTools.assertTuple3DEquals(new Vector3D(linearArray), wrench.getLinearPart(), epsilon);
    }
 
-   @Test(expected = RuntimeException.class)
+   @Test// expected = RuntimeException.class
    public void testConstructUsingDoubleArrayTooSmall()
    {
       new Wrench(frameA, frameB, new double[Wrench.SIZE - 1]);
    }
 
-   @Test(expected = RuntimeException.class)
+   @Test// expected = RuntimeException.class
    public void testAddNotAllowed()
    {
       Wrench wrench1 = null, wrench2 = null;
@@ -191,7 +191,7 @@ public class WrenchTest
       wrench1.add(wrench2);
    }
 
-   @Test(expected = RuntimeException.class)
+   @Test// expected = RuntimeException.class
    public void testAddNotAllowed2()
    {
       Wrench wrench1 = null, wrench2 = null;
@@ -227,7 +227,7 @@ public class WrenchTest
       EuclidCoreTestTools.assertTuple3DEquals(wrench3.getAngularPart(), angularPart, 1e-24);
    }
 
-   @Test(expected = RuntimeException.class)
+   @Test// expected = RuntimeException.class
    public void testSubNotAllowed()
    {
       Wrench wrench1 = null, wrench2 = null;
@@ -244,7 +244,7 @@ public class WrenchTest
       wrench1.sub(wrench2);
    }
 
-   @Test(expected = RuntimeException.class)
+   @Test// expected = RuntimeException.class
    public void testSubNotAllowed2()
    {
       Wrench wrench1 = null, wrench2 = null;
@@ -280,7 +280,7 @@ public class WrenchTest
       EuclidCoreTestTools.assertTuple3DEquals(wrench3.getAngularPart(), angularPart, 1e-24);
    }
 
-   @Test(expected = RuntimeException.class)
+   @Test// expected = RuntimeException.class
    public void testCheckAndSetNotAllowed1()
    {
       Wrench wrench1 = null, wrench2 = null;
@@ -297,7 +297,7 @@ public class WrenchTest
       wrench2.set(wrench1);
    }
 
-   @Test(expected = RuntimeException.class)
+   @Test// expected = RuntimeException.class
    public void testCheckAndSetNotAllowed2()
    {
       Wrench wrench1 = null, wrench2 = null;
@@ -320,13 +320,13 @@ public class WrenchTest
       testDotProduct(frameA, frameB, frameC);
    }
 
-   @Test(expected = RuntimeException.class)
+   @Test// expected = RuntimeException.class
    public void testDotProductNotAllowed1()
    {
       testDotProductNotAllowed1(frameA, frameB, frameC);
    }
 
-   @Test(expected = RuntimeException.class)
+   @Test// expected = RuntimeException.class
    public void testDotProductNotAllowed2()
    {
       testDotProductNotAllowed2(frameA, frameB, frameC);

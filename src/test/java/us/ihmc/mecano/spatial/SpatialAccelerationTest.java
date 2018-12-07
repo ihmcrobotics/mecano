@@ -1,11 +1,11 @@
 package us.ihmc.mecano.spatial;
 
-import static org.junit.Assert.*;
+import static us.ihmc.robotics.Assert.*;
 
 import java.util.Random;
 
 import org.ejml.data.DenseMatrix64F;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.FrameVector3D;
@@ -159,7 +159,7 @@ public class SpatialAccelerationTest extends SpatialMotionTest<SpatialAccelerati
     * You shouldn't be able to add two spatial acceleration vectors expressed in different frames
     */
 
-   @Test(expected = ReferenceFrameMismatchException.class)
+   @Test// expected = ReferenceFrameMismatchException.class
    public void testAddExpressedInDifferentFrames()
    {
       SpatialAcceleration acceleration1 = createSpatialMotionVector(frameB, frameA, frameC, new Vector3D(), new Vector3D());
@@ -173,7 +173,7 @@ public class SpatialAccelerationTest extends SpatialMotionTest<SpatialAccelerati
     * the first
     */
 
-   @Test(expected = ReferenceFrameMismatchException.class)
+   @Test// expected = ReferenceFrameMismatchException.class
    public void testAddNotRelative()
    {
       SpatialAcceleration acceleration1 = createSpatialMotionVector(frameB, frameA, frameC, new Vector3D(), new Vector3D());
@@ -262,7 +262,7 @@ public class SpatialAccelerationTest extends SpatialMotionTest<SpatialAccelerati
       MecanoTestTools.assertSpatialAccelerationEquals(vector1, vector1Back, epsilon);
    }
 
-   @Test(expected = RuntimeException.class)
+   @Test// expected = RuntimeException.class
    public void testSubWrongExpressedInFrame()
    {
       SpatialAcceleration vector1 = new SpatialAcceleration(frameB, frameA, frameD);
@@ -270,7 +270,7 @@ public class SpatialAccelerationTest extends SpatialMotionTest<SpatialAccelerati
       vector1.sub(vector2);
    }
 
-   @Test(expected = RuntimeException.class)
+   @Test// expected = RuntimeException.class
    public void testSubFramesDontMatchUp()
    {
       SpatialAcceleration vector1 = new SpatialAcceleration(frameD, frameA, frameC);
