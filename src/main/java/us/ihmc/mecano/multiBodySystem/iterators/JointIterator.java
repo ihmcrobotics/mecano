@@ -36,7 +36,7 @@ public class JointIterator<J extends JointReadOnly> implements Iterator<J>
     *           instance of the {@code filteringClass}, then it will not be part of the iteration.
     * @param selectionRule rule to filter the joints to iterate through. Joints for which
     *           {@code selectionRule.test(joint)} returns {@code false} are ignored and will not be
-    *           part of the iteration.
+    *           part of the iteration. Can be {@code null}.
     * @param root joint from which the subtree starts. Not modified.
     */
    public JointIterator(Class<J> filteringClass, Predicate<J> selectionRule, J root)
@@ -54,7 +54,7 @@ public class JointIterator<J extends JointReadOnly> implements Iterator<J>
     *           instance of the {@code filteringClass}, then it will not be part of the iteration.
     * @param selectionRule rule to filter the joints to iterate through. Joints for which
     *           {@code selectionRule.test(joint)} returns {@code false} are ignored and will not be
-    *           part of the iteration.
+    *           part of the iteration. Can be {@code null}.
     * @param roots joints from which each subtree starts. Not modified.
     */
    public JointIterator(Class<J> filteringClass, Predicate<J> selectionRule, Collection<? extends JointReadOnly> roots)
