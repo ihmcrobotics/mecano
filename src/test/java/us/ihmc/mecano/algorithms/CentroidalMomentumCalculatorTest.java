@@ -1,6 +1,6 @@
 package us.ihmc.mecano.algorithms;
 
-import static us.ihmc.robotics.Assert.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 import java.util.List;
 import java.util.Random;
