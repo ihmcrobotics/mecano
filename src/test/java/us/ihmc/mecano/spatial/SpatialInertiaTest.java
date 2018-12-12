@@ -11,7 +11,6 @@ import org.ejml.interfaces.decomposition.EigenDecomposition;
 import org.ejml.ops.CommonOps;
 import org.ejml.ops.MatrixFeatures;
 import org.ejml.simple.SimpleMatrix;
-import org.junit.After;
 import org.junit.Test;
 
 import us.ihmc.euclid.matrix.Matrix3D;
@@ -30,12 +29,6 @@ public class SpatialInertiaTest
 {
    private static final double EPSILON = 1.0e-12;
    private static final int ITERATIONS = 1000;
-
-   @After
-   public void tearDown() throws Exception
-   {
-      ReferenceFrame.getWorldFrame().clearChildren();
-   }
 
    @Test
    public void testApplyInverseTransform() throws Exception

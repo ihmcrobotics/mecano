@@ -6,12 +6,10 @@ import java.util.List;
 import java.util.Random;
 
 import org.ejml.ops.MatrixFeatures;
-import org.junit.After;
 import org.junit.Test;
 
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.referenceFrame.tools.EuclidFrameRandomTools;
-import us.ihmc.euclid.referenceFrame.tools.ReferenceFrameTools;
 import us.ihmc.mecano.multiBodySystem.interfaces.JointBasics;
 import us.ihmc.mecano.multiBodySystem.interfaces.MultiBodySystemReadOnly;
 import us.ihmc.mecano.tools.JointStateType;
@@ -22,12 +20,6 @@ public class CompositeRigidBodyMassMatrixCalculatorTest
 {
    private static final int ITERATIONS = 1000;
    private static final double EPSILON = 1.0e-12;
-
-   @After
-   public void tearDown()
-   {
-      ReferenceFrameTools.clearWorldFrameTree();
-   }
 
    @Test
    public void testCentroidalMomentumPart()

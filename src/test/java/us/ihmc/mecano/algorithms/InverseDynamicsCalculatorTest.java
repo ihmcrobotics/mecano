@@ -4,12 +4,10 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
 
-import org.junit.After;
 import org.junit.Ignore;
 import org.junit.Test;
 
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
-import us.ihmc.euclid.referenceFrame.tools.ReferenceFrameTools;
 import us.ihmc.mecano.multiBodySystem.Joint;
 import us.ihmc.mecano.multiBodySystem.OneDoFJoint;
 import us.ihmc.mecano.multiBodySystem.RigidBody;
@@ -20,15 +18,8 @@ import us.ihmc.mecano.tools.MultiBodySystemRandomTools;
 @Ignore
 public class InverseDynamicsCalculatorTest
 {
-
    private static final int WARMUP_ITERATIONS = 5000;
    private static final int ITERATIONS = 50000;
-
-   @After
-   public void tearDown()
-   {
-      ReferenceFrameTools.clearWorldFrameTree();
-   }
 
    @Test
    public void benchmarkForOneDoFJointChain()

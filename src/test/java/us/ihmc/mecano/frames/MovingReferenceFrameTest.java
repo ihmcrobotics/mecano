@@ -134,8 +134,6 @@ public class MovingReferenceFrameTest
          twistBRelativeToA.changeFrame(frameA);
 
          MecanoTestTools.assertTwistEquals(twistARelativeToB, twistBRelativeToA, EPSILON);
-
-         worldFrame.clearChildren();
       }
    }
 
@@ -162,8 +160,6 @@ public class MovingReferenceFrameTest
             frame.getTwistRelativeToOther(parent, twistRelativeToParentTwo);
             MecanoTestTools.assertTwistEquals(twistRelativeToParentOne, twistRelativeToParentTwo, EPSILON);
          }
-
-         worldFrame.clearChildren();
       }
    }
 
@@ -185,8 +181,6 @@ public class MovingReferenceFrameTest
          frame.getTwistRelativeToOther(worldFrame, twistOne);
          Twist twistTwo = computeTwistRelativeToRootByClimbingTree(frame);
          MecanoTestTools.assertTwistEquals(twistOne, twistTwo, EPSILON);
-
-         worldFrame.clearChildren();
       }
 
       for (int i = 0; i < ITERATIONS; i++)
@@ -204,8 +198,6 @@ public class MovingReferenceFrameTest
          frame.getTwistRelativeToOther(anotherRoot, twistOne);
          Twist twistTwo = computeTwistRelativeToRootByClimbingTree(frame);
          MecanoTestTools.assertTwistEquals(twistOne, twistTwo, EPSILON);
-
-         anotherRoot.clearChildren();
       }
 
       for (int i = 0; i < ITERATIONS; i++)
@@ -228,7 +220,6 @@ public class MovingReferenceFrameTest
             Twist twistTwo = computeTwistRelativeToRootByClimbingTree(frame);
             MecanoTestTools.assertTwistEquals(twistOne, twistTwo, EPSILON);
          }
-         worldFrame.clearChildren();
       }
    }
 

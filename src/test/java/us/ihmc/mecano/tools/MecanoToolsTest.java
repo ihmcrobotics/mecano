@@ -6,7 +6,6 @@ import java.util.Random;
 
 import org.ejml.data.DenseMatrix64F;
 import org.ejml.ops.CommonOps;
-import org.junit.After;
 import org.junit.Test;
 
 import us.ihmc.euclid.matrix.Matrix3D;
@@ -25,12 +24,6 @@ public class MecanoToolsTest
 {
    private static final double EPSILON = 1.0e-12;
    private static final int ITERATIONS = 1000;
-
-   @After
-   public void tearDown() throws Exception
-   {
-      ReferenceFrame.getWorldFrame().clearChildren();
-   }
 
    @Test
    public void testTranslateMomentOfInertia()

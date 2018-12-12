@@ -9,7 +9,6 @@ import org.ejml.ops.CommonOps;
 import org.ejml.ops.EjmlUnitTests;
 import org.ejml.ops.NormOps;
 import org.ejml.ops.RandomMatrices;
-import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 
@@ -61,12 +60,6 @@ public class WrenchTest
 
       frameB.update();
       frameC.update();
-   }
-
-   @After
-   public void tearDown() throws Exception
-   {
-      ReferenceFrame.getWorldFrame().clearChildren();
    }
 
    @Test

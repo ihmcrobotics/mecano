@@ -5,7 +5,6 @@ import java.util.Random;
 
 import org.ejml.data.DenseMatrix64F;
 import org.ejml.ops.CommonOps;
-import org.junit.After;
 import org.junit.Test;
 
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
@@ -35,12 +34,6 @@ public class CentroidalMomentumRateCalculatorTest
    private static final int ITERATIONS = 500;
    private static final double EPSILON = 2.0e-10;
    private static final double FD_EPSILON = 5.0e-4;
-
-   @After
-   public void tearDown() throws Exception
-   {
-      worldFrame.clearChildren();
-   }
 
    @Test
    public void testMomentumRateWithOneDoFJointChain()

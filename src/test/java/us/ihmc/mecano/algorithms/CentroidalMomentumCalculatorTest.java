@@ -5,7 +5,6 @@ import static org.junit.Assert.*;
 import java.util.List;
 import java.util.Random;
 
-import org.junit.After;
 import org.junit.Test;
 
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
@@ -26,12 +25,6 @@ public class CentroidalMomentumCalculatorTest
    private static final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
    private static final int ITERATIONS = 500;
    private static final double EPSILON = 2.0e-10;
-
-   @After
-   public void tearDown() throws Exception
-   {
-      worldFrame.clearChildren();
-   }
 
    @Test
    public void testMomentumWithOneDoFJointChain()

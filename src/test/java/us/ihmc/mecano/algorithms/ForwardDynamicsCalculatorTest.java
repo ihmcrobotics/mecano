@@ -12,10 +12,8 @@ import java.util.stream.Collectors;
 import org.ejml.data.DenseMatrix64F;
 import org.ejml.ops.CommonOps;
 import org.ejml.ops.MatrixFeatures;
-import org.junit.After;
 import org.junit.Test;
 
-import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.tools.EuclidCoreIOTools;
 import us.ihmc.euclid.tools.EuclidCoreRandomTools;
 import us.ihmc.mecano.multiBodySystem.Joint;
@@ -39,12 +37,6 @@ public class ForwardDynamicsCalculatorTest
    private static final double ONE_DOF_JOINT_EPSILON = 8.0e-12;
    private static final double FLOATING_JOINT_EPSILON = 2.0e-11;
    private static final double ALL_JOINT_EPSILON = 1.0e-4;
-
-   @After
-   public void tearDown() throws Exception
-   {
-      ReferenceFrame.getWorldFrame().clearChildren();
-   }
 
    @Test
    public void testPrismaticJointChain() throws Exception

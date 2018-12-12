@@ -5,7 +5,6 @@ import static org.junit.Assert.*;
 import java.util.Random;
 
 import org.ejml.data.DenseMatrix64F;
-import org.junit.After;
 import org.junit.Test;
 
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
@@ -40,12 +39,6 @@ public class SpatialAccelerationTest extends SpatialMotionTest<SpatialAccelerati
                                                         DenseMatrix64F matrix)
    {
       return new SpatialAcceleration(bodyFrame, baseFrame, expressedInFrame, matrix);
-   }
-
-   @After
-   public void tearDown() throws Exception
-   {
-      ReferenceFrame.getWorldFrame().clearChildren();
    }
 
    @Test

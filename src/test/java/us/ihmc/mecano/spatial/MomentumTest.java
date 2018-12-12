@@ -4,7 +4,6 @@ import static org.junit.Assert.*;
 
 import java.util.Random;
 
-import org.junit.After;
 import org.junit.Test;
 
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
@@ -15,12 +14,6 @@ public class MomentumTest
 {
    private static final int ITERATIONS = 1000;
    private static final double EPSILON = 1.0e-12;
-
-   @After
-   public void tearDown() throws Exception
-   {
-      ReferenceFrame.getWorldFrame().clearChildren();
-   }
 
    @Test
    public void testComputeKineticCoEnergy()

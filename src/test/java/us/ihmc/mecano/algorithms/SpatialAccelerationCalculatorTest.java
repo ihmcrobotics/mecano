@@ -1,13 +1,11 @@
 package us.ihmc.mecano.algorithms;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.*;
 
 import java.util.Arrays;
 import java.util.List;
 import java.util.Random;
 
-import org.junit.After;
 import org.junit.Test;
 
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
@@ -46,12 +44,6 @@ public class SpatialAccelerationCalculatorTest
 {
    private static final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
    private static final int ITERATIONS = 1000;
-
-   @After
-   public void tearDown() throws Exception
-   {
-      worldFrame.clearChildren();
-   }
 
    @Test
    public void testWithChainComposedOfPrismaticJoints() throws Exception

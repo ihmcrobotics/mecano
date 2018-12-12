@@ -8,7 +8,6 @@ import org.ejml.data.DenseMatrix64F;
 import org.ejml.ops.CommonOps;
 import org.ejml.ops.EjmlUnitTests;
 import org.ejml.ops.RandomMatrices;
-import org.junit.After;
 import org.junit.Test;
 
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
@@ -39,12 +38,6 @@ public class TwistTest extends SpatialMotionTest<Twist>
    public Twist createSpatialMotionVector(ReferenceFrame bodyFrame, ReferenceFrame baseFrame, ReferenceFrame expressedInFrame, DenseMatrix64F matrix)
    {
       return new Twist(bodyFrame, baseFrame, expressedInFrame, matrix);
-   }
-
-   @After
-   public void tearDown() throws Exception
-   {
-      ReferenceFrame.getWorldFrame().clearChildren();
    }
 
    /**

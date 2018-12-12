@@ -8,7 +8,6 @@ import java.util.Random;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-import org.junit.After;
 import org.junit.Test;
 
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
@@ -28,12 +27,6 @@ public class MultiBodySystemFactoriesTest
 {
    private static final int NUMBER_OF_ITERATIONS = 100;
    private static final double EPSILON = 1.0e-14;
-
-   @After
-   public void tearDown()
-   {
-      ReferenceFrame.getWorldFrame().clearChildren();
-   }
 
    @Test
    public void testCloneKinematicChain() throws Exception
