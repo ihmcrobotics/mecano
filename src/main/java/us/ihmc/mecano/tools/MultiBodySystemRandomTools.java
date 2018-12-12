@@ -11,7 +11,6 @@ import us.ihmc.euclid.tools.EuclidCoreRandomTools;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple3D.interfaces.Vector3DReadOnly;
-import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.mecano.multiBodySystem.FixedJoint;
 import us.ihmc.mecano.multiBodySystem.Joint;
 import us.ihmc.mecano.multiBodySystem.OneDoFJoint;
@@ -1150,12 +1149,7 @@ public class MultiBodySystemRandomTools
     */
    public static PrismaticJoint nextPrismaticJoint(Random random, String name, Vector3DReadOnly jointAxis, RigidBodyBasics predecessor)
    {
-      RigidBodyTransform transformToParent;
-      if (predecessor.isRootBody())
-         transformToParent = null;
-      else
-         transformToParent = new RigidBodyTransform(new Quaternion(), EuclidCoreRandomTools.nextVector3D(random));
-
+      RigidBodyTransform transformToParent = predecessor.isRootBody() ? null : EuclidCoreRandomTools.nextRigidBodyTransform(random);
       return new PrismaticJoint(name, predecessor, transformToParent, jointAxis);
    }
 
@@ -1186,12 +1180,7 @@ public class MultiBodySystemRandomTools
     */
    public static RevoluteJoint nextRevoluteJoint(Random random, String name, Vector3DReadOnly jointAxis, RigidBodyBasics predecessor)
    {
-      RigidBodyTransform transformToParent;
-      if (predecessor.isRootBody())
-         transformToParent = null;
-      else
-         transformToParent = new RigidBodyTransform(new Quaternion(), EuclidCoreRandomTools.nextVector3D(random));
-
+      RigidBodyTransform transformToParent = predecessor.isRootBody() ? null : EuclidCoreRandomTools.nextRigidBodyTransform(random);
       return new RevoluteJoint(name, predecessor, transformToParent, jointAxis);
    }
 
@@ -1231,6 +1220,66 @@ public class MultiBodySystemRandomTools
    }
 
    /**
+    * Generates a 6-DoF floating joint with random physical parameters and attaches it to the given
+    * {@code predecessor}.
+    * 
+    * @param random the random generator to use.
+    * @param name the joint name.
+    * @param predecessor the rigid-body to which the joint is added as a child.
+    * @return the random joint.
+    */
+   public static SixDoFJoint nextSixDoFJoint(Random random, String name, RigidBodyBasics predecessor)
+   {
+      RigidBodyTransform transformToParent = predecessor.isRootBody() ? null : EuclidCoreRandomTools.nextRigidBodyTransform(random);
+      return new SixDoFJoint(name, predecessor, transformToParent);
+   }
+
+   /**
+    * Generates a 3-DoF floating joint with random physical parameters and attaches it to the given
+    * {@code predecessor}.
+    * 
+    * @param random the random generator to use.
+    * @param name the joint name.
+    * @param predecessor the rigid-body to which the joint is added as a child.
+    * @return the random joint.
+    */
+   public static PlanarJoint nextPlanarJoint(Random random, String name, RigidBodyBasics predecessor)
+   {
+      RigidBodyTransform transformToParent = predecessor.isRootBody() ? null : EuclidCoreRandomTools.nextRigidBodyTransform(random);
+      return new PlanarJoint(name, predecessor, transformToParent);
+   }
+
+   /**
+    * Generates a 3-DoF spherical joint with random physical parameters and attaches it to the given
+    * {@code predecessor}.
+    * 
+    * @param random the random generator to use.
+    * @param name the joint name.
+    * @param predecessor the rigid-body to which the joint is added as a child.
+    * @return the random joint.
+    */
+   public static SphericalJoint nextSphericalJoint(Random random, String name, RigidBodyBasics predecessor)
+   {
+      RigidBodyTransform transformToParent = predecessor.isRootBody() ? null : EuclidCoreRandomTools.nextRigidBodyTransform(random);
+      return new SphericalJoint(name, predecessor, transformToParent);
+   }
+
+   /**
+    * Generates a 0-DoF fixed joint with random physical parameters and attaches it to the given
+    * {@code predecessor}.
+    * 
+    * @param random the random generator to use.
+    * @param name the joint name.
+    * @param predecessor the rigid-body to which the joint is added as a child.
+    * @return the random joint.
+    */
+   public static FixedJoint nextFixedJoint(Random random, String name, RigidBodyBasics predecessor)
+   {
+      RigidBodyTransform transformToParent = predecessor.isRootBody() ? null : EuclidCoreRandomTools.nextRigidBodyTransform(random);
+      return new FixedJoint(name, predecessor, transformToParent);
+   }
+
+   /**
     * Generates a joint with random type and physical parameters and attaches it to the given
     * {@code predecessor}.
     * 
@@ -1241,22 +1290,20 @@ public class MultiBodySystemRandomTools
     */
    public static JointBasics nextJoint(Random random, String name, RigidBodyBasics predecessor)
    {
-      RigidBodyTransform transformToParent = predecessor.isRootBody() ? null : EuclidCoreRandomTools.nextRigidBodyTransform(random);
-
       switch (random.nextInt(6))
       {
       case 0:
-         return new SixDoFJoint(name, predecessor, transformToParent);
+         return nextSixDoFJoint(random, name, predecessor);
       case 1:
-         return new PlanarJoint(name, predecessor, transformToParent);
+         return nextPlanarJoint(random, name, predecessor);
       case 2:
-         return new SphericalJoint(name, predecessor, transformToParent);
+         return nextSphericalJoint(random, name, predecessor);
       case 3:
          return nextPrismaticJoint(random, name, predecessor);
       case 4:
          return nextRevoluteJoint(random, name, predecessor);
       default:
-         return new FixedJoint(name, predecessor, transformToParent);
+         return nextFixedJoint(random, name, predecessor);
       }
    }
 
