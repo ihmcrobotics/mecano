@@ -44,6 +44,7 @@ public class JointIterator<J extends JointReadOnly> implements Iterator<J>
          this.selectionRule = joint -> filteringClass.isInstance(joint);
       else
          this.selectionRule = joint -> filteringClass.isInstance(joint) && selectionRule.test((J) joint);
+
       if (root != null)
          stack.add(root);
    }
@@ -66,10 +67,7 @@ public class JointIterator<J extends JointReadOnly> implements Iterator<J>
          this.selectionRule = joint -> filteringClass.isInstance(joint) && selectionRule.test((J) joint);
 
       if (roots != null)
-      {
-         for (JointReadOnly root : roots)
-            stack.add(root);
-      }
+         stack.addAll(roots);
    }
 
    private J next = null;
@@ -131,10 +129,7 @@ public class JointIterator<J extends JointReadOnly> implements Iterator<J>
          List<? extends JointReadOnly> childrenJoints = successor.getChildrenJoints();
 
          if (childrenJoints != null)
-         {
-            for (JointReadOnly childJoint : childrenJoints)
-               stack.add(childJoint);
-         }
+            stack.addAll(childrenJoints);
       }
 
       return currentJoint;
