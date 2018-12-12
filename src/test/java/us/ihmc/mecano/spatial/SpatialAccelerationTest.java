@@ -277,7 +277,7 @@ public class SpatialAccelerationTest extends SpatialMotionTest<SpatialAccelerati
       });
    }
 
-   @Test // expected = RuntimeException.class
+   @Test
    public void testSubFramesDontMatchUp()
    {
       Assertions.assertThrows(RuntimeException.class, () -> {
