@@ -25,9 +25,8 @@ import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyReadOnly;
 @SuppressWarnings("unchecked")
 public class JointIterator<J extends JointReadOnly> implements Iterator<J>
 {
-   private final Deque<J> stack = new ArrayDeque<>();
-   private final Predicate<J> selectionRule;
-   private final Class<J> filteringClass;
+   private final Deque<JointReadOnly> stack = new ArrayDeque<>();
+   private final Predicate<JointReadOnly> selectionRule;
 
    /**
     * Creates a new iterator for multiple subtrees.
@@ -36,13 +35,16 @@ public class JointIterator<J extends JointReadOnly> implements Iterator<J>
     *           instance of the {@code filteringClass}, then it will not be part of the iteration.
     * @param selectionRule rule to filter the joints to iterate through. Joints for which
     *           {@code selectionRule.test(joint)} returns {@code false} are ignored and will not be
-    *           part of the iteration.
+    *           part of the iteration. Can be {@code null}.
     * @param root joint from which the subtree starts. Not modified.
     */
-   public JointIterator(Class<J> filteringClass, Predicate<J> selectionRule, J root)
+   public JointIterator(Class<J> filteringClass, Predicate<J> selectionRule, JointReadOnly root)
    {
-      this.filteringClass = filteringClass;
-      this.selectionRule = selectionRule;
+      if (selectionRule == null)
+         this.selectionRule = joint -> filteringClass.isInstance(joint);
+      else
+         this.selectionRule = joint -> filteringClass.isInstance(joint) && selectionRule.test((J) joint);
+
       if (root != null)
          stack.add(root);
    }
@@ -54,21 +56,18 @@ public class JointIterator<J extends JointReadOnly> implements Iterator<J>
     *           instance of the {@code filteringClass}, then it will not be part of the iteration.
     * @param selectionRule rule to filter the joints to iterate through. Joints for which
     *           {@code selectionRule.test(joint)} returns {@code false} are ignored and will not be
-    *           part of the iteration.
+    *           part of the iteration. Can be {@code null}.
     * @param roots joints from which each subtree starts. Not modified.
     */
    public JointIterator(Class<J> filteringClass, Predicate<J> selectionRule, Collection<? extends JointReadOnly> roots)
    {
-      this.filteringClass = filteringClass;
-      this.selectionRule = selectionRule;
+      if (selectionRule == null)
+         this.selectionRule = joint -> filteringClass.isInstance(joint);
+      else
+         this.selectionRule = joint -> filteringClass.isInstance(joint) && selectionRule.test((J) joint);
+
       if (roots != null)
-      {
-         for (JointReadOnly root : roots)
-         {
-            if (filteringClass.isInstance(root))
-               stack.add((J) root);
-         }
-      }
+         stack.addAll(roots);
    }
 
    private J next = null;
@@ -107,27 +106,21 @@ public class JointIterator<J extends JointReadOnly> implements Iterator<J>
 
    private J searchNextJointPassingRule()
    {
-      if (stack.isEmpty())
-         return null;
-
-      if (selectionRule == null)
-         return searchNextJoint();
-
       while (!stack.isEmpty())
       {
-         J currentJoint = searchNextJoint();
+         JointReadOnly currentJoint = searchNextJoint();
          if (currentJoint == null || selectionRule.test(currentJoint))
-            return currentJoint;
+            return (J) currentJoint;
       }
       return null;
    }
 
-   private J searchNextJoint()
+   private JointReadOnly searchNextJoint()
    {
       if (stack.isEmpty())
          return null;
 
-      J currentJoint = stack.poll();
+      JointReadOnly currentJoint = stack.poll();
 
       RigidBodyReadOnly successor = currentJoint.getSuccessor();
 
@@ -136,13 +129,7 @@ public class JointIterator<J extends JointReadOnly> implements Iterator<J>
          List<? extends JointReadOnly> childrenJoints = successor.getChildrenJoints();
 
          if (childrenJoints != null)
-         {
-            for (JointReadOnly childJoint : childrenJoints)
-            {
-               if (filteringClass.isInstance(childJoint))
-                  stack.add((J) childJoint);
-            }
-         }
+            stack.addAll(childrenJoints);
       }
 
       return currentJoint;
