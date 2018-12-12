@@ -1,6 +1,6 @@
 package us.ihmc.mecano.spatial;
 
-import static org.junit.Assert.*;
+import static org.junit.jupiter.api.Assertions.*;
 
 import java.util.Random;
 
@@ -8,7 +8,8 @@ import org.ejml.data.DenseMatrix64F;
 import org.ejml.ops.CommonOps;
 import org.ejml.ops.EjmlUnitTests;
 import org.ejml.ops.RandomMatrices;
-import org.junit.Test;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.Test;
 
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.FrameVector3D;
@@ -108,14 +109,16 @@ public class TwistTest extends SpatialMotionTest<Twist>
       DenseMatrix64F matrixBack = new DenseMatrix64F(Twist.SIZE, 1);
       twist.get(matrixBack);
       double[] arrayBack = matrixBack.getData();
-      assertArrayEquals(array, arrayBack, 0.0);
+      assertArrayEquals(array, arrayBack);
    }
 
-   @Test(expected = RuntimeException.class)
+   @Test
    public void testConstructUsingArrayTooSmall()
    {
-      double[] array = new double[Twist.SIZE - 1];
-      new Twist(frameC, frameD, frameA, array);
+      Assertions.assertThrows(RuntimeException.class, () -> {
+         double[] array = new double[Twist.SIZE - 1];
+         new Twist(frameC, frameD, frameA, array);
+      });
    }
 
    /**
@@ -168,42 +171,50 @@ public class TwistTest extends SpatialMotionTest<Twist>
       WrenchTest.testDotProduct(frameA, frameB, frameC);
    }
 
-   @Test(expected = RuntimeException.class)
+   @Test
    public void testDotProductNotAllowed1()
    {
-      WrenchTest.testDotProductNotAllowed1(frameA, frameB, frameC);
+      Assertions.assertThrows(RuntimeException.class, () -> {
+         WrenchTest.testDotProductNotAllowed1(frameA, frameB, frameC);
+      });
    }
 
-   @Test(expected = RuntimeException.class)
+   @Test
    public void testDotProductNotAllowed2()
    {
-      WrenchTest.testDotProductNotAllowed2(frameA, frameB, frameC);
+      Assertions.assertThrows(RuntimeException.class, () -> {
+         WrenchTest.testDotProductNotAllowed2(frameA, frameB, frameC);
+      });
    }
 
    /**
     * You shouldn't be able to add two twists expressed in different frames
     */
 
-   @Test(expected = ReferenceFrameMismatchException.class)
+   @Test
    public void testAddExpressedInDifferentFrames()
    {
-      Twist twist1 = createSpatialMotionVector(frameB, frameA, frameC, new Vector3D(), new Vector3D());
-      Twist twist2 = createSpatialMotionVector(frameB, frameA, frameA, new Vector3D(), new Vector3D());
+      Assertions.assertThrows(ReferenceFrameMismatchException.class, () -> {
+         Twist twist1 = createSpatialMotionVector(frameB, frameA, frameC, new Vector3D(), new Vector3D());
+         Twist twist2 = createSpatialMotionVector(frameB, frameA, frameA, new Vector3D(), new Vector3D());
 
-      twist1.add(twist2);
+         twist1.add(twist2);
+      });
    }
 
    /**
     * You shouldn't be able to add two twists if the second is not relative to the first
     */
 
-   @Test(expected = ReferenceFrameMismatchException.class)
+   @Test
    public void testAddNotRelative()
    {
-      Twist twist1 = createSpatialMotionVector(frameB, frameA, frameC, new Vector3D(), new Vector3D());
-      Twist twist2 = createSpatialMotionVector(frameB, frameA, frameC, new Vector3D(), new Vector3D());
+      Assertions.assertThrows(ReferenceFrameMismatchException.class, () -> {
+         Twist twist1 = createSpatialMotionVector(frameB, frameA, frameC, new Vector3D(), new Vector3D());
+         Twist twist2 = createSpatialMotionVector(frameB, frameA, frameC, new Vector3D(), new Vector3D());
 
-      twist1.add(twist2);
+         twist1.add(twist2);
+      });
    }
 
    /**
@@ -283,25 +294,29 @@ public class TwistTest extends SpatialMotionTest<Twist>
       MecanoTestTools.assertTwistEquals(twist1, twist1Back, epsilon);
    }
 
-   @Test(expected = RuntimeException.class)
+   @Test
    public void testSubWrongExpressedInFrame()
    {
-      Twist twist1 = new Twist(frameB, frameA, frameD);
-      Twist twist2 = new Twist(frameB, frameC, frameC);
-      twist1.sub(twist2);
+      Assertions.assertThrows(RuntimeException.class, () -> {
+         Twist twist1 = new Twist(frameB, frameA, frameD);
+         Twist twist2 = new Twist(frameB, frameC, frameC);
+         twist1.sub(twist2);
+      });
    }
 
-   @Test(expected = RuntimeException.class)
+   @Test
    public void testSubFramesDontMatchUp()
    {
-      Twist twist1 = new Twist(frameD, frameA, frameC);
-      Twist twist2 = new Twist(frameB, frameC, frameC);
-      twist1.sub(twist2);
+      Assertions.assertThrows(RuntimeException.class, () -> {
+         Twist twist1 = new Twist(frameD, frameA, frameC);
+         Twist twist2 = new Twist(frameB, frameC, frameC);
+         twist1.sub(twist2);
+      });
    }
 
    /**
-    * Test changing frames by comparing the results of changeExpressedInWhatReferenceFrame() with
-    * the results of the 'tilde' formula from Duindam, Port-Based Modeling and Control for Efficient
+    * Test changing frames by comparing the results of changeExpressedInWhatReferenceFrame() with the
+    * results of the 'tilde' formula from Duindam, Port-Based Modeling and Control for Efficient
     * Bipedal Walking Robots, page 25, lemma 2.8 (b)
     */
 
@@ -388,8 +403,8 @@ public class TwistTest extends SpatialMotionTest<Twist>
    }
 
    /**
-    * This test is used to prove that the reference frame in which the linear velocity of a body
-    * fixed point in computed in does not matter.
+    * This test is used to prove that the reference frame in which the linear velocity of a body fixed
+    * point in computed in does not matter.
     */
    @Test
    public void testGetLinearVelocityOfPointFixedInBodyFrameComputedInDifferentFrames() throws Exception
@@ -445,8 +460,7 @@ public class TwistTest extends SpatialMotionTest<Twist>
    }
 
    /**
-    * Converts a twist in tilde form back to twist coordinates (angular velocity and linear
-    * velocity)
+    * Converts a twist in tilde form back to twist coordinates (angular velocity and linear velocity)
     */
    private static void fromTildeForm(DenseMatrix64F twistTilde, Vector3D angularVelocityToPack, Vector3D linearVelocityToPack)
    {
