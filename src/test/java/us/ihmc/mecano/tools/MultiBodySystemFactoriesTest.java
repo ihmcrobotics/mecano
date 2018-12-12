@@ -1,6 +1,6 @@
 package us.ihmc.mecano.tools;
 
-import static org.junit.Assert.*;
+import static org.junit.jupiter.api.Assertions.*;
 
 import java.util.Arrays;
 import java.util.List;
@@ -8,8 +8,7 @@ import java.util.Random;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-import org.junit.After;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.tools.EuclidCoreTestTools;
@@ -28,12 +27,6 @@ public class MultiBodySystemFactoriesTest
 {
    private static final int NUMBER_OF_ITERATIONS = 100;
    private static final double EPSILON = 1.0e-14;
-
-   @After
-   public void tearDown()
-   {
-      ReferenceFrame.getWorldFrame().clearChildren();
-   }
 
    @Test
    public void testCloneKinematicChain() throws Exception

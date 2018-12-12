@@ -1,13 +1,12 @@
 package us.ihmc.mecano.algorithms;
 
-import static org.junit.Assert.*;
+import static org.junit.jupiter.api.Assertions.*;
 
 import java.util.Random;
 
 import org.ejml.data.DenseMatrix64F;
 import org.ejml.ops.MatrixFeatures;
-import org.junit.After;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.referenceFrame.tools.EuclidFrameRandomTools;
@@ -20,12 +19,6 @@ public class ArticulatedBodyInertiaTest
 {
    private static final int ITERATIONS = 1000;
    private static final double EPSILON = 1.0e-12;
-
-   @After
-   public void tearDown() throws Exception
-   {
-      ReferenceFrame.getWorldFrame().clearChildren();
-   }
 
    @Test
    public void testApplyTransform()

@@ -1,13 +1,12 @@
 package us.ihmc.mecano.algorithms;
 
-import static org.junit.Assert.*;
+import static org.junit.jupiter.api.Assertions.*;
 
 import java.util.List;
 import java.util.Random;
 
 import org.ejml.data.DenseMatrix64F;
-import org.junit.After;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.referenceFrame.tools.ReferenceFrameTools;
@@ -28,12 +27,6 @@ import us.ihmc.mecano.tools.MultiBodySystemTools;
 public class GeometricJacobianCalculatorTest
 {
    private static final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
-
-   @After
-   public void clearFrames()
-   {
-      worldFrame.clearChildren();
-   }
 
    @Test
    public void testBasicFeatures() throws Exception

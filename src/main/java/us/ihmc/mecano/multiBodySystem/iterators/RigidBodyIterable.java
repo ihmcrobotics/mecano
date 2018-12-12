@@ -38,7 +38,7 @@ public class RigidBodyIterable<B extends RigidBodyReadOnly> implements Iterable<
     *           of the iteration.
     * @param root rigid-body from which the subtree starts. Not modified.
     */
-   public RigidBodyIterable(Class<B> filteringClass, Predicate<B> selectionRule, B root)
+   public RigidBodyIterable(Class<B> filteringClass, Predicate<B> selectionRule, RigidBodyReadOnly root)
    {
       this.selectionRule = selectionRule;
       this.roots = Collections.singleton(root);

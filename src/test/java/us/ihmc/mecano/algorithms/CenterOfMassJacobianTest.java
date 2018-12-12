@@ -1,14 +1,13 @@
 package us.ihmc.mecano.algorithms;
 
-import static org.junit.Assert.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 import java.util.List;
 import java.util.Random;
 
 import org.ejml.data.DenseMatrix64F;
 import org.ejml.ops.CommonOps;
-import org.junit.After;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.FrameVector3D;
@@ -29,12 +28,6 @@ public class CenterOfMassJacobianTest
    private static final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
    private static final int ITERATIONS = 500;
    private static final double EPSILON = 1.0e-12;
-
-   @After
-   public void tearDown() throws Exception
-   {
-      worldFrame.clearChildren();
-   }
 
    @Test
    public void testOneDoFJointChain()

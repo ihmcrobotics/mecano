@@ -118,8 +118,10 @@ public class ReferenceFrameTreeViewer
 
    private void addChildrenToGraph(ReferenceFrame currentFrame, MutableNode currentNode, MutableGraph graph)
    {
-      for (ReferenceFrame child : currentFrame.getChildren())
+      for (int childIndex = 0; childIndex < currentFrame.getNumberOfChildren(); childIndex++)
       {
+         ReferenceFrame child = currentFrame.getChild(childIndex);
+
          if (filter.test(child))
          {
             MutableNode childNode = createFrameNode(child, graph);

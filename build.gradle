@@ -1,17 +1,11 @@
-buildscript {
-   repositories {
-      maven { url "https://plugins.gradle.org/m2/" }
-      mavenLocal()
-   }
-   dependencies {
-      classpath "us.ihmc:ihmc-build:0.15.3"
-   }
+plugins {
+   id("us.ihmc.ihmc-build") version "0.15.5"
+   id("us.ihmc.ihmc-ci") version "3.2"
 }
-apply plugin: "us.ihmc.ihmc-build"
 
 ihmc {
    group = "us.ihmc"
-   version = "0.0.15"
+   version = "0.0.16"
    vcsUrl = "https://github.com/ihmcrobotics/mecano"
    openSource = true
 
@@ -28,7 +22,6 @@ mainDependencies {
 }
 
 testDependencies {
-   compile group: "junit", name: "junit", version: "4.12"
    compile group: "org.ejml", name: "simple", version: "0.30"
 }
 
