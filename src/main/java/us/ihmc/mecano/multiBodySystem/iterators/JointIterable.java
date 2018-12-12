@@ -37,7 +37,7 @@ public class JointIterable<J extends JointReadOnly> implements Iterable<J>
     *           part of the iteration. Can be {@code null}.
     * @param root joint from which the subtree starts. Not modified.
     */
-   public JointIterable(Class<J> filteringClass, Predicate<J> selectionRule, J root)
+   public JointIterable(Class<J> filteringClass, Predicate<J> selectionRule, JointReadOnly root)
    {
       this.filteringClass = filteringClass;
       this.selectionRule = selectionRule;

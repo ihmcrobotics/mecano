@@ -12,6 +12,7 @@ import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.mecano.multiBodySystem.RigidBody;
 import us.ihmc.mecano.multiBodySystem.interfaces.JointBasics;
 import us.ihmc.mecano.multiBodySystem.interfaces.JointReadOnly;
+import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointReadOnly;
 import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
 import us.ihmc.mecano.tools.MultiBodySystemRandomTools;
 
@@ -40,6 +41,26 @@ public class JointIterableTest
             }
          }
       }
+
+      for (int i = 0; i < ITERATIONS; i++)
+      { // Testing the filtering class with OneDoFJointReadOnly
+         int numberOfJoints = random.nextInt(50) + 1;
+         List<JointBasics> joints = MultiBodySystemRandomTools.nextJointChain(random, numberOfJoints);
+         JointIterable<OneDoFJointReadOnly> jointIterable = new JointIterable<OneDoFJointReadOnly>(OneDoFJointReadOnly.class, null, joints.get(0));
+         for (int j = 0; j < 2; j++) // Doing 2 calls to JointIterable.iterator() to make sure the second time the iterator is brand new.
+         {
+            Iterator<OneDoFJointReadOnly> iterator = jointIterable.iterator();
+
+            for (int jointIndex = 0; jointIndex < joints.size(); jointIndex++)
+            {
+               if (joints.get(jointIndex) instanceof OneDoFJointReadOnly)
+               {
+                  assertTrue(iterator.hasNext());
+                  assertTrue(joints.get(jointIndex) == iterator.next());
+               }
+            }
+         }
+      }
    }
 
    @Test
@@ -47,28 +68,26 @@ public class JointIterableTest
    {
       Random random = new Random(324534);
 
-      RigidBodyBasics rootBody = new RigidBody("rootBody", ReferenceFrame.getWorldFrame());
-      JointBasics rootJoint = MultiBodySystemRandomTools.nextJoint(random, "root", rootBody);
-      RigidBody rootJointSuccessor = MultiBodySystemRandomTools.nextRigidBody(random, "rootJointSuccessor", rootJoint);
-
-      int numberOfChildren = 10;
-
-      for (int childIndex = 0; childIndex < numberOfChildren; childIndex++)
+      for (int i = 0; i < ITERATIONS; i++)
       {
-         JointBasics childJoint = MultiBodySystemRandomTools.nextJoint(random, "jointDepth1", rootJointSuccessor);
-         MultiBodySystemRandomTools.nextRigidBody(random, "bodyDepth1", childJoint);
-      }
-
-      JointIterable<JointReadOnly> jointIterable = new JointIterable<>(JointReadOnly.class, null, rootJoint);
-      Iterator<JointReadOnly> iterator = jointIterable.iterator();
-
-      assertTrue(iterator.hasNext());
-      assertTrue(rootJoint == iterator.next());
-
-      for (int childIndex = 0; childIndex < numberOfChildren; childIndex++)
-      {
+         RigidBodyBasics rootBody = new RigidBody("rootBody", ReferenceFrame.getWorldFrame());
+         JointBasics rootJoint = MultiBodySystemRandomTools.nextJoint(random, "root", rootBody);
+         RigidBody rootJointSuccessor = MultiBodySystemRandomTools.nextRigidBody(random, "rootJointSuccessor", rootJoint);
+         int numberOfChildren = 10;
+         for (int childIndex = 0; childIndex < numberOfChildren; childIndex++)
+         {
+            JointBasics childJoint = MultiBodySystemRandomTools.nextJoint(random, "jointDepth1", rootJointSuccessor);
+            MultiBodySystemRandomTools.nextRigidBody(random, "bodyDepth1", childJoint);
+         }
+         JointIterable<JointReadOnly> jointIterable = new JointIterable<>(JointReadOnly.class, null, rootJoint);
+         Iterator<JointReadOnly> iterator = jointIterable.iterator();
          assertTrue(iterator.hasNext());
-         assertTrue(rootJointSuccessor.getChildrenJoints().get(childIndex) == iterator.next());
+         assertTrue(rootJoint == iterator.next());
+         for (int childIndex = 0; childIndex < numberOfChildren; childIndex++)
+         {
+            assertTrue(iterator.hasNext());
+            assertTrue(rootJointSuccessor.getChildrenJoints().get(childIndex) == iterator.next());
+         }
       }
    }
 
@@ -77,46 +96,83 @@ public class JointIterableTest
    {
       Random random = new Random(324534);
 
-      RigidBodyBasics rootBody = new RigidBody("rootBody", ReferenceFrame.getWorldFrame());
-      JointBasics rootJoint = MultiBodySystemRandomTools.nextJoint(random, "root", rootBody);
-      RigidBody rootJointSuccessor = MultiBodySystemRandomTools.nextRigidBody(random, "rootJointSuccessor", rootJoint);
-
-      int numberOfChildren = 10;
-      int numberOfGrandChildrenPerChild = 10;
-
-      for (int childIndex = 0; childIndex < numberOfChildren; childIndex++)
+      for (int i = 0; i < ITERATIONS; i++)
       {
-         JointBasics childJoint = MultiBodySystemRandomTools.nextJoint(random, "jointDepth1", rootJointSuccessor);
-         RigidBody childBody = MultiBodySystemRandomTools.nextRigidBody(random, "bodyDepth1", childJoint);
-
-         for (int grandChildIndex = 0; grandChildIndex < numberOfGrandChildrenPerChild; grandChildIndex++)
+         RigidBodyBasics rootBody = new RigidBody("rootBody", ReferenceFrame.getWorldFrame());
+         JointBasics rootJoint = MultiBodySystemRandomTools.nextJoint(random, "root", rootBody);
+         RigidBody rootJointSuccessor = MultiBodySystemRandomTools.nextRigidBody(random, "rootJointSuccessor", rootJoint);
+         int numberOfChildren = 10;
+         int numberOfGrandChildrenPerChild = 10;
+         for (int childIndex = 0; childIndex < numberOfChildren; childIndex++)
          {
-            JointBasics grandChildJoint = MultiBodySystemRandomTools.nextJoint(random, "jointDepth2", childBody);
-            MultiBodySystemRandomTools.nextRigidBody(random, "bodyDepth2", grandChildJoint);
+            JointBasics childJoint = MultiBodySystemRandomTools.nextJoint(random, "jointDepth1", rootJointSuccessor);
+            RigidBody childBody = MultiBodySystemRandomTools.nextRigidBody(random, "bodyDepth1", childJoint);
+
+            for (int grandChildIndex = 0; grandChildIndex < numberOfGrandChildrenPerChild; grandChildIndex++)
+            {
+               JointBasics grandChildJoint = MultiBodySystemRandomTools.nextJoint(random, "jointDepth2", childBody);
+               MultiBodySystemRandomTools.nextRigidBody(random, "bodyDepth2", grandChildJoint);
+            }
+         }
+         JointIterable<JointReadOnly> jointIterable = new JointIterable<>(JointReadOnly.class, null, rootJoint);
+         Iterator<JointReadOnly> iterator = jointIterable.iterator();
+         assertTrue(iterator.hasNext());
+         assertTrue(rootJoint == iterator.next());
+         for (int childIndex = 0; childIndex < numberOfChildren; childIndex++)
+         {
+            assertTrue(iterator.hasNext());
+            assertTrue(rootJointSuccessor.getChildrenJoints().get(childIndex) == iterator.next());
+         }
+         for (int childIndex = 0; childIndex < numberOfChildren; childIndex++)
+         {
+            JointBasics childJoint = rootJointSuccessor.getChildrenJoints().get(childIndex);
+
+            for (int grandChildIndex = 0; grandChildIndex < numberOfGrandChildrenPerChild; grandChildIndex++)
+            {
+               JointBasics grandChildJoint = childJoint.getSuccessor().getChildrenJoints().get(grandChildIndex);
+               assertTrue(iterator.hasNext());
+               assertTrue(grandChildJoint == iterator.next());
+            }
          }
       }
 
-      JointIterable<JointReadOnly> jointIterable = new JointIterable<>(JointReadOnly.class, null, rootJoint);
-      Iterator<JointReadOnly> iterator = jointIterable.iterator();
-
-      assertTrue(iterator.hasNext());
-      assertTrue(rootJoint == iterator.next());
-
-      for (int childIndex = 0; childIndex < numberOfChildren; childIndex++)
-      {
-         assertTrue(iterator.hasNext());
-         assertTrue(rootJointSuccessor.getChildrenJoints().get(childIndex) == iterator.next());
-      }
-
-      for (int childIndex = 0; childIndex < numberOfChildren; childIndex++)
-      {
-         JointBasics childJoint = rootJointSuccessor.getChildrenJoints().get(childIndex);
-
-         for (int grandChildIndex = 0; grandChildIndex < numberOfGrandChildrenPerChild; grandChildIndex++)
+      for (int i = 0; i < ITERATIONS; i++)
+      { // Trying the filtering class for OneDofJointReadOnly, the 1-DoF joints are at the depth 2.
+         RigidBodyBasics rootBody = new RigidBody("rootBody", ReferenceFrame.getWorldFrame());
+         JointBasics rootJoint = MultiBodySystemRandomTools.nextJoint(random, "root", rootBody);
+         RigidBody rootJointSuccessor = MultiBodySystemRandomTools.nextRigidBody(random, "rootJointSuccessor", rootJoint);
+         int numberOfChildren = 10;
+         int numberOfGrandChildrenPerChild = 10;
+         for (int childIndex = 0; childIndex < numberOfChildren; childIndex++)
          {
-            JointBasics grandChildJoint = childJoint.getSuccessor().getChildrenJoints().get(grandChildIndex);
+            JointBasics childJoint = MultiBodySystemRandomTools.nextJoint(random, "jointDepth1", rootJointSuccessor);
+            RigidBody childBody = MultiBodySystemRandomTools.nextRigidBody(random, "bodyDepth1", childJoint);
+
+            for (int grandChildIndex = 0; grandChildIndex < numberOfGrandChildrenPerChild; grandChildIndex++)
+            {
+               JointBasics grandChildJoint = MultiBodySystemRandomTools.nextJoint(random, "jointDepth2", childBody);
+               MultiBodySystemRandomTools.nextRigidBody(random, "bodyDepth2", grandChildJoint);
+            }
+         }
+         JointIterable<JointReadOnly> jointIterable = new JointIterable<>(JointReadOnly.class, null, rootJoint);
+         Iterator<JointReadOnly> iterator = jointIterable.iterator();
+         assertTrue(iterator.hasNext());
+         assertTrue(rootJoint == iterator.next());
+         for (int childIndex = 0; childIndex < numberOfChildren; childIndex++)
+         {
             assertTrue(iterator.hasNext());
-            assertTrue(grandChildJoint == iterator.next());
+            assertTrue(rootJointSuccessor.getChildrenJoints().get(childIndex) == iterator.next());
+         }
+         for (int childIndex = 0; childIndex < numberOfChildren; childIndex++)
+         {
+            JointBasics childJoint = rootJointSuccessor.getChildrenJoints().get(childIndex);
+
+            for (int grandChildIndex = 0; grandChildIndex < numberOfGrandChildrenPerChild; grandChildIndex++)
+            {
+               JointBasics grandChildJoint = childJoint.getSuccessor().getChildrenJoints().get(grandChildIndex);
+               assertTrue(iterator.hasNext());
+               assertTrue(grandChildJoint == iterator.next());
+            }
          }
       }
    }
