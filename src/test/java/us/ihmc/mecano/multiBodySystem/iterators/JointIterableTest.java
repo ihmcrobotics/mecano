@@ -139,30 +139,25 @@ public class JointIterableTest
       for (int i = 0; i < ITERATIONS; i++)
       { // Trying the filtering class for OneDofJointReadOnly, the 1-DoF joints are at the depth 2.
          RigidBodyBasics rootBody = new RigidBody("rootBody", ReferenceFrame.getWorldFrame());
-         JointBasics rootJoint = MultiBodySystemRandomTools.nextJoint(random, "root", rootBody);
+         JointBasics rootJoint = MultiBodySystemRandomTools.nextSixDoFJoint(random, "root", rootBody);
          RigidBody rootJointSuccessor = MultiBodySystemRandomTools.nextRigidBody(random, "rootJointSuccessor", rootJoint);
          int numberOfChildren = 10;
          int numberOfGrandChildrenPerChild = 10;
          for (int childIndex = 0; childIndex < numberOfChildren; childIndex++)
          {
-            JointBasics childJoint = MultiBodySystemRandomTools.nextJoint(random, "jointDepth1", rootJointSuccessor);
+            JointBasics childJoint = MultiBodySystemRandomTools.nextSphericalJoint(random, "jointDepth1", rootJointSuccessor);
             RigidBody childBody = MultiBodySystemRandomTools.nextRigidBody(random, "bodyDepth1", childJoint);
 
             for (int grandChildIndex = 0; grandChildIndex < numberOfGrandChildrenPerChild; grandChildIndex++)
             {
-               JointBasics grandChildJoint = MultiBodySystemRandomTools.nextJoint(random, "jointDepth2", childBody);
+               JointBasics grandChildJoint = MultiBodySystemRandomTools.nextOneDoFJoint(random, "jointDepth2", childBody);
                MultiBodySystemRandomTools.nextRigidBody(random, "bodyDepth2", grandChildJoint);
             }
          }
-         JointIterable<JointReadOnly> jointIterable = new JointIterable<>(JointReadOnly.class, null, rootJoint);
-         Iterator<JointReadOnly> iterator = jointIterable.iterator();
-         assertTrue(iterator.hasNext());
-         assertTrue(rootJoint == iterator.next());
-         for (int childIndex = 0; childIndex < numberOfChildren; childIndex++)
-         {
-            assertTrue(iterator.hasNext());
-            assertTrue(rootJointSuccessor.getChildrenJoints().get(childIndex) == iterator.next());
-         }
+
+         JointIterable<OneDoFJointReadOnly> jointIterable = new JointIterable<>(OneDoFJointReadOnly.class, null, rootJoint);
+         Iterator<OneDoFJointReadOnly> iterator = jointIterable.iterator();
+
          for (int childIndex = 0; childIndex < numberOfChildren; childIndex++)
          {
             JointBasics childJoint = rootJointSuccessor.getChildrenJoints().get(childIndex);
@@ -171,7 +166,9 @@ public class JointIterableTest
             {
                JointBasics grandChildJoint = childJoint.getSuccessor().getChildrenJoints().get(grandChildIndex);
                assertTrue(iterator.hasNext());
-               assertTrue(grandChildJoint == iterator.next());
+               JointReadOnly actual = iterator.next();
+               assertTrue(grandChildJoint == actual, "child: " + childIndex + ", grand-child: " + grandChildIndex + ", expected: " + grandChildJoint.getName()
+                     + ", actual: " + actual.getName());
             }
          }
       }

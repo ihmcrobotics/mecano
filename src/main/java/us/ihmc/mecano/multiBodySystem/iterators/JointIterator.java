@@ -108,9 +108,6 @@ public class JointIterator<J extends JointReadOnly> implements Iterator<J>
 
    private J searchNextJointPassingRule()
    {
-      if (stack.isEmpty())
-         return null;
-
       while (!stack.isEmpty())
       {
          JointReadOnly currentJoint = searchNextJoint();
