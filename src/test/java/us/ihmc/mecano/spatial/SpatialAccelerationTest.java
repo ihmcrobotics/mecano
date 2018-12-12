@@ -5,6 +5,7 @@ import static us.ihmc.robotics.Assert.*;
 import java.util.Random;
 
 import org.ejml.data.DenseMatrix64F;
+import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
@@ -159,13 +160,15 @@ public class SpatialAccelerationTest extends SpatialMotionTest<SpatialAccelerati
     * You shouldn't be able to add two spatial acceleration vectors expressed in different frames
     */
 
-   @Test// expected = ReferenceFrameMismatchException.class
+   @Test
    public void testAddExpressedInDifferentFrames()
    {
-      SpatialAcceleration acceleration1 = createSpatialMotionVector(frameB, frameA, frameC, new Vector3D(), new Vector3D());
-      SpatialAcceleration acceleration2 = createSpatialMotionVector(frameB, frameA, frameA, new Vector3D(), new Vector3D());
+      Assertions.assertThrows(ReferenceFrameMismatchException.class, () -> {
+         SpatialAcceleration acceleration1 = createSpatialMotionVector(frameB, frameA, frameC, new Vector3D(), new Vector3D());
+         SpatialAcceleration acceleration2 = createSpatialMotionVector(frameB, frameA, frameA, new Vector3D(), new Vector3D());
 
-      acceleration1.add(acceleration2);
+         acceleration1.add(acceleration2);
+      });
    }
 
    /**
@@ -173,13 +176,15 @@ public class SpatialAccelerationTest extends SpatialMotionTest<SpatialAccelerati
     * the first
     */
 
-   @Test// expected = ReferenceFrameMismatchException.class
+   @Test
    public void testAddNotRelative()
    {
-      SpatialAcceleration acceleration1 = createSpatialMotionVector(frameB, frameA, frameC, new Vector3D(), new Vector3D());
-      SpatialAcceleration acceleration2 = createSpatialMotionVector(frameB, frameA, frameC, new Vector3D(), new Vector3D());
+      Assertions.assertThrows(ReferenceFrameMismatchException.class, () -> {
+         SpatialAcceleration acceleration1 = createSpatialMotionVector(frameB, frameA, frameC, new Vector3D(), new Vector3D());
+         SpatialAcceleration acceleration2 = createSpatialMotionVector(frameB, frameA, frameC, new Vector3D(), new Vector3D());
 
-      acceleration1.add(acceleration2);
+         acceleration1.add(acceleration2);
+      });
    }
 
    /**
@@ -262,20 +267,24 @@ public class SpatialAccelerationTest extends SpatialMotionTest<SpatialAccelerati
       MecanoTestTools.assertSpatialAccelerationEquals(vector1, vector1Back, epsilon);
    }
 
-   @Test// expected = RuntimeException.class
+   @Test
    public void testSubWrongExpressedInFrame()
    {
-      SpatialAcceleration vector1 = new SpatialAcceleration(frameB, frameA, frameD);
-      SpatialAcceleration vector2 = new SpatialAcceleration(frameB, frameC, frameC);
-      vector1.sub(vector2);
+      Assertions.assertThrows(RuntimeException.class, () -> {
+         SpatialAcceleration vector1 = new SpatialAcceleration(frameB, frameA, frameD);
+         SpatialAcceleration vector2 = new SpatialAcceleration(frameB, frameC, frameC);
+         vector1.sub(vector2);
+      });
    }
 
-   @Test// expected = RuntimeException.class
+   @Test // expected = RuntimeException.class
    public void testSubFramesDontMatchUp()
    {
-      SpatialAcceleration vector1 = new SpatialAcceleration(frameD, frameA, frameC);
-      SpatialAcceleration vector2 = new SpatialAcceleration(frameB, frameC, frameC);
-      vector1.sub(vector2);
+      Assertions.assertThrows(RuntimeException.class, () -> {
+         SpatialAcceleration vector1 = new SpatialAcceleration(frameD, frameA, frameC);
+         SpatialAcceleration vector2 = new SpatialAcceleration(frameB, frameC, frameC);
+         vector1.sub(vector2);
+      });
    }
 
    @Test
@@ -366,37 +375,37 @@ public class SpatialAccelerationTest extends SpatialMotionTest<SpatialAccelerati
          deltaTwist.changeFrame(EuclidFrameRandomTools.nextReferenceFrame(random));
          accelerationMethod1.setReferenceFrame(initialFrame);
          MecanoTestTools.assertExceptionIsThrown(() -> accelerationMethod1.changeFrame(desiredFrame, deltaTwist, bodyTwist),
-                                                            ReferenceFrameMismatchException.class);
+                                                 ReferenceFrameMismatchException.class);
 
          bodyTwist.setReferenceFrame(initialFrame);
          deltaTwist.setReferenceFrame(desiredFrame);
          accelerationMethod1.setReferenceFrame(initialFrame);
          MecanoTestTools.assertExceptionIsThrown(() -> accelerationMethod1.changeFrame(desiredFrame, deltaTwist, bodyTwist),
-                                                            ReferenceFrameMismatchException.class);
+                                                 ReferenceFrameMismatchException.class);
 
          bodyTwist.setReferenceFrame(desiredFrame);
          deltaTwist.setReferenceFrame(initialFrame);
          accelerationMethod1.setReferenceFrame(initialFrame);
          MecanoTestTools.assertExceptionIsThrown(() -> accelerationMethod1.changeFrame(desiredFrame, deltaTwist, bodyTwist),
-                                                            ReferenceFrameMismatchException.class);
+                                                 ReferenceFrameMismatchException.class);
 
          bodyTwist.setReferenceFrame(initialFrame);
          bodyTwist.setBodyFrame(initialFrame);
          accelerationMethod1.setReferenceFrame(initialFrame);
          MecanoTestTools.assertExceptionIsThrown(() -> accelerationMethod1.changeFrame(desiredFrame, deltaTwist, bodyTwist),
-                                                            ReferenceFrameMismatchException.class);
+                                                 ReferenceFrameMismatchException.class);
 
          bodyTwist.setBodyFrame(bodyFrame);
          bodyTwist.setBaseFrame(desiredFrame);
          accelerationMethod1.setReferenceFrame(initialFrame);
          MecanoTestTools.assertExceptionIsThrown(() -> accelerationMethod1.changeFrame(desiredFrame, deltaTwist, bodyTwist),
-                                                            ReferenceFrameMismatchException.class);
+                                                 ReferenceFrameMismatchException.class);
 
          bodyTwist.setReferenceFrame(EuclidFrameRandomTools.nextReferenceFrame(random));
          bodyTwist.setBaseFrame(baseFrame);
          accelerationMethod1.setReferenceFrame(initialFrame);
          MecanoTestTools.assertExceptionIsThrown(() -> accelerationMethod1.changeFrame(desiredFrame, deltaTwist, bodyTwist),
-                                                            ReferenceFrameMismatchException.class);
+                                                 ReferenceFrameMismatchException.class);
       }
    }
 

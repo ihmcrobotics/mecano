@@ -7,6 +7,7 @@ import java.util.Random;
 import org.ejml.data.DenseMatrix64F;
 import org.ejml.ops.EjmlUnitTests;
 import org.ejml.ops.RandomMatrices;
+import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
@@ -115,10 +116,12 @@ public abstract class SpatialMotionTest<T extends SpatialMotionBasics>
       EjmlUnitTests.assertEquals(matrix, matrixBack, 0.0);
    }
 
-   @Test// expected = RuntimeException.class
+   @Test
    public void testConstructUsingMatrixTooSmall()
    {
-      DenseMatrix64F matrix = new DenseMatrix64F(SpatialVectorReadOnly.SIZE - 1, 1);
-      createSpatialMotionVector(frameC, frameD, frameA, matrix);
+      Assertions.assertThrows(RuntimeException.class, () -> {
+         DenseMatrix64F matrix = new DenseMatrix64F(SpatialVectorReadOnly.SIZE - 1, 1);
+         createSpatialMotionVector(frameC, frameD, frameA, matrix);
+      });
    }
 }

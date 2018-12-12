@@ -9,6 +9,7 @@ import org.ejml.ops.CommonOps;
 import org.ejml.ops.EjmlUnitTests;
 import org.ejml.ops.NormOps;
 import org.ejml.ops.RandomMatrices;
+import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
@@ -135,12 +136,14 @@ public class WrenchTest
       EuclidCoreTestTools.assertTuple3DEquals(force, wrench.getLinearPart(), 0.0);
    }
 
-   @Test// expected = RuntimeException.class
+   @Test
    public void testConstructUsingMatrixTooSmall()
    {
-      Random random = new Random(12342L);
-      DenseMatrix64F matrix = RandomMatrices.createRandom(Wrench.SIZE - 1, 1, random);
-      new Wrench(frameA, frameB, matrix);
+      Assertions.assertThrows(RuntimeException.class, () -> {
+         Random random = new Random(12342L);
+         DenseMatrix64F matrix = RandomMatrices.createRandom(Wrench.SIZE - 1, 1, random);
+         new Wrench(frameA, frameB, matrix);
+      });
    }
 
    @Test
@@ -168,44 +171,32 @@ public class WrenchTest
       EuclidCoreTestTools.assertTuple3DEquals(new Vector3D(linearArray), wrench.getLinearPart(), epsilon);
    }
 
-   @Test// expected = RuntimeException.class
+   @Test
    public void testConstructUsingDoubleArrayTooSmall()
    {
-      new Wrench(frameA, frameB, new double[Wrench.SIZE - 1]);
+      Assertions.assertThrows(RuntimeException.class, () -> {
+         new Wrench(frameA, frameB, new double[Wrench.SIZE - 1]);
+      });
    }
 
-   @Test// expected = RuntimeException.class
+   @Test
    public void testAddNotAllowed()
    {
-      Wrench wrench1 = null, wrench2 = null;
-      try
-      {
-         wrench1 = new Wrench(frameB, frameA);
-         wrench2 = new Wrench(frameC, frameA);
-      }
-      catch (RuntimeException e)
-      {
-         fail();
-      }
-
-      wrench1.add(wrench2);
+      Wrench wrench1 = new Wrench(frameB, frameA);
+      Wrench wrench2 = new Wrench(frameC, frameA);
+      Assertions.assertThrows(RuntimeException.class, () -> {
+         wrench1.add(wrench2);
+      });
    }
 
-   @Test// expected = RuntimeException.class
+   @Test
    public void testAddNotAllowed2()
    {
-      Wrench wrench1 = null, wrench2 = null;
-      try
-      {
-         wrench1 = new Wrench(frameB, frameA);
-         wrench2 = new Wrench(frameB, frameB);
-      }
-      catch (RuntimeException e)
-      {
-         fail();
-      }
-
-      wrench1.add(wrench2);
+      Wrench wrench1 = new Wrench(frameB, frameA);
+      Wrench wrench2 = new Wrench(frameB, frameB);
+      Assertions.assertThrows(RuntimeException.class, () -> {
+         wrench1.add(wrench2);
+      });
    }
 
    @Test
@@ -227,38 +218,24 @@ public class WrenchTest
       EuclidCoreTestTools.assertTuple3DEquals(wrench3.getAngularPart(), angularPart, 1e-24);
    }
 
-   @Test// expected = RuntimeException.class
+   @Test
    public void testSubNotAllowed()
    {
-      Wrench wrench1 = null, wrench2 = null;
-      try
-      {
-         wrench1 = new Wrench(frameB, frameA);
-         wrench2 = new Wrench(frameC, frameA);
-      }
-      catch (RuntimeException e)
-      {
-         fail();
-      }
-
-      wrench1.sub(wrench2);
+      Wrench wrench1 = new Wrench(frameB, frameA);
+      Wrench wrench2 = new Wrench(frameC, frameA);
+      Assertions.assertThrows(RuntimeException.class, () -> {
+         wrench1.sub(wrench2);
+      });
    }
 
-   @Test// expected = RuntimeException.class
+   @Test
    public void testSubNotAllowed2()
    {
-      Wrench wrench1 = null, wrench2 = null;
-      try
-      {
-         wrench1 = new Wrench(frameB, frameA);
-         wrench2 = new Wrench(frameB, frameB);
-      }
-      catch (RuntimeException e)
-      {
-         fail();
-      }
-
-      wrench1.sub(wrench2);
+      Wrench wrench1 = new Wrench(frameB, frameA);
+      Wrench wrench2 = new Wrench(frameB, frameB);
+      Assertions.assertThrows(RuntimeException.class, () -> {
+         wrench1.sub(wrench2);
+      });
    }
 
    @Test
@@ -280,38 +257,24 @@ public class WrenchTest
       EuclidCoreTestTools.assertTuple3DEquals(wrench3.getAngularPart(), angularPart, 1e-24);
    }
 
-   @Test// expected = RuntimeException.class
+   @Test
    public void testCheckAndSetNotAllowed1()
    {
-      Wrench wrench1 = null, wrench2 = null;
-      try
-      {
-         wrench1 = new Wrench(frameA, frameB);
-         wrench2 = new Wrench(frameA, frameC);
-      }
-      catch (RuntimeException e)
-      {
-         fail();
-      }
-
-      wrench2.set(wrench1);
+      Wrench wrench1 = new Wrench(frameA, frameB);
+      Wrench wrench2 = new Wrench(frameA, frameC);
+      Assertions.assertThrows(RuntimeException.class, () -> {
+         wrench2.set(wrench1);
+      });
    }
 
-   @Test// expected = RuntimeException.class
+   @Test
    public void testCheckAndSetNotAllowed2()
    {
-      Wrench wrench1 = null, wrench2 = null;
-      try
-      {
-         wrench1 = new Wrench(frameA, frameB);
-         wrench2 = new Wrench(frameC, frameB);
-      }
-      catch (RuntimeException e)
-      {
-         fail();
-      }
-
-      wrench2.set(wrench1);
+      Wrench wrench1 = new Wrench(frameA, frameB);
+      Wrench wrench2 = new Wrench(frameC, frameB);
+      Assertions.assertThrows(RuntimeException.class, () -> {
+         wrench2.set(wrench1);
+      });
    }
 
    @Test
@@ -320,16 +283,20 @@ public class WrenchTest
       testDotProduct(frameA, frameB, frameC);
    }
 
-   @Test// expected = RuntimeException.class
+   @Test
    public void testDotProductNotAllowed1()
    {
-      testDotProductNotAllowed1(frameA, frameB, frameC);
+      Assertions.assertThrows(RuntimeException.class, () -> {
+         testDotProductNotAllowed1(frameA, frameB, frameC);
+      });
    }
 
-   @Test// expected = RuntimeException.class
+   @Test 
    public void testDotProductNotAllowed2()
    {
-      testDotProductNotAllowed2(frameA, frameB, frameC);
+      Assertions.assertThrows(RuntimeException.class, () -> {
+         testDotProductNotAllowed2(frameA, frameB, frameC);
+      });
    }
 
    public static void testDotProduct(ReferenceFrame frameA, ReferenceFrame frameB, ReferenceFrame frameC)
