@@ -25,9 +25,8 @@ import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyReadOnly;
 @SuppressWarnings("unchecked")
 public class RigidBodyIterator<B extends RigidBodyReadOnly> implements Iterator<B>
 {
-   private final Deque<B> stack = new ArrayDeque<>();
-   private final Predicate<B> selectionRule;
-   private final Class<B> filteringClass;
+   private final Deque<RigidBodyReadOnly> stack = new ArrayDeque<>();
+   private final Predicate<RigidBodyReadOnly> selectionRule;
 
    /**
     * Creates a new iterable for a single subtree.
@@ -40,10 +39,13 @@ public class RigidBodyIterator<B extends RigidBodyReadOnly> implements Iterator<
     *           of the iteration.
     * @param root rigid-body from which the subtree starts. Not modified.
     */
-   public RigidBodyIterator(Class<B> filteringClass, Predicate<B> selectionRule, B root)
+   public RigidBodyIterator(Class<B> filteringClass, Predicate<B> selectionRule, RigidBodyReadOnly root)
    {
-      this.filteringClass = filteringClass;
-      this.selectionRule = selectionRule;
+      if (selectionRule == null)
+         this.selectionRule = body -> filteringClass.isInstance(body);
+      else
+         this.selectionRule = body -> filteringClass.isInstance(body) && selectionRule.test((B) body);
+
       if (root != null)
          stack.add(root);
    }
@@ -61,16 +63,13 @@ public class RigidBodyIterator<B extends RigidBodyReadOnly> implements Iterator<
     */
    public RigidBodyIterator(Class<B> filteringClass, Predicate<B> selectionRule, Collection<? extends RigidBodyReadOnly> roots)
    {
-      this.filteringClass = filteringClass;
-      this.selectionRule = selectionRule;
+      if (selectionRule == null)
+         this.selectionRule = body -> filteringClass.isInstance(body);
+      else
+         this.selectionRule = body -> filteringClass.isInstance(body) && selectionRule.test((B) body);
+
       if (roots != null)
-      {
-         for (RigidBodyReadOnly root : roots)
-         {
-            if (filteringClass.isInstance(root))
-               stack.add((B) root);
-         }
-      }
+         stack.addAll(roots);
    }
 
    private B next = null;
@@ -109,27 +108,21 @@ public class RigidBodyIterator<B extends RigidBodyReadOnly> implements Iterator<
 
    private B searchNextRigidBodyPassingRule()
    {
-      if (stack.isEmpty())
-         return null;
-
-      if (selectionRule == null)
-         return searchNextRigidBody();
-
       while (!stack.isEmpty())
       {
-         B currentBody = searchNextRigidBody();
+         RigidBodyReadOnly currentBody = searchNextRigidBody();
          if (currentBody == null || selectionRule.test(currentBody))
-            return currentBody;
+            return (B) currentBody;
       }
       return null;
    }
 
-   private B searchNextRigidBody()
+   private RigidBodyReadOnly searchNextRigidBody()
    {
       if (stack.isEmpty())
          return null;
 
-      B currentBody = stack.poll();
+      RigidBodyReadOnly currentBody = stack.poll();
 
       List<? extends JointReadOnly> childrenJoints = currentBody.getChildrenJoints();
 
@@ -138,9 +131,7 @@ public class RigidBodyIterator<B extends RigidBodyReadOnly> implements Iterator<
          for (JointReadOnly childJoint : childrenJoints)
          {
             RigidBodyReadOnly childBody = childJoint.getSuccessor();
-
-            if (childBody != null || filteringClass.isInstance(childBody))
-               stack.add((B) childBody);
+            stack.add(childBody);
          }
       }
 
