@@ -1,6 +1,6 @@
 package us.ihmc.mecano.spatial;
 
-import static us.ihmc.robotics.Assert.*;
+import static org.junit.jupiter.api.Assertions.*;
 
 import java.util.Random;
 
@@ -109,7 +109,7 @@ public class TwistTest extends SpatialMotionTest<Twist>
       DenseMatrix64F matrixBack = new DenseMatrix64F(Twist.SIZE, 1);
       twist.get(matrixBack);
       double[] arrayBack = matrixBack.getData();
-      assertArrayEquals(array, arrayBack, 0.0);
+      assertArrayEquals(array, arrayBack);
    }
 
    @Test

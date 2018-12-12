@@ -1,6 +1,6 @@
 package us.ihmc.mecano.algorithms;
 
-import static us.ihmc.robotics.Assert.*;
+import static org.junit.jupiter.api.Assertions.*;
 
 import java.util.List;
 import java.util.Random;
@@ -39,9 +39,9 @@ public class CompositeRigidBodyMassMatrixCalculatorTest
          CompositeRigidBodyMassMatrixCalculator compositeRigidBodyMassMatrixCalculator = new CompositeRigidBodyMassMatrixCalculator(input, matrixFrame);
 
          assertTrue(MatrixFeatures.isEquals(centroidalMomentumRateCalculator.getCentroidalMomentumMatrix(),
-               compositeRigidBodyMassMatrixCalculator.getCentroidalMomentumMatrix(), EPSILON));
+                                            compositeRigidBodyMassMatrixCalculator.getCentroidalMomentumMatrix(), EPSILON));
          MecanoTestTools.assertSpatialForceEquals(centroidalMomentumRateCalculator.getBiasSpatialForce(),
-               compositeRigidBodyMassMatrixCalculator.getCentroidalConvectiveTerm(), EPSILON);
+                                                  compositeRigidBodyMassMatrixCalculator.getCentroidalConvectiveTerm(), EPSILON);
 
          for (JointStateType stateToRandomize : JointStateType.values())
             MultiBodySystemRandomTools.nextState(random, stateToRandomize, joints);
@@ -49,9 +49,9 @@ public class CompositeRigidBodyMassMatrixCalculatorTest
          centroidalMomentumRateCalculator.reset();
          compositeRigidBodyMassMatrixCalculator.reset();
          assertTrue(MatrixFeatures.isEquals(centroidalMomentumRateCalculator.getCentroidalMomentumMatrix(),
-               compositeRigidBodyMassMatrixCalculator.getCentroidalMomentumMatrix(), EPSILON));
+                                            compositeRigidBodyMassMatrixCalculator.getCentroidalMomentumMatrix(), EPSILON));
          MecanoTestTools.assertSpatialForceEquals(centroidalMomentumRateCalculator.getBiasSpatialForce(),
-               compositeRigidBodyMassMatrixCalculator.getCentroidalConvectiveTerm(), EPSILON);
+                                                  compositeRigidBodyMassMatrixCalculator.getCentroidalConvectiveTerm(), EPSILON);
       }
 
       for (int i = 0; i < ITERATIONS; i++)
@@ -68,9 +68,9 @@ public class CompositeRigidBodyMassMatrixCalculatorTest
          compositeRigidBodyMassMatrixCalculator.setCentroidalMomentumFrame(matrixFrame);
 
          assertTrue(MatrixFeatures.isEquals(centroidalMomentumRateCalculator.getCentroidalMomentumMatrix(),
-               compositeRigidBodyMassMatrixCalculator.getCentroidalMomentumMatrix(), EPSILON));
+                                            compositeRigidBodyMassMatrixCalculator.getCentroidalMomentumMatrix(), EPSILON));
          MecanoTestTools.assertSpatialForceEquals(centroidalMomentumRateCalculator.getBiasSpatialForce(),
-               compositeRigidBodyMassMatrixCalculator.getCentroidalConvectiveTerm(), EPSILON);
+                                                  compositeRigidBodyMassMatrixCalculator.getCentroidalConvectiveTerm(), EPSILON);
       }
    }
 }

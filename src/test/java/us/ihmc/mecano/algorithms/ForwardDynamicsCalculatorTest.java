@@ -1,7 +1,7 @@
 package us.ihmc.mecano.algorithms;
 
+import static org.junit.jupiter.api.Assertions.*;
 import static us.ihmc.mecano.tools.MecanoRandomTools.*;
-import static us.ihmc.robotics.Assert.*;
 
 import java.util.Collections;
 import java.util.List;

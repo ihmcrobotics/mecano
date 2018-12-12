@@ -1,6 +1,6 @@
 package us.ihmc.mecano.spatial;
 
-import static us.ihmc.robotics.Assert.*;
+import static org.junit.jupiter.api.Assertions.*;
 
 import java.util.Random;
 
