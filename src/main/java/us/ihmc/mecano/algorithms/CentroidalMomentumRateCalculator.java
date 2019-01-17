@@ -403,7 +403,7 @@ public class CentroidalMomentumRateCalculator implements ReferenceFrameHolder
    public void getCenterOfMassAcceleration(DenseMatrix64F jointAccelerationMatrix, FrameVector3DBasics centerOfMassAccelerationToPack)
    {
       CommonOps.mult(getCentroidalMomentumMatrix(), jointAccelerationMatrix, momentumMatrix);
-      CommonOps.subtractEquals(momentumMatrix, getBiasSpatialForceMatrix());
+      CommonOps.addEquals(momentumMatrix, getBiasSpatialForceMatrix());
       centerOfMassAccelerationToPack.setIncludingFrame(matrixFrame, 3, momentumMatrix);
       centerOfMassAccelerationToPack.scale(1.0 / getTotalMass());
    }
@@ -472,7 +472,7 @@ public class CentroidalMomentumRateCalculator implements ReferenceFrameHolder
    public void getMomentumRate(DenseMatrix64F jointAccelerationMatrix, SpatialForceBasics momentumRateToPack)
    {
       CommonOps.mult(getCentroidalMomentumMatrix(), jointAccelerationMatrix, momentumMatrix);
-      CommonOps.subtractEquals(momentumMatrix, getBiasSpatialForceMatrix());
+      CommonOps.addEquals(momentumMatrix, getBiasSpatialForceMatrix());
       momentumRateToPack.setIncludingFrame(matrixFrame, momentumMatrix);
    }
 

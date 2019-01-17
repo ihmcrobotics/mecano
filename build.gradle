@@ -1,11 +1,11 @@
 plugins {
    id("us.ihmc.ihmc-build") version "0.15.5"
-   id("us.ihmc.ihmc-ci") version "3.2"
+   id("us.ihmc.ihmc-ci") version "4.2"
 }
 
 ihmc {
    group = "us.ihmc"
-   version = "0.0.16"
+   version = "0.0.17"
    vcsUrl = "https://github.com/ihmcrobotics/mecano"
    openSource = true
 
