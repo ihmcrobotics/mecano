@@ -7,7 +7,10 @@ import org.ejml.data.DenseMatrix64F;
 import org.ejml.ops.CommonOps;
 import org.junit.jupiter.api.Test;
 
+import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
+import us.ihmc.euclid.referenceFrame.interfaces.FrameVector3DReadOnly;
+import us.ihmc.euclid.referenceFrame.tools.EuclidFrameTestTools;
 import us.ihmc.mecano.frames.CenterOfMassReferenceFrame;
 import us.ihmc.mecano.multiBodySystem.interfaces.JointBasics;
 import us.ihmc.mecano.multiBodySystem.interfaces.JointReadOnly;
@@ -75,6 +78,11 @@ public class CentroidalMomentumRateCalculatorTest
          actualMomentumRate = new SpatialForce();
          centroidalMomentumRateCalculator.getMomentumRate(jointAccelerationMatrix, actualMomentumRate);
          MecanoTestTools.assertSpatialVectorEquals(expectedMomentumRate, actualMomentumRate, EPSILON);
+
+         FrameVector3DReadOnly expectedCenterOfMassAcceleration = centroidalMomentumRateCalculator.getCenterOfMassAcceleration();
+         FrameVector3D actualCenterOfMassAcceleration = new FrameVector3D();
+         centroidalMomentumRateCalculator.getCenterOfMassAcceleration(jointAccelerationMatrix, actualCenterOfMassAcceleration);
+         EuclidFrameTestTools.assertFrameTuple3DEquals(expectedCenterOfMassAcceleration, actualCenterOfMassAcceleration, EPSILON);
       }
    }
 
@@ -118,6 +126,11 @@ public class CentroidalMomentumRateCalculatorTest
          actualMomentumRate = new SpatialForce();
          centroidalMomentumRateCalculator.getMomentumRate(jointAccelerationMatrix, actualMomentumRate);
          MecanoTestTools.assertSpatialVectorEquals(expectedMomentumRate, actualMomentumRate, EPSILON);
+
+         FrameVector3DReadOnly expectedCenterOfMassAcceleration = centroidalMomentumRateCalculator.getCenterOfMassAcceleration();
+         FrameVector3D actualCenterOfMassAcceleration = new FrameVector3D();
+         centroidalMomentumRateCalculator.getCenterOfMassAcceleration(jointAccelerationMatrix, actualCenterOfMassAcceleration);
+         EuclidFrameTestTools.assertFrameTuple3DEquals(expectedCenterOfMassAcceleration, actualCenterOfMassAcceleration, EPSILON);
       }
    }
 
@@ -161,6 +174,11 @@ public class CentroidalMomentumRateCalculatorTest
          actualMomentumRate = new SpatialForce();
          centroidalMomentumRateCalculator.getMomentumRate(jointAccelerationMatrix, actualMomentumRate);
          MecanoTestTools.assertSpatialVectorEquals(expectedMomentumRate, actualMomentumRate, EPSILON);
+
+         FrameVector3DReadOnly expectedCenterOfMassAcceleration = centroidalMomentumRateCalculator.getCenterOfMassAcceleration();
+         FrameVector3D actualCenterOfMassAcceleration = new FrameVector3D();
+         centroidalMomentumRateCalculator.getCenterOfMassAcceleration(jointAccelerationMatrix, actualCenterOfMassAcceleration);
+         EuclidFrameTestTools.assertFrameTuple3DEquals(expectedCenterOfMassAcceleration, actualCenterOfMassAcceleration, EPSILON);
       }
    }
 
