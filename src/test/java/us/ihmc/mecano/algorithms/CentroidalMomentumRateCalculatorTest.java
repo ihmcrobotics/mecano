@@ -66,8 +66,14 @@ public class CentroidalMomentumRateCalculatorTest
          SpatialAccelerationCalculator spatialAccelerationCalculator = new SpatialAccelerationCalculator(rootBody, worldFrame);
          spatialAccelerationCalculator.reset();
 
-         SpatialForceReadOnly actualMomentumRate = centroidalMomentumRateCalculator.getMomentumRate();
+         SpatialForce actualMomentumRate = new SpatialForce(centroidalMomentumRateCalculator.getMomentumRate());
          SpatialForce expectedMomentumRate = computeMomentumRate(rootBody, spatialAccelerationCalculator, centroidalMomentumRateCalculator.getReferenceFrame());
+         MecanoTestTools.assertSpatialVectorEquals(expectedMomentumRate, actualMomentumRate, EPSILON);
+
+         DenseMatrix64F jointAccelerationMatrix = new DenseMatrix64F(numberOfJoints, 1);
+         MultiBodySystemTools.extractJointsState(joints, JointStateType.ACCELERATION, jointAccelerationMatrix);
+         actualMomentumRate = new SpatialForce();
+         centroidalMomentumRateCalculator.getMomentumRate(jointAccelerationMatrix, actualMomentumRate);
          MecanoTestTools.assertSpatialVectorEquals(expectedMomentumRate, actualMomentumRate, EPSILON);
       }
    }
@@ -103,8 +109,14 @@ public class CentroidalMomentumRateCalculatorTest
          SpatialAccelerationCalculator spatialAccelerationCalculator = new SpatialAccelerationCalculator(rootBody, worldFrame);
          spatialAccelerationCalculator.reset();
 
-         SpatialForceReadOnly actualMomentumRate = centroidalMomentumRateCalculator.getMomentumRate();
+         SpatialForce actualMomentumRate = new SpatialForce(centroidalMomentumRateCalculator.getMomentumRate());
          SpatialForce expectedMomentumRate = computeMomentumRate(rootBody, spatialAccelerationCalculator, centroidalMomentumRateCalculator.getReferenceFrame());
+         MecanoTestTools.assertSpatialVectorEquals(expectedMomentumRate, actualMomentumRate, EPSILON);
+
+         DenseMatrix64F jointAccelerationMatrix = new DenseMatrix64F(numberOfJoints, 1);
+         MultiBodySystemTools.extractJointsState(joints, JointStateType.ACCELERATION, jointAccelerationMatrix);
+         actualMomentumRate = new SpatialForce();
+         centroidalMomentumRateCalculator.getMomentumRate(jointAccelerationMatrix, actualMomentumRate);
          MecanoTestTools.assertSpatialVectorEquals(expectedMomentumRate, actualMomentumRate, EPSILON);
       }
    }
@@ -140,8 +152,14 @@ public class CentroidalMomentumRateCalculatorTest
          SpatialAccelerationCalculator spatialAccelerationCalculator = new SpatialAccelerationCalculator(rootBody, worldFrame);
          spatialAccelerationCalculator.reset();
 
-         SpatialForceReadOnly actualMomentumRate = centroidalMomentumRateCalculator.getMomentumRate();
+         SpatialForce actualMomentumRate = new SpatialForce(centroidalMomentumRateCalculator.getMomentumRate());
          SpatialForce expectedMomentumRate = computeMomentumRate(rootBody, spatialAccelerationCalculator, centroidalMomentumRateCalculator.getReferenceFrame());
+         MecanoTestTools.assertSpatialVectorEquals(expectedMomentumRate, actualMomentumRate, EPSILON);
+
+         DenseMatrix64F jointAccelerationMatrix = new DenseMatrix64F(centroidalMomentumCalculator.getCentroidalMomentumMatrix().getNumCols(), 1);
+         MultiBodySystemTools.extractJointsState(joints, JointStateType.ACCELERATION, jointAccelerationMatrix);
+         actualMomentumRate = new SpatialForce();
+         centroidalMomentumRateCalculator.getMomentumRate(jointAccelerationMatrix, actualMomentumRate);
          MecanoTestTools.assertSpatialVectorEquals(expectedMomentumRate, actualMomentumRate, EPSILON);
       }
    }
