@@ -191,7 +191,7 @@ public class InverseDynamicsCalculator
       rigidBodyToRecursionStepMap.put(rootBody, initialRecursionStep);
       buildMultiBodyTree(initialRecursionStep, input.getJointsToIgnore());
 
-      if (considerJointAccelerations)
+      if (considerIgnoredSubtreesInertia)
          initialRecursionStep.includeIgnoredSubtreeInertia();
 
       int nDoFs = MultiBodySystemTools.computeDegreesOfFreedom(input.getJointsToConsider());
