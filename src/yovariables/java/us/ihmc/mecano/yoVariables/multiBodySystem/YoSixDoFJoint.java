@@ -80,7 +80,10 @@ public class YoSixDoFJoint extends Joint implements SixDoFJointBasics
    {
       this.successor = successor;
       ReferenceFrame successorFrame = successor.getBodyFixedFrame();
-      jointWrench = new YoFixedFrameWrench(name + "Wrench", successorFrame, afterJointFrame, registry);
+      if (jointWrench == null)
+         jointWrench = new YoFixedFrameWrench(name + "Wrench", successorFrame, afterJointFrame, registry);
+      else
+         jointWrench.checkBodyFrameMatch(successorFrame);
    }
 
    /** {@inheritDoc} */
