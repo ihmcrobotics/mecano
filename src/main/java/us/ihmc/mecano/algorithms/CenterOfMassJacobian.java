@@ -128,7 +128,29 @@ public class CenterOfMassJacobian implements ReferenceFrameHolder
     */
    public CenterOfMassJacobian(MultiBodySystemReadOnly input, String centerOfMassFrameName)
    {
-      this(input, null, centerOfMassFrameName, true);
+      this(input, centerOfMassFrameName, true);
+   }
+
+   /**
+    * Creates a new calculator for the given {@code input}.
+    * <p>
+    * A new reference frame at the center of mass is created, the Jacobian is expressed in that
+    * reference frame. The center of mass frame can then be retrieved using
+    * {@link #getReferenceFrame()}.
+    * </p>
+    * 
+    * @param input the definition of the system to be evaluated by this calculator.
+    * @param centerOfMassFrameName the name for the new frame at the center of mass.
+    * @param considerIgnoredSubtreesInertia whether the inertia of the ignored part(s) of the given
+    *           multi-body system should be considered. When {@code true}, this provides more accurate
+    *           Jacobian as it account for the ignored rigid-bodies, i.e. bodies which have an ancestor
+    *           joint that is ignored as specified in the given {@code input}. When {@code false}, the
+    *           resulting Jacobian may be less accurate and this calculator may gain slight performance
+    *           improvement.
+    */
+   public CenterOfMassJacobian(MultiBodySystemReadOnly input, String centerOfMassFrameName, boolean considerIgnoredSubtreesInertia)
+   {
+      this(input, null, centerOfMassFrameName, considerIgnoredSubtreesInertia);
    }
 
    /**
@@ -139,7 +161,24 @@ public class CenterOfMassJacobian implements ReferenceFrameHolder
     */
    public CenterOfMassJacobian(MultiBodySystemReadOnly input, ReferenceFrame jacobianFrame)
    {
-      this(input, jacobianFrame, null, true);
+      this(input, jacobianFrame, true);
+   }
+
+   /**
+    * Creates a new calculator for the given {@code input}.
+    *
+    * @param input the definition of the system to be evaluated by this calculator.
+    * @param jacobianFrame the frame in which the center of mass Jacobian is to be expressed.
+    * @param considerIgnoredSubtreesInertia whether the inertia of the ignored part(s) of the given
+    *           multi-body system should be considered. When {@code true}, this provides more accurate
+    *           Jacobian as it account for the ignored rigid-bodies, i.e. bodies which have an ancestor
+    *           joint that is ignored as specified in the given {@code input}. When {@code false}, the
+    *           resulting Jacobian may be less accurate and this calculator may gain slight performance
+    *           improvement.
+    */
+   public CenterOfMassJacobian(MultiBodySystemReadOnly input, ReferenceFrame jacobianFrame, boolean considerIgnoredSubtreesInertia)
+   {
+      this(input, jacobianFrame, null, considerIgnoredSubtreesInertia);
    }
 
    private CenterOfMassJacobian(MultiBodySystemReadOnly input, ReferenceFrame jacobianFrame, String centerOfMassFrameName,
