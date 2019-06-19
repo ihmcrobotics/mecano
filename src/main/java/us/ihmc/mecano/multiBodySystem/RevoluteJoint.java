@@ -4,6 +4,7 @@ import us.ihmc.euclid.orientation.interfaces.Orientation3DReadOnly;
 import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.referenceFrame.interfaces.FrameVector3DReadOnly;
 import us.ihmc.euclid.transform.RigidBodyTransform;
+import us.ihmc.euclid.transform.interfaces.RigidBodyTransformReadOnly;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple3D.interfaces.Tuple3DReadOnly;
 import us.ihmc.euclid.tuple3D.interfaces.Vector3DReadOnly;
@@ -65,7 +66,7 @@ public class RevoluteJoint extends OneDoFJoint implements RevoluteJointBasics
     * @param transformToParent the transform to the frame after the parent joint. Not modified.
     * @param jointAxis the axis around which this joint can rotate. Not modified.
     */
-   public RevoluteJoint(String name, RigidBodyBasics predecessor, RigidBodyTransform transformToParent, Vector3DReadOnly jointAxis)
+   public RevoluteJoint(String name, RigidBodyBasics predecessor, RigidBodyTransformReadOnly transformToParent, Vector3DReadOnly jointAxis)
    {
       super(name, predecessor, jointAxis, new Vector3D(), transformToParent);
       this.jointAxis = new FrameVector3D(beforeJointFrame, jointAxis);

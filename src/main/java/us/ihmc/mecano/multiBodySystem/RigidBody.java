@@ -7,6 +7,7 @@ import java.util.List;
 import us.ihmc.euclid.matrix.interfaces.Matrix3DReadOnly;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.transform.RigidBodyTransform;
+import us.ihmc.euclid.transform.interfaces.RigidBodyTransformReadOnly;
 import us.ihmc.euclid.tuple3D.interfaces.Tuple3DReadOnly;
 import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.mecano.frames.MovingReferenceFrame;
@@ -91,7 +92,7 @@ public class RigidBody implements RigidBodyBasics
     *           frame, frame to which this rigid-body will create and attach its body fixed frame.
     *           Most of the time {@code parentStationaryFrame == ReferenceFrame.getWorldFrame()}.
     */
-   public RigidBody(String bodyName, RigidBodyTransform transformToParent, ReferenceFrame parentStationaryFrame)
+   public RigidBody(String bodyName, RigidBodyTransformReadOnly transformToParent, ReferenceFrame parentStationaryFrame)
    {
       if (bodyName == null)
          throw new IllegalArgumentException("Name can not be null");
@@ -155,14 +156,14 @@ public class RigidBody implements RigidBodyBasics
     *           part corresponds to the position of this rigid-body center of mass position
     *           expressed in {@code parentJoint.getFrameAfterJointFrame()}. Not modified.
     */
-   public RigidBody(String bodyName, JointBasics parentJoint, Matrix3DReadOnly momentOfInertia, double mass, RigidBodyTransform inertiaPose)
+   public RigidBody(String bodyName, JointBasics parentJoint, Matrix3DReadOnly momentOfInertia, double mass, RigidBodyTransformReadOnly inertiaPose)
    {
       this(bodyName, parentJoint, inertiaPose);
       inertia.getMomentOfInertia().set(momentOfInertia);
       inertia.setMass(mass);
    }
 
-   private RigidBody(String bodyName, JointBasics parentJoint, RigidBodyTransform inertiaPose)
+   private RigidBody(String bodyName, JointBasics parentJoint, RigidBodyTransformReadOnly inertiaPose)
    {
       if (bodyName == null)
          throw new IllegalArgumentException("Name can not be null");

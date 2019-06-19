@@ -10,7 +10,7 @@ import us.ihmc.euclid.geometry.interfaces.Pose3DReadOnly;
 import us.ihmc.euclid.orientation.interfaces.Orientation3DReadOnly;
 import us.ihmc.euclid.referenceFrame.exceptions.ReferenceFrameMismatchException;
 import us.ihmc.euclid.referenceFrame.interfaces.FrameVector3DReadOnly;
-import us.ihmc.euclid.transform.RigidBodyTransform;
+import us.ihmc.euclid.transform.interfaces.RigidBodyTransformReadOnly;
 import us.ihmc.euclid.tuple3D.interfaces.Tuple3DReadOnly;
 import us.ihmc.euclid.tuple3D.interfaces.Vector3DReadOnly;
 import us.ihmc.mecano.multiBodySystem.RigidBody;
@@ -226,7 +226,7 @@ public interface JointBasics extends JointReadOnly
     * @param jointConfiguration the transform containing the new configuration for this joint. Not
     *           modified.
     */
-   default void setJointConfiguration(RigidBodyTransform jointConfiguration)
+   default void setJointConfiguration(RigidBodyTransformReadOnly jointConfiguration)
    {
       setJointOrientation(jointConfiguration.getRotation());
       setJointPosition(jointConfiguration.getTranslation());

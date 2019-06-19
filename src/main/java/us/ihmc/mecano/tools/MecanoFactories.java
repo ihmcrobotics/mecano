@@ -16,6 +16,7 @@ import us.ihmc.euclid.referenceFrame.interfaces.ReferenceFrameHolder;
 import us.ihmc.euclid.tools.EuclidCoreIOTools;
 import us.ihmc.euclid.tools.Matrix3DTools;
 import us.ihmc.euclid.transform.RigidBodyTransform;
+import us.ihmc.euclid.transform.interfaces.RigidBodyTransformReadOnly;
 import us.ihmc.euclid.tuple2D.interfaces.Tuple2DBasics;
 import us.ihmc.euclid.tuple2D.interfaces.Tuple2DReadOnly;
 import us.ihmc.euclid.tuple3D.Vector3D;
@@ -55,7 +56,7 @@ public class MecanoFactories
     *           Not modified.
     * @return the new frame before joint.
     */
-   public static MovingReferenceFrame newFrameBeforeJoint(JointReadOnly joint, RigidBodyTransform transformToParent)
+   public static MovingReferenceFrame newFrameBeforeJoint(JointReadOnly joint, RigidBodyTransformReadOnly transformToParent)
    {
       String beforeJointName = "before" + MecanoTools.capitalize(joint.getName());
 
@@ -71,7 +72,7 @@ public class MecanoFactories
     * @param beforeJointName the name of the new frame.
     * @return the new frame before joint.
     */
-   public static MovingReferenceFrame newJointFrame(JointReadOnly joint, RigidBodyTransform transformToParent, String beforeJointName)
+   public static MovingReferenceFrame newJointFrame(JointReadOnly joint, RigidBodyTransformReadOnly transformToParent, String beforeJointName)
    {
       MovingReferenceFrame parentFrame;
       RigidBodyReadOnly parentBody = joint.getPredecessor();

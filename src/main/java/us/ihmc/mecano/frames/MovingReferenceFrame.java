@@ -6,6 +6,7 @@ import java.util.List;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.referenceFrame.exceptions.ReferenceFrameMismatchException;
 import us.ihmc.euclid.transform.RigidBodyTransform;
+import us.ihmc.euclid.transform.interfaces.RigidBodyTransformReadOnly;
 import us.ihmc.mecano.exceptions.ScrewTheoryException;
 import us.ihmc.mecano.spatial.Twist;
 import us.ihmc.mecano.spatial.interfaces.TwistReadOnly;
@@ -69,7 +70,7 @@ public abstract class MovingReferenceFrame extends ReferenceFrame
     * @throws ScrewTheoryException if {@code parentFrame} is not a {@code MovingReferenceFrame} nor
     *            a stationary {@code ReferenceFrame}.
     */
-   public static MovingReferenceFrame constructFrameFixedInParent(String frameName, ReferenceFrame parentFrame, RigidBodyTransform transformToParent)
+   public static MovingReferenceFrame constructFrameFixedInParent(String frameName, ReferenceFrame parentFrame, RigidBodyTransformReadOnly transformToParent)
    {
       boolean isZUpFrame = parentFrame.isZupFrame() && transformToParent.isRotation2D();
       boolean isFixedInParent = true;
@@ -169,7 +170,7 @@ public abstract class MovingReferenceFrame extends ReferenceFrame
     * @throws ScrewTheoryException if {@code parentFrame} is not a {@code MovingReferenceFrame} nor
     *            a stationary {@code ReferenceFrame}.
     */
-   public MovingReferenceFrame(String frameName, ReferenceFrame parentFrame, RigidBodyTransform transformToParent)
+   public MovingReferenceFrame(String frameName, ReferenceFrame parentFrame, RigidBodyTransformReadOnly transformToParent)
    {
       this(frameName, parentFrame, transformToParent, false, false);
    }
@@ -198,12 +199,12 @@ public abstract class MovingReferenceFrame extends ReferenceFrame
     * @throws ScrewTheoryException if {@code parentFrame} is not a {@code MovingReferenceFrame} nor
     *            a stationary {@code ReferenceFrame}.
     */
-   public MovingReferenceFrame(String frameName, ReferenceFrame parentFrame, RigidBodyTransform transformToParent, boolean isZUpFrame)
+   public MovingReferenceFrame(String frameName, ReferenceFrame parentFrame, RigidBodyTransformReadOnly transformToParent, boolean isZUpFrame)
    {
       this(frameName, parentFrame, transformToParent, isZUpFrame, false);
    }
 
-   private MovingReferenceFrame(String frameName, ReferenceFrame parentFrame, RigidBodyTransform transformToParent, boolean isZUpFrame, boolean isFixedInParent)
+   private MovingReferenceFrame(String frameName, ReferenceFrame parentFrame, RigidBodyTransformReadOnly transformToParent, boolean isZUpFrame, boolean isFixedInParent)
    {
       super(frameName, parentFrame, transformToParent, parentFrame.isAStationaryFrame() && isFixedInParent, isZUpFrame);
 

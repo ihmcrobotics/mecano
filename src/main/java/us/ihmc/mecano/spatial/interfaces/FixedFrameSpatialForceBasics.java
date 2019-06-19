@@ -5,7 +5,7 @@ import us.ihmc.euclid.referenceFrame.exceptions.ReferenceFrameMismatchException;
 import us.ihmc.euclid.referenceFrame.interfaces.FixedFrameVector3DBasics;
 import us.ihmc.euclid.referenceFrame.interfaces.FramePoint3DReadOnly;
 import us.ihmc.euclid.referenceFrame.interfaces.FrameVector3DReadOnly;
-import us.ihmc.euclid.transform.RigidBodyTransform;
+import us.ihmc.euclid.transform.interfaces.RigidBodyTransformReadOnly;
 import us.ihmc.euclid.transform.interfaces.Transform;
 import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
 import us.ihmc.euclid.tuple3D.interfaces.Vector3DReadOnly;
@@ -189,8 +189,8 @@ public interface FixedFrameSpatialForceBasics extends SpatialForceReadOnly, Fixe
    @Override
    default void applyTransform(Transform transform)
    {
-      if (transform instanceof RigidBodyTransform)
-         applyTransform((RigidBodyTransform) transform);
+      if (transform instanceof RigidBodyTransformReadOnly)
+         applyTransform((RigidBodyTransformReadOnly) transform);
       else
          throw new UnsupportedOperationException("The feature applyTransform is not supported for the transform of the type: "
                + transform.getClass().getSimpleName());
@@ -220,8 +220,8 @@ public interface FixedFrameSpatialForceBasics extends SpatialForceReadOnly, Fixe
    @Override
    default void applyInverseTransform(Transform transform)
    {
-      if (transform instanceof RigidBodyTransform)
-         applyInverseTransform((RigidBodyTransform) transform);
+      if (transform instanceof RigidBodyTransformReadOnly)
+         applyInverseTransform((RigidBodyTransformReadOnly) transform);
       else
          throw new UnsupportedOperationException("The feature applyInverseTransform is not supported for the transform of the type: "
                + transform.getClass().getSimpleName());
@@ -247,7 +247,7 @@ public interface FixedFrameSpatialForceBasics extends SpatialForceReadOnly, Fixe
     * 
     * @param transform the transform to use on this. Not modified.
     */
-   default void applyTransform(RigidBodyTransform transform)
+   default void applyTransform(RigidBodyTransformReadOnly transform)
    {
       if (transform.hasRotation())
       {
@@ -279,7 +279,7 @@ public interface FixedFrameSpatialForceBasics extends SpatialForceReadOnly, Fixe
     * 
     * @param transform the transform to use on this. Not modified.
     */
-   default void applyInverseTransform(RigidBodyTransform transform)
+   default void applyInverseTransform(RigidBodyTransformReadOnly transform)
    {
       if (transform.hasTranslation())
          addCrossToAngularPart(getLinearPart(), transform.getTranslation());

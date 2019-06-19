@@ -5,7 +5,7 @@ import java.util.List;
 
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.tools.EuclidCoreIOTools;
-import us.ihmc.euclid.transform.RigidBodyTransform;
+import us.ihmc.euclid.transform.interfaces.RigidBodyTransformReadOnly;
 import us.ihmc.euclid.tuple3D.interfaces.Vector3DReadOnly;
 import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointBasics;
 import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
@@ -162,7 +162,7 @@ public abstract class OneDoFJoint extends Joint implements OneDoFJointBasics
     *           parent joint. Not modified.
     */
    public OneDoFJoint(String name, RigidBodyBasics predecessor, Vector3DReadOnly jointAxisAngularPart, Vector3DReadOnly jointAxisLinearPart,
-                      RigidBodyTransform transformToParent)
+                      RigidBodyTransformReadOnly transformToParent)
    {
       super(name, predecessor, transformToParent);
 

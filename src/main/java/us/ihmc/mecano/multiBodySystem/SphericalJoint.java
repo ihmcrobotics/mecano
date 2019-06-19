@@ -7,6 +7,7 @@ import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.referenceFrame.interfaces.FixedFrameVector3DBasics;
 import us.ihmc.euclid.tools.EuclidCoreIOTools;
 import us.ihmc.euclid.transform.RigidBodyTransform;
+import us.ihmc.euclid.transform.interfaces.RigidBodyTransformReadOnly;
 import us.ihmc.euclid.tuple3D.interfaces.Tuple3DReadOnly;
 import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.euclid.tuple4D.interfaces.QuaternionBasics;
@@ -76,7 +77,7 @@ public class SphericalJoint extends Joint implements SphericalJointBasics
     * @param predecessor the rigid-body connected to and preceding this joint.
     * @param transformToParent the transform to the frame after the parent joint. Not modified.
     */
-   public SphericalJoint(String name, RigidBodyBasics predecessor, RigidBodyTransform transformToParent)
+   public SphericalJoint(String name, RigidBodyBasics predecessor, RigidBodyTransformReadOnly transformToParent)
    {
       super(name, predecessor, transformToParent);
       jointAngularVelocity = new FrameVector3D(afterJointFrame);

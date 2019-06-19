@@ -3,6 +3,7 @@ package us.ihmc.mecano.multiBodySystem;
 import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.referenceFrame.interfaces.FrameVector3DReadOnly;
 import us.ihmc.euclid.transform.RigidBodyTransform;
+import us.ihmc.euclid.transform.interfaces.RigidBodyTransformReadOnly;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple3D.interfaces.Tuple3DReadOnly;
 import us.ihmc.euclid.tuple3D.interfaces.Vector3DReadOnly;
@@ -43,7 +44,7 @@ public class PrismaticJoint extends OneDoFJoint implements PrismaticJointBasics
     * @param transformToParent the transform to the frame after the parent joint. Not modified.
     * @param jointAxis the axis along which this joint can translate. Not modified.
     */
-   public PrismaticJoint(String name, RigidBodyBasics predecessor, RigidBodyTransform transformToParent, Vector3DReadOnly jointAxis)
+   public PrismaticJoint(String name, RigidBodyBasics predecessor, RigidBodyTransformReadOnly transformToParent, Vector3DReadOnly jointAxis)
    {
       super(name, predecessor, new Vector3D(), jointAxis, transformToParent);
       this.jointAxis = new FrameVector3D(beforeJointFrame, jointAxis);
