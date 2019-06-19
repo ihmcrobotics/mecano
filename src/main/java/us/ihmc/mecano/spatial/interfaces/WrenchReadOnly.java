@@ -56,8 +56,7 @@ public interface WrenchReadOnly extends SpatialForceReadOnly
    /**
     * Calculates and returns the value of the dot product of this wrench with {@code twist}.
     * <p>
-    * Note that the dot product of a wrench and a twist results in calculating the instantaneous
-    * power.
+    * Note that the dot product of a wrench and a twist results in calculating the instantaneous power.
     * </p>
     * <p>
     * For instance, the dot product of a wrench W and a twist T is defined as: <br>
@@ -68,9 +67,9 @@ public interface WrenchReadOnly extends SpatialForceReadOnly
     * @return the value of the dot product, the value of the instantaneous power resulting from this
     *         wrench and the twist.
     * @throws ReferenceFrameMismatchException if the two vectors are not expressed in the same
-    *            reference frame.
-    * @throws ReferenceFrameMismatchException if the two vectors are not associated with the same
-    *            body frame.
+    *                                         reference frame.
+    * @throws ReferenceFrameMismatchException if the two vectors are not associated with the same body
+    *                                         frame.
     */
    default double dot(TwistReadOnly twist)
    {
@@ -78,14 +77,14 @@ public interface WrenchReadOnly extends SpatialForceReadOnly
    }
 
    /**
-    * Checks that all frames, i.e. the body frame and the "expressed in frame", are identical
-    * between the two wrenches.
+    * Checks that all frames, i.e. the body frame and the "expressed in frame", are identical between
+    * the two wrenches.
     *
-    * @param other the other wrench holding onto the reference frames to compare against the
-    *           reference frames held by {@code this}. Not modified.
+    * @param other the other wrench holding onto the reference frames to compare against the reference
+    *              frames held by {@code this}. Not modified.
     * @throws ReferenceFrameMismatchException if the reference frames are not the same:
-    *            {@code this.getBodyFrame() != other.getBodyFrame()} or
-    *            {@code this.getReferenceFrame() != other.getReferenceFrame()}.
+    *                                         {@code this.getBodyFrame() != other.getBodyFrame()} or
+    *                                         {@code this.getReferenceFrame() != other.getReferenceFrame()}.
     */
    default void checkReferenceFrameMatch(WrenchReadOnly other) throws ReferenceFrameMismatchException
    {
@@ -95,11 +94,11 @@ public interface WrenchReadOnly extends SpatialForceReadOnly
    /**
     * Checks that the reference frames used by {@code this} correspond to the given ones.
     *
-    * @param bodyFrame the query for the body frame.
+    * @param bodyFrame        the query for the body frame.
     * @param expressedInFrame the query for the "expressed in frame".
     * @throws ReferenceFrameMismatchException if the reference frames are not the same:
-    *            {@code this.getBodyFrame() != bodyFrame} or
-    *            {@code this.getReferenceFrame() != expressedInFrame}.
+    *                                         {@code this.getBodyFrame() != bodyFrame} or
+    *                                         {@code this.getReferenceFrame() != expressedInFrame}.
     */
    default void checkReferenceFrameMatch(ReferenceFrame bodyFrame, ReferenceFrame expressedInFrame) throws ReferenceFrameMismatchException
    {
@@ -110,10 +109,9 @@ public interface WrenchReadOnly extends SpatialForceReadOnly
    /**
     * Checks if the body frame held by {@code this} matches the query {@code bodyFrame}.
     *
-    * @param bodyFrame the query to compare against the body frame held by {@code this}. Not
-    *           modified.
+    * @param bodyFrame the query to compare against the body frame held by {@code this}. Not modified.
     * @throws ReferenceFrameMismatchException if the two reference frames are not the same:
-    *            {@code this.getBodyFrame() != bodyFrame}.
+    *                                         {@code this.getBodyFrame() != bodyFrame}.
     */
    default void checkBodyFrameMatch(ReferenceFrame bodyFrame)
    {
@@ -126,9 +124,9 @@ public interface WrenchReadOnly extends SpatialForceReadOnly
     * {@code expressedInFrame}.
     *
     * @param expressedInFrame the query to compare against the "expressed in frame" held by
-    *           {@code this}. Not modified.
+    *                         {@code this}. Not modified.
     * @throws ReferenceFrameMismatchException if the two reference frames are not the same:
-    *            {@code this.getReferenceFrame() != expressedInFrame}.
+    *                                         {@code this.getReferenceFrame() != expressedInFrame}.
     */
    default void checkExpressedInFrameMatch(ReferenceFrame expressedInFrame)
    {
@@ -141,7 +139,7 @@ public interface WrenchReadOnly extends SpatialForceReadOnly
     * Tests on a per component basis if this vector is equal to the given {@code other} to an
     * {@code epsilon} and both vectors have the same frames.
     *
-    * @param other the other wrench to compare against this. Not modified.
+    * @param other   the other wrench to compare against this. Not modified.
     * @param epsilon the tolerance to use when comparing each component.
     * @return {@code true} if the two vectors are equal, {@code false} otherwise.
     */
@@ -155,23 +153,22 @@ public interface WrenchReadOnly extends SpatialForceReadOnly
    /**
     * Tests if {@code this} and {@code other} represent the same wrench to an {@code epsilon}.
     * <p>
-    * It is likely that the implementation of this method will change in the future as the
-    * definition of "geometrically-equal" for wrenches might evolve. In the meantime, the current
-    * assumption is that two wrenches are geometrically equal if both their 3D torque and 3D force
-    * are independently geometrically equal, see
-    * {@link Vector3DReadOnly#geometricallyEquals(Vector3DReadOnly, double)}.
+    * It is likely that the implementation of this method will change in the future as the definition
+    * of "geometrically-equal" for wrenches might evolve. In the meantime, the current assumption is
+    * that two wrenches are geometrically equal if both their 3D torque and 3D force are independently
+    * geometrically equal, see {@link Vector3DReadOnly#geometricallyEquals(Vector3DReadOnly, double)}.
     * </p>
     * <p>
     * Note that {@code this.geometricallyEquals(other, epsilon) == true} does not necessarily imply
     * {@code this.epsilonEquals(other, epsilon)} and vice versa.
     * </p>
     *
-    * @param other the other wrench to compare against this. Not modified.
+    * @param other   the other wrench to compare against this. Not modified.
     * @param epsilon the tolerance to use for the comparison.
     * @return {@code true} if the two wrenches represent the same physical quantity, {@code false}
     *         otherwise.
     * @throws ReferenceFrameMismatchException if the reference frames of {@code other} do not
-    *            respectively match the reference frames of {@code this}.
+    *                                         respectively match the reference frames of {@code this}.
     */
    default boolean geometricallyEquals(WrenchReadOnly other, double epsilon)
    {

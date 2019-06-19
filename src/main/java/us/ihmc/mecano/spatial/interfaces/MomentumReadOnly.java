@@ -46,9 +46,8 @@ public interface MomentumReadOnly extends SpatialForceReadOnly
     * 
     * @param twist the twist to use for computing the kinetic co-energy. Not modified.
     * @return the value of the kinetic co-energy.
-    * @throws ReferenceFrameMismatchException if the given {@code twist} is not expressed in the
-    *            same reference frame as {@code this}.
-    *            
+    * @throws ReferenceFrameMismatchException if the given {@code twist} is not expressed in the same
+    *                                         reference frame as {@code this}.
     */
    default double computeKineticCoEnergy(TwistReadOnly twist)
    {

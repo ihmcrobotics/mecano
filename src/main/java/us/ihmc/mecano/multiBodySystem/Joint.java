@@ -1,6 +1,6 @@
 package us.ihmc.mecano.multiBodySystem;
 
-import us.ihmc.euclid.transform.RigidBodyTransform;
+import us.ihmc.euclid.transform.interfaces.RigidBodyTransformReadOnly;
 import us.ihmc.mecano.frames.MovingReferenceFrame;
 import us.ihmc.mecano.multiBodySystem.interfaces.JointBasics;
 import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
@@ -29,8 +29,8 @@ import us.ihmc.mecano.tools.MecanoFactories;
 public abstract class Joint implements JointBasics
 {
    /**
-    * The name of this joint. Each joint of a robot should have a unique name, but it is not
-    * enforced here.
+    * The name of this joint. Each joint of a robot should have a unique name, but it is not enforced
+    * here.
     */
    protected final String name;
    /**
@@ -45,8 +45,7 @@ public abstract class Joint implements JointBasics
    protected final RigidBodyBasics predecessor;
    /**
     * The {@code RigidBody} directly connected to this joint and located between this joint and an
-    * end-effector of the robot. The successor should not be {@code null}, but it is not enforced
-    * here.
+    * end-effector of the robot. The successor should not be {@code null}, but it is not enforced here.
     */
    protected RigidBodyBasics successor;
    /**
@@ -67,7 +66,7 @@ public abstract class Joint implements JointBasics
     * Note that the {@link #beforeJointFrame} is set to {@code predecessor.getBodyFixedFrame()}.
     * </p>
     * 
-    * @param name the name for the new joint.
+    * @param name        the name for the new joint.
     * @param predecessor the rigid-body connected to and preceding this joint.
     */
    public Joint(String name, RigidBodyBasics predecessor)
@@ -78,11 +77,11 @@ public abstract class Joint implements JointBasics
    /**
     * Creates the abstract layer for a new joint.
     * 
-    * @param name the name for the new joint.
-    * @param predecessor the rigid-body connected to and preceding this joint.
+    * @param name              the name for the new joint.
+    * @param predecessor       the rigid-body connected to and preceding this joint.
     * @param transformToParent the transform to the frame after the parent joint. Not modified.
     */
-   public Joint(String name, RigidBodyBasics predecessor, RigidBodyTransform transformToParent)
+   public Joint(String name, RigidBodyBasics predecessor, RigidBodyTransformReadOnly transformToParent)
    {
       if (name.contains(NAME_ID_SEPARATOR))
          throw new IllegalArgumentException("A joint name can not contain '" + NAME_ID_SEPARATOR + "'. Tried to construct a jonit with name " + name + ".");

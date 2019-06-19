@@ -138,10 +138,12 @@ public class CompositeRigidBodyMassMatrixCalculator
    /**
     * Creates a new calculator for the subtree that starts off the given {@code rootBody}.
     * 
-    * @param rootBody the start of subtree for which the mass matrix is to be computed. Not modified.
+    * @param rootBody                the start of subtree for which the mass matrix is to be computed.
+    *                                Not modified.
     * @param centroidalMomentumFrame the reference frame in which the centroidal momentum matrix and
-    *           convective term are to be computed. Only needed when this calculator is used to
-    *           calculate the centroidal momentum matrix and convective term.
+    *                                convective term are to be computed. Only needed when this
+    *                                calculator is used to calculate the centroidal momentum matrix and
+    *                                convective term.
     */
    public CompositeRigidBodyMassMatrixCalculator(RigidBodyReadOnly rootBody, ReferenceFrame centroidalMomentumFrame)
    {
@@ -161,10 +163,11 @@ public class CompositeRigidBodyMassMatrixCalculator
    /**
     * Creates a new calculator for the given {@code input}.
     * 
-    * @param input the definition of the system to be evaluated by this calculator.
+    * @param input                   the definition of the system to be evaluated by this calculator.
     * @param centroidalMomentumFrame the reference frame in which the centroidal momentum matrix and
-    *           convective term are to be computed. Only needed when this calculator is used to
-    *           calculate the centroidal momentum matrix and convective term.
+    *                                convective term are to be computed. Only needed when this
+    *                                calculator is used to calculate the centroidal momentum matrix and
+    *                                convective term.
     */
    public CompositeRigidBodyMassMatrixCalculator(MultiBodySystemReadOnly input, ReferenceFrame centroidalMomentumFrame)
    {
@@ -174,14 +177,17 @@ public class CompositeRigidBodyMassMatrixCalculator
    /**
     * Creates a new calculator for the given {@code input}.
     * 
-    * @param input the definition of the system to be evaluated by this calculator.
-    * @param centroidalMomentumFrame the reference frame in which the centroidal momentum matrix and
-    *           convective term are to be computed. Only needed when this calculator is used to
-    *           calculate the centroidal momentum matrix and convective term.
+    * @param input                          the definition of the system to be evaluated by this
+    *                                       calculator.
+    * @param centroidalMomentumFrame        the reference frame in which the centroidal momentum matrix
+    *                                       and convective term are to be computed. Only needed when
+    *                                       this calculator is used to calculate the centroidal
+    *                                       momentum matrix and convective term.
     * @param considerIgnoredSubtreesInertia whether the inertia of the ignored part(s) of the given
-    *           multi-body system should be considered. When {@code true}, this provides a more
-    *           accurate mass matrix, while when {@code false}, this calculator may gain slight
-    *           performance improvement.
+    *                                       multi-body system should be considered. When {@code true},
+    *                                       this provides a more accurate mass matrix, while when
+    *                                       {@code false}, this calculator may gain slight performance
+    *                                       improvement.
     */
    public CompositeRigidBodyMassMatrixCalculator(MultiBodySystemReadOnly input, ReferenceFrame centroidalMomentumFrame, boolean considerIgnoredSubtreesInertia)
    {
@@ -294,8 +300,9 @@ public class CompositeRigidBodyMassMatrixCalculator
     * </p>
     * 
     * @param centroidalMomentumFrame the reference frame in which the centroidal momentum matrix and
-    *           convective term are to be computed. Only needed when this calculator is used to
-    *           calculate the centroidal momentum matrix and convective term.
+    *                                convective term are to be computed. Only needed when this
+    *                                calculator is used to calculate the centroidal momentum matrix and
+    *                                convective term.
     */
    public void setCentroidalMomentumFrame(ReferenceFrame centroidalMomentumFrame)
    {

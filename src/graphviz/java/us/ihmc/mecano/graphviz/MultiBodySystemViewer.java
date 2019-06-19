@@ -154,7 +154,8 @@ public class MultiBodySystemViewer
     */
    public MultiBodySystemViewer showRigidBodyMass()
    {
-      rigidBodyLabelProviders.add(rigidBody -> {
+      rigidBodyLabelProviders.add(rigidBody ->
+      {
          if (rigidBody.isRootBody())
             return null;
          else
@@ -173,7 +174,8 @@ public class MultiBodySystemViewer
     */
    public MultiBodySystemViewer showRigidBodyInertia()
    {
-      rigidBodyLabelProviders.add(rigidBody -> {
+      rigidBodyLabelProviders.add(rigidBody ->
+      {
          if (rigidBody.isRootBody())
             return null;
          else
@@ -192,7 +194,8 @@ public class MultiBodySystemViewer
     */
    public MultiBodySystemViewer showRigidBodyCenterOfMass()
    {
-      rigidBodyLabelProviders.add(rigidBody -> {
+      rigidBodyLabelProviders.add(rigidBody ->
+      {
          if (rigidBody.isRootBody())
             return null;
          FramePoint3D centerOfMass = new FramePoint3D(rigidBody.getInertia().getCenterOfMassOffset());
@@ -244,27 +247,27 @@ public class MultiBodySystemViewer
 
          switch (display)
          {
-         case RIGID_BODIES:
-            childBodyNode = createRigidBodyNode(childBody, graph);
-            graph.addLink(currentNode.addLink(childBodyNode));
-            addChildrenToGraph(childBody, childBodyNode, graph);
-            break;
+            case RIGID_BODIES:
+               childBodyNode = createRigidBodyNode(childBody, graph);
+               graph.addLink(currentNode.addLink(childBodyNode));
+               addChildrenToGraph(childBody, childBodyNode, graph);
+               break;
 
-         case JOINTS:
-            childJointNode = createJointNode(childJoint, graph);
-            graph.addLink(currentNode.addLink(childJointNode));
-            addChildrenToGraph(childBody, childJointNode, graph);
-            break;
+            case JOINTS:
+               childJointNode = createJointNode(childJoint, graph);
+               graph.addLink(currentNode.addLink(childJointNode));
+               addChildrenToGraph(childBody, childJointNode, graph);
+               break;
 
-         case BOTH:
-            childJointNode = createJointNode(childJoint, graph);
-            childBodyNode = createRigidBodyNode(childBody, graph);
-            graph.addLink(currentNode.addLink(childJointNode));
-            graph.addLink(childJointNode.addLink(childBodyNode));
-            addChildrenToGraph(childBody, childBodyNode, graph);
-            break;
-         default:
-            throw new RuntimeException("Unexpected value for Display: " + display);
+            case BOTH:
+               childJointNode = createJointNode(childJoint, graph);
+               childBodyNode = createRigidBodyNode(childBody, graph);
+               graph.addLink(currentNode.addLink(childJointNode));
+               graph.addLink(childJointNode.addLink(childBodyNode));
+               addChildrenToGraph(childBody, childBodyNode, graph);
+               break;
+            default:
+               throw new RuntimeException("Unexpected value for Display: " + display);
          }
       }
    }
@@ -325,27 +328,27 @@ public class MultiBodySystemViewer
    {
       switch (state)
       {
-      case CONFIGURATION:
-         Pose3DReadOnly pose = joint.getJointPose();
-         return "(x,y,z) = " + pose.getPosition().toString() + "\n" + ReferenceFrameTreeViewer.getOrientationLabel(pose.getOrientation());
+         case CONFIGURATION:
+            Pose3DReadOnly pose = joint.getJointPose();
+            return "(x,y,z) = " + pose.getPosition().toString() + "\n" + ReferenceFrameTreeViewer.getOrientationLabel(pose.getOrientation());
 
-      case VELOCITY:
-         TwistReadOnly jointTwist = joint.getJointTwist();
-         return "linear velocity = " + EuclidCoreIOTools.getTuple3DString(jointTwist.getLinearPart()) + "\nangular velocity = "
-               + EuclidCoreIOTools.getTuple3DString(jointTwist.getAngularPart());
+         case VELOCITY:
+            TwistReadOnly jointTwist = joint.getJointTwist();
+            return "linear velocity = " + EuclidCoreIOTools.getTuple3DString(jointTwist.getLinearPart()) + "\nangular velocity = "
+                  + EuclidCoreIOTools.getTuple3DString(jointTwist.getAngularPart());
 
-      case ACCELERATION:
-         SpatialAccelerationReadOnly jointAcceleration = joint.getJointAcceleration();
-         return "linear acceleration = " + EuclidCoreIOTools.getTuple3DString(jointAcceleration.getLinearPart()) + "\nangular acceleration = "
-               + EuclidCoreIOTools.getTuple3DString(jointAcceleration.getAngularPart());
+         case ACCELERATION:
+            SpatialAccelerationReadOnly jointAcceleration = joint.getJointAcceleration();
+            return "linear acceleration = " + EuclidCoreIOTools.getTuple3DString(jointAcceleration.getLinearPart()) + "\nangular acceleration = "
+                  + EuclidCoreIOTools.getTuple3DString(jointAcceleration.getAngularPart());
 
-      case EFFORT:
-         WrenchReadOnly jointWrench = joint.getJointWrench();
-         return "force = " + EuclidCoreIOTools.getTuple3DString(jointWrench.getLinearPart()) + "\nmoment = "
-               + EuclidCoreIOTools.getTuple3DString(jointWrench.getAngularPart());
+         case EFFORT:
+            WrenchReadOnly jointWrench = joint.getJointWrench();
+            return "force = " + EuclidCoreIOTools.getTuple3DString(jointWrench.getLinearPart()) + "\nmoment = "
+                  + EuclidCoreIOTools.getTuple3DString(jointWrench.getAngularPart());
 
-      default:
-         throw new UnsupportedOperationException("Unsupported value of JointStateType: " + state);
+         default:
+            throw new UnsupportedOperationException("Unsupported value of JointStateType: " + state);
       }
    }
 
@@ -353,28 +356,28 @@ public class MultiBodySystemViewer
    {
       switch (state)
       {
-      case CONFIGURATION:
-         Pose3DReadOnly pose = joint.getJointPose();
-         return "(x,z) = " + ReferenceFrameTreeViewer.getLabelOf(pose.getX(), pose.getZ()) + "\n(pitch) = "
-               + ReferenceFrameTreeViewer.getLabelOf(pose.getPitch());
+         case CONFIGURATION:
+            Pose3DReadOnly pose = joint.getJointPose();
+            return "(x,z) = " + ReferenceFrameTreeViewer.getLabelOf(pose.getX(), pose.getZ()) + "\n(pitch) = "
+                  + ReferenceFrameTreeViewer.getLabelOf(pose.getPitch());
 
-      case VELOCITY:
-         TwistReadOnly jointTwist = joint.getJointTwist();
-         return "linear velocity = " + ReferenceFrameTreeViewer.getLabelOf(jointTwist.getLinearPartX(), jointTwist.getLinearPartZ()) + "\nangular velocity = "
-               + ReferenceFrameTreeViewer.getLabelOf(jointTwist.getAngularPartY());
+         case VELOCITY:
+            TwistReadOnly jointTwist = joint.getJointTwist();
+            return "linear velocity = " + ReferenceFrameTreeViewer.getLabelOf(jointTwist.getLinearPartX(), jointTwist.getLinearPartZ())
+                  + "\nangular velocity = " + ReferenceFrameTreeViewer.getLabelOf(jointTwist.getAngularPartY());
 
-      case ACCELERATION:
-         SpatialAccelerationReadOnly jointAcceleration = joint.getJointAcceleration();
-         return "linear acceleration = " + ReferenceFrameTreeViewer.getLabelOf(jointAcceleration.getLinearPartX(), jointAcceleration.getLinearPartZ())
-               + "\nangular acceleration = " + ReferenceFrameTreeViewer.getLabelOf(jointAcceleration.getAngularPartY());
+         case ACCELERATION:
+            SpatialAccelerationReadOnly jointAcceleration = joint.getJointAcceleration();
+            return "linear acceleration = " + ReferenceFrameTreeViewer.getLabelOf(jointAcceleration.getLinearPartX(), jointAcceleration.getLinearPartZ())
+                  + "\nangular acceleration = " + ReferenceFrameTreeViewer.getLabelOf(jointAcceleration.getAngularPartY());
 
-      case EFFORT:
-         WrenchReadOnly jointWrench = joint.getJointWrench();
-         return "force = " + ReferenceFrameTreeViewer.getLabelOf(jointWrench.getLinearPartX(), jointWrench.getLinearPartZ()) + "\nmoment = "
-               + ReferenceFrameTreeViewer.getLabelOf(jointWrench.getAngularPartY());
+         case EFFORT:
+            WrenchReadOnly jointWrench = joint.getJointWrench();
+            return "force = " + ReferenceFrameTreeViewer.getLabelOf(jointWrench.getLinearPartX(), jointWrench.getLinearPartZ()) + "\nmoment = "
+                  + ReferenceFrameTreeViewer.getLabelOf(jointWrench.getAngularPartY());
 
-      default:
-         throw new UnsupportedOperationException("Unsupported value of JointStateType: " + state);
+         default:
+            throw new UnsupportedOperationException("Unsupported value of JointStateType: " + state);
       }
    }
 
@@ -382,20 +385,20 @@ public class MultiBodySystemViewer
    {
       switch (state)
       {
-      case CONFIGURATION:
-         return ReferenceFrameTreeViewer.getOrientationLabel(joint.getJointOrientation());
+         case CONFIGURATION:
+            return ReferenceFrameTreeViewer.getOrientationLabel(joint.getJointOrientation());
 
-      case VELOCITY:
-         return "angular velocity = " + EuclidCoreIOTools.getTuple3DString(joint.getJointAngularVelocity());
+         case VELOCITY:
+            return "angular velocity = " + EuclidCoreIOTools.getTuple3DString(joint.getJointAngularVelocity());
 
-      case ACCELERATION:
-         return "angular acceleration = " + EuclidCoreIOTools.getTuple3DString(joint.getJointAngularAcceleration());
+         case ACCELERATION:
+            return "angular acceleration = " + EuclidCoreIOTools.getTuple3DString(joint.getJointAngularAcceleration());
 
-      case EFFORT:
-         return "moment = " + EuclidCoreIOTools.getTuple3DString(joint.getJointTorque());
+         case EFFORT:
+            return "moment = " + EuclidCoreIOTools.getTuple3DString(joint.getJointTorque());
 
-      default:
-         throw new UnsupportedOperationException("Unsupported value of JointStateType: " + state);
+         default:
+            throw new UnsupportedOperationException("Unsupported value of JointStateType: " + state);
       }
    }
 
@@ -403,20 +406,20 @@ public class MultiBodySystemViewer
    {
       switch (state)
       {
-      case CONFIGURATION:
-         return "q = " + ReferenceFrameTreeViewer.getLabelOf(joint.getQ());
+         case CONFIGURATION:
+            return "q = " + ReferenceFrameTreeViewer.getLabelOf(joint.getQ());
 
-      case VELOCITY:
-         return "qd = " + ReferenceFrameTreeViewer.getLabelOf(joint.getQd());
+         case VELOCITY:
+            return "qd = " + ReferenceFrameTreeViewer.getLabelOf(joint.getQd());
 
-      case ACCELERATION:
-         return "qdd = " + ReferenceFrameTreeViewer.getLabelOf(joint.getQdd());
+         case ACCELERATION:
+            return "qdd = " + ReferenceFrameTreeViewer.getLabelOf(joint.getQdd());
 
-      case EFFORT:
-         return "tau = " + ReferenceFrameTreeViewer.getLabelOf(joint.getTau());
+         case EFFORT:
+            return "tau = " + ReferenceFrameTreeViewer.getLabelOf(joint.getTau());
 
-      default:
-         throw new UnsupportedOperationException("Unsupported value of JointStateType: " + state);
+         default:
+            throw new UnsupportedOperationException("Unsupported value of JointStateType: " + state);
       }
    }
 
@@ -513,7 +516,7 @@ public class MultiBodySystemViewer
    public static void viewJointSubtree(RigidBodyReadOnly rootBody)
    {
       new MultiBodySystemViewer(rootBody).setDisplay(Display.JOINTS).showJointStates(JointStateType.CONFIGURATION, JointStateType.VELOCITY)
-            .view("jointSystemView");
+                                         .view("jointSystemView");
    }
 
    /**
@@ -544,7 +547,7 @@ public class MultiBodySystemViewer
    public static void viewRigidBodySubtree(RigidBodyReadOnly rootBody)
    {
       new MultiBodySystemViewer(rootBody).setDisplay(Display.RIGID_BODIES).showRigidBodyMass().showRigidBodyCenterOfMass().showRigidBodyInertia()
-            .view("rigidBodySystemView");
+                                         .view("rigidBodySystemView");
    }
 
    /**
@@ -562,7 +565,10 @@ public class MultiBodySystemViewer
          MultiBodySystemRandomTools.nextState(random, stateToRandomize, joints);
 
       new MultiBodySystemViewer(rootBody).showJointType().showOneDoFJointAxis().showRigidBodyMass().showRigidBodyCenterOfMass().showRigidBodyInertia()
-            .showJointStates(JointStateType.CONFIGURATION, JointStateType.VELOCITY, JointStateType.ACCELERATION, JointStateType.EFFORT).setDisplay(Display.BOTH)
-            .view("MultiBodySystemViewExample");
+                                         .showJointStates(JointStateType.CONFIGURATION,
+                                                          JointStateType.VELOCITY,
+                                                          JointStateType.ACCELERATION,
+                                                          JointStateType.EFFORT)
+                                         .setDisplay(Display.BOTH).view("MultiBodySystemViewExample");
    }
 }

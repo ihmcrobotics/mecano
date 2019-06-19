@@ -78,11 +78,11 @@ public interface SpatialVectorBasics extends FixedFrameSpatialVectorBasics, Fram
     * Sets this vector given an angular part and linear part and updates the frame of this vector.
     *
     * @param angularPart the vector holding the new values for the angular part and expressed in the
-    *           new "expressed-in-frame" to use for this spatial vector. Not modified.
-    * @param linearPart the vector holding the new values for the linear part and expressed in the
-    *           new "expressed-in-frame" to use for this spatial vector. Not modified.
+    *                    new "expressed-in-frame" to use for this spatial vector. Not modified.
+    * @param linearPart  the vector holding the new values for the linear part and expressed in the new
+    *                    "expressed-in-frame" to use for this spatial vector. Not modified.
     * @throws ReferenceFrameMismatchException if {@code angularPart} and {@code linearPart} are not
-    *            expressed in the same reference frame.
+    *                                         expressed in the same reference frame.
     */
    default void setIncludingFrame(FrameVector3DReadOnly angularPart, FrameVector3DReadOnly linearPart)
    {
@@ -94,8 +94,8 @@ public interface SpatialVectorBasics extends FixedFrameSpatialVectorBasics, Fram
     * Sets this vector given an angular part and linear part and updates the frame of this vector.
     *
     * @param expressedInFrame the reference frame in which the vectors are expressed.
-    * @param angularPart the vector holding the new values for the angular part. Not modified.
-    * @param linearPart the vector holding the new values for the linear part. Not modified.
+    * @param angularPart      the vector holding the new values for the angular part. Not modified.
+    * @param linearPart       the vector holding the new values for the linear part. Not modified.
     */
    default void setIncludingFrame(ReferenceFrame expressedInFrame, Vector3DReadOnly angularPart, Vector3DReadOnly linearPart)
    {
@@ -112,7 +112,8 @@ public interface SpatialVectorBasics extends FixedFrameSpatialVectorBasics, Fram
     * </p>
     *
     * @param expressedInFrame the reference frame in which the data is expressed.
-    * @param array the array containing the new values for this vector's components. Not modified.
+    * @param array            the array containing the new values for this vector's components. Not
+    *                         modified.
     */
    default void setIncludingFrame(ReferenceFrame expressedInFrame, double[] array)
    {
@@ -129,8 +130,9 @@ public interface SpatialVectorBasics extends FixedFrameSpatialVectorBasics, Fram
     * </p>
     *
     * @param expressedInFrame the reference frame in which the data is expressed.
-    * @param startIndex the first index to start reading from in the array.
-    * @param array the array containing the new values for this vector's components. Not modified.
+    * @param startIndex       the first index to start reading from in the array.
+    * @param array            the array containing the new values for this vector's components. Not
+    *                         modified.
     */
    default void setIncludingFrame(ReferenceFrame expressedInFrame, int startIndex, double[] array)
    {
@@ -147,7 +149,8 @@ public interface SpatialVectorBasics extends FixedFrameSpatialVectorBasics, Fram
     * </p>
     *
     * @param expressedInFrame the reference frame in which the data is expressed.
-    * @param array the array containing the new values for this vector's components. Not modified.
+    * @param array            the array containing the new values for this vector's components. Not
+    *                         modified.
     */
    default void setIncludingFrame(ReferenceFrame expressedInFrame, float[] array)
    {
@@ -163,8 +166,9 @@ public interface SpatialVectorBasics extends FixedFrameSpatialVectorBasics, Fram
     * </p>
     *
     * @param expressedInFrame the reference frame in which the data is expressed.
-    * @param startIndex the first index to start reading from in the array.
-    * @param array the array containing the new values for this vector's components. Not modified.
+    * @param startIndex       the first index to start reading from in the array.
+    * @param array            the array containing the new values for this vector's components. Not
+    *                         modified.
     */
    default void setIncludingFrame(ReferenceFrame expressedInFrame, int startIndex, float[] array)
    {
@@ -181,8 +185,8 @@ public interface SpatialVectorBasics extends FixedFrameSpatialVectorBasics, Fram
     * </p>
     *
     * @param expressedInFrame the reference frame in which the data is expressed.
-    * @param matrix the column vector containing the new values for this vector's components. Not
-    *           modified.
+    * @param matrix           the column vector containing the new values for this vector's components.
+    *                         Not modified.
     */
    default void setIncludingFrame(ReferenceFrame expressedInFrame, DenseMatrix64F matrix)
    {
@@ -191,17 +195,17 @@ public interface SpatialVectorBasics extends FixedFrameSpatialVectorBasics, Fram
    }
 
    /**
-    * Sets this vector's components from the given column vector starting to read from
-    * {@code startRow} and updates the frame of this vector.
+    * Sets this vector's components from the given column vector starting to read from {@code startRow}
+    * and updates the frame of this vector.
     * <p>
     * The components are read in the following order: {@code angularPartX}, {@code angularPartY},
     * {@code angularPartZ}, {@code linearPartX}, {@code linearPartY}, {@code linearPartZ}.
     * </p>
     *
     * @param expressedInFrame the reference frame in which the data is expressed.
-    * @param startRow the first row index to start reading in the dense-matrix.
-    * @param matrix the column vector containing the new values for this vector's components. Not
-    *           modified.
+    * @param startRow         the first row index to start reading in the dense-matrix.
+    * @param matrix           the column vector containing the new values for this vector's components.
+    *                         Not modified.
     */
    default void setIncludingFrame(ReferenceFrame expressedInFrame, int startRow, DenseMatrix64F matrix)
    {
@@ -210,18 +214,18 @@ public interface SpatialVectorBasics extends FixedFrameSpatialVectorBasics, Fram
    }
 
    /**
-    * Sets this vector's components from the given column vector starting to read from
-    * {@code startRow} at the column index {@code column} and updates the frame of this vector.
+    * Sets this vector's components from the given column vector starting to read from {@code startRow}
+    * at the column index {@code column} and updates the frame of this vector.
     * <p>
     * The components are read in the following order: {@code angularPartX}, {@code angularPartY},
     * {@code angularPartZ}, {@code linearPartX}, {@code linearPartY}, {@code linearPartZ}.
     * </p>
     *
     * @param expressedInFrame the reference frame in which the data is expressed.
-    * @param startRow the first row index to start reading in the dense-matrix.
-    * @param column the column index to read in the dense-matrix.
-    * @param matrix the column vector containing the new values for this vector's components. Not
-    *           modified.
+    * @param startRow         the first row index to start reading in the dense-matrix.
+    * @param column           the column index to read in the dense-matrix.
+    * @param matrix           the column vector containing the new values for this vector's components.
+    *                         Not modified.
     */
    default void setIncludingFrame(ReferenceFrame expressedInFrame, int startRow, int column, DenseMatrix64F matrix)
    {

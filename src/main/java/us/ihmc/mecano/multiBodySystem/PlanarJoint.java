@@ -4,7 +4,7 @@ import java.util.List;
 
 import us.ihmc.euclid.geometry.interfaces.Pose3DBasics;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
-import us.ihmc.euclid.transform.RigidBodyTransform;
+import us.ihmc.euclid.transform.interfaces.RigidBodyTransformReadOnly;
 import us.ihmc.mecano.multiBodySystem.interfaces.PlanarJointBasics;
 import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
 import us.ihmc.mecano.spatial.interfaces.FixedFrameSpatialAccelerationBasics;
@@ -42,7 +42,7 @@ public class PlanarJoint extends Joint implements PlanarJointBasics
     * This constructor is typically used for creating a root floating joint.
     * </p>
     * 
-    * @param name the name for the new joint.
+    * @param name        the name for the new joint.
     * @param predecessor the rigid-body connected to and preceding this joint.
     */
    public PlanarJoint(String name, RigidBodyBasics predecessor)
@@ -53,11 +53,11 @@ public class PlanarJoint extends Joint implements PlanarJointBasics
    /**
     * Creates a new planar joint.
     * 
-    * @param name the name for the new joint.
-    * @param predecessor the rigid-body connected to and preceding this joint.
+    * @param name              the name for the new joint.
+    * @param predecessor       the rigid-body connected to and preceding this joint.
     * @param transformToParent the transform to the frame after the parent joint. Not modified.
     */
-   public PlanarJoint(String name, RigidBodyBasics predecessor, RigidBodyTransform transformToParent)
+   public PlanarJoint(String name, RigidBodyBasics predecessor, RigidBodyTransformReadOnly transformToParent)
    {
       super(name, predecessor, transformToParent);
 

@@ -76,7 +76,7 @@ public class MultiBodySystemFactories
     * </p>
     * 
     * @param start the rigid-body from where the kinematic chain starts.
-    * @param end the rigid-body where the kinematic chain ends.
+    * @param end   the rigid-body where the kinematic chain ends.
     * @return the clone kinematic chain.
     */
    public static OneDoFJointBasics[] cloneOneDoFJointKinematicChain(RigidBodyBasics start, RigidBodyBasics end)
@@ -121,7 +121,7 @@ public class MultiBodySystemFactories
     * </p>
     * 
     * @param originalJoints the kinematic chain to clone. Not modified.
-    * @param clazz class used to filter the cloned joints that are to be returned.
+    * @param clazz          class used to filter the cloned joints that are to be returned.
     * @return the clone kinematic chain.
     */
    public static <T extends JointReadOnly> T[] cloneKinematicChainAndFilter(T[] originalJoints, Class<T> clazz)
@@ -144,8 +144,8 @@ public class MultiBodySystemFactories
     * </p>
     * 
     * @param originalJoints the kinematic chain to clone. Not modified.
-    * @param clazz class used to filter the cloned joints that are to be returned.
-    * @param cloneSuffix suffix to append to the cloned joints and rigid-bodies.
+    * @param clazz          class used to filter the cloned joints that are to be returned.
+    * @param cloneSuffix    suffix to append to the cloned joints and rigid-bodies.
     * @return the clone kinematic chain.
     */
    public static <T extends JointReadOnly> T[] cloneKinematicChainAndFilter(T[] originalJoints, Class<T> clazz, String cloneSuffix)
@@ -188,7 +188,7 @@ public class MultiBodySystemFactories
     * </p>
     * 
     * @param originalJoints the kinematic chain to clone. Not modified.
-    * @param cloneSuffix suffix to append to the cloned joints and rigid-bodies.
+    * @param cloneSuffix    suffix to append to the cloned joints and rigid-bodies.
     * @return the clone kinematic chain.
     */
    public static JointBasics[] cloneKinematicChain(JointReadOnly[] originalJoints, String cloneSuffix)
@@ -211,10 +211,10 @@ public class MultiBodySystemFactories
     * </p>
     * 
     * @param originalJoints the kinematic chain to clone. Not modified.
-    * @param cloneSuffix suffix to append to the cloned joints and rigid-bodies.
+    * @param cloneSuffix    suffix to append to the cloned joints and rigid-bodies.
     * @param chainRootFrame the parent frame of the rigid-body of the clone kinematic chain. When
-    *           {@code null}, the frame is equal to frame after the parent joint of
-    *           {@code originalJoints[0]}.
+    *                       {@code null}, the frame is equal to frame after the parent joint of
+    *                       {@code originalJoints[0]}.
     * @return the clone kinematic chain.
     */
    public static JointBasics[] cloneKinematicChain(JointReadOnly[] originalJoints, String cloneSuffix, ReferenceFrame chainRootFrame)
@@ -264,13 +264,13 @@ public class MultiBodySystemFactories
     * parent as {@code originalRootBody.getBodyFixedFrame()}.
     * </p>
     * 
-    * @param originalRootBody the root of the multi-body system to clone. Not modified.
+    * @param originalRootBody     the root of the multi-body system to clone. Not modified.
     * @param cloneStationaryFrame the reference frame to which the cloned system is attached to. The
-    *           given frame is expected to be stationary.
-    * @param cloneSuffix suffix to append to the cloned joints and rigid-bodies.
+    *                             given frame is expected to be stationary.
+    * @param cloneSuffix          suffix to append to the cloned joints and rigid-bodies.
     * @return the clone multi-body system.
     * @throws IllegalArgumentException if the given {@code originalRootBody} is not the root body of
-    *            its system.
+    *                                  its system.
     */
    public static RigidBodyBasics cloneMultiBodySystem(RigidBodyReadOnly originalRootBody, ReferenceFrame cloneStationaryFrame, String cloneSuffix)
    {
@@ -284,17 +284,17 @@ public class MultiBodySystemFactories
     * parent as {@code originalRootBody.getBodyFixedFrame()}.
     * </p>
     * 
-    * @param originalRootBody the root of the multi-body system to clone. Not modified.
+    * @param originalRootBody     the root of the multi-body system to clone. Not modified.
     * @param cloneStationaryFrame the reference frame to which the cloned system is attached to. The
-    *           given frame is expected to be stationary.
-    * @param cloneSuffix suffix to append to the cloned joints and rigid-bodies.
-    * @param rigidBodyBuilder the builder to use for creating rigid-bodies. If {@code null},
-    *           {@link #DEFAULT_RIGID_BODY_BUILDER} is used.
-    * @param jointBuilder the builder to use for creating joints. If {@code null},
-    *           {@link #DEFAULT_JOINT_BUILDER} is used.
+    *                             given frame is expected to be stationary.
+    * @param cloneSuffix          suffix to append to the cloned joints and rigid-bodies.
+    * @param rigidBodyBuilder     the builder to use for creating rigid-bodies. If {@code null},
+    *                             {@link #DEFAULT_RIGID_BODY_BUILDER} is used.
+    * @param jointBuilder         the builder to use for creating joints. If {@code null},
+    *                             {@link #DEFAULT_JOINT_BUILDER} is used.
     * @return the clone multi-body system.
     * @throws IllegalArgumentException if the given {@code originalRootBody} is not the root body of
-    *            its system.
+    *                                  its system.
     */
    public static RigidBodyBasics cloneMultiBodySystem(RigidBodyReadOnly originalRootBody, ReferenceFrame cloneStationaryFrame, String cloneSuffix,
                                                       RigidBodyBuilder rigidBodyBuilder, JointBuilder jointBuilder)
@@ -316,12 +316,12 @@ public class MultiBodySystemFactories
     * </p>
     * 
     * @param originalSubtreeStartBody the rigid-body holding the subtree to be cloned. Not modified.
-    * @param cloneSuffix suffix to append to the cloned joints and rigid-bodies.
+    * @param cloneSuffix              suffix to append to the cloned joints and rigid-bodies.
     * @return the clone subtree.
     * @throws IllegalArgumentException if {@code originalSubtreeStartBody} is a root body, in which
-    *            case
-    *            {@link #cloneMultiBodySystem(RigidBodyReadOnly, ReferenceFrame, String, RigidBodyBuilder, JointBuilder)}
-    *            should be used.
+    *                                  case
+    *                                  {@link #cloneMultiBodySystem(RigidBodyReadOnly, ReferenceFrame, String, RigidBodyBuilder, JointBuilder)}
+    *                                  should be used.
     */
    public static RigidBodyBasics cloneSubtree(RigidBodyReadOnly originalSubtreeStartBody, String cloneSuffix)
    {
@@ -337,16 +337,16 @@ public class MultiBodySystemFactories
     * </p>
     * 
     * @param originalSubtreeStartBody the rigid-body holding the subtree to be cloned. Not modified.
-    * @param cloneSuffix suffix to append to the cloned joints and rigid-bodies.
-    * @param rigidBodyBuilder the builder to use for creating rigid-bodies. If {@code null},
-    *           {@link #DEFAULT_RIGID_BODY_BUILDER} is used.
-    * @param jointBuilder the builder to use for creating joints. If {@code null},
-    *           {@link #DEFAULT_JOINT_BUILDER} is used.
+    * @param cloneSuffix              suffix to append to the cloned joints and rigid-bodies.
+    * @param rigidBodyBuilder         the builder to use for creating rigid-bodies. If {@code null},
+    *                                 {@link #DEFAULT_RIGID_BODY_BUILDER} is used.
+    * @param jointBuilder             the builder to use for creating joints. If {@code null},
+    *                                 {@link #DEFAULT_JOINT_BUILDER} is used.
     * @return the clone subtree.
     * @throws IllegalArgumentException if {@code originalSubtreeStartBody} is a root body, in which
-    *            case
-    *            {@link #cloneMultiBodySystem(RigidBodyReadOnly, ReferenceFrame, String, RigidBodyBuilder, JointBuilder)}
-    *            should be used.
+    *                                  case
+    *                                  {@link #cloneMultiBodySystem(RigidBodyReadOnly, ReferenceFrame, String, RigidBodyBuilder, JointBuilder)}
+    *                                  should be used.
     */
    public static RigidBodyBasics cloneSubtree(RigidBodyReadOnly originalSubtreeStartBody, String cloneSuffix, RigidBodyBuilder rigidBodyBuilder,
                                               JointBuilder jointBuilder)
@@ -357,7 +357,8 @@ public class MultiBodySystemFactories
       if (rigidBodyBuilder == null)
          rigidBodyBuilder = DEFAULT_RIGID_BODY_BUILDER;
 
-      RigidBodyBasics cloneSubtreeStartBody = rigidBodyBuilder.buildRoot(originalSubtreeStartBody.getName() + cloneSuffix, new RigidBodyTransform(),
+      RigidBodyBasics cloneSubtreeStartBody = rigidBodyBuilder.buildRoot(originalSubtreeStartBody.getName() + cloneSuffix,
+                                                                         new RigidBodyTransform(),
                                                                          originalSubtreeStartBody.getParentJoint().getFrameAfterJoint());
 
       cloneSubtree(originalSubtreeStartBody, cloneSubtreeStartBody, cloneSuffix, rigidBodyBuilder, jointBuilder);
@@ -517,8 +518,8 @@ public class MultiBodySystemFactories
       /**
        * Builds a new implementation of {@code SixDoFJointBasics}.
        * 
-       * @param name the joint name.
-       * @param predecessor the predecessor of the joint.
+       * @param name              the joint name.
+       * @param predecessor       the predecessor of the joint.
        * @param transformToParent the transform to the frame after the parent joint.
        * @return the new 6-DoF joint.
        */
@@ -530,8 +531,8 @@ public class MultiBodySystemFactories
       /**
        * Builds a new implementation of {@code PlanarJointBasics}.
        * 
-       * @param name the joint name.
-       * @param predecessor the predecessor of the joint.
+       * @param name              the joint name.
+       * @param predecessor       the predecessor of the joint.
        * @param transformToParent the transform to the frame after the parent joint.
        * @return the new planar joint.
        */
@@ -543,8 +544,8 @@ public class MultiBodySystemFactories
       /**
        * Builds a new implementation of {@code SphericalJointBasics}.
        * 
-       * @param name the joint name.
-       * @param predecessor the predecessor of the joint.
+       * @param name              the joint name.
+       * @param predecessor       the predecessor of the joint.
        * @param transformToParent the transform to the frame after the parent joint.
        * @return the new spherical joint.
        */
@@ -556,10 +557,10 @@ public class MultiBodySystemFactories
       /**
        * Builds a new implementation of {@code RevoluteJointBasics}.
        * 
-       * @param name the joint name.
-       * @param predecessor the predecessor of the joint.
+       * @param name              the joint name.
+       * @param predecessor       the predecessor of the joint.
        * @param transformToParent the transform to the frame after the parent joint.
-       * @param jointAxis the joint axis.
+       * @param jointAxis         the joint axis.
        * @return the new revolute joint.
        */
       default RevoluteJointBasics buildRevoluteJoint(String name, RigidBodyBasics predecessor, RigidBodyTransform transformToParent, Vector3DReadOnly jointAxis)
@@ -570,10 +571,10 @@ public class MultiBodySystemFactories
       /**
        * Builds a new implementation of {@code PrismaticJointBasics}.
        * 
-       * @param name the joint name.
-       * @param predecessor the predecessor of the joint.
+       * @param name              the joint name.
+       * @param predecessor       the predecessor of the joint.
        * @param transformToParent the transform to the frame after the parent joint.
-       * @param jointAxis the joint axis.
+       * @param jointAxis         the joint axis.
        * @return the new prismatic joint.
        */
       default PrismaticJointBasics buildPrismaticJoint(String name, RigidBodyBasics predecessor, RigidBodyTransform transformToParent,
@@ -585,8 +586,8 @@ public class MultiBodySystemFactories
       /**
        * Builds a new implementation of {@code FixedJointBasics}.
        * 
-       * @param name the joint name.
-       * @param predecessor the predecessor of the joint.
+       * @param name              the joint name.
+       * @param predecessor       the predecessor of the joint.
        * @param transformToParent the transform to the frame after the parent joint.
        * @return the new fixed joint.
        */
@@ -611,11 +612,12 @@ public class MultiBodySystemFactories
       /**
        * Builds a new root body.
        * 
-       * @param bodyName the body's name.
-       * @param transformToParent provides the pose of this rigid-body's body-fixed-frame with respect to
-       *           the parentStationaryFrame.
+       * @param bodyName              the body's name.
+       * @param transformToParent     provides the pose of this rigid-body's body-fixed-frame with respect
+       *                              to the parentStationaryFrame.
        * @param parentStationaryFrame the parent stationary, i.e. non-moving with respect to world frame,
-       *           frame to which this rigid-body will create and attach its body fixed frame.
+       *                              frame to which this rigid-body will create and attach its body fixed
+       *                              frame.
        * @return the new root body.
        */
       default RigidBodyBasics buildRoot(String bodyName, RigidBodyTransform transformToParent, ReferenceFrame parentStationaryFrame)
@@ -626,16 +628,16 @@ public class MultiBodySystemFactories
       /**
        * Builds a new rigid-body.
        * 
-       * @param bodyName the body's name.
-       * @param parentJoint the joint directly attached to this rigid-body and located between this
-       *           rigid-body and the root body of the robot.
+       * @param bodyName        the body's name.
+       * @param parentJoint     the joint directly attached to this rigid-body and located between this
+       *                        rigid-body and the root body of the robot.
        * @param momentOfInertia the 3D moment of inertia of this rigid-body.
-       * @param mass the mass of this rigid-body.
-       * @param inertiaPose defines the transform from this rigid-body body-fixed-frame to the
-       *           parentJoint.getFrameAfterJointFrame(). The given moment of inertia is assumed to be
-       *           expressed in that body-fixed-frame. Also note that the translation part corresponds to
-       *           the position of this rigid-body center of mass position expressed in
-       *           parentJoint.getFrameAfterJointFrame().
+       * @param mass            the mass of this rigid-body.
+       * @param inertiaPose     defines the transform from this rigid-body body-fixed-frame to the
+       *                        parentJoint.getFrameAfterJointFrame(). The given moment of inertia is
+       *                        assumed to be expressed in that body-fixed-frame. Also note that the
+       *                        translation part corresponds to the position of this rigid-body center of
+       *                        mass position expressed in parentJoint.getFrameAfterJointFrame().
        * @return the new rigid-body.
        */
       default RigidBodyBasics build(String bodyName, JointBasics parentJoint, Matrix3DReadOnly momentOfInertia, double mass, RigidBodyTransform inertiaPose)

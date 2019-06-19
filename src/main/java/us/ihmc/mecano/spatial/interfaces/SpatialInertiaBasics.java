@@ -59,7 +59,7 @@ public interface SpatialInertiaBasics extends FixedFrameSpatialInertiaBasics, Fr
    /**
     * Sets all the components of this spatial inertia to zero and updates its reference frames.
     *
-    * @param bodyFrame the new body frame.
+    * @param bodyFrame        the new body frame.
     * @param expressedInFrame the new reference frame in which this inertia is expressed.
     */
    default void setToZero(ReferenceFrame bodyFrame, ReferenceFrame expressedInFrame)
@@ -73,7 +73,7 @@ public interface SpatialInertiaBasics extends FixedFrameSpatialInertiaBasics, Fr
     * Sets all the components of this spatial inertia to {@link Double#NaN} and sets its reference
     * frames.
     *
-    * @param bodyFrame the new body frame.
+    * @param bodyFrame        the new body frame.
     * @param expressedInFrame the new reference frame in which this inertia is expressed.
     */
    default void setToNaN(ReferenceFrame bodyFrame, ReferenceFrame expressedInFrame)
@@ -98,19 +98,19 @@ public interface SpatialInertiaBasics extends FixedFrameSpatialInertiaBasics, Fr
    }
 
    /**
-    * Sets the moment of inertia to a diagonal matrix, sets the mass to the given value, and sets
-    * the center of mass offset to zero.
+    * Sets the moment of inertia to a diagonal matrix, sets the mass to the given value, and sets the
+    * center of mass offset to zero.
     * <p>
-    * Use this method if {@code expressedInFrame} has origin that coincides with the center of mass
-    * and has its axes aligned with the principal directions of the inertia ellipsoid.
+    * Use this method if {@code expressedInFrame} has origin that coincides with the center of mass and
+    * has its axes aligned with the principal directions of the inertia ellipsoid.
     * </p>
     * 
-    * @param bodyFrame what we are specifying the inertia of.
+    * @param bodyFrame        what we are specifying the inertia of.
     * @param expressedInFrame the new reference frame in which this spatial inertia is expressed.
-    * @param Ixx the moment of inertia around the x-axis.
-    * @param Iyy the moment of inertia around the y-axis.
-    * @param Izz the moment of inertia around the z-axis.
-    * @param mass the new mass value.
+    * @param Ixx              the moment of inertia around the x-axis.
+    * @param Iyy              the moment of inertia around the y-axis.
+    * @param Izz              the moment of inertia around the z-axis.
+    * @param mass             the new mass value.
     */
    default void setIncludingFrame(ReferenceFrame bodyFrame, ReferenceFrame expressedInFrame, double Ixx, double Iyy, double Izz, double mass)
    {
@@ -127,10 +127,10 @@ public interface SpatialInertiaBasics extends FixedFrameSpatialInertiaBasics, Fr
     * Use this method if {@code expressedInFrame} has origin that coincides with the center of mass.
     * </p>
     * 
-    * @param bodyFrame what we are specifying the inertia of.
+    * @param bodyFrame        what we are specifying the inertia of.
     * @param expressedInFrame the new reference frame in which this spatial inertia is expressed.
-    * @param momentOfInertia the 3 by 3 moment of inertia matrix. Not modified.
-    * @param mass the new mass value.
+    * @param momentOfInertia  the 3 by 3 moment of inertia matrix. Not modified.
+    * @param mass             the new mass value.
     */
    default void setIncludingFrame(ReferenceFrame bodyFrame, ReferenceFrame expressedInFrame, Matrix3DReadOnly momentOfInertia, double mass)
    {
@@ -144,12 +144,12 @@ public interface SpatialInertiaBasics extends FixedFrameSpatialInertiaBasics, Fr
    /**
     * Sets all the components of this spatial inertia matrix.
     * 
-    * @param bodyFrame what we are specifying the inertia of.
-    * @param expressedInFrame the new reference frame in which this spatial inertia is expressed.
-    * @param momentOfInertia the 3 by 3 moment of inertia matrix. Not modified.
-    * @param mass the new mass value.
+    * @param bodyFrame          what we are specifying the inertia of.
+    * @param expressedInFrame   the new reference frame in which this spatial inertia is expressed.
+    * @param momentOfInertia    the 3 by 3 moment of inertia matrix. Not modified.
+    * @param mass               the new mass value.
     * @param centerOfMassOffset the new offset of the center of mass with respect to
-    *           {@code expressedInFrame}'s origin. Not modified.
+    *                           {@code expressedInFrame}'s origin. Not modified.
     */
    default void setIncludingFrame(ReferenceFrame bodyFrame, ReferenceFrame expressedInFrame, Matrix3DReadOnly momentOfInertia, double mass,
                                   Tuple3DReadOnly centerOfMassOffset)
@@ -164,14 +164,13 @@ public interface SpatialInertiaBasics extends FixedFrameSpatialInertiaBasics, Fr
    /**
     * Transforms this spatial inertia using the given transform.
     * <p>
-    * See the Word&trade; document located in the document folder of this project for more
-    * information about the transformation rule for spatial inertia. Also see Duindam, <i>Port-Based
-    * Modeling and Control for Efficient Bipedal Walking Robots</i>, page 40, equation (2.57) from
-    * which the equations here were derived.
+    * See the Word&trade; document located in the document folder of this project for more information
+    * about the transformation rule for spatial inertia. Also see Duindam, <i>Port-Based Modeling and
+    * Control for Efficient Bipedal Walking Robots</i>, page 40, equation (2.57) from which the
+    * equations here were derived.
     * </p>
     * 
-    * @throws UnsupportedOperationException if the given transform is not a
-    *            {@code RigidBodyTransform}.
+    * @throws UnsupportedOperationException if the given transform is not a {@code RigidBodyTransform}.
     */
    @Override
    default void applyTransform(Transform transform)
@@ -186,14 +185,13 @@ public interface SpatialInertiaBasics extends FixedFrameSpatialInertiaBasics, Fr
    /**
     * Transforms this spatial inertia by the inverse of the given transform.
     * <p>
-    * See the Word&trade; document located in the document folder of this project for more
-    * information about the transformation rule for spatial inertia. Also see Duindam, <i>Port-Based
-    * Modeling and Control for Efficient Bipedal Walking Robots</i>, page 40, equation (2.57) from
-    * which the equations here were derived.
+    * See the Word&trade; document located in the document folder of this project for more information
+    * about the transformation rule for spatial inertia. Also see Duindam, <i>Port-Based Modeling and
+    * Control for Efficient Bipedal Walking Robots</i>, page 40, equation (2.57) from which the
+    * equations here were derived.
     * </p>
     * 
-    * @throws UnsupportedOperationException if the given transform is not a
-    *            {@code RigidBodyTransform}.
+    * @throws UnsupportedOperationException if the given transform is not a {@code RigidBodyTransform}.
     */
    @Override
    default void applyInverseTransform(Transform transform)
@@ -208,10 +206,10 @@ public interface SpatialInertiaBasics extends FixedFrameSpatialInertiaBasics, Fr
    /**
     * Transforms this spatial inertia using the given transform.
     * <p>
-    * See the Word&trade; document located in the document folder of this project for more
-    * information about the transformation rule for spatial inertia. Also see Duindam, <i>Port-Based
-    * Modeling and Control for Efficient Bipedal Walking Robots</i>, page 40, equation (2.57) from
-    * which the equations here were derived.
+    * See the Word&trade; document located in the document folder of this project for more information
+    * about the transformation rule for spatial inertia. Also see Duindam, <i>Port-Based Modeling and
+    * Control for Efficient Bipedal Walking Robots</i>, page 40, equation (2.57) from which the
+    * equations here were derived.
     * </p>
     * 
     * @param transform the transform to use on this. Not modified.
@@ -221,25 +219,25 @@ public interface SpatialInertiaBasics extends FixedFrameSpatialInertiaBasics, Fr
       if (transform.hasRotation())
       {
          // Let's first apply the rotation onto the CoM and the mass moment of inertia:
-         MecanoTools.transformSymmetricMatrix3D(transform.getRotationMatrix(), getMomentOfInertia());
+         MecanoTools.transformSymmetricMatrix3D(transform.getRotation(), getMomentOfInertia());
          getCenterOfMassOffset().applyTransform(transform);
       }
 
       if (transform.hasTranslation())
       {
          // Now we can simply apply the translation on the CoM and mass moment of inertia:
-         MecanoTools.translateMomentOfInertia(getMass(), getCenterOfMassOffset(), false, transform.getTranslationVector(), getMomentOfInertia());
-         getCenterOfMassOffset().add(transform.getTranslationVector());
+         MecanoTools.translateMomentOfInertia(getMass(), getCenterOfMassOffset(), false, transform.getTranslation(), getMomentOfInertia());
+         getCenterOfMassOffset().add(transform.getTranslation());
       }
    }
 
    /**
     * Transforms this spatial inertia by the inverse of the given transform.
     * <p>
-    * See the Word&trade; document located in the document folder of this project for more
-    * information about the transformation rule for spatial inertia. Also see Duindam, <i>Port-Based
-    * Modeling and Control for Efficient Bipedal Walking Robots</i>, page 40, equation (2.57) from
-    * which the equations here were derived.
+    * See the Word&trade; document located in the document folder of this project for more information
+    * about the transformation rule for spatial inertia. Also see Duindam, <i>Port-Based Modeling and
+    * Control for Efficient Bipedal Walking Robots</i>, page 40, equation (2.57) from which the
+    * equations here were derived.
     * </p>
     * 
     * @param transform the transform to use on this. Not modified.
@@ -249,14 +247,14 @@ public interface SpatialInertiaBasics extends FixedFrameSpatialInertiaBasics, Fr
       if (transform.hasTranslation())
       {
          // Now we can simply apply the translation on the CoM and mass moment of inertia:
-         MecanoTools.translateMomentOfInertia(getMass(), getCenterOfMassOffset(), true, transform.getTranslationVector(), getMomentOfInertia());
-         getCenterOfMassOffset().sub(transform.getTranslationVector());
+         MecanoTools.translateMomentOfInertia(getMass(), getCenterOfMassOffset(), true, transform.getTranslation(), getMomentOfInertia());
+         getCenterOfMassOffset().sub(transform.getTranslation());
       }
 
       if (transform.hasRotation())
       {
          // Let's first apply the rotation onto the CoM and the mass moment of inertia:
-         MecanoTools.inverseTransformSymmetricMatrix3D(transform.getRotationMatrix(), getMomentOfInertia());
+         MecanoTools.inverseTransformSymmetricMatrix3D(transform.getRotation(), getMomentOfInertia());
          getCenterOfMassOffset().applyInverseTransform(transform);
       }
    }

@@ -34,15 +34,14 @@ public class YoFixedFrameSpatialVector implements FixedFrameSpatialVectorBasics
    private final YoFrameVector3D linearPart;
 
    /**
-    * Creates a new spatial vector with its components set to zero and initializes its reference
-    * frame.
+    * Creates a new spatial vector with its components set to zero and initializes its reference frame.
     * <p>
     * Note that the reference frame is final.
     * </p>
     * 
-    * @param namePrefix a unique name string to use as the prefix for child variable names.
+    * @param namePrefix       a unique name string to use as the prefix for child variable names.
     * @param expressedInFrame in which reference frame the spatial vector is expressed.
-    * @param registry the registry to register child variables to.
+    * @param registry         the registry to register child variables to.
     */
    public YoFixedFrameSpatialVector(String namePrefix, ReferenceFrame expressedInFrame, YoVariableRegistry registry)
    {
@@ -50,21 +49,20 @@ public class YoFixedFrameSpatialVector implements FixedFrameSpatialVectorBasics
    }
 
    /**
-    * Creates a new spatial vector with its components set to zero and initializes its reference
-    * frame.
+    * Creates a new spatial vector with its components set to zero and initializes its reference frame.
     * <p>
     * Note that the reference frame is final.
     * </p>
     * 
-    * @param namePrefix a unique name string to use as the prefix for child variable names.
-    * @param nameSuffix a string to use as the suffix for child variable names.
+    * @param namePrefix       a unique name string to use as the prefix for child variable names.
+    * @param nameSuffix       a string to use as the suffix for child variable names.
     * @param expressedInFrame in which reference frame the spatial vector is expressed.
-    * @param registry the registry to register child variables to.
+    * @param registry         the registry to register child variables to.
     */
    public YoFixedFrameSpatialVector(String namePrefix, String nameSuffix, ReferenceFrame expressedInFrame, YoVariableRegistry registry)
    {
       this(new YoFrameVector3D(namePrefix + "Angular", nameSuffix, expressedInFrame, registry),
-            new YoFrameVector3D(namePrefix + "Linear", nameSuffix, expressedInFrame, registry));
+           new YoFrameVector3D(namePrefix + "Linear", nameSuffix, expressedInFrame, registry));
    }
 
    /**
@@ -75,7 +73,7 @@ public class YoFixedFrameSpatialVector implements FixedFrameSpatialVectorBasics
     * </p>
     * 
     * @param angularPart the vector to use for the angular part.
-    * @param linearPart the vector to use for the linear part.
+    * @param linearPart  the vector to use for the linear part.
     */
    public YoFixedFrameSpatialVector(YoFrameVector3D angularPart, YoFrameVector3D linearPart)
    {
@@ -107,8 +105,8 @@ public class YoFixedFrameSpatialVector implements FixedFrameSpatialVectorBasics
    }
 
    /**
-    * Tests if the given {@code object}'s class is the same as this, in which case the method
-    * returns {@link #equals(SpatialVectorReadOnly)}, it returns {@code false} otherwise.
+    * Tests if the given {@code object}'s class is the same as this, in which case the method returns
+    * {@link #equals(SpatialVectorReadOnly)}, it returns {@code false} otherwise.
     *
     * @param object the object to compare against this. Not modified.
     * @return {@code true} if {@code object} and this are exactly equal, {@code false} otherwise.

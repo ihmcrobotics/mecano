@@ -68,8 +68,8 @@ public class Momentum implements MomentumBasics, GeometryObject<Momentum>
     * expressed in.
     *
     * @param expressedInFrame the initial frame in which this vector is expressed.
-    * @param angularPart the vector holding the values for the angular part. Not modified.
-    * @param linearPart the vector holding the values for the linear part. Not modified.
+    * @param angularPart      the vector holding the values for the angular part. Not modified.
+    * @param linearPart       the vector holding the values for the linear part. Not modified.
     */
    public Momentum(ReferenceFrame expressedInFrame, Vector3DReadOnly angularPart, Vector3DReadOnly linearPart)
    {
@@ -84,8 +84,8 @@ public class Momentum implements MomentumBasics, GeometryObject<Momentum>
     * </p>
     *
     * @param expressedInFrame the reference frame in which the data is expressed.
-    * @param matrix the column vector containing the values for this vector's components. Not
-    *           modified.
+    * @param matrix           the column vector containing the values for this vector's components. Not
+    *                         modified.
     */
    public Momentum(ReferenceFrame expressedInFrame, DenseMatrix64F matrix)
    {
@@ -100,7 +100,8 @@ public class Momentum implements MomentumBasics, GeometryObject<Momentum>
     * </p>
     *
     * @param expressedInFrame the reference frame in which the data is expressed.
-    * @param array the array containing the new values for this vector's components. Not modified.
+    * @param array            the array containing the new values for this vector's components. Not
+    *                         modified.
     */
    public Momentum(ReferenceFrame expressedInFrame, double[] array)
    {

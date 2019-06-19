@@ -110,7 +110,7 @@ public interface MultiBodySystemReadOnly
     * joints composing the subtree starting off the given body less the given joints to ignore and
     * their respective descendants.
     * 
-    * @param rootBody the support body to the subtree to consider. Not modified.
+    * @param rootBody       the support body to the subtree to consider. Not modified.
     * @param jointsToIgnore the array of joints to ignore. Not modified.
     * @return the new input.
     */
@@ -124,7 +124,7 @@ public interface MultiBodySystemReadOnly
     * joints composing the subtree starting off the given body less the given joints to ignore and
     * their respective descendants.
     * 
-    * @param rootBody the support body to the subtree to consider. Not modified.
+    * @param rootBody       the support body to the subtree to consider. Not modified.
     * @param jointsToIgnore the array of joints to ignore. Not modified.
     * @return the new input.
     */
@@ -241,7 +241,7 @@ public interface MultiBodySystemReadOnly
     * another joint to ignore.
     * </p>
     * 
-    * @param rootBody the supporting body of the subtree to collect joints from. Not modified.
+    * @param rootBody       the supporting body of the subtree to collect joints from. Not modified.
     * @param jointsToIgnore the list of joints to ignore. Not modified.
     * @return the list of joints to consider.
     */
@@ -257,7 +257,7 @@ public interface MultiBodySystemReadOnly
     * another joint to ignore.
     * </p>
     * 
-    * @param query the joint to test. Not modified.
+    * @param query          the joint to test. Not modified.
     * @param jointsToIgnore the list of joints to ignore. Not modified.
     * @return {@code true} if the query is to be ignored, {@code false} otherwise.
     */

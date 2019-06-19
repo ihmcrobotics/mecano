@@ -57,8 +57,8 @@ public class SubtreeStreams
     * {@code root}.
     * 
     * @param filteringClass the class of the type of joint to stream. If a joint is not an instance of
-    *           the {@code filteringClass}, then it will not be part of the stream.
-    * @param root the start of the subtree. Not modified.
+    *                       the {@code filteringClass}, then it will not be part of the stream.
+    * @param root           the start of the subtree. Not modified.
     * @return the new subtree stream.
     */
    public static <J extends JointReadOnly> Stream<J> from(Class<J> filteringClass, J root)
@@ -70,8 +70,8 @@ public class SubtreeStreams
     * Creates a new {@code Stream} for multiple subtrees.
     * 
     * @param filteringClass the class of the type of joint to stream. If a joint is not an instance of
-    *           the {@code filteringClass}, then it will not be part of the stream.
-    * @param roots the start of each subtree. Not modified.
+    *                       the {@code filteringClass}, then it will not be part of the stream.
+    * @param roots          the start of each subtree. Not modified.
     * @return the new subtree stream.
     */
    public static <J extends JointReadOnly> Stream<J> from(Class<J> filteringClass, Collection<? extends JointReadOnly> roots)
@@ -132,8 +132,8 @@ public class SubtreeStreams
     * children.
     * 
     * @param filteringClass the class of the type of joint to stream. If a joint is not an instance of
-    *           the {@code filteringClass}, then it will not be part of the stream.
-    * @param root the root of the joint subtree.
+    *                       the {@code filteringClass}, then it will not be part of the stream.
+    * @param root           the root of the joint subtree.
     * @return the new joint subtree stream.
     */
    public static <J extends JointReadOnly> Stream<J> fromChildren(Class<J> filteringClass, RigidBodyReadOnly root)
@@ -146,8 +146,8 @@ public class SubtreeStreams
     * {@code root}.
     * 
     * @param filteringClass the class of the type of joint to stream. If a joint is not an instance of
-    *           the {@code filteringClass}, then it will not be part of the stream.
-    * @param root the start of the subtree. Not modified.
+    *                       the {@code filteringClass}, then it will not be part of the stream.
+    * @param root           the start of the subtree. Not modified.
     * @return the new subtree stream.
     */
    public static <B extends RigidBodyReadOnly> Stream<B> from(Class<B> filteringClass, B root)

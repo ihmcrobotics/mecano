@@ -47,9 +47,9 @@ public class YoPlanarJoint extends Joint implements PlanarJointBasics
     * This constructor is typically used for creating a root floating joint.
     * </p>
     * 
-    * @param name the name for the new joint.
+    * @param name        the name for the new joint.
     * @param predecessor the rigid-body connected to and preceding this joint.
-    * @param registry the registry to register child variables to.
+    * @param registry    the registry to register child variables to.
     */
    public YoPlanarJoint(String name, RigidBodyBasics predecessor, YoVariableRegistry registry)
    {
@@ -59,10 +59,10 @@ public class YoPlanarJoint extends Joint implements PlanarJointBasics
    /**
     * Creates a new planar joint.
     * 
-    * @param name the name for the new joint.
-    * @param predecessor the rigid-body connected to and preceding this joint.
+    * @param name              the name for the new joint.
+    * @param predecessor       the rigid-body connected to and preceding this joint.
     * @param transformToParent the transform to the frame after the parent joint. Not modified.
-    * @param registry the registry to register child variables to.
+    * @param registry          the registry to register child variables to.
     */
    public YoPlanarJoint(String name, RigidBodyBasics predecessor, RigidBodyTransform transformToParent, YoVariableRegistry registry)
    {
@@ -76,13 +76,21 @@ public class YoPlanarJoint extends Joint implements PlanarJointBasics
       YoDouble angularVelocityY = new YoDouble(name + "AngularVelocityY", registry);
       YoDouble linearVelocityX = new YoDouble(name + "LinearVelocityX", registry);
       YoDouble linearVelocityZ = new YoDouble(name + "LinearVelocityZ", registry);
-      jointTwist = YoMecanoFactories.newPlanarYoFixedFrameTwistBasics(angularVelocityY, linearVelocityX, linearVelocityZ, afterJointFrame,
-            beforeJointFrame, afterJointFrame);
+      jointTwist = YoMecanoFactories.newPlanarYoFixedFrameTwistBasics(angularVelocityY,
+                                                                      linearVelocityX,
+                                                                      linearVelocityZ,
+                                                                      afterJointFrame,
+                                                                      beforeJointFrame,
+                                                                      afterJointFrame);
       YoDouble angularAccelerationY = new YoDouble(name + "AngularAccelerationY", registry);
       YoDouble linearAccelerationX = new YoDouble(name + "LinearAccelerationX", registry);
       YoDouble linearAccelerationZ = new YoDouble(name + "LinearAccelerationZ", registry);
-      jointAcceleration = YoMecanoFactories.newPlanarYoFixedFrameSpatialAccelerationVectorBasics(angularAccelerationY, linearAccelerationX,
-            linearAccelerationZ, afterJointFrame, beforeJointFrame, afterJointFrame);
+      jointAcceleration = YoMecanoFactories.newPlanarYoFixedFrameSpatialAccelerationVectorBasics(angularAccelerationY,
+                                                                                                 linearAccelerationX,
+                                                                                                 linearAccelerationZ,
+                                                                                                 afterJointFrame,
+                                                                                                 beforeJointFrame,
+                                                                                                 afterJointFrame);
       unitTwists = MecanoTools.computePlanarJointMotionSubspace(beforeJointFrame, afterJointFrame);
    }
 

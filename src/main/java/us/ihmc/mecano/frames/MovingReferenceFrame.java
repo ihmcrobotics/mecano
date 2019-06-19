@@ -6,6 +6,7 @@ import java.util.List;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.referenceFrame.exceptions.ReferenceFrameMismatchException;
 import us.ihmc.euclid.transform.RigidBodyTransform;
+import us.ihmc.euclid.transform.interfaces.RigidBodyTransformReadOnly;
 import us.ihmc.mecano.exceptions.ScrewTheoryException;
 import us.ihmc.mecano.spatial.Twist;
 import us.ihmc.mecano.spatial.interfaces.TwistReadOnly;
@@ -18,13 +19,12 @@ import us.ihmc.mecano.spatial.interfaces.TwistReadOnly;
  * The parent of a {@code MovingReferenceFrame} can either be another {@code MovingReferenceFrame}
  * or a stationary {@code ReferenceFrame}, i.e. not moving with respect to its root frame.
  * </p>
- *
  */
 public abstract class MovingReferenceFrame extends ReferenceFrame
 {
    /**
-    * Dirty bit used to mark {@link #twistOfFrame} as out-of-date or up-to-date and allow to save
-    * some computation. The twist is marked as out-of-date upon calling {@link #update()}.
+    * Dirty bit used to mark {@link #twistOfFrame} as out-of-date or up-to-date and allow to save some
+    * computation. The twist is marked as out-of-date upon calling {@link #update()}.
     */
    private boolean isTwistOfFrameUpToDate = false;
    /**
@@ -32,8 +32,8 @@ public abstract class MovingReferenceFrame extends ReferenceFrame
     */
    private final Twist twistRelativeToParent;
    /**
-    * This the computed twist of this frame relative to the root moving frame, i.e. the ancestor
-    * frame that was created with a stationary {@code ReferenceFrame} as a parent.
+    * This the computed twist of this frame relative to the root moving frame, i.e. the ancestor frame
+    * that was created with a stationary {@code ReferenceFrame} as a parent.
     */
    private final Twist twistOfFrame = new Twist();
 
@@ -52,24 +52,23 @@ public abstract class MovingReferenceFrame extends ReferenceFrame
    private final boolean isFixedInParent;
 
    /**
-    * Constructs a {@code MovingReferenceFrame} that has a 'zero-velocity' with respect to its
-    * parent.
+    * Constructs a {@code MovingReferenceFrame} that has a 'zero-velocity' with respect to its parent.
     * <p>
-    * The {@code transformToParent} should describe the pose of the new frame expressed in its
-    * parent frame.
+    * The {@code transformToParent} should describe the pose of the new frame expressed in its parent
+    * frame.
     * </p>
     *
-    * @param frameName the name of the new frame.
-    * @param parentFrame the parent of the new frame. It has to be either another
-    *           {@code MovingReferenceFrame} or a stationary {@code ReferenceFrame}, i.e. not moving
-    *           with respect to its root frame.
+    * @param frameName         the name of the new frame.
+    * @param parentFrame       the parent of the new frame. It has to be either another
+    *                          {@code MovingReferenceFrame} or a stationary {@code ReferenceFrame},
+    *                          i.e. not moving with respect to its root frame.
     * @param transformToParent the transform that can be used to transform a geometry object the new
-    *           frame to its parent frame. Not modified.
+    *                          frame to its parent frame. Not modified.
     * @return the new moving reference frame.
-    * @throws ScrewTheoryException if {@code parentFrame} is not a {@code MovingReferenceFrame} nor
-    *            a stationary {@code ReferenceFrame}.
+    * @throws ScrewTheoryException if {@code parentFrame} is not a {@code MovingReferenceFrame} nor a
+    *                              stationary {@code ReferenceFrame}.
     */
-   public static MovingReferenceFrame constructFrameFixedInParent(String frameName, ReferenceFrame parentFrame, RigidBodyTransform transformToParent)
+   public static MovingReferenceFrame constructFrameFixedInParent(String frameName, ReferenceFrame parentFrame, RigidBodyTransformReadOnly transformToParent)
    {
       boolean isZUpFrame = parentFrame.isZupFrame() && transformToParent.isRotation2D();
       boolean isFixedInParent = true;
@@ -105,12 +104,12 @@ public abstract class MovingReferenceFrame extends ReferenceFrame
     * frame.
     * </p>
     *
-    * @param frameName the name of the new frame.
+    * @param frameName   the name of the new frame.
     * @param parentFrame the parent of the new frame. It has to be either another
-    *           {@code MovingReferenceFrame} or a stationary {@code ReferenceFrame}, i.e. not moving
-    *           with respect to its root frame.
-    * @throws ScrewTheoryException if {@code parentFrame} is not a {@code MovingReferenceFrame} nor
-    *            a stationary {@code ReferenceFrame}.
+    *                    {@code MovingReferenceFrame} or a stationary {@code ReferenceFrame}, i.e. not
+    *                    moving with respect to its root frame.
+    * @throws ScrewTheoryException if {@code parentFrame} is not a {@code MovingReferenceFrame} nor a
+    *                              stationary {@code ReferenceFrame}.
     */
    public MovingReferenceFrame(String frameName, ReferenceFrame parentFrame)
    {
@@ -129,14 +128,14 @@ public abstract class MovingReferenceFrame extends ReferenceFrame
     * {@link #updateTwistRelativeToParent(Twist)} when overriding them.
     * </p>
     *
-    * @param frameName the name of the new frame.
+    * @param frameName   the name of the new frame.
     * @param parentFrame the parent of the new frame. It has to be either another
-    *           {@code MovingReferenceFrame} or a stationary {@code ReferenceFrame}, i.e. not moving
-    *           with respect to its root frame.
-    * @param isZUpFrame refers to whether this new frame has its z-axis aligned with the root frame
-    *           at all time or not.
-    * @throws ScrewTheoryException if {@code parentFrame} is not a {@code MovingReferenceFrame} nor
-    *            a stationary {@code ReferenceFrame}.
+    *                    {@code MovingReferenceFrame} or a stationary {@code ReferenceFrame}, i.e. not
+    *                    moving with respect to its root frame.
+    * @param isZUpFrame  refers to whether this new frame has its z-axis aligned with the root frame at
+    *                    all time or not.
+    * @throws ScrewTheoryException if {@code parentFrame} is not a {@code MovingReferenceFrame} nor a
+    *                              stationary {@code ReferenceFrame}.
     */
    public MovingReferenceFrame(String frameName, ReferenceFrame parentFrame, boolean isZUpFrame)
    {
@@ -144,8 +143,8 @@ public abstract class MovingReferenceFrame extends ReferenceFrame
    }
 
    /**
-    * Creates a new moving reference frame as a child of the given {@code parentFrame} and
-    * initializes the transform to its parent.
+    * Creates a new moving reference frame as a child of the given {@code parentFrame} and initializes
+    * the transform to its parent.
     * <p>
     * This new reference frame defined in the {@code parentFrame} and moves with it.
     * </p>
@@ -160,23 +159,23 @@ public abstract class MovingReferenceFrame extends ReferenceFrame
     * frame.
     * </p>
     *
-    * @param frameName the name of the new frame.
-    * @param parentFrame the parent of the new frame. It has to be either another
-    *           {@code MovingReferenceFrame} or a stationary {@code ReferenceFrame}, i.e. not moving
-    *           with respect to its root frame.
+    * @param frameName         the name of the new frame.
+    * @param parentFrame       the parent of the new frame. It has to be either another
+    *                          {@code MovingReferenceFrame} or a stationary {@code ReferenceFrame},
+    *                          i.e. not moving with respect to its root frame.
     * @param transformToParent the transform that can be used to transform a geometry object the new
-    *           frame to its parent frame. Not modified.
-    * @throws ScrewTheoryException if {@code parentFrame} is not a {@code MovingReferenceFrame} nor
-    *            a stationary {@code ReferenceFrame}.
+    *                          frame to its parent frame. Not modified.
+    * @throws ScrewTheoryException if {@code parentFrame} is not a {@code MovingReferenceFrame} nor a
+    *                              stationary {@code ReferenceFrame}.
     */
-   public MovingReferenceFrame(String frameName, ReferenceFrame parentFrame, RigidBodyTransform transformToParent)
+   public MovingReferenceFrame(String frameName, ReferenceFrame parentFrame, RigidBodyTransformReadOnly transformToParent)
    {
       this(frameName, parentFrame, transformToParent, false, false);
    }
 
    /**
-    * Creates a new moving reference frame as a child of the given {@code parentFrame} and
-    * initializes the transform to its parent.
+    * Creates a new moving reference frame as a child of the given {@code parentFrame} and initializes
+    * the transform to its parent.
     * <p>
     * This new reference frame defined in the {@code parentFrame} and moves with it.
     * </p>
@@ -187,23 +186,24 @@ public abstract class MovingReferenceFrame extends ReferenceFrame
     * {@link #updateTwistRelativeToParent(Twist)} when overriding them.
     * </p>
     *
-    * @param frameName the name of the new frame.
-    * @param parentFrame the parent of the new frame. It has to be either another
-    *           {@code MovingReferenceFrame} or a stationary {@code ReferenceFrame}, i.e. not moving
-    *           with respect to its root frame.
+    * @param frameName         the name of the new frame.
+    * @param parentFrame       the parent of the new frame. It has to be either another
+    *                          {@code MovingReferenceFrame} or a stationary {@code ReferenceFrame},
+    *                          i.e. not moving with respect to its root frame.
     * @param transformToParent the transform that can be used to transform a geometry object the new
-    *           frame to its parent frame. Not modified.
-    * @param isZUpFrame refers to whether this new frame has its z-axis aligned with the root frame
-    *           at all time or not.
-    * @throws ScrewTheoryException if {@code parentFrame} is not a {@code MovingReferenceFrame} nor
-    *            a stationary {@code ReferenceFrame}.
+    *                          frame to its parent frame. Not modified.
+    * @param isZUpFrame        refers to whether this new frame has its z-axis aligned with the root
+    *                          frame at all time or not.
+    * @throws ScrewTheoryException if {@code parentFrame} is not a {@code MovingReferenceFrame} nor a
+    *                              stationary {@code ReferenceFrame}.
     */
-   public MovingReferenceFrame(String frameName, ReferenceFrame parentFrame, RigidBodyTransform transformToParent, boolean isZUpFrame)
+   public MovingReferenceFrame(String frameName, ReferenceFrame parentFrame, RigidBodyTransformReadOnly transformToParent, boolean isZUpFrame)
    {
       this(frameName, parentFrame, transformToParent, isZUpFrame, false);
    }
 
-   private MovingReferenceFrame(String frameName, ReferenceFrame parentFrame, RigidBodyTransform transformToParent, boolean isZUpFrame, boolean isFixedInParent)
+   private MovingReferenceFrame(String frameName, ReferenceFrame parentFrame, RigidBodyTransformReadOnly transformToParent, boolean isZUpFrame,
+                                boolean isFixedInParent)
    {
       super(frameName, parentFrame, transformToParent, parentFrame.isAStationaryFrame() && isFixedInParent, isZUpFrame);
 
@@ -237,8 +237,9 @@ public abstract class MovingReferenceFrame extends ReferenceFrame
     * </p>
     *
     * @throws ReferenceFrameMismatchException if the twist set in
-    *            {@link #updateTwistRelativeToParent(Twist)} is not expressed with the proper
-    *            frames, see {@link #updateTwistRelativeToParent(Twist)}.
+    *                                         {@link #updateTwistRelativeToParent(Twist)} is not
+    *                                         expressed with the proper frames, see
+    *                                         {@link #updateTwistRelativeToParent(Twist)}.
     */
    @Override
    public void update()
@@ -266,8 +267,9 @@ public abstract class MovingReferenceFrame extends ReferenceFrame
     * </ul>
     * </p>
     *
-    * @param twistRelativeToParentToPack the transform to updated according to how this reference
-    *           frame should now positioned with respect to its parent frame. Modified.
+    * @param twistRelativeToParentToPack the transform to updated according to how this reference frame
+    *                                    should now positioned with respect to its parent frame.
+    *                                    Modified.
     */
    protected abstract void updateTwistRelativeToParent(Twist twistRelativeToParentToPack);
 
@@ -357,7 +359,7 @@ public abstract class MovingReferenceFrame extends ReferenceFrame
     * </ul>
     * </p>
     *
-    * @param base the frame with respect to which the twist is to be computed.
+    * @param base                the frame with respect to which the twist is to be computed.
     * @param relativeTwistToPack the twist of {@code this} with respect to {@code base}. Modified.
     */
    public void getTwistRelativeToOther(ReferenceFrame base, Twist relativeTwistToPack)

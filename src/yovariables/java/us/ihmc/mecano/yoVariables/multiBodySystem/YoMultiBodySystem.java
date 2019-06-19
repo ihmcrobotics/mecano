@@ -40,9 +40,9 @@ public class YoMultiBodySystem implements MultiBodySystemBasics
     * Creates a new yo-variablelized multi-body system with the same properties as the given
     * {@code input}.
     * 
-    * @param input the multi-body system to clone. Not modified.
+    * @param input           the multi-body system to clone. Not modified.
     * @param stationaryFrame the root frame to which yo-multi-body system is attached.
-    * @param registry the registry to register child variables to.
+    * @param registry        the registry to register child variables to.
     */
    public YoMultiBodySystem(MultiBodySystemReadOnly input, ReferenceFrame stationaryFrame, YoVariableRegistry registry)
    {
@@ -53,13 +53,13 @@ public class YoMultiBodySystem implements MultiBodySystemBasics
     * Creates a new yo-variablelized multi-body system with the same properties as the given
     * {@code input}.
     * 
-    * @param input the multi-body system to clone. Not modified.
-    * @param stationaryFrame the root frame to which yo-multi-body system is attached.
-    * @param registry the registry to register child variables to.
+    * @param input            the multi-body system to clone. Not modified.
+    * @param stationaryFrame  the root frame to which yo-multi-body system is attached.
+    * @param registry         the registry to register child variables to.
     * @param rigidBodyBuilder use a custom rigid-body builder. Can be {@code null}, the default builder
-    *           is {@link MultiBodySystemFactories#DEFAULT_RIGID_BODY_BUILDER}.
-    * @param yoJointBuilder use a custom yo-joint builder, the default used is
-    *           {@link YoMultiBodySystemFactories#newYoJointBuilder(YoVariableRegistry)}.
+    *                         is {@link MultiBodySystemFactories#DEFAULT_RIGID_BODY_BUILDER}.
+    * @param yoJointBuilder   use a custom yo-joint builder, the default used is
+    *                         {@link YoMultiBodySystemFactories#newYoJointBuilder(YoVariableRegistry)}.
     */
    public YoMultiBodySystem(MultiBodySystemReadOnly input, ReferenceFrame stationaryFrame, YoVariableRegistry registry, RigidBodyBuilder rigidBodyBuilder,
                             JointBuilder yoJointBuilder)

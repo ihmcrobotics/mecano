@@ -53,7 +53,7 @@ public interface FixedFrameWrenchBasics extends WrenchReadOnly, FixedFrameSpatia
     *
     * @param other the other wrench to copy. Not modified.
     * @throws ReferenceFrameMismatchException if any of the reference frames in {@code other} do not
-    *            match {@code this}.
+    *                                         match {@code this}.
     */
    default void set(WrenchReadOnly other)
    {
@@ -67,13 +67,13 @@ public interface FixedFrameWrenchBasics extends WrenchReadOnly, FixedFrameSpatia
     * {@link #set(WrenchReadOnly)}.
     * </p>
     * <p>
-    * If {@code other} is expressed in a different frame than {@code this}, then {@code this} is set
-    * to {@code other} once transformed to be expressed in {@code this.getReferenceFrame()}.
+    * If {@code other} is expressed in a different frame than {@code this}, then {@code this} is set to
+    * {@code other} once transformed to be expressed in {@code this.getReferenceFrame()}.
     * </p>
     *
     * @param other the other vector to copy. Not modified.
-    * @throws ReferenceFrameMismatchException if either the body frame or base frame in
-    *            {@code other} does not match {@code this}.
+    * @throws ReferenceFrameMismatchException if either the body frame or base frame in {@code other}
+    *                                         does not match {@code this}.
     */
    default void setMatchingFrame(WrenchReadOnly other)
    {
@@ -84,10 +84,10 @@ public interface FixedFrameWrenchBasics extends WrenchReadOnly, FixedFrameSpatia
    /**
     * Sets this wrench to {@code spatialVector}.
     *
-    * @param bodyFrame the body frame associated with the given spatial force.
+    * @param bodyFrame     the body frame associated with the given spatial force.
     * @param spatialVector the spatial vector to copy values from. Not modified.
-    * @throws ReferenceFrameMismatchException if any of the reference frames from the arguments do
-    *            not match the current frames of {@code this}.
+    * @throws ReferenceFrameMismatchException if any of the reference frames from the arguments do not
+    *                                         match the current frames of {@code this}.
     */
    default void set(ReferenceFrame bodyFrame, SpatialVectorReadOnly spatialVector)
    {
@@ -97,11 +97,11 @@ public interface FixedFrameWrenchBasics extends WrenchReadOnly, FixedFrameSpatia
    /**
     * Sets this wrench given an angular part and linear part.
     *
-    * @param bodyFrame the body frame associated with the given spatial force.
+    * @param bodyFrame   the body frame associated with the given spatial force.
     * @param angularPart the vector holding the new values for the angular part. Not modified.
-    * @param linearPart the vector holding the new values for the linear part. Not modified.
-    * @throws ReferenceFrameMismatchException if any of the reference frames from the arguments do
-    *            not match the current frames of {@code this}.
+    * @param linearPart  the vector holding the new values for the linear part. Not modified.
+    * @throws ReferenceFrameMismatchException if any of the reference frames from the arguments do not
+    *                                         match the current frames of {@code this}.
     */
    default void set(ReferenceFrame bodyFrame, FrameVector3DReadOnly angularPart, FrameVector3DReadOnly linearPart)
    {
@@ -112,12 +112,12 @@ public interface FixedFrameWrenchBasics extends WrenchReadOnly, FixedFrameSpatia
    /**
     * Sets this wrench given an angular part and linear part.
     *
-    * @param bodyFrame the body frame associated with the given spatial force.
+    * @param bodyFrame        the body frame associated with the given spatial force.
     * @param expressedInFrame the reference frame in which the spatial force is expressed.
-    * @param angularPart the vector holding the new values for the angular part. Not modified.
-    * @param linearPart the vector holding the new values for the linear part. Not modified.
-    * @throws ReferenceFrameMismatchException if any of the reference frames from the arguments do
-    *            not match the current frames of {@code this}.
+    * @param angularPart      the vector holding the new values for the angular part. Not modified.
+    * @param linearPart       the vector holding the new values for the linear part. Not modified.
+    * @throws ReferenceFrameMismatchException if any of the reference frames from the arguments do not
+    *                                         match the current frames of {@code this}.
     */
    default void set(ReferenceFrame bodyFrame, ReferenceFrame expressedInFrame, Vector3DReadOnly angularPart, Vector3DReadOnly linearPart)
    {
@@ -143,13 +143,14 @@ public interface FixedFrameWrenchBasics extends WrenchReadOnly, FixedFrameSpatia
     * When the given {@code angularPart} is {@code null}, it is assumed to be zero.
     * </p>
     *
-    * @param bodyFrame the body frame associated with the given spatial force.
-    * @param expressedInFrame the reference frame in which the arguments are expressed.
-    * @param angularPart the 3D moment that is applied. Can be {@code null}. Not modified.
-    * @param linearPart the 3D force that is applied. Not modified.
+    * @param bodyFrame          the body frame associated with the given spatial force.
+    * @param expressedInFrame   the reference frame in which the arguments are expressed.
+    * @param angularPart        the 3D moment that is applied. Can be {@code null}. Not modified.
+    * @param linearPart         the 3D force that is applied. Not modified.
     * @param pointOfApplication the location where the force is exerted. Not modified.
-    * @throws ReferenceFrameMismatchException if {@code expressedInFrame} is not equal to the
-    *            reference frame in which this spatial force vector is currently expressed.
+    * @throws ReferenceFrameMismatchException if {@code expressedInFrame} is not equal to the reference
+    *                                         frame in which this spatial force vector is currently
+    *                                         expressed.
     */
    default void set(ReferenceFrame bodyFrame, ReferenceFrame expressedInFrame, Vector3DReadOnly angularPart, Vector3DReadOnly linearPart,
                     Point3DReadOnly pointOfApplication)
@@ -165,8 +166,8 @@ public interface FixedFrameWrenchBasics extends WrenchReadOnly, FixedFrameSpatia
     * </p>
     *
     * @param other the other wrench to add to this. Not modified.
-    * @throws ReferenceFrameMismatchException if the reference frame of {@code other} do not match
-    *            this wrench's reference frames.
+    * @throws ReferenceFrameMismatchException if the reference frame of {@code other} do not match this
+    *                                         wrench's reference frames.
     */
    default void add(WrenchReadOnly other)
    {
@@ -180,10 +181,11 @@ public interface FixedFrameWrenchBasics extends WrenchReadOnly, FixedFrameSpatia
     * {@code this += spatialVector}
     * </p>
     *
-    * @param bodyFrame the body frame associated with the given vector.
+    * @param bodyFrame     the body frame associated with the given vector.
     * @param spatialVector the spatial vector to add to {@code this}. Not modified.
     * @throws ReferenceFrameMismatchException if {@code bodyFrame != this.getBodyFrame()} or if the
-    *            given vector is not expressed in the same frame as this wrench.
+    *                                         given vector is not expressed in the same frame as this
+    *                                         wrench.
     */
    default void add(ReferenceFrame bodyFrame, SpatialVectorReadOnly spatialVector)
    {
@@ -191,19 +193,19 @@ public interface FixedFrameWrenchBasics extends WrenchReadOnly, FixedFrameSpatia
    }
 
    /**
-    * Adds the given angular and linear parts to {@code this} providing the expected
-    * {@code bodyFrame} for additional safety.
+    * Adds the given angular and linear parts to {@code this} providing the expected {@code bodyFrame}
+    * for additional safety.
     * <p>
     * {@code this.angularPart += angular}<br>
     * {@code this.linearPart += linear}
     * </p>
     *
     * @param bodyFrame the body frame associated with the given spatial force.
-    * @param angular the vector to add to this vector's angular part. Not modified.
-    * @param linear the vector to add to this vector's linear part. Not modified.
-    * @throws ReferenceFrameMismatchException if {@code bodyFrame != this.getBodyFrame()} or if
-    *            either {@code angular} or {@code linear} are not expressed in the same frame as
-    *            this wrench.
+    * @param angular   the vector to add to this vector's angular part. Not modified.
+    * @param linear    the vector to add to this vector's linear part. Not modified.
+    * @throws ReferenceFrameMismatchException if {@code bodyFrame != this.getBodyFrame()} or if either
+    *                                         {@code angular} or {@code linear} are not expressed in
+    *                                         the same frame as this wrench.
     */
    default void add(ReferenceFrame bodyFrame, FrameVector3DReadOnly angular, FrameVector3DReadOnly linear)
    {
@@ -219,8 +221,8 @@ public interface FixedFrameWrenchBasics extends WrenchReadOnly, FixedFrameSpatia
     * </p>
     *
     * @param other the other wrench to subtract to this. Not modified.
-    * @throws ReferenceFrameMismatchException if the reference frame of {@code other} do not match
-    *            this wrench's reference frames.
+    * @throws ReferenceFrameMismatchException if the reference frame of {@code other} do not match this
+    *                                         wrench's reference frames.
     */
    default void sub(WrenchReadOnly other)
    {
@@ -228,16 +230,17 @@ public interface FixedFrameWrenchBasics extends WrenchReadOnly, FixedFrameSpatia
    }
 
    /**
-    * Subtracts the given spatial vector to {@code this} providing the expected {@code bodyFrame}
-    * for additional safety.
+    * Subtracts the given spatial vector to {@code this} providing the expected {@code bodyFrame} for
+    * additional safety.
     * <p>
     * {@code this -= spatialVector}
     * </p>
     *
-    * @param bodyFrame the body frame associated with the given vector.
+    * @param bodyFrame     the body frame associated with the given vector.
     * @param spatialVector the spatial vector to subtract to {@code this}. Not modified.
     * @throws ReferenceFrameMismatchException if {@code bodyFrame != this.getBodyFrame()} or if the
-    *            given vector is not expressed in the same frame as this wrench.
+    *                                         given vector is not expressed in the same frame as this
+    *                                         wrench.
     */
    default void sub(ReferenceFrame bodyFrame, SpatialVectorReadOnly spatialVector)
    {
@@ -253,11 +256,11 @@ public interface FixedFrameWrenchBasics extends WrenchReadOnly, FixedFrameSpatia
     * </p>
     *
     * @param bodyFrame the body frame associated with the given spatial force.
-    * @param angular the vector to subtract to this vector's angular part. Not modified.
-    * @param linear the vector to subtract to this vector's linear part. Not modified.
-    * @throws ReferenceFrameMismatchException if {@code bodyFrame != this.getBodyFrame()} or if
-    *            either {@code angular} or {@code linear} are not expressed in the same frame as
-    *            this wrench.
+    * @param angular   the vector to subtract to this vector's angular part. Not modified.
+    * @param linear    the vector to subtract to this vector's linear part. Not modified.
+    * @throws ReferenceFrameMismatchException if {@code bodyFrame != this.getBodyFrame()} or if either
+    *                                         {@code angular} or {@code linear} are not expressed in
+    *                                         the same frame as this wrench.
     */
    default void sub(ReferenceFrame bodyFrame, FrameVector3DReadOnly angular, FrameVector3DReadOnly linear)
    {

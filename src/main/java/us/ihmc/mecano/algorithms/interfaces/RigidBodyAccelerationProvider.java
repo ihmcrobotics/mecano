@@ -44,14 +44,14 @@ public interface RigidBodyAccelerationProvider
    /**
     * Computes and packs the spatial acceleration of the {@code body} relative to the given
     * {@code base}. The resulting spatial acceleration is the acceleration of the
-    * {@code body.getBodyFixedFrame()} with respect to the {@code base.getBodyFixedFrame()},
-    * expressed in {@code body.getBodyFixedFrame()}.
+    * {@code body.getBodyFixedFrame()} with respect to the {@code base.getBodyFixedFrame()}, expressed
+    * in {@code body.getBodyFixedFrame()}.
     * <p>
-    * The relative acceleration between the two rigid-bodies is calculated knowing their
-    * accelerations with respect to the inertial frame using the method
+    * The relative acceleration between the two rigid-bodies is calculated knowing their accelerations
+    * with respect to the inertial frame using the method
     * {@link #getAccelerationOfBody(RigidBodyReadOnly)}: <br>
-    * A<sup>b2, b2</sup><sub>b1</sub> = A<sup>b2, b2</sup><sub>i</sub> - A<sup>b1,
-    * b2</sup><sub>i</sub> </br>
+    * A<sup>b2, b2</sup><sub>b1</sub> = A<sup>b2, b2</sup><sub>i</sub> - A<sup>b1, b2</sup><sub>i</sub>
+    * </br>
     * with 'b1' being the {@code base}, 'b2' the {@code body}, and 'i' the {@code inertialFrame}.
     * </p>
     * 
@@ -62,10 +62,10 @@ public interface RigidBodyAccelerationProvider
    SpatialAccelerationReadOnly getRelativeAcceleration(RigidBodyReadOnly base, RigidBodyReadOnly body);
 
    /**
-    * Computes and packs the linear acceleration of the point {@code bodyFixedPoint} that is
-    * attached to {@code body} with respect to {@code inertialFrame}.
+    * Computes and packs the linear acceleration of the point {@code bodyFixedPoint} that is attached
+    * to {@code body} with respect to {@code inertialFrame}.
     * 
-    * @param body the rigid-body to which {@code bodyFixedPoint} belongs.
+    * @param body           the rigid-body to which {@code bodyFixedPoint} belongs.
     * @param bodyFixedPoint the point to compute the linear acceleration of. Not modified.
     * @return the linear acceleration of the body fixed point.
     */
@@ -75,19 +75,19 @@ public interface RigidBodyAccelerationProvider
    }
 
    /**
-    * Computes and packs the linear acceleration of the point {@code bodyFixedPoint} that is
-    * attached to {@code body} with respect to {@code base}.
+    * Computes and packs the linear acceleration of the point {@code bodyFixedPoint} that is attached
+    * to {@code body} with respect to {@code base}.
     * 
-    * @param base the rigid-body with respect to which the acceleration is to be computed.
-    * @param body the rigid-body to which {@code bodyFixedPoint} belongs.
+    * @param base           the rigid-body with respect to which the acceleration is to be computed.
+    * @param body           the rigid-body to which {@code bodyFixedPoint} belongs.
     * @param bodyFixedPoint the point to compute the linear acceleration of. Not modified.
     * @return the linear acceleration of the body fixed point.
     */
    FrameVector3DReadOnly getLinearAccelerationOfBodyFixedPoint(RigidBodyReadOnly base, RigidBodyReadOnly body, FramePoint3DReadOnly bodyFixedPoint);
 
    /**
-    * Whether rigid-body accelerations resulting from centrifugal and Coriolis effects are
-    * considered or ignored.
+    * Whether rigid-body accelerations resulting from centrifugal and Coriolis effects are considered
+    * or ignored.
     * 
     * @return {@code true} if this provider considers the velocity terms, {@code false} otherwise.
     */
@@ -124,13 +124,13 @@ public interface RigidBodyAccelerationProvider
     * Factory for implementing a {@link RigidBodyAccelerationProvider} from a given function that
     * computes spatial acceleration any given rigid-body.
     * <p>
-    * The function is used to implement {@link #getAccelerationOfBody(RigidBodyReadOnly)} and is
-    * enough to implement the other acceleration getters of this interface.
+    * The function is used to implement {@link #getAccelerationOfBody(RigidBodyReadOnly)} and is enough
+    * to implement the other acceleration getters of this interface.
     * </p>
     * 
     * @param accelerationFunction the function that computes rigid-body accelerations.
-    * @param inertialFrame the inertial frame with respect to which the body accelerations are
-    *           expressed.
+    * @param inertialFrame        the inertial frame with respect to which the body accelerations are
+    *                             expressed.
     * @return a new instance of {@code RigidBodyAccelerationProvider}.
     */
    public static RigidBodyAccelerationProvider toRigidBodyAccelerationProvider(Function<RigidBodyReadOnly, SpatialAccelerationReadOnly> accelerationFunction,
@@ -143,15 +143,15 @@ public interface RigidBodyAccelerationProvider
     * Factory for implementing a {@link RigidBodyAccelerationProvider} from a given function that
     * computes spatial acceleration any given rigid-body.
     * <p>
-    * The function is used to implement {@link #getAccelerationOfBody(RigidBodyReadOnly)} and is
-    * enough to implement the other acceleration getters of this interface.
+    * The function is used to implement {@link #getAccelerationOfBody(RigidBodyReadOnly)} and is enough
+    * to implement the other acceleration getters of this interface.
     * </p>
     * 
-    * @param accelerationFunction the function that computes rigid-body accelerations.
-    * @param inertialFrame the inertial frame with respect to which the body accelerations are
-    *           expressed.
-    * @param considerVelocities whether the Coriolis and centrifugal resulting accelerations should
-    *           be considered.
+    * @param accelerationFunction  the function that computes rigid-body accelerations.
+    * @param inertialFrame         the inertial frame with respect to which the body accelerations are
+    *                              expressed.
+    * @param considerVelocities    whether the Coriolis and centrifugal resulting accelerations should
+    *                              be considered.
     * @param considerAccelerations whether the joint accelerations are considered by the function.
     * @return a new instance of {@code RigidBodyAccelerationProvider}.
     */

@@ -13,9 +13,9 @@ public class MomentOfInertiaFactory
    /**
     * Computes the moment of inertia matrix for a solid cylinder.
     * 
-    * @param mass the cylinder mass.
-    * @param radius the radius of the cylinder.
-    * @param height the height, or length, of the cylinder.
+    * @param mass           the cylinder mass.
+    * @param radius         the radius of the cylinder.
+    * @param height         the height, or length, of the cylinder.
     * @param axisOfCylinder the revolution axis of the cylinder. Not modified.
     * @return the moment of inertia of the cylinder.
     */
@@ -42,7 +42,7 @@ public class MomentOfInertiaFactory
    /**
     * Computes the moment of inertia matrix for a solid ellipsoid.
     * 
-    * @param mass the ellipsoid mass.
+    * @param mass  the ellipsoid mass.
     * @param radii the three radii of the ellipsoid. Not modified.
     * @return the moment of inertia of the ellipsoid.
     */
@@ -54,7 +54,7 @@ public class MomentOfInertiaFactory
    /**
     * Computes the moment of inertia matrix for a solid ellipsoid.
     * 
-    * @param mass the ellipsoid mass.
+    * @param mass    the ellipsoid mass.
     * @param xRadius radius of the ellipsoid along the x-axis.
     * @param yRadius radius of the ellipsoid along the y-axis.
     * @param zRadius radius of the ellipsoid along the z-axis.

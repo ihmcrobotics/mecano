@@ -67,15 +67,15 @@ public interface TwistReadOnly extends SpatialMotionReadOnly
     * &nu;<sub>result</sub> = &nu;<sub>this</sub> - P &times; &omega;<sub>this</sub>
     * </pre>
     *
-    * where &omega; and &nu; represent the angular and linear parts respectively, and {@code P} is
-    * the {@code observerPosition}.
+    * where &omega; and &nu; represent the angular and linear parts respectively, and {@code P} is the
+    * {@code observerPosition}.
     * </p>
     *
-    * @param observerPosition the position on the body where the linear velocity is to be estimated.
-    *           Not modified.
+    * @param observerPosition     the position on the body where the linear velocity is to be
+    *                             estimated. Not modified.
     * @param linearVelocityToPack the vector used to store the result. Modified.
-    * @throws ReferenceFrameMismatchException if {@code observerPosition} is not expressed in the
-    *            same reference frame as {@code this}.
+    * @throws ReferenceFrameMismatchException if {@code observerPosition} is not expressed in the same
+    *                                         reference frame as {@code this}.
     */
    default void getLinearVelocityAt(FramePoint3DReadOnly observerPosition, FrameVector3DBasics linearVelocityToPack)
    {
@@ -88,8 +88,7 @@ public interface TwistReadOnly extends SpatialMotionReadOnly
    /**
     * Calculates and returns the value of the dot product of this twist with {@code wrench}.
     * <p>
-    * Note that the dot product of a twist and a wrench results in calculating the instantaneous
-    * power.
+    * Note that the dot product of a twist and a wrench results in calculating the instantaneous power.
     * </p>
     * <p>
     * For instance, the dot product of a twist T and a wrench W is defined as: <br>
@@ -100,9 +99,9 @@ public interface TwistReadOnly extends SpatialMotionReadOnly
     * @return the value of the dot product, the value of the instantaneous power resulting from this
     *         twist and the wrench.
     * @throws ReferenceFrameMismatchException if the two vectors are not expressed in the same
-    *            reference frame.
-    * @throws ReferenceFrameMismatchException if the two vectors are not associated with the same
-    *            body frame.
+    *                                         reference frame.
+    * @throws ReferenceFrameMismatchException if the two vectors are not associated with the same body
+    *                                         frame.
     */
    default double dot(WrenchReadOnly wrench)
    {
@@ -113,10 +112,10 @@ public interface TwistReadOnly extends SpatialMotionReadOnly
    /**
     * Tests if {@code this} and {@code other} represent the same twist to an {@code epsilon}.
     * <p>
-    * It is likely that the implementation of this method will change in the future as the
-    * definition of "geometrically-equal" for twists might evolve. In the meantime, the current
-    * assumption is that two twists are geometrically equal if both their 3D angular and 3D linear
-    * velocities are independently geometrically equal, see
+    * It is likely that the implementation of this method will change in the future as the definition
+    * of "geometrically-equal" for twists might evolve. In the meantime, the current assumption is that
+    * two twists are geometrically equal if both their 3D angular and 3D linear velocities are
+    * independently geometrically equal, see
     * {@link Vector3DReadOnly#geometricallyEquals(Vector3DReadOnly, double)}.
     * </p>
     * <p>
@@ -124,12 +123,12 @@ public interface TwistReadOnly extends SpatialMotionReadOnly
     * {@code this.epsilonEquals(other, epsilon)} and vice versa.
     * </p>
     *
-    * @param other the other twist to compare against this. Not modified.
+    * @param other   the other twist to compare against this. Not modified.
     * @param epsilon the tolerance to use for the comparison.
     * @return {@code true} if the two twists represent the same physical quantity, {@code false}
     *         otherwise.
     * @throws ReferenceFrameMismatchException if the reference frames of {@code other} do not
-    *            respectively match the reference frames of {@code this}.
+    *                                         respectively match the reference frames of {@code this}.
     */
    default boolean geometricallyEquals(TwistReadOnly other, double epsilon)
    {

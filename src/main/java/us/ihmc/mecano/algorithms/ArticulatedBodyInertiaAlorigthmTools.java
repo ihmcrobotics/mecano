@@ -18,14 +18,15 @@ public class ArticulatedBodyInertiaAlorigthmTools
     * <p>
     * Compared to
     * {@link MecanoTools#translateMomentOfInertia(double, Tuple3DReadOnly, boolean, Tuple3DReadOnly, Matrix3DBasics)}
-    * this method doesn't assume the linear inertia and cross inertia to have properties allowing
-    * for simplification of the transformation.
+    * this method doesn't assume the linear inertia and cross inertia to have properties allowing for
+    * simplification of the transformation.
     * </p>
     * 
-    * @param negateTranslation whether to negate the translation before transforming the angular inertia.
-    * @param translation the translation to be applied. Not modified.
-    * @param linearInertia the corresponding linear part of the inertia. Not modified.
-    * @param crossInertia the corresponding cross part of the inertia. Not modified.
+    * @param negateTranslation         whether to negate the translation before transforming the
+    *                                  angular inertia.
+    * @param translation               the translation to be applied. Not modified.
+    * @param linearInertia             the corresponding linear part of the inertia. Not modified.
+    * @param crossInertia              the corresponding cross part of the inertia. Not modified.
     * @param angularInertiaToTranslate the angular part to translate. Modified.
     */
    public static void translateAngularInertia(boolean negateTranslation, Tuple3DReadOnly translation, Matrix3DReadOnly linearInertia,
@@ -103,9 +104,10 @@ public class ArticulatedBodyInertiaAlorigthmTools
    /**
     * Applies a translation to the cross part of a complex inertia.
     * 
-    * @param negateTranslation whether to negate the translation before transforming the cross inertia.
-    * @param translation the translation to be applied. Not modified.
-    * @param linearInertia the corresponding linear part of the inertia. Not modified.
+    * @param negateTranslation       whether to negate the translation before transforming the cross
+    *                                inertia.
+    * @param translation             the translation to be applied. Not modified.
+    * @param linearInertia           the corresponding linear part of the inertia. Not modified.
     * @param crossInertiaToTranslate the cross inertia to transform. Modified.
     */
    public static void translateCrossInertia(boolean negateTranslation, Tuple3DReadOnly translation, Matrix3DReadOnly linearInertia,

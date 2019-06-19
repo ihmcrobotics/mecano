@@ -28,14 +28,16 @@ public class CenterOfMassCalculator implements ReferenceFrameHolder
    private final FramePoint3D centerOfMass = new FramePoint3D();
    /** Intermediate variable for garbage free operations. */
    private final FramePoint3D tempPoint = new FramePoint3D();
-   /** Whether the center of mass position has been calculated since the last call to {@link #reset()}. */
+   /**
+    * Whether the center of mass position has been calculated since the last call to {@link #reset()}.
+    */
    private boolean isCenterOfMassUpToDate = false;
 
    /**
     * Creates a new calculator for the subtree that starts off the given {@code rootBody}.
     *
-    * @param rootBody the start of subtree for which the center of mass is to be computed. Not
-    *           modified.
+    * @param rootBody       the start of subtree for which the center of mass is to be computed. Not
+    *                       modified.
     * @param referenceFrame the frame in which the center of mass is to be expressed.
     */
    public CenterOfMassCalculator(RigidBodyReadOnly rootBody, ReferenceFrame referenceFrame)
@@ -46,7 +48,7 @@ public class CenterOfMassCalculator implements ReferenceFrameHolder
    /**
     * Creates a new calculator for the given {@code input}.
     *
-    * @param input the definition of the system to be evaluated by this calculator.
+    * @param input          the definition of the system to be evaluated by this calculator.
     * @param referenceFrame the frame in which the center of mass is to be expressed.
     */
    public CenterOfMassCalculator(MultiBodySystemReadOnly input, ReferenceFrame referenceFrame)

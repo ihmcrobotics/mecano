@@ -4,7 +4,7 @@ import java.util.Collections;
 import java.util.List;
 
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
-import us.ihmc.euclid.transform.RigidBodyTransform;
+import us.ihmc.euclid.transform.interfaces.RigidBodyTransformReadOnly;
 import us.ihmc.mecano.frames.MovingReferenceFrame;
 import us.ihmc.mecano.multiBodySystem.interfaces.FixedJointBasics;
 import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
@@ -61,7 +61,7 @@ public class FixedJoint implements FixedJointBasics
     * the multi-body system.
     * </p>
     * 
-    * @param name the name for the new joint.
+    * @param name        the name for the new joint.
     * @param predecessor the rigid-body connected to and preceding this joint.
     */
    public FixedJoint(String name, RigidBodyBasics predecessor)
@@ -72,11 +72,11 @@ public class FixedJoint implements FixedJointBasics
    /**
     * Creates a new fixed joint.
     * 
-    * @param name the name for the new joint.
-    * @param predecessor the rigid-body connected to and preceding this joint.
+    * @param name              the name for the new joint.
+    * @param predecessor       the rigid-body connected to and preceding this joint.
     * @param transformToParent the transform to the frame after the parent joint. Not modified.
     */
-   public FixedJoint(String name, RigidBodyBasics predecessor, RigidBodyTransform transformToParent)
+   public FixedJoint(String name, RigidBodyBasics predecessor, RigidBodyTransformReadOnly transformToParent)
    {
       if (name.contains(NAME_ID_SEPARATOR))
          throw new IllegalArgumentException("A joint name can not contain '" + NAME_ID_SEPARATOR + "'. Tried to construct a jonit with name " + name + ".");

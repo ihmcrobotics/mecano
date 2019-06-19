@@ -147,8 +147,8 @@ public class CentroidalMomentumRateCalculator implements ReferenceFrameHolder
    /**
     * Creates a new calculator for the subtree that starts off the given {@code rootBody}.
     *
-    * @param rootBody the start of subtree for which the centroidal momentum matrix and bias force is
-    *           to be computed. Not modified.
+    * @param rootBody    the start of subtree for which the centroidal momentum matrix and bias force
+    *                    is to be computed. Not modified.
     * @param matrixFrame the frame in which the centroidal momentum matrix is to be expressed.
     */
    public CentroidalMomentumRateCalculator(RigidBodyReadOnly rootBody, ReferenceFrame matrixFrame)
@@ -159,7 +159,7 @@ public class CentroidalMomentumRateCalculator implements ReferenceFrameHolder
    /**
     * Creates a new calculator for the given {@code input}.
     *
-    * @param input the definition of the system to be evaluated by this calculator.
+    * @param input       the definition of the system to be evaluated by this calculator.
     * @param matrixFrame the frame in which the centroidal momentum matrix is to be expressed.
     */
    public CentroidalMomentumRateCalculator(MultiBodySystemReadOnly input, ReferenceFrame matrixFrame)
@@ -170,12 +170,15 @@ public class CentroidalMomentumRateCalculator implements ReferenceFrameHolder
    /**
     * Creates a new calculator for the given {@code input}.
     *
-    * @param input the definition of the system to be evaluated by this calculator.
-    * @param matrixFrame the frame in which the centroidal momentum matrix is to be expressed.
+    * @param input                          the definition of the system to be evaluated by this
+    *                                       calculator.
+    * @param matrixFrame                    the frame in which the centroidal momentum matrix is to be
+    *                                       expressed.
     * @param considerIgnoredSubtreesInertia whether the inertia of the ignored part(s) of the given
-    *           multi-body system should be considered. When {@code true}, this provides a more
-    *           accurate centroidal momentum matrix, while when {@code false}, this calculator may gain
-    *           slight performance improvement.
+    *                                       multi-body system should be considered. When {@code true},
+    *                                       this provides a more accurate centroidal momentum matrix,
+    *                                       while when {@code false}, this calculator may gain slight
+    *                                       performance improvement.
     */
    public CentroidalMomentumRateCalculator(MultiBodySystemReadOnly input, ReferenceFrame matrixFrame, boolean considerIgnoredSubtreesInertia)
    {
@@ -361,9 +364,10 @@ public class CentroidalMomentumRateCalculator implements ReferenceFrameHolder
     * {@link JointMatrixIndexProvider} that was used to configure this calculator.
     * </p>
     * 
-    * @param jointVelocityMatrix the matrix containing the joint velocities to use. Not modified.
+    * @param jointVelocityMatrix        the matrix containing the joint velocities to use. Not
+    *                                   modified.
     * @param centerOfMassVelocityToPack the vector used to stored the computed center of mass velocity.
-    *           Modified.
+    *                                   Modified.
     */
    public void getCenterOfMassVelocity(DenseMatrix64F jointVelocityMatrix, FrameVector3DBasics centerOfMassVelocityToPack)
    {
@@ -395,10 +399,10 @@ public class CentroidalMomentumRateCalculator implements ReferenceFrameHolder
     * {@link JointMatrixIndexProvider} that was used to configure this calculator.
     * </p>
     * 
-    * @param jointAccelerationMatrix the matrix containing the joint accelerations to use. Not
-    *           modified.
+    * @param jointAccelerationMatrix        the matrix containing the joint accelerations to use. Not
+    *                                       modified.
     * @param centerOfMassAccelerationToPack the vector used to stored the computed center of mass
-    *           acceleration. Modified.
+    *                                       acceleration. Modified.
     */
    public void getCenterOfMassAcceleration(DenseMatrix64F jointAccelerationMatrix, FrameVector3DBasics centerOfMassAccelerationToPack)
    {
@@ -432,7 +436,7 @@ public class CentroidalMomentumRateCalculator implements ReferenceFrameHolder
     * </p>
     * 
     * @param jointVelocityMatrix the matrix containing the joint velocities to use. Not modified.
-    * @param momentumToPack the vector used to stored the computed momentum. Modified.
+    * @param momentumToPack      the vector used to stored the computed momentum. Modified.
     */
    public void getMomentum(DenseMatrix64F jointVelocityMatrix, MomentumBasics momentumToPack)
    {
@@ -465,9 +469,9 @@ public class CentroidalMomentumRateCalculator implements ReferenceFrameHolder
     * </p>
     * 
     * @param jointAccelerationMatrix the matrix containing the joint accelerations to use. Not
-    *           modified.
-    * @param momentumRateToPack the vector used to stored the computed rate of change of momentum.
-    *           Modified.
+    *                                modified.
+    * @param momentumRateToPack      the vector used to stored the computed rate of change of momentum.
+    *                                Modified.
     */
    public void getMomentumRate(DenseMatrix64F jointAccelerationMatrix, SpatialForceBasics momentumRateToPack)
    {
@@ -680,9 +684,8 @@ public class CentroidalMomentumRateCalculator implements ReferenceFrameHolder
        * where <tt>h</tt> is the resulting unit-momentum, <tt>I<sub>i</sub></tt> is the spatial inertia of
        * the i<sup>th</sup> body, and <tt>T</tt> is the unit-twist.
        * 
-       * 
-       * @param ancestorUnitTwist the unit-twist to use for computing a the unit-momentum for this body
-       *           that is then added to {@code unitMomentumToAddTo}. Not modified.
+       * @param ancestorUnitTwist   the unit-twist to use for computing a the unit-momentum for this body
+       *                            that is then added to {@code unitMomentumToAddTo}. Not modified.
        * @param unitMomentumToAddTo the unit-momentum to build up. Modified.
        */
       private void addToUnitMomentumRecursively(TwistReadOnly ancestorUnitTwist, FixedFrameMomentumBasics unitMomentumToAddTo)

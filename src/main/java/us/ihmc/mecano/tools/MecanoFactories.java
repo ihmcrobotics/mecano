@@ -16,6 +16,7 @@ import us.ihmc.euclid.referenceFrame.interfaces.ReferenceFrameHolder;
 import us.ihmc.euclid.tools.EuclidCoreIOTools;
 import us.ihmc.euclid.tools.Matrix3DTools;
 import us.ihmc.euclid.transform.RigidBodyTransform;
+import us.ihmc.euclid.transform.interfaces.RigidBodyTransformReadOnly;
 import us.ihmc.euclid.tuple2D.interfaces.Tuple2DBasics;
 import us.ihmc.euclid.tuple2D.interfaces.Tuple2DReadOnly;
 import us.ihmc.euclid.tuple3D.Vector3D;
@@ -50,12 +51,12 @@ public class MecanoFactories
    /**
     * Creates the reference frame that is at the joint and rigidly attached to the joint's predecessor.
     *
-    * @param joint the joint to which the new frame is for. Not modified.
+    * @param joint             the joint to which the new frame is for. Not modified.
     * @param transformToParent the transform from the new frame to the frame after the parent joint.
-    *           Not modified.
+    *                          Not modified.
     * @return the new frame before joint.
     */
-   public static MovingReferenceFrame newFrameBeforeJoint(JointReadOnly joint, RigidBodyTransform transformToParent)
+   public static MovingReferenceFrame newFrameBeforeJoint(JointReadOnly joint, RigidBodyTransformReadOnly transformToParent)
    {
       String beforeJointName = "before" + MecanoTools.capitalize(joint.getName());
 
@@ -65,13 +66,13 @@ public class MecanoFactories
    /**
     * Creates the reference frame that is at the joint and rigidly attached to the joint's predecessor.
     *
-    * @param joint the joint to which the new frame is for. Not modified.
+    * @param joint             the joint to which the new frame is for. Not modified.
     * @param transformToParent the transform from the new frame to the frame after the parent joint.
-    *           Not modified.
-    * @param beforeJointName the name of the new frame.
+    *                          Not modified.
+    * @param beforeJointName   the name of the new frame.
     * @return the new frame before joint.
     */
-   public static MovingReferenceFrame newJointFrame(JointReadOnly joint, RigidBodyTransform transformToParent, String beforeJointName)
+   public static MovingReferenceFrame newJointFrame(JointReadOnly joint, RigidBodyTransformReadOnly transformToParent, String beforeJointName)
    {
       MovingReferenceFrame parentFrame;
       RigidBodyReadOnly parentBody = joint.getPredecessor();
@@ -149,7 +150,8 @@ public class MecanoFactories
       else
       {
          AxisAngle axisAngle = new AxisAngle();
-         jointTransformUpdater = transform -> {
+         jointTransformUpdater = transform ->
+         {
             axisAngle.set(joint.getJointAxis(), joint.getQ());
             transform.setRotationAndZeroTranslation(axisAngle);
          };
@@ -218,7 +220,7 @@ public class MecanoFactories
             s = qs;
 
             if (Math.abs(x) > 1.0e-5 || Math.abs(z) > 1.0e-5)
-               setToPitchQuaternion(getPitch());
+               setToPitchOrientation(getPitch());
          }
 
          @Override
@@ -485,7 +487,7 @@ public class MecanoFactories
     *
     * where the scale is obtained from the given {@code scaleSupplier}.
     *
-    * @param scaleSupplier the supplier to get the scale.
+    * @param scaleSupplier  the supplier to get the scale.
     * @param referenceTuple the reference tuple to scale. Not modified.
     * @return the new point linked to {@code referenceTuple}.
     */
@@ -534,7 +536,7 @@ public class MecanoFactories
     *
     * where the scale is obtained from the given {@code scaleSupplier}.
     *
-    * @param scaleSupplier the supplier to get the scale.
+    * @param scaleSupplier   the supplier to get the scale.
     * @param referenceVector the reference vector to scale. Not modified.
     * @return the new vector linked to {@code referenceVector}.
     */
@@ -609,7 +611,7 @@ public class MecanoFactories
     *
     * where the scale is obtained from the given {@code scaleSupplier}.
     *
-    * @param scaleSupplier the supplier to get the scale.
+    * @param scaleSupplier  the supplier to get the scale.
     * @param referenceTwist the reference twist to scale. Not modified.
     * @return the new twist linked to the {@code referenceTwist}.
     */
@@ -661,14 +663,14 @@ public class MecanoFactories
    /**
     * Creates a new twist that is linked to the given {@code angularPart} and {@code linearPart}.
     *
-    * @param bodyFrame the twist's body frame.
-    * @param baseFrame the twist's base frame.
+    * @param bodyFrame   the twist's body frame.
+    * @param baseFrame   the twist's base frame.
     * @param angularPart the vector holding the angular part the twist should be linked to.
-    * @param linearPart the vector holding the linear part the twist should be linked to.
+    * @param linearPart  the vector holding the linear part the twist should be linked to.
     * @return the new twist linked to the two vectors.
     */
    public static TwistReadOnly newTwistReadOnly(ReferenceFrame bodyFrame, ReferenceFrame baseFrame, FrameVector3DReadOnly angularPart,
-         FrameVector3DReadOnly linearPart)
+                                                FrameVector3DReadOnly linearPart)
    {
       angularPart.checkReferenceFrameMatch(linearPart);
 
@@ -719,8 +721,8 @@ public class MecanoFactories
     * The frames of the new twist cannot be changed.
     * </p>
     *
-    * @param bodyFrame the twist's body frame.
-    * @param baseFrame the twist's base frame.
+    * @param bodyFrame        the twist's body frame.
+    * @param baseFrame        the twist's base frame.
     * @param expressedInFrame the twist
     * @return the new twist.
     */
@@ -778,12 +780,12 @@ public class MecanoFactories
     *
     * where the scale is obtained from the given {@code scaleSupplier}.
     *
-    * @param scaleSupplier the supplier to get the scale.
+    * @param scaleSupplier         the supplier to get the scale.
     * @param referenceAcceleration the reference acceleration. Not modified.
     * @return the new acceleration linked to the {@code referenceAcceleration}.
     */
    public static SpatialAccelerationReadOnly newSpatialAccelerationVectorReadOnly(DoubleSupplier scaleSupplier,
-         SpatialAccelerationReadOnly referenceAcceleration)
+                                                                                  SpatialAccelerationReadOnly referenceAcceleration)
    {
       return new SpatialAccelerationReadOnly()
       {
@@ -832,14 +834,14 @@ public class MecanoFactories
     * Creates a new acceleration that is linked to the given {@code angularPart} and
     * {@code linearPart}.
     *
-    * @param bodyFrame the acceleration's body frame.
-    * @param baseFrame the acceleration's base frame.
+    * @param bodyFrame   the acceleration's body frame.
+    * @param baseFrame   the acceleration's base frame.
     * @param angularPart the vector holding the angular part the acceleration should be linked to.
-    * @param linearPart the vector holding the linear part the acceleration should be linked to.
+    * @param linearPart  the vector holding the linear part the acceleration should be linked to.
     * @return the new acceleration linked to the two vectors.
     */
    public static SpatialAccelerationReadOnly newSpatialAccelerationVectorReadOnly(ReferenceFrame bodyFrame, ReferenceFrame baseFrame,
-         FrameVector3DReadOnly angularPart, FrameVector3DReadOnly linearPart)
+                                                                                  FrameVector3DReadOnly angularPart, FrameVector3DReadOnly linearPart)
    {
       angularPart.checkReferenceFrameMatch(linearPart);
 
@@ -890,13 +892,13 @@ public class MecanoFactories
     * The frames of the new acceleration cannot be changed.
     * </p>
     *
-    * @param bodyFrame the acceleration's body frame.
-    * @param baseFrame the acceleration's base frame.
+    * @param bodyFrame        the acceleration's body frame.
+    * @param baseFrame        the acceleration's base frame.
     * @param expressedInFrame the acceleration
     * @return the new acceleration.
     */
    public static FixedFrameSpatialAccelerationBasics newPlanarFixedFrameSpatialAccelerationVectorBasics(ReferenceFrame bodyFrame, ReferenceFrame baseFrame,
-         ReferenceFrame expressedInFrame)
+                                                                                                        ReferenceFrame expressedInFrame)
    {
       return new FixedFrameSpatialAccelerationBasics()
       {
@@ -950,7 +952,7 @@ public class MecanoFactories
     *
     * where the scale is obtained from the given {@code scaleSupplier}.
     *
-    * @param scaleSupplier the supplier to get the scale.
+    * @param scaleSupplier   the supplier to get the scale.
     * @param referenceWrench the reference wrench to scale. Not modified.
     * @return the new wrench linked to the {@code referenceTwist}.
     */
@@ -996,9 +998,9 @@ public class MecanoFactories
    /**
     * Creates a new wrench that is linked to the given {@code angularPart} and {@code linearPart}.
     *
-    * @param bodyFrame the wrench's body frame.
+    * @param bodyFrame   the wrench's body frame.
     * @param angularPart the vector holding the angular part the wrench should be linked to.
-    * @param linearPart the vector holding the linear part the wrench should be linked to.
+    * @param linearPart  the vector holding the linear part the wrench should be linked to.
     * @return the new wrench linked to the two vectors.
     */
    public static WrenchReadOnly newWrenchReadOnly(ReferenceFrame bodyFrame, FrameVector3DReadOnly angularPart, FrameVector3DReadOnly linearPart)
@@ -1046,7 +1048,7 @@ public class MecanoFactories
     * The frames of the new wrench cannot be changed.
     * </p>
     *
-    * @param bodyFrame the wrench's body frame.
+    * @param bodyFrame        the wrench's body frame.
     * @param expressedInFrame the wrench
     * @return the new wrench.
     */
@@ -1094,7 +1096,7 @@ public class MecanoFactories
     * that a multi-system is under.
     * 
     * @param rootBody the very first body of the multi-body system.
-    * @param gravity the magnitude of the gravitational acceleration along the z-axis.
+    * @param gravity  the magnitude of the gravitational acceleration along the z-axis.
     * @return the spatial acceleration representing the gravitational acceleration.
     */
    public static SpatialAccelerationReadOnly newGravitationalSpatialAcceleration(RigidBodyReadOnly rootBody, double gravity)

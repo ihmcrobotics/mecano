@@ -7,6 +7,7 @@ import java.util.List;
 import us.ihmc.euclid.matrix.interfaces.Matrix3DReadOnly;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.transform.RigidBodyTransform;
+import us.ihmc.euclid.transform.interfaces.RigidBodyTransformReadOnly;
 import us.ihmc.euclid.tuple3D.interfaces.Tuple3DReadOnly;
 import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.mecano.frames.MovingReferenceFrame;
@@ -27,16 +28,15 @@ public class RigidBody implements RigidBodyBasics
    /** This is where the physical properties of this rigid-body are stored. */
    private final SpatialInertia inertia;
    /**
-    * This is a reference rigidly attached this rigid-body. It's usually centered at the
-    * rigid-body's center of mass.
+    * This is a reference rigidly attached this rigid-body. It's usually centered at the rigid-body's
+    * center of mass.
     */
    private final MovingReferenceFrame bodyFixedFrame;
    /**
     * The parent joint is the joint directly connected to a rigid-body and located between the
     * rigid-body and the robot's root.
     * <p>
-    * The parent joint is equal to {@code null} when this rigid-body represents the root of the
-    * robot.
+    * The parent joint is equal to {@code null} when this rigid-body represents the root of the robot.
     * </p>
     */
    private final JointBasics parentJoint;
@@ -50,8 +50,8 @@ public class RigidBody implements RigidBodyBasics
    private final List<JointBasics> childrenJoints = new ArrayList<>();
    private final List<JointBasics> childrenJointsReadOnly = Collections.unmodifiableList(childrenJoints);
    /**
-    * The name of this rigid-body. It is important that this name is unique among all the
-    * rigid-bodies of a robot.
+    * The name of this rigid-body. It is important that this name is unique among all the rigid-bodies
+    * of a robot.
     */
    private final String name;
    /**
@@ -61,16 +61,16 @@ public class RigidBody implements RigidBodyBasics
    private final String nameId;
 
    /**
-    * Creates a new root rigid-body to which the first joint of a robot kinematic chain can be
-    * added.
+    * Creates a new root rigid-body to which the first joint of a robot kinematic chain can be added.
     * <p>
     * Note that there is only one root body per robot.
     * </p>
     *
-    * @param bodyName the name for this rigid-body.
-    * @param parentStationaryFrame the parent stationary, i.e. non-moving with respect to world
-    *           frame, frame to which this rigid-body will create and attach its body fixed frame.
-    *           Most of the time {@code parentStationaryFrame == ReferenceFrame.getWorldFrame()}.
+    * @param bodyName              the name for this rigid-body.
+    * @param parentStationaryFrame the parent stationary, i.e. non-moving with respect to world frame,
+    *                              frame to which this rigid-body will create and attach its body fixed
+    *                              frame. Most of the time
+    *                              {@code parentStationaryFrame == ReferenceFrame.getWorldFrame()}.
     */
    public RigidBody(String bodyName, ReferenceFrame parentStationaryFrame)
    {
@@ -78,20 +78,20 @@ public class RigidBody implements RigidBodyBasics
    }
 
    /**
-    * Creates a new root rigid-body to which the first joint of a robot kinematic chain can be
-    * added.
+    * Creates a new root rigid-body to which the first joint of a robot kinematic chain can be added.
     * <p>
     * Note that there is only one root body per robot.
     * </p>
     *
-    * @param bodyName the name for this rigid-body.
-    * @param transformToParent provides the pose of this rigid-body's body-fixed-frame with respect
-    *           to the {@code parentStationaryFrame}. Not modified.
-    * @param parentStationaryFrame the parent stationary, i.e. non-moving with respect to world
-    *           frame, frame to which this rigid-body will create and attach its body fixed frame.
-    *           Most of the time {@code parentStationaryFrame == ReferenceFrame.getWorldFrame()}.
+    * @param bodyName              the name for this rigid-body.
+    * @param transformToParent     provides the pose of this rigid-body's body-fixed-frame with respect
+    *                              to the {@code parentStationaryFrame}. Not modified.
+    * @param parentStationaryFrame the parent stationary, i.e. non-moving with respect to world frame,
+    *                              frame to which this rigid-body will create and attach its body fixed
+    *                              frame. Most of the time
+    *                              {@code parentStationaryFrame == ReferenceFrame.getWorldFrame()}.
     */
-   public RigidBody(String bodyName, RigidBodyTransform transformToParent, ReferenceFrame parentStationaryFrame)
+   public RigidBody(String bodyName, RigidBodyTransformReadOnly transformToParent, ReferenceFrame parentStationaryFrame)
    {
       if (bodyName == null)
          throw new IllegalArgumentException("Name can not be null");
@@ -106,15 +106,15 @@ public class RigidBody implements RigidBodyBasics
    /**
     * Creates a new rigid-body that is setup as the successor of the given {@code parentJoint}.
     * 
-    * @param bodyName the name for this rigid-body.
-    * @param parentJoint the joint directly attached to this rigid-body and located between this
-    *           rigid-body and the root body of the robot.
-    * @param Ixx the moment of inertia around the x-axis.
-    * @param Iyy the moment of inertia around the y-axis.
-    * @param Izz the moment of inertia around the z-axis.
-    * @param mass the mass of this rigid-body.
+    * @param bodyName           the name for this rigid-body.
+    * @param parentJoint        the joint directly attached to this rigid-body and located between this
+    *                           rigid-body and the root body of the robot.
+    * @param Ixx                the moment of inertia around the x-axis.
+    * @param Iyy                the moment of inertia around the y-axis.
+    * @param Izz                the moment of inertia around the z-axis.
+    * @param mass               the mass of this rigid-body.
     * @param centerOfMassOffset the translation offset of the center of the mass with respect to the
-    *           frame after the parent joint. Not modified.
+    *                           frame after the parent joint. Not modified.
     */
    public RigidBody(String bodyName, JointBasics parentJoint, double Ixx, double Iyy, double Izz, double mass, Tuple3DReadOnly centerOfMassOffset)
    {
@@ -126,13 +126,13 @@ public class RigidBody implements RigidBodyBasics
    /**
     * Creates a new rigid-body that is setup as the successor of the given {@code parentJoint}.
     *
-    * @param bodyName the name for this rigid-body.
-    * @param parentJoint the joint directly attached to this rigid-body and located between this
-    *           rigid-body and the root body of the robot.
-    * @param momentOfInertia the 3D moment of inertia of this rigid-body. Not modified.
-    * @param mass the mass of this rigid-body.
+    * @param bodyName           the name for this rigid-body.
+    * @param parentJoint        the joint directly attached to this rigid-body and located between this
+    *                           rigid-body and the root body of the robot.
+    * @param momentOfInertia    the 3D moment of inertia of this rigid-body. Not modified.
+    * @param mass               the mass of this rigid-body.
     * @param centerOfMassOffset the translation offset of the center of the mass with respect to the
-    *           frame after the parent joint. Not modified.
+    *                           frame after the parent joint. Not modified.
     */
    public RigidBody(String bodyName, JointBasics parentJoint, Matrix3DReadOnly momentOfInertia, double mass, Tuple3DReadOnly centerOfMassOffset)
    {
@@ -144,25 +144,26 @@ public class RigidBody implements RigidBodyBasics
    /**
     * Creates a new rigid-body that is setup as the successor of the given {@code parentJoint}.
     *
-    * @param bodyName the name for this rigid-body.
-    * @param parentJoint the joint directly attached to this rigid-body and located between this
-    *           rigid-body and the root body of the robot.
+    * @param bodyName        the name for this rigid-body.
+    * @param parentJoint     the joint directly attached to this rigid-body and located between this
+    *                        rigid-body and the root body of the robot.
     * @param momentOfInertia the 3D moment of inertia of this rigid-body. Not modified.
-    * @param mass the mass of this rigid-body.
-    * @param inertiaPose defines the transform from this rigid-body body-fixed-frame to the
-    *           {@code parentJoint.getFrameAfterJointFrame()}. The given moment of inertia is
-    *           assumed to be expressed in that body-fixed-frame. Also note that the translation
-    *           part corresponds to the position of this rigid-body center of mass position
-    *           expressed in {@code parentJoint.getFrameAfterJointFrame()}. Not modified.
+    * @param mass            the mass of this rigid-body.
+    * @param inertiaPose     defines the transform from this rigid-body body-fixed-frame to the
+    *                        {@code parentJoint.getFrameAfterJointFrame()}. The given moment of inertia
+    *                        is assumed to be expressed in that body-fixed-frame. Also note that the
+    *                        translation part corresponds to the position of this rigid-body center of
+    *                        mass position expressed in {@code parentJoint.getFrameAfterJointFrame()}.
+    *                        Not modified.
     */
-   public RigidBody(String bodyName, JointBasics parentJoint, Matrix3DReadOnly momentOfInertia, double mass, RigidBodyTransform inertiaPose)
+   public RigidBody(String bodyName, JointBasics parentJoint, Matrix3DReadOnly momentOfInertia, double mass, RigidBodyTransformReadOnly inertiaPose)
    {
       this(bodyName, parentJoint, inertiaPose);
       inertia.getMomentOfInertia().set(momentOfInertia);
       inertia.setMass(mass);
    }
 
-   private RigidBody(String bodyName, JointBasics parentJoint, RigidBodyTransform inertiaPose)
+   private RigidBody(String bodyName, JointBasics parentJoint, RigidBodyTransformReadOnly inertiaPose)
    {
       if (bodyName == null)
          throw new IllegalArgumentException("Name can not be null");

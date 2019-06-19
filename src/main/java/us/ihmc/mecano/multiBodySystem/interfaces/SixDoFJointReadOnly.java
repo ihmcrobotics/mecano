@@ -61,8 +61,8 @@ public interface SixDoFJointReadOnly extends FloatingJointReadOnly
    default int getConfigurationMatrixSize()
    {
       /*
-       * This is because of the orientation have 3 DoFs but being represented with a quaternion that
-       * has 4 elements.
+       * This is because of the orientation have 3 DoFs but being represented with a quaternion that has 4
+       * elements.
        */
       return NUMBER_OF_DOFS + 1;
    }

@@ -91,10 +91,10 @@ public class SpatialAccelerationCalculator implements RigidBodyAccelerationProvi
     * Creates a new {@code SpatialAccelerationCalculator} that will compute all the spatial
     * accelerations of all the rigid-bodies of the system to which {@code body} belongs.
     *
-    * @param body a body that belongs to the system this spatial acceleration calculator will be
-    *           available for.
+    * @param body          a body that belongs to the system this spatial acceleration calculator will
+    *                      be available for.
     * @param inertialFrame each rigid-body acceleration is calculated with respect to the inertial
-    *           frame.
+    *                      frame.
     */
    public SpatialAccelerationCalculator(RigidBodyReadOnly body, ReferenceFrame inertialFrame)
    {
@@ -105,12 +105,12 @@ public class SpatialAccelerationCalculator implements RigidBodyAccelerationProvi
     * Creates a new {@code SpatialAccelerationCalculator} that will compute all the spatial
     * accelerations of all the rigid-bodies of the system to which {@code body} belongs.
     *
-    * @param body a body that belongs to the system this spatial acceleration calculator will be
-    *           available for.
-    * @param inertialFrame each rigid-body acceleration is calculated with respect to the inertial
-    *           frame.
+    * @param body            a body that belongs to the system this spatial acceleration calculator
+    *                        will be available for.
+    * @param inertialFrame   each rigid-body acceleration is calculated with respect to the inertial
+    *                        frame.
     * @param doVelocityTerms whether the centrifugal and Coriolis are considered or ignored in the
-    *           computation of the rigid-body accelerations.
+    *                        computation of the rigid-body accelerations.
     */
    public SpatialAccelerationCalculator(RigidBodyReadOnly body, ReferenceFrame inertialFrame, boolean doVelocityTerms)
    {
@@ -121,14 +121,14 @@ public class SpatialAccelerationCalculator implements RigidBodyAccelerationProvi
     * Creates a new {@code SpatialAccelerationCalculator} that will compute all the spatial
     * accelerations of all the rigid-bodies of the system to which {@code body} belongs.
     *
-    * @param body a body that belongs to the system this spatial acceleration calculator will be
-    *           available for.
-    * @param inertialFrame each rigid-body acceleration is calculated with respect to the inertial
-    *           frame.
-    * @param doVelocityTerms whether the centrifugal and Coriolis are considered or ignored in the
-    *           computation of the rigid-body accelerations.
+    * @param body                a body that belongs to the system this spatial acceleration calculator
+    *                            will be available for.
+    * @param inertialFrame       each rigid-body acceleration is calculated with respect to the
+    *                            inertial frame.
+    * @param doVelocityTerms     whether the centrifugal and Coriolis are considered or ignored in the
+    *                            computation of the rigid-body accelerations.
     * @param doAccelerationTerms whether the joint accelerations are considered or ignored in the
-    *           computation of the rigid-body accelerations.
+    *                            computation of the rigid-body accelerations.
     */
    public SpatialAccelerationCalculator(RigidBodyReadOnly body, ReferenceFrame inertialFrame, boolean doVelocityTerms, boolean doAccelerationTerms)
    {
@@ -147,7 +147,9 @@ public class SpatialAccelerationCalculator implements RigidBodyAccelerationProvi
       rigidBodiesWithAssignedAcceleration.add(rootBody);
       rigidBodyToAssignedAccelerationIndex.put(rootBody, new AccelerationIndex(0));
 
-      accelerationProvider = RigidBodyAccelerationProvider.toRigidBodyAccelerationProvider(this::getAccelerationOfBody, inertialFrame, doVelocityTerms,
+      accelerationProvider = RigidBodyAccelerationProvider.toRigidBodyAccelerationProvider(this::getAccelerationOfBody,
+                                                                                           inertialFrame,
+                                                                                           doVelocityTerms,
                                                                                            doAccelerationTerms);
    }
 
@@ -159,7 +161,7 @@ public class SpatialAccelerationCalculator implements RigidBodyAccelerationProvi
     * </p>
     *
     * @param gravity the gravitational linear acceleration, it is usually equal to
-    *           {@code (0, 0, -9.81)}.
+    *                {@code (0, 0, -9.81)}.
     */
    public void setGravitionalAcceleration(FrameTuple3DReadOnly gravity)
    {
@@ -175,7 +177,7 @@ public class SpatialAccelerationCalculator implements RigidBodyAccelerationProvi
     * </p>
     *
     * @param gravity the gravitational linear acceleration, it is usually equal to
-    *           {@code (0, 0, -9.81)}.
+    *                {@code (0, 0, -9.81)}.
     */
    public void setGravitionalAcceleration(Tuple3DReadOnly gravity)
    {
@@ -192,7 +194,7 @@ public class SpatialAccelerationCalculator implements RigidBodyAccelerationProvi
     * </p>
     *
     * @param gravity the gravitational linear acceleration along the z-axis, it is usually equal to
-    *           {@code -9.81}.
+    *                {@code -9.81}.
     */
    public void setGravitionalAcceleration(double gravity)
    {
@@ -207,11 +209,11 @@ public class SpatialAccelerationCalculator implements RigidBodyAccelerationProvi
     * </p>
     *
     * @param gravityX the gravitational linear acceleration along the x-axis, it is usually equal to
-    *           {@code 0}.
+    *                 {@code 0}.
     * @param gravityY the gravitational linear acceleration along the y-axis, it is usually equal to
-    *           {@code 0}.
+    *                 {@code 0}.
     * @param gravityZ the gravitational linear acceleration along the z-axis, it is usually equal to
-    *           {@code -9.81}.
+    *                 {@code -9.81}.
     */
    public void setGravitionalAcceleration(double gravityX, double gravityY, double gravityZ)
    {
@@ -228,8 +230,8 @@ public class SpatialAccelerationCalculator implements RigidBodyAccelerationProvi
     *
     * @param newRootAcceleration the new spatial acceleration of the root.
     * @throws ReferenceFrameMismatchException if any of the reference frames of
-    *            {@code newRootAcceleration} does not match this calculator's root spatial
-    *            acceleration's frames.
+    *                                         {@code newRootAcceleration} does not match this
+    *                                         calculator's root spatial acceleration's frames.
     */
    public void setRootAcceleration(SpatialAccelerationReadOnly newRootAcceleration)
    {

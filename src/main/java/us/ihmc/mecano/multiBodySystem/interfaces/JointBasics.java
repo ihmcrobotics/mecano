@@ -10,7 +10,7 @@ import us.ihmc.euclid.geometry.interfaces.Pose3DReadOnly;
 import us.ihmc.euclid.orientation.interfaces.Orientation3DReadOnly;
 import us.ihmc.euclid.referenceFrame.exceptions.ReferenceFrameMismatchException;
 import us.ihmc.euclid.referenceFrame.interfaces.FrameVector3DReadOnly;
-import us.ihmc.euclid.transform.RigidBodyTransform;
+import us.ihmc.euclid.transform.interfaces.RigidBodyTransformReadOnly;
 import us.ihmc.euclid.tuple3D.interfaces.Tuple3DReadOnly;
 import us.ihmc.euclid.tuple3D.interfaces.Vector3DReadOnly;
 import us.ihmc.mecano.multiBodySystem.RigidBody;
@@ -144,9 +144,9 @@ public interface JointBasics extends JointReadOnly
     * new robot configuration.
     * </p>
     *
-    * @param rowStart row index of the first component of this joint configuration.
-    * @param jointConfiguration the column vector from which the configuration of this joint is to be extracted.
-    *           Not modified.
+    * @param rowStart           row index of the first component of this joint configuration.
+    * @param jointConfiguration the column vector from which the configuration of this joint is to be
+    *                           extracted. Not modified.
     * @return {@code rowStart + this.getConfigurationMatrixSize()}.
     */
    int setJointConfiguration(int rowStart, DenseMatrix64F jointConfiguration);
@@ -163,9 +163,9 @@ public interface JointBasics extends JointReadOnly
     * the {@code afterJointFrame}.
     * </ul>
     *
-    * @param rowStart row index of the first component of this joint velocity.
+    * @param rowStart      row index of the first component of this joint velocity.
     * @param jointVelocity the column vector from which the current velocity of this joint is to be
-    *           extracted. Not modified.
+    *                      extracted. Not modified.
     * @return {@code rowStart + this.getDegreesOfFreedom()}.
     */
    int setJointVelocity(int rowStart, DenseMatrix64F jointVelocity);
@@ -182,9 +182,9 @@ public interface JointBasics extends JointReadOnly
     * {@code beforeJointFrame} expressed in the {@code afterJointFrame}.
     * </ul>
     *
-    * @param rowStart row index of the first component of this joint acceleration.
+    * @param rowStart          row index of the first component of this joint acceleration.
     * @param jointAcceleration the column vector from which the acceleration of this joint is to be
-    *           extracted. Not modified.
+    *                          extracted. Not modified.
     * @return {@code rowStart + this.getDegreesOfFreedom()}.
     */
    int setJointAcceleration(int rowStart, DenseMatrix64F jointAcceleration);
@@ -203,7 +203,7 @@ public interface JointBasics extends JointReadOnly
     *
     * @param rowStart row index of the first component of this joint configuration.
     * @param jointTau the column vector from which the configuration of this joint is to be extracted.
-    *           Not modified.
+    *                 Not modified.
     * @return {@code rowStart + this.getDegreesOfFreedom()}.
     */
    int setJointTau(int rowStart, DenseMatrix64F jointTau);
@@ -224,12 +224,12 @@ public interface JointBasics extends JointReadOnly
     * </p>
     *
     * @param jointConfiguration the transform containing the new configuration for this joint. Not
-    *           modified.
+    *                           modified.
     */
-   default void setJointConfiguration(RigidBodyTransform jointConfiguration)
+   default void setJointConfiguration(RigidBodyTransformReadOnly jointConfiguration)
    {
-      setJointOrientation(jointConfiguration.getRotationMatrix());
-      setJointPosition(jointConfiguration.getTranslationVector());
+      setJointOrientation(jointConfiguration.getRotation());
+      setJointPosition(jointConfiguration.getTranslation());
    }
 
    /**
@@ -247,7 +247,7 @@ public interface JointBasics extends JointReadOnly
     * </p>
     *
     * @param jointConfiguration the pose 3D containing the new configuration for this joint. Not
-    *           modified.
+    *                           modified.
     */
    default void setJointConfiguration(Pose3DReadOnly jointConfiguration)
    {
@@ -270,9 +270,9 @@ public interface JointBasics extends JointReadOnly
     * </p>
     *
     * @param jointOrientation the new orientation for this joint. Unused for a joint that cannot
-    *           rotate. Not modified.
-    * @param jointPosition the new position for this joint. Unused for a joint that cannot translate.
-    *           Not modified.
+    *                         rotate. Not modified.
+    * @param jointPosition    the new position for this joint. Unused for a joint that cannot
+    *                         translate. Not modified.
     */
    default void setJointConfiguration(Orientation3DReadOnly jointOrientation, Tuple3DReadOnly jointPosition)
    {
@@ -298,7 +298,7 @@ public interface JointBasics extends JointReadOnly
     * </p>
     *
     * @param jointOrientation the new orientation for this joint. Unused for a joint that cannot
-    *           rotate. Not modified.
+    *                         rotate. Not modified.
     */
    void setJointOrientation(Orientation3DReadOnly jointOrientation);
 
@@ -320,7 +320,7 @@ public interface JointBasics extends JointReadOnly
     * </p>
     *
     * @param jointPosition the new position for this joint. Unused for a joint that cannot translate.
-    *           Not modified.
+    *                      Not modified.
     */
    void setJointPosition(Tuple3DReadOnly jointPosition);
 
@@ -339,11 +339,11 @@ public interface JointBasics extends JointReadOnly
     *
     * @param jointTwist the new twist for this joint. Not modified.
     * @throws ReferenceFrameMismatchException if the given twist does not have the following frames:
-    *            <ul>
-    *            <li>{@code bodyFrame} is {@code afterJointFrame}.
-    *            <li>{@code baseFrame} is {@code beforeJointFrame}.
-    *            <li>{@code expressedInFrame} is {@code afterJointFrame}.
-    *            </ul>
+    *                                         <ul>
+    *                                         <li>{@code bodyFrame} is {@code afterJointFrame}.
+    *                                         <li>{@code baseFrame} is {@code beforeJointFrame}.
+    *                                         <li>{@code expressedInFrame} is {@code afterJointFrame}.
+    *                                         </ul>
     */
    default void setJointTwist(TwistReadOnly jointTwist)
    {
@@ -371,9 +371,9 @@ public interface JointBasics extends JointReadOnly
     * </p>
     *
     * @param jointAngularVelocity the new angular velocity for this joint. Unused if this joint cannot
-    *           rotate. Not modified.
+    *                             rotate. Not modified.
     * @throws ReferenceFrameMismatchException if the given vector is not expressed in
-    *            {@code frameAfterJoint}.
+    *                                         {@code frameAfterJoint}.
     */
    default void setJointAngularVelocity(FrameVector3DReadOnly jointAngularVelocity)
    {
@@ -402,9 +402,9 @@ public interface JointBasics extends JointReadOnly
     * </p>
     *
     * @param jointLinearVelocity the new linear velocity for this joint. Unused if this joint cannot
-    *           translate. Not modified.
+    *                            translate. Not modified.
     * @throws ReferenceFrameMismatchException if the given vector is not expressed in
-    *            {@code frameAfterJoint}.
+    *                                         {@code frameAfterJoint}.
     */
    default void setJointLinearVelocity(FrameVector3DReadOnly jointLinearVelocity)
    {
@@ -433,7 +433,7 @@ public interface JointBasics extends JointReadOnly
     * </p>
     *
     * @param jointAngularVelocity the new angular velocity for this joint. Unused if this joint cannot
-    *           rotate. Not modified.
+    *                             rotate. Not modified.
     */
    void setJointAngularVelocity(Vector3DReadOnly jointAngularVelocity);
 
@@ -459,7 +459,7 @@ public interface JointBasics extends JointReadOnly
     * </p>
     *
     * @param jointLinearVelocity the new linear velocity for this joint. Unused if this joint cannot
-    *           translate. Not modified.
+    *                            translate. Not modified.
     */
    void setJointLinearVelocity(Vector3DReadOnly jointLinearVelocity);
 
@@ -473,12 +473,12 @@ public interface JointBasics extends JointReadOnly
     *
     * @param jointAcceleration the new acceleration for this joint. Not modified.
     * @throws ReferenceFrameMismatchException if the given spatial acceleration does not have the
-    *            following frames:
-    *            <ul>
-    *            <li>{@code bodyFrame} is {@code afterJointFrame}.
-    *            <li>{@code baseFrame} is {@code beforeJointFrame}.
-    *            <li>{@code expressedInFrame} is {@code afterJointFrame}.
-    *            </ul>
+    *                                         following frames:
+    *                                         <ul>
+    *                                         <li>{@code bodyFrame} is {@code afterJointFrame}.
+    *                                         <li>{@code baseFrame} is {@code beforeJointFrame}.
+    *                                         <li>{@code expressedInFrame} is {@code afterJointFrame}.
+    *                                         </ul>
     */
    default void setJointAcceleration(SpatialAccelerationReadOnly jointAcceleration)
    {
@@ -501,9 +501,9 @@ public interface JointBasics extends JointReadOnly
     * </p>
     *
     * @param jointAngularAcceleration the new angular acceleration for this joint. Unused if this joint
-    *           cannot rotate. Not modified.
+    *                                 cannot rotate. Not modified.
     * @throws ReferenceFrameMismatchException if the given vector is not expressed in
-    *            {@code frameAfterJoint}.
+    *                                         {@code frameAfterJoint}.
     */
    default void setJointAngularAcceleration(FrameVector3DReadOnly jointAngularAcceleration)
    {
@@ -527,9 +527,9 @@ public interface JointBasics extends JointReadOnly
     * </p>
     *
     * @param jointLinearAcceleration the new linear acceleration for this joint. Unused if this joint
-    *           cannot translate. Not modified.
+    *                                cannot translate. Not modified.
     * @throws ReferenceFrameMismatchException if the given vector is not expressed in
-    *            {@code frameAfterJoint}.
+    *                                         {@code frameAfterJoint}.
     */
    default void setJointLinearAcceleration(FrameVector3DReadOnly jointLinearAcceleration)
    {
@@ -553,7 +553,7 @@ public interface JointBasics extends JointReadOnly
     * </p>
     *
     * @param jointAngularAcceleration the new angular velocity for this joint. Unused if this joint
-    *           cannot rotate. Not modified.
+    *                                 cannot rotate. Not modified.
     */
    void setJointAngularAcceleration(Vector3DReadOnly jointAngularAcceleration);
 
@@ -574,7 +574,7 @@ public interface JointBasics extends JointReadOnly
     * </p>
     *
     * @param jointLinearAcceleration the new linear acceleration for this joint. Unused if this joint
-    *           cannot translate. Not modified.
+    *                                cannot translate. Not modified.
     */
    void setJointLinearAcceleration(Vector3DReadOnly jointLinearAcceleration);
 
@@ -589,10 +589,11 @@ public interface JointBasics extends JointReadOnly
     *
     * @param jointWrench the new wrench for this joint. Not modified.
     * @throws ReferenceFrameMismatchException if the given wrench does not have the following frames:
-    *            <ul>
-    *            <li>{@code bodyFrame} is {@code successor.getBodyFixedFrame()}.
-    *            <li>{@code expressedInFrame} is {@code frameAfterJoint}.
-    *            </ul>
+    *                                         <ul>
+    *                                         <li>{@code bodyFrame} is
+    *                                         {@code successor.getBodyFixedFrame()}.
+    *                                         <li>{@code expressedInFrame} is {@code frameAfterJoint}.
+    *                                         </ul>
     */
    default void setJointWrench(WrenchReadOnly jointWrench)
    {
@@ -618,9 +619,9 @@ public interface JointBasics extends JointReadOnly
     * </p>
     *
     * @param jointTorque the new torque for this joint. Unused if this joint cannot rotate. Not
-    *           modified.
+    *                    modified.
     * @throws ReferenceFrameMismatchException if the given vector is not expressed in
-    *            {@code frameAfterJoint}.
+    *                                         {@code frameAfterJoint}.
     */
    default void setJointTorque(FrameVector3DReadOnly jointTorque)
    {
@@ -641,9 +642,9 @@ public interface JointBasics extends JointReadOnly
     * </p>
     *
     * @param jointForce the new force for this joint. Unused if this joint cannot translate. Not
-    *           modified.
+    *                   modified.
     * @throws ReferenceFrameMismatchException if the given vector is not expressed in
-    *            {@code frameAfterJoint}.
+    *                                         {@code frameAfterJoint}.
     */
    default void setJointForce(FrameVector3DReadOnly jointForce)
    {
@@ -668,7 +669,7 @@ public interface JointBasics extends JointReadOnly
     * </p>
     *
     * @param jointTorque the new torque for this joint. Unused if this joint cannot rotate. Not
-    *           modified.
+    *                    modified.
     */
    void setJointTorque(Vector3DReadOnly jointTorque);
 
@@ -688,7 +689,7 @@ public interface JointBasics extends JointReadOnly
     * </p>
     *
     * @param jointForce the new force for this joint. Unused if this joint cannot translate. Not
-    *           modified.
+    *                   modified.
     */
    void setJointForce(Vector3DReadOnly jointForce);
 

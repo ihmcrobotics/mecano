@@ -54,16 +54,16 @@ public class SpatialForce implements SpatialForceBasics, GeometryObject<SpatialF
    private final RigidBodyTransform transformToDesiredFrame = new RigidBodyTransform();
 
    /**
-    * Creates a new spatial force vector with its components set to zero and its reference frame set
-    * to {@code ReferenceFrame.getWorldFrame()}.
+    * Creates a new spatial force vector with its components set to zero and its reference frame set to
+    * {@code ReferenceFrame.getWorldFrame()}.
     */
    public SpatialForce()
    {
    }
 
    /**
-    * Creates a new spatial force vector with its components set to zero and initializes its
-    * reference frame.
+    * Creates a new spatial force vector with its components set to zero and initializes its reference
+    * frame.
     *
     * @param expressedInFrame the initial frame in which this vector is expressed.
     */
@@ -73,12 +73,12 @@ public class SpatialForce implements SpatialForceBasics, GeometryObject<SpatialF
    }
 
    /**
-    * Creates a new spatial force vector and initializes its components and the reference frame it
-    * is expressed in.
+    * Creates a new spatial force vector and initializes its components and the reference frame it is
+    * expressed in.
     *
     * @param expressedInFrame the initial frame in which this vector is expressed.
-    * @param angularPart the vector holding the values for the angular part. Not modified.
-    * @param linearPart the vector holding the values for the linear part. Not modified.
+    * @param angularPart      the vector holding the values for the angular part. Not modified.
+    * @param linearPart       the vector holding the values for the linear part. Not modified.
     */
    public SpatialForce(ReferenceFrame expressedInFrame, Vector3DReadOnly angularPart, Vector3DReadOnly linearPart)
    {
@@ -93,8 +93,8 @@ public class SpatialForce implements SpatialForceBasics, GeometryObject<SpatialF
     * </p>
     *
     * @param expressedInFrame the reference frame in which the data is expressed.
-    * @param matrix the column vector containing the values for this vector's components. Not
-    *           modified.
+    * @param matrix           the column vector containing the values for this vector's components. Not
+    *                         modified.
     */
    public SpatialForce(ReferenceFrame expressedInFrame, DenseMatrix64F matrix)
    {
@@ -109,7 +109,8 @@ public class SpatialForce implements SpatialForceBasics, GeometryObject<SpatialF
     * </p>
     *
     * @param expressedInFrame the reference frame in which the data is expressed.
-    * @param array the array containing the new values for this vector's components. Not modified.
+    * @param array            the array containing the new values for this vector's components. Not
+    *                         modified.
     */
    public SpatialForce(ReferenceFrame expressedInFrame, double[] array)
    {
@@ -162,8 +163,8 @@ public class SpatialForce implements SpatialForceBasics, GeometryObject<SpatialF
    }
 
    /**
-    * Transforms this vector such that the result is the same physical spatial force but expressed
-    * in a different frame.
+    * Transforms this vector such that the result is the same physical spatial force but expressed in a
+    * different frame.
     * <p>
     * Once this spatial force is transformed, the reference frame "expressed-in-frame" is updated to
     * {@code desiredFrame}. In the case, {@code this.expressedInFrame == desiredFrame}, this method
@@ -171,8 +172,7 @@ public class SpatialForce implements SpatialForceBasics, GeometryObject<SpatialF
     * </p>
     * <p>
     * Note that in addition to transforming the angular and linear parts so their components are
-    * expressed in {@code desiredFrame}, the moment is also affected by the position of the new
-    * frame.
+    * expressed in {@code desiredFrame}, the moment is also affected by the position of the new frame.
     * </p>
     * <p>
     * Effectively, the new spatial force F<sub>des</sub> = [&tau;<sub>new</sub>; f<sub>new</sub>] is
@@ -186,8 +186,8 @@ public class SpatialForce implements SpatialForceBasics, GeometryObject<SpatialF
     * where:
     * <ul>
     * <li>&tau; and f are the current angular and linear parts of this spatial vector,
-    * <li>R and P are the rotation and translation of the current "expressed-in-frame" with respect
-    * to the desired frame.
+    * <li>R and P are the rotation and translation of the current "expressed-in-frame" with respect to
+    * the desired frame.
     * </ul>
     * </p>
     * <p>
@@ -283,7 +283,7 @@ public class SpatialForce implements SpatialForceBasics, GeometryObject<SpatialF
     * Tests on a per component basis if this vector is equal to the given {@code other} to an
     * {@code epsilon} and both vectors are expressed in the same reference frame.
     *
-    * @param other the other vector to compare against this. Not modified.
+    * @param other   the other vector to compare against this. Not modified.
     * @param epsilon the tolerance to use when comparing each component.
     * @return {@code true} if the two vectors are equal, {@code false} otherwise.
     */
@@ -294,13 +294,12 @@ public class SpatialForce implements SpatialForceBasics, GeometryObject<SpatialF
    }
 
    /**
-    * Tests if {@code this} and {@code other} represent the same spatial force to an
-    * {@code epsilon}.
+    * Tests if {@code this} and {@code other} represent the same spatial force to an {@code epsilon}.
     * <p>
-    * It is likely that the implementation of this method will change in the future as the
-    * definition of "geometrically-equal" for spatial forces might evolve. In the meantime, the
-    * current assumption is that two spatial forces are geometrically equal if both their 3D torque
-    * and 3D force are independently geometrically equal, see
+    * It is likely that the implementation of this method will change in the future as the definition
+    * of "geometrically-equal" for spatial forces might evolve. In the meantime, the current assumption
+    * is that two spatial forces are geometrically equal if both their 3D torque and 3D force are
+    * independently geometrically equal, see
     * {@link Vector3DReadOnly#geometricallyEquals(Vector3DReadOnly, double)}.
     * </p>
     * <p>
@@ -308,12 +307,12 @@ public class SpatialForce implements SpatialForceBasics, GeometryObject<SpatialF
     * {@code this.epsilonEquals(other, epsilon)} and vice versa.
     * </p>
     *
-    * @param other the other vector to compare against this. Not modified.
+    * @param other   the other vector to compare against this. Not modified.
     * @param epsilon the tolerance to use for the comparison.
     * @return {@code true} if the two spatial forces represent the same physical quantity,
     *         {@code false} otherwise.
     * @throws ReferenceFrameMismatchException if the reference frames of {@code other} do not
-    *            respectively match the reference frames of {@code this}.
+    *                                         respectively match the reference frames of {@code this}.
     */
    @Override
    public boolean geometricallyEquals(SpatialForce other, double epsilon)
@@ -322,8 +321,8 @@ public class SpatialForce implements SpatialForceBasics, GeometryObject<SpatialF
    }
 
    /**
-    * Tests if the given {@code object}'s class is the same as this, in which case the method
-    * returns {@link #equals(SpatialVectorReadOnly)}, it returns {@code false} otherwise.
+    * Tests if the given {@code object}'s class is the same as this, in which case the method returns
+    * {@link #equals(SpatialVectorReadOnly)}, it returns {@code false} otherwise.
     *
     * @param object the object to compare against this. Not modified.
     * @return {@code true} if {@code object} and this are exactly equal, {@code false} otherwise.

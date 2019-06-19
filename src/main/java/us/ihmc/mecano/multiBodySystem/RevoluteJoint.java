@@ -4,6 +4,7 @@ import us.ihmc.euclid.orientation.interfaces.Orientation3DReadOnly;
 import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.referenceFrame.interfaces.FrameVector3DReadOnly;
 import us.ihmc.euclid.transform.RigidBodyTransform;
+import us.ihmc.euclid.transform.interfaces.RigidBodyTransformReadOnly;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple3D.interfaces.Tuple3DReadOnly;
 import us.ihmc.euclid.tuple3D.interfaces.Vector3DReadOnly;
@@ -34,9 +35,9 @@ public class RevoluteJoint extends OneDoFJoint implements RevoluteJointBasics
     * This constructor is typically used to create a root joint.
     * </p>
     * 
-    * @param name the name for the new joint.
+    * @param name        the name for the new joint.
     * @param predecessor the rigid-body connected to and preceding this joint.
-    * @param jointAxis the axis around which this joint can rotate. Not modified.
+    * @param jointAxis   the axis around which this joint can rotate. Not modified.
     */
    public RevoluteJoint(String name, RigidBodyBasics predecessor, Vector3DReadOnly jointAxis)
    {
@@ -46,11 +47,11 @@ public class RevoluteJoint extends OneDoFJoint implements RevoluteJointBasics
    /**
     * Creates a new revolute joint which has only a translation offset with respect to its parent.
     * 
-    * @param name the name for the new joint.
+    * @param name        the name for the new joint.
     * @param predecessor the rigid-body connected to and preceding this joint.
     * @param jointOffset the offset in translation with respect to the frame after the parent joint.
-    *           Not modified.
-    * @param jointAxis the axis around which this joint can rotate. Not modified.
+    *                    Not modified.
+    * @param jointAxis   the axis around which this joint can rotate. Not modified.
     */
    public RevoluteJoint(String name, RigidBodyBasics predecessor, Tuple3DReadOnly jointOffset, Vector3DReadOnly jointAxis)
    {
@@ -60,12 +61,12 @@ public class RevoluteJoint extends OneDoFJoint implements RevoluteJointBasics
    /**
     * Creates a new revolute joint.
     * 
-    * @param name the name for the new joint.
-    * @param predecessor the rigid-body connected to and preceding this joint.
+    * @param name              the name for the new joint.
+    * @param predecessor       the rigid-body connected to and preceding this joint.
     * @param transformToParent the transform to the frame after the parent joint. Not modified.
-    * @param jointAxis the axis around which this joint can rotate. Not modified.
+    * @param jointAxis         the axis around which this joint can rotate. Not modified.
     */
-   public RevoluteJoint(String name, RigidBodyBasics predecessor, RigidBodyTransform transformToParent, Vector3DReadOnly jointAxis)
+   public RevoluteJoint(String name, RigidBodyBasics predecessor, RigidBodyTransformReadOnly transformToParent, Vector3DReadOnly jointAxis)
    {
       super(name, predecessor, jointAxis, new Vector3D(), transformToParent);
       this.jointAxis = new FrameVector3D(beforeJointFrame, jointAxis);

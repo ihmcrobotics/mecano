@@ -63,7 +63,8 @@ public class ReferenceFrameTreeViewer
     */
    public ReferenceFrameTreeViewer addTransformToParentLabel()
    {
-      return addLabelProvider(frame -> {
+      return addLabelProvider(frame ->
+      {
          if (!frame.isRootFrame())
             return "Transform to parent:\n" + getTransformLabel(frame.getTransformToParent());
          else
@@ -197,8 +198,8 @@ public class ReferenceFrameTreeViewer
     */
    public static String getTransformLabel(RigidBodyTransform transform)
    {
-      String translationAsString = transform.getTranslationVector().toString();
-      return "(x,y,z) = " + translationAsString + "\n" + getOrientationLabel(transform.getRotationMatrix());
+      String translationAsString = transform.getTranslation().toString();
+      return "(x,y,z) = " + translationAsString + "\n" + getOrientationLabel(transform.getRotation());
    }
 
    /**

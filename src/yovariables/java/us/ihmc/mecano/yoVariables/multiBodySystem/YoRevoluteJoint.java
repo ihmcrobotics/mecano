@@ -35,10 +35,10 @@ public class YoRevoluteJoint extends YoOneDoFJoint implements RevoluteJointBasic
     * This constructor is typically used to create a root joint.
     * </p>
     *
-    * @param name the name for the new joint.
+    * @param name        the name for the new joint.
     * @param predecessor the rigid-body connected to and preceding this joint.
-    * @param jointAxis the axis around which this joint can rotate. Not modified.
-    * @param registry the registry to register child variables to.
+    * @param jointAxis   the axis around which this joint can rotate. Not modified.
+    * @param registry    the registry to register child variables to.
     */
    public YoRevoluteJoint(String name, RigidBodyBasics predecessor, Vector3DReadOnly jointAxis, YoVariableRegistry registry)
    {
@@ -46,15 +46,15 @@ public class YoRevoluteJoint extends YoOneDoFJoint implements RevoluteJointBasic
    }
 
    /**
-    * Creates a new revolute joint which has only a translation offset with respect to its parent
-    * and which state is backed by {@code YoVariable}s.
+    * Creates a new revolute joint which has only a translation offset with respect to its parent and
+    * which state is backed by {@code YoVariable}s.
     *
-    * @param name the name for the new joint.
+    * @param name        the name for the new joint.
     * @param predecessor the rigid-body connected to and preceding this joint.
     * @param jointOffset the offset in translation with respect to the frame after the parent joint.
-    *           Not modified.
-    * @param jointAxis the axis around which this joint can rotate. Not modified.
-    * @param registry the registry to register child variables to.
+    *                    Not modified.
+    * @param jointAxis   the axis around which this joint can rotate. Not modified.
+    * @param registry    the registry to register child variables to.
     */
    public YoRevoluteJoint(String name, RigidBodyBasics predecessor, Tuple3DReadOnly jointOffset, Vector3DReadOnly jointAxis, YoVariableRegistry registry)
    {
@@ -64,14 +64,14 @@ public class YoRevoluteJoint extends YoOneDoFJoint implements RevoluteJointBasic
    /**
     * Creates a new revolute joint which state is backed by {@code YoVariable}s.
     *
-    * @param name the name for the new joint.
-    * @param predecessor the rigid-body connected to and preceding this joint.
+    * @param name              the name for the new joint.
+    * @param predecessor       the rigid-body connected to and preceding this joint.
     * @param transformToParent the transform to the frame after the parent joint. Not modified.
-    * @param jointAxis the axis around which this joint can rotate. Not modified.
-    * @param registry the registry to register child variables to.
+    * @param jointAxis         the axis around which this joint can rotate. Not modified.
+    * @param registry          the registry to register child variables to.
     */
    public YoRevoluteJoint(String name, RigidBodyBasics predecessor, RigidBodyTransform transformToParent, Vector3DReadOnly jointAxis,
-         YoVariableRegistry registry)
+                          YoVariableRegistry registry)
    {
       super(name, predecessor, jointAxis, new Vector3D(), transformToParent, registry);
       this.jointAxis = new FrameVector3D(beforeJointFrame, jointAxis);

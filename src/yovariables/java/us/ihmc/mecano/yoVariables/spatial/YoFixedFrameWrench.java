@@ -60,10 +60,10 @@ public class YoFixedFrameWrench implements FixedFrameWrenchBasics, GeometryObjec
     * Note that the reference frames are final.
     * </p>
     * 
-    * @param namePrefix a unique name string to use as the prefix for child variable names.
-    * @param bodyFrame the frame rigidly attached to the body on which this wrench is applied.
+    * @param namePrefix       a unique name string to use as the prefix for child variable names.
+    * @param bodyFrame        the frame rigidly attached to the body on which this wrench is applied.
     * @param expressedInFrame the frame in which this wrench is expressed.
-    * @param registry the registry to register child variables to.
+    * @param registry         the registry to register child variables to.
     */
    public YoFixedFrameWrench(String namePrefix, ReferenceFrame bodyFrame, ReferenceFrame expressedInFrame, YoVariableRegistry registry)
    {
@@ -76,11 +76,11 @@ public class YoFixedFrameWrench implements FixedFrameWrenchBasics, GeometryObjec
     * Note that the reference frames are final.
     * </p>
     * 
-    * @param namePrefix a unique name string to use as the prefix for child variable names.
-    * @param nameSuffix a string to use as the suffix for child variable names.
-    * @param bodyFrame the frame rigidly attached to the body on which this wrench is applied.
+    * @param namePrefix       a unique name string to use as the prefix for child variable names.
+    * @param nameSuffix       a string to use as the suffix for child variable names.
+    * @param bodyFrame        the frame rigidly attached to the body on which this wrench is applied.
     * @param expressedInFrame the frame in which this wrench is expressed.
-    * @param registry the registry to register child variables to.
+    * @param registry         the registry to register child variables to.
     */
    public YoFixedFrameWrench(String namePrefix, String nameSuffix, ReferenceFrame bodyFrame, ReferenceFrame expressedInFrame, YoVariableRegistry registry)
    {
@@ -93,9 +93,9 @@ public class YoFixedFrameWrench implements FixedFrameWrenchBasics, GeometryObjec
     * Note that the reference frames are final.
     * </p>
     * 
-    * @param bodyFrame the frame rigidly attached to the body on which this wrench is applied.
+    * @param bodyFrame   the frame rigidly attached to the body on which this wrench is applied.
     * @param angularPart the vector to use for the angular part.
-    * @param linearPart the vector to use for the linear part.
+    * @param linearPart  the vector to use for the linear part.
     */
    public YoFixedFrameWrench(ReferenceFrame bodyFrame, YoFrameVector3D angularPart, YoFrameVector3D linearPart)
    {
@@ -103,13 +103,12 @@ public class YoFixedFrameWrench implements FixedFrameWrenchBasics, GeometryObjec
    }
 
    /**
-    * Creates a new wrench given the spatial vector holding data and initializes its reference
-    * frames.
+    * Creates a new wrench given the spatial vector holding data and initializes its reference frames.
     * <p>
     * Note that the reference frames are final.
     * </p>
     * 
-    * @param bodyFrame the frame rigidly attached to the body on which this wrench is applied.
+    * @param bodyFrame     the frame rigidly attached to the body on which this wrench is applied.
     * @param spatialVector the spatial vector to use for holding data.
     */
    public YoFixedFrameWrench(ReferenceFrame bodyFrame, YoFixedFrameSpatialVector spatialVector)
@@ -175,7 +174,7 @@ public class YoFixedFrameWrench implements FixedFrameWrenchBasics, GeometryObjec
     * Tests on a per component basis if this vector is equal to the given {@code other} to an
     * {@code epsilon} and both vectors have the same frames.
     *
-    * @param other the other wrench to compare against this. Not modified.
+    * @param other   the other wrench to compare against this. Not modified.
     * @param epsilon the tolerance to use when comparing each component.
     * @return {@code true} if the two vectors are equal, {@code false} otherwise.
     */
@@ -188,23 +187,22 @@ public class YoFixedFrameWrench implements FixedFrameWrenchBasics, GeometryObjec
    /**
     * Tests if {@code this} and {@code other} represent the same wrench to an {@code epsilon}.
     * <p>
-    * It is likely that the implementation of this method will change in the future as the
-    * definition of "geometrically-equal" for wrenches might evolve. In the meantime, the current
-    * assumption is that two wrenches are geometrically equal if both their 3D torque and 3D force
-    * are independently geometrically equal, see
-    * {@link Vector3DReadOnly#geometricallyEquals(Vector3DReadOnly, double)}.
+    * It is likely that the implementation of this method will change in the future as the definition
+    * of "geometrically-equal" for wrenches might evolve. In the meantime, the current assumption is
+    * that two wrenches are geometrically equal if both their 3D torque and 3D force are independently
+    * geometrically equal, see {@link Vector3DReadOnly#geometricallyEquals(Vector3DReadOnly, double)}.
     * </p>
     * <p>
     * Note that {@code this.geometricallyEquals(other, epsilon) == true} does not necessarily imply
     * {@code this.epsilonEquals(other, epsilon)} and vice versa.
     * </p>
     *
-    * @param other the other wrench to compare against this. Not modified.
+    * @param other   the other wrench to compare against this. Not modified.
     * @param epsilon the tolerance to use for the comparison.
     * @return {@code true} if the two wrenches represent the same physical quantity, {@code false}
     *         otherwise.
     * @throws ReferenceFrameMismatchException if the reference frames of {@code other} do not
-    *            respectively match the reference frames of {@code this}.
+    *                                         respectively match the reference frames of {@code this}.
     */
    @Override
    public boolean geometricallyEquals(YoFixedFrameWrench other, double epsilon)
@@ -213,8 +211,8 @@ public class YoFixedFrameWrench implements FixedFrameWrenchBasics, GeometryObjec
    }
 
    /**
-    * Tests if the given {@code object}'s class is the same as this, in which case the method
-    * returns {@link #equals(WrenchReadOnly)}, it returns {@code false} otherwise.
+    * Tests if the given {@code object}'s class is the same as this, in which case the method returns
+    * {@link #equals(WrenchReadOnly)}, it returns {@code false} otherwise.
     *
     * @param object the object to compare against this. Not modified.
     * @return {@code true} if {@code object} and this are exactly equal, {@code false} otherwise.

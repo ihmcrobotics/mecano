@@ -77,7 +77,7 @@ public class InverseDynamicsCalculator
     * </p>
     * 
     * @param rootBody the supporting body of the subtree to be evaluated by this calculator. Not
-    *           modified.
+    *                 modified.
     */
    public InverseDynamicsCalculator(RigidBodyReadOnly rootBody)
    {
@@ -92,12 +92,12 @@ public class InverseDynamicsCalculator
     * it.
     * </p>
     * 
-    * @param rootBody the supporting body of the subtree to be evaluated by this calculator. Not
-    *           modified.
+    * @param rootBody                             the supporting body of the subtree to be evaluated by
+    *                                             this calculator. Not modified.
     * @param considerCoriolisAndCentrifugalForces whether the effort resulting from the Coriolis and
-    *           centrifugal forces should be considered.
-    * @param considerJointAccelerations whether the effort resulting from the joint accelerations
-    *           should be considered.
+    *                                             centrifugal forces should be considered.
+    * @param considerJointAccelerations           whether the effort resulting from the joint
+    *                                             accelerations should be considered.
     */
    public InverseDynamicsCalculator(RigidBodyReadOnly rootBody, boolean considerCoriolisAndCentrifugalForces, boolean considerJointAccelerations)
    {
@@ -127,13 +127,17 @@ public class InverseDynamicsCalculator
     * it.
     * </p>
     * 
-    * @param input the definition of the system to be evaluated by this calculator.
+    * @param input                          the definition of the system to be evaluated by this
+    *                                       calculator.
     * @param considerIgnoredSubtreesInertia whether the inertia of the ignored part(s) of the given
-    *           multi-body system should be considered. When {@code true}, this provides more accurate
-    *           joint torques as they compensate for instance for the gravity acting on the ignored
-    *           rigid-bodies, i.e. bodies which have an ancestor joint that is ignored as specified in
-    *           the given {@code input}. When {@code false}, the resulting joint torques may be less
-    *           accurate and this calculator may gain slight performance improvement.
+    *                                       multi-body system should be considered. When {@code true},
+    *                                       this provides more accurate joint torques as they
+    *                                       compensate for instance for the gravity acting on the
+    *                                       ignored rigid-bodies, i.e. bodies which have an ancestor
+    *                                       joint that is ignored as specified in the given
+    *                                       {@code input}. When {@code false}, the resulting joint
+    *                                       torques may be less accurate and this calculator may gain
+    *                                       slight performance improvement.
     */
    public InverseDynamicsCalculator(MultiBodySystemReadOnly input, boolean considerIgnoredSubtreesInertia)
    {
@@ -148,11 +152,12 @@ public class InverseDynamicsCalculator
     * it.
     * </p>
     * 
-    * @param input the definition of the system to be evaluated by this calculator.
+    * @param input                                the definition of the system to be evaluated by this
+    *                                             calculator.
     * @param considerCoriolisAndCentrifugalForces whether the effort resulting from the Coriolis and
-    *           centrifugal forces should be considered.
-    * @param considerJointAccelerations whether the effort resulting from the joint accelerations
-    *           should be considered.
+    *                                             centrifugal forces should be considered.
+    * @param considerJointAccelerations           whether the effort resulting from the joint
+    *                                             accelerations should be considered.
     */
    public InverseDynamicsCalculator(MultiBodySystemReadOnly input, boolean considerCoriolisAndCentrifugalForces, boolean considerJointAccelerations)
    {
@@ -167,17 +172,22 @@ public class InverseDynamicsCalculator
     * it.
     * </p>
     * 
-    * @param input the definition of the system to be evaluated by this calculator.
+    * @param input                                the definition of the system to be evaluated by this
+    *                                             calculator.
     * @param considerCoriolisAndCentrifugalForces whether the effort resulting from the Coriolis and
-    *           centrifugal forces should be considered.
-    * @param considerJointAccelerations whether the effort resulting from the joint accelerations
-    *           should be considered.
-    * @param considerIgnoredSubtreesInertia whether the inertia of the ignored part(s) of the given
-    *           multi-body system should be considered. When {@code true}, this provides more accurate
-    *           joint torques as they compensate for instance for the gravity acting on the ignored
-    *           rigid-bodies, i.e. bodies which have an ancestor joint that is ignored as specified in
-    *           the given {@code input}. When {@code false}, the resulting joint torques may be less
-    *           accurate and this calculator may gain slight performance improvement.
+    *                                             centrifugal forces should be considered.
+    * @param considerJointAccelerations           whether the effort resulting from the joint
+    *                                             accelerations should be considered.
+    * @param considerIgnoredSubtreesInertia       whether the inertia of the ignored part(s) of the
+    *                                             given multi-body system should be considered. When
+    *                                             {@code true}, this provides more accurate joint
+    *                                             torques as they compensate for instance for the
+    *                                             gravity acting on the ignored rigid-bodies, i.e.
+    *                                             bodies which have an ancestor joint that is ignored
+    *                                             as specified in the given {@code input}. When
+    *                                             {@code false}, the resulting joint torques may be
+    *                                             less accurate and this calculator may gain slight
+    *                                             performance improvement.
     */
    public InverseDynamicsCalculator(MultiBodySystemReadOnly input, boolean considerCoriolisAndCentrifugalForces, boolean considerJointAccelerations,
                                     boolean considerIgnoredSubtreesInertia)
@@ -199,7 +209,8 @@ public class InverseDynamicsCalculator
       jointTauMatrix = new DenseMatrix64F(nDoFs, 1);
 
       accelerationProvider = RigidBodyAccelerationProvider.toRigidBodyAccelerationProvider(body -> rigidBodyToRecursionStepMap.get(body).rigidBodyAcceleration,
-                                                                                           input.getInertialFrame(), considerCoriolisAndCentrifugalForces,
+                                                                                           input.getInertialFrame(),
+                                                                                           considerCoriolisAndCentrifugalForces,
                                                                                            considerJointAccelerations);
    }
 
@@ -230,7 +241,7 @@ public class InverseDynamicsCalculator
     * </p>
     * 
     * @param gravity the gravitational linear acceleration, it is usually equal to
-    *           {@code (0, 0, -9.81)}.
+    *                {@code (0, 0, -9.81)}.
     */
    public void setGravitionalAcceleration(FrameTuple3DReadOnly gravity)
    {
@@ -246,7 +257,7 @@ public class InverseDynamicsCalculator
     * </p>
     * 
     * @param gravity the gravitational linear acceleration, it is usually equal to
-    *           {@code (0, 0, -9.81)}.
+    *                {@code (0, 0, -9.81)}.
     */
    public void setGravitionalAcceleration(Tuple3DReadOnly gravity)
    {
@@ -263,7 +274,7 @@ public class InverseDynamicsCalculator
     * </p>
     * 
     * @param gravity the gravitational linear acceleration along the z-axis, it is usually equal to
-    *           {@code -9.81}.
+    *                {@code -9.81}.
     */
    public void setGravitionalAcceleration(double gravity)
    {
@@ -278,11 +289,11 @@ public class InverseDynamicsCalculator
     * </p>
     * 
     * @param gravityX the gravitational linear acceleration along the x-axis, it is usually equal to
-    *           {@code 0}.
+    *                 {@code 0}.
     * @param gravityY the gravitational linear acceleration along the y-axis, it is usually equal to
-    *           {@code 0}.
+    *                 {@code 0}.
     * @param gravityZ the gravitational linear acceleration along the z-axis, it is usually equal to
-    *           {@code -9.81}.
+    *                 {@code -9.81}.
     */
    public void setGravitionalAcceleration(double gravityX, double gravityY, double gravityZ)
    {
@@ -299,8 +310,8 @@ public class InverseDynamicsCalculator
     * 
     * @param newRootAcceleration the new spatial acceleration of the root.
     * @throws ReferenceFrameMismatchException if any of the reference frames of
-    *            {@code newRootAcceleration} does not match this calculator's root spatial
-    *            acceleration's frames.
+    *                                         {@code newRootAcceleration} does not match this
+    *                                         calculator's root spatial acceleration's frames.
     */
    public void setRootAcceleration(SpatialAccelerationReadOnly newRootAcceleration)
    {
@@ -332,7 +343,7 @@ public class InverseDynamicsCalculator
    /**
     * Sets external wrench to apply to the given {@code rigidBody}.
     * 
-    * @param rigidBody the rigid-body to which the wrench is to applied. Not modified.
+    * @param rigidBody      the rigid-body to which the wrench is to applied. Not modified.
     * @param externalWrench the external wrench to apply to the rigid-body.
     */
    public void setExternalWrench(RigidBodyReadOnly rigidBody, WrenchReadOnly externalWrench)
@@ -360,7 +371,7 @@ public class InverseDynamicsCalculator
     * </p>
     * 
     * @param jointAccelerationMatrix the matrix containing the joint accelerations to use. Not
-    *           modified.
+    *                                modified.
     */
    public void compute(DenseMatrix64F jointAccelerationMatrix)
    {

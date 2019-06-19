@@ -56,13 +56,13 @@ import us.ihmc.yoVariables.variable.YoVariable;
 public class YoFixedFrameSpatialAcceleration implements FixedFrameSpatialAccelerationBasics, GeometryObject<YoFixedFrameSpatialAcceleration>
 {
    /**
-    * Reference frame rigidly attached to the body that this spatial acceleration describes the
-    * motion of.
+    * Reference frame rigidly attached to the body that this spatial acceleration describes the motion
+    * of.
     */
    private final ReferenceFrame bodyFrame;
    /**
-    * Reference frame rigidly attached to the base that this spatial acceleration uses as reference
-    * for quantifying the body's acceleration.
+    * Reference frame rigidly attached to the base that this spatial acceleration uses as reference for
+    * quantifying the body's acceleration.
     */
    private final ReferenceFrame baseFrame;
    /** This is where we store the internal data. */
@@ -71,40 +71,40 @@ public class YoFixedFrameSpatialAcceleration implements FixedFrameSpatialAcceler
    private final Point3D observerPosition = new Point3D();
 
    /**
-    * Creates a new spatial acceleration with its components set to zero and initializes its
-    * reference frames.
+    * Creates a new spatial acceleration with its components set to zero and initializes its reference
+    * frames.
     * <p>
     * Note that the reference frames are final.
     * </p>
     * 
-    * @param namePrefix a unique name string to use as the prefix for child variable names.
-    * @param bodyFrame what we are specifying the spatial acceleration of.
-    * @param baseFrame with respect to what we are specifying the spatial acceleration.
+    * @param namePrefix       a unique name string to use as the prefix for child variable names.
+    * @param bodyFrame        what we are specifying the spatial acceleration of.
+    * @param baseFrame        with respect to what we are specifying the spatial acceleration.
     * @param expressedInFrame in which reference frame the spatial acceleration is expressed.
-    * @param registry the registry to register child variables to.
+    * @param registry         the registry to register child variables to.
     */
    public YoFixedFrameSpatialAcceleration(String namePrefix, ReferenceFrame bodyFrame, ReferenceFrame baseFrame, ReferenceFrame expressedInFrame,
-         YoVariableRegistry registry)
+                                          YoVariableRegistry registry)
    {
       this(bodyFrame, baseFrame, new YoFixedFrameSpatialVector(namePrefix, expressedInFrame, registry));
    }
 
    /**
-    * Creates a new spatial acceleration with its components set to zero and initializes its
-    * reference frames.
+    * Creates a new spatial acceleration with its components set to zero and initializes its reference
+    * frames.
     * <p>
     * Note that the reference frames are final.
     * </p>
     * 
-    * @param namePrefix a unique name string to use as the prefix for child variable names.
-    * @param nameSuffix a string to use as the suffix for child variable names.
-    * @param bodyFrame what we are specifying the spatial acceleration of.
-    * @param baseFrame with respect to what we are specifying the spatial acceleration.
+    * @param namePrefix       a unique name string to use as the prefix for child variable names.
+    * @param nameSuffix       a string to use as the suffix for child variable names.
+    * @param bodyFrame        what we are specifying the spatial acceleration of.
+    * @param baseFrame        with respect to what we are specifying the spatial acceleration.
     * @param expressedInFrame in which reference frame the spatial acceleration is expressed.
-    * @param registry the registry to register child variables to.
+    * @param registry         the registry to register child variables to.
     */
    public YoFixedFrameSpatialAcceleration(String namePrefix, String nameSuffix, ReferenceFrame bodyFrame, ReferenceFrame baseFrame,
-         ReferenceFrame expressedInFrame, YoVariableRegistry registry)
+                                          ReferenceFrame expressedInFrame, YoVariableRegistry registry)
    {
       this(bodyFrame, baseFrame, new YoFixedFrameSpatialVector(namePrefix, nameSuffix, expressedInFrame, registry));
    }
@@ -116,10 +116,10 @@ public class YoFixedFrameSpatialAcceleration implements FixedFrameSpatialAcceler
     * Note that the reference frames are final.
     * </p>
     * 
-    * @param bodyFrame what we are specifying the spatial acceleration of.
-    * @param baseFrame with respect to what we are specifying the spatial acceleration.
+    * @param bodyFrame   what we are specifying the spatial acceleration of.
+    * @param baseFrame   with respect to what we are specifying the spatial acceleration.
     * @param angularPart the vector to use for the angular part.
-    * @param linearPart the vector to use for the linear part.
+    * @param linearPart  the vector to use for the linear part.
     */
    public YoFixedFrameSpatialAcceleration(ReferenceFrame bodyFrame, ReferenceFrame baseFrame, YoFrameVector3D angularPart, YoFrameVector3D linearPart)
    {
@@ -133,8 +133,8 @@ public class YoFixedFrameSpatialAcceleration implements FixedFrameSpatialAcceler
     * Note that the reference frames are final.
     * </p>
     * 
-    * @param bodyFrame what we are specifying the spatial acceleration of.
-    * @param baseFrame with respect to what we are specifying the spatial acceleration.
+    * @param bodyFrame     what we are specifying the spatial acceleration of.
+    * @param baseFrame     with respect to what we are specifying the spatial acceleration.
     * @param spatialVector the spatial vector to use for holding data.
     */
    public YoFixedFrameSpatialAcceleration(ReferenceFrame bodyFrame, ReferenceFrame baseFrame, YoFixedFrameSpatialVector spatialVector)
@@ -258,7 +258,7 @@ public class YoFixedFrameSpatialAcceleration implements FixedFrameSpatialAcceler
     * Tests on a per component basis if this vector is equal to the given {@code other} to an
     * {@code epsilon} and both vectors have the same frames.
     *
-    * @param other the other motion vector to compare against this. Not modified.
+    * @param other   the other motion vector to compare against this. Not modified.
     * @param epsilon the tolerance to use when comparing each component.
     * @return {@code true} if the two vectors are equal, {@code false} otherwise.
     */
@@ -272,10 +272,10 @@ public class YoFixedFrameSpatialAcceleration implements FixedFrameSpatialAcceler
     * Tests if {@code this} and {@code other} represent the same spatial acceleration to an
     * {@code epsilon}.
     * <p>
-    * It is likely that the implementation of this method will change in the future as the
-    * definition of "geometrically-equal" for spatial accelerations might evolve. In the meantime,
-    * the current assumption is that two spatial accelerations are geometrically equal if both their
-    * 3D angular and 3D linear accelerations are independently geometrically equal, see
+    * It is likely that the implementation of this method will change in the future as the definition
+    * of "geometrically-equal" for spatial accelerations might evolve. In the meantime, the current
+    * assumption is that two spatial accelerations are geometrically equal if both their 3D angular and
+    * 3D linear accelerations are independently geometrically equal, see
     * {@link Vector3DReadOnly#geometricallyEquals(Vector3DReadOnly, double)}.
     * </p>
     * <p>
@@ -283,12 +283,12 @@ public class YoFixedFrameSpatialAcceleration implements FixedFrameSpatialAcceler
     * {@code this.epsilonEquals(other, epsilon)} and vice versa.
     * </p>
     *
-    * @param other the other spatial acceleration to compare against this. Not modified.
+    * @param other   the other spatial acceleration to compare against this. Not modified.
     * @param epsilon the tolerance to use for the comparison.
     * @return {@code true} if the two spatial accelerations represent the same physical quantity,
     *         {@code false} otherwise.
     * @throws ReferenceFrameMismatchException if the reference frames of {@code other} do not
-    *            respectively match the reference frames of {@code this}.
+    *                                         respectively match the reference frames of {@code this}.
     */
    @Override
    public boolean geometricallyEquals(YoFixedFrameSpatialAcceleration other, double epsilon)
@@ -297,8 +297,8 @@ public class YoFixedFrameSpatialAcceleration implements FixedFrameSpatialAcceler
    }
 
    /**
-    * Tests if the given {@code object}'s class is the same as this, in which case the method
-    * returns {@link #equals(SpatialVectorReadOnly)}, it returns {@code false} otherwise.
+    * Tests if the given {@code object}'s class is the same as this, in which case the method returns
+    * {@link #equals(SpatialVectorReadOnly)}, it returns {@code false} otherwise.
     *
     * @param object the object to compare against this. Not modified.
     * @return {@code true} if {@code object} and this are exactly equal, {@code false} otherwise.
@@ -314,8 +314,8 @@ public class YoFixedFrameSpatialAcceleration implements FixedFrameSpatialAcceler
 
    /**
     * Provides a {@code String} representation of this spatial acceleration vector as follows:<br>
-    * Spatial acceleration of bodyFrame, with respect to baseFrame: [angular = (x, y, z), linear =
-    * (x, y, z)] - expressedInFrame
+    * Spatial acceleration of bodyFrame, with respect to baseFrame: [angular = (x, y, z), linear = (x,
+    * y, z)] - expressedInFrame
     *
     * @return the {@code String} representing this spatial acceleration vector.
     */

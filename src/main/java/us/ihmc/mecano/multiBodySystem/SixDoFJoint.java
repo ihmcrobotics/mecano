@@ -5,7 +5,7 @@ import java.util.List;
 import us.ihmc.euclid.geometry.Pose3D;
 import us.ihmc.euclid.geometry.interfaces.Pose3DBasics;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
-import us.ihmc.euclid.transform.RigidBodyTransform;
+import us.ihmc.euclid.transform.interfaces.RigidBodyTransformReadOnly;
 import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
 import us.ihmc.mecano.multiBodySystem.interfaces.SixDoFJointBasics;
 import us.ihmc.mecano.spatial.SpatialAcceleration;
@@ -46,7 +46,7 @@ public class SixDoFJoint extends Joint implements SixDoFJointBasics
     * the multi-body system.
     * </p>
     * 
-    * @param name the name for the new joint.
+    * @param name        the name for the new joint.
     * @param predecessor the rigid-body connected to and preceding this joint.
     */
    public SixDoFJoint(String name, RigidBodyBasics predecessor)
@@ -57,11 +57,11 @@ public class SixDoFJoint extends Joint implements SixDoFJointBasics
    /**
     * Creates a new 6-DoF joint.
     * 
-    * @param name the name for the new joint.
-    * @param predecessor the rigid-body connected to and preceding this joint.
+    * @param name              the name for the new joint.
+    * @param predecessor       the rigid-body connected to and preceding this joint.
     * @param transformToParent the transform to the frame after the parent joint. Not modified.
     */
-   public SixDoFJoint(String name, RigidBodyBasics predecessor, RigidBodyTransform transformToParent)
+   public SixDoFJoint(String name, RigidBodyBasics predecessor, RigidBodyTransformReadOnly transformToParent)
    {
       super(name, predecessor, transformToParent);
       jointTwist = new Twist(afterJointFrame, beforeJointFrame, afterJointFrame);

@@ -3,6 +3,7 @@ package us.ihmc.mecano.multiBodySystem;
 import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.referenceFrame.interfaces.FrameVector3DReadOnly;
 import us.ihmc.euclid.transform.RigidBodyTransform;
+import us.ihmc.euclid.transform.interfaces.RigidBodyTransformReadOnly;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple3D.interfaces.Tuple3DReadOnly;
 import us.ihmc.euclid.tuple3D.interfaces.Vector3DReadOnly;
@@ -24,11 +25,11 @@ public class PrismaticJoint extends OneDoFJoint implements PrismaticJointBasics
    /**
     * Creates a new prismatic joint which has only a translation offset with respect to its parent.
     * 
-    * @param name the name for the new joint.
+    * @param name        the name for the new joint.
     * @param predecessor the rigid-body connected to and preceding this joint.
     * @param jointOffset the offset in translation with respect to the frame after the parent joint.
-    *           Not modified.
-    * @param jointAxis the axis along which this joint can translate. Not modified.
+    *                    Not modified.
+    * @param jointAxis   the axis along which this joint can translate. Not modified.
     */
    public PrismaticJoint(String name, RigidBodyBasics predecessor, Tuple3DReadOnly jointOffset, Vector3DReadOnly jointAxis)
    {
@@ -38,12 +39,12 @@ public class PrismaticJoint extends OneDoFJoint implements PrismaticJointBasics
    /**
     * Creates a new prismatic joint.
     * 
-    * @param name the name for the new joint.
-    * @param predecessor the rigid-body connected to and preceding this joint.
+    * @param name              the name for the new joint.
+    * @param predecessor       the rigid-body connected to and preceding this joint.
     * @param transformToParent the transform to the frame after the parent joint. Not modified.
-    * @param jointAxis the axis along which this joint can translate. Not modified.
+    * @param jointAxis         the axis along which this joint can translate. Not modified.
     */
-   public PrismaticJoint(String name, RigidBodyBasics predecessor, RigidBodyTransform transformToParent, Vector3DReadOnly jointAxis)
+   public PrismaticJoint(String name, RigidBodyBasics predecessor, RigidBodyTransformReadOnly transformToParent, Vector3DReadOnly jointAxis)
    {
       super(name, predecessor, new Vector3D(), jointAxis, transformToParent);
       this.jointAxis = new FrameVector3D(beforeJointFrame, jointAxis);

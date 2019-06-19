@@ -48,8 +48,8 @@ public class MultiBodySystemFactoriesTest
             assertEquals(originalSuccessors.size(), bodyNames.size());
          }
          String cloneSuffix = "Test";
-         List<JointBasics> cloneJoints = Arrays
-               .asList(MultiBodySystemFactories.cloneKinematicChain(originalJoints.toArray(new JointBasics[originalJoints.size()]), cloneSuffix));
+         List<JointBasics> cloneJoints = Arrays.asList(MultiBodySystemFactories.cloneKinematicChain(originalJoints.toArray(new JointBasics[originalJoints.size()]),
+                                                                                                    cloneSuffix));
          List<RigidBodyBasics> cloneSuccessors = cloneJoints.stream().map(JointBasics::getSuccessor).collect(Collectors.toList());
          RigidBodyBasics cloneStart = MultiBodySystemTools.getRootBody(cloneSuccessors.get(0));
          { // Perform assertions on the cloneStart
@@ -103,15 +103,19 @@ public class MultiBodySystemFactoriesTest
          originalStart.updateFramesRecursively();
          cloneStart.updateFramesRecursively();
          EuclidCoreTestTools.assertRigidBodyTransformEquals(originalStart.getParentJoint().getFrameAfterJoint().getTransformToRoot(),
-               cloneStart.getBodyFixedFrame().getTransformToRoot(), EPSILON);
+                                                            cloneStart.getBodyFixedFrame().getTransformToRoot(),
+                                                            EPSILON);
          EuclidCoreTestTools.assertRigidBodyTransformEquals(originalJoints.get(0).getFrameBeforeJoint().getTransformToRoot(),
-               cloneJoints.get(0).getFrameBeforeJoint().getTransformToRoot(), EPSILON);
+                                                            cloneJoints.get(0).getFrameBeforeJoint().getTransformToRoot(),
+                                                            EPSILON);
          MultiBodySystemRandomTools.nextState(random, JointStateType.CONFIGURATION, supportJoints);
          MultiBodySystemTools.getRootBody(supportJoints.get(0).getPredecessor()).updateFramesRecursively();
          EuclidCoreTestTools.assertRigidBodyTransformEquals(originalStart.getParentJoint().getFrameAfterJoint().getTransformToRoot(),
-               cloneStart.getBodyFixedFrame().getTransformToRoot(), EPSILON);
+                                                            cloneStart.getBodyFixedFrame().getTransformToRoot(),
+                                                            EPSILON);
          EuclidCoreTestTools.assertRigidBodyTransformEquals(originalJoints.get(0).getFrameBeforeJoint().getTransformToRoot(),
-               cloneJoints.get(0).getFrameBeforeJoint().getTransformToRoot(), EPSILON);
+                                                            cloneJoints.get(0).getFrameBeforeJoint().getTransformToRoot(),
+                                                            EPSILON);
          MultiBodySystemRandomTools.nextState(random, JointStateType.CONFIGURATION, originalJoints);
          MultiBodySystemTools.copyJointsState(originalJoints, cloneJoints, JointStateType.CONFIGURATION);
          originalStart.updateFramesRecursively();
@@ -120,13 +124,15 @@ public class MultiBodySystemFactoriesTest
          {
             ReferenceFrame originalFrameAfterJoint = originalJoints.get(jointIndex).getFrameAfterJoint();
             ReferenceFrame cloneFrameAfterJoint = cloneJoints.get(jointIndex).getFrameAfterJoint();
-            EuclidCoreTestTools.assertRigidBodyTransformEquals(originalFrameAfterJoint.getTransformToParent(), cloneFrameAfterJoint.getTransformToParent(),
-                  EPSILON);
+            EuclidCoreTestTools.assertRigidBodyTransformEquals(originalFrameAfterJoint.getTransformToParent(),
+                                                               cloneFrameAfterJoint.getTransformToParent(),
+                                                               EPSILON);
          }
          RigidBodyReadOnly originalLeaf = originalJoints.get(originalJoints.size() - 1).getSuccessor();
          RigidBodyReadOnly cloneLeaf = cloneJoints.get(cloneJoints.size() - 1).getSuccessor();
          EuclidCoreTestTools.assertRigidBodyTransformEquals(originalLeaf.getBodyFixedFrame().getTransformToRoot(),
-               cloneLeaf.getBodyFixedFrame().getTransformToRoot(), EPSILON);
+                                                            cloneLeaf.getBodyFixedFrame().getTransformToRoot(),
+                                                            EPSILON);
       }
    }
 
@@ -211,16 +217,20 @@ public class MultiBodySystemFactoriesTest
          originalStart.updateFramesRecursively();
          cloneStart.updateFramesRecursively();
          EuclidCoreTestTools.assertRigidBodyTransformEquals(originalStart.getParentJoint().getFrameAfterJoint().getTransformToRoot(),
-               cloneStart.getBodyFixedFrame().getTransformToRoot(), EPSILON);
+                                                            cloneStart.getBodyFixedFrame().getTransformToRoot(),
+                                                            EPSILON);
          EuclidCoreTestTools.assertRigidBodyTransformEquals(originalJoints.get(0).getFrameBeforeJoint().getTransformToRoot(),
-               cloneJoints.get(0).getFrameBeforeJoint().getTransformToRoot(), EPSILON);
+                                                            cloneJoints.get(0).getFrameBeforeJoint().getTransformToRoot(),
+                                                            EPSILON);
 
          MultiBodySystemRandomTools.nextState(random, JointStateType.CONFIGURATION, supportJoints);
          MultiBodySystemTools.getRootBody(supportJoints.get(0).getPredecessor()).updateFramesRecursively();
          EuclidCoreTestTools.assertRigidBodyTransformEquals(originalStart.getParentJoint().getFrameAfterJoint().getTransformToRoot(),
-               cloneStart.getBodyFixedFrame().getTransformToRoot(), EPSILON);
+                                                            cloneStart.getBodyFixedFrame().getTransformToRoot(),
+                                                            EPSILON);
          EuclidCoreTestTools.assertRigidBodyTransformEquals(originalJoints.get(0).getFrameBeforeJoint().getTransformToRoot(),
-               cloneJoints.get(0).getFrameBeforeJoint().getTransformToRoot(), EPSILON);
+                                                            cloneJoints.get(0).getFrameBeforeJoint().getTransformToRoot(),
+                                                            EPSILON);
 
          MultiBodySystemRandomTools.nextState(random, JointStateType.CONFIGURATION, originalJoints);
          MultiBodySystemTools.copyJointsState(originalJoints, cloneJoints, JointStateType.CONFIGURATION);
@@ -231,14 +241,16 @@ public class MultiBodySystemFactoriesTest
          {
             ReferenceFrame originalFrameAfterJoint = originalJoints.get(jointIndex).getFrameAfterJoint();
             ReferenceFrame cloneFrameAfterJoint = cloneJoints.get(jointIndex).getFrameAfterJoint();
-            EuclidCoreTestTools.assertRigidBodyTransformEquals(originalFrameAfterJoint.getTransformToParent(), cloneFrameAfterJoint.getTransformToParent(),
-                  EPSILON);
+            EuclidCoreTestTools.assertRigidBodyTransformEquals(originalFrameAfterJoint.getTransformToParent(),
+                                                               cloneFrameAfterJoint.getTransformToParent(),
+                                                               EPSILON);
          }
 
          RigidBodyReadOnly originalLeaf = originalJoints.get(originalJoints.size() - 1).getSuccessor();
          RigidBodyReadOnly cloneLeaf = cloneJoints.get(cloneJoints.size() - 1).getSuccessor();
          EuclidCoreTestTools.assertRigidBodyTransformEquals(originalLeaf.getBodyFixedFrame().getTransformToRoot(),
-               cloneLeaf.getBodyFixedFrame().getTransformToRoot(), EPSILON);
+                                                            cloneLeaf.getBodyFixedFrame().getTransformToRoot(),
+                                                            EPSILON);
       }
    }
 
@@ -365,8 +377,9 @@ public class MultiBodySystemFactoriesTest
       else
          assertEquals(frameBeforeOriginalJoint.getName() + cloneSuffix, frameBeforeCloneJoint.getName());
       // Test clone joint offset
-      EuclidCoreTestTools.assertRigidBodyTransformEquals(frameBeforeOriginalJoint.getTransformToParent(), frameBeforeCloneJoint.getTransformToParent(),
-            EPSILON);
+      EuclidCoreTestTools.assertRigidBodyTransformEquals(frameBeforeOriginalJoint.getTransformToParent(),
+                                                         frameBeforeCloneJoint.getTransformToParent(),
+                                                         EPSILON);
       // Test clone type
       assertEquals(originalJoint.getClass(), cloneJoint.getClass());
 

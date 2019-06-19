@@ -167,8 +167,9 @@ public class JointIterableTest
                JointBasics grandChildJoint = childJoint.getSuccessor().getChildrenJoints().get(grandChildIndex);
                assertTrue(iterator.hasNext());
                JointReadOnly actual = iterator.next();
-               assertTrue(grandChildJoint == actual, "child: " + childIndex + ", grand-child: " + grandChildIndex + ", expected: " + grandChildJoint.getName()
-                     + ", actual: " + actual.getName());
+               assertTrue(grandChildJoint == actual,
+                          "child: " + childIndex + ", grand-child: " + grandChildIndex + ", expected: " + grandChildJoint.getName() + ", actual: "
+                                + actual.getName());
             }
          }
       }

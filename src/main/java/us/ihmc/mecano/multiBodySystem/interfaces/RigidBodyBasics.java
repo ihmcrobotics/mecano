@@ -36,8 +36,8 @@ public interface RigidBodyBasics extends RigidBodyReadOnly
    /**
     * Gets the reference to the parent joint of this rigid-body.
     * <p>
-    * The parent joint is the joint directed connected to this rigid-body and located between this
-    * and the root body of the robot.
+    * The parent joint is the joint directed connected to this rigid-body and located between this and
+    * the root body of the robot.
     * </p>
     *
     * @return the reference to the parent joint or {@code null} if this rigid-body is a root body.
@@ -65,14 +65,14 @@ public interface RigidBodyBasics extends RigidBodyReadOnly
    /**
     * Changes the position of this rigid-body's center of mass.
     * <p>
-    * Note that the center of mass position should only be set at construction time and that
-    * changing it at runtime might result in undesirable effects as some modules may not anticipate
-    * such a change or may not consider the case where the body-fixed-frame is not centered at the
-    * center of mass position.
+    * Note that the center of mass position should only be set at construction time and that changing
+    * it at runtime might result in undesirable effects as some modules may not anticipate such a
+    * change or may not consider the case where the body-fixed-frame is not centered at the center of
+    * mass position.
     * </p>
     *
     * @param centerOfMass the new coordinates of this rigid-body's center of mass position. Not
-    *           modified.
+    *                     modified.
     */
    default void setCenterOfMass(FramePoint3DReadOnly centerOfMass)
    {

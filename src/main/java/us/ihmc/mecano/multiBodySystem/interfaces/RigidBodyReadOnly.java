@@ -115,7 +115,7 @@ public interface RigidBodyReadOnly
     * </p>
     *
     * @param centerOfMassToPack the {@code FramePoint} in which the center of mass position is stored.
-    *           Modified.
+    *                           Modified.
     */
    default void getCenterOfMass(FramePoint3DBasics centerOfMassToPack)
    {

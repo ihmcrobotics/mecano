@@ -5,7 +5,7 @@ import us.ihmc.euclid.referenceFrame.exceptions.ReferenceFrameMismatchException;
 import us.ihmc.euclid.referenceFrame.interfaces.FixedFrameVector3DBasics;
 import us.ihmc.euclid.referenceFrame.interfaces.FramePoint3DReadOnly;
 import us.ihmc.euclid.referenceFrame.interfaces.FrameVector3DReadOnly;
-import us.ihmc.euclid.transform.RigidBodyTransform;
+import us.ihmc.euclid.transform.interfaces.RigidBodyTransformReadOnly;
 import us.ihmc.euclid.transform.interfaces.Transform;
 import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
 import us.ihmc.euclid.tuple3D.interfaces.Vector3DReadOnly;
@@ -87,8 +87,8 @@ public interface FixedFrameSpatialForceBasics extends SpatialForceReadOnly, Fixe
     * When the given {@code angularPart} is {@code null}, it is assumed to be zero.
     * </p>
     *
-    * @param angularPart the 3D moment that is applied. Can be {@code null}. Not modified.
-    * @param linearPart the 3D force that is applied. Not modified.
+    * @param angularPart        the 3D moment that is applied. Can be {@code null}. Not modified.
+    * @param linearPart         the 3D force that is applied. Not modified.
     * @param pointOfApplication the location where the force is exerted. Not modified.
     */
    default void set(Vector3DReadOnly angularPart, Vector3DReadOnly linearPart, Point3DReadOnly pointOfApplication)
@@ -120,12 +120,13 @@ public interface FixedFrameSpatialForceBasics extends SpatialForceReadOnly, Fixe
     * When the given {@code angularPart} is {@code null}, it is assumed to be zero.
     * </p>
     *
-    * @param expressedInFrame the reference frame in which the arguments are expressed.
-    * @param angularPart the 3D moment that is applied. Can be {@code null}. Not modified.
-    * @param linearPart the 3D force that is applied. Not modified.
+    * @param expressedInFrame   the reference frame in which the arguments are expressed.
+    * @param angularPart        the 3D moment that is applied. Can be {@code null}. Not modified.
+    * @param linearPart         the 3D force that is applied. Not modified.
     * @param pointOfApplication the location where the force is exerted. Not modified.
-    * @throws ReferenceFrameMismatchException if {@code expressedInFrame} is not equal to the
-    *            reference frame in which this spatial force vector is currently expressed.
+    * @throws ReferenceFrameMismatchException if {@code expressedInFrame} is not equal to the reference
+    *                                         frame in which this spatial force vector is currently
+    *                                         expressed.
     */
    default void set(ReferenceFrame expressedInFrame, Vector3DReadOnly angularPart, Vector3DReadOnly linearPart, Point3DReadOnly pointOfApplication)
    {
@@ -151,11 +152,11 @@ public interface FixedFrameSpatialForceBasics extends SpatialForceReadOnly, Fixe
     * When the given {@code angularPart} is {@code null}, it is assumed to be zero.
     * </p>
     *
-    * @param angularPart the 3D moment that is applied. Can be {@code null}. Not modified.
-    * @param linearPart the 3D force that is applied. Not modified.
+    * @param angularPart        the 3D moment that is applied. Can be {@code null}. Not modified.
+    * @param linearPart         the 3D force that is applied. Not modified.
     * @param pointOfApplication the location where the force is exerted. Not modified.
     * @throws ReferenceFrameMismatchException if any of the arguments are not expressed in the same
-    *            reference frame as {@code this}.
+    *                                         reference frame as {@code this}.
     */
    default void set(FrameVector3DReadOnly angularPart, FrameVector3DReadOnly linearPart, FramePoint3DReadOnly pointOfApplication)
    {
@@ -183,14 +184,13 @@ public interface FixedFrameSpatialForceBasics extends SpatialForceReadOnly, Fixe
     * </ul>
     * </p>
     * 
-    * @throws UnsupportedOperationException if the given transform is not a
-    *            {@code RigidBodyTransform}.
+    * @throws UnsupportedOperationException if the given transform is not a {@code RigidBodyTransform}.
     */
    @Override
    default void applyTransform(Transform transform)
    {
-      if (transform instanceof RigidBodyTransform)
-         applyTransform((RigidBodyTransform) transform);
+      if (transform instanceof RigidBodyTransformReadOnly)
+         applyTransform((RigidBodyTransformReadOnly) transform);
       else
          throw new UnsupportedOperationException("The feature applyTransform is not supported for the transform of the type: "
                + transform.getClass().getSimpleName());
@@ -214,14 +214,13 @@ public interface FixedFrameSpatialForceBasics extends SpatialForceReadOnly, Fixe
     * </ul>
     * </p>
     * 
-    * @throws UnsupportedOperationException if the given transform is not a
-    *            {@code RigidBodyTransform}.
+    * @throws UnsupportedOperationException if the given transform is not a {@code RigidBodyTransform}.
     */
    @Override
    default void applyInverseTransform(Transform transform)
    {
-      if (transform instanceof RigidBodyTransform)
-         applyInverseTransform((RigidBodyTransform) transform);
+      if (transform instanceof RigidBodyTransformReadOnly)
+         applyInverseTransform((RigidBodyTransformReadOnly) transform);
       else
          throw new UnsupportedOperationException("The feature applyInverseTransform is not supported for the transform of the type: "
                + transform.getClass().getSimpleName());
@@ -247,7 +246,7 @@ public interface FixedFrameSpatialForceBasics extends SpatialForceReadOnly, Fixe
     * 
     * @param transform the transform to use on this. Not modified.
     */
-   default void applyTransform(RigidBodyTransform transform)
+   default void applyTransform(RigidBodyTransformReadOnly transform)
    {
       if (transform.hasRotation())
       {
@@ -256,7 +255,7 @@ public interface FixedFrameSpatialForceBasics extends SpatialForceReadOnly, Fixe
       }
 
       if (transform.hasTranslation())
-         addCrossToAngularPart(transform.getTranslationVector(), getLinearPart());
+         addCrossToAngularPart(transform.getTranslation(), getLinearPart());
    }
 
    /**
@@ -279,10 +278,10 @@ public interface FixedFrameSpatialForceBasics extends SpatialForceReadOnly, Fixe
     * 
     * @param transform the transform to use on this. Not modified.
     */
-   default void applyInverseTransform(RigidBodyTransform transform)
+   default void applyInverseTransform(RigidBodyTransformReadOnly transform)
    {
       if (transform.hasTranslation())
-         addCrossToAngularPart(getLinearPart(), transform.getTranslationVector());
+         addCrossToAngularPart(getLinearPart(), transform.getTranslation());
 
       if (transform.hasRotation())
       {

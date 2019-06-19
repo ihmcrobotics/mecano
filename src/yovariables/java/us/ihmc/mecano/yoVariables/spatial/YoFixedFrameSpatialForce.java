@@ -47,15 +47,14 @@ public class YoFixedFrameSpatialForce implements FixedFrameSpatialForceBasics, G
    private final Point3D pointOfApplication = new Point3D();
 
    /**
-    * Creates a new spatial force with its components set to zero and initializes its reference
-    * frame.
+    * Creates a new spatial force with its components set to zero and initializes its reference frame.
     * <p>
     * Note that the reference frame is final.
     * </p>
     * 
-    * @param namePrefix a unique name string to use as the prefix for child variable names.
+    * @param namePrefix       a unique name string to use as the prefix for child variable names.
     * @param expressedInFrame in which reference frame the spatial force is expressed.
-    * @param registry the registry to register child variables to.
+    * @param registry         the registry to register child variables to.
     */
    public YoFixedFrameSpatialForce(String namePrefix, ReferenceFrame expressedInFrame, YoVariableRegistry registry)
    {
@@ -63,16 +62,15 @@ public class YoFixedFrameSpatialForce implements FixedFrameSpatialForceBasics, G
    }
 
    /**
-    * Creates a new spatial force with its components set to zero and initializes its reference
-    * frame.
+    * Creates a new spatial force with its components set to zero and initializes its reference frame.
     * <p>
     * Note that the reference frame is final.
     * </p>
     * 
-    * @param namePrefix a unique name string to use as the prefix for child variable names.
-    * @param nameSuffix a string to use as the suffix for child variable names.
+    * @param namePrefix       a unique name string to use as the prefix for child variable names.
+    * @param nameSuffix       a string to use as the suffix for child variable names.
     * @param expressedInFrame in which reference frame the spatial force is expressed.
-    * @param registry the registry to register child variables to.
+    * @param registry         the registry to register child variables to.
     */
    public YoFixedFrameSpatialForce(String namePrefix, String nameSuffix, ReferenceFrame expressedInFrame, YoVariableRegistry registry)
    {
@@ -87,7 +85,7 @@ public class YoFixedFrameSpatialForce implements FixedFrameSpatialForceBasics, G
     * </p>
     * 
     * @param angularPart the vector to use for the angular part.
-    * @param linearPart the vector to use for the linear part.
+    * @param linearPart  the vector to use for the linear part.
     */
    public YoFixedFrameSpatialForce(YoFrameVector3D angularPart, YoFrameVector3D linearPart)
    {
@@ -208,7 +206,7 @@ public class YoFixedFrameSpatialForce implements FixedFrameSpatialForceBasics, G
     * Tests on a per component basis if this vector is equal to the given {@code other} to an
     * {@code epsilon} and both vectors are expressed in the same reference frame.
     *
-    * @param other the other vector to compare against this. Not modified.
+    * @param other   the other vector to compare against this. Not modified.
     * @param epsilon the tolerance to use when comparing each component.
     * @return {@code true} if the two vectors are equal, {@code false} otherwise.
     */
@@ -219,13 +217,12 @@ public class YoFixedFrameSpatialForce implements FixedFrameSpatialForceBasics, G
    }
 
    /**
-    * Tests if {@code this} and {@code other} represent the same spatial force to an
-    * {@code epsilon}.
+    * Tests if {@code this} and {@code other} represent the same spatial force to an {@code epsilon}.
     * <p>
-    * It is likely that the implementation of this method will change in the future as the
-    * definition of "geometrically-equal" for spatial forces might evolve. In the meantime, the
-    * current assumption is that two spatial forces are geometrically equal if both their 3D torque
-    * and 3D force are independently geometrically equal, see
+    * It is likely that the implementation of this method will change in the future as the definition
+    * of "geometrically-equal" for spatial forces might evolve. In the meantime, the current assumption
+    * is that two spatial forces are geometrically equal if both their 3D torque and 3D force are
+    * independently geometrically equal, see
     * {@link Vector3DReadOnly#geometricallyEquals(Vector3DReadOnly, double)}.
     * </p>
     * <p>
@@ -233,12 +230,12 @@ public class YoFixedFrameSpatialForce implements FixedFrameSpatialForceBasics, G
     * {@code this.epsilonEquals(other, epsilon)} and vice versa.
     * </p>
     *
-    * @param other the other vector to compare against this. Not modified.
+    * @param other   the other vector to compare against this. Not modified.
     * @param epsilon the tolerance to use for the comparison.
     * @return {@code true} if the two spatial forces represent the same physical quantity,
     *         {@code false} otherwise.
     * @throws ReferenceFrameMismatchException if the reference frames of {@code other} do not
-    *            respectively match the reference frames of {@code this}.
+    *                                         respectively match the reference frames of {@code this}.
     */
    @Override
    public boolean geometricallyEquals(YoFixedFrameSpatialForce other, double epsilon)
@@ -247,8 +244,8 @@ public class YoFixedFrameSpatialForce implements FixedFrameSpatialForceBasics, G
    }
 
    /**
-    * Tests if the given {@code object}'s class is the same as this, in which case the method
-    * returns {@link #equals(SpatialVectorReadOnly)}, it returns {@code false} otherwise.
+    * Tests if the given {@code object}'s class is the same as this, in which case the method returns
+    * {@link #equals(SpatialVectorReadOnly)}, it returns {@code false} otherwise.
     *
     * @param object the object to compare against this. Not modified.
     * @return {@code true} if {@code object} and this are exactly equal, {@code false} otherwise.

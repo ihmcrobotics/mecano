@@ -119,7 +119,8 @@ public abstract class SpatialMotionTest<T extends SpatialMotionBasics>
    @Test
    public void testConstructUsingMatrixTooSmall()
    {
-      Assertions.assertThrows(RuntimeException.class, () -> {
+      Assertions.assertThrows(RuntimeException.class, () ->
+      {
          DenseMatrix64F matrix = new DenseMatrix64F(SpatialVectorReadOnly.SIZE - 1, 1);
          createSpatialMotionVector(frameC, frameD, frameA, matrix);
       });

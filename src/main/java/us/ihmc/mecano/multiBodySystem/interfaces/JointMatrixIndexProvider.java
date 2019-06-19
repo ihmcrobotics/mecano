@@ -19,8 +19,8 @@ public interface JointMatrixIndexProvider
     * Gets a list of the joints in order their information should be stored in or extracted from a
     * matrix.
     * <p>
-    * When this {@code JointMatrixIndexProvider} is obtained from a {@link MultiBodySystemReadOnly}, the
-    * returned list only contains the joints considered and is expected to preserve the ordering.
+    * When this {@code JointMatrixIndexProvider} is obtained from a {@link MultiBodySystemReadOnly},
+    * the returned list only contains the joints considered and is expected to preserve the ordering.
     * </p>
     * 
     * @return the ordered joint list.

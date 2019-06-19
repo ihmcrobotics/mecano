@@ -18,9 +18,9 @@ public class CenterOfMassReferenceFrame extends ReferenceFrame
     * Creates a new center of mass reference frame for the subtree defined by its root:
     * {@code rootBody}.
     * 
-    * @param frameName the name of this new frame.
+    * @param frameName   the name of this new frame.
     * @param parentFrame the parent frame of the new reference frame.
-    * @param rootBody the center of mass is computed given {@code rootBody} and all its descendants.
+    * @param rootBody    the center of mass is computed given {@code rootBody} and all its descendants.
     */
    public CenterOfMassReferenceFrame(String frameName, ReferenceFrame parentFrame, RigidBodyReadOnly rootBody)
    {
@@ -31,7 +31,7 @@ public class CenterOfMassReferenceFrame extends ReferenceFrame
     * Creates a new center of mass reference frame that uses the given {@code centerOfMassCalculator}
     * to update its position.
     * 
-    * @param frameName the name of this new frame.
+    * @param frameName              the name of this new frame.
     * @param centerOfMassCalculator the calculator to use to update the position of this frame.
     */
    public CenterOfMassReferenceFrame(String frameName, CenterOfMassCalculator centerOfMassCalculator)

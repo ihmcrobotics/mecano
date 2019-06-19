@@ -79,12 +79,12 @@ public interface SpatialMotionReadOnly extends SpatialVectorReadOnly
     * Checks that all frames, i.e. the body frame, base frame, and the "expressed in frame", are
     * identical between the two spatial motion vectors.
     *
-    * @param other the other object holding onto the reference frames to compare against the
-    *           reference frames held by {@code this}. Not modified.
+    * @param other the other object holding onto the reference frames to compare against the reference
+    *              frames held by {@code this}. Not modified.
     * @throws ReferenceFrameMismatchException if the reference frames are not the same:
-    *            {@code this.getBodyFrame() != other.getBodyFrame()},
-    *            {@code this.getBaseFrame() != other.getBaseFrame()}, or
-    *            {@code this.getReferenceFrame() != other.getReferenceFrame()}.
+    *                                         {@code this.getBodyFrame() != other.getBodyFrame()},
+    *                                         {@code this.getBaseFrame() != other.getBaseFrame()}, or
+    *                                         {@code this.getReferenceFrame() != other.getReferenceFrame()}.
     */
    default void checkReferenceFrameMatch(SpatialMotionReadOnly other) throws ReferenceFrameMismatchException
    {
@@ -94,12 +94,13 @@ public interface SpatialMotionReadOnly extends SpatialVectorReadOnly
    /**
     * Checks that the reference frames used by {@code this} correspond to the given ones.
     *
-    * @param bodyFrame the query for the body frame.
-    * @param baseFrame the query for the base frame.
+    * @param bodyFrame        the query for the body frame.
+    * @param baseFrame        the query for the base frame.
     * @param expressedInFrame the query for the "expressed in frame".
     * @throws ReferenceFrameMismatchException if the reference frames are not the same:
-    *            {@code this.getBodyFrame() != bodyFrame}, {@code this.getBaseFrame() != baseFrame},
-    *            or {@code this.getReferenceFrame() != expressedInFrame}.
+    *                                         {@code this.getBodyFrame() != bodyFrame},
+    *                                         {@code this.getBaseFrame() != baseFrame}, or
+    *                                         {@code this.getReferenceFrame() != expressedInFrame}.
     */
    default void checkReferenceFrameMatch(ReferenceFrame bodyFrame, ReferenceFrame baseFrame, ReferenceFrame expressedInFrame)
          throws ReferenceFrameMismatchException
@@ -112,10 +113,9 @@ public interface SpatialMotionReadOnly extends SpatialVectorReadOnly
    /**
     * Checks if the body frame held by {@code this} matches the query {@code bodyFrame}.
     *
-    * @param bodyFrame the query to compare against the body frame held by {@code this}. Not
-    *           modified.
+    * @param bodyFrame the query to compare against the body frame held by {@code this}. Not modified.
     * @throws ReferenceFrameMismatchException if the two reference frames are not the same:
-    *            {@code this.getBodyFrame() != bodyFrame}.
+    *                                         {@code this.getBodyFrame() != bodyFrame}.
     */
    default void checkBodyFrameMatch(ReferenceFrame bodyFrame)
    {
@@ -126,10 +126,9 @@ public interface SpatialMotionReadOnly extends SpatialVectorReadOnly
    /**
     * Checks if the base frame held by {@code this} matches the query {@code baseFrame}.
     *
-    * @param baseFrame the query to compare against the base frame held by {@code this}. Not
-    *           modified.
+    * @param baseFrame the query to compare against the base frame held by {@code this}. Not modified.
     * @throws ReferenceFrameMismatchException if the two reference frames are not the same:
-    *            {@code this.getBaseFrame() != baseFrame}.
+    *                                         {@code this.getBaseFrame() != baseFrame}.
     */
    default void checkBaseFrameMatch(ReferenceFrame baseFrame)
    {
@@ -142,9 +141,9 @@ public interface SpatialMotionReadOnly extends SpatialVectorReadOnly
     * {@code expressedInFrame}.
     *
     * @param expressedInFrame the query to compare against the "expressed in frame" held by
-    *           {@code this}. Not modified.
+    *                         {@code this}. Not modified.
     * @throws ReferenceFrameMismatchException if the two reference frames are not the same:
-    *            {@code this.getReferenceFrame() != expressedInFrame}.
+    *                                         {@code this.getReferenceFrame() != expressedInFrame}.
     */
    default void checkExpressedInFrameMatch(ReferenceFrame expressedInFrame)
    {
@@ -157,7 +156,7 @@ public interface SpatialMotionReadOnly extends SpatialVectorReadOnly
     * Tests on a per component basis if this vector is equal to the given {@code other} to an
     * {@code epsilon} and both vectors have the same frames.
     *
-    * @param other the other motion vector to compare against this. Not modified.
+    * @param other   the other motion vector to compare against this. Not modified.
     * @param epsilon the tolerance to use when comparing each component.
     * @return {@code true} if the two vectors are equal, {@code false} otherwise.
     */

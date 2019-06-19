@@ -88,7 +88,7 @@ public class SpatialInertia implements SpatialInertiaBasics, GeometryObject<Spat
     * Creates a new spatial inertia matrix with its components set to zero and initializes its
     * reference frames.
     * 
-    * @param bodyFrame what we are specifying the spatial inertia of.
+    * @param bodyFrame        what we are specifying the spatial inertia of.
     * @param expressedInFrame in which reference frame the spatial inertia is expressed.
     */
    public SpatialInertia(ReferenceFrame bodyFrame, ReferenceFrame expressedInFrame)
@@ -103,11 +103,11 @@ public class SpatialInertia implements SpatialInertiaBasics, GeometryObject<Spat
     * {@code expressedInFrame}.
     * </p>
     *
-    * @param bodyFrame what we are specifying the spatial inertia of.
+    * @param bodyFrame        what we are specifying the spatial inertia of.
     * @param expressedInFrame in which reference frame the spatial inertia is expressed.
-    * @param momentOfInertia the moment of inertia of the body expressed in
-    *           {@code expressedInFrame}. Not modified.
-    * @param mass the mass of the rigid body.
+    * @param momentOfInertia  the moment of inertia of the body expressed in {@code expressedInFrame}.
+    *                         Not modified.
+    * @param mass             the mass of the rigid body.
     */
    public SpatialInertia(ReferenceFrame bodyFrame, ReferenceFrame expressedInFrame, Matrix3DReadOnly momentOfInertia, double mass)
    {
@@ -118,16 +118,19 @@ public class SpatialInertia implements SpatialInertiaBasics, GeometryObject<Spat
     * Creates a new spatial inertia matrix and initializes its components and reference frames.
     * <p>
     * This method assumes that the body's center of mass is located at the origin of the given
-    * {@code expressedInFrame} and that the axes of the given {@code expressedInFrame} are aligned
-    * with the principal axes of the inertia ellipsoid.
+    * {@code expressedInFrame} and that the axes of the given {@code expressedInFrame} are aligned with
+    * the principal axes of the inertia ellipsoid.
     * </p>
     * 
-    * @param bodyFrame what we are specifying the spatial inertia of.
+    * @param bodyFrame        what we are specifying the spatial inertia of.
     * @param expressedInFrame in which reference frame the spatial inertia is expressed.
-    * @param Ixx the moment of inertia around the x-axis of the given {@code expressedInFrame}.
-    * @param Iyy the moment of inertia around the y-axis of the given {@code expressedInFrame}.
-    * @param Izz the moment of inertia around the z-axis of the given {@code expressedInFrame}.
-    * @param mass the mass of the rigid body.
+    * @param Ixx              the moment of inertia around the x-axis of the given
+    *                         {@code expressedInFrame}.
+    * @param Iyy              the moment of inertia around the y-axis of the given
+    *                         {@code expressedInFrame}.
+    * @param Izz              the moment of inertia around the z-axis of the given
+    *                         {@code expressedInFrame}.
+    * @param mass             the mass of the rigid body.
     */
    public SpatialInertia(ReferenceFrame bodyFrame, ReferenceFrame expressedInFrame, double Ixx, double Iyy, double Izz, double mass)
    {
@@ -137,13 +140,13 @@ public class SpatialInertia implements SpatialInertiaBasics, GeometryObject<Spat
    /**
     * Creates a new spatial inertia matrix and initializes its components and reference frames.
     * 
-    * @param bodyFrame what we are specifying the spatial inertia of.
-    * @param expressedInFrame in which reference frame the spatial inertia is expressed.
-    * @param momentOfInertia the moment of inertia of the body expressed in
-    *           {@code expressedInFrame}. Not modified.
-    * @param mass the mass of the rigid body.
-    * @param centerOfMassOffset the offset of the body's center of mass position and the origin of
-    *           the given {@code expressedInFrame}. Not modified.
+    * @param bodyFrame          what we are specifying the spatial inertia of.
+    * @param expressedInFrame   in which reference frame the spatial inertia is expressed.
+    * @param momentOfInertia    the moment of inertia of the body expressed in
+    *                           {@code expressedInFrame}. Not modified.
+    * @param mass               the mass of the rigid body.
+    * @param centerOfMassOffset the offset of the body's center of mass position and the origin of the
+    *                           given {@code expressedInFrame}. Not modified.
     */
    public SpatialInertia(ReferenceFrame bodyFrame, ReferenceFrame expressedInFrame, Matrix3DReadOnly momentOfInertia, double mass,
                          Tuple3DReadOnly centerOfMassOffset)
@@ -190,23 +193,23 @@ public class SpatialInertia implements SpatialInertiaBasics, GeometryObject<Spat
    }
 
    /**
-    * Transforms this matrix such that the result is the same physical spatial inertia but expressed
-    * in a different frame.
+    * Transforms this matrix such that the result is the same physical spatial inertia but expressed in
+    * a different frame.
     * <p>
-    * Once this spatial inertia is transformed, the reference frame "expressed-in-frame" is updated
-    * to {@code desiredFrame}. In the case, {@code this.expressedInFrame == desiredFrame}, this
-    * method does nothing.
+    * Once this spatial inertia is transformed, the reference frame "expressed-in-frame" is updated to
+    * {@code desiredFrame}. In the case, {@code this.expressedInFrame == desiredFrame}, this method
+    * does nothing.
     * </p>
     * <p>
     * Note that in addition to transforming the coordinate system in which the components are
-    * expressed, the point at which the inertia is estimated is also changed to be at the origin of
-    * the given {@code desiredFrame}.
+    * expressed, the point at which the inertia is estimated is also changed to be at the origin of the
+    * given {@code desiredFrame}.
     * </p>
     * <p>
-    * See the Word&trade; document located in the document folder of this project for more
-    * information about the transformation rule for spatial inertia. Also see Duindam, <i>Port-Based
-    * Modeling and Control for Efficient Bipedal Walking Robots</i>, page 40, equation (2.57) from
-    * which the equations here were derived.
+    * See the Word&trade; document located in the document folder of this project for more information
+    * about the transformation rule for spatial inertia. Also see Duindam, <i>Port-Based Modeling and
+    * Control for Efficient Bipedal Walking Robots</i>, page 40, equation (2.57) from which the
+    * equations here were derived.
     * </p>
     *
     * @param desiredFrame the new reference frame in which this spatial inertia is to be expressed.
@@ -225,10 +228,10 @@ public class SpatialInertia implements SpatialInertiaBasics, GeometryObject<Spat
    /**
     * Transforms this spatial inertia using the given transform.
     * <p>
-    * See the Word&trade; document located in the document folder of this project for more
-    * information about the transformation rule for spatial inertia. Also see Duindam, <i>Port-Based
-    * Modeling and Control for Efficient Bipedal Walking Robots</i>, page 40, equation (2.57) from
-    * which the equations here were derived.
+    * See the Word&trade; document located in the document folder of this project for more information
+    * about the transformation rule for spatial inertia. Also see Duindam, <i>Port-Based Modeling and
+    * Control for Efficient Bipedal Walking Robots</i>, page 40, equation (2.57) from which the
+    * equations here were derived.
     * </p>
     */
    @Override
@@ -256,10 +259,10 @@ public class SpatialInertia implements SpatialInertiaBasics, GeometryObject<Spat
    /**
     * Transforms this spatial inertia by the inverse of the given transform.
     * <p>
-    * See the Word&trade; document located in the document folder of this project for more
-    * information about the transformation rule for spatial inertia. Also see Duindam, <i>Port-Based
-    * Modeling and Control for Efficient Bipedal Walking Robots</i>, page 40, equation (2.57) from
-    * which the equations here were derived.
+    * See the Word&trade; document located in the document folder of this project for more information
+    * about the transformation rule for spatial inertia. Also see Duindam, <i>Port-Based Modeling and
+    * Control for Efficient Bipedal Walking Robots</i>, page 40, equation (2.57) from which the
+    * equations here were derived.
     * </p>
     */
    @Override
@@ -273,11 +276,11 @@ public class SpatialInertia implements SpatialInertiaBasics, GeometryObject<Spat
       {
          translation.setToZero();
          translation.applyInverseTransform(transform);
-         
+
          // Let's first apply the rotation onto the CoM and the mass moment of inertia:
          momentOfInertia.applyInverseTransform(transform);
          centerOfMassOffset.applyInverseTransform(transform);
-         
+
          // Now we can simply apply the translation on the CoM and mass moment of inertia:
          MecanoTools.translateMomentOfInertia(mass, centerOfMassOffset, true, translation, momentOfInertia);
          centerOfMassOffset.add(translation);
@@ -333,7 +336,7 @@ public class SpatialInertia implements SpatialInertiaBasics, GeometryObject<Spat
     * method returns {@code false}.
     * </p>
     * 
-    * @param other the other spatial inertia matrix to compare against this. Not modified.
+    * @param other   the other spatial inertia matrix to compare against this. Not modified.
     * @param epsilon the tolerance to use.
     * @return {@code true} if the two spatial inertia matrices are considered equal, {@code false}
     *         otherwise.
@@ -345,21 +348,20 @@ public class SpatialInertia implements SpatialInertiaBasics, GeometryObject<Spat
    }
 
    /**
-    * Tests if {@code this} and {@code other} represent the same spatial inertia to an
-    * {@code epsilon}.
+    * Tests if {@code this} and {@code other} represent the same spatial inertia to an {@code epsilon}.
     * <p>
-    * It is likely that the implementation of this method will change in the future as the
-    * definition of "geometrically-equal" for spatial inertia might evolve. In the meantime, the
-    * current assumption is that two spatial inertia matrices are geometrically equal if they are
-    * epsilon equal, see {@link #epsilonEquals(SpatialInertiaReadOnly, double)}.
+    * It is likely that the implementation of this method will change in the future as the definition
+    * of "geometrically-equal" for spatial inertia might evolve. In the meantime, the current
+    * assumption is that two spatial inertia matrices are geometrically equal if they are epsilon
+    * equal, see {@link #epsilonEquals(SpatialInertiaReadOnly, double)}.
     * </p>
     *
-    * @param other the other spatial inertia to compare against this. Not modified.
+    * @param other   the other spatial inertia to compare against this. Not modified.
     * @param epsilon the tolerance to use for the comparison.
     * @return {@code true} if the two spatial inertia matrices represent the same physical quantity,
     *         {@code false} otherwise.
     * @throws ReferenceFrameMismatchException if the reference frames of {@code other} do not
-    *            respectively match the reference frames of {@code this}.
+    *                                         respectively match the reference frames of {@code this}.
     */
    @Override
    public boolean geometricallyEquals(SpatialInertia other, double epsilon)
@@ -368,8 +370,8 @@ public class SpatialInertia implements SpatialInertiaBasics, GeometryObject<Spat
    }
 
    /**
-    * Tests if the given {@code object}'s class is the same as this, in which case the method
-    * returns {@link #equals(SpatialInertiaReadOnly)}, it returns {@code false} otherwise.
+    * Tests if the given {@code object}'s class is the same as this, in which case the method returns
+    * {@link #equals(SpatialInertiaReadOnly)}, it returns {@code false} otherwise.
     *
     * @param object the object to compare against this. Not modified.
     * @return {@code true} if {@code object} and this are exactly equal, {@code false} otherwise.
@@ -396,7 +398,6 @@ public class SpatialInertia implements SpatialInertiaBasics, GeometryObject<Spat
     * \-0.247,  0.387,  0.000,  0.000,  0.000,  0.773 /
     * </pre>
     * 
-    *
     * @return the {@code String} representing this spatial inertia matrix.
     */
    @Override

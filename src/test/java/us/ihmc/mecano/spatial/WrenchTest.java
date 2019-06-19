@@ -139,7 +139,8 @@ public class WrenchTest
    @Test
    public void testConstructUsingMatrixTooSmall()
    {
-      Assertions.assertThrows(RuntimeException.class, () -> {
+      Assertions.assertThrows(RuntimeException.class, () ->
+      {
          Random random = new Random(12342L);
          DenseMatrix64F matrix = RandomMatrices.createRandom(Wrench.SIZE - 1, 1, random);
          new Wrench(frameA, frameB, matrix);
@@ -174,7 +175,8 @@ public class WrenchTest
    @Test
    public void testConstructUsingDoubleArrayTooSmall()
    {
-      Assertions.assertThrows(RuntimeException.class, () -> {
+      Assertions.assertThrows(RuntimeException.class, () ->
+      {
          new Wrench(frameA, frameB, new double[Wrench.SIZE - 1]);
       });
    }
@@ -184,7 +186,8 @@ public class WrenchTest
    {
       Wrench wrench1 = new Wrench(frameB, frameA);
       Wrench wrench2 = new Wrench(frameC, frameA);
-      Assertions.assertThrows(RuntimeException.class, () -> {
+      Assertions.assertThrows(RuntimeException.class, () ->
+      {
          wrench1.add(wrench2);
       });
    }
@@ -194,7 +197,8 @@ public class WrenchTest
    {
       Wrench wrench1 = new Wrench(frameB, frameA);
       Wrench wrench2 = new Wrench(frameB, frameB);
-      Assertions.assertThrows(RuntimeException.class, () -> {
+      Assertions.assertThrows(RuntimeException.class, () ->
+      {
          wrench1.add(wrench2);
       });
    }
@@ -223,7 +227,8 @@ public class WrenchTest
    {
       Wrench wrench1 = new Wrench(frameB, frameA);
       Wrench wrench2 = new Wrench(frameC, frameA);
-      Assertions.assertThrows(RuntimeException.class, () -> {
+      Assertions.assertThrows(RuntimeException.class, () ->
+      {
          wrench1.sub(wrench2);
       });
    }
@@ -233,7 +238,8 @@ public class WrenchTest
    {
       Wrench wrench1 = new Wrench(frameB, frameA);
       Wrench wrench2 = new Wrench(frameB, frameB);
-      Assertions.assertThrows(RuntimeException.class, () -> {
+      Assertions.assertThrows(RuntimeException.class, () ->
+      {
          wrench1.sub(wrench2);
       });
    }
@@ -262,7 +268,8 @@ public class WrenchTest
    {
       Wrench wrench1 = new Wrench(frameA, frameB);
       Wrench wrench2 = new Wrench(frameA, frameC);
-      Assertions.assertThrows(RuntimeException.class, () -> {
+      Assertions.assertThrows(RuntimeException.class, () ->
+      {
          wrench2.set(wrench1);
       });
    }
@@ -272,7 +279,8 @@ public class WrenchTest
    {
       Wrench wrench1 = new Wrench(frameA, frameB);
       Wrench wrench2 = new Wrench(frameC, frameB);
-      Assertions.assertThrows(RuntimeException.class, () -> {
+      Assertions.assertThrows(RuntimeException.class, () ->
+      {
          wrench2.set(wrench1);
       });
    }
@@ -286,15 +294,17 @@ public class WrenchTest
    @Test
    public void testDotProductNotAllowed1()
    {
-      Assertions.assertThrows(RuntimeException.class, () -> {
+      Assertions.assertThrows(RuntimeException.class, () ->
+      {
          testDotProductNotAllowed1(frameA, frameB, frameC);
       });
    }
 
-   @Test 
+   @Test
    public void testDotProductNotAllowed2()
    {
-      Assertions.assertThrows(RuntimeException.class, () -> {
+      Assertions.assertThrows(RuntimeException.class, () ->
+      {
          testDotProductNotAllowed2(frameA, frameB, frameC);
       });
    }

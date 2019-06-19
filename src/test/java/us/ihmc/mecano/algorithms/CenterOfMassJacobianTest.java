@@ -50,7 +50,8 @@ public class CenterOfMassJacobianTest
          assertEquals(centerOfMassCalculator.getTotalMass(), centerOfMassJacobian.getTotalMass(), EPSILON);
          EuclidFrameTestTools.assertFrameTuple3DEquals(centerOfMassCalculator.getCenterOfMass(), centerOfMassJacobian.getCenterOfMass(), EPSILON);
          EuclidFrameTestTools.assertFrameTuple3DEquals(computeCenterOfMassVelocity(rootBody, centerOfMassJacobian.getReferenceFrame()),
-                                                       centerOfMassJacobian.getCenterOfMassVelocity(), EPSILON);
+                                                       centerOfMassJacobian.getCenterOfMassVelocity(),
+                                                       EPSILON);
       }
 
       for (int i = 0; i < ITERATIONS; i++)
@@ -71,7 +72,8 @@ public class CenterOfMassJacobianTest
          centerOfMass.changeFrame(worldFrame);
          EuclidFrameTestTools.assertFrameTuple3DEquals(centerOfMassCalculator.getCenterOfMass(), centerOfMass, EPSILON);
          EuclidFrameTestTools.assertFrameTuple3DEquals(computeCenterOfMassVelocity(rootBody, centerOfMassJacobian.getReferenceFrame()),
-                                                       centerOfMassJacobian.getCenterOfMassVelocity(), EPSILON);
+                                                       centerOfMassJacobian.getCenterOfMassVelocity(),
+                                                       EPSILON);
       }
    }
 
@@ -95,7 +97,8 @@ public class CenterOfMassJacobianTest
 
          EuclidFrameTestTools.assertFrameTuple3DEquals(centerOfMassCalculator.getCenterOfMass(), centerOfMassJacobian.getCenterOfMass(), EPSILON);
          EuclidFrameTestTools.assertFrameTuple3DEquals(computeCenterOfMassVelocity(rootBody, centerOfMassJacobian.getReferenceFrame()),
-                                                       centerOfMassJacobian.getCenterOfMassVelocity(), EPSILON);
+                                                       centerOfMassJacobian.getCenterOfMassVelocity(),
+                                                       EPSILON);
       }
 
       for (int i = 0; i < ITERATIONS; i++)
@@ -116,7 +119,8 @@ public class CenterOfMassJacobianTest
          centerOfMass.changeFrame(worldFrame);
          EuclidFrameTestTools.assertFrameTuple3DEquals(centerOfMassCalculator.getCenterOfMass(), centerOfMass, EPSILON);
          EuclidFrameTestTools.assertFrameTuple3DEquals(computeCenterOfMassVelocity(rootBody, centerOfMassJacobian.getReferenceFrame()),
-                                                       centerOfMassJacobian.getCenterOfMassVelocity(), EPSILON);
+                                                       centerOfMassJacobian.getCenterOfMassVelocity(),
+                                                       EPSILON);
       }
    }
 
@@ -140,7 +144,8 @@ public class CenterOfMassJacobianTest
 
          EuclidFrameTestTools.assertFrameTuple3DEquals(centerOfMassCalculator.getCenterOfMass(), centerOfMassJacobian.getCenterOfMass(), EPSILON);
          EuclidFrameTestTools.assertFrameTuple3DEquals(computeCenterOfMassVelocity(rootBody, centerOfMassJacobian.getReferenceFrame()),
-                                                       centerOfMassJacobian.getCenterOfMassVelocity(), EPSILON);
+                                                       centerOfMassJacobian.getCenterOfMassVelocity(),
+                                                       EPSILON);
 
          MultiBodySystemRandomTools.nextState(random, JointStateType.VELOCITY, joints);
          rootBody.updateFramesRecursively();
@@ -171,7 +176,8 @@ public class CenterOfMassJacobianTest
          FramePoint3D centerOfMass = new FramePoint3D(centerOfMassJacobian.getCenterOfMass());
          EuclidFrameTestTools.assertFrameTuple3DEquals(centerOfMassCalculator.getCenterOfMass(), centerOfMass, EPSILON);
          EuclidFrameTestTools.assertFrameTuple3DEquals(computeCenterOfMassVelocity(rootBody, centerOfMassJacobian.getReferenceFrame()),
-                                                       centerOfMassJacobian.getCenterOfMassVelocity(), EPSILON);
+                                                       centerOfMassJacobian.getCenterOfMassVelocity(),
+                                                       EPSILON);
 
          MultiBodySystemRandomTools.nextState(random, JointStateType.VELOCITY, joints);
          rootBody.updateFramesRecursively();

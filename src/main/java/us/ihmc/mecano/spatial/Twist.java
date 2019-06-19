@@ -74,8 +74,7 @@ public class Twist implements TwistBasics, GeometryObject<Twist>
    private RigidBodyTransform transformToDesiredFrame = new RigidBodyTransform();
 
    /**
-    * Creates a new twist with its components set to zero and its reference frames set to
-    * {@code null}.
+    * Creates a new twist with its components set to zero and its reference frames set to {@code null}.
     */
    public Twist()
    {
@@ -85,8 +84,8 @@ public class Twist implements TwistBasics, GeometryObject<Twist>
    /**
     * Creates a new twist with its components set to zero and initializes its reference frames.
     *
-    * @param bodyFrame what we are specifying the twist of.
-    * @param baseFrame with respect to what we are specifying the twist.
+    * @param bodyFrame        what we are specifying the twist of.
+    * @param baseFrame        with respect to what we are specifying the twist.
     * @param expressedInFrame in which reference frame the twist is expressed.
     */
    public Twist(ReferenceFrame bodyFrame, ReferenceFrame baseFrame, ReferenceFrame expressedInFrame)
@@ -97,11 +96,11 @@ public class Twist implements TwistBasics, GeometryObject<Twist>
    /**
     * Creates a new twist and initializes its components and reference frames.
     *
-    * @param bodyFrame what we are specifying the twist of.
-    * @param baseFrame with respect to what we are specifying the twist.
+    * @param bodyFrame        what we are specifying the twist of.
+    * @param baseFrame        with respect to what we are specifying the twist.
     * @param expressedInFrame in which reference frame the twist is expressed.
-    * @param angularPart the vector holding the values for the angular part. Not modified.
-    * @param linearPart the vector holding the values for the linear part. Not modified.
+    * @param angularPart      the vector holding the values for the angular part. Not modified.
+    * @param linearPart       the vector holding the values for the linear part. Not modified.
     */
    public Twist(ReferenceFrame bodyFrame, ReferenceFrame baseFrame, ReferenceFrame expressedInFrame, Vector3DReadOnly angularPart, Vector3DReadOnly linearPart)
    {
@@ -111,12 +110,12 @@ public class Twist implements TwistBasics, GeometryObject<Twist>
    /**
     * Creates a new twist and initializes its components and reference frames.
     *
-    * @param bodyFrame what we are specifying the twist of.
-    * @param baseFrame with respect to what we are specifying the twist.
+    * @param bodyFrame   what we are specifying the twist of.
+    * @param baseFrame   with respect to what we are specifying the twist.
     * @param angularPart the vector holding the values for the angular part, it is expressed in the
-    *           "expressed-in-frame" to use for this twist. Not modified.
-    * @param linearPart the vector holding the values for the linear part, it is expressed in the
-    *           "expressed-in-frame" to use for this twist. Not modified.
+    *                    "expressed-in-frame" to use for this twist. Not modified.
+    * @param linearPart  the vector holding the values for the linear part, it is expressed in the
+    *                    "expressed-in-frame" to use for this twist. Not modified.
     */
    public Twist(ReferenceFrame bodyFrame, ReferenceFrame baseFrame, FrameVector3DReadOnly angularPart, FrameVector3DReadOnly linearPart)
    {
@@ -126,10 +125,10 @@ public class Twist implements TwistBasics, GeometryObject<Twist>
    /**
     * Creates a new twist and initializes its components and reference frames.
     *
-    * @param bodyFrame what we are specifying the twist of.
-    * @param baseFrame with respect to what we are specifying the twist.
-    * @param spatialVector the vector holding the values, it is expressed in the
-    *           "expressed-in-frame" to use for this twist. Not modified.
+    * @param bodyFrame     what we are specifying the twist of.
+    * @param baseFrame     with respect to what we are specifying the twist.
+    * @param spatialVector the vector holding the values, it is expressed in the "expressed-in-frame"
+    *                      to use for this twist. Not modified.
     */
    public Twist(ReferenceFrame bodyFrame, ReferenceFrame baseFrame, SpatialVectorReadOnly spatialVector)
    {
@@ -143,11 +142,11 @@ public class Twist implements TwistBasics, GeometryObject<Twist>
     * {@code angularPartZ}, {@code linearPartX}, {@code linearPartY}, {@code linearPartZ}.
     * </p>
     *
-    * @param bodyFrame what we are specifying the twist of.
-    * @param baseFrame with respect to what we are specifying the twist.
+    * @param bodyFrame        what we are specifying the twist of.
+    * @param baseFrame        with respect to what we are specifying the twist.
     * @param expressedInFrame in which reference frame the twist is expressed.
-    * @param matrix the column vector containing the values for this vector's components. Not
-    *           modified.
+    * @param matrix           the column vector containing the values for this vector's components. Not
+    *                         modified.
     */
    public Twist(ReferenceFrame bodyFrame, ReferenceFrame baseFrame, ReferenceFrame expressedInFrame, DenseMatrix64F matrix)
    {
@@ -161,10 +160,11 @@ public class Twist implements TwistBasics, GeometryObject<Twist>
     * {@code angularPartZ}, {@code linearPartX}, {@code linearPartY}, {@code linearPartZ}.
     * </p>
     *
-    * @param bodyFrame what we are specifying the twist of.
-    * @param baseFrame with respect to what we are specifying the twist.
+    * @param bodyFrame        what we are specifying the twist of.
+    * @param baseFrame        with respect to what we are specifying the twist.
     * @param expressedInFrame in which reference frame the twist is expressed.
-    * @param array the array containing the new values for this vector's components. Not modified.
+    * @param array            the array containing the new values for this vector's components. Not
+    *                         modified.
     */
    public Twist(ReferenceFrame bodyFrame, ReferenceFrame baseFrame, ReferenceFrame expressedInFrame, double[] array)
    {
@@ -234,8 +234,8 @@ public class Twist implements TwistBasics, GeometryObject<Twist>
     * where:
     * <ul>
     * <li>&omega; and &nu; are the current angular and linear parts of this spatial vector,
-    * <li>R and P are the rotation and translation of the current "expressed-in-frame" with respect
-    * to the desired frame.
+    * <li>R and P are the rotation and translation of the current "expressed-in-frame" with respect to
+    * the desired frame.
     * </ul>
     * </p>
     * <p>
@@ -365,7 +365,7 @@ public class Twist implements TwistBasics, GeometryObject<Twist>
     * Tests on a per component basis if this vector is equal to the given {@code other} to an
     * {@code epsilon} and both vectors have the same frames.
     *
-    * @param other the other motion vector to compare against this. Not modified.
+    * @param other   the other motion vector to compare against this. Not modified.
     * @param epsilon the tolerance to use when comparing each component.
     * @return {@code true} if the two vectors are equal, {@code false} otherwise.
     */
@@ -378,10 +378,10 @@ public class Twist implements TwistBasics, GeometryObject<Twist>
    /**
     * Tests if {@code this} and {@code other} represent the same twist to an {@code epsilon}.
     * <p>
-    * It is likely that the implementation of this method will change in the future as the
-    * definition of "geometrically-equal" for twists might evolve. In the meantime, the current
-    * assumption is that two twists are geometrically equal if both their 3D angular and 3D linear
-    * velocities are independently geometrically equal, see
+    * It is likely that the implementation of this method will change in the future as the definition
+    * of "geometrically-equal" for twists might evolve. In the meantime, the current assumption is that
+    * two twists are geometrically equal if both their 3D angular and 3D linear velocities are
+    * independently geometrically equal, see
     * {@link Vector3DReadOnly#geometricallyEquals(Vector3DReadOnly, double)}.
     * </p>
     * <p>
@@ -389,12 +389,12 @@ public class Twist implements TwistBasics, GeometryObject<Twist>
     * {@code this.epsilonEquals(other, epsilon)} and vice versa.
     * </p>
     *
-    * @param other the other twist to compare against this. Not modified.
+    * @param other   the other twist to compare against this. Not modified.
     * @param epsilon the tolerance to use for the comparison.
     * @return {@code true} if the two twists represent the same physical quantity, {@code false}
     *         otherwise.
     * @throws ReferenceFrameMismatchException if the reference frames of {@code other} do not
-    *            respectively match the reference frames of {@code this}.
+    *                                         respectively match the reference frames of {@code this}.
     */
    @Override
    public boolean geometricallyEquals(Twist other, double epsilon)
@@ -403,8 +403,8 @@ public class Twist implements TwistBasics, GeometryObject<Twist>
    }
 
    /**
-    * Tests if the given {@code object}'s class is the same as this, in which case the method
-    * returns {@link #equals(SpatialVectorReadOnly)}, it returns {@code false} otherwise.
+    * Tests if the given {@code object}'s class is the same as this, in which case the method returns
+    * {@link #equals(SpatialVectorReadOnly)}, it returns {@code false} otherwise.
     *
     * @param object the object to compare against this. Not modified.
     * @return {@code true} if {@code object} and this are exactly equal, {@code false} otherwise.

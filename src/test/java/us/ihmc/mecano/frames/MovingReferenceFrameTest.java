@@ -81,8 +81,12 @@ public class MovingReferenceFrameTest
       Random random = new Random(1231);
 
       MovingReferenceFrame parentMovingFrame = nextRandomlyChangingFrameTree(random, 1)[0];
-      MovingReferenceFrame fixedInParentOne = MovingReferenceFrame.constructFrameFixedInParent("fixed1", parentMovingFrame, EuclidCoreRandomTools.nextRigidBodyTransform(random));
-      MovingReferenceFrame fixedInParentTwo = MovingReferenceFrame.constructFrameFixedInParent("fixed2", parentMovingFrame, EuclidCoreRandomTools.nextRigidBodyTransform(random));
+      MovingReferenceFrame fixedInParentOne = MovingReferenceFrame.constructFrameFixedInParent("fixed1",
+                                                                                               parentMovingFrame,
+                                                                                               EuclidCoreRandomTools.nextRigidBodyTransform(random));
+      MovingReferenceFrame fixedInParentTwo = MovingReferenceFrame.constructFrameFixedInParent("fixed2",
+                                                                                               parentMovingFrame,
+                                                                                               EuclidCoreRandomTools.nextRigidBodyTransform(random));
 
       parentMovingFrame.update();
 
@@ -99,10 +103,10 @@ public class MovingReferenceFrameTest
 
       actualTwistFrameOne = new Twist(fixedInParentOne.getTwistOfFrame());
       expectedTwistFrameOne = computeTwistRelativeToRootByClimbingTree(fixedInParentOne);
-      
+
       actualTwistFrameTwo = new Twist(fixedInParentTwo.getTwistOfFrame());
       expectedTwistFrameTwo = computeTwistRelativeToRootByClimbingTree(fixedInParentTwo);
-      
+
       MecanoTestTools.assertTwistEquals(actualTwistFrameOne, expectedTwistFrameOne, EPSILON);
       MecanoTestTools.assertTwistEquals(actualTwistFrameTwo, expectedTwistFrameTwo, EPSILON);
    }

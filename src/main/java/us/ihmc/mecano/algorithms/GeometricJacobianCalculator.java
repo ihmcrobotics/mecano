@@ -135,7 +135,7 @@ public class GeometricJacobianCalculator
     * The internal memory is automatically cleared with {@link #reset()}.
     * </p>
     * 
-    * @param base the new base to use. Not modified.
+    * @param base        the new base to use. Not modified.
     * @param endEffector the new end-effector to use. Not modified.
     * @throws IllegalArgumentException if the {@code base} is not an ancestor of {@code endEffector}.
     */
@@ -184,9 +184,9 @@ public class GeometricJacobianCalculator
     * 
     * @param joints the array of joints to use for computing the Jacobian. Not modified.
     * @throws IllegalArgumentException if {@code joints[0].getPredecessor()} is not the ancestor of
-    *            {@code joints[joints.length - 1].getSuccessor()} and that
-    *            {@code joints[joints.length - 1].getPredecessor()} is not the ancestor of
-    *            {@code joints[0].getSuccessor()}.
+    *                                  {@code joints[joints.length - 1].getSuccessor()} and that
+    *                                  {@code joints[joints.length - 1].getPredecessor()} is not the
+    *                                  ancestor of {@code joints[0].getSuccessor()}.
     */
    public void setKinematicChain(JointReadOnly[] joints)
    {
@@ -373,10 +373,10 @@ public class GeometricJacobianCalculator
     * Computes and packs the twist of the end-effector relative to the base that is induced by the
     * given joint velocity vector.
     * 
-    * @param jointVelocities the joint velocity column vector, starting from base child joint velocity.
-    *           Not modified.
+    * @param jointVelocities        the joint velocity column vector, starting from base child joint
+    *                               velocity. Not modified.
     * @param endEffectorTwistToPack the twist of the end effector with respect to the base, expressed
-    *           in the jacobianFrame. Modified.
+    *                               in the jacobianFrame. Modified.
     * @throws RuntimeException if either the base or the end-effector has not been provided beforehand.
     */
    public void getEndEffectorTwist(DenseMatrix64F jointVelocities, TwistBasics endEffectorTwistToPack)
@@ -389,10 +389,10 @@ public class GeometricJacobianCalculator
     * Computes and packs the spatial acceleration of the end-effector relative to the base that is
     * induced by the given joint acceleration vector.
     * 
-    * @param jointAccelerations the joint acceleration column vector, starting from base child joint
-    *           acceleration. Not modified.
+    * @param jointAccelerations        the joint acceleration column vector, starting from base child
+    *                                  joint acceleration. Not modified.
     * @param spatialAccelerationToPack the spatial acceleration of the end effector with respect to the
-    *           base, expressed in the jacobianFrame. Modified.
+    *                                  base, expressed in the jacobianFrame. Modified.
     * @throws RuntimeException if either the base or the end-effector has not been provided beforehand.
     */
    public void getEndEffectorAcceleration(DenseMatrix64F jointAccelerations, SpatialAccelerationBasics spatialAccelerationToPack)
@@ -405,14 +405,16 @@ public class GeometricJacobianCalculator
    /**
     * Computes and packs the joint torque vector that corresponds to the given wrench.
     * 
-    * @param endEffectorWrench the resulting wrench at the end effector. The wrench should be expressed
-    *           in {@code jacobianFrame} and the wrench's {@code bodyFrame} should be the body fixed
-    *           frame of the end-effector. Not modified.
+    * @param endEffectorWrench  the resulting wrench at the end effector. The wrench should be
+    *                           expressed in {@code jacobianFrame} and the wrench's {@code bodyFrame}
+    *                           should be the body fixed frame of the end-effector. Not modified.
     * @param jointTorquesToPack the dense matrix used to store the computed joint torques. Modified.
     * @throws ReferenceFrameMismatchException if the given wrench
-    *            {@code wrench.getExpressedInFrame() != this.getJacobianFrame()} or
-    *            {@code wrench.getBodyFrame() != this.getEndEffectorFrame()}.
-    * @throws RuntimeException if either the base or the end-effector has not been provided beforehand.
+    *                                         {@code wrench.getExpressedInFrame() != this.getJacobianFrame()}
+    *                                         or
+    *                                         {@code wrench.getBodyFrame() != this.getEndEffectorFrame()}.
+    * @throws RuntimeException                if either the base or the end-effector has not been
+    *                                         provided beforehand.
     */
    public void getJointTorques(WrenchReadOnly endEffectorWrench, DenseMatrix64F jointTorquesToPack)
    {

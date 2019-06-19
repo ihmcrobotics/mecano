@@ -69,7 +69,7 @@ public class Wrench implements WrenchBasics, GeometryObject<Wrench>
    /**
     * Creates a new wrench with its components set to zero and initializes its reference frames.
     *
-    * @param bodyFrame the frame rigidly attached to the body on which this wrench is applied.
+    * @param bodyFrame        the frame rigidly attached to the body on which this wrench is applied.
     * @param expressedInFrame the frame in which this wrench is expressed.
     */
    public Wrench(ReferenceFrame bodyFrame, ReferenceFrame expressedInFrame)
@@ -80,10 +80,10 @@ public class Wrench implements WrenchBasics, GeometryObject<Wrench>
    /**
     * Creates a new wrench and initializes its components and reference frames.
     *
-    * @param bodyFrame the frame rigidly attached to the body on which this wrench is applied.
+    * @param bodyFrame        the frame rigidly attached to the body on which this wrench is applied.
     * @param expressedInFrame the frame in which this wrench is expressed.
-    * @param angularPart the vector holding the values for the angular part. Not modified.
-    * @param linearPart the vector holding the values for the linear part. Not modified.
+    * @param angularPart      the vector holding the values for the angular part. Not modified.
+    * @param linearPart       the vector holding the values for the linear part. Not modified.
     */
    public Wrench(ReferenceFrame bodyFrame, ReferenceFrame expressedInFrame, Vector3DReadOnly angularPart, Vector3DReadOnly linearPart)
    {
@@ -97,10 +97,10 @@ public class Wrench implements WrenchBasics, GeometryObject<Wrench>
     * {@code angularPartZ}, {@code linearPartX}, {@code linearPartY}, {@code linearPartZ}.
     * </p>
     *
-    * @param bodyFrame the frame rigidly attached to the body on which this wrench is applied.
+    * @param bodyFrame        the frame rigidly attached to the body on which this wrench is applied.
     * @param expressedInFrame the frame in which this wrench is expressed.
-    * @param matrix the column vector containing the values for this vector's components. Not
-    *           modified.
+    * @param matrix           the column vector containing the values for this vector's components. Not
+    *                         modified.
     */
    public Wrench(ReferenceFrame bodyFrame, ReferenceFrame expressedInFrame, DenseMatrix64F matrix)
    {
@@ -114,9 +114,10 @@ public class Wrench implements WrenchBasics, GeometryObject<Wrench>
     * {@code angularPartZ}, {@code linearPartX}, {@code linearPartY}, {@code linearPartZ}.
     * </p>
     *
-    * @param bodyFrame the frame rigidly attached to the body on which this wrench is applied.
+    * @param bodyFrame        the frame rigidly attached to the body on which this wrench is applied.
     * @param expressedInFrame the frame in which this wrench is expressed.
-    * @param array the array containing the new values for this vector's components. Not modified.
+    * @param array            the array containing the new values for this vector's components. Not
+    *                         modified.
     */
    public Wrench(ReferenceFrame bodyFrame, ReferenceFrame expressedInFrame, double[] array)
    {
@@ -213,7 +214,7 @@ public class Wrench implements WrenchBasics, GeometryObject<Wrench>
     * Tests on a per component basis if this vector is equal to the given {@code other} to an
     * {@code epsilon} and both vectors have the same frames.
     *
-    * @param other the other wrench to compare against this. Not modified.
+    * @param other   the other wrench to compare against this. Not modified.
     * @param epsilon the tolerance to use when comparing each component.
     * @return {@code true} if the two vectors are equal, {@code false} otherwise.
     */
@@ -226,23 +227,22 @@ public class Wrench implements WrenchBasics, GeometryObject<Wrench>
    /**
     * Tests if {@code this} and {@code other} represent the same wrench to an {@code epsilon}.
     * <p>
-    * It is likely that the implementation of this method will change in the future as the
-    * definition of "geometrically-equal" for wrenches might evolve. In the meantime, the current
-    * assumption is that two wrenches are geometrically equal if both their 3D torque and 3D force
-    * are independently geometrically equal, see
-    * {@link Vector3DReadOnly#geometricallyEquals(Vector3DReadOnly, double)}.
+    * It is likely that the implementation of this method will change in the future as the definition
+    * of "geometrically-equal" for wrenches might evolve. In the meantime, the current assumption is
+    * that two wrenches are geometrically equal if both their 3D torque and 3D force are independently
+    * geometrically equal, see {@link Vector3DReadOnly#geometricallyEquals(Vector3DReadOnly, double)}.
     * </p>
     * <p>
     * Note that {@code this.geometricallyEquals(other, epsilon) == true} does not necessarily imply
     * {@code this.epsilonEquals(other, epsilon)} and vice versa.
     * </p>
     *
-    * @param other the other wrench to compare against this. Not modified.
+    * @param other   the other wrench to compare against this. Not modified.
     * @param epsilon the tolerance to use for the comparison.
     * @return {@code true} if the two wrenches represent the same physical quantity, {@code false}
     *         otherwise.
     * @throws ReferenceFrameMismatchException if the reference frames of {@code other} do not
-    *            respectively match the reference frames of {@code this}.
+    *                                         respectively match the reference frames of {@code this}.
     */
    @Override
    public boolean geometricallyEquals(Wrench other, double epsilon)
@@ -251,8 +251,8 @@ public class Wrench implements WrenchBasics, GeometryObject<Wrench>
    }
 
    /**
-    * Tests if the given {@code object}'s class is the same as this, in which case the method
-    * returns {@link #equals(WrenchReadOnly)}, it returns {@code false} otherwise.
+    * Tests if the given {@code object}'s class is the same as this, in which case the method returns
+    * {@link #equals(WrenchReadOnly)}, it returns {@code false} otherwise.
     *
     * @param object the object to compare against this. Not modified.
     * @return {@code true} if {@code object} and this are exactly equal, {@code false} otherwise.

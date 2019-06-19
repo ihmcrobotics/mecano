@@ -76,7 +76,7 @@ public class ForwardDynamicsCalculator
     * </p>
     * 
     * @param rootBody the supporting body of the subtree to be evaluated by this calculator. Not
-    *           modified.
+    *                 modified.
     */
    public ForwardDynamicsCalculator(RigidBodyReadOnly rootBody)
    {
@@ -106,13 +106,17 @@ public class ForwardDynamicsCalculator
     * it.
     * </p>
     * 
-    * @param input the definition of the system to be evaluated by this calculator.
+    * @param input                          the definition of the system to be evaluated by this
+    *                                       calculator.
     * @param considerIgnoredSubtreesInertia whether the inertia of the ignored part(s) of the given
-    *           multi-body system should be considered. When {@code true}, this provides more accurate
-    *           joint accelerations as they account for instance for the gravity acting on the ignored
-    *           rigid-bodies, i.e. bodies which have an ancestor joint that is ignored as specified in
-    *           the given {@code input}. When {@code false}, the resulting joint accelerations may be
-    *           less accurate and this calculator may gain slight performance improvement.
+    *                                       multi-body system should be considered. When {@code true},
+    *                                       this provides more accurate joint accelerations as they
+    *                                       account for instance for the gravity acting on the ignored
+    *                                       rigid-bodies, i.e. bodies which have an ancestor joint that
+    *                                       is ignored as specified in the given {@code input}. When
+    *                                       {@code false}, the resulting joint accelerations may be
+    *                                       less accurate and this calculator may gain slight
+    *                                       performance improvement.
     */
    public ForwardDynamicsCalculator(MultiBodySystemReadOnly input, boolean considerIgnoredSubtreesInertia)
    {
@@ -158,7 +162,7 @@ public class ForwardDynamicsCalculator
     * </p>
     * 
     * @param gravity the gravitational linear acceleration, it is usually equal to
-    *           {@code (0, 0, -9.81)}.
+    *                {@code (0, 0, -9.81)}.
     */
    public void setGravitionalAcceleration(FrameTuple3DReadOnly gravity)
    {
@@ -174,7 +178,7 @@ public class ForwardDynamicsCalculator
     * </p>
     * 
     * @param gravity the gravitational linear acceleration, it is usually equal to
-    *           {@code (0, 0, -9.81)}.
+    *                {@code (0, 0, -9.81)}.
     */
    public void setGravitionalAcceleration(Tuple3DReadOnly gravity)
    {
@@ -191,7 +195,7 @@ public class ForwardDynamicsCalculator
     * </p>
     * 
     * @param gravity the gravitational linear acceleration along the z-axis, it is usually equal to
-    *           {@code -9.81}.
+    *                {@code -9.81}.
     */
    public void setGravitionalAcceleration(double gravity)
    {
@@ -206,11 +210,11 @@ public class ForwardDynamicsCalculator
     * </p>
     * 
     * @param gravityX the gravitational linear acceleration along the x-axis, it is usually equal to
-    *           {@code 0}.
+    *                 {@code 0}.
     * @param gravityY the gravitational linear acceleration along the y-axis, it is usually equal to
-    *           {@code 0}.
+    *                 {@code 0}.
     * @param gravityZ the gravitational linear acceleration along the z-axis, it is usually equal to
-    *           {@code -9.81}.
+    *                 {@code -9.81}.
     */
    public void setGravitionalAcceleration(double gravityX, double gravityY, double gravityZ)
    {
@@ -227,8 +231,8 @@ public class ForwardDynamicsCalculator
     * 
     * @param newRootAcceleration the new spatial acceleration of the root.
     * @throws ReferenceFrameMismatchException if any of the reference frames of
-    *            {@code newRootAcceleration} does not match this calculator's root spatial
-    *            acceleration's frames.
+    *                                         {@code newRootAcceleration} does not match this
+    *                                         calculator's root spatial acceleration's frames.
     */
    public void setRootAcceleration(SpatialAccelerationReadOnly newRootAcceleration)
    {
@@ -260,7 +264,7 @@ public class ForwardDynamicsCalculator
    /**
     * Sets external wrench to apply to the given {@code rigidBody}.
     * 
-    * @param rigidBody the rigid-body to which the wrench is to applied. Not modified.
+    * @param rigidBody      the rigid-body to which the wrench is to applied. Not modified.
     * @param externalWrench the external wrench to apply to the rigid-body.
     */
    public void setExternalWrench(RigidBodyReadOnly rigidBody, WrenchReadOnly externalWrench)

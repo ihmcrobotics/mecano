@@ -23,15 +23,15 @@ public class YoPrismaticJoint extends YoOneDoFJoint implements PrismaticJointBas
    private final FrameVector3D jointAxis;
 
    /**
-    * Creates a new prismatic joint which has only a translation offset with respect to its parent
-    * and which state is backed by {@code YoVariable}s.
+    * Creates a new prismatic joint which has only a translation offset with respect to its parent and
+    * which state is backed by {@code YoVariable}s.
     * 
-    * @param name the name for the new joint.
+    * @param name        the name for the new joint.
     * @param predecessor the rigid-body connected to and preceding this joint.
     * @param jointOffset the offset in translation with respect to the frame after the parent joint.
-    *           Not modified.
-    * @param jointAxis the axis along which this joint can translate. Not modified.
-    * @param registry the registry to register child variables to.
+    *                    Not modified.
+    * @param jointAxis   the axis along which this joint can translate. Not modified.
+    * @param registry    the registry to register child variables to.
     */
    public YoPrismaticJoint(String name, RigidBodyBasics predecessor, Tuple3DReadOnly jointOffset, Vector3DReadOnly jointAxis, YoVariableRegistry registry)
    {
@@ -41,14 +41,14 @@ public class YoPrismaticJoint extends YoOneDoFJoint implements PrismaticJointBas
    /**
     * Creates a new prismatic joint which state is backed by {@code YoVariable}s.
     * 
-    * @param name the name for the new joint.
-    * @param predecessor the rigid-body connected to and preceding this joint.
+    * @param name              the name for the new joint.
+    * @param predecessor       the rigid-body connected to and preceding this joint.
     * @param transformToParent the transform to the frame after the parent joint. Not modified.
-    * @param jointAxis the axis along which this joint can translate. Not modified.
-    * @param registry the registry to register child variables to.
+    * @param jointAxis         the axis along which this joint can translate. Not modified.
+    * @param registry          the registry to register child variables to.
     */
    public YoPrismaticJoint(String name, RigidBodyBasics predecessor, RigidBodyTransform transformToParent, Vector3DReadOnly jointAxis,
-         YoVariableRegistry registry)
+                           YoVariableRegistry registry)
    {
       super(name, predecessor, new Vector3D(), jointAxis, transformToParent, registry);
       this.jointAxis = new FrameVector3D(beforeJointFrame, jointAxis);

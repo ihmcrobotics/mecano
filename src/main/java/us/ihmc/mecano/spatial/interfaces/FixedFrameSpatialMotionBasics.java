@@ -4,7 +4,7 @@ import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.referenceFrame.exceptions.ReferenceFrameMismatchException;
 import us.ihmc.euclid.referenceFrame.interfaces.FramePoint3DReadOnly;
 import us.ihmc.euclid.referenceFrame.interfaces.FrameVector3DReadOnly;
-import us.ihmc.euclid.transform.RigidBodyTransform;
+import us.ihmc.euclid.transform.interfaces.RigidBodyTransformReadOnly;
 import us.ihmc.euclid.transform.interfaces.Transform;
 import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
 import us.ihmc.euclid.tuple3D.interfaces.Vector3DReadOnly;
@@ -68,7 +68,7 @@ public interface FixedFrameSpatialMotionBasics extends SpatialMotionReadOnly, Fi
     *
     * @param other the other vector to copy. Not modified.
     * @throws ReferenceFrameMismatchException if any of the reference frames in {@code other} do not
-    *            match {@code this}.
+    *                                         match {@code this}.
     */
    default void set(SpatialMotionReadOnly other)
    {
@@ -82,13 +82,13 @@ public interface FixedFrameSpatialMotionBasics extends SpatialMotionReadOnly, Fi
     * {@link #set(SpatialMotionReadOnly)}.
     * </p>
     * <p>
-    * If {@code other} is expressed in a different frame than {@code this}, then {@code this} is set
-    * to {@code other} once transformed to be expressed in {@code this.getReferenceFrame()}.
+    * If {@code other} is expressed in a different frame than {@code this}, then {@code this} is set to
+    * {@code other} once transformed to be expressed in {@code this.getReferenceFrame()}.
     * </p>
     *
     * @param other the other vector to copy. Not modified.
-    * @throws ReferenceFrameMismatchException if either the body frame or base frame in
-    *            {@code other} does not match {@code this}.
+    * @throws ReferenceFrameMismatchException if either the body frame or base frame in {@code other}
+    *                                         does not match {@code this}.
     */
    default void setMatchingFrame(SpatialMotionReadOnly other)
    {
@@ -100,11 +100,11 @@ public interface FixedFrameSpatialMotionBasics extends SpatialMotionReadOnly, Fi
    /**
     * Sets this motion vector to {@code spatialVector}.
     *
-    * @param bodyFrame what we are specifying the motion of.
-    * @param baseFrame with respect to what we are specifying the motion.
+    * @param bodyFrame     what we are specifying the motion of.
+    * @param baseFrame     with respect to what we are specifying the motion.
     * @param spatialVector the spatial vector to copy values from. Not modified.
-    * @throws ReferenceFrameMismatchException if any of the reference frames from the arguments do
-    *            not match the current frames of {@code this}.
+    * @throws ReferenceFrameMismatchException if any of the reference frames from the arguments do not
+    *                                         match the current frames of {@code this}.
     */
    default void set(ReferenceFrame bodyFrame, ReferenceFrame baseFrame, SpatialVectorReadOnly spatialVector)
    {
@@ -114,12 +114,12 @@ public interface FixedFrameSpatialMotionBasics extends SpatialMotionReadOnly, Fi
    /**
     * Sets this motion vector given an angular part and linear part.
     *
-    * @param bodyFrame what we are specifying the motion of.
-    * @param baseFrame with respect to what we are specifying the motion.
+    * @param bodyFrame   what we are specifying the motion of.
+    * @param baseFrame   with respect to what we are specifying the motion.
     * @param angularPart the vector holding the new values for the angular part. Not modified.
-    * @param linearPart the vector holding the new values for the linear part. Not modified.
-    * @throws ReferenceFrameMismatchException if any of the reference frames from the arguments do
-    *            not match the current frames of {@code this}.
+    * @param linearPart  the vector holding the new values for the linear part. Not modified.
+    * @throws ReferenceFrameMismatchException if any of the reference frames from the arguments do not
+    *                                         match the current frames of {@code this}.
     */
    default void set(ReferenceFrame bodyFrame, ReferenceFrame baseFrame, FrameVector3DReadOnly angularPart, FrameVector3DReadOnly linearPart)
    {
@@ -130,13 +130,13 @@ public interface FixedFrameSpatialMotionBasics extends SpatialMotionReadOnly, Fi
    /**
     * Sets this motion vector given an angular part and linear part.
     *
-    * @param bodyFrame what we are specifying the motion of.
-    * @param baseFrame with respect to what we are specifying the motion.
+    * @param bodyFrame        what we are specifying the motion of.
+    * @param baseFrame        with respect to what we are specifying the motion.
     * @param expressedInFrame in which reference frame the motion is expressed.
-    * @param angularPart the vector holding the new values for the angular part. Not modified.
-    * @param linearPart the vector holding the new values for the linear part. Not modified.
-    * @throws ReferenceFrameMismatchException if any of the reference frames from the arguments do
-    *            not match the current frames of {@code this}.
+    * @param angularPart      the vector holding the new values for the angular part. Not modified.
+    * @param linearPart       the vector holding the new values for the linear part. Not modified.
+    * @throws ReferenceFrameMismatchException if any of the reference frames from the arguments do not
+    *                                         match the current frames of {@code this}.
     */
    default void set(ReferenceFrame bodyFrame, ReferenceFrame baseFrame, ReferenceFrame expressedInFrame, Vector3DReadOnly angularPart,
                     Vector3DReadOnly linearPart)
@@ -155,13 +155,13 @@ public interface FixedFrameSpatialMotionBasics extends SpatialMotionReadOnly, Fi
     * &nu;<sub>this</sub> = &nu;<sub>new</sub> + P &times; &omega;<sub>new</sub>
     * </pre>
     *
-    * where &omega; and &nu; represent the angular and linear parts respectively, and {@code P} is
-    * the {@code observerPosition}.
+    * where &omega; and &nu; represent the angular and linear parts respectively, and {@code P} is the
+    * {@code observerPosition}.
     * </p>
     *
-    * @param angularPart the angular part of the motion. Not modified.
-    * @param linearPart the linear part of the motion measured at the observer position. Not
-    *           modified.
+    * @param angularPart      the angular part of the motion. Not modified.
+    * @param linearPart       the linear part of the motion measured at the observer position. Not
+    *                         modified.
     * @param observerPosition the location at which the motion is measured. Not modified.
     */
    default void set(Vector3DReadOnly angularPart, Vector3DReadOnly linearPart, Point3DReadOnly observerPosition)
@@ -184,17 +184,17 @@ public interface FixedFrameSpatialMotionBasics extends SpatialMotionReadOnly, Fi
     * &nu;<sub>this</sub> = &nu;<sub>new</sub> + P &times; &omega;<sub>new</sub>
     * </pre>
     *
-    * where &omega; and &nu; represent the angular and linear parts respectively, and {@code P} is
-    * the {@code observerPosition}.
+    * where &omega; and &nu; represent the angular and linear parts respectively, and {@code P} is the
+    * {@code observerPosition}.
     * </p>
     *
     * @param expressedInFrame the reference frame in which the given motion is expressed.
-    * @param angularPart the angular part of the motion. Not modified.
-    * @param linearPart the linear part of the motion measured at the observer position. Not
-    *           modified.
+    * @param angularPart      the angular part of the motion. Not modified.
+    * @param linearPart       the linear part of the motion measured at the observer position. Not
+    *                         modified.
     * @param observerPosition the location at which the motion is measured. Not modified.
     * @throws ReferenceFrameMismatchException if {@code expressedInFrame} is not the same as
-    *            {@code this.getReferenceFrame()}.
+    *                                         {@code this.getReferenceFrame()}.
     */
    default void set(ReferenceFrame expressedInFrame, Vector3DReadOnly angularPart, Vector3DReadOnly linearPart, Point3DReadOnly observerPosition)
    {
@@ -212,16 +212,16 @@ public interface FixedFrameSpatialMotionBasics extends SpatialMotionReadOnly, Fi
     * &nu;<sub>this</sub> = &nu;<sub>new</sub> + P &times; &omega;<sub>new</sub>
     * </pre>
     *
-    * where &omega; and &nu; represent the angular and linear parts respectively, and {@code P} is
-    * the {@code observerPosition}.
+    * where &omega; and &nu; represent the angular and linear parts respectively, and {@code P} is the
+    * {@code observerPosition}.
     * </p>
     *
-    * @param angularPart the angular part of the motion. Not modified.
-    * @param linearPart the linear part of the motion measured at the observer position. Not
-    *           modified.
+    * @param angularPart      the angular part of the motion. Not modified.
+    * @param linearPart       the linear part of the motion measured at the observer position. Not
+    *                         modified.
     * @param observerPosition the location at which the motion is measured. Not modified.
     * @throws ReferenceFrameMismatchException if any of the arguments is not expressed in
-    *            {@code this.getReferenceFrame()}.
+    *                                         {@code this.getReferenceFrame()}.
     */
    default void set(FrameVector3DReadOnly angularPart, FrameVector3DReadOnly linearPart, FramePoint3DReadOnly observerPosition)
    {
@@ -247,14 +247,13 @@ public interface FixedFrameSpatialMotionBasics extends SpatialMotionReadOnly, Fi
     * </ul>
     * </p>
     * 
-    * @throws UnsupportedOperationException if the given transform is not a
-    *            {@code RigidBodyTransform}.
+    * @throws UnsupportedOperationException if the given transform is not a {@code RigidBodyTransform}.
     */
    @Override
    default void applyTransform(Transform transform)
    {
-      if (transform instanceof RigidBodyTransform)
-         applyTransform((RigidBodyTransform) transform);
+      if (transform instanceof RigidBodyTransformReadOnly)
+         applyTransform((RigidBodyTransformReadOnly) transform);
       else
          throw new UnsupportedOperationException("The feature applyTransform is not supported for the transform of the type: "
                + transform.getClass().getSimpleName());
@@ -278,14 +277,13 @@ public interface FixedFrameSpatialMotionBasics extends SpatialMotionReadOnly, Fi
     * </ul>
     * </p>
     * 
-    * @throws UnsupportedOperationException if the given transform is not a
-    *            {@code RigidBodyTransform}.
+    * @throws UnsupportedOperationException if the given transform is not a {@code RigidBodyTransform}.
     */
    @Override
    default void applyInverseTransform(Transform transform)
    {
-      if (transform instanceof RigidBodyTransform)
-         applyInverseTransform((RigidBodyTransform) transform);
+      if (transform instanceof RigidBodyTransformReadOnly)
+         applyInverseTransform((RigidBodyTransformReadOnly) transform);
       else
          throw new UnsupportedOperationException("The feature applyInverseTransform is not supported for the transform of the type: "
                + transform.getClass().getSimpleName());
@@ -310,7 +308,7 @@ public interface FixedFrameSpatialMotionBasics extends SpatialMotionReadOnly, Fi
     * 
     * @param transform the transform to use on this. Not modified.
     */
-   default void applyTransform(RigidBodyTransform transform)
+   default void applyTransform(RigidBodyTransformReadOnly transform)
    {
       if (transform.hasRotation())
       {
@@ -319,7 +317,7 @@ public interface FixedFrameSpatialMotionBasics extends SpatialMotionReadOnly, Fi
       }
 
       if (transform.hasTranslation())
-         addCrossToLinearPart(transform.getTranslationVector(), getAngularPart());
+         addCrossToLinearPart(transform.getTranslation(), getAngularPart());
    }
 
    /**
@@ -342,10 +340,10 @@ public interface FixedFrameSpatialMotionBasics extends SpatialMotionReadOnly, Fi
     * 
     * @param transform the transform to use on this. Not modified.
     */
-   default void applyInverseTransform(RigidBodyTransform transform)
+   default void applyInverseTransform(RigidBodyTransformReadOnly transform)
    {
       if (transform.hasTranslation())
-         addCrossToLinearPart(getAngularPart(), transform.getTranslationVector());
+         addCrossToLinearPart(getAngularPart(), transform.getTranslation());
 
       if (transform.hasRotation())
       {

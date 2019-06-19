@@ -50,9 +50,9 @@ public interface TwistBasics extends FixedFrameTwistBasics, SpatialMotionBasics
    /**
     * Adds another twist to this twist after performing the usual reference frame checks.
     * <p>
-    * Note that either the base frame or the body frame of this twist after this operation is
-    * updated. Let's assume the twist T<sub>B</sub> of a banana with respect to a table and the
-    * twist T<sub>O</sub> of an orange with respect to the banana, then the addition T<sub>B</sub> +
+    * Note that either the base frame or the body frame of this twist after this operation is updated.
+    * Let's assume the twist T<sub>B</sub> of a banana with respect to a table and the twist
+    * T<sub>O</sub> of an orange with respect to the banana, then the addition T<sub>B</sub> +
     * T<sub>O</sub> is the twist of the orange with respect to the table.
     * </p>
     * <p>
@@ -61,10 +61,10 @@ public interface TwistBasics extends FixedFrameTwistBasics, SpatialMotionBasics
     * </p>
     *
     * @param other the other twist to add to {@code this}. Not modified.
-    * @throws ReferenceFrameMismatchException if {@code other} is not expressed in the same
-    *            reference frame as {@code this}. Or if the two twists cannot be "concatenated":
-    *            {@code this.bodyFrame != other.baseFrame} and
-    *            {@code other.bodyFrame != this.baseFrame}.
+    * @throws ReferenceFrameMismatchException if {@code other} is not expressed in the same reference
+    *                                         frame as {@code this}. Or if the two twists cannot be
+    *                                         "concatenated": {@code this.bodyFrame != other.baseFrame}
+    *                                         and {@code other.bodyFrame != this.baseFrame}.
     */
    default void add(TwistReadOnly other)
    {
@@ -84,10 +84,10 @@ public interface TwistBasics extends FixedFrameTwistBasics, SpatialMotionBasics
    /**
     * Subtracts another twist to this twist after performing the usual reference frame checks.
     * <p>
-    * Note that either the base frame or the body frame of this twist after this operation is
-    * updated. Let's assume the twist T<sub>B</sub> of a banana with respect to a table and the
-    * twist T<sub>O</sub> of an orange with respect to the table, then the difference T<sub>B</sub>
-    * - T<sub>O</sub> is the twist of the banana with respect to the orange.
+    * Note that either the base frame or the body frame of this twist after this operation is updated.
+    * Let's assume the twist T<sub>B</sub> of a banana with respect to a table and the twist
+    * T<sub>O</sub> of an orange with respect to the table, then the difference T<sub>B</sub> -
+    * T<sub>O</sub> is the twist of the banana with respect to the orange.
     * </p>
     * <p>
     * See Duindam, <i>Port-Based Modeling and Control for Efficient Bipedal Walking Robots</i>, page
@@ -95,10 +95,10 @@ public interface TwistBasics extends FixedFrameTwistBasics, SpatialMotionBasics
     * </p>
     *
     * @param other the other twist to subtract to {@code this}. Not modified.
-    * @throws ReferenceFrameMismatchException if {@code other} is not expressed in the same
-    *            reference frame as {@code this}. Or if the two twists cannot be "concatenated":
-    *            {@code this.bodyFrame != other.baseFrame} and
-    *            {@code other.bodyFrame != this.baseFrame}.
+    * @throws ReferenceFrameMismatchException if {@code other} is not expressed in the same reference
+    *                                         frame as {@code this}. Or if the two twists cannot be
+    *                                         "concatenated": {@code this.bodyFrame != other.baseFrame}
+    *                                         and {@code other.bodyFrame != this.baseFrame}.
     */
    default void sub(TwistReadOnly other)
    {

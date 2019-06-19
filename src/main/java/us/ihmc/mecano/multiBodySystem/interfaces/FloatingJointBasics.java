@@ -32,11 +32,11 @@ import us.ihmc.mecano.spatial.interfaces.FixedFrameWrenchBasics;
 public interface FloatingJointBasics extends FloatingJointReadOnly, JointBasics
 {
    /**
-    * Gets the reference to the pose of this floating joint, i.e. the pose of the multi-body system
-    * in world.
+    * Gets the reference to the pose of this floating joint, i.e. the pose of the multi-body system in
+    * world.
     * <p>
-    * Note that for 2D floating joints, some components of the 3D pose cannot be set as set the
-    * motion is constrained to a 2D plane.
+    * Note that for 2D floating joints, some components of the 3D pose cannot be set as set the motion
+    * is constrained to a 2D plane.
     * </p>
     * 
     * @return this joint pose.
@@ -45,16 +45,16 @@ public interface FloatingJointBasics extends FloatingJointReadOnly, JointBasics
    Pose3DBasics getJointPose();
 
    /**
-    * Gets the reference to this joint twist (3D angular and linear velocities). The reference
-    * frames of the joint twist can not be changed and are as follows:
+    * Gets the reference to this joint twist (3D angular and linear velocities). The reference frames
+    * of the joint twist can not be changed and are as follows:
     * <ul>
     * <li>{@code bodyFrame} is {@code afterJointFrame}.
     * <li>{@code baseFrame} is {@code beforeJointFrame}.
     * <li>{@code expressedInFrame} is {@code afterJointFrame}.
     * </ul>
     * <p>
-    * Note that for 2D floating joints, some components of the twist cannot be set as set the motion
-    * is constrained to a 2D plane.
+    * Note that for 2D floating joints, some components of the twist cannot be set as set the motion is
+    * constrained to a 2D plane.
     * </p>
     * 
     * @return the reference to this joint twist.
@@ -63,8 +63,8 @@ public interface FloatingJointBasics extends FloatingJointReadOnly, JointBasics
    FixedFrameTwistBasics getJointTwist();
 
    /**
-    * Gets the reference to this joint spatial acceleration (3D angular and linear accelerations).
-    * The reference frames of the joint acceleration can not be changed and are as follows:
+    * Gets the reference to this joint spatial acceleration (3D angular and linear accelerations). The
+    * reference frames of the joint acceleration can not be changed and are as follows:
     * <ul>
     * <li>{@code bodyFrame} is {@code afterJointFrame}.
     * <li>{@code baseFrame} is {@code beforeJointFrame}.
@@ -81,8 +81,8 @@ public interface FloatingJointBasics extends FloatingJointReadOnly, JointBasics
    FixedFrameSpatialAccelerationBasics getJointAcceleration();
 
    /**
-    * Gets the reference to this joint wrench (3D force and torque). The reference frames of the
-    * joint wrench can not be changed and are as follows:
+    * Gets the reference to this joint wrench (3D force and torque). The reference frames of the joint
+    * wrench can not be changed and are as follows:
     * <ul>
     * <li>{@code bodyFrame} is {@code successor.getBodyFixedFrame()}.
     * <li>{@code expressedInFrame} is {@code afterJointFrame}.
