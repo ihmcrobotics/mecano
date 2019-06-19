@@ -228,8 +228,8 @@ public interface JointBasics extends JointReadOnly
     */
    default void setJointConfiguration(RigidBodyTransform jointConfiguration)
    {
-      setJointOrientation(jointConfiguration.getRotationMatrix());
-      setJointPosition(jointConfiguration.getTranslationVector());
+      setJointOrientation(jointConfiguration.getRotation());
+      setJointPosition(jointConfiguration.getTranslation());
    }
 
    /**

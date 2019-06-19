@@ -218,7 +218,7 @@ public class MecanoFactories
             s = qs;
 
             if (Math.abs(x) > 1.0e-5 || Math.abs(z) > 1.0e-5)
-               setToPitchQuaternion(getPitch());
+               setToPitchOrientation(getPitch());
          }
 
          @Override

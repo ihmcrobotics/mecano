@@ -221,15 +221,15 @@ public interface SpatialInertiaBasics extends FixedFrameSpatialInertiaBasics, Fr
       if (transform.hasRotation())
       {
          // Let's first apply the rotation onto the CoM and the mass moment of inertia:
-         MecanoTools.transformSymmetricMatrix3D(transform.getRotationMatrix(), getMomentOfInertia());
+         MecanoTools.transformSymmetricMatrix3D(transform.getRotation(), getMomentOfInertia());
          getCenterOfMassOffset().applyTransform(transform);
       }
 
       if (transform.hasTranslation())
       {
          // Now we can simply apply the translation on the CoM and mass moment of inertia:
-         MecanoTools.translateMomentOfInertia(getMass(), getCenterOfMassOffset(), false, transform.getTranslationVector(), getMomentOfInertia());
-         getCenterOfMassOffset().add(transform.getTranslationVector());
+         MecanoTools.translateMomentOfInertia(getMass(), getCenterOfMassOffset(), false, transform.getTranslation(), getMomentOfInertia());
+         getCenterOfMassOffset().add(transform.getTranslation());
       }
    }
 
@@ -249,14 +249,14 @@ public interface SpatialInertiaBasics extends FixedFrameSpatialInertiaBasics, Fr
       if (transform.hasTranslation())
       {
          // Now we can simply apply the translation on the CoM and mass moment of inertia:
-         MecanoTools.translateMomentOfInertia(getMass(), getCenterOfMassOffset(), true, transform.getTranslationVector(), getMomentOfInertia());
-         getCenterOfMassOffset().sub(transform.getTranslationVector());
+         MecanoTools.translateMomentOfInertia(getMass(), getCenterOfMassOffset(), true, transform.getTranslation(), getMomentOfInertia());
+         getCenterOfMassOffset().sub(transform.getTranslation());
       }
 
       if (transform.hasRotation())
       {
          // Let's first apply the rotation onto the CoM and the mass moment of inertia:
-         MecanoTools.inverseTransformSymmetricMatrix3D(transform.getRotationMatrix(), getMomentOfInertia());
+         MecanoTools.inverseTransformSymmetricMatrix3D(transform.getRotation(), getMomentOfInertia());
          getCenterOfMassOffset().applyInverseTransform(transform);
       }
    }

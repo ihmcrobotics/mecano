@@ -107,7 +107,7 @@ public interface PlanarJointBasics extends PlanarJointReadOnly, FloatingJointBas
       double qRot = matrix.get(index++, 0);
       double x = matrix.get(index++, 0);
       double z = matrix.get(index++, 0);
-      getJointPose().getOrientation().setToPitchQuaternion(qRot);
+      getJointPose().getOrientation().setToPitchOrientation(qRot);
       getJointPose().getPosition().set(x, 0.0, z);
       return rowStart + getConfigurationMatrixSize();
    }

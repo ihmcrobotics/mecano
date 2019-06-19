@@ -361,7 +361,7 @@ public class ArticulatedBodyInertia implements GeometryObject<ArticulatedBodyIne
    {
       if (transform.hasRotation())
       {
-         RotationMatrixReadOnly rotationMatrix = transform.getRotationMatrix();
+         RotationMatrixReadOnly rotationMatrix = transform.getRotation();
          MecanoTools.transformSymmetricMatrix3D(rotationMatrix, angularInertia);
          MecanoTools.transformSymmetricMatrix3D(rotationMatrix, linearInertia);
          rotationMatrix.transform(crossInertia);
@@ -369,7 +369,7 @@ public class ArticulatedBodyInertia implements GeometryObject<ArticulatedBodyIne
 
       if (transform.hasTranslation())
       {
-         Vector3DReadOnly translationVector = transform.getTranslationVector();
+         Vector3DReadOnly translationVector = transform.getTranslation();
          ArticulatedBodyInertiaAlorigthmTools.translateAngularInertia(false, translationVector, linearInertia, crossInertia, angularInertia);
          ArticulatedBodyInertiaAlorigthmTools.translateCrossInertia(false, translationVector, linearInertia, crossInertia);
       }
@@ -388,14 +388,14 @@ public class ArticulatedBodyInertia implements GeometryObject<ArticulatedBodyIne
    {
       if (transform.hasTranslation())
       {
-         Vector3DReadOnly translationVector = transform.getTranslationVector();
+         Vector3DReadOnly translationVector = transform.getTranslation();
          ArticulatedBodyInertiaAlorigthmTools.translateAngularInertia(true, translationVector, linearInertia, crossInertia, angularInertia);
          ArticulatedBodyInertiaAlorigthmTools.translateCrossInertia(true, translationVector, linearInertia, crossInertia);
       }
 
       if (transform.hasRotation())
       {
-         RotationMatrixReadOnly rotationMatrix = transform.getRotationMatrix();
+         RotationMatrixReadOnly rotationMatrix = transform.getRotation();
          MecanoTools.inverseTransformSymmetricMatrix3D(rotationMatrix, angularInertia);
          MecanoTools.inverseTransformSymmetricMatrix3D(rotationMatrix, linearInertia);
          rotationMatrix.inverseTransform(crossInertia);

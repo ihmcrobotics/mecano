@@ -550,7 +550,7 @@ public class CenterOfMassJacobian implements ReferenceFrameHolder
       public void passTwo()
       {
          centerOfMassTimesMass.setIncludingFrame(centerOfMass);
-         centerOfMassTimesMass.sub(jacobianFrame.getTransformToRoot().getTranslationVector());
+         centerOfMassTimesMass.sub(jacobianFrame.getTransformToRoot().getTranslation());
          centerOfMassTimesMass.setReferenceFrame(jacobianFrame);
          centerOfMassTimesMass.scale(subTreeMass);
       }

@@ -256,7 +256,7 @@ public interface FixedFrameSpatialForceBasics extends SpatialForceReadOnly, Fixe
       }
 
       if (transform.hasTranslation())
-         addCrossToAngularPart(transform.getTranslationVector(), getLinearPart());
+         addCrossToAngularPart(transform.getTranslation(), getLinearPart());
    }
 
    /**
@@ -282,7 +282,7 @@ public interface FixedFrameSpatialForceBasics extends SpatialForceReadOnly, Fixe
    default void applyInverseTransform(RigidBodyTransform transform)
    {
       if (transform.hasTranslation())
-         addCrossToAngularPart(getLinearPart(), transform.getTranslationVector());
+         addCrossToAngularPart(getLinearPart(), transform.getTranslation());
 
       if (transform.hasRotation())
       {

@@ -376,12 +376,12 @@ public class SpatialInertiaTest
    private static DenseMatrix64F adjoint(RigidBodyTransform transform)
    {
       Matrix3D translationTilde = new Matrix3D();
-      translationTilde.setToTildeForm(transform.getTranslationVector());
+      translationTilde.setToTildeForm(transform.getTranslation());
       DenseMatrix64F translationTildeDense = new DenseMatrix64F(3, 3);
       translationTilde.get(translationTildeDense);
 
       DenseMatrix64F rotationDense = new DenseMatrix64F(3, 3);
-      transform.getRotationMatrix().get(rotationDense);
+      transform.getRotation().get(rotationDense);
 
       DenseMatrix64F adjointMatrix = new DenseMatrix64F(6, 6);
 

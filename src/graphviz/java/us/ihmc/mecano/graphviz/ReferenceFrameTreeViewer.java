@@ -197,8 +197,8 @@ public class ReferenceFrameTreeViewer
     */
    public static String getTransformLabel(RigidBodyTransform transform)
    {
-      String translationAsString = transform.getTranslationVector().toString();
-      return "(x,y,z) = " + translationAsString + "\n" + getOrientationLabel(transform.getRotationMatrix());
+      String translationAsString = transform.getTranslation().toString();
+      return "(x,y,z) = " + translationAsString + "\n" + getOrientationLabel(transform.getRotation());
    }
 
    /**
