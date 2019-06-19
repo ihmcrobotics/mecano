@@ -39,8 +39,7 @@ public class ArticulatedBodyInertia implements GeometryObject<ArticulatedBodyIne
     */
    private final Matrix3D angularInertia = new Matrix3D();
    /**
-    * The linear part of this inertia, i.e. the 3-by-3 bottom right block of the 6-by-6 spatial
-    * matrix.
+    * The linear part of this inertia, i.e. the 3-by-3 bottom right block of the 6-by-6 spatial matrix.
     */
    private final Matrix3D linearInertia = new Matrix3D();
    /**
@@ -48,8 +47,8 @@ public class ArticulatedBodyInertia implements GeometryObject<ArticulatedBodyIne
     */
    private final Matrix3D crossInertia = new Matrix3D();
    /**
-    * The transpose of the cross part of this inertia, i.e. the 3-by-3 bottom left block of the
-    * 6-by-6 spatial matrix.
+    * The transpose of the cross part of this inertia, i.e. the 3-by-3 bottom left block of the 6-by-6
+    * spatial matrix.
     */
    private final Matrix3DReadOnly crossInertiaTranspose = MecanoFactories.createTransposeLinkedMatrix3DReadOnly(crossInertia);
    /** Variable to store intermediate results for garbage-free operations. */
@@ -64,8 +63,7 @@ public class ArticulatedBodyInertia implements GeometryObject<ArticulatedBodyIne
    }
 
    /**
-    * Creates a new inertia matrix with its components set to zero and initializes its reference
-    * frame.
+    * Creates a new inertia matrix with its components set to zero and initializes its reference frame.
     *
     * @param expressedInFrame in which reference frame the inertia is expressed.
     */
@@ -108,8 +106,8 @@ public class ArticulatedBodyInertia implements GeometryObject<ArticulatedBodyIne
    }
 
    /**
-    * Sets all the coefficients of this inertia to {@link Double#NaN} and sets the reference frame
-    * in which it is expressed.
+    * Sets all the coefficients of this inertia to {@link Double#NaN} and sets the reference frame in
+    * which it is expressed.
     * 
     * @param expressedInFrame the new reference frame for this inertia.
     */
@@ -144,7 +142,7 @@ public class ArticulatedBodyInertia implements GeometryObject<ArticulatedBodyIne
     * {@inheritDoc}
     * 
     * @throws ReferenceFrameMismatchException if {@code other} is not expressed in the same frame as
-    *            {@code this}.
+    *                                         {@code this}.
     */
    @Override
    public void set(ArticulatedBodyInertia other)
@@ -190,7 +188,7 @@ public class ArticulatedBodyInertia implements GeometryObject<ArticulatedBodyIne
     * 
     * @param other the other inertia to add. Not modified.
     * @throws ReferenceFrameMismatchException if {@code other} is not expressed in the same frame as
-    *            {@code this}.
+    *                                         {@code this}.
     */
    public void add(ArticulatedBodyInertia other)
    {
@@ -201,8 +199,7 @@ public class ArticulatedBodyInertia implements GeometryObject<ArticulatedBodyIne
    }
 
    /**
-    * Assuming {@code matrix} represents a proper 6-by-6 inertia matrix, it is added to this
-    * inertia.
+    * Assuming {@code matrix} represents a proper 6-by-6 inertia matrix, it is added to this inertia.
     * 
     * @param matrix the inertia matrix to add. Not modified.
     */
@@ -218,7 +215,7 @@ public class ArticulatedBodyInertia implements GeometryObject<ArticulatedBodyIne
     * 
     * @param other the other inertia to subtract. Not modified.
     * @throws ReferenceFrameMismatchException if {@code other} is not expressed in the same frame as
-    *            {@code this}.
+    *                                         {@code this}.
     */
    public void sub(ArticulatedBodyInertia other)
    {
@@ -351,8 +348,8 @@ public class ArticulatedBodyInertia implements GeometryObject<ArticulatedBodyIne
    /**
     * Transforms this articulated-body inertia using the given transform.
     * <p>
-    * See the Word&trade; document located in the document folder of this project for more
-    * information about the transformation rule for spatial inertia.
+    * See the Word&trade; document located in the document folder of this project for more information
+    * about the transformation rule for spatial inertia.
     * </p>
     * 
     * @param transform the transform to use on this. Not modified.
@@ -378,8 +375,8 @@ public class ArticulatedBodyInertia implements GeometryObject<ArticulatedBodyIne
    /**
     * Transforms this articulated-body inertia by the inverse of the given transform.
     * <p>
-    * See the Word&trade; document located in the document folder of this project for more
-    * information about the transformation rule for spatial inertia.
+    * See the Word&trade; document located in the document folder of this project for more information
+    * about the transformation rule for spatial inertia.
     * </p>
     * 
     * @param transform the transform to use on this. Not modified.
@@ -422,7 +419,7 @@ public class ArticulatedBodyInertia implements GeometryObject<ArticulatedBodyIne
     * {@link #epsilonEquals(ArticulatedBodyInertia, double)}.
     * 
     * @throws ReferenceFrameMismatchException if {@code other} is not expressed in the same frame as
-    *            {@code this}.
+    *                                         {@code this}.
     */
    @Override
    public boolean geometricallyEquals(ArticulatedBodyInertia other, double epsilon)

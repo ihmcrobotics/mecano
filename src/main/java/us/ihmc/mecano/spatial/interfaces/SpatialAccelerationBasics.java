@@ -56,19 +56,19 @@ public interface SpatialAccelerationBasics extends FixedFrameSpatialAcceleration
     * respect to the same base, but expressed in a different frame.
     * <p>
     * Once this spatial acceleration is transformed, the reference frame "expressed-in-frame" is
-    * updated to {@code desiredFrame}. In the case, {@code this.expressedInFrame == desiredFrame},
-    * this method does nothing.
+    * updated to {@code desiredFrame}. In the case, {@code this.expressedInFrame == desiredFrame}, this
+    * method does nothing.
     * </p>
     * <p>
-    * Note that from a physical perspective, changing the frame of a spatial acceleration
-    * essentially means 3 things:
+    * Note that from a physical perspective, changing the frame of a spatial acceleration essentially
+    * means 3 things:
     * <ul>
     * <li>Changing the frame of the two internal 3D vectors such that their components ends up being
     * expressed in {@code desiredFrame}.
     * <li>Changing the location where the body acceleration is measured.
-    * <li>Changing the reference from which the acceleration is perceived, this is essentially
-    * modifies the measured acceleration when the velocity between the current and the new
-    * "expressed-in-frame"s is non-zero.
+    * <li>Changing the reference from which the acceleration is perceived, this is essentially modifies
+    * the measured acceleration when the velocity between the current and the new "expressed-in-frame"s
+    * is non-zero.
     * </ul>
     * </p>
     * <p>
@@ -83,13 +83,13 @@ public interface SpatialAccelerationBasics extends FixedFrameSpatialAcceleration
     * where:
     * <ul>
     * <li>&omega;' and &alpha; are the current angular and linear parts of this spatial vector,
-    * <li>R and P are the rotation and translation of the current "expressed-in-frame" with respect
-    * to the desired frame,
-    * <li>T<sub>body</sub><sup>old, base</sup> = [&omega;<sub>body</sub>; &nu;<sub>body</sub>] is
-    * the twist of the body with respect to base,
+    * <li>R and P are the rotation and translation of the current "expressed-in-frame" with respect to
+    * the desired frame,
+    * <li>T<sub>body</sub><sup>old, base</sup> = [&omega;<sub>body</sub>; &nu;<sub>body</sub>] is the
+    * twist of the body with respect to base,
     * <li>and finally T<sub>old</sub><sup>old, des</sup></sub> = [&omega;<sub>old</sub>;
-    * &nu;<sub>old</sub>] is the twist of the current "expressed-in-frame" with respect to the
-    * desired frame.
+    * &nu;<sub>old</sub>] is the twist of the current "expressed-in-frame" with respect to the desired
+    * frame.
     * </ul>
     * </p>
     * <p>
@@ -107,26 +107,28 @@ public interface SpatialAccelerationBasics extends FixedFrameSpatialAcceleration
     * Then introducing the identities introduced in the lemma 2.8 (f).
     * </p>
     * <p>
-    * Although the equations above specifically dictate the frames of the twists to be provided,
-    * this method attempts to provide as much flexibility as possible notably regarding the frame in
-    * which they are expressed.
+    * Although the equations above specifically dictate the frames of the twists to be provided, this
+    * method attempts to provide as much flexibility as possible notably regarding the frame in which
+    * they are expressed.
     * </p>
     *
     * @param desiredFrame the frame in which this spatial should be expressed.
-    * @param deltaTwist twists referring the relative velocity between the {@code desiredFrame} and
-    *           the current {@code expressedInFrame}. It can either be expressed in
-    *           {@code desiredFrame} or in {@code this.expressedInFrame}. Not modified.
-    * @param bodyTwist twist of {@code this.bodyFrame} with respect to {@code this.baseFrame}. It
-    *           can either be expressed in {@code desiredFrame} or in {@code this.expressedInFrame}.
-    *           Not modified.
+    * @param deltaTwist   twists referring the relative velocity between the {@code desiredFrame} and
+    *                     the current {@code expressedInFrame}. It can either be expressed in
+    *                     {@code desiredFrame} or in {@code this.expressedInFrame}. Not modified.
+    * @param bodyTwist    twist of {@code this.bodyFrame} with respect to {@code this.baseFrame}. It
+    *                     can either be expressed in {@code desiredFrame} or in
+    *                     {@code this.expressedInFrame}. Not modified.
     * @throws ReferenceFrameMismatchException if
-    *            {@code deltaTwist.getReferenceFrame() != bodyTwist.getReferenceFrame()} and if the
-    *            frame in which they are expressed is neither {@code this.expressedInFrame} or
-    *            {@code desiredFrame}.
+    *                                         {@code deltaTwist.getReferenceFrame() != bodyTwist.getReferenceFrame()}
+    *                                         and if the frame in which they are expressed is neither
+    *                                         {@code this.expressedInFrame} or {@code desiredFrame}.
     * @throws ReferenceFrameMismatchException if {@code deltaTwist} does not refer to the relative
-    *            velocity between {@code this.expressedInFrame} and {@code desiredFrame}.
+    *                                         velocity between {@code this.expressedInFrame} and
+    *                                         {@code desiredFrame}.
     * @throws ReferenceFrameMismatchException if {@code bodyTwist}does not refer to the velocity of
-    *            {@code this.bodyFrame} with respect to {@code desiredFrame}.
+    *                                         {@code this.bodyFrame} with respect to
+    *                                         {@code desiredFrame}.
     */
    default void changeFrame(ReferenceFrame desiredFrame, TwistReadOnly deltaTwist, TwistReadOnly bodyTwist)
    {
@@ -138,16 +140,16 @@ public interface SpatialAccelerationBasics extends FixedFrameSpatialAcceleration
       else if (getReferenceFrame() == getBaseFrame() && desiredFrame == getBodyFrame())
       {
          /*
-          * Trying benefit from the property of switching between base and body frames which does
-          * not require the use of the twists as they cancel each other.
+          * Trying benefit from the property of switching between base and body frames which does not require
+          * the use of the twists as they cancel each other.
           */
          changeFrame(desiredFrame);
       }
       else if (getReferenceFrame() == getBodyFrame() && desiredFrame == getBaseFrame())
       {
          /*
-          * Trying benefit from the property of switching between base and body frames which does
-          * not require the use of the twists as they cancel each other.
+          * Trying benefit from the property of switching between base and body frames which does not require
+          * the use of the twists as they cancel each other.
           */
          changeFrame(desiredFrame);
       }
@@ -238,10 +240,9 @@ public interface SpatialAccelerationBasics extends FixedFrameSpatialAcceleration
     * <p>
     * It is often more intuitive to quantify a body acceleration from the perspective of the base
     * frame. However, when creating a spatial acceleration, the frame from which the acceleration is
-    * perceived and the point of which the acceleration is measured are usually part of the same
-    * frame. This implies an actual difference between the two representations due to Coriolis
-    * accelerations solely introduced because the two reference frames are moving with respect to
-    * each other.
+    * perceived and the point of which the acceleration is measured are usually part of the same frame.
+    * This implies an actual difference between the two representations due to Coriolis accelerations
+    * solely introduced because the two reference frames are moving with respect to each other.
     * </p>
     * <p>
     * This method allows to change from the intuitive representation, to the one used in this
@@ -253,16 +254,16 @@ public interface SpatialAccelerationBasics extends FixedFrameSpatialAcceleration
     * </pre>
     * </p>
     *
-    * @param bodyFrame what we are specifying the acceleration of. It is also used to define in what
-    *           frame the acceleration is expressed.
-    * @param baseFrame with respect to what we are specifying the acceleration.
+    * @param bodyFrame           what we are specifying the acceleration of. It is also used to define
+    *                            in what frame the acceleration is expressed.
+    * @param baseFrame           with respect to what we are specifying the acceleration.
     * @param angularAcceleration the angular acceleration of the body. Not modified.
-    * @param originAcceleration the linear acceleration of the body frame's origin perceived from
-    *           the base frame. Not modified.
-    * @param bodyTwist this is the twist of {@code bodyFrame} with respect to {@code baseFrame} and
-    *           expressed in {@code expressedInFrame}.
+    * @param originAcceleration  the linear acceleration of the body frame's origin perceived from the
+    *                            base frame. Not modified.
+    * @param bodyTwist           this is the twist of {@code bodyFrame} with respect to
+    *                            {@code baseFrame} and expressed in {@code expressedInFrame}.
     * @throws ReferenceFrameMismatchException if {@code bodyTwist} does not have the same frames as
-    *            {@code this}.
+    *                                         {@code this}.
     */
    default void setBasedOnOriginAccelerationIncludingFrame(ReferenceFrame bodyFrame, ReferenceFrame baseFrame, FrameVector3DReadOnly angularAcceleration,
                                                            FrameVector3DReadOnly originAcceleration, TwistReadOnly bodyTwist)
@@ -281,8 +282,8 @@ public interface SpatialAccelerationBasics extends FixedFrameSpatialAcceleration
     * Note that either the base frame or the body frame of this spatial acceleration after this
     * operation is updated. Let's assume the spatial acceleration A<sub>B</sub> of a banana with
     * respect to a table and the spatial acceleration A<sub>O</sub> of an orange with respect to the
-    * banana, then the addition A<sub>B</sub> + A<sub>O</sub> is the spatial acceleration of the
-    * orange with respect to the table.
+    * banana, then the addition A<sub>B</sub> + A<sub>O</sub> is the spatial acceleration of the orange
+    * with respect to the table.
     * </p>
     * <p>
     * See Duindam, <i>Port-Based Modeling and Control for Efficient Bipedal Walking Robots</i>, page
@@ -291,10 +292,11 @@ public interface SpatialAccelerationBasics extends FixedFrameSpatialAcceleration
     * </p>
     *
     * @param other the other spatial acceleration to add to {@code this}. Not modified.
-    * @throws ReferenceFrameMismatchException if {@code other} is not expressed in the same
-    *            reference frame as {@code this}. Or if the two spatial accelerations cannot be
-    *            "concatenated": {@code this.bodyFrame != other.baseFrame} and
-    *            {@code other.bodyFrame != this.baseFrame}.
+    * @throws ReferenceFrameMismatchException if {@code other} is not expressed in the same reference
+    *                                         frame as {@code this}. Or if the two spatial
+    *                                         accelerations cannot be "concatenated":
+    *                                         {@code this.bodyFrame != other.baseFrame} and
+    *                                         {@code other.bodyFrame != this.baseFrame}.
     */
    default void add(SpatialAccelerationReadOnly other)
    {
@@ -312,8 +314,8 @@ public interface SpatialAccelerationBasics extends FixedFrameSpatialAcceleration
    }
 
    /**
-    * Subtracts another spatial acceleration to {@code code} after performing the usual reference
-    * frame checks.
+    * Subtracts another spatial acceleration to {@code code} after performing the usual reference frame
+    * checks.
     * <p>
     * Note that either the base frame or the body frame of this spatial acceleration after this
     * operation is updated. Let's assume the spatial acceleration A<sub>B</sub> of a banana with
@@ -328,10 +330,11 @@ public interface SpatialAccelerationBasics extends FixedFrameSpatialAcceleration
     * </p>
     *
     * @param other the other spatial acceleration to subtract to {@code this}. Not modified.
-    * @throws ReferenceFrameMismatchException if {@code other} is not expressed in the same
-    *            reference frame as {@code this}. Or if the two spatial accelerations cannot be
-    *            "concatenated": {@code this.bodyFrame != other.baseFrame} and
-    *            {@code other.bodyFrame != this.baseFrame}.
+    * @throws ReferenceFrameMismatchException if {@code other} is not expressed in the same reference
+    *                                         frame as {@code this}. Or if the two spatial
+    *                                         accelerations cannot be "concatenated":
+    *                                         {@code this.bodyFrame != other.baseFrame} and
+    *                                         {@code other.bodyFrame != this.baseFrame}.
     */
    default void sub(SpatialAccelerationReadOnly other)
    {

@@ -55,8 +55,8 @@ public interface WrenchBasics extends FixedFrameWrenchBasics, SpatialForceBasics
     * Sets the frame attached to the body that the wrench is applied to.
     * <p>
     * This method does not modify anything but the body frame. If the new body frame is rigidly
-    * attached to the same body, then and only then this wrench remains valid. Otherwise, the values
-    * of this wrench should immediately be updated.
+    * attached to the same body, then and only then this wrench remains valid. Otherwise, the values of
+    * this wrench should immediately be updated.
     * </p>
     *
     * @param bodyFrame the new body frame.
@@ -66,7 +66,7 @@ public interface WrenchBasics extends FixedFrameWrenchBasics, SpatialForceBasics
    /**
     * Sets all the components of this vector to zero and updates its reference frames.
     *
-    * @param bodyFrame the new body frame.
+    * @param bodyFrame        the new body frame.
     * @param expressedInFrame the new reference frame in which this motion is expressed.
     */
    default void setToZero(ReferenceFrame bodyFrame, ReferenceFrame expressedInFrame)
@@ -78,7 +78,7 @@ public interface WrenchBasics extends FixedFrameWrenchBasics, SpatialForceBasics
    /**
     * Sets all the components of this vector to {@link Double#NaN} and sets its reference frames.
     *
-    * @param bodyFrame the new body frame.
+    * @param bodyFrame        the new body frame.
     * @param expressedInFrame the new reference frame.
     */
    default void setToNaN(ReferenceFrame bodyFrame, ReferenceFrame expressedInFrame)
@@ -100,7 +100,7 @@ public interface WrenchBasics extends FixedFrameWrenchBasics, SpatialForceBasics
    /**
     * Sets this wrench to {@code spatialVector} and updates all its reference frames.
     *
-    * @param bodyFrame the body frame associated with the given spatial force.
+    * @param bodyFrame     the body frame associated with the given spatial force.
     * @param spatialVector the spatial vector to copy values from. Not modified.
     */
    default void setIncludingFrame(ReferenceFrame bodyFrame, SpatialVectorReadOnly spatialVector)
@@ -112,11 +112,11 @@ public interface WrenchBasics extends FixedFrameWrenchBasics, SpatialForceBasics
    /**
     * Sets this wrench given an angular part and linear part and updates all its reference frames.
     *
-    * @param bodyFrame the body frame associated with the given spatial force.
+    * @param bodyFrame   the body frame associated with the given spatial force.
     * @param angularPart the vector holding the new values for the angular part. Not modified.
-    * @param linearPart the vector holding the new values for the linear part. Not modified.
-    * @throws ReferenceFrameMismatchException if the given {@code angularPart} and
-    *            {@code linearPart} are not expressed in the same reference frame.
+    * @param linearPart  the vector holding the new values for the linear part. Not modified.
+    * @throws ReferenceFrameMismatchException if the given {@code angularPart} and {@code linearPart}
+    *                                         are not expressed in the same reference frame.
     */
    default void setIncludingFrame(ReferenceFrame bodyFrame, FrameVector3DReadOnly angularPart, FrameVector3DReadOnly linearPart)
    {
@@ -128,10 +128,10 @@ public interface WrenchBasics extends FixedFrameWrenchBasics, SpatialForceBasics
     * Sets this motion vector given an angular part and linear part and updates all its reference
     * frames.
     *
-    * @param bodyFrame the body frame associated with the given spatial force.
+    * @param bodyFrame        the body frame associated with the given spatial force.
     * @param expressedInFrame the reference frame in which the given motion is expressed.
-    * @param angularPart the vector holding the new values for the angular part. Not modified.
-    * @param linearPart the vector holding the new values for the linear part. Not modified.
+    * @param angularPart      the vector holding the new values for the angular part. Not modified.
+    * @param linearPart       the vector holding the new values for the linear part. Not modified.
     */
    default void setIncludingFrame(ReferenceFrame bodyFrame, ReferenceFrame expressedInFrame, Vector3DReadOnly angularPart, Vector3DReadOnly linearPart)
    {
@@ -147,9 +147,10 @@ public interface WrenchBasics extends FixedFrameWrenchBasics, SpatialForceBasics
     * {@code angularPartZ}, {@code linearPartX}, {@code linearPartY}, {@code linearPartZ}.
     * </p>
     *
-    * @param bodyFrame the body frame associated with the given spatial force.
+    * @param bodyFrame        the body frame associated with the given spatial force.
     * @param expressedInFrame the reference frame in which the data is expressed.
-    * @param array the array containing the new values for this wrench's components. Not modified.
+    * @param array            the array containing the new values for this wrench's components. Not
+    *                         modified.
     */
    default void setIncludingFrame(ReferenceFrame bodyFrame, ReferenceFrame expressedInFrame, double[] array)
    {
@@ -165,10 +166,11 @@ public interface WrenchBasics extends FixedFrameWrenchBasics, SpatialForceBasics
     * {@code angularPartZ}, {@code linearPartX}, {@code linearPartY}, {@code linearPartZ}.
     * </p>
     *
-    * @param bodyFrame the body frame associated with the given spatial force.
+    * @param bodyFrame        the body frame associated with the given spatial force.
     * @param expressedInFrame the reference frame in which the data is expressed.
-    * @param startIndex the first index to start reading from in the array.
-    * @param array the array containing the new values for this wrench's components. Not modified.
+    * @param startIndex       the first index to start reading from in the array.
+    * @param array            the array containing the new values for this wrench's components. Not
+    *                         modified.
     */
    default void setIncludingFrame(ReferenceFrame bodyFrame, ReferenceFrame expressedInFrame, int startIndex, double[] array)
    {
@@ -184,9 +186,10 @@ public interface WrenchBasics extends FixedFrameWrenchBasics, SpatialForceBasics
     * {@code angularPartZ}, {@code linearPartX}, {@code linearPartY}, {@code linearPartZ}.
     * </p>
     *
-    * @param bodyFrame the body frame associated with the given spatial force.
+    * @param bodyFrame        the body frame associated with the given spatial force.
     * @param expressedInFrame the reference frame in which the data is expressed.
-    * @param array the array containing the new values for this wrench's components. Not modified.
+    * @param array            the array containing the new values for this wrench's components. Not
+    *                         modified.
     */
    default void setIncludingFrame(ReferenceFrame bodyFrame, ReferenceFrame expressedInFrame, float[] array)
    {
@@ -202,10 +205,11 @@ public interface WrenchBasics extends FixedFrameWrenchBasics, SpatialForceBasics
     * {@code angularPartZ}, {@code linearPartX}, {@code linearPartY}, {@code linearPartZ}.
     * </p>
     *
-    * @param bodyFrame the body frame associated with the given spatial force.
+    * @param bodyFrame        the body frame associated with the given spatial force.
     * @param expressedInFrame the reference frame in which the data is expressed.
-    * @param startIndex the first index to start reading from in the array.
-    * @param array the array containing the new values for this wrench's components. Not modified.
+    * @param startIndex       the first index to start reading from in the array.
+    * @param array            the array containing the new values for this wrench's components. Not
+    *                         modified.
     */
    default void setIncludingFrame(ReferenceFrame bodyFrame, ReferenceFrame expressedInFrame, int startIndex, float[] array)
    {
@@ -214,17 +218,17 @@ public interface WrenchBasics extends FixedFrameWrenchBasics, SpatialForceBasics
    }
 
    /**
-    * Sets this wrench's components from the given column vector starting to read from
-    * {@code startRow} and updates all its reference frames.
+    * Sets this wrench's components from the given column vector starting to read from {@code startRow}
+    * and updates all its reference frames.
     * <p>
     * The components are read in the following order: {@code angularPartX}, {@code angularPartY},
     * {@code angularPartZ}, {@code linearPartX}, {@code linearPartY}, {@code linearPartZ}.
     * </p>
     *
-    * @param bodyFrame the body frame associated with the given spatial force.
+    * @param bodyFrame        the body frame associated with the given spatial force.
     * @param expressedInFrame the reference frame in which the data is expressed.
-    * @param matrix the column vector containing the new values for this wrench's components. Not
-    *           modified.
+    * @param matrix           the column vector containing the new values for this wrench's components.
+    *                         Not modified.
     */
    default void setIncludingFrame(ReferenceFrame bodyFrame, ReferenceFrame expressedInFrame, DenseMatrix64F matrix)
    {
@@ -233,18 +237,18 @@ public interface WrenchBasics extends FixedFrameWrenchBasics, SpatialForceBasics
    }
 
    /**
-    * Sets this wrench's components from the given column vector starting to read from
-    * {@code startRow} at the column index {@code column} and updates all its reference frames.
+    * Sets this wrench's components from the given column vector starting to read from {@code startRow}
+    * at the column index {@code column} and updates all its reference frames.
     * <p>
     * The components are read in the following order: {@code angularPartX}, {@code angularPartY},
     * {@code angularPartZ}, {@code linearPartX}, {@code linearPartY}, {@code linearPartZ}.
     * </p>
     *
-    * @param bodyFrame the body frame associated with the given spatial force.
+    * @param bodyFrame        the body frame associated with the given spatial force.
     * @param expressedInFrame the reference frame in which the data is expressed.
-    * @param startRow the first row index to start reading in the dense-matrix.
-    * @param matrix the column vector containing the new values for this wrench's components. Not
-    *           modified.
+    * @param startRow         the first row index to start reading in the dense-matrix.
+    * @param matrix           the column vector containing the new values for this wrench's components.
+    *                         Not modified.
     */
    default void setIncludingFrame(ReferenceFrame bodyFrame, ReferenceFrame expressedInFrame, int startRow, DenseMatrix64F matrix)
    {
@@ -260,12 +264,12 @@ public interface WrenchBasics extends FixedFrameWrenchBasics, SpatialForceBasics
     * {@code angularPartZ}, {@code linearPartX}, {@code linearPartY}, {@code linearPartZ}.
     * </p>
     *
-    * @param bodyFrame the body frame associated with the given spatial force.
+    * @param bodyFrame        the body frame associated with the given spatial force.
     * @param expressedInFrame the reference frame in which the data is expressed.
-    * @param startRow the first row index to start reading in the dense-matrix.
-    * @param column the column index to read in the dense-matrix.
-    * @param matrix the column vector containing the new values for this wrench's components. Not
-    *           modified.
+    * @param startRow         the first row index to start reading in the dense-matrix.
+    * @param column           the column index to read in the dense-matrix.
+    * @param matrix           the column vector containing the new values for this wrench's components.
+    *                         Not modified.
     */
    default void setIncludingFrame(ReferenceFrame bodyFrame, ReferenceFrame expressedInFrame, int startRow, int column, DenseMatrix64F matrix)
    {
@@ -291,10 +295,10 @@ public interface WrenchBasics extends FixedFrameWrenchBasics, SpatialForceBasics
     * When the given {@code angularPart} is {@code null}, it is assumed to be zero.
     * </p>
     *
-    * @param bodyFrame the body frame associated with the given spatial force.
-    * @param expressedInFrame the reference frame in which the arguments are expressed.
-    * @param angularPart the 3D moment that is applied. Can be {@code null}. Not modified.
-    * @param linearPart the 3D force that is applied. Not modified.
+    * @param bodyFrame          the body frame associated with the given spatial force.
+    * @param expressedInFrame   the reference frame in which the arguments are expressed.
+    * @param angularPart        the 3D moment that is applied. Can be {@code null}. Not modified.
+    * @param linearPart         the 3D force that is applied. Not modified.
     * @param pointOfApplication the location where the force is exerted. Not modified.
     */
    default void setIncludingFrame(ReferenceFrame bodyFrame, ReferenceFrame expressedInFrame, Vector3DReadOnly angularPart, Vector3DReadOnly linearPart,
@@ -322,13 +326,13 @@ public interface WrenchBasics extends FixedFrameWrenchBasics, SpatialForceBasics
     * When the given {@code angularPart} is {@code null}, it is assumed to be zero.
     * </p>
     *
-    * @param bodyFrame the body frame associated with the given spatial force.
-    * @param expressedInFrame the reference frame in which the arguments are expressed.
-    * @param angularPart the 3D moment that is applied. Can be {@code null}. Not modified.
-    * @param linearPart the 3D force that is applied. Not modified.
+    * @param bodyFrame          the body frame associated with the given spatial force.
+    * @param expressedInFrame   the reference frame in which the arguments are expressed.
+    * @param angularPart        the 3D moment that is applied. Can be {@code null}. Not modified.
+    * @param linearPart         the 3D force that is applied. Not modified.
     * @param pointOfApplication the location where the force is exerted. Not modified.
-    * @throws ReferenceFrameMismatchException if the arguments are not expressed in the same
-    *            reference frame.
+    * @throws ReferenceFrameMismatchException if the arguments are not expressed in the same reference
+    *                                         frame.
     */
    default void setIncludingFrame(ReferenceFrame bodyFrame, FrameVector3DReadOnly angularPart, FrameVector3DReadOnly linearPart,
                                   FramePoint3DReadOnly pointOfApplication)

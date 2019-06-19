@@ -38,41 +38,41 @@ public class MultiBodySystemRandomTools
    /**
     * Generates a random state and update the given {@code joint} with it.
     * 
-    * @param random the random generator to use.
+    * @param random           the random generator to use.
     * @param stateToRandomize the joint state that is to be randomized.
-    * @param joint the joint to set the state of. Modified.
+    * @param joint            the joint to set the state of. Modified.
     */
    public static void nextState(Random random, JointStateType stateToRandomize, JointBasics joint)
    {
       switch (stateToRandomize)
       {
-      case CONFIGURATION:
-         joint.setJointOrientation(EuclidCoreRandomTools.nextQuaternion(random));
-         joint.setJointPosition(EuclidCoreRandomTools.nextVector3D(random));
-         break;
-      case VELOCITY:
-         joint.setJointAngularVelocity(EuclidCoreRandomTools.nextVector3D(random));
-         joint.setJointLinearVelocity(EuclidCoreRandomTools.nextVector3D(random));
-         break;
-      case ACCELERATION:
-         joint.setJointAngularAcceleration(EuclidCoreRandomTools.nextVector3D(random));
-         joint.setJointLinearAcceleration(EuclidCoreRandomTools.nextVector3D(random));
-         break;
-      case EFFORT:
-         joint.setJointTorque(EuclidCoreRandomTools.nextVector3D(random));
-         joint.setJointForce(EuclidCoreRandomTools.nextVector3D(random));
-         break;
-      default:
-         throw new RuntimeException("Unhandled state selection: " + stateToRandomize);
+         case CONFIGURATION:
+            joint.setJointOrientation(EuclidCoreRandomTools.nextQuaternion(random));
+            joint.setJointPosition(EuclidCoreRandomTools.nextVector3D(random));
+            break;
+         case VELOCITY:
+            joint.setJointAngularVelocity(EuclidCoreRandomTools.nextVector3D(random));
+            joint.setJointLinearVelocity(EuclidCoreRandomTools.nextVector3D(random));
+            break;
+         case ACCELERATION:
+            joint.setJointAngularAcceleration(EuclidCoreRandomTools.nextVector3D(random));
+            joint.setJointLinearAcceleration(EuclidCoreRandomTools.nextVector3D(random));
+            break;
+         case EFFORT:
+            joint.setJointTorque(EuclidCoreRandomTools.nextVector3D(random));
+            joint.setJointForce(EuclidCoreRandomTools.nextVector3D(random));
+            break;
+         default:
+            throw new RuntimeException("Unhandled state selection: " + stateToRandomize);
       }
    }
 
    /**
     * Generates a random state and update the given {@code joints} with it.
     * 
-    * @param random the random generator to use.
+    * @param random           the random generator to use.
     * @param stateToRandomize the joint state that is to be randomized.
-    * @param joints the joints to set the state of. Modified.
+    * @param joints           the joints to set the state of. Modified.
     */
    public static void nextState(Random random, JointStateType stateToRandomize, JointBasics[] joints)
    {
@@ -83,9 +83,9 @@ public class MultiBodySystemRandomTools
    /**
     * Generates a random state and update the given {@code joints} with it.
     * 
-    * @param random the random generator to use.
+    * @param random           the random generator to use.
     * @param stateToRandomize the joint state that is to be randomized.
-    * @param joints the joints to set the state of. Modified.
+    * @param joints           the joints to set the state of. Modified.
     */
    public static void nextState(Random random, JointStateType stateToRandomize, Iterable<? extends JointBasics> joints)
    {
@@ -95,30 +95,30 @@ public class MultiBodySystemRandomTools
    /**
     * Generates a random state and update the given {@code joint} with it.
     * 
-    * @param random the random generator to use.
+    * @param random           the random generator to use.
     * @param stateToRandomize the joint state that is to be randomized.
-    * @param min the minimum value for the generated random value.
-    * @param max the maximum value for the generated random value.
-    * @param joint the joints to set the state of. Modified.
+    * @param min              the minimum value for the generated random value.
+    * @param max              the maximum value for the generated random value.
+    * @param joint            the joints to set the state of. Modified.
     */
    public static void nextState(Random random, JointStateType stateToRandomize, double min, double max, OneDoFJointBasics joint)
    {
       switch (stateToRandomize)
       {
-      case CONFIGURATION:
-         joint.setQ(EuclidCoreRandomTools.nextDouble(random, min, max));
-         break;
-      case VELOCITY:
-         joint.setQd(EuclidCoreRandomTools.nextDouble(random, min, max));
-         break;
-      case ACCELERATION:
-         joint.setQdd(EuclidCoreRandomTools.nextDouble(random, min, max));
-         break;
-      case EFFORT:
-         joint.setTau(EuclidCoreRandomTools.nextDouble(random, min, max));
-         break;
-      default:
-         throw new RuntimeException("Unhandled state selection: " + stateToRandomize);
+         case CONFIGURATION:
+            joint.setQ(EuclidCoreRandomTools.nextDouble(random, min, max));
+            break;
+         case VELOCITY:
+            joint.setQd(EuclidCoreRandomTools.nextDouble(random, min, max));
+            break;
+         case ACCELERATION:
+            joint.setQdd(EuclidCoreRandomTools.nextDouble(random, min, max));
+            break;
+         case EFFORT:
+            joint.setTau(EuclidCoreRandomTools.nextDouble(random, min, max));
+            break;
+         default:
+            throw new RuntimeException("Unhandled state selection: " + stateToRandomize);
       }
    }
 
@@ -130,12 +130,12 @@ public class MultiBodySystemRandomTools
     * {@code joint.getJointLimitUpper()}].
     * </p>
     * 
-    * @param random the random generator to use.
+    * @param random           the random generator to use.
     * @param stateToRandomize the joint state that is to be randomized. As no limits are imposed on the
-    *           joint accelerations, the state to randomize cannot be the acceleration. For generating
-    *           random acceleration, please see
-    *           {@link #nextState(Random, JointStateType, double, double, OneDoFJointBasics)}.
-    * @param joints the joints to set the state of. Modified.
+    *                         joint accelerations, the state to randomize cannot be the acceleration.
+    *                         For generating random acceleration, please see
+    *                         {@link #nextState(Random, JointStateType, double, double, OneDoFJointBasics)}.
+    * @param joints           the joints to set the state of. Modified.
     */
    public static void nextStateWithinJointLimits(Random random, JointStateType stateToRandomize, OneDoFJointBasics[] joints)
    {
@@ -151,12 +151,12 @@ public class MultiBodySystemRandomTools
     * {@code joint.getJointLimitUpper()}].
     * </p>
     * 
-    * @param random the random generator to use.
+    * @param random           the random generator to use.
     * @param stateToRandomize the joint state that is to be randomized. As no limits are imposed on the
-    *           joint accelerations, the state to randomize cannot be the acceleration. For generating
-    *           random acceleration, please see
-    *           {@link #nextState(Random, JointStateType, double, double, OneDoFJointBasics)}.
-    * @param joints the joints to set the state of. Modified.
+    *                         joint accelerations, the state to randomize cannot be the acceleration.
+    *                         For generating random acceleration, please see
+    *                         {@link #nextState(Random, JointStateType, double, double, OneDoFJointBasics)}.
+    * @param joints           the joints to set the state of. Modified.
     */
    public static void nextStateWithinJointLimits(Random random, JointStateType stateToRandomize, Iterable<? extends OneDoFJointBasics> joints)
    {
@@ -171,39 +171,39 @@ public class MultiBodySystemRandomTools
     * {@code joint.getJointLimitUpper()}].
     * </p>
     * 
-    * @param random the random generator to use.
+    * @param random           the random generator to use.
     * @param stateToRandomize the joint state that is to be randomized. As no limits are imposed on the
-    *           joint accelerations, the state to randomize cannot be the acceleration. For generating
-    *           random acceleration, please see
-    *           {@link #nextState(Random, JointStateType, double, double, OneDoFJointBasics)}.
-    * @param joint the joints to set the state of. Modified.
+    *                         joint accelerations, the state to randomize cannot be the acceleration.
+    *                         For generating random acceleration, please see
+    *                         {@link #nextState(Random, JointStateType, double, double, OneDoFJointBasics)}.
+    * @param joint            the joints to set the state of. Modified.
     */
    public static void nextStateWithinJointLimits(Random random, JointStateType stateToRandomize, OneDoFJointBasics joint)
    {
       switch (stateToRandomize)
       {
-      case CONFIGURATION:
-         joint.setQ(EuclidCoreRandomTools.nextDouble(random, joint.getJointLimitLower(), joint.getJointLimitUpper()));
-         break;
-      case VELOCITY:
-         joint.setQd(EuclidCoreRandomTools.nextDouble(random, joint.getVelocityLimitLower(), joint.getVelocityLimitUpper()));
-         break;
-      case EFFORT:
-         joint.setTau(EuclidCoreRandomTools.nextDouble(random, joint.getEffortLimitLower(), joint.getEffortLimitUpper()));
-         break;
-      default:
-         throw new RuntimeException("Unhandled state selection: " + stateToRandomize);
+         case CONFIGURATION:
+            joint.setQ(EuclidCoreRandomTools.nextDouble(random, joint.getJointLimitLower(), joint.getJointLimitUpper()));
+            break;
+         case VELOCITY:
+            joint.setQd(EuclidCoreRandomTools.nextDouble(random, joint.getVelocityLimitLower(), joint.getVelocityLimitUpper()));
+            break;
+         case EFFORT:
+            joint.setTau(EuclidCoreRandomTools.nextDouble(random, joint.getEffortLimitLower(), joint.getEffortLimitUpper()));
+            break;
+         default:
+            throw new RuntimeException("Unhandled state selection: " + stateToRandomize);
       }
    }
 
    /**
     * Generates a random state and update the given {@code joints} with it.
     * 
-    * @param random the random generator to use.
+    * @param random           the random generator to use.
     * @param stateToRandomize the joint state that is to be randomized.
-    * @param min the minimum value for the generated random values.
-    * @param max the maximum value for the generated random values.
-    * @param joints the joints to set the state of. Modified.
+    * @param min              the minimum value for the generated random values.
+    * @param max              the maximum value for the generated random values.
+    * @param joints           the joints to set the state of. Modified.
     */
    public static void nextState(Random random, JointStateType stateToRandomize, double min, double max, OneDoFJointBasics[] joints)
    {
@@ -214,11 +214,11 @@ public class MultiBodySystemRandomTools
    /**
     * Generates a random state and update the given {@code joints} with it.
     * 
-    * @param random the random generator to use.
+    * @param random           the random generator to use.
     * @param stateToRandomize the joint state that is to be randomized.
-    * @param min the minimum value for the generated random values.
-    * @param max the maximum value for the generated random values.
-    * @param joints the joints to set the state of. Modified.
+    * @param min              the minimum value for the generated random values.
+    * @param max              the maximum value for the generated random values.
+    * @param joints           the joints to set the state of. Modified.
     */
    public static void nextState(Random random, JointStateType stateToRandomize, double min, double max, Iterable<? extends OneDoFJointBasics> joints)
    {
@@ -235,7 +235,7 @@ public class MultiBodySystemRandomTools
     * joint.
     * </p>
     * 
-    * @param random the random generator to use.
+    * @param random         the random generator to use.
     * @param numberOfJoints how many joints the kinematic chain should be composed of.
     * @return the list of all the joints composing the kinematic chain.
     */
@@ -254,8 +254,8 @@ public class MultiBodySystemRandomTools
     * joint.
     * </p>
     * 
-    * @param random the random generator to use.
-    * @param prefix provides a common prefix used for all the joint and rigid-body names.
+    * @param random         the random generator to use.
+    * @param prefix         provides a common prefix used for all the joint and rigid-body names.
     * @param numberOfJoints how many joints the kinematic chain should be composed of.
     * @return the list of all the joints composing the kinematic chain.
     */
@@ -274,10 +274,10 @@ public class MultiBodySystemRandomTools
     * joint.
     * </p>
     * 
-    * @param random the random generator to use.
-    * @param prefix provides a common prefix used for all the joint and rigid-body names.
+    * @param random    the random generator to use.
+    * @param prefix    provides a common prefix used for all the joint and rigid-body names.
     * @param jointAxes array containing in order the axis for each joint. The length of the array also
-    *           defines the number of joints for the generated kinematic chain.
+    *                  defines the number of joints for the generated kinematic chain.
     * @return the list of all the joints composing the kinematic chain.
     */
    public static List<PrismaticJoint> nextPrismaticJointChain(Random random, String prefix, Vector3DReadOnly[] jointAxes)
@@ -297,8 +297,8 @@ public class MultiBodySystemRandomTools
     * joint.
     * </p>
     * 
-    * @param random the random generator to use.
-    * @param rootBody the root to which the kinematic chain is to be attached.
+    * @param random         the random generator to use.
+    * @param rootBody       the root to which the kinematic chain is to be attached.
     * @param numberOfJoints how many joints the kinematic chain should be composed of.
     * @return the list of all the joints composing the kinematic chain.
     */
@@ -317,9 +317,9 @@ public class MultiBodySystemRandomTools
     * joint.
     * </p>
     * 
-    * @param random the random generator to use.
-    * @param prefix provides a common prefix used for all the joint and rigid-body names.
-    * @param rootBody the root to which the kinematic chain is to be attached.
+    * @param random         the random generator to use.
+    * @param prefix         provides a common prefix used for all the joint and rigid-body names.
+    * @param rootBody       the root to which the kinematic chain is to be attached.
     * @param numberOfJoints how many joints the kinematic chain should be composed of.
     * @return the list of all the joints composing the kinematic chain.
     */
@@ -338,11 +338,11 @@ public class MultiBodySystemRandomTools
     * joint.
     * </p>
     * 
-    * @param random the random generator to use.
-    * @param prefix provides a common prefix used for all the joint and rigid-body names.
-    * @param rootBody the root to which the kinematic chain is to be attached.
+    * @param random    the random generator to use.
+    * @param prefix    provides a common prefix used for all the joint and rigid-body names.
+    * @param rootBody  the root to which the kinematic chain is to be attached.
     * @param jointAxes array containing in order the axis for each joint. The length of the array also
-    *           defines the number of joints for the generated kinematic chain.
+    *                  defines the number of joints for the generated kinematic chain.
     * @return the list of all the joints composing the kinematic chain.
     */
    public static List<PrismaticJoint> nextPrismaticJointChain(Random random, String prefix, RigidBodyBasics rootBody, Vector3DReadOnly[] jointAxes)
@@ -370,7 +370,7 @@ public class MultiBodySystemRandomTools
     * joint.
     * </p>
     * 
-    * @param random the random generator to use.
+    * @param random         the random generator to use.
     * @param numberOfJoints how many joints the kinematic chain should be composed of.
     * @return the list of all the joints composing the kinematic chain.
     */
@@ -389,8 +389,8 @@ public class MultiBodySystemRandomTools
     * joint.
     * </p>
     * 
-    * @param random the random generator to use.
-    * @param prefix provides a common prefix used for all the joint and rigid-body names.
+    * @param random         the random generator to use.
+    * @param prefix         provides a common prefix used for all the joint and rigid-body names.
     * @param numberOfJoints how many joints the kinematic chain should be composed of.
     * @return the list of all the joints composing the kinematic chain.
     */
@@ -409,10 +409,10 @@ public class MultiBodySystemRandomTools
     * joint.
     * </p>
     * 
-    * @param random the random generator to use.
-    * @param prefix provides a common prefix used for all the joint and rigid-body names.
+    * @param random    the random generator to use.
+    * @param prefix    provides a common prefix used for all the joint and rigid-body names.
     * @param jointAxes array containing in order the axis for each joint. The length of the array also
-    *           defines the number of joints for the generated kinematic chain.
+    *                  defines the number of joints for the generated kinematic chain.
     * @return the list of all the joints composing the kinematic chain.
     */
    public static List<RevoluteJoint> nextRevoluteJointChain(Random random, String prefix, Vector3DReadOnly[] jointAxes)
@@ -432,8 +432,8 @@ public class MultiBodySystemRandomTools
     * joint.
     * </p>
     * 
-    * @param random the random generator to use.
-    * @param rootBody the root to which the kinematic chain is to be attached.
+    * @param random         the random generator to use.
+    * @param rootBody       the root to which the kinematic chain is to be attached.
     * @param numberOfJoints how many joints the kinematic chain should be composed of.
     * @return the list of all the joints composing the kinematic chain.
     */
@@ -452,9 +452,9 @@ public class MultiBodySystemRandomTools
     * joint.
     * </p>
     * 
-    * @param random the random generator to use.
-    * @param prefix provides a common prefix used for all the joint and rigid-body names.
-    * @param rootBody the root to which the kinematic chain is to be attached.
+    * @param random         the random generator to use.
+    * @param prefix         provides a common prefix used for all the joint and rigid-body names.
+    * @param rootBody       the root to which the kinematic chain is to be attached.
     * @param numberOfJoints how many joints the kinematic chain should be composed of.
     * @return the list of all the joints composing the kinematic chain.
     */
@@ -473,11 +473,11 @@ public class MultiBodySystemRandomTools
     * joint.
     * </p>
     * 
-    * @param random the random generator to use.
-    * @param prefix provides a common prefix used for all the joint and rigid-body names.
-    * @param rootBody the root to which the kinematic chain is to be attached.
+    * @param random    the random generator to use.
+    * @param prefix    provides a common prefix used for all the joint and rigid-body names.
+    * @param rootBody  the root to which the kinematic chain is to be attached.
     * @param jointAxes array containing in order the axis for each joint. The length of the array also
-    *           defines the number of joints for the generated kinematic chain.
+    *                  defines the number of joints for the generated kinematic chain.
     * @return the list of all the joints composing the kinematic chain.
     */
    public static List<RevoluteJoint> nextRevoluteJointChain(Random random, String prefix, RigidBodyBasics rootBody, Vector3DReadOnly[] jointAxes)
@@ -505,7 +505,7 @@ public class MultiBodySystemRandomTools
     * joint.
     * </p>
     * 
-    * @param random the random generator to use.
+    * @param random         the random generator to use.
     * @param numberOfJoints how many joints the kinematic chain should be composed of.
     * @return the list of all the joints composing the kinematic chain.
     */
@@ -524,8 +524,8 @@ public class MultiBodySystemRandomTools
     * joint.
     * </p>
     * 
-    * @param random the random generator to use.
-    * @param prefix provides a common prefix used for all the joint and rigid-body names.
+    * @param random         the random generator to use.
+    * @param prefix         provides a common prefix used for all the joint and rigid-body names.
     * @param numberOfJoints how many joints the kinematic chain should be composed of.
     * @return the list of all the joints composing the kinematic chain.
     */
@@ -544,10 +544,10 @@ public class MultiBodySystemRandomTools
     * joint.
     * </p>
     * 
-    * @param random the random generator to use.
-    * @param prefix provides a common prefix used for all the joint and rigid-body names.
+    * @param random    the random generator to use.
+    * @param prefix    provides a common prefix used for all the joint and rigid-body names.
     * @param jointAxes array containing in order the axis for each joint. The length of the array also
-    *           defines the number of joints for the generated kinematic chain.
+    *                  defines the number of joints for the generated kinematic chain.
     * @return the list of all the joints composing the kinematic chain.
     */
    public static List<OneDoFJoint> nextOneDoFJointChain(Random random, String prefix, Vector3DReadOnly[] jointAxes)
@@ -567,8 +567,8 @@ public class MultiBodySystemRandomTools
     * joint.
     * </p>
     * 
-    * @param random the random generator to use.
-    * @param rootBody the root to which the kinematic chain is to be attached.
+    * @param random         the random generator to use.
+    * @param rootBody       the root to which the kinematic chain is to be attached.
     * @param numberOfJoints how many joints the kinematic chain should be composed of.
     * @return the list of all the joints composing the kinematic chain.
     */
@@ -587,9 +587,9 @@ public class MultiBodySystemRandomTools
     * joint.
     * </p>
     * 
-    * @param random the random generator to use.
-    * @param prefix provides a common prefix used for all the joint and rigid-body names.
-    * @param rootBody the root to which the kinematic chain is to be attached.
+    * @param random         the random generator to use.
+    * @param prefix         provides a common prefix used for all the joint and rigid-body names.
+    * @param rootBody       the root to which the kinematic chain is to be attached.
     * @param numberOfJoints how many joints the kinematic chain should be composed of.
     * @return the list of all the joints composing the kinematic chain.
     */
@@ -608,11 +608,11 @@ public class MultiBodySystemRandomTools
     * joint.
     * </p>
     * 
-    * @param random the random generator to use.
-    * @param prefix provides a common prefix used for all the joint and rigid-body names.
-    * @param rootBody the root to which the kinematic chain is to be attached.
+    * @param random    the random generator to use.
+    * @param prefix    provides a common prefix used for all the joint and rigid-body names.
+    * @param rootBody  the root to which the kinematic chain is to be attached.
     * @param jointAxes array containing in order the axis for each joint. The length of the array also
-    *           defines the number of joints for the generated kinematic chain.
+    *                  defines the number of joints for the generated kinematic chain.
     * @return the list of all the joints composing the kinematic chain.
     */
    public static List<OneDoFJoint> nextOneDoFJointChain(Random random, String prefix, RigidBodyBasics rootBody, Vector3DReadOnly[] jointAxes)
@@ -643,7 +643,7 @@ public class MultiBodySystemRandomTools
     * joint.
     * </p>
     * 
-    * @param random the random generator to use.
+    * @param random         the random generator to use.
     * @param numberOfJoints how many joints the kinematic chain should be composed of.
     * @return the list of all the joints composing the kinematic chain.
     */
@@ -665,8 +665,8 @@ public class MultiBodySystemRandomTools
     * joint.
     * </p>
     * 
-    * @param random the random generator to use.
-    * @param prefix provides a common prefix used for all the joint and rigid-body names.
+    * @param random         the random generator to use.
+    * @param prefix         provides a common prefix used for all the joint and rigid-body names.
     * @param numberOfJoints how many joints the kinematic chain should be composed of.
     * @return the list of all the joints composing the kinematic chain.
     */
@@ -690,8 +690,8 @@ public class MultiBodySystemRandomTools
     * joint.
     * </p>
     * 
-    * @param random the random generator to use.
-    * @param rootBody the root to which the kinematic chain is to be attached.
+    * @param random         the random generator to use.
+    * @param rootBody       the root to which the kinematic chain is to be attached.
     * @param numberOfJoints how many joints the kinematic chain should be composed of.
     * @return the list of all the joints composing the kinematic chain.
     */
@@ -713,9 +713,9 @@ public class MultiBodySystemRandomTools
     * joint.
     * </p>
     * 
-    * @param random the random generator to use.
-    * @param prefix provides a common prefix used for all the joint and rigid-body names.
-    * @param rootBody the root to which the kinematic chain is to be attached.
+    * @param random         the random generator to use.
+    * @param prefix         provides a common prefix used for all the joint and rigid-body names.
+    * @param rootBody       the root to which the kinematic chain is to be attached.
     * @param numberOfJoints how many joints the kinematic chain should be composed of.
     * @return the list of all the joints composing the kinematic chain.
     */
@@ -744,7 +744,7 @@ public class MultiBodySystemRandomTools
     * child joint(s).
     * </p>
     * 
-    * @param random the random generator to use.
+    * @param random         the random generator to use.
     * @param numberOfJoints how many joints the kinematic tree should be composed of.
     * @return the list of all the joints composing the kinematic tree.
     */
@@ -763,8 +763,8 @@ public class MultiBodySystemRandomTools
     * child joint(s).
     * </p>
     * 
-    * @param random the random generator to use.
-    * @param prefix provides a common prefix used for all the joint and rigid-body names.
+    * @param random         the random generator to use.
+    * @param prefix         provides a common prefix used for all the joint and rigid-body names.
     * @param numberOfJoints how many joints the kinematic tree should be composed of.
     * @return the list of all the joints composing the kinematic tree.
     */
@@ -785,8 +785,8 @@ public class MultiBodySystemRandomTools
     * child joint(s).
     * </p>
     * 
-    * @param random the random generator to use.
-    * @param rootBody the root to which the kinematic tree is to be attached.
+    * @param random         the random generator to use.
+    * @param rootBody       the root to which the kinematic tree is to be attached.
     * @param numberOfJoints how many joints the kinematic tree should be composed of.
     * @return the list of all the joints composing the kinematic tree.
     */
@@ -805,9 +805,9 @@ public class MultiBodySystemRandomTools
     * child joint(s).
     * </p>
     * 
-    * @param random the random generator to use.
-    * @param prefix provides a common prefix used for all the joint and rigid-body names.
-    * @param rootBody the root to which the kinematic tree is to be attached.
+    * @param random         the random generator to use.
+    * @param prefix         provides a common prefix used for all the joint and rigid-body names.
+    * @param rootBody       the root to which the kinematic tree is to be attached.
     * @param numberOfJoints how many joints the kinematic tree should be composed of.
     * @return the list of all the joints composing the kinematic tree.
     */
@@ -838,7 +838,7 @@ public class MultiBodySystemRandomTools
     * child joint(s).
     * </p>
     * 
-    * @param random the random generator to use.
+    * @param random         the random generator to use.
     * @param numberOfJoints how many joints the kinematic tree should be composed of.
     * @return the list of all the joints composing the kinematic tree.
     */
@@ -857,8 +857,8 @@ public class MultiBodySystemRandomTools
     * child joint(s).
     * </p>
     * 
-    * @param random the random generator to use.
-    * @param prefix provides a common prefix used for all the joint and rigid-body names.
+    * @param random         the random generator to use.
+    * @param prefix         provides a common prefix used for all the joint and rigid-body names.
     * @param numberOfJoints how many joints the kinematic tree should be composed of.
     * @return the list of all the joints composing the kinematic tree.
     */
@@ -879,8 +879,8 @@ public class MultiBodySystemRandomTools
     * child joint(s).
     * </p>
     * 
-    * @param random the random generator to use.
-    * @param rootBody the root to which the kinematic tree is to be attached.
+    * @param random         the random generator to use.
+    * @param rootBody       the root to which the kinematic tree is to be attached.
     * @param numberOfJoints how many joints the kinematic tree should be composed of.
     * @return the list of all the joints composing the kinematic tree.
     */
@@ -899,9 +899,9 @@ public class MultiBodySystemRandomTools
     * child joint(s).
     * </p>
     * 
-    * @param random the random generator to use.
-    * @param prefix provides a common prefix used for all the joint and rigid-body names.
-    * @param rootBody the root to which the kinematic tree is to be attached.
+    * @param random         the random generator to use.
+    * @param prefix         provides a common prefix used for all the joint and rigid-body names.
+    * @param rootBody       the root to which the kinematic tree is to be attached.
     * @param numberOfJoints how many joints the kinematic tree should be composed of.
     * @return the list of all the joints composing the kinematic tree.
     */
@@ -932,7 +932,7 @@ public class MultiBodySystemRandomTools
     * child joint(s).
     * </p>
     * 
-    * @param random the random generator to use.
+    * @param random         the random generator to use.
     * @param numberOfJoints how many joints the kinematic tree should be composed of.
     * @return the list of all the joints composing the kinematic tree.
     */
@@ -951,8 +951,8 @@ public class MultiBodySystemRandomTools
     * child joint(s).
     * </p>
     * 
-    * @param random the random generator to use.
-    * @param prefix provides a common prefix used for all the joint and rigid-body names.
+    * @param random         the random generator to use.
+    * @param prefix         provides a common prefix used for all the joint and rigid-body names.
     * @param numberOfJoints how many joints the kinematic tree should be composed of.
     * @return the list of all the joints composing the kinematic tree.
     */
@@ -973,8 +973,8 @@ public class MultiBodySystemRandomTools
     * child joint(s).
     * </p>
     * 
-    * @param random the random generator to use.
-    * @param rootBody the root to which the kinematic tree is to be attached.
+    * @param random         the random generator to use.
+    * @param rootBody       the root to which the kinematic tree is to be attached.
     * @param numberOfJoints how many joints the kinematic tree should be composed of.
     * @return the list of all the joints composing the kinematic tree.
     */
@@ -993,9 +993,9 @@ public class MultiBodySystemRandomTools
     * child joint(s).
     * </p>
     * 
-    * @param random the random generator to use.
-    * @param prefix provides a common prefix used for all the joint and rigid-body names.
-    * @param rootBody the root to which the kinematic tree is to be attached.
+    * @param random         the random generator to use.
+    * @param prefix         provides a common prefix used for all the joint and rigid-body names.
+    * @param rootBody       the root to which the kinematic tree is to be attached.
     * @param numberOfJoints how many joints the kinematic tree should be composed of.
     * @return the list of all the joints composing the kinematic tree.
     */
@@ -1029,7 +1029,7 @@ public class MultiBodySystemRandomTools
     * child joint(s).
     * </p>
     * 
-    * @param random the random generator to use.
+    * @param random         the random generator to use.
     * @param numberOfJoints how many joints the kinematic tree should be composed of.
     * @return the list of all the joints composing the kinematic tree.
     */
@@ -1051,8 +1051,8 @@ public class MultiBodySystemRandomTools
     * child joint(s).
     * </p>
     * 
-    * @param random the random generator to use.
-    * @param prefix provides a common prefix used for all the joint and rigid-body names.
+    * @param random         the random generator to use.
+    * @param prefix         provides a common prefix used for all the joint and rigid-body names.
     * @param numberOfJoints how many joints the kinematic tree should be composed of.
     * @return the list of all the joints composing the kinematic tree.
     */
@@ -1076,8 +1076,8 @@ public class MultiBodySystemRandomTools
     * child joint(s).
     * </p>
     * 
-    * @param random the random generator to use.
-    * @param rootBody the root to which the kinematic tree is to be attached.
+    * @param random         the random generator to use.
+    * @param rootBody       the root to which the kinematic tree is to be attached.
     * @param numberOfJoints how many joints the kinematic tree should be composed of.
     * @return the list of all the joints composing the kinematic tree.
     */
@@ -1099,9 +1099,9 @@ public class MultiBodySystemRandomTools
     * child joint(s).
     * </p>
     * 
-    * @param random the random generator to use.
-    * @param prefix provides a common prefix used for all the joint and rigid-body names.
-    * @param rootBody the root to which the kinematic tree is to be attached.
+    * @param random         the random generator to use.
+    * @param prefix         provides a common prefix used for all the joint and rigid-body names.
+    * @param rootBody       the root to which the kinematic tree is to be attached.
     * @param numberOfJoints how many joints the kinematic tree should be composed of.
     * @return the list of all the joints composing the kinematic tree.
     */
@@ -1126,8 +1126,8 @@ public class MultiBodySystemRandomTools
     * Generates a prismatic joint with random physical parameters and attaches it to the given
     * {@code predecessor}.
     * 
-    * @param random the random generator to use.
-    * @param name the joint name.
+    * @param random      the random generator to use.
+    * @param name        the joint name.
     * @param predecessor the rigid-body to which the joint is added as a child.
     * @return the random joint.
     */
@@ -1141,9 +1141,9 @@ public class MultiBodySystemRandomTools
     * Generates a prismatic joint with random physical parameters and attaches it to the given
     * {@code predecessor}.
     * 
-    * @param random the random generator to use.
-    * @param name the joint name.
-    * @param jointAxis used to define the joint axis.
+    * @param random      the random generator to use.
+    * @param name        the joint name.
+    * @param jointAxis   used to define the joint axis.
     * @param predecessor the rigid-body to which the joint is added as a child.
     * @return the random joint.
     */
@@ -1157,8 +1157,8 @@ public class MultiBodySystemRandomTools
     * Generates a revolute joint with random physical parameters and attaches it to the given
     * {@code predecessor}.
     * 
-    * @param random the random generator to use.
-    * @param name the joint name.
+    * @param random      the random generator to use.
+    * @param name        the joint name.
     * @param predecessor the rigid-body to which the joint is added as a child.
     * @return the random joint.
     */
@@ -1172,9 +1172,9 @@ public class MultiBodySystemRandomTools
     * Generates a revolute joint with random physical parameters and attaches it to the given
     * {@code predecessor}.
     * 
-    * @param random the random generator to use.
-    * @param name the joint name.
-    * @param jointAxis used to define the joint axis.
+    * @param random      the random generator to use.
+    * @param name        the joint name.
+    * @param jointAxis   used to define the joint axis.
     * @param predecessor the rigid-body to which the joint is added as a child.
     * @return the random joint.
     */
@@ -1188,8 +1188,8 @@ public class MultiBodySystemRandomTools
     * Generates a 1-DoF joint with random physical parameters and attaches it to the given
     * {@code predecessor}.
     * 
-    * @param random the random generator to use.
-    * @param name the joint name.
+    * @param random      the random generator to use.
+    * @param name        the joint name.
     * @param predecessor the rigid-body to which the joint is added as a child.
     * @return the random joint.
     */
@@ -1205,9 +1205,9 @@ public class MultiBodySystemRandomTools
     * Generates a 1-DoF joint with random physical parameters and attaches it to the given
     * {@code predecessor}.
     * 
-    * @param random the random generator to use.
-    * @param name the joint name.
-    * @param jointAxis used to define the joint axis.
+    * @param random      the random generator to use.
+    * @param name        the joint name.
+    * @param jointAxis   used to define the joint axis.
     * @param predecessor the rigid-body to which the joint is added as a child.
     * @return the random joint.
     */
@@ -1223,8 +1223,8 @@ public class MultiBodySystemRandomTools
     * Generates a 6-DoF floating joint with random physical parameters and attaches it to the given
     * {@code predecessor}.
     * 
-    * @param random the random generator to use.
-    * @param name the joint name.
+    * @param random      the random generator to use.
+    * @param name        the joint name.
     * @param predecessor the rigid-body to which the joint is added as a child.
     * @return the random joint.
     */
@@ -1238,8 +1238,8 @@ public class MultiBodySystemRandomTools
     * Generates a 3-DoF floating joint with random physical parameters and attaches it to the given
     * {@code predecessor}.
     * 
-    * @param random the random generator to use.
-    * @param name the joint name.
+    * @param random      the random generator to use.
+    * @param name        the joint name.
     * @param predecessor the rigid-body to which the joint is added as a child.
     * @return the random joint.
     */
@@ -1253,8 +1253,8 @@ public class MultiBodySystemRandomTools
     * Generates a 3-DoF spherical joint with random physical parameters and attaches it to the given
     * {@code predecessor}.
     * 
-    * @param random the random generator to use.
-    * @param name the joint name.
+    * @param random      the random generator to use.
+    * @param name        the joint name.
     * @param predecessor the rigid-body to which the joint is added as a child.
     * @return the random joint.
     */
@@ -1268,8 +1268,8 @@ public class MultiBodySystemRandomTools
     * Generates a 0-DoF fixed joint with random physical parameters and attaches it to the given
     * {@code predecessor}.
     * 
-    * @param random the random generator to use.
-    * @param name the joint name.
+    * @param random      the random generator to use.
+    * @param name        the joint name.
     * @param predecessor the rigid-body to which the joint is added as a child.
     * @return the random joint.
     */
@@ -1283,8 +1283,8 @@ public class MultiBodySystemRandomTools
     * Generates a joint with random type and physical parameters and attaches it to the given
     * {@code predecessor}.
     * 
-    * @param random the random generator to use.
-    * @param name the joint name.
+    * @param random      the random generator to use.
+    * @param name        the joint name.
     * @param predecessor the rigid-body to which the joint is added as a child.
     * @return the random joint.
     */
@@ -1292,18 +1292,18 @@ public class MultiBodySystemRandomTools
    {
       switch (random.nextInt(6))
       {
-      case 0:
-         return nextSixDoFJoint(random, name, predecessor);
-      case 1:
-         return nextPlanarJoint(random, name, predecessor);
-      case 2:
-         return nextSphericalJoint(random, name, predecessor);
-      case 3:
-         return nextPrismaticJoint(random, name, predecessor);
-      case 4:
-         return nextRevoluteJoint(random, name, predecessor);
-      default:
-         return nextFixedJoint(random, name, predecessor);
+         case 0:
+            return nextSixDoFJoint(random, name, predecessor);
+         case 1:
+            return nextPlanarJoint(random, name, predecessor);
+         case 2:
+            return nextSphericalJoint(random, name, predecessor);
+         case 3:
+            return nextPrismaticJoint(random, name, predecessor);
+         case 4:
+            return nextRevoluteJoint(random, name, predecessor);
+         default:
+            return nextFixedJoint(random, name, predecessor);
       }
    }
 
@@ -1311,8 +1311,8 @@ public class MultiBodySystemRandomTools
     * Generates a rigid-body with random physical parameters and attaches it to the given
     * {@code parentJoint}.
     * 
-    * @param random the random generator to use.
-    * @param name the rigid-body name.
+    * @param random      the random generator to use.
+    * @param name        the rigid-body name.
     * @param parentJoint the joint to which the rigid-body is added as its successor.
     * @return the random rigid-body.
     */
@@ -1341,7 +1341,7 @@ public class MultiBodySystemRandomTools
       /**
        * Creates a new random multi-body system.
        * 
-       * @param random the random generator to use.
+       * @param random                 the random generator to use.
        * @param numberOfRevoluteJoints the number of revolute joints to add to this kinematic chain.
        */
       public RandomFloatingRevoluteJointChain(Random random, int numberOfRevoluteJoints)
@@ -1352,9 +1352,10 @@ public class MultiBodySystemRandomTools
       /**
        * Creates a new random multi-body system.
        * 
-       * @param random the random generator to use.
+       * @param random    the random generator to use.
        * @param jointAxes array containing in order the axis for each revolute joint. The length of the
-       *           array also defines the number of revolute joints for the generated kinematic chain.
+       *                  array also defines the number of revolute joints for the generated kinematic
+       *                  chain.
        */
       public RandomFloatingRevoluteJointChain(Random random, Vector3D[] jointAxes)
       {
@@ -1371,7 +1372,7 @@ public class MultiBodySystemRandomTools
       /**
        * Randomizes the state of this multi-body system and updates its reference frames.
        * 
-       * @param random the random generator to use.
+       * @param random          the random generator to use.
        * @param stateSelections the states to randomize.
        */
       public void nextState(Random random, JointStateType... stateSelections)

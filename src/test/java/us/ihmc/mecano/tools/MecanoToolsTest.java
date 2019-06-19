@@ -101,8 +101,7 @@ public class MecanoToolsTest
          Vector3D dynamicForce1 = EuclidCoreRandomTools.nextVector3D(random);
          Vector3D dynamicForce2 = EuclidCoreRandomTools.nextVector3D(random);
 
-         MecanoTools.computeDynamicForce(mass, centerOfMassOffset, angularAcceleration, linearAcceleration, angularVelocity, linearVelocity,
-                                                    dynamicForce1);
+         MecanoTools.computeDynamicForce(mass, centerOfMassOffset, angularAcceleration, linearAcceleration, angularVelocity, linearVelocity, dynamicForce1);
          MecanoTools.computeDynamicForceFast(mass, linearAcceleration, angularVelocity, linearVelocity, dynamicForce2);
 
          EuclidCoreTestTools.assertTuple3DEquals(dynamicForce1, dynamicForce2, EPSILON);
@@ -121,8 +120,7 @@ public class MecanoToolsTest
          Vector3D dynamicForce1 = EuclidCoreRandomTools.nextVector3D(random);
          Vector3D dynamicForce2 = EuclidCoreRandomTools.nextVector3D(random);
 
-         MecanoTools.computeDynamicForce(mass, centerOfMassOffset, angularAcceleration, linearAcceleration, angularVelocity, linearVelocity,
-                                                    dynamicForce1);
+         MecanoTools.computeDynamicForce(mass, centerOfMassOffset, angularAcceleration, linearAcceleration, angularVelocity, linearVelocity, dynamicForce1);
          MecanoTools.computeDynamicForceFast(mass, linearAcceleration, angularVelocity, linearVelocity, dynamicForce2);
 
          EuclidCoreTestTools.assertTuple3DEquals(expected, dynamicForce1, EPSILON);
@@ -147,8 +145,7 @@ public class MecanoToolsTest
          Vector3D dynamicForce2 = EuclidCoreRandomTools.nextVector3D(random);
 
          MecanoTools.computeDynamicForceFast(mass, linearAcceleration, angularVelocity, linearVelocity, dynamicForce1);
-         MecanoTools.computeDynamicForce(mass, centerOfMassOffset, angularAcceleration, linearAcceleration, angularVelocity, linearVelocity,
-                                                    dynamicForce2);
+         MecanoTools.computeDynamicForce(mass, centerOfMassOffset, angularAcceleration, linearAcceleration, angularVelocity, linearVelocity, dynamicForce2);
 
          EuclidCoreTestTools.assertTuple3DEquals(expected, dynamicForce1, EPSILON);
          EuclidCoreTestTools.assertTuple3DEquals(expected, dynamicForce2, EPSILON);
@@ -172,8 +169,14 @@ public class MecanoToolsTest
          Vector3D dynamicMoment1 = EuclidCoreRandomTools.nextVector3D(random);
          Vector3D dynamicMoment2 = EuclidCoreRandomTools.nextVector3D(random);
 
-         MecanoTools.computeDynamicMoment(momentOfInertia, mass, centerOfMassOffset, angularAcceleration, linearAcceleration, angularVelocity,
-                                                     linearVelocity, dynamicMoment1);
+         MecanoTools.computeDynamicMoment(momentOfInertia,
+                                          mass,
+                                          centerOfMassOffset,
+                                          angularAcceleration,
+                                          linearAcceleration,
+                                          angularVelocity,
+                                          linearVelocity,
+                                          dynamicMoment1);
          MecanoTools.computeDynamicMomentFast(momentOfInertia, angularAcceleration, angularVelocity, dynamicMoment2);
 
          EuclidCoreTestTools.assertTuple3DEquals(dynamicMoment1, dynamicMoment2, EPSILON);
@@ -193,8 +196,14 @@ public class MecanoToolsTest
          Vector3D dynamicMoment1 = EuclidCoreRandomTools.nextVector3D(random);
          Vector3D dynamicMoment2 = EuclidCoreRandomTools.nextVector3D(random);
 
-         MecanoTools.computeDynamicMoment(momentOfInertia, mass, centerOfMassOffset, angularAcceleration, linearAcceleration, angularVelocity,
-                                                     linearVelocity, dynamicMoment1);
+         MecanoTools.computeDynamicMoment(momentOfInertia,
+                                          mass,
+                                          centerOfMassOffset,
+                                          angularAcceleration,
+                                          linearAcceleration,
+                                          angularVelocity,
+                                          linearVelocity,
+                                          dynamicMoment1);
          MecanoTools.computeDynamicMomentFast(momentOfInertia, angularAcceleration, angularVelocity, dynamicMoment2);
 
          EuclidCoreTestTools.assertTuple3DEquals(expected, dynamicMoment1, EPSILON);
@@ -223,8 +232,14 @@ public class MecanoToolsTest
          Vector3D dynamicMoment2 = EuclidCoreRandomTools.nextVector3D(random);
 
          MecanoTools.computeDynamicMomentFast(momentOfInertia, angularAcceleration, angularVelocity, dynamicMoment1);
-         MecanoTools.computeDynamicMoment(momentOfInertia, mass, centerOfMassOffset, angularAcceleration, linearAcceleration, angularVelocity,
-                                                     linearVelocity, dynamicMoment2);
+         MecanoTools.computeDynamicMoment(momentOfInertia,
+                                          mass,
+                                          centerOfMassOffset,
+                                          angularAcceleration,
+                                          linearAcceleration,
+                                          angularVelocity,
+                                          linearVelocity,
+                                          dynamicMoment2);
 
          EuclidCoreTestTools.assertTuple3DEquals(expected, dynamicMoment1, EPSILON);
          EuclidCoreTestTools.assertTuple3DEquals(expected, dynamicMoment2, EPSILON);
@@ -261,21 +276,35 @@ public class MecanoToolsTest
          Wrench wrenchAtFrameA = new Wrench(bodyFrame, frameA);
 
          // Compute the wrench at the bodyFrame, with the center of mass offset set to zero.
-         MecanoTools.computeDynamicMomentFast(inertia.getMomentOfInertia(), acceleration.getAngularPart(), twist.getAngularPart(),
-                                                         wrenchAtBody.getAngularPart());
-         MecanoTools.computeDynamicForceFast(inertia.getMass(), acceleration.getLinearPart(), twist.getAngularPart(), twist.getLinearPart(),
-                                                        wrenchAtBody.getLinearPart());
+         MecanoTools.computeDynamicMomentFast(inertia.getMomentOfInertia(),
+                                              acceleration.getAngularPart(),
+                                              twist.getAngularPart(),
+                                              wrenchAtBody.getAngularPart());
+         MecanoTools.computeDynamicForceFast(inertia.getMass(),
+                                             acceleration.getLinearPart(),
+                                             twist.getAngularPart(),
+                                             twist.getLinearPart(),
+                                             wrenchAtBody.getLinearPart());
 
          // Compute the wrench at the frameA, with the center of mass offset non-zero.
          inertia.changeFrame(frameA);
          acceleration.changeFrame(frameA);
          twist.changeFrame(frameA);
-         MecanoTools.computeDynamicMoment(inertia.getMomentOfInertia(), inertia.getMass(), inertia.getCenterOfMassOffset(),
-                                                     acceleration.getAngularPart(), acceleration.getLinearPart(), twist.getAngularPart(), twist.getLinearPart(),
-                                                     wrenchAtFrameA.getAngularPart());
-         MecanoTools.computeDynamicForce(inertia.getMass(), inertia.getCenterOfMassOffset(), acceleration.getAngularPart(),
-                                                    acceleration.getLinearPart(), twist.getAngularPart(), twist.getLinearPart(),
-                                                    wrenchAtFrameA.getLinearPart());
+         MecanoTools.computeDynamicMoment(inertia.getMomentOfInertia(),
+                                          inertia.getMass(),
+                                          inertia.getCenterOfMassOffset(),
+                                          acceleration.getAngularPart(),
+                                          acceleration.getLinearPart(),
+                                          twist.getAngularPart(),
+                                          twist.getLinearPart(),
+                                          wrenchAtFrameA.getAngularPart());
+         MecanoTools.computeDynamicForce(inertia.getMass(),
+                                         inertia.getCenterOfMassOffset(),
+                                         acceleration.getAngularPart(),
+                                         acceleration.getLinearPart(),
+                                         twist.getAngularPart(),
+                                         twist.getLinearPart(),
+                                         wrenchAtFrameA.getLinearPart());
 
          // Let's change frames to bodyFrame and compare the wrenches
          wrenchAtFrameA.changeFrame(bodyFrame);
@@ -298,32 +327,55 @@ public class MecanoToolsTest
          Wrench wrenchAtFrameB = new Wrench(bodyFrame, frameB);
 
          // Compute the wrench at the bodyFrame, with the center of mass offset set to zero.
-         MecanoTools.computeDynamicMomentFast(inertia.getMomentOfInertia(), acceleration.getAngularPart(), twist.getAngularPart(),
-                                                         wrenchAtBody.getAngularPart());
-         MecanoTools.computeDynamicForceFast(inertia.getMass(), acceleration.getLinearPart(), twist.getAngularPart(), twist.getLinearPart(),
-                                                        wrenchAtBody.getLinearPart());
+         MecanoTools.computeDynamicMomentFast(inertia.getMomentOfInertia(),
+                                              acceleration.getAngularPart(),
+                                              twist.getAngularPart(),
+                                              wrenchAtBody.getAngularPart());
+         MecanoTools.computeDynamicForceFast(inertia.getMass(),
+                                             acceleration.getLinearPart(),
+                                             twist.getAngularPart(),
+                                             twist.getLinearPart(),
+                                             wrenchAtBody.getLinearPart());
 
          // Compute the wrench at the frameA, with the center of mass offset non-zero.
          inertia.changeFrame(frameA);
          acceleration.changeFrame(frameA);
          twist.changeFrame(frameA);
-         MecanoTools.computeDynamicMoment(inertia.getMomentOfInertia(), inertia.getMass(), inertia.getCenterOfMassOffset(),
-                                                     acceleration.getAngularPart(), acceleration.getLinearPart(), twist.getAngularPart(), twist.getLinearPart(),
-                                                     wrenchAtFrameA.getAngularPart());
-         MecanoTools.computeDynamicForce(inertia.getMass(), inertia.getCenterOfMassOffset(), acceleration.getAngularPart(),
-                                                    acceleration.getLinearPart(), twist.getAngularPart(), twist.getLinearPart(),
-                                                    wrenchAtFrameA.getLinearPart());
+         MecanoTools.computeDynamicMoment(inertia.getMomentOfInertia(),
+                                          inertia.getMass(),
+                                          inertia.getCenterOfMassOffset(),
+                                          acceleration.getAngularPart(),
+                                          acceleration.getLinearPart(),
+                                          twist.getAngularPart(),
+                                          twist.getLinearPart(),
+                                          wrenchAtFrameA.getAngularPart());
+         MecanoTools.computeDynamicForce(inertia.getMass(),
+                                         inertia.getCenterOfMassOffset(),
+                                         acceleration.getAngularPart(),
+                                         acceleration.getLinearPart(),
+                                         twist.getAngularPart(),
+                                         twist.getLinearPart(),
+                                         wrenchAtFrameA.getLinearPart());
 
          // Compute the wrench at the frameB, with the center of mass offset non-zero.
          inertia.changeFrame(frameB);
          acceleration.changeFrame(frameB);
          twist.changeFrame(frameB);
-         MecanoTools.computeDynamicMoment(inertia.getMomentOfInertia(), inertia.getMass(), inertia.getCenterOfMassOffset(),
-                                                     acceleration.getAngularPart(), acceleration.getLinearPart(), twist.getAngularPart(), twist.getLinearPart(),
-                                                     wrenchAtFrameB.getAngularPart());
-         MecanoTools.computeDynamicForce(inertia.getMass(), inertia.getCenterOfMassOffset(), acceleration.getAngularPart(),
-                                                    acceleration.getLinearPart(), twist.getAngularPart(), twist.getLinearPart(),
-                                                    wrenchAtFrameB.getLinearPart());
+         MecanoTools.computeDynamicMoment(inertia.getMomentOfInertia(),
+                                          inertia.getMass(),
+                                          inertia.getCenterOfMassOffset(),
+                                          acceleration.getAngularPart(),
+                                          acceleration.getLinearPart(),
+                                          twist.getAngularPart(),
+                                          twist.getLinearPart(),
+                                          wrenchAtFrameB.getAngularPart());
+         MecanoTools.computeDynamicForce(inertia.getMass(),
+                                         inertia.getCenterOfMassOffset(),
+                                         acceleration.getAngularPart(),
+                                         acceleration.getLinearPart(),
+                                         twist.getAngularPart(),
+                                         twist.getLinearPart(),
+                                         wrenchAtFrameB.getLinearPart());
 
          // Let's change frame from frameA to bodyFrame and compare the wrenches
          wrenchAtFrameA.changeFrame(bodyFrame);
@@ -348,8 +400,11 @@ public class MecanoToolsTest
          SpatialInertia inertia = MecanoRandomTools.nextSpatialInertia(random, bodyFrame, expressedInFrame);
          Twist twist = MecanoRandomTools.nextTwist(random, bodyFrame, worldFrame, expressedInFrame);
 
-         double actual = MecanoTools.computeKineticCoEnergy(inertia.getMomentOfInertia(), inertia.getMass(), inertia.getCenterOfMassOffset(),
-                                                                       twist.getAngularPart(), twist.getLinearPart());
+         double actual = MecanoTools.computeKineticCoEnergy(inertia.getMomentOfInertia(),
+                                                            inertia.getMass(),
+                                                            inertia.getCenterOfMassOffset(),
+                                                            twist.getAngularPart(),
+                                                            twist.getLinearPart());
          double expected;
          { // Compute the matrix form
             DenseMatrix64F inertiaMatrix = new DenseMatrix64F(6, 6);
@@ -389,12 +444,12 @@ public class MecanoToolsTest
          MecanoTools.transformSymmetricMatrix3D(rotationMatrix, actual);
       }
    }
-   
+
    @Test
    public void testInverseTransformSymmetricMatrix3D() throws Exception
    {
       Random random = new Random(4363);
-      
+
       for (int i = 0; i < ITERATIONS; i++)
       {
          RotationMatrix rotationMatrix = EuclidCoreRandomTools.nextRotationMatrix(random);
@@ -403,7 +458,7 @@ public class MecanoToolsTest
          expected.setM20(expected.getM02());
          expected.setM21(expected.getM12());
          Matrix3D actual = new Matrix3D(expected);
-         
+
          rotationMatrix.inverseTransform(expected);
          MecanoTools.inverseTransformSymmetricMatrix3D(rotationMatrix, actual);
       }

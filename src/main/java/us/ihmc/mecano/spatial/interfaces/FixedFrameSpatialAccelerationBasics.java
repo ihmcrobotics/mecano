@@ -55,10 +55,9 @@ public interface FixedFrameSpatialAccelerationBasics extends SpatialAcceleration
     * <p>
     * It is often more intuitive to quantify a body acceleration from the perspective of the base
     * frame. However, when creating a spatial acceleration, the frame from which the acceleration is
-    * perceived and the point of which the acceleration is measured are usually part of the same
-    * frame. This implies an actual difference between the two representations due to Coriolis
-    * accelerations solely introduced because the two reference frames are moving with respect to
-    * each other.
+    * perceived and the point of which the acceleration is measured are usually part of the same frame.
+    * This implies an actual difference between the two representations due to Coriolis accelerations
+    * solely introduced because the two reference frames are moving with respect to each other.
     * </p>
     * <p>
     * This method allows to change from the intuitive representation, to the one used in this
@@ -71,12 +70,13 @@ public interface FixedFrameSpatialAccelerationBasics extends SpatialAcceleration
     * </p>
     *
     * @param angularAcceleration the angular acceleration of the body. Not modified.
-    * @param originAcceleration the linear acceleration of the body frame's origin perceived from
-    *           the base frame. Not modified.
-    * @param bodyTwist this is the twist of {@code this.bodyFrame} with respect to
-    *           {@code this.baseFrame} and expressed in {@code this.expressedInFrame}.
-    * @throws ReferenceFrameMismatchException if {@code this.bodyFrame != this.expressedInFrame}, or
-    *            if {@code bodyTwist} does not have the same frames as {@code this}.
+    * @param originAcceleration  the linear acceleration of the body frame's origin perceived from the
+    *                            base frame. Not modified.
+    * @param bodyTwist           this is the twist of {@code this.bodyFrame} with respect to
+    *                            {@code this.baseFrame} and expressed in {@code this.expressedInFrame}.
+    * @throws ReferenceFrameMismatchException if {@code this.bodyFrame != this.expressedInFrame}, or if
+    *                                         {@code bodyTwist} does not have the same frames as
+    *                                         {@code this}.
     */
    default void setBasedOnOriginAcceleration(FrameVector3DReadOnly angularAcceleration, FrameVector3DReadOnly originAcceleration, TwistReadOnly bodyTwist)
    {

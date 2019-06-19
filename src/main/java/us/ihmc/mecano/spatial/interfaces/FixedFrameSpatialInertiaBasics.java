@@ -109,7 +109,7 @@ public interface FixedFrameSpatialInertiaBasics extends SpatialInertiaReadOnly, 
     * 
     * @param other the other spatial inertia to copy values from. Not modified.
     * @throws ReferenceFrameMismatchException if {@code other} does not have the same frames as
-    *            {@code this}.
+    *                                         {@code this}.
     */
    default void set(SpatialInertiaReadOnly other)
    {
@@ -124,7 +124,7 @@ public interface FixedFrameSpatialInertiaBasics extends SpatialInertiaReadOnly, 
     * 
     * @param other the other inertia to add. Not modified.
     * @throws ReferenceFrameMismatchException if {@code other} is not expressed in the same reference
-    *            frame as {@code this}.
+    *                                         frame as {@code this}.
     */
    default void add(SpatialInertiaReadOnly other)
    {

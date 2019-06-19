@@ -123,9 +123,11 @@ public class SpatialAccelerationTest extends SpatialMotionTest<SpatialAccelerati
       for (int i = 0; i < 1000; i++)
       {
          ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
-         ReferenceFrame baseFrame = ReferenceFrameTools.constructFrameWithUnchangingTransformToParent("baseFrame", worldFrame,
+         ReferenceFrame baseFrame = ReferenceFrameTools.constructFrameWithUnchangingTransformToParent("baseFrame",
+                                                                                                      worldFrame,
                                                                                                       EuclidCoreRandomTools.nextRigidBodyTransform(random));
-         ReferenceFrame bodyFrame = ReferenceFrameTools.constructFrameWithUnchangingTransformToParent("bodyFrame", worldFrame,
+         ReferenceFrame bodyFrame = ReferenceFrameTools.constructFrameWithUnchangingTransformToParent("bodyFrame",
+                                                                                                      worldFrame,
                                                                                                       EuclidCoreRandomTools.nextRigidBodyTransform(random));
 
          Vector3D linearAcceleration = EuclidCoreRandomTools.nextVector3D(random, -10.0, 10.0);
@@ -163,7 +165,8 @@ public class SpatialAccelerationTest extends SpatialMotionTest<SpatialAccelerati
    @Test
    public void testAddExpressedInDifferentFrames()
    {
-      Assertions.assertThrows(ReferenceFrameMismatchException.class, () -> {
+      Assertions.assertThrows(ReferenceFrameMismatchException.class, () ->
+      {
          SpatialAcceleration acceleration1 = createSpatialMotionVector(frameB, frameA, frameC, new Vector3D(), new Vector3D());
          SpatialAcceleration acceleration2 = createSpatialMotionVector(frameB, frameA, frameA, new Vector3D(), new Vector3D());
 
@@ -179,7 +182,8 @@ public class SpatialAccelerationTest extends SpatialMotionTest<SpatialAccelerati
    @Test
    public void testAddNotRelative()
    {
-      Assertions.assertThrows(ReferenceFrameMismatchException.class, () -> {
+      Assertions.assertThrows(ReferenceFrameMismatchException.class, () ->
+      {
          SpatialAcceleration acceleration1 = createSpatialMotionVector(frameB, frameA, frameC, new Vector3D(), new Vector3D());
          SpatialAcceleration acceleration2 = createSpatialMotionVector(frameB, frameA, frameC, new Vector3D(), new Vector3D());
 
@@ -249,9 +253,15 @@ public class SpatialAccelerationTest extends SpatialMotionTest<SpatialAccelerati
    public void testSub()
    {
       Random random = new Random(3454L);
-      SpatialAcceleration vector1 = new SpatialAcceleration(frameB, frameA, frameD, EuclidCoreRandomTools.nextVector3D(random),
+      SpatialAcceleration vector1 = new SpatialAcceleration(frameB,
+                                                            frameA,
+                                                            frameD,
+                                                            EuclidCoreRandomTools.nextVector3D(random),
                                                             EuclidCoreRandomTools.nextVector3D(random));
-      SpatialAcceleration vector2 = new SpatialAcceleration(frameC, frameB, frameD, EuclidCoreRandomTools.nextVector3D(random),
+      SpatialAcceleration vector2 = new SpatialAcceleration(frameC,
+                                                            frameB,
+                                                            frameD,
+                                                            EuclidCoreRandomTools.nextVector3D(random),
                                                             EuclidCoreRandomTools.nextVector3D(random));
       SpatialAcceleration vector3 = new SpatialAcceleration(vector1);
       vector3.add(vector2);
@@ -270,7 +280,8 @@ public class SpatialAccelerationTest extends SpatialMotionTest<SpatialAccelerati
    @Test
    public void testSubWrongExpressedInFrame()
    {
-      Assertions.assertThrows(RuntimeException.class, () -> {
+      Assertions.assertThrows(RuntimeException.class, () ->
+      {
          SpatialAcceleration vector1 = new SpatialAcceleration(frameB, frameA, frameD);
          SpatialAcceleration vector2 = new SpatialAcceleration(frameB, frameC, frameC);
          vector1.sub(vector2);
@@ -280,7 +291,8 @@ public class SpatialAccelerationTest extends SpatialMotionTest<SpatialAccelerati
    @Test
    public void testSubFramesDontMatchUp()
    {
-      Assertions.assertThrows(RuntimeException.class, () -> {
+      Assertions.assertThrows(RuntimeException.class, () ->
+      {
          SpatialAcceleration vector1 = new SpatialAcceleration(frameD, frameA, frameC);
          SpatialAcceleration vector2 = new SpatialAcceleration(frameB, frameC, frameC);
          vector1.sub(vector2);
@@ -291,7 +303,10 @@ public class SpatialAccelerationTest extends SpatialMotionTest<SpatialAccelerati
    public void testSetBasedOnOriginAcceleration()
    {
       SpatialAcceleration acceleration = new SpatialAcceleration(frameA, frameB, frameA);
-      Twist twistOfBodyWithRespectToBase = new Twist(frameA, frameB, frameA, EuclidCoreRandomTools.nextVector3D(random),
+      Twist twistOfBodyWithRespectToBase = new Twist(frameA,
+                                                     frameB,
+                                                     frameA,
+                                                     EuclidCoreRandomTools.nextVector3D(random),
                                                      EuclidCoreRandomTools.nextVector3D(random));
       FrameVector3D angularAcceleration = new FrameVector3D(twistOfBodyWithRespectToBase.getReferenceFrame(), EuclidCoreRandomTools.nextVector3D(random));
       FrameVector3D originAcceleration = new FrameVector3D(twistOfBodyWithRespectToBase.getReferenceFrame(), EuclidCoreRandomTools.nextVector3D(random));

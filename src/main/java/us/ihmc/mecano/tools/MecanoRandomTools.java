@@ -48,9 +48,9 @@ public class MecanoRandomTools
    /**
     * Generates a moving reference frame with random transform and twist to world frame.
     *
-    * @param random the random generator to use.
+    * @param random         the random generator to use.
     * @param use2DTransform whether to use a 2D or 3D rotation for the transform used to create the
-    *           random frame.
+    *                       random frame.
     * @return the new random moving reference frame.
     */
    public static MovingReferenceFrame nextMovingReferenceFrame(Random random, boolean use2DTransform)
@@ -61,7 +61,7 @@ public class MecanoRandomTools
    /**
     * Generates a moving reference frame with random transform and twist to its parent frame.
     *
-    * @param random the random generator to use.
+    * @param random      the random generator to use.
     * @param parentFrame the parent frame of the new moving reference frame.
     * @return the new random moving reference frame.
     */
@@ -73,10 +73,10 @@ public class MecanoRandomTools
    /**
     * Generates a moving reference frame with random transform and twist to its parent frame.
     *
-    * @param random the random generator to use.
-    * @param parentFrame the parent frame of the new moving reference frame.
+    * @param random         the random generator to use.
+    * @param parentFrame    the parent frame of the new moving reference frame.
     * @param use2DTransform whether to use a 2D or 3D rotation for the transform used to create the
-    *           random frame.
+    *                       random frame.
     * @return the new random moving reference frame.
     */
    public static MovingReferenceFrame nextMovingReferenceFrame(Random random, ReferenceFrame parentFrame, boolean use2DTransform)
@@ -87,8 +87,8 @@ public class MecanoRandomTools
    /**
     * Generates a moving reference frame with random transform and twist to its parent frame.
     *
-    * @param frameName the name of the new frame.
-    * @param random the random generator to use.
+    * @param frameName   the name of the new frame.
+    * @param random      the random generator to use.
     * @param parentFrame the parent frame of the new moving reference frame.
     * @return the new random moving reference frame.
     */
@@ -100,11 +100,11 @@ public class MecanoRandomTools
    /**
     * Generates a moving reference frame with random transform and twist to its parent frame.
     *
-    * @param frameName the name of the new frame.
-    * @param random the random generator to use.
-    * @param parentFrame the parent frame of the new moving reference frame.
+    * @param frameName      the name of the new frame.
+    * @param random         the random generator to use.
+    * @param parentFrame    the parent frame of the new moving reference frame.
     * @param use2DTransform whether to use a 2D or 3D rotation for the transform used to create the
-    *           random frame.
+    *                       random frame.
     * @return the new random moving reference frame.
     */
    public static MovingReferenceFrame nextMovingReferenceFrame(String frameName, Random random, ReferenceFrame parentFrame, boolean use2DTransform)
@@ -156,9 +156,9 @@ public class MecanoRandomTools
     * Creates a tree structure of 20 random moving reference frames start off
     * {@link ReferenceFrame#getWorldFrame()}.
     * 
-    * @param random the random generator to use.
+    * @param random          the random generator to use.
     * @param use2DTransforms whether to use a 2D or 3D rotation for the transform used to create the
-    *           random frames.
+    *                        random frames.
     * @return the array containing the random moving reference frames.
     */
    public static MovingReferenceFrame[] nextMovingReferenceFrameTree(Random random, boolean use2DTransforms)
@@ -170,7 +170,7 @@ public class MecanoRandomTools
     * Creates a tree structure of random reference frames starting off
     * {@code ReferenceFrame.getWorldFrame()}.
     *
-    * @param random the random generator to use.
+    * @param random                        the random generator to use.
     * @param numberOfMovingReferenceFrames the number of reference frames to be created.
     * @return the array containing the random reference frames.
     */
@@ -183,10 +183,10 @@ public class MecanoRandomTools
     * Creates a tree structure of random moving reference frames starting off
     * {@code ReferenceFrame.getWorldFrame()}.
     *
-    * @param random the random generator to use.
+    * @param random                        the random generator to use.
     * @param numberOfMovingReferenceFrames the number of moving reference frames to be created.
-    * @param use2DTransforms whether to use a 2D or 3D rotation for the transform used to create the
-    *           random frames.
+    * @param use2DTransforms               whether to use a 2D or 3D rotation for the transform used to
+    *                                      create the random frames.
     * @return the array containing the random moving reference frames.
     */
    public static MovingReferenceFrame[] nextMovingReferenceFrameTree(Random random, int numberOfMovingReferenceFrames, boolean use2DTransforms)
@@ -198,9 +198,10 @@ public class MecanoRandomTools
     * Creates a tree structure of random moving reference frames starting off the given
     * {@code rootFrame}.
     *
-    * @param frameNamePrefix prefix to use when creating each random moving reference frame.
-    * @param random the random generator to use.
-    * @param rootFrame the base frame from which the tree is to be expanded.
+    * @param frameNamePrefix               prefix to use when creating each random moving reference
+    *                                      frame.
+    * @param random                        the random generator to use.
+    * @param rootFrame                     the base frame from which the tree is to be expanded.
     * @param numberOfMovingReferenceFrames the number of moving reference frames to be created.
     * @return the array containing the random moving reference frames.
     */
@@ -214,12 +215,13 @@ public class MecanoRandomTools
     * Creates a tree structure of random moving reference frames starting off the given
     * {@code rootFrame}.
     *
-    * @param frameNamePrefix prefix to use when creating each random moving reference frame.
-    * @param random the random generator to use.
-    * @param rootFrame the base frame from which the tree is to be expanded.
+    * @param frameNamePrefix               prefix to use when creating each random moving reference
+    *                                      frame.
+    * @param random                        the random generator to use.
+    * @param rootFrame                     the base frame from which the tree is to be expanded.
     * @param numberOfMovingReferenceFrames the number of moving reference frames to be created.
-    * @param use2DTransforms whether to use a 2D or 3D rotation for the transform used to create the
-    *           random frames.
+    * @param use2DTransforms               whether to use a 2D or 3D rotation for the transform used to
+    *                                      create the random frames.
     * @return the array containing the random moving reference frames.
     */
    public static MovingReferenceFrame[] nextMovingReferenceFrameTree(String frameNamePrefix, Random random, ReferenceFrame rootFrame,
@@ -244,8 +246,8 @@ public class MecanoRandomTools
    /**
     * Generates an array filled with random vectors with fixed length.
     * 
-    * @param random the random generator to use.
-    * @param arrayLength the length of the array to generate.
+    * @param random        the random generator to use.
+    * @param arrayLength   the length of the array to generate.
     * @param vectorsLength the length each random vector should have.
     * @return the array of random vectors.
     */
@@ -260,7 +262,7 @@ public class MecanoRandomTools
     * {@code spatialVector}<sub>i=0,5</sub> &in; [-1.0; 1.0].
     * </p>
     *
-    * @param random the random generator to use.
+    * @param random           the random generator to use.
     * @param expressedInFrame the frame in which the generated vector is expressed.
     * @return the random spatial vector.
     */
@@ -274,19 +276,19 @@ public class MecanoRandomTools
     * <p>
     * {@code spatialVector}<sub>i=0,2</sub> &in; [-{@code angularPartMinMax};
     * {@code angularPartMinMax}].<br>
-    * {@code spatialVector}<sub>i=3,5</sub> &in; [-{@code linearPartMinMax};
-    * {@code linearPartMinMax}].
+    * {@code spatialVector}<sub>i=3,5</sub> &in; [-{@code linearPartMinMax}; {@code linearPartMinMax}].
     * </p>
     *
-    * @param random the random generator to use.
-    * @param expressedInFrame the frame in which the generated vector is expressed.
+    * @param random            the random generator to use.
+    * @param expressedInFrame  the frame in which the generated vector is expressed.
     * @param angularPartMinMax the maximum absolute value for each component of the angular part.
-    * @param linearPartMinMax the maximum absolute value for each component of the linear part.
+    * @param linearPartMinMax  the maximum absolute value for each component of the linear part.
     * @return the random spatial vector.
     */
    public static SpatialVector nextSpatialVector(Random random, ReferenceFrame expressedInFrame, double angularPartMinMax, double linearPartMinMax)
    {
-      return new SpatialVector(expressedInFrame, nextVector3D(random, -angularPartMinMax, angularPartMinMax),
+      return new SpatialVector(expressedInFrame,
+                               nextVector3D(random, -angularPartMinMax, angularPartMinMax),
                                nextVector3D(random, -linearPartMinMax, linearPartMinMax));
    }
 
@@ -296,7 +298,7 @@ public class MecanoRandomTools
     * {@code spatialForceVector}<sub>i=0,5</sub> &in; [-1.0; 1.0].
     * </p>
     *
-    * @param random the random generator to use.
+    * @param random           the random generator to use.
     * @param expressedInFrame the frame in which the generated vector is expressed.
     * @return the random spatial force vector.
     */
@@ -314,15 +316,16 @@ public class MecanoRandomTools
     * {@code linearPartMinMax}].
     * </p>
     *
-    * @param random the random generator to use.
-    * @param expressedInFrame the frame in which the generated vector is expressed.
+    * @param random            the random generator to use.
+    * @param expressedInFrame  the frame in which the generated vector is expressed.
     * @param angularPartMinMax the maximum absolute value for each component of the angular part.
-    * @param linearPartMinMax the maximum absolute value for each component of the linear part.
+    * @param linearPartMinMax  the maximum absolute value for each component of the linear part.
     * @return the random spatial force vector.
     */
    public static SpatialForce nextSpatialForce(Random random, ReferenceFrame expressedInFrame, double angularPartMinMax, double linearPartMinMax)
    {
-      return new SpatialForce(expressedInFrame, nextVector3D(random, -angularPartMinMax, angularPartMinMax),
+      return new SpatialForce(expressedInFrame,
+                              nextVector3D(random, -angularPartMinMax, angularPartMinMax),
                               nextVector3D(random, -linearPartMinMax, linearPartMinMax));
    }
 
@@ -332,8 +335,8 @@ public class MecanoRandomTools
     * {@code wrench}<sub>i=0,5</sub> &in; [-1.0; 1.0].
     * </p>
     *
-    * @param random the random generator to use.
-    * @param bodyFrame the frame of the body on which the wrench is exerted.
+    * @param random           the random generator to use.
+    * @param bodyFrame        the frame of the body on which the wrench is exerted.
     * @param expressedInFrame the frame in which the generated vector is expressed.
     * @return the random wrench.
     */
@@ -345,21 +348,22 @@ public class MecanoRandomTools
    /**
     * Generates a random wrench.
     * <p>
-    * {@code wrench}<sub>i=0,2</sub> &in; [-{@code angularPartMinMax};
-    * {@code angularPartMinMax}].<br>
+    * {@code wrench}<sub>i=0,2</sub> &in; [-{@code angularPartMinMax}; {@code angularPartMinMax}].<br>
     * {@code wrench}<sub>i=3,5</sub> &in; [-{@code linearPartMinMax}; {@code linearPartMinMax}].
     * </p>
     *
-    * @param random the random generator to use.
-    * @param bodyFrame the frame of the body on which the wrench is exerted.
-    * @param expressedInFrame the frame in which the generated vector is expressed.
+    * @param random            the random generator to use.
+    * @param bodyFrame         the frame of the body on which the wrench is exerted.
+    * @param expressedInFrame  the frame in which the generated vector is expressed.
     * @param angularPartMinMax the maximum absolute value for each component of the angular part.
-    * @param linearPartMinMax the maximum absolute value for each component of the linear part.
+    * @param linearPartMinMax  the maximum absolute value for each component of the linear part.
     * @return the random wrench.
     */
    public static Wrench nextWrench(Random random, ReferenceFrame bodyFrame, ReferenceFrame expressedInFrame, double angularPartMinMax, double linearPartMinMax)
    {
-      return new Wrench(bodyFrame, expressedInFrame, nextVector3D(random, -angularPartMinMax, angularPartMinMax),
+      return new Wrench(bodyFrame,
+                        expressedInFrame,
+                        nextVector3D(random, -angularPartMinMax, angularPartMinMax),
                         nextVector3D(random, -linearPartMinMax, linearPartMinMax));
    }
 
@@ -369,9 +373,9 @@ public class MecanoRandomTools
     * {@code twist}<sub>i=0,5</sub> &in; [-1.0; 1.0].
     * </p>
     *
-    * @param random the random generator to use.
-    * @param bodyFrame what we are specifying the twist of.
-    * @param baseFrame with respect to what we are specifying the twist.
+    * @param random           the random generator to use.
+    * @param bodyFrame        what we are specifying the twist of.
+    * @param baseFrame        with respect to what we are specifying the twist.
     * @param expressedInFrame in which reference frame the twist is expressed.
     * @return the random twist.
     */
@@ -383,23 +387,25 @@ public class MecanoRandomTools
    /**
     * Generates a random twist.
     * <p>
-    * {@code twist}<sub>i=0,2</sub> &in; [-{@code angularPartMinMax};
-    * {@code angularPartMinMax}].<br>
+    * {@code twist}<sub>i=0,2</sub> &in; [-{@code angularPartMinMax}; {@code angularPartMinMax}].<br>
     * {@code twist}<sub>i=3,5</sub> &in; [-{@code linearPartMinMax}; {@code linearPartMinMax}].
     * </p>
     *
-    * @param random the random generator to use.
-    * @param bodyFrame what we are specifying the twist of.
-    * @param baseFrame with respect to what we are specifying the twist.
-    * @param expressedInFrame in which reference frame the twist is expressed.
+    * @param random            the random generator to use.
+    * @param bodyFrame         what we are specifying the twist of.
+    * @param baseFrame         with respect to what we are specifying the twist.
+    * @param expressedInFrame  in which reference frame the twist is expressed.
     * @param angularPartMinMax the maximum absolute value for each component of the angular part.
-    * @param linearPartMinMax the maximum absolute value for each component of the linear part.
+    * @param linearPartMinMax  the maximum absolute value for each component of the linear part.
     * @return the random twist.
     */
    public static Twist nextTwist(Random random, ReferenceFrame bodyFrame, ReferenceFrame baseFrame, ReferenceFrame expressedInFrame, double angularPartMinMax,
                                  double linearPartMinMax)
    {
-      return new Twist(bodyFrame, baseFrame, expressedInFrame, nextVector3D(random, -linearPartMinMax, linearPartMinMax),
+      return new Twist(bodyFrame,
+                       baseFrame,
+                       expressedInFrame,
+                       nextVector3D(random, -linearPartMinMax, linearPartMinMax),
                        nextVector3D(random, -angularPartMinMax, angularPartMinMax));
    }
 
@@ -409,9 +415,9 @@ public class MecanoRandomTools
     * {@code spatialAccelerationVector}<sub>i=0,5</sub> &in; [-1.0; 1.0].
     * </p>
     *
-    * @param random the random generator to use.
-    * @param bodyFrame what we are specifying the acceleration of.
-    * @param baseFrame with respect to what we are specifying the acceleration.
+    * @param random           the random generator to use.
+    * @param bodyFrame        what we are specifying the acceleration of.
+    * @param baseFrame        with respect to what we are specifying the acceleration.
     * @param expressedInFrame in which reference frame the acceleration is expressed.
     * @return the random spatial acceleration vector.
     */
@@ -429,18 +435,21 @@ public class MecanoRandomTools
     * {@code linearPartMinMax}].
     * </p>
     *
-    * @param random the random generator to use.
-    * @param bodyFrame what we are specifying the acceleration of.
-    * @param baseFrame with respect to what we are specifying the acceleration.
-    * @param expressedInFrame in which reference frame the acceleration is expressed.
+    * @param random            the random generator to use.
+    * @param bodyFrame         what we are specifying the acceleration of.
+    * @param baseFrame         with respect to what we are specifying the acceleration.
+    * @param expressedInFrame  in which reference frame the acceleration is expressed.
     * @param angularPartMinMax the maximum absolute value for each component of the angular part.
-    * @param linearPartMinMax the maximum absolute value for each component of the linear part.
+    * @param linearPartMinMax  the maximum absolute value for each component of the linear part.
     * @return the random spatial acceleration vector.
     */
    public static SpatialAcceleration nextSpatialAcceleration(Random random, ReferenceFrame bodyFrame, ReferenceFrame baseFrame, ReferenceFrame expressedInFrame,
                                                              double angularPartMinMax, double linearPartMinMax)
    {
-      return new SpatialAcceleration(bodyFrame, baseFrame, expressedInFrame, nextVector3D(random, -angularPartMinMax, angularPartMinMax),
+      return new SpatialAcceleration(bodyFrame,
+                                     baseFrame,
+                                     expressedInFrame,
+                                     nextVector3D(random, -angularPartMinMax, angularPartMinMax),
                                      nextVector3D(random, -linearPartMinMax, linearPartMinMax));
    }
 
@@ -450,7 +459,7 @@ public class MecanoRandomTools
     * {@code momentum}<sub>i=0,5</sub> &in; [-1.0; 1.0].
     * </p>
     *
-    * @param random the random generator to use.
+    * @param random           the random generator to use.
     * @param expressedInFrame the frame in which the generated vector is expressed.
     * @return the random momentum.
     */
@@ -467,15 +476,16 @@ public class MecanoRandomTools
     * {@code momentum}<sub>i=3,5</sub> &in; [-{@code linearPartMinMax}; {@code linearPartMinMax}].
     * </p>
     *
-    * @param random the random generator to use.
-    * @param expressedInFrame the frame in which the generated vector is expressed.
+    * @param random            the random generator to use.
+    * @param expressedInFrame  the frame in which the generated vector is expressed.
     * @param angularPartMinMax the maximum absolute value for each component of the angular part.
-    * @param linearPartMinMax the maximum absolute value for each component of the linear part.
+    * @param linearPartMinMax  the maximum absolute value for each component of the linear part.
     * @return the random momentum.
     */
    public static Momentum nextMomentum(Random random, ReferenceFrame expressedInFrame, double angularPartMinMax, double linearPartMinMax)
    {
-      return new Momentum(expressedInFrame, nextVector3D(random, -angularPartMinMax, angularPartMinMax),
+      return new Momentum(expressedInFrame,
+                          nextVector3D(random, -angularPartMinMax, angularPartMinMax),
                           nextVector3D(random, -linearPartMinMax, linearPartMinMax));
    }
 
@@ -487,8 +497,8 @@ public class MecanoRandomTools
     * {@code centerOfMassOffset}<sub>i=0,2</sub> &in; [-1.0; 1.0].
     * </p>
     *
-    * @param random the random generator to use.
-    * @param bodyFrame what we are specifying the inertia of.
+    * @param random           the random generator to use.
+    * @param bodyFrame        what we are specifying the inertia of.
     * @param expressedInFrame in which reference frame the inertia is expressed.
     * @return the random spatial inertia matrix.
     */
@@ -506,14 +516,14 @@ public class MecanoRandomTools
     * {@code centerOfMassOffsetMinMax}].
     * </p>
     *
-    * @param random the random generator to use.
-    * @param bodyFrame what we are specifying the inertia of.
-    * @param expressedInFrame in which reference frame the inertia is expressed.
-    * @param inertiaMax the maximum positive value for each coefficients of the mass moment of
-    *           inertia's diagonal.
-    * @param massMax the maximum positive value for the mass.
-    * @param centerOfMassOffsetMinMax the maximum absolute value for each coordinate of the center
-    *           of mass offset.
+    * @param random                   the random generator to use.
+    * @param bodyFrame                what we are specifying the inertia of.
+    * @param expressedInFrame         in which reference frame the inertia is expressed.
+    * @param inertiaMax               the maximum positive value for each coefficients of the mass
+    *                                 moment of inertia's diagonal.
+    * @param massMax                  the maximum positive value for the mass.
+    * @param centerOfMassOffsetMinMax the maximum absolute value for each coordinate of the center of
+    *                                 mass offset.
     * @return the random spatial inertia matrix.
     */
    public static SpatialInertia nextSpatialInertia(Random random, ReferenceFrame bodyFrame, ReferenceFrame expressedInFrame, double inertiaMax, double massMax,
@@ -524,7 +534,10 @@ public class MecanoRandomTools
       if (massMax < 0.0)
          throw new IllegalArgumentException("The mass cannot be negative.");
 
-      return new SpatialInertia(bodyFrame, expressedInFrame, nextDiagonalMatrix3D(random, 0.0, inertiaMax), massMax * random.nextDouble(),
+      return new SpatialInertia(bodyFrame,
+                                expressedInFrame,
+                                nextDiagonalMatrix3D(random, 0.0, inertiaMax),
+                                massMax * random.nextDouble(),
                                 EuclidCoreRandomTools.nextPoint3D(random, centerOfMassOffsetMinMax));
    }
 
@@ -542,14 +555,13 @@ public class MecanoRandomTools
    /**
     * Generates a random symmetric matrix 3D which eigen values are all real and strictly positive.
     * 
-    * @param random the random generator to use.
-    * @param minDiagonal the minimum value for each element on the diagonal.
-    * @param maxDiagonal the maximum value for each element on the diagonal.
-    * @param minMaxOffDiagonal the maximum absolute value for each element that is not on the
-    *           diagonal.
+    * @param random            the random generator to use.
+    * @param minDiagonal       the minimum value for each element on the diagonal.
+    * @param maxDiagonal       the maximum value for each element on the diagonal.
+    * @param minMaxOffDiagonal the maximum absolute value for each element that is not on the diagonal.
     * @return the random symmetric and positive definite matrix.
     * @throws RuntimeException if {@code minDiagonal > maxDiagonal}, if {@code minDiagonal} is
-    *            negative, or if {@code minMaxOffDiagonal} is negative.
+    *                          negative, or if {@code minMaxOffDiagonal} is negative.
     */
    public static Matrix3D nextSymmetricPositiveDefiniteMatrix3D(Random random, double minDiagonal, double maxDiagonal, double minMaxOffDiagonal)
    {

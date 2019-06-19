@@ -21,7 +21,6 @@ import us.ihmc.mecano.spatial.SpatialInertia;
 /**
  * This class provides a variety of tools to facilitate operations that need to navigate through a
  * multi-body system.
- * 
  */
 public class MultiBodySystemTools
 {
@@ -71,7 +70,7 @@ public class MultiBodySystemTools
     * Retrieves and gets the root body of the multi-body system the given {@code body} belongs to.
     *
     * @param body an arbitrary body that belongs to the multi-body system that this method is to find
-    *           the root.
+    *             the root.
     * @return the root body.
     */
    public static RigidBodyReadOnly getRootBody(RigidBodyReadOnly body)
@@ -90,7 +89,7 @@ public class MultiBodySystemTools
     * Retrieves and gets the root body of the multi-body system the given {@code body} belongs to.
     *
     * @param body an arbitrary body that belongs to the multi-body system that this method is to find
-    *           the root.
+    *             the root.
     * @return the root body.
     */
    public static RigidBodyBasics getRootBody(RigidBodyBasics body)
@@ -113,7 +112,7 @@ public class MultiBodySystemTools
     * </p>
     *
     * @param start the rigid-body from where to begin the collection of joints.
-    * @param end the rigid-body where to stop the collection of joints.
+    * @param end   the rigid-body where to stop the collection of joints.
     * @return the array of joints representing the path from {@code start} to {@code end}.
     */
    public static OneDoFJointBasics[] createOneDoFJointPath(RigidBodyBasics start, RigidBodyBasics end)
@@ -129,7 +128,7 @@ public class MultiBodySystemTools
     * </p>
     *
     * @param start the rigid-body from where to begin the collection of joints.
-    * @param end the rigid-body where to stop the collection of joints.
+    * @param end   the rigid-body where to stop the collection of joints.
     * @return the array of joints representing the path from {@code start} to {@code end}, or
     *         {@code null} if the given rigid-bodies are not part of the same multi-body system.
     */
@@ -146,7 +145,7 @@ public class MultiBodySystemTools
     * </p>
     *
     * @param start the rigid-body from where to begin the collection of joints.
-    * @param end the rigid-body where to stop the collection of joints.
+    * @param end   the rigid-body where to stop the collection of joints.
     * @return the array of joints representing the path from {@code start} to {@code end}, or
     *         {@code null} if the given rigid-bodies are not part of the same multi-body system.
     */
@@ -189,9 +188,10 @@ public class MultiBodySystemTools
     * see if each parent body is the ancestor in question.
     * 
     * @param candidateDescendant the query for the descendant. A rigid-body is the descendant of
-    *           another rigid-body if it is between the other rigid-body and an end-effector.
-    * @param ancestor the query for the ancestor. A rigid-body is the ancestor of another rigid-body if
-    *           it is between the other rigid-body and the root body.
+    *                            another rigid-body if it is between the other rigid-body and an
+    *                            end-effector.
+    * @param ancestor            the query for the ancestor. A rigid-body is the ancestor of another
+    *                            rigid-body if it is between the other rigid-body and the root body.
     * @return {@code true} if {@code candidateDescendant} is a descendant of {@code ancestor},
     *         {@code false} otherwise.
     */
@@ -218,7 +218,7 @@ public class MultiBodySystemTools
     * </p>
     *
     * @param descendant the descendant, often it is the end-effector.
-    * @param ancestor the ancestor of the descendant, often it is the root body.
+    * @param ancestor   the ancestor of the descendant, often it is the root body.
     * @return the distance in number of joints between the {@code descendant} and the {@code ancestor}.
     *         This method returns {@code 0} if the two rigid-bodies are the same. This method returns
     *         {@code -1} if the given {@code ancestor} is not located between the {@code descendant}
@@ -245,13 +245,13 @@ public class MultiBodySystemTools
     * Calculates the number of degrees of freedom of the kinematic chain that starts from
     * {@code ancestor} to end to {@code descendant}.
     * 
-    * @param ancestor the base of the kinematic chain.
+    * @param ancestor   the base of the kinematic chain.
     * @param descendant the end-effector of the kinematic chain.
     * @return the number of degrees of freedom.
     * @throws RuntimeException if the given ancestor and descendant are swapped, or if the do not
-    *            belong to the same system.
+    *                          belong to the same system.
     * @throws RuntimeException this method does not support in kinematic trees to go through different
-    *            branches.
+    *                          branches.
     */
    public static int computeDegreesOfFreedom(RigidBodyReadOnly ancestor, RigidBodyReadOnly descendant)
    {
@@ -535,7 +535,7 @@ public class MultiBodySystemTools
     * </p>
     * 
     * @param source the original collection of joints to filter. Not modified.
-    * @param clazz the class that the filtered joints have to implement.
+    * @param clazz  the class that the filtered joints have to implement.
     * @return the filtered joints.
     */
    public static <T extends JointReadOnly> List<T> filterJoints(List<? extends JointReadOnly> source, Class<T> clazz)
@@ -552,9 +552,9 @@ public class MultiBodySystemTools
     * The filtered joints are added to the end of {@code destination} using {@link List#add(Object)}.
     * </p>
     *
-    * @param source the original collection of joints to filter. Not modified.
+    * @param source      the original collection of joints to filter. Not modified.
     * @param destination the collection where to store the filtered joints. Modified.
-    * @param clazz the class that the filtered joints have to implement.
+    * @param clazz       the class that the filtered joints have to implement.
     * @return the number of joints that implement the given class.
     */
    @SuppressWarnings("unchecked")
@@ -584,7 +584,7 @@ public class MultiBodySystemTools
     * </p>
     *
     * @param source the original array of joints to filter. Not modified.
-    * @param clazz the class that the filtered joints have to implement.
+    * @param clazz  the class that the filtered joints have to implement.
     * @return the array containing the filtered joints.
     */
    public static <T extends JointReadOnly> T[] filterJoints(JointReadOnly[] source, Class<T> clazz)
@@ -603,9 +603,9 @@ public class MultiBodySystemTools
     * overwriting any element previously stored in the array.
     * </p>
     *
-    * @param source the original array of joints to filter. Not modified.
+    * @param source      the original array of joints to filter. Not modified.
     * @param destination the array where to store the filtered joints. Modified.
-    * @param clazz the class that the filtered joints have to implement.
+    * @param clazz       the class that the filtered joints have to implement.
     * @return the number of joints that implement the given class.
     */
    @SuppressWarnings("unchecked")
@@ -691,7 +691,7 @@ public class MultiBodySystemTools
    /**
     * Iterates through the given array and compute how many do implement the given {@code clazz}.
     * 
-    * @param clazz the query for the joint type.
+    * @param clazz  the query for the joint type.
     * @param joints the array containing the joints to be tested.
     * @return the number of joints in the array that implement the given class.
     */
@@ -714,8 +714,8 @@ public class MultiBodySystemTools
     * index should be of the same type.
     * </p>
     * 
-    * @param source the joints holding the state to copy over. Not modified.
-    * @param destination the joints which state is to be be updated. Modified.
+    * @param source         the joints holding the state to copy over. Not modified.
+    * @param destination    the joints which state is to be be updated. Modified.
     * @param stateSelection the state that is to be copied over.
     */
    public static void copyJointsState(List<? extends JointReadOnly> source, List<? extends JointBasics> destination, JointStateType stateSelection)
@@ -725,20 +725,20 @@ public class MultiBodySystemTools
 
       switch (stateSelection)
       {
-      case CONFIGURATION:
-         copyJointsConfiguration(source, destination);
-         return;
-      case VELOCITY:
-         copyJointsVelocity(source, destination);
-         return;
-      case ACCELERATION:
-         copyJointsAcceleration(source, destination);
-         return;
-      case EFFORT:
-         copyJointsTau(source, destination);
-         return;
-      default:
-         throw new RuntimeException("Unexpected value for stateSelection: " + stateSelection);
+         case CONFIGURATION:
+            copyJointsConfiguration(source, destination);
+            return;
+         case VELOCITY:
+            copyJointsVelocity(source, destination);
+            return;
+         case ACCELERATION:
+            copyJointsAcceleration(source, destination);
+            return;
+         case EFFORT:
+            copyJointsTau(source, destination);
+            return;
+         default:
+            throw new RuntimeException("Unexpected value for stateSelection: " + stateSelection);
       }
    }
 
@@ -786,26 +786,26 @@ public class MultiBodySystemTools
     * Iterates through the given {@code joints}, extract the requested state {@code stateSelection} for
     * each joint, and finally stores the states in order in the given matrix {@code matrixToPack}.
     * 
-    * @param joints the joints to extract the state of. Not modified.
+    * @param joints         the joints to extract the state of. Not modified.
     * @param stateSelection indicates what state is to be extract, i.e. it can be either configuration,
-    *           velocity, acceleration, or tau (or effort).
-    * @param matrixToPack the matrix in which the state of the joints is to be stored. Modified.
+    *                       velocity, acceleration, or tau (or effort).
+    * @param matrixToPack   the matrix in which the state of the joints is to be stored. Modified.
     * @return the number of rows used to store the information in the matrix.
     */
    public static int extractJointsState(List<? extends JointReadOnly> joints, JointStateType stateSelection, DenseMatrix64F matrixToPack)
    {
       switch (stateSelection)
       {
-      case CONFIGURATION:
-         return extractJointsConfiguration(joints, 0, matrixToPack);
-      case VELOCITY:
-         return extractJointsVelocity(joints, 0, matrixToPack);
-      case ACCELERATION:
-         return extractJointsAcceleration(joints, 0, matrixToPack);
-      case EFFORT:
-         return extractJointsTau(joints, 0, matrixToPack);
-      default:
-         throw new RuntimeException("Unexpected value for stateSelection: " + stateSelection);
+         case CONFIGURATION:
+            return extractJointsConfiguration(joints, 0, matrixToPack);
+         case VELOCITY:
+            return extractJointsVelocity(joints, 0, matrixToPack);
+         case ACCELERATION:
+            return extractJointsAcceleration(joints, 0, matrixToPack);
+         case EFFORT:
+            return extractJointsTau(joints, 0, matrixToPack);
+         default:
+            throw new RuntimeException("Unexpected value for stateSelection: " + stateSelection);
       }
    }
 
@@ -857,26 +857,26 @@ public class MultiBodySystemTools
     * Iterates through the given {@code joints}, extract the requested state {@code stateSelection} for
     * each joint, and finally stores the states in order in the given matrix {@code matrixToPack}.
     * 
-    * @param joints the joints to extract the state of. Not modified.
+    * @param joints         the joints to extract the state of. Not modified.
     * @param stateSelection indicates what state is to be extract, i.e. it can be either configuration,
-    *           velocity, acceleration, or tau (or effort).
-    * @param matrixToPack the matrix in which the state of the joints is to be stored. Modified.
+    *                       velocity, acceleration, or tau (or effort).
+    * @param matrixToPack   the matrix in which the state of the joints is to be stored. Modified.
     * @return the number of rows used to store the information in the matrix.
     */
    public static int extractJointsState(JointReadOnly[] joints, JointStateType stateSelection, DenseMatrix64F matrixToPack)
    {
       switch (stateSelection)
       {
-      case CONFIGURATION:
-         return extractJointsConfiguration(joints, 0, matrixToPack);
-      case VELOCITY:
-         return extractJointsVelocity(joints, 0, matrixToPack);
-      case ACCELERATION:
-         return extractJointsAcceleration(joints, 0, matrixToPack);
-      case EFFORT:
-         return extractJointsTau(joints, 0, matrixToPack);
-      default:
-         throw new RuntimeException("Unexpected value for stateSelection: " + stateSelection);
+         case CONFIGURATION:
+            return extractJointsConfiguration(joints, 0, matrixToPack);
+         case VELOCITY:
+            return extractJointsVelocity(joints, 0, matrixToPack);
+         case ACCELERATION:
+            return extractJointsAcceleration(joints, 0, matrixToPack);
+         case EFFORT:
+            return extractJointsTau(joints, 0, matrixToPack);
+         default:
+            throw new RuntimeException("Unexpected value for stateSelection: " + stateSelection);
       }
    }
 
@@ -929,27 +929,28 @@ public class MultiBodySystemTools
     * {@code stateSelection} using the given {@code matrix} assuming the state has been previously
     * stored in the proper order.
     * 
-    * @param joints the joints to update the state of. Modified.
+    * @param joints         the joints to update the state of. Modified.
     * @param stateSelection indicates what state is to be updated, i.e. it can be either configuration,
-    *           velocity, acceleration, or tau (or effort).
-    * @param matrix the matrix in which the new state of the joints is stored. The data is expected to
-    *           be stored as a column vector starting at the first row. Modified.
+    *                       velocity, acceleration, or tau (or effort).
+    * @param matrix         the matrix in which the new state of the joints is stored. The data is
+    *                       expected to be stored as a column vector starting at the first row.
+    *                       Modified.
     * @return the number of rows that were used from the matrix.
     */
    public static int insertJointsState(List<? extends JointBasics> joints, JointStateType stateSelection, DenseMatrix64F matrix)
    {
       switch (stateSelection)
       {
-      case CONFIGURATION:
-         return insertJointsConfiguration(joints, 0, matrix);
-      case VELOCITY:
-         return insertJointsVelocity(joints, 0, matrix);
-      case ACCELERATION:
-         return insertJointsAcceleration(joints, 0, matrix);
-      case EFFORT:
-         return insertJointsTau(joints, 0, matrix);
-      default:
-         throw new RuntimeException("Unexpected value for stateSelection: " + stateSelection);
+         case CONFIGURATION:
+            return insertJointsConfiguration(joints, 0, matrix);
+         case VELOCITY:
+            return insertJointsVelocity(joints, 0, matrix);
+         case ACCELERATION:
+            return insertJointsAcceleration(joints, 0, matrix);
+         case EFFORT:
+            return insertJointsTau(joints, 0, matrix);
+         default:
+            throw new RuntimeException("Unexpected value for stateSelection: " + stateSelection);
       }
    }
 
@@ -1002,27 +1003,28 @@ public class MultiBodySystemTools
     * {@code stateSelection} using the given {@code matrix} assuming the state has been previously
     * stored in the proper order.
     * 
-    * @param joints the joints to update the state of. Modified.
+    * @param joints         the joints to update the state of. Modified.
     * @param stateSelection indicates what state is to be updated, i.e. it can be either configuration,
-    *           velocity, acceleration, or tau (or effort).
-    * @param matrix the matrix in which the new state of the joints is stored. The data is expected to
-    *           be stored as a column vector starting at the first row. Modified.
+    *                       velocity, acceleration, or tau (or effort).
+    * @param matrix         the matrix in which the new state of the joints is stored. The data is
+    *                       expected to be stored as a column vector starting at the first row.
+    *                       Modified.
     * @return the number of rows that were used from the matrix.
     */
    public static int insertJointsState(JointBasics[] joints, JointStateType stateSelection, DenseMatrix64F matrix)
    {
       switch (stateSelection)
       {
-      case CONFIGURATION:
-         return insertJointsConfiguration(joints, 0, matrix);
-      case VELOCITY:
-         return insertJointsVelocity(joints, 0, matrix);
-      case ACCELERATION:
-         return insertJointsAcceleration(joints, 0, matrix);
-      case EFFORT:
-         return insertJointsTau(joints, 0, matrix);
-      default:
-         throw new RuntimeException("Unexpected value for stateSelection: " + stateSelection);
+         case CONFIGURATION:
+            return insertJointsConfiguration(joints, 0, matrix);
+         case VELOCITY:
+            return insertJointsVelocity(joints, 0, matrix);
+         case ACCELERATION:
+            return insertJointsAcceleration(joints, 0, matrix);
+         case EFFORT:
+            return insertJointsTau(joints, 0, matrix);
+         default:
+            throw new RuntimeException("Unexpected value for stateSelection: " + stateSelection);
       }
    }
 

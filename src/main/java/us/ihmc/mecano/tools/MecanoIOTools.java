@@ -54,7 +54,7 @@ public class MecanoIOTools
     * </pre>
     * </p>
     *
-    * @param format the format to use for each number.
+    * @param format        the format to use for each number.
     * @param spatialVector the object to get the {@code String} of. Not modified.
     * @return the representative {@code String}.
     */
@@ -76,12 +76,12 @@ public class MecanoIOTools
     * </pre>
     * </p>
     *
-    * @param format the format to use for each number.
+    * @param format           the format to use for each number.
     * @param expressedInFrame the reference frame in which the spatial vector is expressed.
-    * @param angularPart the angular part of the spatial vector to get the {@code String} of. Not
-    *           modified.
-    * @param linearPart the linear part of the spatial vector to get the {@code String} of. Not
-    *           modified.
+    * @param angularPart      the angular part of the spatial vector to get the {@code String} of. Not
+    *                         modified.
+    * @param linearPart       the linear part of the spatial vector to get the {@code String} of. Not
+    *                         modified.
     * @return the representative {@code String}.
     */
    public static String getSpatialVectorString(String format, ReferenceFrame expressedInFrame, Vector3DReadOnly angularPart, Vector3DReadOnly linearPart)
@@ -116,7 +116,7 @@ public class MecanoIOTools
     * </pre>
     * </p>
     *
-    * @param format the format to use for each number.
+    * @param format       the format to use for each number.
     * @param spatialForce the object to get the {@code String} of. Not modified.
     * @return the representative {@code String}.
     */
@@ -139,12 +139,12 @@ public class MecanoIOTools
     * </pre>
     * </p>
     *
-    * @param format the format to use for each number.
+    * @param format           the format to use for each number.
     * @param expressedInFrame the reference frame in which the spatial force vector is expressed.
-    * @param angularPart the angular part of the spatial force vector to get the {@code String} of.
-    *           Not modified.
-    * @param linearPart the linear part of the spatial force vector to get the {@code String} of.
-    *           Not modified.
+    * @param angularPart      the angular part of the spatial force vector to get the {@code String}
+    *                         of. Not modified.
+    * @param linearPart       the linear part of the spatial force vector to get the {@code String} of.
+    *                         Not modified.
     * @return the representative {@code String}.
     */
    public static String getSpatialForceVectorString(String format, ReferenceFrame expressedInFrame, Vector3DReadOnly angularPart, Vector3DReadOnly linearPart)
@@ -201,11 +201,12 @@ public class MecanoIOTools
     * </pre>
     * </p>
     *
-    * @param format the format to use for each number.
-    * @param bodyFrame the frame of the body on which the wrench is exerted.
+    * @param format           the format to use for each number.
+    * @param bodyFrame        the frame of the body on which the wrench is exerted.
     * @param expressedInFrame the reference frame in which the wrench is expressed.
-    * @param angularPart the angular part of the wrench to get the {@code String} of. Not modified.
-    * @param linearPart the linear part of the wrench to get the {@code String} of. Not modified.
+    * @param angularPart      the angular part of the wrench to get the {@code String} of. Not
+    *                         modified.
+    * @param linearPart       the linear part of the wrench to get the {@code String} of. Not modified.
     * @return the representative {@code String}.
     */
    public static String getWrenchString(String format, ReferenceFrame bodyFrame, ReferenceFrame expressedInFrame, Vector3DReadOnly angularPart,
@@ -242,7 +243,7 @@ public class MecanoIOTools
     * </p>
     *
     * @param format the format to use for each number.
-    * @param twist the object to get the {@code String} of. Not modified.
+    * @param twist  the object to get the {@code String} of. Not modified.
     * @return the representative {@code String}.
     */
    public static String getTwistString(String format, TwistReadOnly twist)
@@ -263,12 +264,12 @@ public class MecanoIOTools
     * </pre>
     * </p>
     *
-    * @param format the format to use for each number.
-    * @param bodyFrame what we are specifying the twist of.
-    * @param baseFrame with respect to what we are specifying the twist.
+    * @param format           the format to use for each number.
+    * @param bodyFrame        what we are specifying the twist of.
+    * @param baseFrame        with respect to what we are specifying the twist.
     * @param expressedInFrame in which reference frame the twist is expressed.
-    * @param angularPart the angular part of the twist to get the {@code String} of. Not modified.
-    * @param linearPart the linear part of the twist to get the {@code String} of. Not modified.
+    * @param angularPart      the angular part of the twist to get the {@code String} of. Not modified.
+    * @param linearPart       the linear part of the twist to get the {@code String} of. Not modified.
     * @return the representative {@code String}.
     */
    public static String getTwistString(String format, ReferenceFrame bodyFrame, ReferenceFrame baseFrame, ReferenceFrame expressedInFrame,
@@ -304,7 +305,7 @@ public class MecanoIOTools
     * </pre>
     * </p>
     *
-    * @param format the format to use for each number.
+    * @param format              the format to use for each number.
     * @param spatialAcceleration the object to get the {@code String} of. Not modified.
     * @return the representative {@code String}.
     */
@@ -313,8 +314,11 @@ public class MecanoIOTools
       if (spatialAcceleration == null)
          return "null";
       else
-         return getSpatialAccelerationString(format, spatialAcceleration.getBodyFrame(), spatialAcceleration.getBaseFrame(),
-                                             spatialAcceleration.getReferenceFrame(), spatialAcceleration.getAngularPart(),
+         return getSpatialAccelerationString(format,
+                                             spatialAcceleration.getBodyFrame(),
+                                             spatialAcceleration.getBaseFrame(),
+                                             spatialAcceleration.getReferenceFrame(),
+                                             spatialAcceleration.getAngularPart(),
                                              spatialAcceleration.getLinearPart());
    }
 
@@ -329,14 +333,14 @@ public class MecanoIOTools
     * </pre>
     * </p>
     *
-    * @param format the format to use for each number.
-    * @param bodyFrame what we are specifying the acceleration of.
-    * @param baseFrame with respect to what we are specifying the acceleration.
+    * @param format           the format to use for each number.
+    * @param bodyFrame        what we are specifying the acceleration of.
+    * @param baseFrame        with respect to what we are specifying the acceleration.
     * @param expressedInFrame in which reference frame the acceleration is expressed.
-    * @param angularPart the angular part of the spatial acceleration to get the {@code String} of.
-    *           Not modified.
-    * @param linearPart the linear part of the spatial acceleration to get the {@code String} of.
-    *           Not modified.
+    * @param angularPart      the angular part of the spatial acceleration to get the {@code String}
+    *                         of. Not modified.
+    * @param linearPart       the linear part of the spatial acceleration to get the {@code String} of.
+    *                         Not modified.
     * @return the representative {@code String}.
     */
    public static String getSpatialAccelerationString(String format, ReferenceFrame bodyFrame, ReferenceFrame baseFrame, ReferenceFrame expressedInFrame,
@@ -372,7 +376,7 @@ public class MecanoIOTools
     * </pre>
     * </p>
     *
-    * @param format the format to use for each number.
+    * @param format   the format to use for each number.
     * @param momentum the object to get the {@code String} of. Not modified.
     * @return the representative {@code String}.
     */
@@ -394,12 +398,12 @@ public class MecanoIOTools
     * </pre>
     * </p>
     *
-    * @param format the format to use for each number.
+    * @param format           the format to use for each number.
     * @param expressedInFrame the reference frame in which the momentum is expressed.
-    * @param angularMomentum the angular part of the momentum to get the {@code String} of. Not
-    *           modified.
-    * @param linearMomentum the linear part of the momentum to get the {@code String} of. Not
-    *           modified.
+    * @param angularMomentum  the angular part of the momentum to get the {@code String} of. Not
+    *                         modified.
+    * @param linearMomentum   the linear part of the momentum to get the {@code String} of. Not
+    *                         modified.
     * @return the representative {@code String}.
     */
    public static String getMomentumString(String format, ReferenceFrame expressedInFrame, Vector3DReadOnly angularMomentum, Vector3DReadOnly linearMomentum)
@@ -430,8 +434,8 @@ public class MecanoIOTools
    }
 
    /**
-    * Gets a representative {@code String} of {@code spatialInertiaMatrix} given a specific format
-    * to use.
+    * Gets a representative {@code String} of {@code spatialInertiaMatrix} given a specific format to
+    * use.
     * <p>
     * Using the default format {@link #DEFAULT_FORMAT}, this provides a {@code String} as follows:
     *
@@ -446,7 +450,7 @@ public class MecanoIOTools
     * </pre>
     * </p>
     * 
-    * @param format the format to use for each number.
+    * @param format         the format to use for each number.
     * @param spatialInertia the object to get the {@code String} of. Not modified.
     * @return the representative {@code String}.
     */
@@ -479,12 +483,12 @@ public class MecanoIOTools
     * </pre>
     * </p>
     * 
-    * @param format the format to use for each number.
-    * @param bodyFrame what we are specifying the inertia of.
-    * @param expressedInFrame the reference frame in which the inertia is expressed.
-    * @param mass the mass part of the spatial inertia.
-    * @param centerOfMassOffset the offset from the frame's origin of the center of mass. Not
-    *           modified.
+    * @param format              the format to use for each number.
+    * @param bodyFrame           what we are specifying the inertia of.
+    * @param expressedInFrame    the reference frame in which the inertia is expressed.
+    * @param mass                the mass part of the spatial inertia.
+    * @param centerOfMassOffset  the offset from the frame's origin of the center of mass. Not
+    *                            modified.
     * @param massMomentOfInertia the mass moment of inertia part. Not modified.
     * @return the representative {@code String}.
     */
@@ -535,7 +539,7 @@ public class MecanoIOTools
     * </pre>
     * </p>
     * 
-    * @param format the format to use for each number.
+    * @param format         the format to use for each number.
     * @param denseMatrix64F the object to get the {@code String} of. Not modified.
     * @return the representative {@code String}.
     */

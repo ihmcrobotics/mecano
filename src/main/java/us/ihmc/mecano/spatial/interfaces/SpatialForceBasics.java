@@ -70,9 +70,9 @@ public interface SpatialForceBasics extends FixedFrameSpatialForceBasics, Spatia
     * When the given {@code angularPart} is {@code null}, it is assumed to be zero.
     * </p>
     *
-    * @param expressedInFrame the reference frame in which the arguments are expressed.
-    * @param angularPart the 3D moment that is applied. Can be {@code null}. Not modified.
-    * @param linearPart the 3D force that is applied. Not modified.
+    * @param expressedInFrame   the reference frame in which the arguments are expressed.
+    * @param angularPart        the 3D moment that is applied. Can be {@code null}. Not modified.
+    * @param linearPart         the 3D force that is applied. Not modified.
     * @param pointOfApplication the location where the force is exerted. Not modified.
     */
    default void setIncludingFrame(ReferenceFrame expressedInFrame, Vector3DReadOnly angularPart, Vector3DReadOnly linearPart,
@@ -100,15 +100,17 @@ public interface SpatialForceBasics extends FixedFrameSpatialForceBasics, Spatia
     * When the given {@code angularPart} is {@code null}, it is assumed to be zero.
     * </p>
     *
-    * @param angularPart the 3D moment that is applied, it is expressed in the new
-    *           "expressed-in-frame" to use for this spatial force vector. Can be {@code null}. Not
-    *           modified.
-    * @param linearPart the 3D force that is applied, it is expressed in the new
-    *           "expressed-in-frame" to use for this spatial force vector. Not modified.
+    * @param angularPart        the 3D moment that is applied, it is expressed in the new
+    *                           "expressed-in-frame" to use for this spatial force vector. Can be
+    *                           {@code null}. Not modified.
+    * @param linearPart         the 3D force that is applied, it is expressed in the new
+    *                           "expressed-in-frame" to use for this spatial force vector. Not
+    *                           modified.
     * @param pointOfApplication the location where the force is exerted, it is expressed in the new
-    *           "expressed-in-frame" to use for this spatial force vector. Not modified.
-    * @throws ReferenceFrameMismatchException if the arguments are not expressed in the same
-    *            reference frame.
+    *                           "expressed-in-frame" to use for this spatial force vector. Not
+    *                           modified.
+    * @throws ReferenceFrameMismatchException if the arguments are not expressed in the same reference
+    *                                         frame.
     */
    default void setIncludingFrame(FrameVector3DReadOnly angularPart, FrameVector3DReadOnly linearPart, FramePoint3DReadOnly pointOfApplication)
    {

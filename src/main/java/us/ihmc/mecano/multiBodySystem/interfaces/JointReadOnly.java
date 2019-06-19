@@ -49,8 +49,8 @@ public interface JointReadOnly
 
    /**
     * Returns the {@code RigidBody} that precedes this joint. In other words, the {@code RigidBody}
-    * directly connected to this joint that sits between this joint and the root or that is the root
-    * of this kinematics chain.
+    * directly connected to this joint that sits between this joint and the root or that is the root of
+    * this kinematics chain.
     * 
     * @return the {@code predecessor} of this joint.
     */
@@ -58,17 +58,17 @@ public interface JointReadOnly
 
    /**
     * Returns the {@code RigidBody} that succeeds this joint. In other words, the {@code RigidBody}
-    * directly connected to this joint that sits between this joint and the end-effector or that is
-    * the end-effector of this kinematics chain.
+    * directly connected to this joint that sits between this joint and the end-effector or that is the
+    * end-effector of this kinematics chain.
     * 
     * @return the {@code successor} of this joint.
     */
    RigidBodyReadOnly getSuccessor();
 
    /**
-    * Returns the the {@code MovingReferenceFrame} that is attached to the predecessor of this
-    * joint, namely the {@code RigidBody} before this joint, and has its origin centered at the
-    * joint origin. The pose of the {@code frameBeforeJoint} is independent from this joint motion.
+    * Returns the the {@code MovingReferenceFrame} that is attached to the predecessor of this joint,
+    * namely the {@code RigidBody} before this joint, and has its origin centered at the joint origin.
+    * The pose of the {@code frameBeforeJoint} is independent from this joint motion.
     * 
     * @return the {@code MovingReferenceFrame} located right before this joint.
     */
@@ -76,8 +76,8 @@ public interface JointReadOnly
 
    /**
     * Returns the the {@code MovingReferenceFrame} that is attached to the successor of this joint,
-    * namely the {@code RigidBody} after this joint, and has its origin centered at the joint
-    * origin. The pose of the {@code frameAfterJoint} will change as this joint moves.
+    * namely the {@code RigidBody} after this joint, and has its origin centered at the joint origin.
+    * The pose of the {@code frameAfterJoint} will change as this joint moves.
     * 
     * @return the {@code MovingReferenceFrame} located right after this joint.
     */
@@ -86,8 +86,8 @@ public interface JointReadOnly
    /**
     * Packs the configuration of this joint as a transform.
     * 
-    * @param jointConfigurationToPack transform in which the pose of the frame after joint expressed
-    *           in the frame before joint is stored. Modified.
+    * @param jointConfigurationToPack transform in which the pose of the frame after joint expressed in
+    *                                 the frame before joint is stored. Modified.
     */
    void getJointConfiguration(RigidBodyTransform jointConfigurationToPack);
 
@@ -110,8 +110,8 @@ public interface JointReadOnly
     * Unit-twist are mostly used to compute a Jacobian.
     * </p>
     * <p>
-    * For instance, the unit-twist for a {@link RevoluteJoint} about the y-axis is equal to [0, 1,
-    * 0, 0, 0, 0]<sup>T</sup> with {@code bodyFrame = frameAfterJoint},
+    * For instance, the unit-twist for a {@link RevoluteJoint} about the y-axis is equal to [0, 1, 0,
+    * 0, 0, 0]<sup>T</sup> with {@code bodyFrame = frameAfterJoint},
     * {@code baseFrame = frameBeforeJoint}, and expressed in the predecessor body-fixed frame.
     * </p>
     * 
@@ -122,13 +122,13 @@ public interface JointReadOnly
    /**
     * Packs the motion subspace of this joint into the given matrix.
     * <p>
-    * The resulting matrix is a 6-by-N matrix, where N is equal to the number of DoFs this joint
-    * has, see {@link #getDegreesOfFreedom()}. The motion subspace is equivalent to the geometric
-    * Jacobian of this joint only expressed in {@code frameAfterJoint}.
+    * The resulting matrix is a 6-by-N matrix, where N is equal to the number of DoFs this joint has,
+    * see {@link #getDegreesOfFreedom()}. The motion subspace is equivalent to the geometric Jacobian
+    * of this joint only expressed in {@code frameAfterJoint}.
     * </p>
     * 
     * @param matrixToPack the matrix used to store the motion subspace. It is reshaped to the proper
-    *           size. Modified.
+    *                     size. Modified.
     */
    default void getMotionSubspace(DenseMatrix64F matrixToPack)
    {
@@ -140,16 +140,16 @@ public interface JointReadOnly
 
    /**
     * Packs the twist (the 3D angular and linear velocities) of this joint's {@code successor} with
-    * respect to this joint's {@code predecessor}. The reference frames of the resulting twist are
-    * as follows:
+    * respect to this joint's {@code predecessor}. The reference frames of the resulting twist are as
+    * follows:
     * <ul>
     * <li>{@code bodyFrame} is {@code successorFrame = successor.getBodyFixedFrame()}.
     * <li>{@code baseFrame} is {@code predecessorFrame = predecessor.getBodyFixedFrame()}.
     * <li>{@code expressedInFrame} is {@code successorFrame}.
     * </ul>
     * 
-    * @param successorTwistToPack the object in which the velocity of this joint's {@code successor}
-    *           is stored. Modified.
+    * @param successorTwistToPack the object in which the velocity of this joint's {@code successor} is
+    *                             stored. Modified.
     */
    default void getSuccessorTwist(TwistBasics successorTwistToPack)
    {
@@ -164,9 +164,9 @@ public interface JointReadOnly
    }
 
    /**
-    * Packs the twist (the 3D angular and linear velocities) of this joint's {@code predecessor}
-    * with respect to this joint's {@code successor}. The reference frames of the resulting twist
-    * are as follows:
+    * Packs the twist (the 3D angular and linear velocities) of this joint's {@code predecessor} with
+    * respect to this joint's {@code successor}. The reference frames of the resulting twist are as
+    * follows:
     * <ul>
     * <li>{@code bodyFrame} is {@code predecessorFrame = predecessor.getBodyFixedFrame()}.
     * <li>{@code baseFrame} is {@code successorFrame = successor.getBodyFixedFrame()}.
@@ -174,7 +174,7 @@ public interface JointReadOnly
     * </ul>
     * 
     * @param predecessorTwistToPack the object in which the velocity of this joint's
-    *           {@code predecessor} is stored. Modified.
+    *                               {@code predecessor} is stored. Modified.
     */
    default void getPredecessorTwist(TwistBasics predecessorTwistToPack)
    {
@@ -204,8 +204,8 @@ public interface JointReadOnly
 
    /**
     * Packs the spatial acceleration (the 3D angular and linear accelerations) of this joint's
-    * {@code successor} with respect to this joint's {@code predecessor}. The reference frames of
-    * the resulting spatial acceleration are as follows:
+    * {@code successor} with respect to this joint's {@code predecessor}. The reference frames of the
+    * resulting spatial acceleration are as follows:
     * <ul>
     * <li>{@code bodyFrame} is {@code successorFrame = successor.getBodyFixedFrame()}.
     * <li>{@code baseFrame} is {@code predecessorFrame = predecessor.getBodyFixedFrame()}.
@@ -213,7 +213,7 @@ public interface JointReadOnly
     * </ul>
     * 
     * @param successorAccelerationToPack the object in which the acceleration of this joint's
-    *           {@code successor} is stored. Modified.
+    *                                    {@code successor} is stored. Modified.
     */
    default void getSuccessorAcceleration(SpatialAccelerationBasics successorAccelerationToPack)
    {
@@ -239,8 +239,8 @@ public interface JointReadOnly
     * </ul>
     * 
     * @param predecessorAccelerationToPack the object in which the acceleration of this joint's
-    *           {@code predecessor} resulting from this joint desired acceleration is stored.
-    *           Modified.
+    *                                      {@code predecessor} resulting from this joint desired
+    *                                      acceleration is stored. Modified.
     */
    default void getPredecessorAcceleration(SpatialAccelerationBasics predecessorAccelerationToPack)
    {
@@ -256,8 +256,8 @@ public interface JointReadOnly
    }
 
    /**
-    * Gets the read-only reference to this joint wrench (the 3D torque and force). The reference
-    * frames of the joint wrench are as follows:
+    * Gets the read-only reference to this joint wrench (the 3D torque and force). The reference frames
+    * of the joint wrench are as follows:
     * <ul>
     * <li>{@code bodyFrame} is {@code successor.getBodyFixedFrame()}.
     * <li>{@code expressedInFrame} is {@code afterJointFrame}.
@@ -277,9 +277,9 @@ public interface JointReadOnly
     * from the {@code rowStart}<sup>th</sup> row to the ({@code rowStart + 3})<sup>th</sup> row.
     * </ul>
     * 
-    * @param rowStart row index for the first component of the configuration.
+    * @param rowStart     row index for the first component of the configuration.
     * @param matrixToPack the column vector in which this joint actual configuration is stored.
-    *           Modified.
+    *                     Modified.
     * @return {@code rowStart + this.getConfigurationMatrixSize()}.
     */
    int getJointConfiguration(int rowStart, DenseMatrix64F matrixToPack);
@@ -290,53 +290,51 @@ public interface JointReadOnly
     * <ul>
     * <li>For a {@code OneDoFJoint}, the scalar velocity {@code qd} is stored at the
     * {@code rowStart}<sup>th</sup> row.
-    * <li>For a {@code SixDoFJoint}, the joint twist is stored from the
-    * {@code rowStart}<sup>th</sup> row to the ({@code rowStart + 5})<sup>th</sup> row, starting
-    * with the three components of the angular velocity. Note: the joint twist is the twist of the
-    * {@code afterJointFrame} with respect to the {@code beforeJointFrame} expressed in the
-    * {@code afterJointFrame}.
+    * <li>For a {@code SixDoFJoint}, the joint twist is stored from the {@code rowStart}<sup>th</sup>
+    * row to the ({@code rowStart + 5})<sup>th</sup> row, starting with the three components of the
+    * angular velocity. Note: the joint twist is the twist of the {@code afterJointFrame} with respect
+    * to the {@code beforeJointFrame} expressed in the {@code afterJointFrame}.
     * </ul>
     * 
-    * @param rowStart row index for the first component of the velocity.
+    * @param rowStart     row index for the first component of the velocity.
     * @param matrixToPack the column vector in which the velocity of this joint is stored. Modified.
     * @return {@code rowStart + this.getDegreesOfFreedom()}.
     */
    int getJointVelocity(int rowStart, DenseMatrix64F matrixToPack);
 
    /**
-    * Packs this joint desired acceleration into a column vector {@code DenseMatrix64F}. Here are a
-    * few examples:
+    * Packs this joint desired acceleration into a column vector {@code DenseMatrix64F}. Here are a few
+    * examples:
     * <ul>
     * <li>For a {@code OneDoFJoint}, the scalar acceleration {@code qddDesired} is stored at the
     * {@code rowStart}<sup>th</sup> row.
     * <li>For a {@code SixDoFJoint}, the joint desired spatial acceleration is stored from the
-    * {@code rowStart}<sup>th</sup> row to the ({@code rowStart + 5})<sup>th</sup> row, starting
-    * with the three components of the angular acceleration.
+    * {@code rowStart}<sup>th</sup> row to the ({@code rowStart + 5})<sup>th</sup> row, starting with
+    * the three components of the angular acceleration.
     * </ul>
     * 
-    * @param rowStart row index for the first component of the acceleration.
+    * @param rowStart     row index for the first component of the acceleration.
     * @param matrixToPack the column vector in which the acceleration of this joint is stored.
-    *           Modified.
+    *                     Modified.
     * @return {@code rowStart + this.getDegreesOfFreedom()}.
     */
    int getJointAcceleration(int rowStart, DenseMatrix64F matrixToPack);
 
    /**
-    * Packs this joint desired force/torque into a column vector {@code DenseMatrix64F}. Here are a
-    * few examples:
+    * Packs this joint desired force/torque into a column vector {@code DenseMatrix64F}. Here are a few
+    * examples:
     * <ul>
     * <li>For a {@code RevoluteJoint}, the desired joint torque is stored at the 1<sup>st</sup> row.
     * <li>For a {@code PrismaticJoint}, the desired joint force is stored at the 1<sup>st</sup> row.
-    * <li>For a {@code SixDoFJoint}, the desired wrench (the 3D torque and 3D force) of this joint
-    * is stored from the {@code rowStart}<sup>th</sup> row to the
-    * ({@code rowStart + 5})<sup>th</sup> row, starting with the three components of the torque.
-    * Note: the joint wrench is the wrench of {@code successorFrame} expressed in
-    * {@code afterJointFrame}.
+    * <li>For a {@code SixDoFJoint}, the desired wrench (the 3D torque and 3D force) of this joint is
+    * stored from the {@code rowStart}<sup>th</sup> row to the ({@code rowStart + 5})<sup>th</sup> row,
+    * starting with the three components of the torque. Note: the joint wrench is the wrench of
+    * {@code successorFrame} expressed in {@code afterJointFrame}.
     * </ul>
     * 
-    * @param rowStart row index for the first component of the force/torque.
-    * @param matrixToPack the column vector in which the desired force/torque of this joint is
-    *           stored. Modified.
+    * @param rowStart     row index for the first component of the force/torque.
+    * @param matrixToPack the column vector in which the desired force/torque of this joint is stored.
+    *                     Modified.
     * @return {@code rowStart + this.getDegreesOfFreedom()}.
     */
    int getJointTau(int rowStart, DenseMatrix64F matrixToPack);
@@ -344,8 +342,7 @@ public interface JointReadOnly
    /**
     * Packs the offset from the frame before this joint to the frame after this parent joint.
     * 
-    * @param jointOffsetTransformToPack the transform in which this joint's offset is stored.
-    *           Modified.
+    * @param jointOffsetTransformToPack the transform in which this joint's offset is stored. Modified.
     */
    default void getJointOffset(RigidBodyTransform jointOffsetTransformToPack)
    {
@@ -373,8 +370,8 @@ public interface JointReadOnly
     * Gets a new iterable to iterate through all the joints, including {@code this}, of the subtree
     * that starts at this joint.
     * <p>
-    * A subtree is defined by a start joint and is the set of all the joint for which the start
-    * joint is an ancestor.
+    * A subtree is defined by a start joint and is the set of all the joint for which the start joint
+    * is an ancestor.
     * </p>
     * <p>
     * This method generates garbage.
@@ -392,8 +389,8 @@ public interface JointReadOnly
     * Gets a new stream to go through all the joints, including {@code this}, of the subtree that
     * starts at this joint.
     * <p>
-    * A subtree is defined by a start joint and is the set of all the joint for which the start
-    * joint is an ancestor.
+    * A subtree is defined by a start joint and is the set of all the joint for which the start joint
+    * is an ancestor.
     * </p>
     * <p>
     * This method generates garbage.
@@ -408,11 +405,11 @@ public interface JointReadOnly
    }
 
    /**
-    * Gets a list that contains all the joints, including {@code this}, of the subtree that starts
-    * at this joint.
+    * Gets a list that contains all the joints, including {@code this}, of the subtree that starts at
+    * this joint.
     * <p>
-    * A subtree is defined by a start joint and is the set of all the joint for which the start
-    * joint is an ancestor.
+    * A subtree is defined by a start joint and is the set of all the joint for which the start joint
+    * is an ancestor.
     * </p>
     * <p>
     * This method generates garbage.

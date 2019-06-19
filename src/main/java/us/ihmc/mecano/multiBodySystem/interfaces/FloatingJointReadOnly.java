@@ -22,8 +22,8 @@ import us.ihmc.euclid.transform.RigidBodyTransform;
 public interface FloatingJointReadOnly extends JointReadOnly
 {
    /**
-    * Gets the read-only reference to the pose of this floating joint, i.e. the pose of the
-    * multi-body system in world.
+    * Gets the read-only reference to the pose of this floating joint, i.e. the pose of the multi-body
+    * system in world.
     * 
     * @return this joint pose.
     */

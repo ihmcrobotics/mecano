@@ -46,8 +46,8 @@ public abstract class OneDoFJoint extends Joint implements OneDoFJointBasics
    /** A 1-element list containing this joint unit-twist. */
    private final List<TwistReadOnly> unitTwists;
    /**
-    * This joint unit-twist in different frames. In the current framework, the unit-twist is
-    * calculated once at construction and remains constant.
+    * This joint unit-twist in different frames. In the current framework, the unit-twist is calculated
+    * once at construction and remains constant.
     */
    private TwistReadOnly unitSuccessorTwist, unitPredecessorTwist;
 
@@ -57,8 +57,8 @@ public abstract class OneDoFJoint extends Joint implements OneDoFJointBasics
     */
    private final SpatialAccelerationReadOnly jointAcceleration;
    /**
-    * This joint unit spatial acceleration. In the current framework, the unit spatial acceleration
-    * is calculated once at construction and remains constant.
+    * This joint unit spatial acceleration. In the current framework, the unit spatial acceleration is
+    * calculated once at construction and remains constant.
     */
    private final SpatialAccelerationReadOnly unitJointAcceleration;
    /**
@@ -69,8 +69,8 @@ public abstract class OneDoFJoint extends Joint implements OneDoFJointBasics
 
    /**
     * This joint resulting wrench on its successor. Note that this field cannot be used to actually
-    * changed this joint force/torque. Instead, this field is automatically updated when
-    * {@link #tau} changes.
+    * changed this joint force/torque. Instead, this field is automatically updated when {@link #tau}
+    * changes.
     */
    private WrenchReadOnly jointWrench;
    /**
@@ -152,14 +152,14 @@ public abstract class OneDoFJoint extends Joint implements OneDoFJointBasics
    /**
     * Creates the abstract layer for a new 1-DoF joint.
     * 
-    * @param name the name for the new joint.
-    * @param predecessor the rigid-body connected to and preceding this joint.
+    * @param name                 the name for the new joint.
+    * @param predecessor          the rigid-body connected to and preceding this joint.
     * @param jointAxisAngularPart the unit-vector if this joint is a revolute joint. A zero vector
-    *           otherwise. Not modified.
-    * @param jointAxisLinearPart the unit-vector if this joint is a prismatic joint. A zero vector
-    *           otherwise. Not modified.
-    * @param transformToParent the transform from this joint to the {@code frameAfterJoint} of its
-    *           parent joint. Not modified.
+    *                             otherwise. Not modified.
+    * @param jointAxisLinearPart  the unit-vector if this joint is a prismatic joint. A zero vector
+    *                             otherwise. Not modified.
+    * @param transformToParent    the transform from this joint to the {@code frameAfterJoint} of its
+    *                             parent joint. Not modified.
     */
    public OneDoFJoint(String name, RigidBodyBasics predecessor, Vector3DReadOnly jointAxisAngularPart, Vector3DReadOnly jointAxisLinearPart,
                       RigidBodyTransformReadOnly transformToParent)

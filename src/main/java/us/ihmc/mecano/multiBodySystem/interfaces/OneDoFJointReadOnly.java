@@ -218,8 +218,8 @@ public interface OneDoFJointReadOnly extends JointReadOnly
    /**
     * Gets the read-only reference to this joint's unitary spatial acceleration.
     * <p>
-    * This is the same unit spatial acceleration as {@link #getUnitJointAcceleration()} but
-    * expressed in different frames:
+    * This is the same unit spatial acceleration as {@link #getUnitJointAcceleration()} but expressed
+    * in different frames:
     * <ul>
     * <li>{@code bodyFrame} is {@code successorFrame = successor.getBodyFixedFrame()}.
     * <li>{@code baseFrame} is {@code predecessorFrame = predecessor.getBodyFixedFrame()}.
@@ -234,8 +234,8 @@ public interface OneDoFJointReadOnly extends JointReadOnly
    /**
     * Gets the read-only reference to this joint's unitary spatial acceleration.
     * <p>
-    * This is the same unit spatial acceleration as {@link #getUnitJointAcceleration()} but
-    * expressed in different frames:
+    * This is the same unit spatial acceleration as {@link #getUnitJointAcceleration()} but expressed
+    * in different frames:
     * <ul>
     * <li>{@code bodyFrame} is {@code predecessorFrame = predecessor.getBodyFixedFrame()}.
     * <li>{@code baseFrame} is {@code successorFrame = successor.getBodyFixedFrame()}.

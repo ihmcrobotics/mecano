@@ -329,7 +329,10 @@ public class SpatialAccelerationCalculatorTest
             Point3D bodyFixedPoint = EuclidCoreRandomTools.nextPoint3D(random, 1.0);
             FramePoint3D frameBodyFixedPoint = new FramePoint3D(body.getBodyFixedFrame(), bodyFixedPoint);
             FrameVector3D actualLinearAcceleration = new FrameVector3D(calculator.getLinearAccelerationOfBodyFixedPoint(body, frameBodyFixedPoint));
-            FrameVector3D expectedLinearAcceleration = computeExpectedLinearAccelerationByFiniteDifference(dt, body, bodyInFuture, bodyFixedPoint,
+            FrameVector3D expectedLinearAcceleration = computeExpectedLinearAccelerationByFiniteDifference(dt,
+                                                                                                           body,
+                                                                                                           bodyInFuture,
+                                                                                                           bodyFixedPoint,
                                                                                                            rootAcceleration);
 
             expectedLinearAcceleration.checkReferenceFrameMatch(actualLinearAcceleration);
@@ -400,20 +403,30 @@ public class SpatialAccelerationCalculatorTest
                RigidBodyBasics baseInFuture = jointsInFuture.get(baseJointIndex).getSuccessor();
                SpatialAcceleration actualRelativeAcceleration = new SpatialAcceleration(calculator.getRelativeAcceleration(base, body));
 
-               SpatialAcceleration expectedRelativeAcceleration = computeExpectedRelativeAccelerationByFiniteDifference(dt, body, bodyInFuture, base,
-                                                                                                                        baseInFuture, rootAcceleration);
+               SpatialAcceleration expectedRelativeAcceleration = computeExpectedRelativeAccelerationByFiniteDifference(dt,
+                                                                                                                        body,
+                                                                                                                        bodyInFuture,
+                                                                                                                        base,
+                                                                                                                        baseInFuture,
+                                                                                                                        rootAcceleration);
 
                assertSpatialAccelerationEquals(expectedRelativeAcceleration, actualRelativeAcceleration, 1.0e-4);
 
                Point3D bodyFixedPoint = EuclidCoreRandomTools.nextPoint3D(random, 1.0);
                FramePoint3D frameBodyFixedPoint = new FramePoint3D(body.getBodyFixedFrame(), bodyFixedPoint);
                FrameVector3D actualLinearAcceleration = new FrameVector3D(calculator.getLinearAccelerationOfBodyFixedPoint(base, body, frameBodyFixedPoint));
-               FrameVector3D expectedLinearAcceleration = computeExpectedLinearAccelerationByFiniteDifference(dt, body, bodyInFuture, base, baseInFuture,
+               FrameVector3D expectedLinearAcceleration = computeExpectedLinearAccelerationByFiniteDifference(dt,
+                                                                                                              body,
+                                                                                                              bodyInFuture,
+                                                                                                              base,
+                                                                                                              baseInFuture,
                                                                                                               bodyFixedPoint);
 
                expectedLinearAcceleration.checkReferenceFrameMatch(actualLinearAcceleration);
-               EuclidCoreTestTools.assertTuple3DEquals("iteration: " + i + ", joint index: " + baseJointIndex, expectedLinearAcceleration,
-                                                       actualLinearAcceleration, 1.1e-4);
+               EuclidCoreTestTools.assertTuple3DEquals("iteration: " + i + ", joint index: " + baseJointIndex,
+                                                       expectedLinearAcceleration,
+                                                       actualLinearAcceleration,
+                                                       1.1e-4);
             }
          }
       }
@@ -429,7 +442,8 @@ public class SpatialAccelerationCalculatorTest
       SixDoFJoint floatingJoint = floatingChain.getRootJoint();
       List<RevoluteJoint> revoluteJoints = floatingChain.getRevoluteJoints();
       List<Joint> joints = floatingChain.getJoints();
-      List<JointBasics> jointsNoVelocity = Arrays.asList(MultiBodySystemFactories.cloneKinematicChain(joints.toArray(new Joint[numberOfRevoluteJoints + 1]), ""));
+      List<JointBasics> jointsNoVelocity = Arrays.asList(MultiBodySystemFactories.cloneKinematicChain(joints.toArray(new Joint[numberOfRevoluteJoints + 1]),
+                                                                                                      ""));
       SixDoFJoint floatingJointNoVelocity = (SixDoFJoint) jointsNoVelocity.get(0);
       List<RevoluteJoint> revoluteJointsNoVelocity = MultiBodySystemTools.filterJoints(jointsNoVelocity, RevoluteJoint.class);
 
@@ -445,7 +459,8 @@ public class SpatialAccelerationCalculatorTest
          SpatialAccelerationCalculator calculator = new SpatialAccelerationCalculator(randomBody, worldFrame, false, true);
          calculator.setRootAcceleration(rootAcceleration);
 
-         SpatialAcceleration rootAccelerationNoVelocity = new SpatialAcceleration(rootBodyNoVelocity.getBodyFixedFrame(), worldFrame,
+         SpatialAcceleration rootAccelerationNoVelocity = new SpatialAcceleration(rootBodyNoVelocity.getBodyFixedFrame(),
+                                                                                  worldFrame,
                                                                                   rootBodyNoVelocity.getBodyFixedFrame());
          rootAccelerationNoVelocity.set((Vector3DReadOnly) rootAcceleration.getAngularPart(), (Vector3DReadOnly) rootAcceleration.getLinearPart());
          SpatialAccelerationCalculator calculatorNoVelocity = new SpatialAccelerationCalculator(randomBodyNoVelocity, worldFrame, true, true);
@@ -457,7 +472,8 @@ public class SpatialAccelerationCalculatorTest
          floatingJoint.setJointConfiguration(floatingJointRotation, floatingJointPosition);
          floatingJointNoVelocity.setJointConfiguration(floatingJointRotation, floatingJointPosition);
 
-         SpatialAcceleration floatJointAcceleration = new SpatialAcceleration(floatingJoint.getFrameAfterJoint(), floatingJoint.getFrameBeforeJoint(),
+         SpatialAcceleration floatJointAcceleration = new SpatialAcceleration(floatingJoint.getFrameAfterJoint(),
+                                                                              floatingJoint.getFrameBeforeJoint(),
                                                                               floatingJoint.getFrameAfterJoint());
          floatJointAcceleration.set(EuclidCoreRandomTools.nextVector3D(random), EuclidCoreRandomTools.nextVector3D(random));
          floatingJoint.setJointAcceleration(floatJointAcceleration);
@@ -468,8 +484,10 @@ public class SpatialAccelerationCalculatorTest
                                               (Vector3DReadOnly) floatJointAcceleration.getLinearPart());
          floatingJointNoVelocity.setJointAcceleration(floatJointAccelerationNoVelocity);
 
-         Twist floatingJointTwist = MecanoRandomTools.nextTwist(random, floatingJoint.getFrameAfterJoint(), floatingJoint.getFrameBeforeJoint(),
-                                                                           floatingJoint.getFrameAfterJoint());
+         Twist floatingJointTwist = MecanoRandomTools.nextTwist(random,
+                                                                floatingJoint.getFrameAfterJoint(),
+                                                                floatingJoint.getFrameBeforeJoint(),
+                                                                floatingJoint.getFrameAfterJoint());
          floatingJoint.setJointTwist(floatingJointTwist);
 
          for (JointStateType selection : JointStateType.values())
@@ -506,7 +524,8 @@ public class SpatialAccelerationCalculatorTest
             Point3D bodyFixedPoint = EuclidCoreRandomTools.nextPoint3D(random, 1.0);
             FramePoint3D frameBodyFixedPoint = new FramePoint3D(body.getBodyFixedFrame(), bodyFixedPoint);
             FrameVector3D actualLinearAcceleration = new FrameVector3D(calculator.getLinearAccelerationOfBodyFixedPoint(body, frameBodyFixedPoint));
-            FrameVector3D expectedLinearAcceleration = new FrameVector3D(calculatorNoVelocity.getLinearAccelerationOfBodyFixedPoint(bodyNoVelocity, frameBodyFixedPoint));
+            FrameVector3D expectedLinearAcceleration = new FrameVector3D(calculatorNoVelocity.getLinearAccelerationOfBodyFixedPoint(bodyNoVelocity,
+                                                                                                                                    frameBodyFixedPoint));
 
             assertEquals(expectedLinearAcceleration.getReferenceFrame().getName(), actualLinearAcceleration.getReferenceFrame().getName());
             EuclidCoreTestTools.assertTuple3DEquals(expectedLinearAcceleration, actualLinearAcceleration, 1.0e-12);
@@ -518,7 +537,8 @@ public class SpatialAccelerationCalculatorTest
                RigidBodyBasics baseNoVelocity = jointsNoVelocity.get(baseJointIndex).getSuccessor();
                SpatialAcceleration actualRelativeAcceleration = new SpatialAcceleration(calculator.getRelativeAcceleration(base, body));
 
-               SpatialAcceleration expectedRelativeAcceleration = new SpatialAcceleration(calculatorNoVelocity.getRelativeAcceleration(baseNoVelocity, bodyNoVelocity));
+               SpatialAcceleration expectedRelativeAcceleration = new SpatialAcceleration(calculatorNoVelocity.getRelativeAcceleration(baseNoVelocity,
+                                                                                                                                       bodyNoVelocity));
 
                String messagePrefix = "iteration: " + i + ", joint index: " + jointIndex + ", base joint index: " + baseJointIndex;
                assertSpatialAccelerationEquals(messagePrefix, expectedRelativeAcceleration, actualRelativeAcceleration, 1.0e-12, true);
@@ -526,7 +546,9 @@ public class SpatialAccelerationCalculatorTest
                bodyFixedPoint = EuclidCoreRandomTools.nextPoint3D(random, 1.0);
                frameBodyFixedPoint = new FramePoint3D(body.getBodyFixedFrame(), bodyFixedPoint);
                actualLinearAcceleration.setIncludingFrame(calculator.getLinearAccelerationOfBodyFixedPoint(base, body, frameBodyFixedPoint));
-               expectedLinearAcceleration.setIncludingFrame(calculatorNoVelocity.getLinearAccelerationOfBodyFixedPoint(baseNoVelocity, bodyNoVelocity, frameBodyFixedPoint));
+               expectedLinearAcceleration.setIncludingFrame(calculatorNoVelocity.getLinearAccelerationOfBodyFixedPoint(baseNoVelocity,
+                                                                                                                       bodyNoVelocity,
+                                                                                                                       frameBodyFixedPoint));
 
                assertEquals(expectedLinearAcceleration.getReferenceFrame().getName(), actualLinearAcceleration.getReferenceFrame().getName());
                EuclidCoreTestTools.assertTuple3DEquals(messagePrefix, expectedLinearAcceleration, actualLinearAcceleration, 1.0e-12);

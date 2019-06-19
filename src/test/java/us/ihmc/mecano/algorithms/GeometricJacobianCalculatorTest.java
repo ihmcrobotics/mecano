@@ -145,7 +145,8 @@ public class GeometricJacobianCalculatorTest
          RigidBodyTransform transformToParent = new RigidBodyTransform();
          transformToParent.setTranslation(EuclidCoreRandomTools.nextPoint3D(random, 10.0));
          ReferenceFrame fixedInEndEffector = ReferenceFrameTools.constructFrameWithUnchangingTransformToParent("fixedFrame" + i,
-               randomEndEffector.getBodyFixedFrame(), transformToParent);
+                                                                                                               randomEndEffector.getBodyFixedFrame(),
+                                                                                                               transformToParent);
 
          jacobianCalculator.clear();
          jacobianCalculator.setKinematicChain(rootBody, randomEndEffector);
@@ -227,15 +228,16 @@ public class GeometricJacobianCalculatorTest
          RigidBodyTransform transformToParent = new RigidBodyTransform();
          transformToParent.setTranslation(EuclidCoreRandomTools.nextPoint3D(random, 10.0));
          ReferenceFrame fixedInEndEffector = ReferenceFrameTools.constructFrameWithUnchangingTransformToParent("fixedFrame" + i,
-               randomEndEffector.getBodyFixedFrame(), transformToParent);
+                                                                                                               randomEndEffector.getBodyFixedFrame(),
+                                                                                                               transformToParent);
 
          jacobianCalculator.clear();
          jacobianCalculator.setKinematicChain(randomBase, randomEndEffector);
          jacobianCalculator.setJacobianFrame(fixedInEndEffector);
          SpatialAcceleration actualConvectiveTerm = new SpatialAcceleration(jacobianCalculator.getConvectiveTerm());
 
-         SpatialAcceleration expectedConvectiveTerm = new SpatialAcceleration(
-               spatialAccelerationCalculator.getRelativeAcceleration(randomBase, randomEndEffector));
+         SpatialAcceleration expectedConvectiveTerm = new SpatialAcceleration(spatialAccelerationCalculator.getRelativeAcceleration(randomBase,
+                                                                                                                                    randomEndEffector));
          expectedConvectiveTerm.changeFrame(fixedInEndEffector);
 
          MecanoTestTools.assertSpatialAccelerationEquals(expectedConvectiveTerm, actualConvectiveTerm, 1.0e-11);
@@ -362,7 +364,8 @@ public class GeometricJacobianCalculatorTest
    }
 
    public static void compareJacobianTwistAgainstTwistCalculator(RigidBodyReadOnly base, RigidBodyReadOnly endEffector,
-         GeometricJacobianCalculator jacobianCalculator, double epsilon) throws AssertionError
+                                                                 GeometricJacobianCalculator jacobianCalculator, double epsilon)
+         throws AssertionError
    {
       Twist expectedTwist = new Twist();
       Twist actualTwist = new Twist();
@@ -379,7 +382,8 @@ public class GeometricJacobianCalculatorTest
    }
 
    public static void compareJacobianAccelerationAgainstSpatialAccelerationCalculator(RigidBodyReadOnly base, RigidBodyReadOnly endEffector,
-         GeometricJacobianCalculator jacobianCalculator, double epsilon) throws AssertionError
+                                                                                      GeometricJacobianCalculator jacobianCalculator, double epsilon)
+         throws AssertionError
    {
       SpatialAccelerationCalculator spatialAccelerationCalculator = new SpatialAccelerationCalculator(base, worldFrame);
       spatialAccelerationCalculator.reset();
@@ -387,8 +391,9 @@ public class GeometricJacobianCalculatorTest
       SpatialAcceleration actualAcceleration = new SpatialAcceleration();
 
       DenseMatrix64F jointDesiredAccelerationsMatrix = new DenseMatrix64F(jacobianCalculator.getNumberOfDegreesOfFreedom(), 1);
-      MultiBodySystemTools.extractJointsState(jacobianCalculator.getJointsFromBaseToEndEffector(), JointStateType.ACCELERATION,
-            jointDesiredAccelerationsMatrix);
+      MultiBodySystemTools.extractJointsState(jacobianCalculator.getJointsFromBaseToEndEffector(),
+                                              JointStateType.ACCELERATION,
+                                              jointDesiredAccelerationsMatrix);
 
       SpatialAccelerationReadOnly expectedAcceleration = spatialAccelerationCalculator.getRelativeAcceleration(base, endEffector);
       jacobianCalculator.getEndEffectorAcceleration(jointDesiredAccelerationsMatrix, actualAcceleration);

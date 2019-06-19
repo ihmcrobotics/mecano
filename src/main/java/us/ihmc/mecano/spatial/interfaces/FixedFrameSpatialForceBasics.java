@@ -87,8 +87,8 @@ public interface FixedFrameSpatialForceBasics extends SpatialForceReadOnly, Fixe
     * When the given {@code angularPart} is {@code null}, it is assumed to be zero.
     * </p>
     *
-    * @param angularPart the 3D moment that is applied. Can be {@code null}. Not modified.
-    * @param linearPart the 3D force that is applied. Not modified.
+    * @param angularPart        the 3D moment that is applied. Can be {@code null}. Not modified.
+    * @param linearPart         the 3D force that is applied. Not modified.
     * @param pointOfApplication the location where the force is exerted. Not modified.
     */
    default void set(Vector3DReadOnly angularPart, Vector3DReadOnly linearPart, Point3DReadOnly pointOfApplication)
@@ -120,12 +120,13 @@ public interface FixedFrameSpatialForceBasics extends SpatialForceReadOnly, Fixe
     * When the given {@code angularPart} is {@code null}, it is assumed to be zero.
     * </p>
     *
-    * @param expressedInFrame the reference frame in which the arguments are expressed.
-    * @param angularPart the 3D moment that is applied. Can be {@code null}. Not modified.
-    * @param linearPart the 3D force that is applied. Not modified.
+    * @param expressedInFrame   the reference frame in which the arguments are expressed.
+    * @param angularPart        the 3D moment that is applied. Can be {@code null}. Not modified.
+    * @param linearPart         the 3D force that is applied. Not modified.
     * @param pointOfApplication the location where the force is exerted. Not modified.
-    * @throws ReferenceFrameMismatchException if {@code expressedInFrame} is not equal to the
-    *            reference frame in which this spatial force vector is currently expressed.
+    * @throws ReferenceFrameMismatchException if {@code expressedInFrame} is not equal to the reference
+    *                                         frame in which this spatial force vector is currently
+    *                                         expressed.
     */
    default void set(ReferenceFrame expressedInFrame, Vector3DReadOnly angularPart, Vector3DReadOnly linearPart, Point3DReadOnly pointOfApplication)
    {
@@ -151,11 +152,11 @@ public interface FixedFrameSpatialForceBasics extends SpatialForceReadOnly, Fixe
     * When the given {@code angularPart} is {@code null}, it is assumed to be zero.
     * </p>
     *
-    * @param angularPart the 3D moment that is applied. Can be {@code null}. Not modified.
-    * @param linearPart the 3D force that is applied. Not modified.
+    * @param angularPart        the 3D moment that is applied. Can be {@code null}. Not modified.
+    * @param linearPart         the 3D force that is applied. Not modified.
     * @param pointOfApplication the location where the force is exerted. Not modified.
     * @throws ReferenceFrameMismatchException if any of the arguments are not expressed in the same
-    *            reference frame as {@code this}.
+    *                                         reference frame as {@code this}.
     */
    default void set(FrameVector3DReadOnly angularPart, FrameVector3DReadOnly linearPart, FramePoint3DReadOnly pointOfApplication)
    {
@@ -183,8 +184,7 @@ public interface FixedFrameSpatialForceBasics extends SpatialForceReadOnly, Fixe
     * </ul>
     * </p>
     * 
-    * @throws UnsupportedOperationException if the given transform is not a
-    *            {@code RigidBodyTransform}.
+    * @throws UnsupportedOperationException if the given transform is not a {@code RigidBodyTransform}.
     */
    @Override
    default void applyTransform(Transform transform)
@@ -214,8 +214,7 @@ public interface FixedFrameSpatialForceBasics extends SpatialForceReadOnly, Fixe
     * </ul>
     * </p>
     * 
-    * @throws UnsupportedOperationException if the given transform is not a
-    *            {@code RigidBodyTransform}.
+    * @throws UnsupportedOperationException if the given transform is not a {@code RigidBodyTransform}.
     */
    @Override
    default void applyInverseTransform(Transform transform)

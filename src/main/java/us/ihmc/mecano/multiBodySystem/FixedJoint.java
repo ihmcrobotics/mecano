@@ -61,7 +61,7 @@ public class FixedJoint implements FixedJointBasics
     * the multi-body system.
     * </p>
     * 
-    * @param name the name for the new joint.
+    * @param name        the name for the new joint.
     * @param predecessor the rigid-body connected to and preceding this joint.
     */
    public FixedJoint(String name, RigidBodyBasics predecessor)
@@ -72,8 +72,8 @@ public class FixedJoint implements FixedJointBasics
    /**
     * Creates a new fixed joint.
     * 
-    * @param name the name for the new joint.
-    * @param predecessor the rigid-body connected to and preceding this joint.
+    * @param name              the name for the new joint.
+    * @param predecessor       the rigid-body connected to and preceding this joint.
     * @param transformToParent the transform to the frame after the parent joint. Not modified.
     */
    public FixedJoint(String name, RigidBodyBasics predecessor, RigidBodyTransformReadOnly transformToParent)

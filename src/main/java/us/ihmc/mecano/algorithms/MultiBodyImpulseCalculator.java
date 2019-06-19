@@ -113,8 +113,15 @@ public class MultiBodyImpulseCalculator
       double collisionMatrix21 = testImpulse.getY();
       double collisionMatrix22 = testImpulse.getZ();
 
-      collisionMatrixToPack.set(collisionMatrix00, collisionMatrix01, collisionMatrix02, collisionMatrix10, collisionMatrix11, collisionMatrix12,
-                                collisionMatrix20, collisionMatrix21, collisionMatrix22);
+      collisionMatrixToPack.set(collisionMatrix00,
+                                collisionMatrix01,
+                                collisionMatrix02,
+                                collisionMatrix10,
+                                collisionMatrix11,
+                                collisionMatrix12,
+                                collisionMatrix20,
+                                collisionMatrix21,
+                                collisionMatrix22);
       return true;
    }
 

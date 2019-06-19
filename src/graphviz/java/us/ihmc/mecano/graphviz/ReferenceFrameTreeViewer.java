@@ -63,7 +63,8 @@ public class ReferenceFrameTreeViewer
     */
    public ReferenceFrameTreeViewer addTransformToParentLabel()
    {
-      return addLabelProvider(frame -> {
+      return addLabelProvider(frame ->
+      {
          if (!frame.isRootFrame())
             return "Transform to parent:\n" + getTransformLabel(frame.getTransformToParent());
          else

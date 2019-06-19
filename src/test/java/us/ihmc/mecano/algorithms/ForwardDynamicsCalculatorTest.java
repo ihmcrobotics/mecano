@@ -52,8 +52,12 @@ public class ForwardDynamicsCalculatorTest
 
          compareAgainstInverseDynamicsCalculator(random, i, joints, nextExternalWrenches(random, joints), Collections.emptyList(), ONE_DOF_JOINT_EPSILON);
 
-         compareAgainstInverseDynamicsCalculator(random, i, joints, Collections.emptyMap(),
-                                                 Collections.singletonList(joints.get(random.nextInt(joints.size()))), ONE_DOF_JOINT_EPSILON);
+         compareAgainstInverseDynamicsCalculator(random,
+                                                 i,
+                                                 joints,
+                                                 Collections.emptyMap(),
+                                                 Collections.singletonList(joints.get(random.nextInt(joints.size()))),
+                                                 ONE_DOF_JOINT_EPSILON);
       }
    }
 
@@ -71,8 +75,12 @@ public class ForwardDynamicsCalculatorTest
 
          compareAgainstInverseDynamicsCalculator(random, i, joints, nextExternalWrenches(random, joints), Collections.emptyList(), ONE_DOF_JOINT_EPSILON);
 
-         compareAgainstInverseDynamicsCalculator(random, i, joints, Collections.emptyMap(),
-                                                 Collections.singletonList(joints.get(random.nextInt(joints.size()))), ONE_DOF_JOINT_EPSILON);
+         compareAgainstInverseDynamicsCalculator(random,
+                                                 i,
+                                                 joints,
+                                                 Collections.emptyMap(),
+                                                 Collections.singletonList(joints.get(random.nextInt(joints.size()))),
+                                                 ONE_DOF_JOINT_EPSILON);
       }
    }
 
@@ -90,8 +98,12 @@ public class ForwardDynamicsCalculatorTest
 
          compareAgainstInverseDynamicsCalculator(random, i, joints, nextExternalWrenches(random, joints), Collections.emptyList(), ONE_DOF_JOINT_EPSILON);
 
-         compareAgainstInverseDynamicsCalculator(random, i, joints, Collections.emptyMap(),
-                                                 Collections.singletonList(joints.get(random.nextInt(joints.size()))), ONE_DOF_JOINT_EPSILON);
+         compareAgainstInverseDynamicsCalculator(random,
+                                                 i,
+                                                 joints,
+                                                 Collections.emptyMap(),
+                                                 Collections.singletonList(joints.get(random.nextInt(joints.size()))),
+                                                 ONE_DOF_JOINT_EPSILON);
       }
    }
 
@@ -109,8 +121,12 @@ public class ForwardDynamicsCalculatorTest
          compareAgainstInverseDynamicsCalculator(random, i, joints, nextExternalWrenches(random, joints), Collections.emptyList(), ONE_DOF_JOINT_EPSILON);
 
          joints = MultiBodySystemRandomTools.nextRevoluteJointTree(random, random.nextInt(40) + 1);
-         compareAgainstInverseDynamicsCalculator(random, i, joints, Collections.emptyMap(),
-                                                 Collections.singletonList(joints.get(random.nextInt(joints.size()))), ONE_DOF_JOINT_EPSILON);
+         compareAgainstInverseDynamicsCalculator(random,
+                                                 i,
+                                                 joints,
+                                                 Collections.emptyMap(),
+                                                 Collections.singletonList(joints.get(random.nextInt(joints.size()))),
+                                                 ONE_DOF_JOINT_EPSILON);
       }
    }
 
@@ -128,8 +144,12 @@ public class ForwardDynamicsCalculatorTest
 
          compareAgainstInverseDynamicsCalculator(random, i, joints, nextExternalWrenches(random, joints), Collections.emptyList(), ONE_DOF_JOINT_EPSILON);
 
-         compareAgainstInverseDynamicsCalculator(random, i, joints, Collections.emptyMap(),
-                                                 Collections.singletonList(joints.get(random.nextInt(joints.size()))), ONE_DOF_JOINT_EPSILON);
+         compareAgainstInverseDynamicsCalculator(random,
+                                                 i,
+                                                 joints,
+                                                 Collections.emptyMap(),
+                                                 Collections.singletonList(joints.get(random.nextInt(joints.size()))),
+                                                 ONE_DOF_JOINT_EPSILON);
       }
    }
 
@@ -147,8 +167,12 @@ public class ForwardDynamicsCalculatorTest
 
          compareAgainstInverseDynamicsCalculator(random, i, joints, nextExternalWrenches(random, joints), Collections.emptyList(), ONE_DOF_JOINT_EPSILON);
 
-         compareAgainstInverseDynamicsCalculator(random, i, joints, Collections.emptyMap(),
-                                                 Collections.singletonList(joints.get(random.nextInt(joints.size()))), ONE_DOF_JOINT_EPSILON);
+         compareAgainstInverseDynamicsCalculator(random,
+                                                 i,
+                                                 joints,
+                                                 Collections.emptyMap(),
+                                                 Collections.singletonList(joints.get(random.nextInt(joints.size()))),
+                                                 ONE_DOF_JOINT_EPSILON);
       }
    }
 
@@ -166,8 +190,12 @@ public class ForwardDynamicsCalculatorTest
 
          compareAgainstInverseDynamicsCalculator(random, i, joints, nextExternalWrenches(random, joints), Collections.emptyList(), FLOATING_JOINT_EPSILON);
 
-         compareAgainstInverseDynamicsCalculator(random, i, joints, Collections.emptyMap(),
-                                                 Collections.singletonList(joints.get(random.nextInt(joints.size()))), 2.0 * FLOATING_JOINT_EPSILON);
+         compareAgainstInverseDynamicsCalculator(random,
+                                                 i,
+                                                 joints,
+                                                 Collections.emptyMap(),
+                                                 Collections.singletonList(joints.get(random.nextInt(joints.size()))),
+                                                 2.0 * FLOATING_JOINT_EPSILON);
       }
    }
 
@@ -185,8 +213,12 @@ public class ForwardDynamicsCalculatorTest
 
          compareAgainstInverseDynamicsCalculator(random, i, joints, nextExternalWrenches(random, joints), Collections.emptyList(), ALL_JOINT_EPSILON);
 
-         compareAgainstInverseDynamicsCalculator(random, i, joints, Collections.emptyMap(),
-                                                 Collections.singletonList(joints.get(random.nextInt(joints.size()))), ALL_JOINT_EPSILON);
+         compareAgainstInverseDynamicsCalculator(random,
+                                                 i,
+                                                 joints,
+                                                 Collections.emptyMap(),
+                                                 Collections.singletonList(joints.get(random.nextInt(joints.size()))),
+                                                 ALL_JOINT_EPSILON);
       }
    }
 

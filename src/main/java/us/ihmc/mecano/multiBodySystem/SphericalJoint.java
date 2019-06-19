@@ -47,8 +47,8 @@ public class SphericalJoint extends Joint implements SphericalJointBasics
     */
    private final SpatialAccelerationReadOnly jointAcceleration;
    /**
-    * This joint resulting wrench on its successor. Note that this field is automatically updated
-    * when {@link #jointTorque} changes.
+    * This joint resulting wrench on its successor. Note that this field is automatically updated when
+    * {@link #jointTorque} changes.
     */
    private WrenchReadOnly successorWrench;
    /**
@@ -60,10 +60,10 @@ public class SphericalJoint extends Joint implements SphericalJointBasics
    /**
     * Creates a new spherical joint.
     * 
-    * @param name the name for the new joint.
+    * @param name        the name for the new joint.
     * @param predecessor the rigid-body connected to and preceding this joint.
     * @param jointOffset the offset in translation with respect to the frame after the parent joint.
-    *           Not modified.
+    *                    Not modified.
     */
    public SphericalJoint(String name, RigidBodyBasics predecessor, Tuple3DReadOnly jointOffset)
    {
@@ -73,8 +73,8 @@ public class SphericalJoint extends Joint implements SphericalJointBasics
    /**
     * Creates a new spherical joint.
     * 
-    * @param name the name for the new joint.
-    * @param predecessor the rigid-body connected to and preceding this joint.
+    * @param name              the name for the new joint.
+    * @param predecessor       the rigid-body connected to and preceding this joint.
     * @param transformToParent the transform to the frame after the parent joint. Not modified.
     */
    public SphericalJoint(String name, RigidBodyBasics predecessor, RigidBodyTransformReadOnly transformToParent)
@@ -83,8 +83,10 @@ public class SphericalJoint extends Joint implements SphericalJointBasics
       jointAngularVelocity = new FrameVector3D(afterJointFrame);
       jointAngularAcceleration = new FrameVector3D(afterJointFrame);
       jointTwist = MecanoFactories.newTwistReadOnly(afterJointFrame, beforeJointFrame, jointAngularVelocity, new FrameVector3D(afterJointFrame));
-      jointAcceleration = MecanoFactories.newSpatialAccelerationVectorReadOnly(afterJointFrame, beforeJointFrame, jointAngularAcceleration,
-                                                                                          new FrameVector3D(afterJointFrame));
+      jointAcceleration = MecanoFactories.newSpatialAccelerationVectorReadOnly(afterJointFrame,
+                                                                               beforeJointFrame,
+                                                                               jointAngularAcceleration,
+                                                                               new FrameVector3D(afterJointFrame));
       unitTwists = MecanoTools.computeSphericalJointMotionSubspace(beforeJointFrame, afterJointFrame);
       jointTorque = new FrameVector3D(afterJointFrame);
    }

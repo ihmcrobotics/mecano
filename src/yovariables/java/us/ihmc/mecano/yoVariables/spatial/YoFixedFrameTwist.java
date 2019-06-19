@@ -68,11 +68,11 @@ public class YoFixedFrameTwist implements FixedFrameTwistBasics, GeometryObject<
     * Note that the reference frames are final.
     * </p>
     * 
-    * @param namePrefix a unique name string to use as the prefix for child variable names.
-    * @param bodyFrame what we are specifying the twist of.
-    * @param baseFrame with respect to what we are specifying the twist.
+    * @param namePrefix       a unique name string to use as the prefix for child variable names.
+    * @param bodyFrame        what we are specifying the twist of.
+    * @param baseFrame        with respect to what we are specifying the twist.
     * @param expressedInFrame in which reference frame the twist is expressed.
-    * @param registry the registry to register child variables to.
+    * @param registry         the registry to register child variables to.
     */
    public YoFixedFrameTwist(String namePrefix, ReferenceFrame bodyFrame, ReferenceFrame baseFrame, ReferenceFrame expressedInFrame, YoVariableRegistry registry)
    {
@@ -85,15 +85,15 @@ public class YoFixedFrameTwist implements FixedFrameTwistBasics, GeometryObject<
     * Note that the reference frames are final.
     * </p>
     * 
-    * @param namePrefix a unique name string to use as the prefix for child variable names.
-    * @param nameSuffix a string to use as the suffix for child variable names.
-    * @param bodyFrame what we are specifying the twist of.
-    * @param baseFrame with respect to what we are specifying the twist.
+    * @param namePrefix       a unique name string to use as the prefix for child variable names.
+    * @param nameSuffix       a string to use as the suffix for child variable names.
+    * @param bodyFrame        what we are specifying the twist of.
+    * @param baseFrame        with respect to what we are specifying the twist.
     * @param expressedInFrame in which reference frame the twist is expressed.
-    * @param registry the registry to register child variables to.
+    * @param registry         the registry to register child variables to.
     */
    public YoFixedFrameTwist(String namePrefix, String nameSuffix, ReferenceFrame bodyFrame, ReferenceFrame baseFrame, ReferenceFrame expressedInFrame,
-         YoVariableRegistry registry)
+                            YoVariableRegistry registry)
    {
       this(bodyFrame, baseFrame, new YoFixedFrameSpatialVector(namePrefix, nameSuffix, expressedInFrame, registry));
    }
@@ -104,10 +104,10 @@ public class YoFixedFrameTwist implements FixedFrameTwistBasics, GeometryObject<
     * Note that the reference frames are final.
     * </p>
     * 
-    * @param bodyFrame what we are specifying the twist of.
-    * @param baseFrame with respect to what we are specifying the twist.
+    * @param bodyFrame   what we are specifying the twist of.
+    * @param baseFrame   with respect to what we are specifying the twist.
     * @param angularPart the vector to use for the angular part.
-    * @param linearPart the vector to use for the linear part.
+    * @param linearPart  the vector to use for the linear part.
     */
    public YoFixedFrameTwist(ReferenceFrame bodyFrame, ReferenceFrame baseFrame, YoFrameVector3D angularPart, YoFrameVector3D linearPart)
    {
@@ -115,14 +115,13 @@ public class YoFixedFrameTwist implements FixedFrameTwistBasics, GeometryObject<
    }
 
    /**
-    * Creates a new twist given the spatial vector holding data and initializes its reference
-    * frames.
+    * Creates a new twist given the spatial vector holding data and initializes its reference frames.
     * <p>
     * Note that the reference frames are final.
     * </p>
     * 
-    * @param bodyFrame what we are specifying the twist of.
-    * @param baseFrame with respect to what we are specifying the twist.
+    * @param bodyFrame     what we are specifying the twist of.
+    * @param baseFrame     with respect to what we are specifying the twist.
     * @param spatialVector the spatial vector to use for holding data.
     */
    public YoFixedFrameTwist(ReferenceFrame bodyFrame, ReferenceFrame baseFrame, YoFixedFrameSpatialVector spatialVector)
@@ -245,7 +244,7 @@ public class YoFixedFrameTwist implements FixedFrameTwistBasics, GeometryObject<
     * Tests on a per component basis if this vector is equal to the given {@code other} to an
     * {@code epsilon} and both vectors have the same frames.
     *
-    * @param other the other motion vector to compare against this. Not modified.
+    * @param other   the other motion vector to compare against this. Not modified.
     * @param epsilon the tolerance to use when comparing each component.
     * @return {@code true} if the two vectors are equal, {@code false} otherwise.
     */
@@ -258,10 +257,10 @@ public class YoFixedFrameTwist implements FixedFrameTwistBasics, GeometryObject<
    /**
     * Tests if {@code this} and {@code other} represent the same twist to an {@code epsilon}.
     * <p>
-    * It is likely that the implementation of this method will change in the future as the
-    * definition of "geometrically-equal" for twists might evolve. In the meantime, the current
-    * assumption is that two twists are geometrically equal if both their 3D angular and 3D linear
-    * velocities are independently geometrically equal, see
+    * It is likely that the implementation of this method will change in the future as the definition
+    * of "geometrically-equal" for twists might evolve. In the meantime, the current assumption is that
+    * two twists are geometrically equal if both their 3D angular and 3D linear velocities are
+    * independently geometrically equal, see
     * {@link Vector3DReadOnly#geometricallyEquals(Vector3DReadOnly, double)}.
     * </p>
     * <p>
@@ -269,12 +268,12 @@ public class YoFixedFrameTwist implements FixedFrameTwistBasics, GeometryObject<
     * {@code this.epsilonEquals(other, epsilon)} and vice versa.
     * </p>
     *
-    * @param other the other twist to compare against this. Not modified.
+    * @param other   the other twist to compare against this. Not modified.
     * @param epsilon the tolerance to use for the comparison.
     * @return {@code true} if the two twists represent the same physical quantity, {@code false}
     *         otherwise.
     * @throws ReferenceFrameMismatchException if the reference frames of {@code other} do not
-    *            respectively match the reference frames of {@code this}.
+    *                                         respectively match the reference frames of {@code this}.
     */
    @Override
    public boolean geometricallyEquals(YoFixedFrameTwist other, double epsilon)
@@ -283,8 +282,8 @@ public class YoFixedFrameTwist implements FixedFrameTwistBasics, GeometryObject<
    }
 
    /**
-    * Tests if the given {@code object}'s class is the same as this, in which case the method
-    * returns {@link #equals(SpatialVectorReadOnly)}, it returns {@code false} otherwise.
+    * Tests if the given {@code object}'s class is the same as this, in which case the method returns
+    * {@link #equals(SpatialVectorReadOnly)}, it returns {@code false} otherwise.
     *
     * @param object the object to compare against this. Not modified.
     * @return {@code true} if {@code object} and this are exactly equal, {@code false} otherwise.

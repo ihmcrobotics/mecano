@@ -25,9 +25,8 @@ public class YoMecanoFactories
     * {@code YoVariable}s.
     * 
     * @param yoPitch the {@code YoVariable} used for the pitch-component of the orientation.
-    * @param yoX the {@code YoVariable} used for the x-component of the position.
-    * @param yoZ the {@code YoVariable} used for the z-component of the position.
-    *
+    * @param yoX     the {@code YoVariable} used for the x-component of the position.
+    * @param yoZ     the {@code YoVariable} used for the z-component of the position.
     * @return the new pose 3D.
     */
    public static Pose3DBasics newPlanarYoPose3DBasics(YoDouble yoPitch, YoDouble yoX, YoDouble yoZ)
@@ -52,8 +51,8 @@ public class YoMecanoFactories
    }
 
    /**
-    * Creates quaternion that is restricted to describe a rotation around the y-axis and which angle
-    * is backed by a {@code YoVariable}.
+    * Creates quaternion that is restricted to describe a rotation around the y-axis and which angle is
+    * backed by a {@code YoVariable}.
     *
     * @param yoPitch the {@code YoVariable} used for the angle.
     * @return the new quaternion.
@@ -172,8 +171,8 @@ public class YoMecanoFactories
     * Creates a vector that is restricted to the XZ-plane and which components are backed by
     * {@code YoVariable}s.
     *
-    * @param yoX the {@code YoVariable} to use for the x-component.
-    * @param yoZ the {@code YoVariable} to use for the z-component.
+    * @param yoX            the {@code YoVariable} to use for the x-component.
+    * @param yoZ            the {@code YoVariable} to use for the z-component.
     * @param referenceFrame the reference frame of the new vector.
     * @return the new vector.
     */
@@ -234,7 +233,7 @@ public class YoMecanoFactories
     * Creates a vector that is restricted to the y-axis and which component is backed by a
     * {@code YoVariable}.
     *
-    * @param yoY the {@code YoVariable} to use for the y-component.
+    * @param yoY            the {@code YoVariable} to use for the y-component.
     * @param referenceFrame the reference frame of the new vector.
     * @return the new vector.
     */
@@ -297,16 +296,16 @@ public class YoMecanoFactories
     * The frames of the new twist cannot be changed.
     * </p>
     *
-    * @param angularY the {@code YoVariable} to use for the y-component of the angular part.
-    * @param linearX the {@code YoVariable} to use for the x-component of the linear part.
-    * @param linearZ the {@code YoVariable} to use for the z-component of the linear part.
-    * @param bodyFrame the twist's body frame.
-    * @param baseFrame the twist's base frame.
+    * @param angularY         the {@code YoVariable} to use for the y-component of the angular part.
+    * @param linearX          the {@code YoVariable} to use for the x-component of the linear part.
+    * @param linearZ          the {@code YoVariable} to use for the z-component of the linear part.
+    * @param bodyFrame        the twist's body frame.
+    * @param baseFrame        the twist's base frame.
     * @param expressedInFrame the twist
     * @return the new twist.
     */
    public static FixedFrameTwistBasics newPlanarYoFixedFrameTwistBasics(YoDouble angularY, YoDouble linearX, YoDouble linearZ, ReferenceFrame bodyFrame,
-         ReferenceFrame baseFrame, ReferenceFrame expressedInFrame)
+                                                                        ReferenceFrame baseFrame, ReferenceFrame expressedInFrame)
    {
       return new FixedFrameTwistBasics()
       {
@@ -358,16 +357,17 @@ public class YoMecanoFactories
     * The frames of the new acceleration cannot be changed.
     * </p>
     *
-    * @param angularY the {@code YoVariable} to use for the y-component of the angular part.
-    * @param linearX the {@code YoVariable} to use for the x-component of the linear part.
-    * @param linearZ the {@code YoVariable} to use for the z-component of the linear part.
-    * @param bodyFrame the acceleration's body frame.
-    * @param baseFrame the acceleration's base frame.
+    * @param angularY         the {@code YoVariable} to use for the y-component of the angular part.
+    * @param linearX          the {@code YoVariable} to use for the x-component of the linear part.
+    * @param linearZ          the {@code YoVariable} to use for the z-component of the linear part.
+    * @param bodyFrame        the acceleration's body frame.
+    * @param baseFrame        the acceleration's base frame.
     * @param expressedInFrame the acceleration
     * @return the new acceleration.
     */
    public static FixedFrameSpatialAccelerationBasics newPlanarYoFixedFrameSpatialAccelerationVectorBasics(YoDouble angularY, YoDouble linearX, YoDouble linearZ,
-         ReferenceFrame bodyFrame, ReferenceFrame baseFrame, ReferenceFrame expressedInFrame)
+                                                                                                          ReferenceFrame bodyFrame, ReferenceFrame baseFrame,
+                                                                                                          ReferenceFrame expressedInFrame)
    {
       return new FixedFrameSpatialAccelerationBasics()
       {
@@ -419,15 +419,15 @@ public class YoMecanoFactories
     * The frames of the new wrench cannot be changed.
     * </p>
     *
-    * @param angularY the {@code YoVariable} to use for the y-component of the angular part.
-    * @param linearX the {@code YoVariable} to use for the x-component of the linear part.
-    * @param linearZ the {@code YoVariable} to use for the z-component of the linear part.
-    * @param bodyFrame the wrench's body frame.
+    * @param angularY         the {@code YoVariable} to use for the y-component of the angular part.
+    * @param linearX          the {@code YoVariable} to use for the x-component of the linear part.
+    * @param linearZ          the {@code YoVariable} to use for the z-component of the linear part.
+    * @param bodyFrame        the wrench's body frame.
     * @param expressedInFrame the wrench
     * @return the new wrench.
     */
    public static FixedFrameWrenchBasics newPlanarYoFixedFrameWrenchBasics(YoDouble angularY, YoDouble linearX, YoDouble linearZ, ReferenceFrame bodyFrame,
-         ReferenceFrame expressedInFrame)
+                                                                          ReferenceFrame expressedInFrame)
    {
       return new FixedFrameWrenchBasics()
       {

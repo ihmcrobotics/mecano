@@ -47,8 +47,7 @@ public class SpatialVector implements SpatialVectorBasics
    }
 
    /**
-    * Creates a new spatial vector with its components set to zero and initializes its reference
-    * frame.
+    * Creates a new spatial vector with its components set to zero and initializes its reference frame.
     *
     * @param expressedInFrame the initial frame in which this vector is expressed.
     */
@@ -62,8 +61,8 @@ public class SpatialVector implements SpatialVectorBasics
     * expressed in.
     *
     * @param expressedInFrame the initial frame in which this vector is expressed.
-    * @param angularPart the vector holding the values for the angular part. Not modified.
-    * @param linearPart the vector holding the values for the linear part. Not modified.
+    * @param angularPart      the vector holding the values for the angular part. Not modified.
+    * @param linearPart       the vector holding the values for the linear part. Not modified.
     */
    public SpatialVector(ReferenceFrame expressedInFrame, Vector3DReadOnly angularPart, Vector3DReadOnly linearPart)
    {
@@ -75,9 +74,9 @@ public class SpatialVector implements SpatialVectorBasics
     * expressed in.
     *
     * @param angularPart the vector holding the new values for the angular part. Not modified.
-    * @param linearPart the vector holding the new values for the linear part. Not modified.
-    * @throws ReferenceFrameMismatchException if the arguments are not expressed in the same
-    *            reference frame.
+    * @param linearPart  the vector holding the new values for the linear part. Not modified.
+    * @throws ReferenceFrameMismatchException if the arguments are not expressed in the same reference
+    *                                         frame.
     */
    public SpatialVector(FrameVector3DReadOnly angularPart, FrameVector3DReadOnly linearPart)
    {
@@ -123,8 +122,8 @@ public class SpatialVector implements SpatialVectorBasics
    }
 
    /**
-    * Tests if the given {@code object}'s class is the same as this, in which case the method
-    * returns {@link #equals(SpatialVectorReadOnly)}, it returns {@code false} otherwise.
+    * Tests if the given {@code object}'s class is the same as this, in which case the method returns
+    * {@link #equals(SpatialVectorReadOnly)}, it returns {@code false} otherwise.
     *
     * @param object the object to compare against this. Not modified.
     * @return {@code true} if {@code object} and this are exactly equal, {@code false} otherwise.

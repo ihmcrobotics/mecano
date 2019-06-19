@@ -70,9 +70,9 @@ public interface SpatialMotionBasics extends FixedFrameSpatialMotionBasics, Spat
     * </p>
     * <p>
     * When there is no relative motion, i.e. velocity for twists or acceleration for spatial
-    * accelerations, between the old and new body frames, this spatial motion vector remains
-    * correct. This is a consequence of Duindam, <i>"Port-Based Modeling and Control for Efficient
-    * Bipedal Walking Robots"</i>, page 25, lemma 2.8 (a).
+    * accelerations, between the old and new body frames, this spatial motion vector remains correct.
+    * This is a consequence of Duindam, <i>"Port-Based Modeling and Control for Efficient Bipedal
+    * Walking Robots"</i>, page 25, lemma 2.8 (a).
     * </p>
     *
     * @param bodyFrame the new body frame.
@@ -80,16 +80,16 @@ public interface SpatialMotionBasics extends FixedFrameSpatialMotionBasics, Spat
    void setBodyFrame(ReferenceFrame bodyFrame);
 
    /**
-    * Sets the frame attached to the base which is used as the reference when describing the motion
-    * of a body.
+    * Sets the frame attached to the base which is used as the reference when describing the motion of
+    * a body.
     * <p>
     * This method does not modify anything but the base frame.
     * </p>
     * <p>
     * When there is no relative motion, i.e. velocity for twists or acceleration for spatial
-    * accelerations, between the old and new base frames, this spatial motion vector remains
-    * correct. This is a consequence of Duindam, <i>"Port-Based Modeling and Control for Efficient
-    * Bipedal Walking Robots"</i>, page 25, lemma 2.8 (a).
+    * accelerations, between the old and new base frames, this spatial motion vector remains correct.
+    * This is a consequence of Duindam, <i>"Port-Based Modeling and Control for Efficient Bipedal
+    * Walking Robots"</i>, page 25, lemma 2.8 (a).
     * </p>
     *
     * @param baseFrame the new base frame.
@@ -99,8 +99,8 @@ public interface SpatialMotionBasics extends FixedFrameSpatialMotionBasics, Spat
    /**
     * Sets all the components of this vector to zero and updates its reference frames.
     *
-    * @param bodyFrame the new body frame.
-    * @param baseFrame the new base frame.
+    * @param bodyFrame        the new body frame.
+    * @param baseFrame        the new base frame.
     * @param expressedInFrame the new reference frame in which this motion is expressed.
     */
    default void setToZero(ReferenceFrame bodyFrame, ReferenceFrame baseFrame, ReferenceFrame expressedInFrame)
@@ -113,8 +113,8 @@ public interface SpatialMotionBasics extends FixedFrameSpatialMotionBasics, Spat
    /**
     * Sets all the components of this vector to {@link Double#NaN} and sets its reference frames.
     *
-    * @param bodyFrame the new body frame.
-    * @param baseFrame the new base frame.
+    * @param bodyFrame        the new body frame.
+    * @param baseFrame        the new base frame.
     * @param expressedInFrame the new reference frame in which this motion is expressed.
     */
    default void setToNaN(ReferenceFrame bodyFrame, ReferenceFrame baseFrame, ReferenceFrame expressedInFrame)
@@ -135,14 +135,14 @@ public interface SpatialMotionBasics extends FixedFrameSpatialMotionBasics, Spat
     * &nu;<sub>this</sub> = &nu;<sub>new</sub> + P &times; &omega;<sub>new</sub>
     * </pre>
     *
-    * where &omega; and &nu; represent the angular and linear parts respectively, and {@code P} is
-    * the {@code observerPosition}.
+    * where &omega; and &nu; represent the angular and linear parts respectively, and {@code P} is the
+    * {@code observerPosition}.
     * </p>
     *
     * @param expressedInFrame the reference frame in which the given motion is expressed.
-    * @param angularPart the angular part of the motion. Not modified.
-    * @param linearPart the linear part of the motion measured at the observer position. Not
-    *           modified.
+    * @param angularPart      the angular part of the motion. Not modified.
+    * @param linearPart       the linear part of the motion measured at the observer position. Not
+    *                         modified.
     * @param observerPosition the location at which the motion is measured. Not modified.
     */
    default void setIncludingFrame(ReferenceFrame expressedInFrame, Vector3DReadOnly angularPart, Vector3DReadOnly linearPart, Point3DReadOnly observerPosition)
@@ -162,17 +162,17 @@ public interface SpatialMotionBasics extends FixedFrameSpatialMotionBasics, Spat
     * &nu;<sub>this</sub> = &nu;<sub>new</sub> + P &times; &omega;<sub>new</sub>
     * </pre>
     *
-    * where &omega; and &nu; represent the angular and linear parts respectively, and {@code P} is
-    * the {@code observerPosition}.
+    * where &omega; and &nu; represent the angular and linear parts respectively, and {@code P} is the
+    * {@code observerPosition}.
     * </p>
     *
     * @param expressedInFrame the reference frame in which the given motion is expressed.
-    * @param angularPart the angular part of the motion. Not modified.
-    * @param linearPart the linear part of the motion measured at the observer position. Not
-    *           modified.
+    * @param angularPart      the angular part of the motion. Not modified.
+    * @param linearPart       the linear part of the motion measured at the observer position. Not
+    *                         modified.
     * @param observerPosition the location at which the motion is measured. Not modified.
     * @throws ReferenceFrameMismatchException if the arguments are not all expressed in the same
-    *            reference frame.
+    *                                         reference frame.
     */
    default void setIncludingFrame(FrameVector3DReadOnly angularPart, FrameVector3DReadOnly linearPart, FramePoint3DReadOnly observerPosition)
    {
@@ -194,8 +194,8 @@ public interface SpatialMotionBasics extends FixedFrameSpatialMotionBasics, Spat
    /**
     * Sets this motion vector to {@code spatialVector} and updates all its reference frames.
     *
-    * @param bodyFrame what we are specifying the motion of.
-    * @param baseFrame with respect to what we are specifying the motion.
+    * @param bodyFrame     what we are specifying the motion of.
+    * @param baseFrame     with respect to what we are specifying the motion.
     * @param spatialVector the spatial vector to copy values from. Not modified.
     */
    default void setIncludingFrame(ReferenceFrame bodyFrame, ReferenceFrame baseFrame, SpatialVectorReadOnly spatialVector)
@@ -207,14 +207,14 @@ public interface SpatialMotionBasics extends FixedFrameSpatialMotionBasics, Spat
     * Sets this motion vector given an angular part and linear part and updates all its reference
     * frames.
     *
-    * @param bodyFrame what we are specifying the motion of.
-    * @param baseFrame with respect to what we are specifying the motion.
-    * @param angularPart the vector holding the new values for the angular part, it is expressed in
-    *           the new "expressed-in-frame" to use for this spatial motion vector. Not modified.
-    * @param linearPart the vector holding the new values for the linear part, it is expressed in
-    *           the new "expressed-in-frame" to use for this spatial motion vector. Not modified.
-    * @throws ReferenceFrameMismatchException if the given {@code angularPart} and
-    *            {@code linearPart} are not expressed in the same reference frame.
+    * @param bodyFrame   what we are specifying the motion of.
+    * @param baseFrame   with respect to what we are specifying the motion.
+    * @param angularPart the vector holding the new values for the angular part, it is expressed in the
+    *                    new "expressed-in-frame" to use for this spatial motion vector. Not modified.
+    * @param linearPart  the vector holding the new values for the linear part, it is expressed in the
+    *                    new "expressed-in-frame" to use for this spatial motion vector. Not modified.
+    * @throws ReferenceFrameMismatchException if the given {@code angularPart} and {@code linearPart}
+    *                                         are not expressed in the same reference frame.
     */
    default void setIncludingFrame(ReferenceFrame bodyFrame, ReferenceFrame baseFrame, FrameVector3DReadOnly angularPart, FrameVector3DReadOnly linearPart)
    {
@@ -226,11 +226,11 @@ public interface SpatialMotionBasics extends FixedFrameSpatialMotionBasics, Spat
     * Sets this motion vector given an angular part and linear part and updates all its reference
     * frames.
     *
-    * @param bodyFrame what we are specifying the motion of.
-    * @param baseFrame with respect to what we are specifying the motion.
+    * @param bodyFrame        what we are specifying the motion of.
+    * @param baseFrame        with respect to what we are specifying the motion.
     * @param expressedInFrame in which reference frame the motion is expressed.
-    * @param angularPart the vector holding the new values for the angular part. Not modified.
-    * @param linearPart the vector holding the new values for the linear part. Not modified.
+    * @param angularPart      the vector holding the new values for the angular part. Not modified.
+    * @param linearPart       the vector holding the new values for the linear part. Not modified.
     */
    default void setIncludingFrame(ReferenceFrame bodyFrame, ReferenceFrame baseFrame, ReferenceFrame expressedInFrame, Vector3DReadOnly angularPart,
                                   Vector3DReadOnly linearPart)
@@ -248,11 +248,11 @@ public interface SpatialMotionBasics extends FixedFrameSpatialMotionBasics, Spat
     * {@code angularPartZ}, {@code linearPartX}, {@code linearPartY}, {@code linearPartZ}.
     * </p>
     *
-    * @param bodyFrame what we are specifying the motion of.
-    * @param baseFrame with respect to what we are specifying the motion.
+    * @param bodyFrame        what we are specifying the motion of.
+    * @param baseFrame        with respect to what we are specifying the motion.
     * @param expressedInFrame in which reference frame the motion is expressed.
-    * @param array the array containing the new values for this motion vector's components. Not
-    *           modified.
+    * @param array            the array containing the new values for this motion vector's components.
+    *                         Not modified.
     */
    default void setIncludingFrame(ReferenceFrame bodyFrame, ReferenceFrame baseFrame, ReferenceFrame expressedInFrame, double[] array)
    {
@@ -269,12 +269,12 @@ public interface SpatialMotionBasics extends FixedFrameSpatialMotionBasics, Spat
     * {@code angularPartZ}, {@code linearPartX}, {@code linearPartY}, {@code linearPartZ}.
     * </p>
     *
-    * @param bodyFrame what we are specifying the motion of.
-    * @param baseFrame with respect to what we are specifying the motion.
+    * @param bodyFrame        what we are specifying the motion of.
+    * @param baseFrame        with respect to what we are specifying the motion.
     * @param expressedInFrame in which reference frame the motion is expressed.
-    * @param startIndex the first index to start reading from in the array.
-    * @param array the array containing the new values for this motion vector's components. Not
-    *           modified.
+    * @param startIndex       the first index to start reading from in the array.
+    * @param array            the array containing the new values for this motion vector's components.
+    *                         Not modified.
     */
    default void setIncludingFrame(ReferenceFrame bodyFrame, ReferenceFrame baseFrame, ReferenceFrame expressedInFrame, int startIndex, double[] array)
    {
@@ -291,11 +291,11 @@ public interface SpatialMotionBasics extends FixedFrameSpatialMotionBasics, Spat
     * {@code angularPartZ}, {@code linearPartX}, {@code linearPartY}, {@code linearPartZ}.
     * </p>
     *
-    * @param bodyFrame what we are specifying the motion of.
-    * @param baseFrame with respect to what we are specifying the motion.
+    * @param bodyFrame        what we are specifying the motion of.
+    * @param baseFrame        with respect to what we are specifying the motion.
     * @param expressedInFrame in which reference frame the motion is expressed.
-    * @param array the array containing the new values for this motion vector's components. Not
-    *           modified.
+    * @param array            the array containing the new values for this motion vector's components.
+    *                         Not modified.
     */
    default void setIncludingFrame(ReferenceFrame bodyFrame, ReferenceFrame baseFrame, ReferenceFrame expressedInFrame, float[] array)
    {
@@ -312,12 +312,12 @@ public interface SpatialMotionBasics extends FixedFrameSpatialMotionBasics, Spat
     * {@code angularPartZ}, {@code linearPartX}, {@code linearPartY}, {@code linearPartZ}.
     * </p>
     *
-    * @param bodyFrame what we are specifying the motion of.
-    * @param baseFrame with respect to what we are specifying the motion.
+    * @param bodyFrame        what we are specifying the motion of.
+    * @param baseFrame        with respect to what we are specifying the motion.
     * @param expressedInFrame in which reference frame the motion is expressed.
-    * @param startIndex the first index to start reading from in the array.
-    * @param array the array containing the new values for this motion vector's components. Not
-    *           modified.
+    * @param startIndex       the first index to start reading from in the array.
+    * @param array            the array containing the new values for this motion vector's components.
+    *                         Not modified.
     */
    default void setIncludingFrame(ReferenceFrame bodyFrame, ReferenceFrame baseFrame, ReferenceFrame expressedInFrame, int startIndex, float[] array)
    {
@@ -334,11 +334,11 @@ public interface SpatialMotionBasics extends FixedFrameSpatialMotionBasics, Spat
     * {@code angularPartZ}, {@code linearPartX}, {@code linearPartY}, {@code linearPartZ}.
     * </p>
     *
-    * @param bodyFrame what we are specifying the motion of.
-    * @param baseFrame with respect to what we are specifying the motion.
+    * @param bodyFrame        what we are specifying the motion of.
+    * @param baseFrame        with respect to what we are specifying the motion.
     * @param expressedInFrame in which reference frame the motion is expressed.
-    * @param matrix the column vector containing the new values for this motion vector's components.
-    *           Not modified.
+    * @param matrix           the column vector containing the new values for this motion vector's
+    *                         components. Not modified.
     */
    default void setIncludingFrame(ReferenceFrame bodyFrame, ReferenceFrame baseFrame, ReferenceFrame expressedInFrame, DenseMatrix64F matrix)
    {
@@ -355,12 +355,12 @@ public interface SpatialMotionBasics extends FixedFrameSpatialMotionBasics, Spat
     * {@code angularPartZ}, {@code linearPartX}, {@code linearPartY}, {@code linearPartZ}.
     * </p>
     *
-    * @param bodyFrame what we are specifying the motion of.
-    * @param baseFrame with respect to what we are specifying the motion.
+    * @param bodyFrame        what we are specifying the motion of.
+    * @param baseFrame        with respect to what we are specifying the motion.
     * @param expressedInFrame in which reference frame the motion is expressed.
-    * @param startRow the first row index to start reading in the dense-matrix.
-    * @param matrix the column vector containing the new values for this motion vector's components.
-    *           Not modified.
+    * @param startRow         the first row index to start reading in the dense-matrix.
+    * @param matrix           the column vector containing the new values for this motion vector's
+    *                         components. Not modified.
     */
    default void setIncludingFrame(ReferenceFrame bodyFrame, ReferenceFrame baseFrame, ReferenceFrame expressedInFrame, int startRow, DenseMatrix64F matrix)
    {
@@ -370,20 +370,20 @@ public interface SpatialMotionBasics extends FixedFrameSpatialMotionBasics, Spat
    }
 
    /**
-    * Sets this motion vector's components from the given column vector starting to read from its
-    * first row index and updates all its reference frames.
+    * Sets this motion vector's components from the given column vector starting to read from its first
+    * row index and updates all its reference frames.
     * <p>
     * The components are read in the following order: {@code angularPartX}, {@code angularPartY},
     * {@code angularPartZ}, {@code linearPartX}, {@code linearPartY}, {@code linearPartZ}.
     * </p>
     *
-    * @param bodyFrame what we are specifying the motion of.
-    * @param baseFrame with respect to what we are specifying the motion.
+    * @param bodyFrame        what we are specifying the motion of.
+    * @param baseFrame        with respect to what we are specifying the motion.
     * @param expressedInFrame in which reference frame the motion is expressed.
-    * @param startRow the first row index to start reading in the dense-matrix.
-    * @param column the column index to read in the dense-matrix.
-    * @param matrix the column vector containing the new values for this motion vector's components.
-    *           Not modified.
+    * @param startRow         the first row index to start reading in the dense-matrix.
+    * @param column           the column index to read in the dense-matrix.
+    * @param matrix           the column vector containing the new values for this motion vector's
+    *                         components. Not modified.
     */
    default void setIncludingFrame(ReferenceFrame bodyFrame, ReferenceFrame baseFrame, ReferenceFrame expressedInFrame, int startRow, int column,
                                   DenseMatrix64F matrix)
@@ -397,9 +397,9 @@ public interface SpatialMotionBasics extends FixedFrameSpatialMotionBasics, Spat
     * Inverts this spatial motion vector such that after calling this method, this motion vector
     * describes the motion of the base with respect to the body.
     * <p>
-    * In other words: given the spatial motion of frame A with respect to frame B, expressed in
-    * frame C, this method computes the spatial motion of frame B with respect to frame A, expressed
-    * in frame C (or vice versa), by just taking the additive inverse.
+    * In other words: given the spatial motion of frame A with respect to frame B, expressed in frame
+    * C, this method computes the spatial motion of frame B with respect to frame A, expressed in frame
+    * C (or vice versa), by just taking the additive inverse.
     * </p>
     * <p>
     * See Duindam, <i>Port-Based Modeling and Control for Efficient Bipedal Walking Robots</i>, page

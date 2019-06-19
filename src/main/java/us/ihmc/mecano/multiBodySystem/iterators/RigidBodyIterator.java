@@ -19,7 +19,6 @@ import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyReadOnly;
  * </p>
  * 
  * @author Sylvain Bertrand
- *
  * @param <B> the type of the {@code Iterable}.
  */
 @SuppressWarnings("unchecked")
@@ -32,12 +31,12 @@ public class RigidBodyIterator<B extends RigidBodyReadOnly> implements Iterator<
     * Creates a new iterable for a single subtree.
     * 
     * @param filteringClass the class of the type of rigid-body to iterate through. If a rigid-body is
-    *           not an instance of the {@code filteringClass}, then it will not be part of the
-    *           iteration.
-    * @param selectionRule rule to filter the rigid-bodies to iterate through. Rigid-bodies for which
-    *           {@code selectionRule.test(body)} returns {@code false} are ignored and will not be part
-    *           of the iteration.
-    * @param root rigid-body from which the subtree starts. Not modified.
+    *                       not an instance of the {@code filteringClass}, then it will not be part of
+    *                       the iteration.
+    * @param selectionRule  rule to filter the rigid-bodies to iterate through. Rigid-bodies for which
+    *                       {@code selectionRule.test(body)} returns {@code false} are ignored and will
+    *                       not be part of the iteration.
+    * @param root           rigid-body from which the subtree starts. Not modified.
     */
    public RigidBodyIterator(Class<B> filteringClass, Predicate<B> selectionRule, RigidBodyReadOnly root)
    {
@@ -54,12 +53,12 @@ public class RigidBodyIterator<B extends RigidBodyReadOnly> implements Iterator<
     * Creates a new iterator for multiple subtrees.
     * 
     * @param filteringClass the class of the type of rigid-body to iterate through. If a rigid-body is
-    *           not an instance of the {@code filteringClass}, then it will not be part of the
-    *           iteration.
-    * @param selectionRule rule to filter the rigid-bodies to iterate through. Rigid-bodies for which
-    *           {@code selectionRule.test(body)} returns {@code false} are ignored and will not be part
-    *           of the iteration.
-    * @param roots rigid-bodies from which each subtree starts. Not modified.
+    *                       not an instance of the {@code filteringClass}, then it will not be part of
+    *                       the iteration.
+    * @param selectionRule  rule to filter the rigid-bodies to iterate through. Rigid-bodies for which
+    *                       {@code selectionRule.test(body)} returns {@code false} are ignored and will
+    *                       not be part of the iteration.
+    * @param roots          rigid-bodies from which each subtree starts. Not modified.
     */
    public RigidBodyIterator(Class<B> filteringClass, Predicate<B> selectionRule, Collection<? extends RigidBodyReadOnly> roots)
    {

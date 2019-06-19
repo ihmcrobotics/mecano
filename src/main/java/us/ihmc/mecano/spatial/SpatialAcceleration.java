@@ -62,13 +62,13 @@ import us.ihmc.mecano.tools.MecanoIOTools;
 public class SpatialAcceleration implements SpatialAccelerationBasics, GeometryObject<SpatialAcceleration>
 {
    /**
-    * Reference frame rigidly attached to the body that this spatial acceleration describes the
-    * motion of.
+    * Reference frame rigidly attached to the body that this spatial acceleration describes the motion
+    * of.
     */
    private ReferenceFrame bodyFrame;
    /**
-    * Reference frame rigidly attached to the base that this spatial acceleration uses as reference
-    * for quantifying the body's acceleration.
+    * Reference frame rigidly attached to the base that this spatial acceleration uses as reference for
+    * quantifying the body's acceleration.
     */
    private ReferenceFrame baseFrame;
    /** This is where we store the internal data. */
@@ -80,8 +80,8 @@ public class SpatialAcceleration implements SpatialAccelerationBasics, GeometryO
    private final RigidBodyTransform transformToDesiredFrame = new RigidBodyTransform();
 
    /**
-    * Creates a new spatial acceleration with its components set to zero and its reference frames
-    * set to {@code null}.
+    * Creates a new spatial acceleration with its components set to zero and its reference frames set
+    * to {@code null}.
     */
    public SpatialAcceleration()
    {
@@ -89,11 +89,11 @@ public class SpatialAcceleration implements SpatialAccelerationBasics, GeometryO
    }
 
    /**
-    * Creates a new spatial acceleration with its components set to zero and initializes its
-    * reference frames.
+    * Creates a new spatial acceleration with its components set to zero and initializes its reference
+    * frames.
     *
-    * @param bodyFrame what we are specifying the spatial acceleration of.
-    * @param baseFrame with respect to what we are specifying the spatial acceleration.
+    * @param bodyFrame        what we are specifying the spatial acceleration of.
+    * @param baseFrame        with respect to what we are specifying the spatial acceleration.
     * @param expressedInFrame in which reference frame the spatial acceleration is expressed.
     */
    public SpatialAcceleration(ReferenceFrame bodyFrame, ReferenceFrame baseFrame, ReferenceFrame expressedInFrame)
@@ -104,11 +104,11 @@ public class SpatialAcceleration implements SpatialAccelerationBasics, GeometryO
    /**
     * Creates a new spatial acceleration and initializes its components and reference frames.
     *
-    * @param bodyFrame what we are specifying the spatial acceleration of.
-    * @param baseFrame with respect to what we are specifying the spatial acceleration.
+    * @param bodyFrame        what we are specifying the spatial acceleration of.
+    * @param baseFrame        with respect to what we are specifying the spatial acceleration.
     * @param expressedInFrame in which reference frame the spatial acceleration is expressed.
-    * @param angularPart the vector holding the values for the angular part. Not modified.
-    * @param linearPart the vector holding the values for the linear part. Not modified.
+    * @param angularPart      the vector holding the values for the angular part. Not modified.
+    * @param linearPart       the vector holding the values for the linear part. Not modified.
     */
    public SpatialAcceleration(ReferenceFrame bodyFrame, ReferenceFrame baseFrame, ReferenceFrame expressedInFrame, Vector3DReadOnly angularPart,
                               Vector3DReadOnly linearPart)
@@ -119,12 +119,14 @@ public class SpatialAcceleration implements SpatialAccelerationBasics, GeometryO
    /**
     * Creates a new spatial acceleration and initializes its components and reference frames.
     *
-    * @param bodyFrame what we are specifying the spatial acceleration of.
-    * @param baseFrame with respect to what we are specifying the spatial acceleration.
+    * @param bodyFrame   what we are specifying the spatial acceleration of.
+    * @param baseFrame   with respect to what we are specifying the spatial acceleration.
     * @param angularPart the vector holding the values for the angular part, it is expressed in the
-    *           "expressed-in-frame" to use for this spatial acceleration vector. Not modified.
-    * @param linearPart the vector holding the values for the linear part, it is expressed in the
-    *           "expressed-in-frame" to use for this spatial acceleration vector. Not modified.
+    *                    "expressed-in-frame" to use for this spatial acceleration vector. Not
+    *                    modified.
+    * @param linearPart  the vector holding the values for the linear part, it is expressed in the
+    *                    "expressed-in-frame" to use for this spatial acceleration vector. Not
+    *                    modified.
     */
    public SpatialAcceleration(ReferenceFrame bodyFrame, ReferenceFrame baseFrame, FrameVector3DReadOnly angularPart, FrameVector3DReadOnly linearPart)
    {
@@ -134,10 +136,10 @@ public class SpatialAcceleration implements SpatialAccelerationBasics, GeometryO
    /**
     * Creates a new spatial acceleration and initializes its components and reference frames.
     *
-    * @param bodyFrame what we are specifying the spatial acceleration of.
-    * @param baseFrame with respect to what we are specifying the spatial acceleration.
-    * @param spatialVector the vector holding the values, it is expressed in the
-    *           "expressed-in-frame" to use for this spatial acceleration vector. Not modified.
+    * @param bodyFrame     what we are specifying the spatial acceleration of.
+    * @param baseFrame     with respect to what we are specifying the spatial acceleration.
+    * @param spatialVector the vector holding the values, it is expressed in the "expressed-in-frame"
+    *                      to use for this spatial acceleration vector. Not modified.
     */
    public SpatialAcceleration(ReferenceFrame bodyFrame, ReferenceFrame baseFrame, SpatialVectorReadOnly spatialVector)
    {
@@ -151,11 +153,11 @@ public class SpatialAcceleration implements SpatialAccelerationBasics, GeometryO
     * {@code angularPartZ}, {@code linearPartX}, {@code linearPartY}, {@code linearPartZ}.
     * </p>
     *
-    * @param bodyFrame what we are specifying the spatial acceleration of.
-    * @param baseFrame with respect to what we are specifying the spatial acceleration.
+    * @param bodyFrame        what we are specifying the spatial acceleration of.
+    * @param baseFrame        with respect to what we are specifying the spatial acceleration.
     * @param expressedInFrame in which reference frame the spatial acceleration is expressed.
-    * @param matrix the column vector containing the values for this vector's components. Not
-    *           modified.
+    * @param matrix           the column vector containing the values for this vector's components. Not
+    *                         modified.
     */
    public SpatialAcceleration(ReferenceFrame bodyFrame, ReferenceFrame baseFrame, ReferenceFrame expressedInFrame, DenseMatrix64F matrix)
    {
@@ -169,10 +171,11 @@ public class SpatialAcceleration implements SpatialAccelerationBasics, GeometryO
     * {@code angularPartZ}, {@code linearPartX}, {@code linearPartY}, {@code linearPartZ}.
     * </p>
     *
-    * @param bodyFrame what we are specifying the spatial acceleration of.
-    * @param baseFrame with respect to what we are specifying the spatial acceleration.
+    * @param bodyFrame        what we are specifying the spatial acceleration of.
+    * @param baseFrame        with respect to what we are specifying the spatial acceleration.
     * @param expressedInFrame in which reference frame the spatial acceleration is expressed.
-    * @param array the array containing the new values for this vector's components. Not modified.
+    * @param array            the array containing the new values for this vector's components. Not
+    *                         modified.
     */
    public SpatialAcceleration(ReferenceFrame bodyFrame, ReferenceFrame baseFrame, ReferenceFrame expressedInFrame, double[] array)
    {
@@ -221,14 +224,14 @@ public class SpatialAcceleration implements SpatialAccelerationBasics, GeometryO
     * Transforms this vector such that the result is the same physical spatial acceleration but
     * expressed in a different frame.
     * <p>
-    * <b> Use this method only if there is no relative motion between the given desired frame and
-    * the frame in which this vector is currently expressed. If there is a relative velocity, use
+    * <b> Use this method only if there is no relative motion between the given desired frame and the
+    * frame in which this vector is currently expressed. If there is a relative velocity, use
     * {@link #changeFrame(ReferenceFrame, TwistReadOnly, TwistReadOnly)} </b>
     * </p>
     * <p>
     * Once this spatial acceleration is transformed, the reference frame "expressed-in-frame" is
-    * updated to {@code desiredFrame}. In the case, {@code this.expressedInFrame == desiredFrame},
-    * this method does nothing.
+    * updated to {@code desiredFrame}. In the case, {@code this.expressedInFrame == desiredFrame}, this
+    * method does nothing.
     * </p>
     * <p>
     * Note that in addition to transforming the angular and linear parts so their components are
@@ -247,8 +250,8 @@ public class SpatialAcceleration implements SpatialAccelerationBasics, GeometryO
     * where:
     * <ul>
     * <li>&omega;' and &alpha; are the current angular and linear parts of this spatial vector,
-    * <li>R and P are the rotation and translation of the current "expressed-in-frame" with respect
-    * to the desired frame.
+    * <li>R and P are the rotation and translation of the current "expressed-in-frame" with respect to
+    * the desired frame.
     * </ul>
     * </p>
     * <p>
@@ -258,7 +261,7 @@ public class SpatialAcceleration implements SpatialAccelerationBasics, GeometryO
     * </p>
     *
     * @param desiredFrame the new reference frame in which this spatial acceleration is to be
-    *           expressed.
+    *                     expressed.
     */
    @Override
    public void changeFrame(ReferenceFrame desiredFrame)
@@ -381,7 +384,7 @@ public class SpatialAcceleration implements SpatialAccelerationBasics, GeometryO
     * Tests on a per component basis if this vector is equal to the given {@code other} to an
     * {@code epsilon} and both vectors have the same frames.
     *
-    * @param other the other motion vector to compare against this. Not modified.
+    * @param other   the other motion vector to compare against this. Not modified.
     * @param epsilon the tolerance to use when comparing each component.
     * @return {@code true} if the two vectors are equal, {@code false} otherwise.
     */
@@ -395,10 +398,10 @@ public class SpatialAcceleration implements SpatialAccelerationBasics, GeometryO
     * Tests if {@code this} and {@code other} represent the same spatial acceleration to an
     * {@code epsilon}.
     * <p>
-    * It is likely that the implementation of this method will change in the future as the
-    * definition of "geometrically-equal" for spatial accelerations might evolve. In the meantime,
-    * the current assumption is that two spatial accelerations are geometrically equal if both their
-    * 3D angular and 3D linear accelerations are independently geometrically equal, see
+    * It is likely that the implementation of this method will change in the future as the definition
+    * of "geometrically-equal" for spatial accelerations might evolve. In the meantime, the current
+    * assumption is that two spatial accelerations are geometrically equal if both their 3D angular and
+    * 3D linear accelerations are independently geometrically equal, see
     * {@link Vector3DReadOnly#geometricallyEquals(Vector3DReadOnly, double)}.
     * </p>
     * <p>
@@ -406,12 +409,12 @@ public class SpatialAcceleration implements SpatialAccelerationBasics, GeometryO
     * {@code this.epsilonEquals(other, epsilon)} and vice versa.
     * </p>
     *
-    * @param other the other spatial acceleration to compare against this. Not modified.
+    * @param other   the other spatial acceleration to compare against this. Not modified.
     * @param epsilon the tolerance to use for the comparison.
     * @return {@code true} if the two spatial accelerations represent the same physical quantity,
     *         {@code false} otherwise.
     * @throws ReferenceFrameMismatchException if the reference frames of {@code other} do not
-    *            respectively match the reference frames of {@code this}.
+    *                                         respectively match the reference frames of {@code this}.
     */
    @Override
    public boolean geometricallyEquals(SpatialAcceleration other, double epsilon)
@@ -420,8 +423,8 @@ public class SpatialAcceleration implements SpatialAccelerationBasics, GeometryO
    }
 
    /**
-    * Tests if the given {@code object}'s class is the same as this, in which case the method
-    * returns {@link #equals(SpatialVectorReadOnly)}, it returns {@code false} otherwise.
+    * Tests if the given {@code object}'s class is the same as this, in which case the method returns
+    * {@link #equals(SpatialVectorReadOnly)}, it returns {@code false} otherwise.
     *
     * @param object the object to compare against this. Not modified.
     * @return {@code true} if {@code object} and this are exactly equal, {@code false} otherwise.
@@ -437,8 +440,8 @@ public class SpatialAcceleration implements SpatialAccelerationBasics, GeometryO
 
    /**
     * Provides a {@code String} representation of this spatial acceleration vector as follows:<br>
-    * Spatial acceleration of bodyFrame, with respect to baseFrame: [angular = (x, y, z), linear =
-    * (x, y, z)] - expressedInFrame
+    * Spatial acceleration of bodyFrame, with respect to baseFrame: [angular = (x, y, z), linear = (x,
+    * y, z)] - expressedInFrame
     *
     * @return the {@code String} representing this spatial acceleration vector.
     */

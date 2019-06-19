@@ -64,7 +64,7 @@ public class MecanoTools
     * Tests if the given matrix is symmetric.
     * 
     * @param matrixToTest the 3D matrix to test for symmetry. Not modified.
-    * @param epsilon the tolerance to use in this test.
+    * @param epsilon      the tolerance to use in this test.
     * @return {@code true} if the given matrix is symmetric, {@code false} otherwise.
     */
    public static boolean isMatrix3DSymmetric(Matrix3DReadOnly matrixToTest, double epsilon)
@@ -82,28 +82,36 @@ public class MecanoTools
     * Tests if the given matrix only has non-zero coefficients on its diagonal.
     * 
     * @param matrixToTest the 3D matrix to test. Not modified.
-    * @param epsilon the tolerance used on the off-diagonal coefficients.
+    * @param epsilon      the tolerance used on the off-diagonal coefficients.
     * @return {@code true} if all the off-diagonal terms of the matrix are equal to zero, {@code false}
     *         otherwise.
     */
    public static boolean isMatrix3DDiagonal(Matrix3DReadOnly matrixToTest, double epsilon)
    {
-      return isMatrix3DDiagonal(matrixToTest.getM00(), matrixToTest.getM01(), matrixToTest.getM02(), matrixToTest.getM10(), matrixToTest.getM11(),
-                                matrixToTest.getM12(), matrixToTest.getM20(), matrixToTest.getM21(), matrixToTest.getM22(), epsilon);
+      return isMatrix3DDiagonal(matrixToTest.getM00(),
+                                matrixToTest.getM01(),
+                                matrixToTest.getM02(),
+                                matrixToTest.getM10(),
+                                matrixToTest.getM11(),
+                                matrixToTest.getM12(),
+                                matrixToTest.getM20(),
+                                matrixToTest.getM21(),
+                                matrixToTest.getM22(),
+                                epsilon);
    }
 
    /**
     * Tests if the given matrix only has non-zero coefficients on its diagonal.
     * 
-    * @param m00 first matrix element in the first row.
-    * @param m01 second matrix element in the first row.
-    * @param m02 third matrix element in the first row.
-    * @param m10 first matrix element in the second row.
-    * @param m11 second matrix element in the second row.
-    * @param m12 third matrix element in the second row.
-    * @param m20 first matrix element in the third row.
-    * @param m21 second matrix element in the third row.
-    * @param m22 third matrix element in the third row.
+    * @param m00     first matrix element in the first row.
+    * @param m01     second matrix element in the first row.
+    * @param m02     third matrix element in the first row.
+    * @param m10     first matrix element in the second row.
+    * @param m11     second matrix element in the second row.
+    * @param m12     third matrix element in the second row.
+    * @param m20     first matrix element in the third row.
+    * @param m21     second matrix element in the third row.
+    * @param m22     third matrix element in the third row.
     * @param epsilon the tolerance used on the off-diagonal coefficients.
     * @return {@code true} if all the off-diagonal terms of the matrix are equal to zero, {@code false}
     *         otherwise.
@@ -123,7 +131,7 @@ public class MecanoTools
     * Asserts that the given matrix is symmetric.
     * 
     * @param matrixToTest the 3D matrix to verify. Not modified.
-    * @param epsilon the tolerance to use.
+    * @param epsilon      the tolerance to use.
     * @throws RuntimeException if the given matrix is not symmetric.
     */
    public static void checkIfMatrix3DIsSymmetric(Matrix3DReadOnly matrixToTest, double epsilon)
@@ -139,10 +147,10 @@ public class MecanoTools
     * vectorToModify += crossTerm1 &times; crossTerm2
     * </pre>
     *
-    * @param crossTerm1 the first term of the cross product. Not modified.
-    * @param crossTerm2 the second term of the cross product. Not modified.
+    * @param crossTerm1     the first term of the cross product. Not modified.
+    * @param crossTerm2     the second term of the cross product. Not modified.
     * @param vectorToModify the vector to which the result of the cross product should be added.
-    *           Modified.
+    *                       Modified.
     */
    public static void addCrossToVector(Tuple3DReadOnly crossTerm1, Tuple3DReadOnly crossTerm2, Vector3DBasics vectorToModify)
    {
@@ -162,11 +170,11 @@ public class MecanoTools
     *     \ -y  x  0 /
     * </pre>
     *
-    * @param tuple the tuple to create the tilde form of. Not modified.
-    * @param startRow the row index at which the tilde matrix is to be inserted in
-    *           {@code matrixToPack}.
-    * @param startColumn the column index at which the tilde matrix is to be inserted in
-    *           {@code matrixToPack}.
+    * @param tuple        the tuple to create the tilde form of. Not modified.
+    * @param startRow     the row index at which the tilde matrix is to be inserted in
+    *                     {@code matrixToPack}.
+    * @param startColumn  the column index at which the tilde matrix is to be inserted in
+    *                     {@code matrixToPack}.
     * @param matrixToPack the matrix used to store the result. Modified.
     */
    public static void toTildeForm(Tuple3DReadOnly tuple, int startRow, int startColumn, DenseMatrix64F matrixToPack)
@@ -183,13 +191,13 @@ public class MecanoTools
     *     \ -y  x  0 /
     * </pre>
     *
-    * @param tuple the tuple to create the tilde form of. Not modified.
-    * @param transpose whether the 3-by-3 tilde form is to be transposed before inserting it in
-    *           {@code matrixToPack}.
-    * @param startRow the row index at which the tilde matrix is to be inserted in
-    *           {@code matrixToPack}.
-    * @param startColumn the column index at which the tilde matrix is to be inserted in
-    *           {@code matrixToPack}.
+    * @param tuple        the tuple to create the tilde form of. Not modified.
+    * @param transpose    whether the 3-by-3 tilde form is to be transposed before inserting it in
+    *                     {@code matrixToPack}.
+    * @param startRow     the row index at which the tilde matrix is to be inserted in
+    *                     {@code matrixToPack}.
+    * @param startColumn  the column index at which the tilde matrix is to be inserted in
+    *                     {@code matrixToPack}.
     * @param matrixToPack the matrix used to store the result. Modified.
     */
    public static void toTildeForm(Tuple3DReadOnly tuple, boolean transpose, int startRow, int startColumn, DenseMatrix64F matrixToPack)
@@ -206,14 +214,14 @@ public class MecanoTools
     *         \ -y  x  0 /
     * </pre>
     *
-    * @param scale scale factor to apply to the components of the resulting matrix.
-    * @param tuple the tuple to create the tilde form of. Not modified.
-    * @param transpose whether the 3-by-3 tilde form is to be transposed before inserting it in
-    *           {@code matrixToPack}.
-    * @param startRow the row index at which the tilde matrix is to be inserted in
-    *           {@code matrixToPack}.
-    * @param startColumn the column index at which the tilde matrix is to be inserted in
-    *           {@code matrixToPack}.
+    * @param scale        scale factor to apply to the components of the resulting matrix.
+    * @param tuple        the tuple to create the tilde form of. Not modified.
+    * @param transpose    whether the 3-by-3 tilde form is to be transposed before inserting it in
+    *                     {@code matrixToPack}.
+    * @param startRow     the row index at which the tilde matrix is to be inserted in
+    *                     {@code matrixToPack}.
+    * @param startColumn  the column index at which the tilde matrix is to be inserted in
+    *                     {@code matrixToPack}.
     * @param matrixToPack the matrix used to store the result. Modified.
     */
    public static void toTildeForm(double scale, Tuple3DReadOnly tuple, boolean transpose, int startRow, int startColumn, DenseMatrix64F matrixToPack)
@@ -251,9 +259,9 @@ public class MecanoTools
    /**
     * Adds the given {@code matrixToAdd} to {@code matrixToModify}.
     * 
-    * @param startRow the first row index in {@code matrixToAdd} to start reading elements.
-    * @param startColumn the first column index in {@code matrixToAdd} to start reading elements.
-    * @param matrixToAdd the matrix to be added. Not modified.
+    * @param startRow       the first row index in {@code matrixToAdd} to start reading elements.
+    * @param startColumn    the first column index in {@code matrixToAdd} to start reading elements.
+    * @param matrixToAdd    the matrix to be added. Not modified.
     * @param matrixToModify the matrix to which the {@code DenseMatrix64F} is to be added. Modified.
     */
    public static void addEquals(int startRow, int startColumn, DenseMatrix64F matrixToAdd, Matrix3DBasics matrixToModify)
@@ -276,11 +284,11 @@ public class MecanoTools
    /**
     * Subtracts the given {@code matrixToAdd} to {@code matrixToModify}.
     * 
-    * @param startRow the first row index in {@code matrixToAdd} to start reading elements.
-    * @param startColumn the first column index in {@code matrixToAdd} to start reading elements.
-    * @param matrixToAdd the matrix to be subtracted. Not modified.
+    * @param startRow       the first row index in {@code matrixToAdd} to start reading elements.
+    * @param startColumn    the first column index in {@code matrixToAdd} to start reading elements.
+    * @param matrixToAdd    the matrix to be subtracted. Not modified.
     * @param matrixToModify the matrix to which the {@code DenseMatrix64F} is to be subtracted.
-    *           Modified.
+    *                       Modified.
     */
    public static void subEquals(int startRow, int startColumn, DenseMatrix64F matrixToAdd, Matrix3DBasics matrixToModify)
    {
@@ -320,12 +328,14 @@ public class MecanoTools
     * </pre>
     * </p>
     * 
-    * @param mass the mass of the corresponding rigid body.
-    * @param centerOfMass the coordinates of the center of mass expressed in the same frame as the
-    *           given {@code massMomentOfInertiaToTransform}. Not modified.
-    * @param negateTranslation whether to negate the translation before transforming the moment of
-    *           inertia.
-    * @param translation the translation to apply to the mass moment of inertia matrix. Not modified.
+    * @param mass                       the mass of the corresponding rigid body.
+    * @param centerOfMass               the coordinates of the center of mass expressed in the same
+    *                                   frame as the given {@code massMomentOfInertiaToTransform}. Not
+    *                                   modified.
+    * @param negateTranslation          whether to negate the translation before transforming the
+    *                                   moment of inertia.
+    * @param translation                the translation to apply to the mass moment of inertia matrix.
+    *                                   Not modified.
     * @param momentOfInertiaToTransform the inertia matrix to transform. Modified.
     */
    public static void translateMomentOfInertia(double mass, Tuple3DReadOnly centerOfMass, boolean negateTranslation, Tuple3DReadOnly translation,
@@ -387,14 +397,14 @@ public class MecanoTools
     * assumed to be equal to zero.
     * </p>
     * 
-    * @param momentOfInertia the moment of inertia of the rigid body expressed at its center of mass.
-    *           Not modified.
+    * @param momentOfInertia     the moment of inertia of the rigid body expressed at its center of
+    *                            mass. Not modified.
     * @param angularAcceleration the angular acceleration of the rigid-body with respect to an inertial
-    *           frame and expressed in the same frame as the inertia matrix. Can be {@code null}. Not
-    *           modified.
-    * @param angularVelocity the angular velocity of the rigid-body with respect to an inertial frame
-    *           and expressed in the same frame as the inertia matrix. Can be {@code null}. Not
-    *           modified.
+    *                            frame and expressed in the same frame as the inertia matrix. Can be
+    *                            {@code null}. Not modified.
+    * @param angularVelocity     the angular velocity of the rigid-body with respect to an inertial
+    *                            frame and expressed in the same frame as the inertia matrix. Can be
+    *                            {@code null}. Not modified.
     * @param dynamicMomentToPack vector used to store the net moment at the center of mass. Modified.
     */
    public static void computeDynamicMomentFast(Matrix3DReadOnly momentOfInertia, Vector3DReadOnly angularAcceleration, Vector3DReadOnly angularVelocity,
@@ -441,24 +451,25 @@ public class MecanoTools
     * {@code linearVelocity} is {@code null}, it is assumed to be equal to zero.
     * </p>
     * 
-    * @param momentOfInertia the moment of inertia of the rigid body. Not modified.
-    * @param mass the rigid body mass.
-    * @param centerOfMassOffset the offset of the center of mass position with respect to the origin of
-    *           the frame in which the inertia is expressed. Not modified.
+    * @param momentOfInertia     the moment of inertia of the rigid body. Not modified.
+    * @param mass                the rigid body mass.
+    * @param centerOfMassOffset  the offset of the center of mass position with respect to the origin
+    *                            of the frame in which the inertia is expressed. Not modified.
     * @param angularAcceleration the angular acceleration of the rigid-body with respect to an inertial
-    *           frame and expressed in the same frame as the inertia matrix. Can be {@code null}. Not
-    *           modified.
-    * @param linearAcceleration the linear acceleration of the origin of the frame in which the inertia
-    *           is expressed with respect to an inertial frame and expressed in the same frame as the
-    *           inertia matrix. Can be {@code null}. Not modified.
-    * @param angularVelocity the angular velocity of the rigid-body with respect to an inertial frame
-    *           and expressed in the same frame as the inertia matrix. Can be {@code null}. Not
-    *           modified.
-    * @param linearVelocity the linear velocity of the origin of the frame in which the inertia is
-    *           expressed with respect to an inertial frame and expressed in the same frame as the
-    *           inertia matrix. Can be {@code null}. Not modified.
+    *                            frame and expressed in the same frame as the inertia matrix. Can be
+    *                            {@code null}. Not modified.
+    * @param linearAcceleration  the linear acceleration of the origin of the frame in which the
+    *                            inertia is expressed with respect to an inertial frame and expressed
+    *                            in the same frame as the inertia matrix. Can be {@code null}. Not
+    *                            modified.
+    * @param angularVelocity     the angular velocity of the rigid-body with respect to an inertial
+    *                            frame and expressed in the same frame as the inertia matrix. Can be
+    *                            {@code null}. Not modified.
+    * @param linearVelocity      the linear velocity of the origin of the frame in which the inertia is
+    *                            expressed with respect to an inertial frame and expressed in the same
+    *                            frame as the inertia matrix. Can be {@code null}. Not modified.
     * @param dynamicMomentToPack vector used to store the net moment at the origin of the frame in
-    *           which the inertia is expressed. Modified.
+    *                            which the inertia is expressed. Modified.
     */
    public static void computeDynamicMoment(Matrix3DReadOnly momentOfInertia, double mass, Vector3DReadOnly centerOfMassOffset,
                                            Vector3DReadOnly angularAcceleration, Vector3DReadOnly linearAcceleration, Vector3DReadOnly angularVelocity,
@@ -539,16 +550,16 @@ public class MecanoTools
     * {@code null}, it is assumed to be equal to zero.
     * </p>
     * 
-    * @param mass the rigid body mass.
+    * @param mass               the rigid body mass.
     * @param linearAcceleration the linear acceleration of the origin of the frame in which the inertia
-    *           is expressed with respect to an inertial frame and expressed in the same frame as the
-    *           inertia matrix. Can be {@code null}. Not modified.
-    * @param angularVelocity the angular velocity of the rigid-body with respect to an inertial frame
-    *           and expressed in the same frame as the inertia matrix. Can be {@code null}. Not
-    *           modified.
-    * @param linearVelocity the linear velocity of the origin of the frame in which the inertia is
-    *           expressed with respect to an inertial frame and expressed in the same frame as the
-    *           inertia matrix. Can be {@code null}. Not modified.
+    *                           is expressed with respect to an inertial frame and expressed in the
+    *                           same frame as the inertia matrix. Can be {@code null}. Not modified.
+    * @param angularVelocity    the angular velocity of the rigid-body with respect to an inertial
+    *                           frame and expressed in the same frame as the inertia matrix. Can be
+    *                           {@code null}. Not modified.
+    * @param linearVelocity     the linear velocity of the origin of the frame in which the inertia is
+    *                           expressed with respect to an inertial frame and expressed in the same
+    *                           frame as the inertia matrix. Can be {@code null}. Not modified.
     * @param dynamicForceToPack vector used to store the net force at the center of mass. Modified.
     */
    public static void computeDynamicForceFast(double mass, Vector3DReadOnly linearAcceleration, Vector3DReadOnly angularVelocity,
@@ -586,23 +597,24 @@ public class MecanoTools
     * {@code linearVelocity} is {@code null}, it is assumed to be equal to zero.
     * </p>
     * 
-    * @param mass the rigid body mass.
-    * @param centerOfMassOffset the offset of the center of mass position with respect to the origin of
-    *           the frame in which the inertia is expressed. Not modified.
+    * @param mass                the rigid body mass.
+    * @param centerOfMassOffset  the offset of the center of mass position with respect to the origin
+    *                            of the frame in which the inertia is expressed. Not modified.
     * @param angularAcceleration the angular acceleration of the rigid-body with respect to an inertial
-    *           frame and expressed in the same frame as the inertia matrix. Can be {@code null}. Not
-    *           modified.
-    * @param linearAcceleration the linear acceleration of the origin of the frame in which the inertia
-    *           is expressed with respect to an inertial frame and expressed in the same frame as the
-    *           inertia matrix. Can be {@code null}. Not modified.
-    * @param angularVelocity the angular velocity of the rigid-body with respect to an inertial frame
-    *           and expressed in the same frame as the inertia matrix. Can be {@code null}. Not
-    *           modified.
-    * @param linearVelocity the linear velocity of the origin of the frame in which the inertia is
-    *           expressed with respect to an inertial frame and expressed in the same frame as the
-    *           inertia matrix. Can be {@code null}. Not modified.
-    * @param dynamicForceToPack vector used to store the net force at the origin of the frame in which
-    *           the inertia is expressed. Modified.
+    *                            frame and expressed in the same frame as the inertia matrix. Can be
+    *                            {@code null}. Not modified.
+    * @param linearAcceleration  the linear acceleration of the origin of the frame in which the
+    *                            inertia is expressed with respect to an inertial frame and expressed
+    *                            in the same frame as the inertia matrix. Can be {@code null}. Not
+    *                            modified.
+    * @param angularVelocity     the angular velocity of the rigid-body with respect to an inertial
+    *                            frame and expressed in the same frame as the inertia matrix. Can be
+    *                            {@code null}. Not modified.
+    * @param linearVelocity      the linear velocity of the origin of the frame in which the inertia is
+    *                            expressed with respect to an inertial frame and expressed in the same
+    *                            frame as the inertia matrix. Can be {@code null}. Not modified.
+    * @param dynamicForceToPack  vector used to store the net force at the origin of the frame in which
+    *                            the inertia is expressed. Modified.
     */
    public static void computeDynamicForce(double mass, Vector3DReadOnly centerOfMassOffset, Vector3DReadOnly angularAcceleration,
                                           Vector3DReadOnly linearAcceleration, Vector3DReadOnly angularVelocity, Vector3DReadOnly linearVelocity,
@@ -647,15 +659,16 @@ public class MecanoTools
     * However, all the arguments should be expressed in the same frame.
     * </p>
     * 
-    * @param momentOfInertia the moment of inertia of the rigid body. Not modified.
-    * @param mass the rigid body mass.
+    * @param momentOfInertia    the moment of inertia of the rigid body. Not modified.
+    * @param mass               the rigid body mass.
     * @param centerOfMassOffset the offset of the center of mass position with respect to the origin of
-    *           the frame in which the inertia is expressed. Not modified.
-    * @param angularVelocity the angular velocity of the rigid-body with respect to an inertial frame
-    *           and expressed in the same frame as the inertia matrix. Not modified.
-    * @param linearVelocity the linear velocity of the origin of the frame in which the inertia is
-    *           expressed with respect to an inertial frame and expressed in the same frame as the
-    *           inertia matrix. Not modified.
+    *                           the frame in which the inertia is expressed. Not modified.
+    * @param angularVelocity    the angular velocity of the rigid-body with respect to an inertial
+    *                           frame and expressed in the same frame as the inertia matrix. Not
+    *                           modified.
+    * @param linearVelocity     the linear velocity of the origin of the frame in which the inertia is
+    *                           expressed with respect to an inertial frame and expressed in the same
+    *                           frame as the inertia matrix. Not modified.
     * @return the value of the kinetic co-energy.
     */
    public static double computeKineticCoEnergy(Matrix3DReadOnly momentOfInertia, double mass, Vector3DReadOnly centerOfMassOffset,
@@ -707,7 +720,7 @@ public class MecanoTools
    /**
     * Attempts to cast the given joint to the type {@code T}.
     * 
-    * @param jointToCast the joint to be casted to the type {@code T}. Not modified.
+    * @param jointToCast   the joint to be casted to the type {@code T}. Not modified.
     * @param classToCastTo the class the joint is susceptible to be an instance of.
     * @return the joint casted to the type {@code T}.
     */
@@ -727,7 +740,7 @@ public class MecanoTools
     * </p>
     * 
     * @param beforeJointFrame the frame right before the joint.
-    * @param afterJointFrame the frame right after the joint.
+    * @param afterJointFrame  the frame right after the joint.
     * @return the list of unit-twists.
     */
    public static List<TwistReadOnly> computePlanarJointMotionSubspace(ReferenceFrame beforeJointFrame, ReferenceFrame afterJointFrame)
@@ -771,7 +784,7 @@ public class MecanoTools
     * </p>
     * 
     * @param beforeJointFrame the frame right before the joint.
-    * @param afterJointFrame the frame right after the joint.
+    * @param afterJointFrame  the frame right after the joint.
     * @return the list of unit-twists.
     */
    public static List<TwistReadOnly> computeSixDoFJointMotionSubspace(ReferenceFrame beforeJointFrame, ReferenceFrame afterJointFrame)
@@ -814,7 +827,7 @@ public class MecanoTools
     * </p>
     * 
     * @param beforeJointFrame the frame right before the joint.
-    * @param afterJointFrame the frame right after the joint.
+    * @param afterJointFrame  the frame right after the joint.
     * @return the list of unit-twists.
     */
    public static List<TwistReadOnly> computeSphericalJointMotionSubspace(ReferenceFrame beforeJointFrame, ReferenceFrame afterJointFrame)
@@ -859,7 +872,7 @@ public class MecanoTools
     * {@code rotation}<sup>-1</sup>.
     * </p>
     * 
-    * @param rotation the rotation to apply to the given matrix. Not modified.
+    * @param rotation                the rotation to apply to the given matrix. Not modified.
     * @param symmetricMatrixToRotate the symmetric matrix to be transformed. Modified.
     * @see Matrix3DTools#transform(Matrix3DReadOnly, Matrix3DReadOnly, Matrix3DBasics)
     */
@@ -891,7 +904,7 @@ public class MecanoTools
     * * {@code rotation}.
     * </p>
     * 
-    * @param rotation the rotation to apply to the given matrix. Not modified.
+    * @param rotation                the rotation to apply to the given matrix. Not modified.
     * @param symmetricMatrixToRotate the symmetric matrix to be transformed. Modified.
     * @see Matrix3DTools#inverseTransform(Matrix3DReadOnly, Matrix3DReadOnly, Matrix3DBasics)
     */

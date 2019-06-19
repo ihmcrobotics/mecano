@@ -42,11 +42,11 @@ public interface FixedFrameMomentumBasics extends MomentumReadOnly, FixedFrameSp
     * </pre>
     * 
     * @param spatialInertia the inertia to use for computing the momentum. Not modified.
-    * @param twist the twist to use for computing the momentum. Not modified.
-    * @throws ReferenceFrameMismatchException if either argument is not expressed in the same
-    *            reference frame as {@code this}.
-    * @throws RuntimeException if the base frame of the given {@code twist} is not an inertial
-    *            frame.
+    * @param twist          the twist to use for computing the momentum. Not modified.
+    * @throws ReferenceFrameMismatchException if either argument is not expressed in the same reference
+    *                                         frame as {@code this}.
+    * @throws RuntimeException                if the base frame of the given {@code twist} is not an
+    *                                         inertial frame.
     */
    default void compute(SpatialInertiaReadOnly spatialInertia, TwistReadOnly twist)
    {

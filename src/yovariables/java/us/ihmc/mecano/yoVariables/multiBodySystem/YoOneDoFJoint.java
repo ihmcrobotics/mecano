@@ -23,18 +23,18 @@ public abstract class YoOneDoFJoint extends OneDoFJoint
    /**
     * Creates the abstract layer for a new 1-DoF joint backed by {@code YoVariable}s.
     *
-    * @param name the name for the new joint.
-    * @param predecessor the rigid-body connected to and preceding this joint.
+    * @param name                 the name for the new joint.
+    * @param predecessor          the rigid-body connected to and preceding this joint.
     * @param jointAxisAngularPart the unit-vector if this joint is a revolute joint. A zero vector
-    *           otherwise. Not modified.
-    * @param jointAxisLinearPart the unit-vector if this joint is a prismatic joint. A zero vector
-    *           otherwise. Not modified.
-    * @param transformToParent the transform from this joint to the {@code frameAfterJoint} of its
-    *           parent joint. Not modified.
-    * @param registry the registry to register child variables to.
+    *                             otherwise. Not modified.
+    * @param jointAxisLinearPart  the unit-vector if this joint is a prismatic joint. A zero vector
+    *                             otherwise. Not modified.
+    * @param transformToParent    the transform from this joint to the {@code frameAfterJoint} of its
+    *                             parent joint. Not modified.
+    * @param registry             the registry to register child variables to.
     */
    public YoOneDoFJoint(String name, RigidBodyBasics predecessor, Vector3DReadOnly jointAxisAngularPart, Vector3DReadOnly jointAxisLinearPart,
-         RigidBodyTransform transformToParent, YoVariableRegistry registry)
+                        RigidBodyTransform transformToParent, YoVariableRegistry registry)
    {
       super(name, predecessor, jointAxisAngularPart, jointAxisLinearPart, transformToParent);
 

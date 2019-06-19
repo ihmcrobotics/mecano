@@ -133,10 +133,10 @@ public interface SpatialVectorReadOnly extends ReferenceFrameHolder
    /**
     * Selects a component of this spatial vector based on {@code index} and returns its value.
     * <ul>
-    * <li>For an {@code index} &in; [0, 2], the corresponding components are {@code x}, {@code y},
-    * and {@code z} of this vector's angular part.
-    * <li>For an {@code index} &in; [3, 5], the corresponding components are {@code x}, {@code y},
-    * and {@code z} of this vector's linear part.
+    * <li>For an {@code index} &in; [0, 2], the corresponding components are {@code x}, {@code y}, and
+    * {@code z} of this vector's angular part.
+    * <li>For an {@code index} &in; [3, 5], the corresponding components are {@code x}, {@code y}, and
+    * {@code z} of this vector's linear part.
     * </ul>
     *
     * @param index the index of the component to get.
@@ -147,20 +147,20 @@ public interface SpatialVectorReadOnly extends ReferenceFrameHolder
    {
       switch (index)
       {
-      case 0:
-         return getAngularPartX();
-      case 1:
-         return getAngularPartY();
-      case 2:
-         return getAngularPartZ();
-      case 3:
-         return getLinearPartX();
-      case 4:
-         return getLinearPartY();
-      case 5:
-         return getLinearPartZ();
-      default:
-         throw new IndexOutOfBoundsException(Integer.toString(index));
+         case 0:
+            return getAngularPartX();
+         case 1:
+            return getAngularPartY();
+         case 2:
+            return getAngularPartZ();
+         case 3:
+            return getLinearPartX();
+         case 4:
+            return getLinearPartY();
+         case 5:
+            return getLinearPartZ();
+         default:
+            throw new IndexOutOfBoundsException(Integer.toString(index));
       }
    }
 
@@ -185,7 +185,7 @@ public interface SpatialVectorReadOnly extends ReferenceFrameHolder
     * {@code angularPartZ}, {@code linearPartX}, {@code linearPartY}, {@code linearPartZ}.
     * </p>
     *
-    * @param startIndex the index in the array where the first component is stored.
+    * @param startIndex  the index in the array where the first component is stored.
     * @param arrayToPack the array in which this vector is stored. Modified.
     */
    default void get(int startIndex, double[] arrayToPack)
@@ -215,7 +215,7 @@ public interface SpatialVectorReadOnly extends ReferenceFrameHolder
     * {@code angularPartZ}, {@code linearPartX}, {@code linearPartY}, {@code linearPartZ}.
     * </p>
     *
-    * @param startIndex the index in the array where the first component is stored.
+    * @param startIndex  the index in the array where the first component is stored.
     * @param arrayToPack the array in which this vector is stored. Modified.
     */
    default void get(int startIndex, float[] arrayToPack)
@@ -245,7 +245,7 @@ public interface SpatialVectorReadOnly extends ReferenceFrameHolder
     * {@code angularPartZ}, {@code linearPartX}, {@code linearPartY}, {@code linearPartZ}.
     * </p>
     *
-    * @param startRow the first row index to start writing in the dense-matrix.
+    * @param startRow     the first row index to start writing in the dense-matrix.
     * @param matrixToPack the column vector in which this vector is stored. Modified.
     */
    default void get(int startRow, DenseMatrix64F matrixToPack)
@@ -261,8 +261,8 @@ public interface SpatialVectorReadOnly extends ReferenceFrameHolder
     * {@code angularPartZ}, {@code linearPartX}, {@code linearPartY}, {@code linearPartZ}.
     * </p>
     *
-    * @param startRow the first row index to start writing in the dense-matrix.
-    * @param column the column index to write in the dense-matrix.
+    * @param startRow     the first row index to start writing in the dense-matrix.
+    * @param column       the column index to write in the dense-matrix.
     * @param matrixToPack the column vector in which this vector is stored. Modified.
     */
    default void get(int startRow, int column, DenseMatrix64F matrixToPack)
@@ -291,8 +291,8 @@ public interface SpatialVectorReadOnly extends ReferenceFrameHolder
     * Calculates and returns the magnitude of this vector.
     * <p>
     * length = &radic;(angular<sub>x</sub><sup>2</sup> + angular<sub>y</sub><sup>2</sup> +
-    * angular<sub>z</sub><sup>2</sup> + linear<sub>x</sub><sup>2</sup> +
-    * linear<sub>y</sub><sup>2</sup> + linear<sub>z</sub><sup>2</sup>)
+    * angular<sub>z</sub><sup>2</sup> + linear<sub>x</sub><sup>2</sup> + linear<sub>y</sub><sup>2</sup>
+    * + linear<sub>z</sub><sup>2</sup>)
     * </p>
     *
     * @return the magnitude of this vector.
@@ -306,8 +306,8 @@ public interface SpatialVectorReadOnly extends ReferenceFrameHolder
     * Calculates and returns the square of the magnitude of this vector.
     * <p>
     * length<sup>2</sup> = angular<sub>x</sub><sup>2</sup> + angular<sub>y</sub><sup>2</sup> +
-    * angular<sub>z</sub><sup>2</sup> + linear<sub>x</sub><sup>2</sup> +
-    * linear<sub>y</sub><sup>2</sup> + linear<sub>z</sub><sup>2</sup>
+    * angular<sub>z</sub><sup>2</sup> + linear<sub>x</sub><sup>2</sup> + linear<sub>y</sub><sup>2</sup>
+    * + linear<sub>z</sub><sup>2</sup>
     * </p>
     * <p>
     * This method is usually preferred over {@link #length()} when calculation speed matters and
@@ -326,7 +326,7 @@ public interface SpatialVectorReadOnly extends ReferenceFrameHolder
     * Tests on a per component basis if this vector is equal to the given {@code other} to an
     * {@code epsilon} and both vectors are expressed in the same reference frame.
     *
-    * @param other the other vector to compare against this. Not modified.
+    * @param other   the other vector to compare against this. Not modified.
     * @param epsilon the tolerance to use when comparing each component.
     * @return {@code true} if the two vectors are equal, {@code false} otherwise.
     */
@@ -342,8 +342,8 @@ public interface SpatialVectorReadOnly extends ReferenceFrameHolder
    }
 
    /**
-    * Tests on a per component basis, if this vector is exactly equal to {@code other} and expressed
-    * in the same reference frame.
+    * Tests on a per component basis, if this vector is exactly equal to {@code other} and expressed in
+    * the same reference frame.
     *
     * @param other the other vector to compare against this. Not modified.
     * @return {@code true} if the two vectors are exactly equal component-wise, {@code false}

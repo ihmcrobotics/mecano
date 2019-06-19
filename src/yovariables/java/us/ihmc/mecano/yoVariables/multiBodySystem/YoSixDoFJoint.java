@@ -47,9 +47,9 @@ public class YoSixDoFJoint extends Joint implements SixDoFJointBasics
     * the multi-body system.
     * </p>
     * 
-    * @param name the name for the new joint.
+    * @param name        the name for the new joint.
     * @param predecessor the rigid-body connected to and preceding this joint.
-    * @param registry the registry to register child variables to.
+    * @param registry    the registry to register child variables to.
     */
    public YoSixDoFJoint(String name, RigidBodyBasics predecessor, YoVariableRegistry registry)
    {
@@ -59,10 +59,10 @@ public class YoSixDoFJoint extends Joint implements SixDoFJointBasics
    /**
     * Creates a new 6-DoF joint which state is backed by {@code YoVariable}s.
     * 
-    * @param name the name for the new joint.
-    * @param predecessor the rigid-body connected to and preceding this joint.
+    * @param name              the name for the new joint.
+    * @param predecessor       the rigid-body connected to and preceding this joint.
     * @param transformToParent the transform to the frame after the parent joint. Not modified.
-    * @param registry the registry to register child variables to.
+    * @param registry          the registry to register child variables to.
     */
    public YoSixDoFJoint(String name, RigidBodyBasics predecessor, RigidBodyTransform transformToParent, YoVariableRegistry registry)
    {

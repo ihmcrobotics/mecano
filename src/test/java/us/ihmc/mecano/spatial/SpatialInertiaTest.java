@@ -62,8 +62,11 @@ public class SpatialInertiaTest
          SpatialInertia inertia = MecanoRandomTools.nextSpatialInertia(random, bodyFrame, expressedInFrame);
          Twist twist = MecanoRandomTools.nextTwist(random, bodyFrame, worldFrame, expressedInFrame);
 
-         double expected = MecanoTools.computeKineticCoEnergy(inertia.getMomentOfInertia(), inertia.getMass(), inertia.getCenterOfMassOffset(),
-                                                                         twist.getAngularPart(), twist.getLinearPart());
+         double expected = MecanoTools.computeKineticCoEnergy(inertia.getMomentOfInertia(),
+                                                              inertia.getMass(),
+                                                              inertia.getCenterOfMassOffset(),
+                                                              twist.getAngularPart(),
+                                                              twist.getLinearPart());
          double actual = inertia.computeKineticCoEnergy(twist);
 
          assertEquals(expected, actual, EPSILON);
@@ -112,10 +115,12 @@ public class SpatialInertiaTest
          Twist twist = MecanoRandomTools.nextTwist(random, bodyFrame, worldFrame, bodyFrame);
 
          Wrench expected = new Wrench(bodyFrame, bodyFrame);
-         MecanoTools.computeDynamicMomentFast(inertia.getMomentOfInertia(), acceleration.getAngularPart(), twist.getAngularPart(),
-                                                         expected.getAngularPart());
-         MecanoTools.computeDynamicForceFast(inertia.getMass(), acceleration.getLinearPart(), twist.getAngularPart(), twist.getLinearPart(),
-                                                        expected.getLinearPart());
+         MecanoTools.computeDynamicMomentFast(inertia.getMomentOfInertia(), acceleration.getAngularPart(), twist.getAngularPart(), expected.getAngularPart());
+         MecanoTools.computeDynamicForceFast(inertia.getMass(),
+                                             acceleration.getLinearPart(),
+                                             twist.getAngularPart(),
+                                             twist.getLinearPart(),
+                                             expected.getLinearPart());
 
          Wrench actual = new Wrench(worldFrame, worldFrame);
          inertia.computeDynamicWrenchFast(acceleration, twist, actual);
@@ -144,8 +149,7 @@ public class SpatialInertiaTest
          inertia.computeDynamicWrenchFast(acceleration, twist, wrench);
 
          inertia.setReferenceFrame(anotherFrame);
-         MecanoTestTools.assertExceptionIsThrown(() -> inertia.computeDynamicWrenchFast(acceleration, twist, wrench),
-                                                            ReferenceFrameMismatchException.class);
+         MecanoTestTools.assertExceptionIsThrown(() -> inertia.computeDynamicWrenchFast(acceleration, twist, wrench), ReferenceFrameMismatchException.class);
          inertia.setReferenceFrame(bodyFrame);
          inertia.computeDynamicWrenchFast(acceleration, twist, wrench);
 
@@ -160,26 +164,22 @@ public class SpatialInertiaTest
          inertia.computeDynamicWrenchFast(acceleration, twist, wrench);
 
          twist.setReferenceFrame(anotherFrame);
-         MecanoTestTools.assertExceptionIsThrown(() -> inertia.computeDynamicWrenchFast(acceleration, twist, wrench),
-                                                            ReferenceFrameMismatchException.class);
+         MecanoTestTools.assertExceptionIsThrown(() -> inertia.computeDynamicWrenchFast(acceleration, twist, wrench), ReferenceFrameMismatchException.class);
          twist.setReferenceFrame(bodyFrame);
          inertia.computeDynamicWrenchFast(acceleration, twist, wrench);
 
          acceleration.setReferenceFrame(anotherFrame);
-         MecanoTestTools.assertExceptionIsThrown(() -> inertia.computeDynamicWrenchFast(acceleration, twist, wrench),
-                                                            ReferenceFrameMismatchException.class);
+         MecanoTestTools.assertExceptionIsThrown(() -> inertia.computeDynamicWrenchFast(acceleration, twist, wrench), ReferenceFrameMismatchException.class);
          acceleration.setReferenceFrame(bodyFrame);
          inertia.computeDynamicWrenchFast(acceleration, twist, wrench);
 
          twist.setBodyFrame(anotherFrame);
-         MecanoTestTools.assertExceptionIsThrown(() -> inertia.computeDynamicWrenchFast(acceleration, twist, wrench),
-                                                            ReferenceFrameMismatchException.class);
+         MecanoTestTools.assertExceptionIsThrown(() -> inertia.computeDynamicWrenchFast(acceleration, twist, wrench), ReferenceFrameMismatchException.class);
          twist.setBodyFrame(bodyFrame);
          inertia.computeDynamicWrenchFast(acceleration, twist, wrench);
 
          acceleration.setBodyFrame(anotherFrame);
-         MecanoTestTools.assertExceptionIsThrown(() -> inertia.computeDynamicWrenchFast(acceleration, twist, wrench),
-                                                            ReferenceFrameMismatchException.class);
+         MecanoTestTools.assertExceptionIsThrown(() -> inertia.computeDynamicWrenchFast(acceleration, twist, wrench), ReferenceFrameMismatchException.class);
          acceleration.setBodyFrame(bodyFrame);
          inertia.computeDynamicWrenchFast(acceleration, twist, wrench);
       }
@@ -193,9 +193,9 @@ public class SpatialInertiaTest
       for (int i = 0; i < ITERATIONS; i++)
       {
          /*
-          * This test uses the fact that the kinetic co-energy is frame invariant. So it effectively
-          * allows to compare the changeFrame method for SpatialInertiaMatrix against the much
-          * simpler changeFrame method for Twist.
+          * This test uses the fact that the kinetic co-energy is frame invariant. So it effectively allows
+          * to compare the changeFrame method for SpatialInertiaMatrix against the much simpler changeFrame
+          * method for Twist.
           */
          ReferenceFrame bodyFrame = EuclidFrameRandomTools.nextReferenceFrame(random);
          ReferenceFrame baseFrame = EuclidFrameRandomTools.nextReferenceFrame(random);
@@ -227,8 +227,8 @@ public class SpatialInertiaTest
       for (int i = 0; i < ITERATIONS; i++)
       {
          /*
-          * This test verifies Newton's law "F = ma" computed in different frames. To make things
-          * easier, we assume zero velocity just acceleration.
+          * This test verifies Newton's law "F = ma" computed in different frames. To make things easier, we
+          * assume zero velocity just acceleration.
           */
          ReferenceFrame bodyFrame = EuclidFrameRandomTools.nextReferenceFrame(random);
          ReferenceFrame baseFrame = EuclidFrameRandomTools.nextReferenceFrame(random);
@@ -272,7 +272,8 @@ public class SpatialInertiaTest
       for (int i = 0; i < ITERATIONS; i++)
       { // Test that a rotation does not change the center of mass offset.
          ReferenceFrame initialFrame = EuclidFrameRandomTools.nextReferenceFrame(random);
-         ReferenceFrame finalFrame = ReferenceFrameTools.constructFrameWithUnchangingTransformToParent("finalFrame", initialFrame,
+         ReferenceFrame finalFrame = ReferenceFrameTools.constructFrameWithUnchangingTransformToParent("finalFrame",
+                                                                                                       initialFrame,
                                                                                                        new RigidBodyTransform(EuclidCoreRandomTools.nextQuaternion(random),
                                                                                                                               new Point3D()));
 
@@ -288,7 +289,8 @@ public class SpatialInertiaTest
       for (int i = 0; i < ITERATIONS; i++)
       { // Sanity test on the moment of inertia
          ReferenceFrame initialFrame = EuclidFrameRandomTools.nextReferenceFrame(random);
-         ReferenceFrame finalFrame = ReferenceFrameTools.constructFrameWithUnchangingTransformToParent("finalFrame", initialFrame,
+         ReferenceFrame finalFrame = ReferenceFrameTools.constructFrameWithUnchangingTransformToParent("finalFrame",
+                                                                                                       initialFrame,
                                                                                                        new RigidBodyTransform(EuclidCoreRandomTools.nextQuaternion(random),
                                                                                                                               new Point3D()));
 

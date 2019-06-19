@@ -115,7 +115,8 @@ public class TwistTest extends SpatialMotionTest<Twist>
    @Test
    public void testConstructUsingArrayTooSmall()
    {
-      Assertions.assertThrows(RuntimeException.class, () -> {
+      Assertions.assertThrows(RuntimeException.class, () ->
+      {
          double[] array = new double[Twist.SIZE - 1];
          new Twist(frameC, frameD, frameA, array);
       });
@@ -174,7 +175,8 @@ public class TwistTest extends SpatialMotionTest<Twist>
    @Test
    public void testDotProductNotAllowed1()
    {
-      Assertions.assertThrows(RuntimeException.class, () -> {
+      Assertions.assertThrows(RuntimeException.class, () ->
+      {
          WrenchTest.testDotProductNotAllowed1(frameA, frameB, frameC);
       });
    }
@@ -182,7 +184,8 @@ public class TwistTest extends SpatialMotionTest<Twist>
    @Test
    public void testDotProductNotAllowed2()
    {
-      Assertions.assertThrows(RuntimeException.class, () -> {
+      Assertions.assertThrows(RuntimeException.class, () ->
+      {
          WrenchTest.testDotProductNotAllowed2(frameA, frameB, frameC);
       });
    }
@@ -194,7 +197,8 @@ public class TwistTest extends SpatialMotionTest<Twist>
    @Test
    public void testAddExpressedInDifferentFrames()
    {
-      Assertions.assertThrows(ReferenceFrameMismatchException.class, () -> {
+      Assertions.assertThrows(ReferenceFrameMismatchException.class, () ->
+      {
          Twist twist1 = createSpatialMotionVector(frameB, frameA, frameC, new Vector3D(), new Vector3D());
          Twist twist2 = createSpatialMotionVector(frameB, frameA, frameA, new Vector3D(), new Vector3D());
 
@@ -209,7 +213,8 @@ public class TwistTest extends SpatialMotionTest<Twist>
    @Test
    public void testAddNotRelative()
    {
-      Assertions.assertThrows(ReferenceFrameMismatchException.class, () -> {
+      Assertions.assertThrows(ReferenceFrameMismatchException.class, () ->
+      {
          Twist twist1 = createSpatialMotionVector(frameB, frameA, frameC, new Vector3D(), new Vector3D());
          Twist twist2 = createSpatialMotionVector(frameB, frameA, frameC, new Vector3D(), new Vector3D());
 
@@ -297,7 +302,8 @@ public class TwistTest extends SpatialMotionTest<Twist>
    @Test
    public void testSubWrongExpressedInFrame()
    {
-      Assertions.assertThrows(RuntimeException.class, () -> {
+      Assertions.assertThrows(RuntimeException.class, () ->
+      {
          Twist twist1 = new Twist(frameB, frameA, frameD);
          Twist twist2 = new Twist(frameB, frameC, frameC);
          twist1.sub(twist2);
@@ -307,7 +313,8 @@ public class TwistTest extends SpatialMotionTest<Twist>
    @Test
    public void testSubFramesDontMatchUp()
    {
-      Assertions.assertThrows(RuntimeException.class, () -> {
+      Assertions.assertThrows(RuntimeException.class, () ->
+      {
          Twist twist1 = new Twist(frameD, frameA, frameC);
          Twist twist2 = new Twist(frameB, frameC, frameC);
          twist1.sub(twist2);
@@ -414,9 +421,11 @@ public class TwistTest extends SpatialMotionTest<Twist>
       for (int i = 0; i < 1000; i++)
       {
          ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
-         ReferenceFrame baseFrame = ReferenceFrameTools.constructFrameWithUnchangingTransformToParent("baseFrame", worldFrame,
+         ReferenceFrame baseFrame = ReferenceFrameTools.constructFrameWithUnchangingTransformToParent("baseFrame",
+                                                                                                      worldFrame,
                                                                                                       EuclidCoreRandomTools.nextRigidBodyTransform(random));
-         ReferenceFrame bodyFrame = ReferenceFrameTools.constructFrameWithUnchangingTransformToParent("bodyFrame", worldFrame,
+         ReferenceFrame bodyFrame = ReferenceFrameTools.constructFrameWithUnchangingTransformToParent("bodyFrame",
+                                                                                                      worldFrame,
                                                                                                       EuclidCoreRandomTools.nextRigidBodyTransform(random));
          Vector3D linearVelocity = EuclidCoreRandomTools.nextVector3D(random, -10.0, 10.0);
          Vector3D angularVelocity = EuclidCoreRandomTools.nextVector3D(random, -10.0, 10.0);

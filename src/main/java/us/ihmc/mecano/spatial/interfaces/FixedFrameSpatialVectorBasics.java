@@ -167,26 +167,26 @@ public interface FixedFrameSpatialVectorBasics extends SpatialVectorReadOnly, Cl
    {
       switch (index)
       {
-      case 0:
-         setAngularPartX(value);
-         break;
-      case 1:
-         setAngularPartY(value);
-         break;
-      case 2:
-         setAngularPartZ(value);
-         break;
-      case 3:
-         setLinearPartX(value);
-         break;
-      case 4:
-         setLinearPartY(value);
-         break;
-      case 5:
-         setLinearPartZ(value);
-         break;
-      default:
-         throw new IndexOutOfBoundsException(Integer.toString(index));
+         case 0:
+            setAngularPartX(value);
+            break;
+         case 1:
+            setAngularPartY(value);
+            break;
+         case 2:
+            setAngularPartZ(value);
+            break;
+         case 3:
+            setLinearPartX(value);
+            break;
+         case 4:
+            setLinearPartY(value);
+            break;
+         case 5:
+            setLinearPartZ(value);
+            break;
+         default:
+            throw new IndexOutOfBoundsException(Integer.toString(index));
       }
    }
 
@@ -212,7 +212,7 @@ public interface FixedFrameSpatialVectorBasics extends SpatialVectorReadOnly, Cl
     * </p>
     *
     * @param startIndex the first index to start reading from in the array.
-    * @param array the array containing the new values for this vector's components. Not modified.
+    * @param array      the array containing the new values for this vector's components. Not modified.
     */
    default void set(int startIndex, double[] array)
    {
@@ -242,7 +242,7 @@ public interface FixedFrameSpatialVectorBasics extends SpatialVectorReadOnly, Cl
     * </p>
     *
     * @param startIndex the first index to start reading from in the array.
-    * @param array the array containing the new values for this vector's components. Not modified.
+    * @param array      the array containing the new values for this vector's components. Not modified.
     */
    default void set(int startIndex, float[] array)
    {
@@ -259,7 +259,7 @@ public interface FixedFrameSpatialVectorBasics extends SpatialVectorReadOnly, Cl
     * </p>
     *
     * @param matrix the column vector containing the new values for this vector's components. Not
-    *           modified.
+    *               modified.
     */
    default void set(DenseMatrix64F matrix)
    {
@@ -275,8 +275,8 @@ public interface FixedFrameSpatialVectorBasics extends SpatialVectorReadOnly, Cl
     * </p>
     *
     * @param startRow the first row index to start reading in the dense-matrix.
-    * @param matrix the column vector containing the new values for this vector's components. Not
-    *           modified.
+    * @param matrix   the column vector containing the new values for this vector's components. Not
+    *                 modified.
     */
    default void set(int startRow, DenseMatrix64F matrix)
    {
@@ -292,9 +292,9 @@ public interface FixedFrameSpatialVectorBasics extends SpatialVectorReadOnly, Cl
     * </p>
     *
     * @param startRow the first row index to start reading in the dense-matrix.
-    * @param column the column index to read in the dense-matrix.
-    * @param matrix the column vector containing the new values for this vector's components. Not
-    *           modified.
+    * @param column   the column index to read in the dense-matrix.
+    * @param matrix   the column vector containing the new values for this vector's components. Not
+    *                 modified.
     */
    default void set(int startRow, int column, DenseMatrix64F matrix)
    {
@@ -306,7 +306,7 @@ public interface FixedFrameSpatialVectorBasics extends SpatialVectorReadOnly, Cl
     * Sets this vector given an angular part and linear part.
     *
     * @param angularPart the vector holding the new values for the angular part. Not modified.
-    * @param linearPart the vector holding the new values for the linear part. Not modified.
+    * @param linearPart  the vector holding the new values for the linear part. Not modified.
     */
    default void set(Vector3DReadOnly angularPart, Vector3DReadOnly linearPart)
    {
@@ -319,7 +319,7 @@ public interface FixedFrameSpatialVectorBasics extends SpatialVectorReadOnly, Cl
     *
     * @param other the other vector to copy. Not modified.
     * @throws ReferenceFrameMismatchException if {@code other} is not expressed in the same reference
-    *            frame as {@code this}.
+    *                                         frame as {@code this}.
     */
    default void set(SpatialVectorReadOnly other)
    {
@@ -359,9 +359,9 @@ public interface FixedFrameSpatialVectorBasics extends SpatialVectorReadOnly, Cl
     * </p>
     *
     * @param angularPart the vector holding the new values for the angular part. Not modified.
-    * @param linearPart the vector holding the new values for the linear part. Not modified.
+    * @param linearPart  the vector holding the new values for the linear part. Not modified.
     * @throws ReferenceFrameMismatchException if the arguments are not expressed in the same reference
-    *            frame.
+    *                                         frame.
     */
    default void setMatchingFrame(FrameVector3DReadOnly angularPart, FrameVector3DReadOnly linearPart)
    {
@@ -375,9 +375,9 @@ public interface FixedFrameSpatialVectorBasics extends SpatialVectorReadOnly, Cl
     * Sets this vector given an angular part and linear part.
     *
     * @param angularPart the vector holding the new values for the angular part. Not modified.
-    * @param linearPart the vector holding the new values for the linear part. Not modified.
+    * @param linearPart  the vector holding the new values for the linear part. Not modified.
     * @throws ReferenceFrameMismatchException if any of the arguments is not expressed in the same
-    *            reference frame as {@code this}.
+    *                                         reference frame as {@code this}.
     */
    default void set(FrameVector3DReadOnly angularPart, FrameVector3DReadOnly linearPart)
    {
@@ -389,10 +389,10 @@ public interface FixedFrameSpatialVectorBasics extends SpatialVectorReadOnly, Cl
     * Sets this vector given an angular part and linear part.
     *
     * @param expressedInFrame the reference frame in which the vectors are expressed.
-    * @param angularPart the vector holding the new values for the angular part. Not modified.
-    * @param linearPart the vector holding the new values for the linear part. Not modified.
+    * @param angularPart      the vector holding the new values for the angular part. Not modified.
+    * @param linearPart       the vector holding the new values for the linear part. Not modified.
     * @throws ReferenceFrameMismatchException if {@code expressedInFrame} is not equal to the frame in
-    *            which this spatial vector is currently expressed.
+    *                                         which this spatial vector is currently expressed.
     */
    default void set(ReferenceFrame expressedInFrame, Vector3DReadOnly angularPart, Vector3DReadOnly linearPart)
    {
@@ -440,7 +440,7 @@ public interface FixedFrameSpatialVectorBasics extends SpatialVectorReadOnly, Cl
     *
     * @param other the other vector to add to this vector. Not modified.
     * @throws ReferenceFrameMismatchException if {@code other} is not expressed in the same reference
-    *            frame as {@code this}.
+    *                                         frame as {@code this}.
     */
    default void add(SpatialVectorReadOnly other)
    {
@@ -456,7 +456,7 @@ public interface FixedFrameSpatialVectorBasics extends SpatialVectorReadOnly, Cl
     * </p>
     *
     * @param angular the vector to add to this vector's angular part. Not modified.
-    * @param linear the vector to add to this vector's linear part. Not modified.
+    * @param linear  the vector to add to this vector's linear part. Not modified.
     */
    default void add(Vector3DReadOnly angular, Vector3DReadOnly linear)
    {
@@ -472,9 +472,9 @@ public interface FixedFrameSpatialVectorBasics extends SpatialVectorReadOnly, Cl
     * </p>
     *
     * @param angular the vector to add to this vector's angular part. Not modified.
-    * @param linear the vector to add to this vector's linear part. Not modified.
+    * @param linear  the vector to add to this vector's linear part. Not modified.
     * @throws ReferenceFrameMismatchException if any of the arguments are not expressed in the same
-    *            reference frame as {@code this}.
+    *                                         reference frame as {@code this}.
     */
    default void add(FrameVector3DReadOnly angular, FrameVector3DReadOnly linear)
    {
@@ -490,7 +490,7 @@ public interface FixedFrameSpatialVectorBasics extends SpatialVectorReadOnly, Cl
     *
     * @param other the other vector to subtract to this vector. Not modified.
     * @throws ReferenceFrameMismatchException if {@code other} is not expressed in the same reference
-    *            frame as {@code this}.
+    *                                         frame as {@code this}.
     */
    default void sub(SpatialVectorReadOnly other)
    {
@@ -506,7 +506,7 @@ public interface FixedFrameSpatialVectorBasics extends SpatialVectorReadOnly, Cl
     * </p>
     *
     * @param angular the vector to subtract to this vector's angular part. Not modified.
-    * @param linear the vector to subtract to this vector's linear part. Not modified.
+    * @param linear  the vector to subtract to this vector's linear part. Not modified.
     */
    default void sub(Vector3DReadOnly angular, Vector3DReadOnly linear)
    {
@@ -522,9 +522,9 @@ public interface FixedFrameSpatialVectorBasics extends SpatialVectorReadOnly, Cl
     * </p>
     *
     * @param angular the vector to subtract to this vector's angular part. Not modified.
-    * @param linear the vector to subtract to this vector's linear part. Not modified.
+    * @param linear  the vector to subtract to this vector's linear part. Not modified.
     * @throws ReferenceFrameMismatchException if any of the arguments are not expressed in the same
-    *            reference frame as {@code this}.
+    *                                         reference frame as {@code this}.
     */
    default void sub(FrameVector3DReadOnly angular, FrameVector3DReadOnly linear)
    {

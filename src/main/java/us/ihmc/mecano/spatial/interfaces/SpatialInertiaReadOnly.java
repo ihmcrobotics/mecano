@@ -70,8 +70,8 @@ public interface SpatialInertiaReadOnly extends ReferenceFrameHolder
    double getMass();
 
    /**
-    * Gets the read-only reference to the center of mass offset from the origin of the frame in
-    * which this spatial inertia is expressed.
+    * Gets the read-only reference to the center of mass offset from the origin of the frame in which
+    * this spatial inertia is expressed.
     * 
     * @return the center of mass offset.
     */
@@ -107,14 +107,14 @@ public interface SpatialInertiaReadOnly extends ReferenceFrameHolder
    }
 
    /**
-    * Checks that all frames, i.e. the body frame and the "expressed in frame", are identical
-    * between the two spatial inertia matrices.
+    * Checks that all frames, i.e. the body frame and the "expressed in frame", are identical between
+    * the two spatial inertia matrices.
     *
-    * @param other the other object holding onto the reference frames to compare against the
-    *           reference frames held by {@code this}. Not modified.
+    * @param other the other object holding onto the reference frames to compare against the reference
+    *              frames held by {@code this}. Not modified.
     * @throws ReferenceFrameMismatchException if the reference frames are not the same:
-    *            {@code this.getBodyFrame() != other.getBodyFrame()} or
-    *            {@code this.getReferenceFrame() != other.getReferenceFrame()}.
+    *                                         {@code this.getBodyFrame() != other.getBodyFrame()} or
+    *                                         {@code this.getReferenceFrame() != other.getReferenceFrame()}.
     */
    default void checkReferenceFrameMatch(SpatialInertiaReadOnly other) throws ReferenceFrameMismatchException
    {
@@ -126,11 +126,11 @@ public interface SpatialInertiaReadOnly extends ReferenceFrameHolder
    /**
     * Checks that the reference frames used by {@code this} correspond to the given ones.
     *
-    * @param bodyFrame the query for the body frame.
+    * @param bodyFrame        the query for the body frame.
     * @param expressedInFrame the query for the "expressed in frame".
     * @throws ReferenceFrameMismatchException if the reference frames are not the same:
-    *            {@code this.getBodyFrame() != bodyFrame} or
-    *            {@code this.getReferenceFrame() != expressedInFrame}.
+    *                                         {@code this.getBodyFrame() != bodyFrame} or
+    *                                         {@code this.getReferenceFrame() != expressedInFrame}.
     */
    default void checkReferenceFrameMatch(ReferenceFrame bodyFrame, ReferenceFrame expressedInFrame)
    {
@@ -141,10 +141,9 @@ public interface SpatialInertiaReadOnly extends ReferenceFrameHolder
    /**
     * Checks if the body frame held by {@code this} matches the query {@code bodyFrame}.
     *
-    * @param bodyFrame the query to compare against the body frame held by {@code this}. Not
-    *           modified.
+    * @param bodyFrame the query to compare against the body frame held by {@code this}. Not modified.
     * @throws ReferenceFrameMismatchException if the two reference frames are not the same:
-    *            {@code this.getBodyFrame() != bodyFrame}.
+    *                                         {@code this.getBodyFrame() != bodyFrame}.
     */
    default void checkBodyFrameMatch(ReferenceFrame bodyFrame)
    {
@@ -169,28 +168,31 @@ public interface SpatialInertiaReadOnly extends ReferenceFrameHolder
     * Using Newton's second law of motion with a rigid-body to compute the net moment from its
     * acceleration.
     * <p>
-    * This method requires this spatial inertia to be expressed at the center of mass. This
-    * simplifies greatly the equations.
+    * This method requires this spatial inertia to be expressed at the center of mass. This simplifies
+    * greatly the equations.
     * </p>
     * <p>
-    * When the given {@code acceleration} or {@code twist} is {@code null}, it assumed to be equal
-    * to zero.
+    * When the given {@code acceleration} or {@code twist} is {@code null}, it assumed to be equal to
+    * zero.
     * </p>
     * 
-    * @param acceleration the spatial acceleration of {@code this.bodyFrame} with respect to world
-    *           and expressed in {@code this.bodyFrame}. Can be {@code null}. Not modified.
-    * @param twist the twist of {@code this.bodyFrame} with respect to world and expressed in
-    *           {@code this.bodyFrame}, Can be {@code null}. Not modified.
+    * @param acceleration        the spatial acceleration of {@code this.bodyFrame} with respect to
+    *                            world and expressed in {@code this.bodyFrame}. Can be {@code null}.
+    *                            Not modified.
+    * @param twist               the twist of {@code this.bodyFrame} with respect to world and
+    *                            expressed in {@code this.bodyFrame}, Can be {@code null}. Not
+    *                            modified.
     * @param dynamicWrenchToPack the wrench used to store the net wrench of {@code this.bodyFrame}
-    *           expressed in {@code bodyFrame}. Modified.
-    * @throws RuntimeException if the center of mass offset is non-zero.
+    *                            expressed in {@code bodyFrame}. Modified.
+    * @throws RuntimeException                if the center of mass offset is non-zero.
     * @throws ReferenceFrameMismatchException if {@code this.bodyFrame != this.expressedInFrame}.
-    * @throws RuntimeException if either the given twist or acceleration base frame is not an
-    *            inertial frame.
-    * @throws ReferenceFrameMismatchException if either the given twist or acceleration body frame
-    *            is not the same as {@code this.bodyFrame}.
+    * @throws RuntimeException                if either the given twist or acceleration base frame is
+    *                                         not an inertial frame.
+    * @throws ReferenceFrameMismatchException if either the given twist or acceleration body frame is
+    *                                         not the same as {@code this.bodyFrame}.
     * @throws ReferenceFrameMismatchException if either the given twist or acceleration
-    *            "expressed-in-frame" is not the same as {@code this.expressedInFrame}.
+    *                                         "expressed-in-frame" is not the same as
+    *                                         {@code this.expressedInFrame}.
     */
    default void computeDynamicWrenchFast(SpatialAccelerationReadOnly acceleration, TwistReadOnly twist, WrenchBasics dynamicWrenchToPack)
    {
@@ -202,24 +204,27 @@ public interface SpatialInertiaReadOnly extends ReferenceFrameHolder
     * Using Newton's second law of motion with a rigid-body to compute the net moment from its
     * acceleration.
     * <p>
-    * When the given {@code acceleration} or {@code twist} is {@code null}, it assumed to be equal
-    * to zero.
+    * When the given {@code acceleration} or {@code twist} is {@code null}, it assumed to be equal to
+    * zero.
     * </p>
     * 
-    * @param acceleration the spatial acceleration of {@code this.bodyFrame} with respect to world
-    *           and expressed in {@code this.bodyFrame}. Can be {@code null}. Not modified.
-    * @param twist the twist of {@code this.bodyFrame} with respect to world and expressed in
-    *           {@code this.bodyFrame}, Can be {@code null}. Not modified.
+    * @param acceleration        the spatial acceleration of {@code this.bodyFrame} with respect to
+    *                            world and expressed in {@code this.bodyFrame}. Can be {@code null}.
+    *                            Not modified.
+    * @param twist               the twist of {@code this.bodyFrame} with respect to world and
+    *                            expressed in {@code this.bodyFrame}, Can be {@code null}. Not
+    *                            modified.
     * @param dynamicWrenchToPack the wrench used to store the net wrench of {@code this.bodyFrame}
-    *           expressed in {@code bodyFrame}. Modified.
-    * @throws RuntimeException if the center of mass offset is non-zero.
+    *                            expressed in {@code bodyFrame}. Modified.
+    * @throws RuntimeException                if the center of mass offset is non-zero.
     * @throws ReferenceFrameMismatchException if {@code this.bodyFrame != this.expressedInFrame}.
-    * @throws RuntimeException if either the given twist or acceleration base frame is not an
-    *            inertial frame.
-    * @throws ReferenceFrameMismatchException if either the given twist or acceleration body frame
-    *            is not the same as {@code this.bodyFrame}.
+    * @throws RuntimeException                if either the given twist or acceleration base frame is
+    *                                         not an inertial frame.
+    * @throws ReferenceFrameMismatchException if either the given twist or acceleration body frame is
+    *                                         not the same as {@code this.bodyFrame}.
     * @throws ReferenceFrameMismatchException if either the given twist or acceleration
-    *            "expressed-in-frame" is not the same as {@code this.expressedInFrame}.
+    *                                         "expressed-in-frame" is not the same as
+    *                                         {@code this.expressedInFrame}.
     */
    default void computeDynamicWrench(SpatialAccelerationReadOnly acceleration, TwistReadOnly twist, WrenchBasics dynamicWrenchToPack)
    {
@@ -272,9 +277,20 @@ public interface SpatialInertiaReadOnly extends ReferenceFrameHolder
       }
       else
       {
-         MecanoTools.computeDynamicMoment(getMomentOfInertia(), getMass(), getCenterOfMassOffset(), angularAcceleration, linearAcceleration, angularVelocity,
-                                          linearVelocity, dynamicMoment);
-         MecanoTools.computeDynamicForce(getMass(), getCenterOfMassOffset(), angularAcceleration, linearAcceleration, angularVelocity, linearVelocity,
+         MecanoTools.computeDynamicMoment(getMomentOfInertia(),
+                                          getMass(),
+                                          getCenterOfMassOffset(),
+                                          angularAcceleration,
+                                          linearAcceleration,
+                                          angularVelocity,
+                                          linearVelocity,
+                                          dynamicMoment);
+         MecanoTools.computeDynamicForce(getMass(),
+                                         getCenterOfMassOffset(),
+                                         angularAcceleration,
+                                         linearAcceleration,
+                                         angularVelocity,
+                                         linearVelocity,
                                          dynamicForce);
       }
    }
@@ -287,13 +303,13 @@ public interface SpatialInertiaReadOnly extends ReferenceFrameHolder
     * </p>
     * 
     * @param twist the twist of {@code this.bodyFrame} with respect to world and expressed in
-    *           {@code this.expressedInFrame}. Not modified.
+    *              {@code this.expressedInFrame}. Not modified.
     * @return the value of the kinetic co-energy.
-    * @throws ReferenceFrameMismatchException if
-    *            {@code twist.getBodyFrame() != this.getBodyFrame()}, or if the given {@code twist}
-    *            is not expressed in the same reference frame as {@code this}.
-    * @throws RuntimeException if the base frame of the given {@code twist} is not an inertial
-    *            frame.
+    * @throws ReferenceFrameMismatchException if {@code twist.getBodyFrame() != this.getBodyFrame()},
+    *                                         or if the given {@code twist} is not expressed in the
+    *                                         same reference frame as {@code this}.
+    * @throws RuntimeException                if the base frame of the given {@code twist} is not an
+    *                                         inertial frame.
     */
    default double computeKineticCoEnergy(TwistReadOnly twist)
    {
@@ -335,8 +351,8 @@ public interface SpatialInertiaReadOnly extends ReferenceFrameHolder
     *     \  my -mx   0   0   0   m /
     * </pre>
     * 
-    * @param startRow the first row index to start writing in the dense-matrix.
-    * @param startColumn the first column index to start writing in the dense-matrix.
+    * @param startRow     the first row index to start writing in the dense-matrix.
+    * @param startColumn  the first column index to start writing in the dense-matrix.
     * @param matrixToPack the matrix in which this spatial inertia is stored. Modified.
     */
    default void get(int startRow, int startColumn, DenseMatrix64F matrixToPack)
@@ -374,7 +390,7 @@ public interface SpatialInertiaReadOnly extends ReferenceFrameHolder
     * method returns {@code false}.
     * </p>
     * 
-    * @param other the other spatial inertia matrix to compare against this. Not modified.
+    * @param other   the other spatial inertia matrix to compare against this. Not modified.
     * @param epsilon the tolerance to use.
     * @return {@code true} if the two spatial inertia matrices are considered equal, {@code false}
     *         otherwise.
@@ -395,21 +411,20 @@ public interface SpatialInertiaReadOnly extends ReferenceFrameHolder
    }
 
    /**
-    * Tests if {@code this} and {@code other} represent the same spatial inertia to an
-    * {@code epsilon}.
+    * Tests if {@code this} and {@code other} represent the same spatial inertia to an {@code epsilon}.
     * <p>
-    * It is likely that the implementation of this method will change in the future as the
-    * definition of "geometrically-equal" for spatial inertia might evolve. In the meantime, the
-    * current assumption is that two spatial inertia matrices are geometrically equal if they are
-    * epsilon equal, see {@link #epsilonEquals(SpatialInertiaReadOnly, double)}.
+    * It is likely that the implementation of this method will change in the future as the definition
+    * of "geometrically-equal" for spatial inertia might evolve. In the meantime, the current
+    * assumption is that two spatial inertia matrices are geometrically equal if they are epsilon
+    * equal, see {@link #epsilonEquals(SpatialInertiaReadOnly, double)}.
     * </p>
     *
-    * @param other the other spatial inertia to compare against this. Not modified.
+    * @param other   the other spatial inertia to compare against this. Not modified.
     * @param epsilon the tolerance to use for the comparison.
     * @return {@code true} if the two spatial inertia matrices represent the same physical quantity,
     *         {@code false} otherwise.
     * @throws ReferenceFrameMismatchException if the reference frames of {@code other} do not
-    *            respectively match the reference frames of {@code this}.
+    *                                         respectively match the reference frames of {@code this}.
     */
    default boolean geometricallyEquals(SpatialInertiaReadOnly other, double epsilon)
    {
@@ -418,8 +433,8 @@ public interface SpatialInertiaReadOnly extends ReferenceFrameHolder
    }
 
    /**
-    * Tests on a per component basis, if this spatial inertia matrix is exactly equal to
-    * {@code other} and have the same reference frames.
+    * Tests on a per component basis, if this spatial inertia matrix is exactly equal to {@code other}
+    * and have the same reference frames.
     *
     * @param other the other spatial inertia to compare against this. Not modified.
     * @return {@code true} if the two spatial inertia matrices are exactly equal component-wise,
