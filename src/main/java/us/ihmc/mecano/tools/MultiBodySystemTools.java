@@ -211,6 +211,27 @@ public class MultiBodySystemTools
    }
 
    /**
+    * Computes the number of joints that separates the {@code rigidBody} from its root body.
+    *
+    * @param rigidBody the query.
+    * @return the distance in number of joints between the {@code rigidBody} and the root body. This
+    *         method returns {@code 0} if the {@code rigidBody} is the root body.
+    */
+   public static int computeDistanceToRoot(RigidBodyReadOnly rigidBody)
+   {
+      int distance = 0;
+      RigidBodyReadOnly currentBody = rigidBody;
+
+      while (!currentBody.isRootBody())
+      {
+         distance++;
+         currentBody = currentBody.getParentJoint().getPredecessor();
+      }
+
+      return distance;
+   }
+
+   /**
     * Computes the number of joints that separates the {@code descendant} from its {@code ancestor}.
     * <p>
     * The {@code ancestor} is expected to be located between the root body and the {@code descendant},
@@ -307,6 +328,96 @@ public class MultiBodySystemTools
       }
 
       return numberOfDegreesOfFreedom;
+   }
+
+   /**
+    * Finds the common ancestor of {@code firstBody} and {@code secondBody} that minimizes the distance
+    * {@code d}:
+    * 
+    * <pre>
+    * d = <i>computeDistanceToAncestor</i>(firstBody, ancestor) + <i>computeDistanceToAncestor</i>(secondBody, ancestor)
+    * </pre>
+    * 
+    * @param firstBody  the first rigid-body of the query.
+    * @param secondBody the second rigid-body of the query.
+    * @return the nearest common ancestor.
+    * @throws IllegalArgumentException if the two rigid-bodies do not belong to the same multi-body
+    *                                  system.
+    */
+   public static RigidBodyBasics computeNearestCommonAncestor(RigidBodyBasics firstBody, RigidBodyBasics secondBody)
+   {
+      return (RigidBodyBasics) computeNearestCommonAncestor((RigidBodyReadOnly) firstBody, (RigidBodyReadOnly) secondBody);
+   }
+
+   /**
+    * Finds the common ancestor of {@code firstBody} and {@code secondBody} that minimizes the distance
+    * {@code d}:
+    * 
+    * <pre>
+    * d = <i>computeDistanceToAncestor</i>(firstBody, ancestor) + <i>computeDistanceToAncestor</i>(secondBody, ancestor)
+    * </pre>
+    * 
+    * @param firstBody  the first rigid-body of the query.
+    * @param secondBody the second rigid-body of the query.
+    * @return the nearest common ancestor.
+    * @throws IllegalArgumentException if the two rigid-bodies do not belong to the same multi-body
+    *                                  system.
+    */
+   public static RigidBodyReadOnly computeNearestCommonAncestor(RigidBodyReadOnly firstBody, RigidBodyReadOnly secondBody)
+   {
+      if (firstBody == secondBody)
+         return firstBody;
+
+      RigidBodyReadOnly firstAncestor = firstBody;
+      int firstDistanceToRoot = computeDistanceToRoot(firstBody);
+      RigidBodyReadOnly secondAncestor = secondBody;
+      int secondDistanceToRoot = computeDistanceToRoot(secondBody);
+
+      int distanceToRoot;
+
+      if (firstDistanceToRoot > secondDistanceToRoot)
+      {
+         distanceToRoot = firstDistanceToRoot;
+         while (distanceToRoot > secondDistanceToRoot)
+         {
+            firstAncestor = firstAncestor.getParentJoint().getPredecessor();
+            distanceToRoot--;
+         }
+      }
+      else if (secondDistanceToRoot > firstDistanceToRoot)
+      {
+         distanceToRoot = secondDistanceToRoot;
+         while (distanceToRoot > firstDistanceToRoot)
+         {
+            secondAncestor = secondAncestor.getParentJoint().getPredecessor();
+            distanceToRoot--;
+         }
+      }
+      else
+      {
+         distanceToRoot = firstDistanceToRoot;
+      }
+
+      if (firstAncestor == secondAncestor)
+         return firstAncestor;
+
+      // The multi-body system has a tree structure and the 2 bodies are on 2 distinct branches of that tree.
+      // Knowing that both firstAncestor and secondAncestor are at the same distance from the root, we go up the tree until they match.
+
+      while (distanceToRoot > 0)
+      {
+         firstAncestor = firstAncestor.getParentJoint().getPredecessor();
+         secondAncestor = secondAncestor.getParentJoint().getPredecessor();
+
+         if (firstAncestor == secondAncestor)
+            return firstAncestor;
+
+         distanceToRoot--;
+      }
+
+      // We are at the root and the ancestor still do not match => we are dealing with 2 distinct multi-body systems.
+      throw new IllegalArgumentException("The two rigid-bodies are not part of the same multi-body system: first root: " + firstAncestor.getName()
+            + ", second root: " + secondAncestor.getName());
    }
 
    /**

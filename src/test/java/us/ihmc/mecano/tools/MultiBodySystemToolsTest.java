@@ -117,4 +117,86 @@ public class MultiBodySystemToolsTest
          }
       }
    }
+
+   @Test
+   public void testComputeNearestCommonAncestor()
+   {
+      Random random = new Random(4589634);
+
+      for (int i = 0; i < ITERATIONS; i++)
+      { // Perform trivial tests on a random chain.
+         int numberOfJoints = random.nextInt(100) + 1;
+         List<JointBasics> joints = MultiBodySystemRandomTools.nextJointChain(random, numberOfJoints);
+         List<? extends RigidBodyBasics> allBodies = MultiBodySystemTools.getRootBody(joints.get(0).getPredecessor()).subtreeList();
+
+         RigidBodyBasics firstBody = allBodies.get(random.nextInt(allBodies.size()));
+         RigidBodyBasics secondBody = allBodies.get(random.nextInt(allBodies.size()));
+
+         RigidBodyBasics expectedNearestAncestor = MultiBodySystemTools.isAncestor(secondBody, firstBody) ? firstBody : secondBody;
+         RigidBodyBasics actualNearestAncestor = MultiBodySystemTools.computeNearestCommonAncestor(firstBody, secondBody);
+         assertTrue(expectedNearestAncestor == actualNearestAncestor);
+         actualNearestAncestor = MultiBodySystemTools.computeNearestCommonAncestor(secondBody, firstBody);
+         assertTrue(expectedNearestAncestor == actualNearestAncestor);
+      }
+
+      for (int i = 0; i < ITERATIONS; i++)
+      {
+         /*
+          * Setup random number of joints in a Y-shaped tree: 1 common trunk and 2 branches starting off the
+          * end of the trunk. We pick 1 body per branch, the common ancestor should be at the bifurcation.
+          */
+         int trunkSize = random.nextInt(30) + 1;
+         int branch1Size = random.nextInt(30) + 1;
+         int branch2Size = random.nextInt(30) + 1;
+         List<JointBasics> trunk = MultiBodySystemRandomTools.nextJointChain(random, trunkSize);
+         RigidBodyBasics bifurcation = trunk.get(trunkSize - 1).getSuccessor();
+         List<JointBasics> branch1 = MultiBodySystemRandomTools.nextJointChain(random, bifurcation, branch1Size);
+         List<JointBasics> branch2 = MultiBodySystemRandomTools.nextJointChain(random, bifurcation, branch2Size);
+
+         RigidBodyBasics firstBody = branch1.get(random.nextInt(branch1Size)).getSuccessor();
+         RigidBodyBasics secondBody = branch2.get(random.nextInt(branch2Size)).getSuccessor();
+         assertFalse(MultiBodySystemTools.isAncestor(firstBody, secondBody));
+         assertFalse(MultiBodySystemTools.isAncestor(secondBody, firstBody));
+         assertTrue(bifurcation == MultiBodySystemTools.computeNearestCommonAncestor(firstBody, secondBody));
+         assertTrue(bifurcation == MultiBodySystemTools.computeNearestCommonAncestor(secondBody, firstBody));
+      }
+
+      { // Purely random generation, asserting properties of the common ancestor.
+         int numberOfJoints = 500;
+         List<JointBasics> joints = MultiBodySystemRandomTools.nextJointTree(random, numberOfJoints);
+
+         for (int i = 0; i < ITERATIONS; i++)
+         {
+            RigidBodyBasics firstBody = joints.get(random.nextInt(numberOfJoints)).getSuccessor();
+            RigidBodyBasics secondBody = joints.get(random.nextInt(numberOfJoints)).getSuccessor();
+            RigidBodyBasics ancestor = MultiBodySystemTools.computeNearestCommonAncestor(firstBody, secondBody);
+            assertTrue(ancestor == MultiBodySystemTools.computeNearestCommonAncestor(secondBody, firstBody));
+
+            assertTrue(MultiBodySystemTools.isAncestor(firstBody, ancestor));
+            assertTrue(MultiBodySystemTools.isAncestor(secondBody, ancestor));
+            if (ancestor != firstBody && ancestor != secondBody)
+            {
+               assertTrue(ancestor.getChildrenJoints().size() > 1);
+
+               for (JointBasics ancestorChild : ancestor.getChildrenJoints())
+               {
+                  boolean isChildAncestorOf1 = MultiBodySystemTools.isAncestor(firstBody, ancestorChild.getSuccessor());
+                  boolean isChildAncestorOf2 = MultiBodySystemTools.isAncestor(secondBody, ancestorChild.getSuccessor());
+                  assertTrue((isChildAncestorOf1 != isChildAncestorOf2) || (!isChildAncestorOf1 && !isChildAncestorOf2));
+               }
+            }
+         }
+      }
+
+      { // Check exception
+         int size1 = random.nextInt(100) + 1;
+         int size2 = random.nextInt(100) + 1;
+         List<JointBasics> system1 = MultiBodySystemRandomTools.nextJointTree(random, size1);
+         List<JointBasics> system2 = MultiBodySystemRandomTools.nextJointTree(random, size2);
+
+         assertThrows(IllegalArgumentException.class,
+                      () -> MultiBodySystemTools.computeNearestCommonAncestor(system1.get(random.nextInt(size1 - 1)).getSuccessor(),
+                                                                              system2.get(random.nextInt(size2 - 1)).getSuccessor()));
+      }
+   }
 }
