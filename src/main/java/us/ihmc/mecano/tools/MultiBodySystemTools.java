@@ -263,30 +263,35 @@ public class MultiBodySystemTools
    }
 
    /**
-    * Calculates the number of degrees of freedom of the kinematic chain that starts from
-    * {@code ancestor} to end to {@code descendant}.
+    * Calculates the number of degrees of freedom of the kinematic chain that connects
+    * {@code firstBody} and {@code secondBody}.
     * 
-    * @param ancestor   the base of the kinematic chain.
-    * @param descendant the end-effector of the kinematic chain.
+    * @param firstBody  the first end of the kinematic chain.
+    * @param secondBody the second end of the kinematic chain.
     * @return the number of degrees of freedom.
-    * @throws RuntimeException if the given ancestor and descendant are swapped, or if the do not
-    *                          belong to the same system.
-    * @throws RuntimeException this method does not support in kinematic trees to go through different
-    *                          branches.
+    * @throws IllegalArgumentException if the two rigid-bodies do not belong to the same multi-body
+    *                                  system.
     */
-   public static int computeDegreesOfFreedom(RigidBodyReadOnly ancestor, RigidBodyReadOnly descendant)
+   public static int computeDegreesOfFreedom(RigidBodyReadOnly firstBody, RigidBodyReadOnly secondBody)
    {
       int nDoFs = 0;
 
-      RigidBodyReadOnly currentBody = descendant;
+      RigidBodyReadOnly ancestor = computeNearestCommonAncestor(firstBody, secondBody);
+
+      RigidBodyReadOnly currentBody = firstBody;
 
       while (currentBody != ancestor)
       {
          JointReadOnly parentJoint = currentBody.getParentJoint();
+         nDoFs += parentJoint.getDegreesOfFreedom();
+         currentBody = parentJoint.getPredecessor();
+      }
 
-         if (parentJoint == null)
-            throw new RuntimeException("Could not find the ancestor: " + ancestor.getName() + ", to the descendant: " + descendant.getName());
+      currentBody = secondBody;
 
+      while (currentBody != ancestor)
+      {
+         JointReadOnly parentJoint = currentBody.getParentJoint();
          nDoFs += parentJoint.getDegreesOfFreedom();
          currentBody = parentJoint.getPredecessor();
       }
