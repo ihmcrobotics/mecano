@@ -263,6 +263,46 @@ public class MultiBodySystemTools
    }
 
    /**
+    * Computes the number of joints that separates the two rigid-bodies {@code firstBody} and
+    * {@code secondBody}.
+    * <p>
+    * Unlike {@link #computeDistanceToAncestor(RigidBodyReadOnly, RigidBodyReadOnly)}, no assumption is
+    * made regarding the relative position of the two bodies within the multi-body system.
+    * </p>
+    *
+    * @param firstBody  the first end of the kinematic chain to compute the distance of.
+    * @param secondBody the second end of the kinematic chain to compute the distance of.
+    * @return the distance in number of joints between the {@code firstBody} and the
+    *         {@code secondBody}. This method returns {@code 0} if the two rigid-bodies are the same.
+    * @throws IllegalArgumentException if the two rigid-bodies do not belong to the same multi-body
+    *                                  system.
+    */
+   public static int computeDistance(RigidBodyReadOnly firstBody, RigidBodyReadOnly secondBody)
+   {
+      int distance = 0;
+
+      RigidBodyReadOnly ancestor = computeNearestCommonAncestor(firstBody, secondBody);
+
+      RigidBodyReadOnly currentBody = firstBody;
+
+      while (currentBody != ancestor)
+      {
+         distance++;
+         currentBody = currentBody.getParentJoint().getPredecessor();
+      }
+
+      currentBody = secondBody;
+
+      while (currentBody != ancestor)
+      {
+         distance++;
+         currentBody = currentBody.getParentJoint().getPredecessor();
+      }
+
+      return distance;
+   }
+
+   /**
     * Calculates the number of degrees of freedom of the kinematic chain that connects
     * {@code firstBody} and {@code secondBody}.
     * 
@@ -641,6 +681,30 @@ public class MultiBodySystemTools
    public static JointBasics[] collectSupportAndSubtreeJoints(RigidBodyBasics... rigidBodies)
    {
       return Stream.of(rigidBodies).map(MultiBodySystemTools::collectSupportAndSubtreeJoints).flatMap(Stream::of).distinct().toArray(JointBasics[]::new);
+   }
+
+   /**
+    * Collects starting from the given {@code rigidBody} all descendant that has no children, i.e. all
+    * end-effector.
+    * 
+    * @param rigidBody the rigid-body to collect of descendant end-effectors of.
+    * @return the array containing the end-effectors.
+    */
+   public static RigidBodyBasics[] collectSubtreeEndEffectors(RigidBodyBasics rigidBody)
+   {
+      return rigidBody.subtreeStream().filter(body -> body.getChildrenJoints().isEmpty()).toArray(RigidBodyBasics[]::new);
+   }
+
+   /**
+    * Collects starting from the given {@code rigidBody} all descendant that has no children, i.e. all
+    * end-effector.
+    * 
+    * @param rigidBody the rigid-body to collect of descendant end-effectors of.
+    * @return the array containing the end-effectors.
+    */
+   public static RigidBodyReadOnly[] collectSubtreeEndEffectors(RigidBodyReadOnly rigidBody)
+   {
+      return rigidBody.subtreeStream().filter(body -> body.getChildrenJoints().isEmpty()).toArray(RigidBodyReadOnly[]::new);
    }
 
    /**

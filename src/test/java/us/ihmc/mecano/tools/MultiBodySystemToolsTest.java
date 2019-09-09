@@ -177,7 +177,8 @@ public class MultiBodySystemToolsTest
             RigidBodyBasics secondBody = joints.get(random.nextInt(numberOfJoints)).getSuccessor();
             RigidBodyBasics ancestor = MultiBodySystemTools.computeNearestCommonAncestor(firstBody, secondBody);
 
-            int expectedDoFs = MultiBodySystemTools.computeDegreesOfFreedom(firstBody, ancestor) + MultiBodySystemTools.computeDegreesOfFreedom(secondBody, ancestor);
+            int expectedDoFs = MultiBodySystemTools.computeDegreesOfFreedom(firstBody, ancestor)
+                  + MultiBodySystemTools.computeDegreesOfFreedom(secondBody, ancestor);
             int actualDoFs = MultiBodySystemTools.computeDegreesOfFreedom(firstBody, secondBody);
             assertEquals(expectedDoFs, actualDoFs);
             actualDoFs = MultiBodySystemTools.computeDegreesOfFreedom(secondBody, firstBody);
@@ -265,6 +266,66 @@ public class MultiBodySystemToolsTest
          assertThrows(IllegalArgumentException.class,
                       () -> MultiBodySystemTools.computeNearestCommonAncestor(system1.get(random.nextInt(size1 - 1)).getSuccessor(),
                                                                               system2.get(random.nextInt(size2 - 1)).getSuccessor()));
+      }
+   }
+
+   @Test
+   public void testComputeDistance()
+   {
+      Random random = new Random(1646541);
+
+      for (int i = 0; i < ITERATIONS; i++)
+      { // Setup random number of joints in a chain.
+         int numberOfJoints = random.nextInt(100) + 1;
+         List<JointBasics> joints = MultiBodySystemRandomTools.nextJointChain(random, numberOfJoints);
+
+         int index2 = random.nextInt(numberOfJoints);
+         int index1 = random.nextInt(index2 + 1);
+
+         int expectedDoFs = index2 - index1 + 1;
+         int actualDoFs = MultiBodySystemTools.computeDistance(joints.get(index1).getPredecessor(), joints.get(index2).getSuccessor());
+         assertEquals(expectedDoFs, actualDoFs);
+         actualDoFs = MultiBodySystemTools.computeDistance(joints.get(index2).getSuccessor(), joints.get(index1).getPredecessor());
+         assertEquals(expectedDoFs, actualDoFs);
+      }
+
+      for (int i = 0; i < ITERATIONS; i++)
+      { // Setup random number of joints in a tree. Picking a common ancestor and 2 descendants from different branches.
+         int numberOfJoints = random.nextInt(100) + 1;
+         List<JointBasics> mainBranchJoints = MultiBodySystemRandomTools.nextJointChain(random, numberOfJoints);
+         int branch1ParentJointIndex = random.nextInt(numberOfJoints);
+         int branch2ParentJointIndex = random.nextInt(numberOfJoints);
+         RigidBodyBasics branch1Root = mainBranchJoints.get(branch1ParentJointIndex).getSuccessor();
+         RigidBodyBasics branch2Root = mainBranchJoints.get(branch2ParentJointIndex).getSuccessor();
+         List<JointBasics> branch1Joints = MultiBodySystemRandomTools.nextJointChain(random, branch1Root, numberOfJoints);
+         List<JointBasics> branch2Joints = MultiBodySystemRandomTools.nextJointChain(random, branch2Root, numberOfJoints);
+
+         RigidBodyBasics commonAncestor = MultiBodySystemTools.isAncestor(branch2Root, branch1Root) ? branch1Root : branch2Root;
+
+         RigidBodyBasics body1 = branch1Joints.get(random.nextInt(numberOfJoints)).getSuccessor();
+         RigidBodyBasics body2 = branch2Joints.get(random.nextInt(numberOfJoints)).getSuccessor();
+
+         int expectedDoFs = MultiBodySystemTools.computeDistance(commonAncestor, body1) + MultiBodySystemTools.computeDistance(commonAncestor, body2);
+         int actualDoFs = MultiBodySystemTools.computeDistance(body1, body2);
+         assertEquals(expectedDoFs, actualDoFs);
+      }
+
+      { // Purely random generation, simple assertions using common ancestor.
+         int numberOfJoints = 500;
+         List<JointBasics> joints = MultiBodySystemRandomTools.nextJointTree(random, numberOfJoints);
+
+         for (int i = 0; i < ITERATIONS; i++)
+         {
+            RigidBodyBasics firstBody = joints.get(random.nextInt(numberOfJoints)).getSuccessor();
+            RigidBodyBasics secondBody = joints.get(random.nextInt(numberOfJoints)).getSuccessor();
+            RigidBodyBasics ancestor = MultiBodySystemTools.computeNearestCommonAncestor(firstBody, secondBody);
+
+            int expectedDoFs = MultiBodySystemTools.computeDistance(firstBody, ancestor) + MultiBodySystemTools.computeDistance(secondBody, ancestor);
+            int actualDoFs = MultiBodySystemTools.computeDistance(firstBody, secondBody);
+            assertEquals(expectedDoFs, actualDoFs);
+            actualDoFs = MultiBodySystemTools.computeDistance(secondBody, firstBody);
+            assertEquals(expectedDoFs, actualDoFs);
+         }
       }
    }
 }
