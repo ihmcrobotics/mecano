@@ -165,6 +165,122 @@ public class MultiBodySystemToolsTest
    }
 
    @Test
+   public void testCollectRigidBodyPath()
+   {
+      Random random = new Random(5436);
+
+      for (int i = 0; i < ITERATIONS; i++)
+      { // Trivial test on a single chain system.
+         int numberOfJoints = random.nextInt(100) + 1;
+         List<JointBasics> joints = MultiBodySystemRandomTools.nextJointChain(random, numberOfJoints);
+         int startJointIndex = random.nextInt(numberOfJoints);
+         int endJointIndex = random.nextInt(numberOfJoints - startJointIndex) + startJointIndex;
+         List<RigidBodyBasics> expectedPath = joints.subList(startJointIndex, endJointIndex + 1).stream().map(JointBasics::getPredecessor)
+                                                    .collect(Collectors.toList());
+         RigidBodyBasics start = expectedPath.get(0);
+         RigidBodyBasics end = expectedPath.get(expectedPath.size() - 1);
+         List<RigidBodyBasics> actualPathBasics = new ArrayList<>();
+         MultiBodySystemTools.collectRigidBodyPath(start, end, actualPathBasics);
+         assertEquals(expectedPath, actualPathBasics);
+         List<RigidBodyReadOnly> actualPathReadOnly = new ArrayList<>();
+         MultiBodySystemTools.collectRigidBodyPath((RigidBodyReadOnly) start, (RigidBodyReadOnly) end, actualPathReadOnly);
+         assertEquals(expectedPath, actualPathReadOnly);
+
+         Collections.reverse(expectedPath);
+         MultiBodySystemTools.collectRigidBodyPath(end, start, actualPathBasics);
+         assertEquals(expectedPath, actualPathBasics);
+         MultiBodySystemTools.collectRigidBodyPath((RigidBodyReadOnly) end, (RigidBodyReadOnly) start, actualPathReadOnly);
+         assertEquals(expectedPath, actualPathReadOnly);
+      }
+
+      for (int i = 0; i < ITERATIONS; i++)
+      { // Test on a Y-shape tree system.
+         int trunkSize = random.nextInt(20) + 1;
+         int branch0Size = random.nextInt(20) + 1;
+         int branch1Size = random.nextInt(20) + 1;
+
+         List<JointBasics> trunk = MultiBodySystemRandomTools.nextJointChain(random, "trunk", trunkSize);
+         RigidBodyBasics bifurcation = trunk.get(trunkSize - 1).getSuccessor();
+         List<JointBasics> branch0 = MultiBodySystemRandomTools.nextJointChain(random, "branch0", bifurcation, branch0Size);
+         List<JointBasics> branch1 = MultiBodySystemRandomTools.nextJointChain(random, "branch1", bifurcation, branch1Size);
+
+         List<RigidBodyBasics> pathOnBranch0 = branch0.subList(0, random.nextInt(branch0Size) + 1).stream().map(JointBasics::getSuccessor)
+                                                      .collect(Collectors.toList());
+         List<RigidBodyBasics> pathOnBranch1 = branch1.subList(0, random.nextInt(branch1Size) + 1).stream().map(JointBasics::getSuccessor)
+                                                      .collect(Collectors.toList());
+         RigidBodyBasics start = pathOnBranch0.get(pathOnBranch0.size() - 1);
+         RigidBodyBasics end = pathOnBranch1.get(pathOnBranch1.size() - 1);
+
+         Collections.reverse(pathOnBranch0);
+         List<RigidBodyBasics> expectedPath = new ArrayList<>();
+         expectedPath.addAll(pathOnBranch0);
+         expectedPath.add(bifurcation);
+         expectedPath.addAll(pathOnBranch1);
+
+         for (int j = 1; j < expectedPath.size(); j++)
+         { // Just to make sure that the ancestor has to be added manually.
+            assertTrue(expectedPath.get(j) != expectedPath.get(j - 1));
+         }
+
+         List<RigidBodyBasics> actualPath = new ArrayList<>();
+         MultiBodySystemTools.collectRigidBodyPath(start, end, actualPath);
+         assertEquals(expectedPath, actualPath);
+         List<RigidBodyReadOnly> actualPathReadOnly = new ArrayList<>();
+         MultiBodySystemTools.collectRigidBodyPath((RigidBodyReadOnly) start, (RigidBodyReadOnly) end, actualPathReadOnly);
+         assertEquals(expectedPath, actualPathReadOnly);
+
+         Collections.reverse(expectedPath);
+         MultiBodySystemTools.collectRigidBodyPath(end, start, actualPath);
+         assertEquals(expectedPath, actualPath);
+         MultiBodySystemTools.collectRigidBodyPath((RigidBodyReadOnly) end, (RigidBodyReadOnly) start, actualPathReadOnly);
+         assertEquals(expectedPath, actualPathReadOnly);
+      }
+
+      { // Purely random generation, using a different approach to compute the path.
+         int numberOfJoints = 500;
+         List<JointBasics> joints = MultiBodySystemRandomTools.nextJointTree(random, numberOfJoints);
+
+         for (int i = 0; i < ITERATIONS; i++)
+         {
+            RigidBodyBasics firstBody = joints.get(random.nextInt(numberOfJoints)).getSuccessor();
+            RigidBodyBasics secondBody = joints.get(random.nextInt(numberOfJoints)).getSuccessor();
+            RigidBodyBasics ancestor = MultiBodySystemTools.computeNearestCommonAncestor(firstBody, secondBody);
+
+            List<RigidBodyBasics> pathFirstHalf = new ArrayList<>();
+            for (RigidBodyBasics body = firstBody; body != ancestor; body = body.getParentJoint().getPredecessor())
+               pathFirstHalf.add(body);
+            List<RigidBodyBasics> pathSecondHalf = new ArrayList<>();
+            for (RigidBodyBasics body = secondBody; body != ancestor; body = body.getParentJoint().getPredecessor())
+               pathSecondHalf.add(body);
+            Collections.reverse(pathSecondHalf);
+
+            List<RigidBodyBasics> expectedPath = new ArrayList<>();
+            expectedPath.addAll(pathFirstHalf);
+            expectedPath.add(ancestor);
+            expectedPath.addAll(pathSecondHalf);
+
+            for (int j = 1; j < expectedPath.size(); j++)
+            { // Just to make sure that the ancestor has to be added manually.
+               assertTrue(expectedPath.get(j) != expectedPath.get(j - 1));
+            }
+
+            List<RigidBodyBasics> actualPath = new ArrayList<>();
+            MultiBodySystemTools.collectRigidBodyPath(firstBody, secondBody, actualPath);
+            assertEquals(expectedPath, actualPath);
+            List<RigidBodyReadOnly> actualPathReadOnly = new ArrayList<>();
+            MultiBodySystemTools.collectRigidBodyPath((RigidBodyReadOnly) firstBody, (RigidBodyReadOnly) secondBody, actualPathReadOnly);
+            assertEquals(expectedPath, actualPathReadOnly);
+
+            Collections.reverse(expectedPath);
+            MultiBodySystemTools.collectRigidBodyPath(secondBody, firstBody, actualPath);
+            assertEquals(expectedPath, actualPath);
+            MultiBodySystemTools.collectRigidBodyPath((RigidBodyReadOnly) secondBody, (RigidBodyReadOnly) firstBody, actualPathReadOnly);
+            assertEquals(expectedPath, actualPathReadOnly);
+         }
+      }
+   }
+
+   @Test
    public void testCollectSuccessors() throws Exception
    {
       Random random = new Random(235423);

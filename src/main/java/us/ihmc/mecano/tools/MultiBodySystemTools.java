@@ -261,6 +261,108 @@ public class MultiBodySystemTools
    }
 
    /**
+    * Travels the multi-body system from {@code start} to {@code end} and stores in order the
+    * rigid-bodies that connect {@code start} to {@code end} in the given {@code rigidBodyPathToPack}.
+    * <p>
+    * The resulting resulting path includes both {@code start} and {@code end} and represent the
+    * shortest path connecting the two rigid-bodies. No assumption is made on the relative position of
+    * the two rigid-bodies in the multi-body system.
+    * </p>
+    * 
+    * @param start               the rigid-body where to begin collecting the rigid-bodies.
+    * @param end                 the rigid-body where to stop collecting the rigid-bodies.
+    * @param rigidBodyPathToPack the list in which the rigid-body path is stored. Note that the list is
+    *                            first cleared before storing the rigid-body path.
+    */
+   public static void collectRigidBodyPath(RigidBodyReadOnly start, RigidBodyReadOnly end, List<RigidBodyReadOnly> rigidBodyPathToPack)
+   {
+      rigidBodyPathToPack.clear();
+
+      RigidBodyReadOnly ancestor = computeNearestCommonAncestor(start, end);
+      RigidBodyReadOnly currentBody;
+
+      currentBody = start;
+
+      while (currentBody != ancestor)
+      {
+         rigidBodyPathToPack.add(currentBody);
+         currentBody = currentBody.getParentJoint().getPredecessor();
+      }
+      rigidBodyPathToPack.add(ancestor);
+
+      int distance = rigidBodyPathToPack.size();
+      currentBody = end;
+
+      while (currentBody != ancestor)
+      {
+         currentBody = currentBody.getParentJoint().getPredecessor();
+         distance++;
+      }
+
+      while (rigidBodyPathToPack.size() < distance)
+         rigidBodyPathToPack.add(null);
+
+      currentBody = end;
+
+      for (int i = distance - 1; currentBody != ancestor; i--)
+      {
+         rigidBodyPathToPack.set(i, currentBody);
+         currentBody = currentBody.getParentJoint().getPredecessor();
+      }
+   }
+
+   /**
+    * Travels the multi-body system from {@code start} to {@code end} and stores in order the
+    * rigid-bodies that connect {@code start} to {@code end} in the given {@code rigidBodyPathToPack}.
+    * <p>
+    * The resulting resulting path includes both {@code start} and {@code end} and represent the
+    * shortest path connecting the two rigid-bodies. No assumption is made on the relative position of
+    * the two rigid-bodies in the multi-body system.
+    * </p>
+    * 
+    * @param start               the rigid-body where to begin collecting the rigid-bodies.
+    * @param end                 the rigid-body where to stop collecting the rigid-bodies.
+    * @param rigidBodyPathToPack the list in which the rigid-body path is stored. Note that the list is
+    *                            first cleared before storing the rigid-body path.
+    */
+   public static void collectRigidBodyPath(RigidBodyBasics start, RigidBodyBasics end, List<RigidBodyBasics> rigidBodyPathToPack)
+   {
+      rigidBodyPathToPack.clear();
+
+      RigidBodyBasics ancestor = computeNearestCommonAncestor(start, end);
+      RigidBodyBasics currentBody;
+
+      currentBody = start;
+
+      while (currentBody != ancestor)
+      {
+         rigidBodyPathToPack.add(currentBody);
+         currentBody = currentBody.getParentJoint().getPredecessor();
+      }
+      rigidBodyPathToPack.add(ancestor);
+
+      int distance = rigidBodyPathToPack.size();
+      currentBody = end;
+
+      while (currentBody != ancestor)
+      {
+         currentBody = currentBody.getParentJoint().getPredecessor();
+         distance++;
+      }
+
+      while (rigidBodyPathToPack.size() < distance)
+         rigidBodyPathToPack.add(null);
+
+      currentBody = end;
+
+      for (int i = distance - 1; currentBody != ancestor; i--)
+      {
+         rigidBodyPathToPack.set(i, currentBody);
+         currentBody = currentBody.getParentJoint().getPredecessor();
+      }
+   }
+
+   /**
     * Traverses up the kinematic chain from the candidate descendant towards the root body, checking to
     * see if each parent body is the ancestor in question.
     * 
