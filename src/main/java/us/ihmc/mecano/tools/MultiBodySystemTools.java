@@ -170,8 +170,9 @@ public class MultiBodySystemTools
     * @param end             the rigid-body where to stop collecting the joints.
     * @param jointPathToPack the list in which the joint path is stored. Note that the list is first
     *                        cleared before storing the joint path.
+    * @return the nearest common ancestor of {@code start} and {@code end}.
     */
-   public static void collectJointPath(RigidBodyReadOnly start, RigidBodyReadOnly end, List<JointReadOnly> jointPathToPack)
+   public static RigidBodyReadOnly collectJointPath(RigidBodyReadOnly start, RigidBodyReadOnly end, List<JointReadOnly> jointPathToPack)
    {
       jointPathToPack.clear();
 
@@ -207,6 +208,7 @@ public class MultiBodySystemTools
          jointPathToPack.set(i, parentJoint);
          currentBody = parentJoint.getPredecessor();
       }
+      return ancestor;
    }
 
    /**
@@ -221,8 +223,9 @@ public class MultiBodySystemTools
     * @param end             the rigid-body where to stop collecting the joints.
     * @param jointPathToPack the list in which the joint path is stored. Note that the list is first
     *                        cleared before storing the joint path.
+    * @return the nearest common ancestor of {@code start} and {@code end}.
     */
-   public static void collectJointPath(RigidBodyBasics start, RigidBodyBasics end, List<JointBasics> jointPathToPack)
+   public static RigidBodyBasics collectJointPath(RigidBodyBasics start, RigidBodyBasics end, List<JointBasics> jointPathToPack)
    {
       jointPathToPack.clear();
 
@@ -258,6 +261,7 @@ public class MultiBodySystemTools
          jointPathToPack.set(i, parentJoint);
          currentBody = parentJoint.getPredecessor();
       }
+      return ancestor;
    }
 
    /**
@@ -273,22 +277,31 @@ public class MultiBodySystemTools
     * @param end                 the rigid-body where to stop collecting the rigid-bodies.
     * @param rigidBodyPathToPack the list in which the rigid-body path is stored. Note that the list is
     *                            first cleared before storing the rigid-body path.
+    * @return the nearest common ancestor of {@code start} and {@code end}.
     */
-   public static void collectRigidBodyPath(RigidBodyReadOnly start, RigidBodyReadOnly end, List<RigidBodyReadOnly> rigidBodyPathToPack)
+   public static RigidBodyReadOnly collectRigidBodyPath(RigidBodyReadOnly start, RigidBodyReadOnly end, List<RigidBodyReadOnly> rigidBodyPathToPack)
    {
       rigidBodyPathToPack.clear();
+
+      if (start == end)
+      {
+         rigidBodyPathToPack.add(end);
+         return end;
+      }
 
       RigidBodyReadOnly ancestor = computeNearestCommonAncestor(start, end);
       RigidBodyReadOnly currentBody;
 
       currentBody = start;
 
+      if (start == ancestor)
+         rigidBodyPathToPack.add(start);
+
       while (currentBody != ancestor)
       {
          rigidBodyPathToPack.add(currentBody);
          currentBody = currentBody.getParentJoint().getPredecessor();
       }
-      rigidBodyPathToPack.add(ancestor);
 
       int distance = rigidBodyPathToPack.size();
       currentBody = end;
@@ -304,11 +317,15 @@ public class MultiBodySystemTools
 
       currentBody = end;
 
+      if (end == ancestor)
+         rigidBodyPathToPack.add(end);
+
       for (int i = distance - 1; currentBody != ancestor; i--)
       {
          rigidBodyPathToPack.set(i, currentBody);
          currentBody = currentBody.getParentJoint().getPredecessor();
       }
+      return ancestor;
    }
 
    /**
@@ -324,22 +341,31 @@ public class MultiBodySystemTools
     * @param end                 the rigid-body where to stop collecting the rigid-bodies.
     * @param rigidBodyPathToPack the list in which the rigid-body path is stored. Note that the list is
     *                            first cleared before storing the rigid-body path.
+    * @return the nearest common ancestor of {@code start} and {@code end}.
     */
-   public static void collectRigidBodyPath(RigidBodyBasics start, RigidBodyBasics end, List<RigidBodyBasics> rigidBodyPathToPack)
+   public static RigidBodyBasics collectRigidBodyPath(RigidBodyBasics start, RigidBodyBasics end, List<RigidBodyBasics> rigidBodyPathToPack)
    {
       rigidBodyPathToPack.clear();
+
+      if (start == end)
+      {
+         rigidBodyPathToPack.add(end);
+         return end;
+      }
 
       RigidBodyBasics ancestor = computeNearestCommonAncestor(start, end);
       RigidBodyBasics currentBody;
 
       currentBody = start;
 
+      if (start == ancestor)
+         rigidBodyPathToPack.add(start);
+
       while (currentBody != ancestor)
       {
          rigidBodyPathToPack.add(currentBody);
          currentBody = currentBody.getParentJoint().getPredecessor();
       }
-      rigidBodyPathToPack.add(ancestor);
 
       int distance = rigidBodyPathToPack.size();
       currentBody = end;
@@ -355,11 +381,15 @@ public class MultiBodySystemTools
 
       currentBody = end;
 
+      if (end == ancestor)
+         rigidBodyPathToPack.add(end);
+
       for (int i = distance - 1; currentBody != ancestor; i--)
       {
          rigidBodyPathToPack.set(i, currentBody);
          currentBody = currentBody.getParentJoint().getPredecessor();
       }
+      return ancestor;
    }
 
    /**

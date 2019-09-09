@@ -214,17 +214,11 @@ public class MultiBodySystemToolsTest
          Collections.reverse(pathOnBranch0);
          List<RigidBodyBasics> expectedPath = new ArrayList<>();
          expectedPath.addAll(pathOnBranch0);
-         expectedPath.add(bifurcation);
          expectedPath.addAll(pathOnBranch1);
-
-         for (int j = 1; j < expectedPath.size(); j++)
-         { // Just to make sure that the ancestor has to be added manually.
-            assertTrue(expectedPath.get(j) != expectedPath.get(j - 1));
-         }
 
          List<RigidBodyBasics> actualPath = new ArrayList<>();
          MultiBodySystemTools.collectRigidBodyPath(start, end, actualPath);
-         assertEquals(expectedPath, actualPath);
+         assertEquals(expectedPath, actualPath, "Iteration: " + i);
          List<RigidBodyReadOnly> actualPathReadOnly = new ArrayList<>();
          MultiBodySystemTools.collectRigidBodyPath((RigidBodyReadOnly) start, (RigidBodyReadOnly) end, actualPathReadOnly);
          assertEquals(expectedPath, actualPathReadOnly);
@@ -247,26 +241,35 @@ public class MultiBodySystemToolsTest
             RigidBodyBasics ancestor = MultiBodySystemTools.computeNearestCommonAncestor(firstBody, secondBody);
 
             List<RigidBodyBasics> pathFirstHalf = new ArrayList<>();
-            for (RigidBodyBasics body = firstBody; body != ancestor; body = body.getParentJoint().getPredecessor())
-               pathFirstHalf.add(body);
+            if (firstBody == ancestor)
+            {
+               pathFirstHalf.add(firstBody);
+            }
+            else
+            {
+               for (RigidBodyBasics body = firstBody; body != ancestor; body = body.getParentJoint().getPredecessor())
+                  pathFirstHalf.add(body);
+            }
             List<RigidBodyBasics> pathSecondHalf = new ArrayList<>();
-            for (RigidBodyBasics body = secondBody; body != ancestor; body = body.getParentJoint().getPredecessor())
-               pathSecondHalf.add(body);
+            if (secondBody == ancestor)
+            {
+               pathSecondHalf.add(secondBody);
+            }
+            else
+            {
+               for (RigidBodyBasics body = secondBody; body != ancestor; body = body.getParentJoint().getPredecessor())
+                  pathSecondHalf.add(body);
+            }
             Collections.reverse(pathSecondHalf);
 
             List<RigidBodyBasics> expectedPath = new ArrayList<>();
             expectedPath.addAll(pathFirstHalf);
-            expectedPath.add(ancestor);
-            expectedPath.addAll(pathSecondHalf);
-
-            for (int j = 1; j < expectedPath.size(); j++)
-            { // Just to make sure that the ancestor has to be added manually.
-               assertTrue(expectedPath.get(j) != expectedPath.get(j - 1));
-            }
+            if (firstBody != secondBody)
+               expectedPath.addAll(pathSecondHalf);
 
             List<RigidBodyBasics> actualPath = new ArrayList<>();
             MultiBodySystemTools.collectRigidBodyPath(firstBody, secondBody, actualPath);
-            assertEquals(expectedPath, actualPath);
+            assertEquals(expectedPath, actualPath, "Iteration: " + i);
             List<RigidBodyReadOnly> actualPathReadOnly = new ArrayList<>();
             MultiBodySystemTools.collectRigidBodyPath((RigidBodyReadOnly) firstBody, (RigidBodyReadOnly) secondBody, actualPathReadOnly);
             assertEquals(expectedPath, actualPathReadOnly);
