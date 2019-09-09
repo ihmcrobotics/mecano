@@ -134,7 +134,9 @@ public class MultiBodySystemTools
     */
    public static JointBasics[] createJointPath(RigidBodyBasics start, RigidBodyBasics end)
    {
-      return filterJoints(createJointPath((RigidBodyReadOnly) start, (RigidBodyReadOnly) end), JointBasics.class);
+      List<JointBasics> jointPath = new ArrayList<>();
+      collectJointPath(start, end, jointPath);
+      return jointPath.toArray(new JointBasics[jointPath.size()]);
    }
 
    /**
@@ -151,36 +153,111 @@ public class MultiBodySystemTools
     */
    public static JointReadOnly[] createJointPath(RigidBodyReadOnly start, RigidBodyReadOnly end)
    {
-      boolean flip = false;
-      RigidBodyReadOnly descendant = start;
-      RigidBodyReadOnly ancestor = end;
-      int pathLength = computeDistanceToAncestor(descendant, ancestor);
+      List<JointReadOnly> jointPath = new ArrayList<>();
+      collectJointPath(start, end, jointPath);
+      return jointPath.toArray(new JointReadOnly[jointPath.size()]);
+   }
 
-      if (pathLength < 0)
-      {
-         flip = true;
-         descendant = end;
-         ancestor = start;
-         pathLength = computeDistanceToAncestor(end, start);
+   /**
+    * Travels the multi-body system from {@code start} to {@code end} and stores in order the joints
+    * that are in between in the given {@code jointPathToPack}.
+    * <p>
+    * The resulting joint path represent the shortest path connecting {@code start} and {@code end}. No
+    * assumption is made on the relative position of the two rigid-bodies in the multi-body system.
+    * </p>
+    * 
+    * @param start           the rigid-body where to begin collecting the joints.
+    * @param end             the rigid-body where to stop collecting the joints.
+    * @param jointPathToPack the list in which the joint path is stored. Note that the list is first
+    *                        cleared before storing the joint path.
+    */
+   public static void collectJointPath(RigidBodyReadOnly start, RigidBodyReadOnly end, List<JointReadOnly> jointPathToPack)
+   {
+      jointPathToPack.clear();
 
-         if (pathLength < 0)
-            return null; // The rigid-bodies are not part of the same system.
-      }
+      RigidBodyReadOnly ancestor = computeNearestCommonAncestor(start, end);
+      RigidBodyReadOnly currentBody;
 
-      JointReadOnly[] jointPath = new JointReadOnly[pathLength];
-      RigidBodyReadOnly currentBody = descendant;
-      int i = 0;
+      currentBody = start;
 
       while (currentBody != ancestor)
       {
-         int j = flip ? pathLength - 1 - i : i;
          JointReadOnly parentJoint = currentBody.getParentJoint();
-         jointPath[j] = parentJoint;
+         jointPathToPack.add(parentJoint);
          currentBody = parentJoint.getPredecessor();
-         i++;
       }
 
-      return jointPath;
+      int distance = jointPathToPack.size();
+      currentBody = end;
+
+      while (currentBody != ancestor)
+      {
+         currentBody = currentBody.getParentJoint().getPredecessor();
+         distance++;
+      }
+
+      while (jointPathToPack.size() < distance)
+         jointPathToPack.add(null);
+
+      currentBody = end;
+
+      for (int i = distance - 1; currentBody != ancestor; i--)
+      {
+         JointReadOnly parentJoint = currentBody.getParentJoint();
+         jointPathToPack.set(i, parentJoint);
+         currentBody = parentJoint.getPredecessor();
+      }
+   }
+
+   /**
+    * Travels the multi-body system from {@code start} to {@code end} and stores in order the joints
+    * that are in between in the given {@code jointPathToPack}.
+    * <p>
+    * The resulting joint path represent the shortest path connecting {@code start} and {@code end}. No
+    * assumption is made on the relative position of the two rigid-bodies in the multi-body system.
+    * </p>
+    * 
+    * @param start           the rigid-body where to begin collecting the joints.
+    * @param end             the rigid-body where to stop collecting the joints.
+    * @param jointPathToPack the list in which the joint path is stored. Note that the list is first
+    *                        cleared before storing the joint path.
+    */
+   public static void collectJointPath(RigidBodyBasics start, RigidBodyBasics end, List<JointBasics> jointPathToPack)
+   {
+      jointPathToPack.clear();
+
+      RigidBodyBasics ancestor = computeNearestCommonAncestor(start, end);
+      RigidBodyBasics currentBody;
+
+      currentBody = start;
+
+      while (currentBody != ancestor)
+      {
+         JointBasics parentJoint = currentBody.getParentJoint();
+         jointPathToPack.add(parentJoint);
+         currentBody = parentJoint.getPredecessor();
+      }
+
+      int distance = jointPathToPack.size();
+      currentBody = end;
+
+      while (currentBody != ancestor)
+      {
+         currentBody = currentBody.getParentJoint().getPredecessor();
+         distance++;
+      }
+
+      while (jointPathToPack.size() < distance)
+         jointPathToPack.add(null);
+
+      currentBody = end;
+
+      for (int i = distance - 1; currentBody != ancestor; i--)
+      {
+         JointBasics parentJoint = currentBody.getParentJoint();
+         jointPathToPack.set(i, parentJoint);
+         currentBody = parentJoint.getPredecessor();
+      }
    }
 
    /**
