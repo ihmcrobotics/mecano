@@ -2,6 +2,7 @@ package us.ihmc.mecano.algorithms;
 
 import static org.junit.jupiter.api.Assertions.*;
 
+import java.util.Arrays;
 import java.util.List;
 import java.util.Random;
 
@@ -13,6 +14,7 @@ import us.ihmc.euclid.referenceFrame.tools.ReferenceFrameTools;
 import us.ihmc.euclid.tools.EuclidCoreRandomTools;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.mecano.multiBodySystem.Joint;
+import us.ihmc.mecano.multiBodySystem.PrismaticJoint;
 import us.ihmc.mecano.multiBodySystem.interfaces.JointBasics;
 import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
 import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyReadOnly;
@@ -26,6 +28,7 @@ import us.ihmc.mecano.tools.MultiBodySystemTools;
 
 public class GeometricJacobianCalculatorTest
 {
+   private static final int ITERATIONS = 1000;
    private static final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
 
    @Test
@@ -119,7 +122,7 @@ public class GeometricJacobianCalculatorTest
 
       GeometricJacobianCalculator jacobianCalculator = new GeometricJacobianCalculator();
 
-      for (int i = 0; i < 1000; i++)
+      for (int i = 0; i < ITERATIONS; i++)
       {
          MultiBodySystemRandomTools.nextState(random, JointStateType.CONFIGURATION, joints);
          MultiBodySystemRandomTools.nextState(random, JointStateType.VELOCITY, joints);
@@ -184,7 +187,7 @@ public class GeometricJacobianCalculatorTest
       List<JointBasics> joints = MultiBodySystemRandomTools.nextJointChain(random, numberOfJoints);
       GeometricJacobianCalculator jacobianCalculator = new GeometricJacobianCalculator();
 
-      for (int i = 0; i < 1000; i++)
+      for (int i = 0; i < ITERATIONS; i++)
       {
          for (JointStateType stateToRandomize : JointStateType.values())
             MultiBodySystemRandomTools.nextState(random, stateToRandomize, joints);
@@ -208,7 +211,7 @@ public class GeometricJacobianCalculatorTest
          MecanoTestTools.assertSpatialAccelerationEquals(expectedConvectiveTerm, actualConvectiveTerm, 1.0e-11);
       }
 
-      for (int i = 0; i < 1000; i++)
+      for (int i = 0; i < ITERATIONS; i++)
       { // Test computing the convective term at fixed frame in the end-effector.
          for (JointStateType stateToRandomize : JointStateType.values())
             MultiBodySystemRandomTools.nextState(random, stateToRandomize, joints);
@@ -256,7 +259,7 @@ public class GeometricJacobianCalculatorTest
 
       GeometricJacobianCalculator jacobianCalculator = new GeometricJacobianCalculator();
 
-      for (int i = 0; i < 1000; i++)
+      for (int i = 0; i < ITERATIONS; i++)
       {
          for (JointStateType stateToRandomize : JointStateType.values())
             MultiBodySystemRandomTools.nextState(random, stateToRandomize, joints);
@@ -304,7 +307,7 @@ public class GeometricJacobianCalculatorTest
 
       GeometricJacobianCalculator jacobianCalculator = new GeometricJacobianCalculator();
 
-      for (int i = 0; i < 1000; i++)
+      for (int i = 0; i < ITERATIONS; i++)
       {
          for (JointStateType stateToRandomize : JointStateType.values())
             MultiBodySystemRandomTools.nextState(random, stateToRandomize, joints);
@@ -340,7 +343,7 @@ public class GeometricJacobianCalculatorTest
 
       GeometricJacobianCalculator jacobianCalculator = new GeometricJacobianCalculator();
 
-      for (int i = 0; i < 1000; i++)
+      for (int i = 0; i < ITERATIONS; i++)
       {
          for (JointStateType stateToRandomize : JointStateType.values())
             MultiBodySystemRandomTools.nextState(random, stateToRandomize, joints);
@@ -360,6 +363,155 @@ public class GeometricJacobianCalculatorTest
          jacobianCalculator.setJacobianFrame(randomEndEffector.getBodyFixedFrame());
 
          compareJacobianAccelerationAgainstSpatialAccelerationCalculator(randomBase, randomEndEffector, jacobianCalculator, 1.0e-10);
+      }
+   }
+
+   /**
+    * This test verifies that a Jacobian between to rigid-bodies that do not share a
+    * ancestor-descendant relationship can be created.
+    */
+   @Test
+   public void testJacobianBetweenTwoEndEffectors()
+   {
+      Random random = new Random(1266545L);
+
+      { // Chain with random prismatic joints, end-effector is ancestor of base.
+         int numberOfJoints = 50;
+
+         List<? extends Joint> joints = MultiBodySystemRandomTools.nextOneDoFJointChain(random, numberOfJoints);
+         RigidBodyBasics rootBody = MultiBodySystemTools.getRootBody(joints.get(0).getSuccessor());
+
+         GeometricJacobianCalculator jacobianCalculator = new GeometricJacobianCalculator();
+
+         for (int i = 0; i < ITERATIONS; i++)
+         {
+            MultiBodySystemRandomTools.nextState(random, JointStateType.CONFIGURATION, joints);
+            MultiBodySystemRandomTools.nextState(random, JointStateType.VELOCITY, joints);
+            rootBody.updateFramesRecursively();
+
+            int randomEndEffectorIndex = random.nextInt(numberOfJoints);
+            RigidBodyBasics randomEndEffector = joints.get(randomEndEffectorIndex).getSuccessor();
+
+            jacobianCalculator.clear();
+            jacobianCalculator.setKinematicChain(randomEndEffector, rootBody);
+            jacobianCalculator.setJacobianFrame(rootBody.getBodyFixedFrame());
+
+            compareJacobianTwistAgainstTwistCalculator(randomEndEffector, rootBody, jacobianCalculator, 1.0e-12);
+            compareJacobianAccelerationAgainstSpatialAccelerationCalculator(randomEndEffector, rootBody, jacobianCalculator, 1.0e-10);
+
+            RigidBodyBasics randomBase = joints.get(random.nextInt(randomEndEffectorIndex + 1)).getPredecessor();
+            jacobianCalculator.clear();
+            jacobianCalculator.setKinematicChain(randomEndEffector, randomBase);
+            jacobianCalculator.setJacobianFrame(randomBase.getBodyFixedFrame());
+
+            compareJacobianTwistAgainstTwistCalculator(randomEndEffector, randomBase, jacobianCalculator, 1.0e-12);
+            compareJacobianAccelerationAgainstSpatialAccelerationCalculator(randomEndEffector, randomBase, jacobianCalculator, 1.0e-10);
+
+            if (MultiBodySystemTools.computeDistance(randomEndEffector, rootBody) > 1)
+            {
+               jacobianCalculator.clear();
+               jacobianCalculator.setKinematicChain(MultiBodySystemTools.createJointPath(randomEndEffector, rootBody));
+               assertTrue(jacobianCalculator.getBase() == randomEndEffector);
+               assertTrue(jacobianCalculator.getEndEffector() == rootBody);
+               jacobianCalculator.setJacobianFrame(rootBody.getBodyFixedFrame());
+
+               compareJacobianTwistAgainstTwistCalculator(randomEndEffector, rootBody, jacobianCalculator, 1.0e-12);
+               compareJacobianAccelerationAgainstSpatialAccelerationCalculator(randomEndEffector, rootBody, jacobianCalculator, 1.0e-10);
+            }
+
+            if (MultiBodySystemTools.computeDistance(randomEndEffector, randomBase) > 1)
+            {
+               jacobianCalculator.clear();
+               jacobianCalculator.setKinematicChain(MultiBodySystemTools.createJointPath(randomEndEffector, randomBase));
+               assertTrue(jacobianCalculator.getBase() == randomEndEffector);
+               assertTrue(jacobianCalculator.getEndEffector() == randomBase);
+               jacobianCalculator.setJacobianFrame(randomBase.getBodyFixedFrame());
+
+               compareJacobianTwistAgainstTwistCalculator(randomEndEffector, randomBase, jacobianCalculator, 1.0e-12);
+               compareJacobianAccelerationAgainstSpatialAccelerationCalculator(randomEndEffector, randomBase, jacobianCalculator, 1.0e-10);
+            }
+         }
+      }
+
+      { // Tree with random prismatic joints
+         int numberOfJoints = 50;
+
+         List<PrismaticJoint> joints = MultiBodySystemRandomTools.nextPrismaticJointTree(random, numberOfJoints);
+         RigidBodyBasics rootBody = MultiBodySystemTools.getRootBody(joints.get(0).getPredecessor());
+         List<RigidBodyBasics> endEffectors = Arrays.asList(MultiBodySystemTools.collectSubtreeEndEffectors(rootBody));
+
+         GeometricJacobianCalculator jacobianCalculator = new GeometricJacobianCalculator();
+
+         for (int i = 0; i < ITERATIONS; i++)
+         {
+            for (JointStateType stateToRandomize : JointStateType.values())
+               MultiBodySystemRandomTools.nextState(random, stateToRandomize, joints);
+            rootBody.updateFramesRecursively();
+
+            int endEffector1Index = random.nextInt(endEffectors.size());
+            int endEffector2Index = random.nextInt(endEffectors.size());
+            while (endEffector2Index == endEffector1Index)
+               endEffector2Index = random.nextInt(endEffectors.size());
+
+            RigidBodyBasics endEffector1 = endEffectors.get(endEffector1Index);
+            RigidBodyBasics endEffector2 = endEffectors.get(endEffector2Index);
+
+            jacobianCalculator.clear();
+            jacobianCalculator.setKinematicChain(endEffector1, endEffector2);
+            jacobianCalculator.setJacobianFrame(endEffector2.getBodyFixedFrame());
+            compareJacobianTwistAgainstTwistCalculator(endEffector1, endEffector2, jacobianCalculator, 1.0e-12);
+            compareJacobianAccelerationAgainstSpatialAccelerationCalculator(endEffector1, endEffector2, jacobianCalculator, 1.0e-10);
+
+            if (MultiBodySystemTools.computeDistance(endEffector1, endEffector2) > 1)
+            {
+               jacobianCalculator.clear();
+               jacobianCalculator.setKinematicChain(MultiBodySystemTools.createJointPath(endEffector1, endEffector2));
+               jacobianCalculator.setJacobianFrame(endEffector2.getBodyFixedFrame());
+               compareJacobianTwistAgainstTwistCalculator(endEffector1, endEffector2, jacobianCalculator, 1.0e-12);
+               compareJacobianAccelerationAgainstSpatialAccelerationCalculator(endEffector1, endEffector2, jacobianCalculator, 1.0e-10);
+            }
+         }
+      }
+
+      { // Tree with random joints
+         int numberOfJoints = 50;
+
+         List<JointBasics> joints = MultiBodySystemRandomTools.nextJointTree(random, numberOfJoints);
+         RigidBodyBasics rootBody = MultiBodySystemTools.getRootBody(joints.get(0).getPredecessor());
+         List<RigidBodyBasics> endEffectors = Arrays.asList(MultiBodySystemTools.collectSubtreeEndEffectors(rootBody));
+
+         GeometricJacobianCalculator jacobianCalculator = new GeometricJacobianCalculator();
+
+         for (int i = 0; i < ITERATIONS; i++)
+         {
+            for (JointStateType stateToRandomize : JointStateType.values())
+               MultiBodySystemRandomTools.nextState(random, stateToRandomize, joints);
+            rootBody.updateFramesRecursively();
+
+            int endEffector1Index = random.nextInt(endEffectors.size());
+            int endEffector2Index = random.nextInt(endEffectors.size());
+            while (endEffector2Index == endEffector1Index)
+               endEffector2Index = random.nextInt(endEffectors.size());
+
+            RigidBodyBasics endEffector1 = endEffectors.get(endEffector1Index);
+            RigidBodyBasics endEffector2 = endEffectors.get(endEffector2Index);
+
+            jacobianCalculator.clear();
+            jacobianCalculator.setKinematicChain(endEffector1, endEffector2);
+            jacobianCalculator.setJacobianFrame(endEffector2.getBodyFixedFrame());
+
+            compareJacobianTwistAgainstTwistCalculator(endEffector1, endEffector2, jacobianCalculator, 1.0e-12);
+            compareJacobianAccelerationAgainstSpatialAccelerationCalculator(endEffector1, endEffector2, jacobianCalculator, 1.0e-10);
+
+            if (MultiBodySystemTools.computeDistance(endEffector1, endEffector2) > 1)
+            {
+               jacobianCalculator.clear();
+               jacobianCalculator.setKinematicChain(MultiBodySystemTools.createJointPath(endEffector1, endEffector2));
+               jacobianCalculator.setJacobianFrame(endEffector2.getBodyFixedFrame());
+               compareJacobianTwistAgainstTwistCalculator(endEffector1, endEffector2, jacobianCalculator, 1.0e-12);
+               compareJacobianAccelerationAgainstSpatialAccelerationCalculator(endEffector1, endEffector2, jacobianCalculator, 1.0e-10);
+            }
+         }
       }
    }
 
