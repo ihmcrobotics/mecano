@@ -45,7 +45,9 @@ public class GeometricJacobianCalculatorTest
       MultiBodySystemRandomTools.nextState(random, JointStateType.CONFIGURATION, joints);
       MultiBodySystemRandomTools.nextState(random, JointStateType.VELOCITY, joints);
 
-      jacobianCalculator.setKinematicChain(joints.get(0).getPredecessor(), joints.get(numberOfJoints - 1).getSuccessor());
+      RigidBodyBasics base = joints.get(0).getPredecessor();
+      RigidBodyBasics endEffector = joints.get(numberOfJoints - 1).getSuccessor();
+      jacobianCalculator.setKinematicChain(base, endEffector);
 
       { // Just checking the matrix sizing is correct
          DenseMatrix64F jacobianMatrix = new DenseMatrix64F(jacobianCalculator.getJacobianMatrix());
@@ -63,6 +65,8 @@ public class GeometricJacobianCalculatorTest
 
       // Do the same thing but now using setKinematicChain(OneDoFJoint[])
       jacobianCalculator.setKinematicChain(joints.toArray(new Joint[0]));
+      assertTrue(base == jacobianCalculator.getBase());
+      assertTrue(endEffector == jacobianCalculator.getEndEffector());
 
       { // Just checking the matrix sizing is correct
          DenseMatrix64F jacobianMatrix = new DenseMatrix64F(jacobianCalculator.getJacobianMatrix());
@@ -166,12 +170,16 @@ public class GeometricJacobianCalculatorTest
          // Do the same thing but now using setKinematicChain(OneDoFJoint[])
          jacobianCalculator.clear();
          jacobianCalculator.setKinematicChain(MultiBodySystemTools.createJointPath(rootBody, randomEndEffector));
+         assertTrue(rootBody == jacobianCalculator.getBase());
+         assertTrue(randomEndEffector == jacobianCalculator.getEndEffector());
          jacobianCalculator.setJacobianFrame(randomEndEffector.getBodyFixedFrame());
 
          compareJacobianTwistAgainstTwistCalculator(rootBody, randomEndEffector, jacobianCalculator, 1.0e-12);
 
          jacobianCalculator.clear();
          jacobianCalculator.setKinematicChain(MultiBodySystemTools.createJointPath(randomBase, randomEndEffector));
+         assertTrue(randomBase == jacobianCalculator.getBase());
+         assertTrue(randomEndEffector == jacobianCalculator.getEndEffector());
          jacobianCalculator.setJacobianFrame(randomEndEffector.getBodyFixedFrame());
 
          compareJacobianTwistAgainstTwistCalculator(randomBase, randomEndEffector, jacobianCalculator, 1.0e-12);
@@ -283,12 +291,16 @@ public class GeometricJacobianCalculatorTest
          // Do the same thing but now using setKinematicChain(OneDoFJoint[])
          jacobianCalculator.clear();
          jacobianCalculator.setKinematicChain(MultiBodySystemTools.createJointPath(rootBody, randomEndEffector));
+         assertTrue(rootBody == jacobianCalculator.getBase());
+         assertTrue(randomEndEffector == jacobianCalculator.getEndEffector());
          jacobianCalculator.setJacobianFrame(randomEndEffector.getBodyFixedFrame());
 
          compareJacobianAccelerationAgainstSpatialAccelerationCalculator(rootBody, randomEndEffector, jacobianCalculator, 1.0e-10);
 
          jacobianCalculator.clear();
          jacobianCalculator.setKinematicChain(MultiBodySystemTools.createJointPath(randomBase, randomEndEffector));
+         assertTrue(randomBase == jacobianCalculator.getBase());
+         assertTrue(randomEndEffector == jacobianCalculator.getEndEffector());
          jacobianCalculator.setJacobianFrame(randomEndEffector.getBodyFixedFrame());
 
          compareJacobianAccelerationAgainstSpatialAccelerationCalculator(randomBase, randomEndEffector, jacobianCalculator, 1.0e-10);
@@ -466,6 +478,8 @@ public class GeometricJacobianCalculatorTest
             {
                jacobianCalculator.clear();
                jacobianCalculator.setKinematicChain(MultiBodySystemTools.createJointPath(endEffector1, endEffector2));
+               assertTrue(endEffector1 == jacobianCalculator.getBase());
+               assertTrue(endEffector2 == jacobianCalculator.getEndEffector());
                jacobianCalculator.setJacobianFrame(endEffector2.getBodyFixedFrame());
                compareJacobianTwistAgainstTwistCalculator(endEffector1, endEffector2, jacobianCalculator, 1.0e-12);
                compareJacobianAccelerationAgainstSpatialAccelerationCalculator(endEffector1, endEffector2, jacobianCalculator, 1.0e-10);
@@ -507,6 +521,8 @@ public class GeometricJacobianCalculatorTest
             {
                jacobianCalculator.clear();
                jacobianCalculator.setKinematicChain(MultiBodySystemTools.createJointPath(endEffector1, endEffector2));
+               assertTrue(endEffector1 == jacobianCalculator.getBase());
+               assertTrue(endEffector2 == jacobianCalculator.getEndEffector());
                jacobianCalculator.setJacobianFrame(endEffector2.getBodyFixedFrame());
                compareJacobianTwistAgainstTwistCalculator(endEffector1, endEffector2, jacobianCalculator, 1.0e-12);
                compareJacobianAccelerationAgainstSpatialAccelerationCalculator(endEffector1, endEffector2, jacobianCalculator, 1.0e-10);

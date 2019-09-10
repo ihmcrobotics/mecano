@@ -186,6 +186,9 @@ public class GeometricJacobianCalculator
          base = joint.getPredecessor();
          endEffector = joint.getSuccessor();
          commonAncestor = base;
+         bodyPathFromBaseToEndEffector.clear();
+         bodyPathFromBaseToEndEffector.add(base);
+         bodyPathFromBaseToEndEffector.add(endEffector);
          numberOfDegreesOfFreedom = joint.getDegreesOfFreedom();
       }
       else
@@ -453,6 +456,21 @@ public class GeometricJacobianCalculator
    public RigidBodyReadOnly getEndEffector()
    {
       return endEffector;
+   }
+
+   /**
+    * Returns the common ancestor to both the {@code base} and the {@code endEffector}.
+    * <p>
+    * It is usually equal to the {@code base}, but it differs from both {@code base} and
+    * {@code endEffector} when expressing a Jacobian for kinematic chain that goes across branches of a
+    * tree-shaped multi-body system
+    * </p>
+    *
+    * @return the common ancestor to {@code base} and {@code endEffector}.
+    */
+   public RigidBodyReadOnly getCommonAncestor()
+   {
+      return commonAncestor;
    }
 
    /**
