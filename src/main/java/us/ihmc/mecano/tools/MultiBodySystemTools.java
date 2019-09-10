@@ -488,27 +488,8 @@ public class MultiBodySystemTools
     */
    public static int computeDistance(RigidBodyReadOnly firstBody, RigidBodyReadOnly secondBody)
    {
-      int distance = 0;
-
       RigidBodyReadOnly ancestor = computeNearestCommonAncestor(firstBody, secondBody);
-
-      RigidBodyReadOnly currentBody = firstBody;
-
-      while (currentBody != ancestor)
-      {
-         distance++;
-         currentBody = currentBody.getParentJoint().getPredecessor();
-      }
-
-      currentBody = secondBody;
-
-      while (currentBody != ancestor)
-      {
-         distance++;
-         currentBody = currentBody.getParentJoint().getPredecessor();
-      }
-
-      return distance;
+      return computeDistanceToAncestor(firstBody, ancestor) + computeDistanceToAncestor(secondBody, ancestor);
    }
 
    /**
