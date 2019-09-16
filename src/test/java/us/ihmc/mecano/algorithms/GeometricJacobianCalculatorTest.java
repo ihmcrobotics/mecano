@@ -392,7 +392,7 @@ public class GeometricJacobianCalculatorTest
    }
 
    /**
-    * This test verifies that a Jacobian between to rigid-bodies that do not share a
+    * This test verifies that a Jacobian between two rigid-bodies that do not share a
     * ancestor-descendant relationship can be created.
     */
    @Test
