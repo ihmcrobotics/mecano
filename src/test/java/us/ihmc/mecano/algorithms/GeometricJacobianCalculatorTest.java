@@ -32,6 +32,19 @@ public class GeometricJacobianCalculatorTest
    private static final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
 
    @Test
+   public void testNoPathFromBaseToEndEffector()
+   {
+      Random random = new Random(34635);
+      List<JointBasics> chain1 = MultiBodySystemRandomTools.nextJointChain(random, 20);
+      List<JointBasics> chain2 = MultiBodySystemRandomTools.nextJointChain(random, 20);
+
+      RigidBodyBasics bodyOnChain1 = chain1.get(random.nextInt(chain1.size())).getSuccessor();
+      RigidBodyBasics bodyOnChain2 = chain2.get(random.nextInt(chain2.size())).getSuccessor();
+      GeometricJacobianCalculator calculator = new GeometricJacobianCalculator();
+      assertThrows(IllegalArgumentException.class, () -> calculator.setKinematicChain(bodyOnChain1, bodyOnChain2));
+   }
+
+   @Test
    public void testBasicFeatures() throws Exception
    {
       Random random = new Random(435435L);
