@@ -1,12 +1,12 @@
 plugins {
-   id("us.ihmc.ihmc-build") version "0.15.7"
+   id("us.ihmc.ihmc-build") version "0.17.1"
    id("us.ihmc.ihmc-ci") version "4.25"
-   id("us.ihmc.ihmc-cd") version "0.1"
+   id("us.ihmc.ihmc-cd") version "0.2"
 }
 
 ihmc {
    group = "us.ihmc"
-   version = "0.0.20"
+   version = "0.0.21"
    vcsUrl = "https://github.com/ihmcrobotics/mecano"
    openSource = true
 
@@ -15,25 +15,25 @@ ihmc {
 }
 
 mainDependencies {
-   compile group: "org.ejml", name: "dense64", version: "0.30"
+   api("org.ejml:dense64:0.30")
 
-   compile group: "us.ihmc", name: "euclid", version: "0.12.0"
-   compile group: "us.ihmc", name: "euclid-frame", version: "0.12.0"
-   compile group: "us.ihmc", name: "euclid-geometry", version: "0.12.0"
+   api("us.ihmc:euclid:0.12.0")
+   api("us.ihmc:euclid-frame:0.12.0")
+   api("us.ihmc:euclid-geometry:0.12.0")
 }
 
 testDependencies {
-   compile group: "org.ejml", name: "simple", version: "0.30"
+   api("org.ejml:simple:0.30")
 }
 
 graphvizDependencies {
    compile ihmc.sourceSetProject("main")
 
-   compile group: "guru.nidi", name: "graphviz-java", version: "0.5.4"
+   api("guru.nidi:graphviz-java:0.5.4")
 }
 
 yovariablesDependencies {
    compile ihmc.sourceSetProject("main")
 
-   compile group: "us.ihmc", name: "ihmc-yovariables", version: "0.3.11"
+   api("us.ihmc:ihmc-yovariables:0.3.11")
 }
