@@ -1,8 +1,8 @@
 package us.ihmc.mecano.algorithms;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
+import java.util.Objects;
 
 import org.ejml.data.DenseMatrix64F;
 import org.ejml.ops.CommonOps;
@@ -48,6 +48,10 @@ public class GeometricJacobianCalculator
    private RigidBodyReadOnly base;
    /** The end-effector is the successor of the last joint that the Jacobian considers. */
    private RigidBodyReadOnly endEffector;
+   /**
+    * The common ancestor of {@code base} and {@code endEffector}, it is usually equal to {@code base}.
+    */
+   private RigidBodyReadOnly commonAncestor;
    /** The list of the joints in order that they are represented in the Jacobian matrix. */
    private final List<JointReadOnly> jointsFromBaseToEndEffector = new ArrayList<>(12);
    /**
@@ -83,7 +87,7 @@ public class GeometricJacobianCalculator
     * Intermediate variable store the successor with respect to the predecessor of a joint in the
     * kinematic chain. Used for computing the Coriolis and centrifugal accelerations.
     */
-   private final Twist predecessorTwist = new Twist();
+   private final Twist relativeJointTwist = new Twist();
 
    private boolean isJacobianUpToDate = false;
    private boolean isConvectiveTermUpToDate = false;
@@ -108,6 +112,7 @@ public class GeometricJacobianCalculator
    {
       base = null;
       endEffector = null;
+      commonAncestor = null;
       numberOfDegreesOfFreedom = -1;
       jacobianFrame = null;
       jointsFromBaseToEndEffector.clear();
@@ -147,27 +152,9 @@ public class GeometricJacobianCalculator
          jacobianFrame = endEffector.getBodyFixedFrame();
       reset();
 
-      jointsFromBaseToEndEffector.clear();
-      int distanceFromBase = MultiBodySystemTools.computeDistanceToAncestor(endEffector, base);
-      if (distanceFromBase < 0)
-         throw new IllegalArgumentException("The base: " + base.getName() + "is not an ancestor of the given end-effector: " + endEffector.getName());
-
-      while (jointsFromBaseToEndEffector.size() < distanceFromBase)
-         jointsFromBaseToEndEffector.add(null);
-
       numberOfDegreesOfFreedom = MultiBodySystemTools.computeDegreesOfFreedom(base, endEffector);
-
-      RigidBodyReadOnly currentBody = endEffector;
-      int index = jointsFromBaseToEndEffector.size() - 1;
-
-      while (currentBody != base)
-      {
-         JointReadOnly joint = currentBody.getParentJoint();
-         jointsFromBaseToEndEffector.set(index--, joint);
-         currentBody = joint.getPredecessor();
-      }
-
-      updateRigidBodyPath();
+      commonAncestor = MultiBodySystemTools.collectJointPath(base, endEffector, jointsFromBaseToEndEffector);
+      MultiBodySystemTools.collectRigidBodyPath(base, endEffector, bodyPathFromBaseToEndEffector);
    }
 
    /**
@@ -183,69 +170,55 @@ public class GeometricJacobianCalculator
     * </p>
     * 
     * @param joints the array of joints to use for computing the Jacobian. Not modified.
-    * @throws IllegalArgumentException if {@code joints[0].getPredecessor()} is not the ancestor of
-    *                                  {@code joints[joints.length - 1].getSuccessor()} and that
-    *                                  {@code joints[joints.length - 1].getPredecessor()} is not the
-    *                                  ancestor of {@code joints[0].getSuccessor()}.
+    * @throws IllegalArgumentException if the number of joints is equal to 0.
     */
    public void setKinematicChain(JointReadOnly[] joints)
    {
-      base = joints[0].getPredecessor();
-      endEffector = joints[joints.length - 1].getSuccessor();
+      Objects.requireNonNull(joints);
 
-      numberOfDegreesOfFreedom = MultiBodySystemTools.computeDegreesOfFreedom(joints);
-
-      if (MultiBodySystemTools.isAncestor(endEffector, base))
+      if (joints.length == 0)
       {
-         if (jacobianFrame == null)
-            jacobianFrame = endEffector.getBodyFixedFrame();
-         reset();
-
-         jointsFromBaseToEndEffector.clear();
-         for (int jointIndex = 0; jointIndex < joints.length; jointIndex++)
-            jointsFromBaseToEndEffector.add(joints[jointIndex]);
+         throw new IllegalArgumentException("Cannot create a geometric jacobian for an empty kinematic chain.");
+      }
+      else if (joints.length == 1)
+      {
+         JointReadOnly joint = joints[0];
+         base = joint.getPredecessor();
+         endEffector = joint.getSuccessor();
+         commonAncestor = base;
+         bodyPathFromBaseToEndEffector.clear();
+         bodyPathFromBaseToEndEffector.add(base);
+         bodyPathFromBaseToEndEffector.add(endEffector);
+         numberOfDegreesOfFreedom = joint.getDegreesOfFreedom();
       }
       else
       {
-         base = joints[joints.length - 1].getPredecessor();
-         endEffector = joints[0].getSuccessor();
-         if (!MultiBodySystemTools.isAncestor(endEffector, base))
-            throw new IllegalArgumentException("Unable to process the array of joints: " + Arrays.toString(joints));
+         JointReadOnly firstJoint = joints[0];
+         JointReadOnly secondJoint = joints[1];
+         JointReadOnly lastJoint = joints[joints.length - 1];
+         JointReadOnly secondToLastJoint = joints[joints.length - 2];
 
-         if (jacobianFrame == null)
-            jacobianFrame = endEffector.getBodyFixedFrame();
-         reset();
+         if (firstJoint == secondJoint.getPredecessor().getParentJoint())
+            base = firstJoint.getPredecessor();
+         else
+            base = firstJoint.getSuccessor();
 
-         jointsFromBaseToEndEffector.clear();
-         for (int jointIndex = joints.length - 1; jointIndex >= 0; jointIndex--)
-            jointsFromBaseToEndEffector.add(joints[jointIndex]);
+         if (lastJoint == secondToLastJoint.getPredecessor().getParentJoint())
+            endEffector = lastJoint.getPredecessor();
+         else
+            endEffector = lastJoint.getSuccessor();
+
+         commonAncestor = MultiBodySystemTools.collectRigidBodyPath(base, endEffector, bodyPathFromBaseToEndEffector);
+         numberOfDegreesOfFreedom = MultiBodySystemTools.computeDegreesOfFreedom(joints);
       }
 
-      updateRigidBodyPath();
-   }
+      if (jacobianFrame == null)
+         jacobianFrame = endEffector.getBodyFixedFrame();
+      reset();
 
-   /**
-    * Updates {@link #bodyPathFromBaseToEndEffector} based on the new {@code base} and
-    * {@code endEffector}.
-    */
-   private void updateRigidBodyPath()
-   {
-      bodyPathFromBaseToEndEffector.clear();
-      int pathLength = MultiBodySystemTools.computeDistanceToAncestor(endEffector, base) + 1;
-
-      while (bodyPathFromBaseToEndEffector.size() < pathLength)
-         bodyPathFromBaseToEndEffector.add(null);
-
-      int index = pathLength - 1;
-      RigidBodyReadOnly currentBody = endEffector;
-
-      while (currentBody != base)
-      {
-         bodyPathFromBaseToEndEffector.set(index--, currentBody);
-         currentBody = currentBody.getParentJoint().getPredecessor();
-      }
-
-      bodyPathFromBaseToEndEffector.set(0, base);
+      jointsFromBaseToEndEffector.clear();
+      for (int jointIndex = 0; jointIndex < joints.length; jointIndex++)
+         jointsFromBaseToEndEffector.add(joints[jointIndex]);
    }
 
    /**
@@ -283,6 +256,7 @@ public class GeometricJacobianCalculator
          throw new RuntimeException("The base and end-effector have to be set first.");
 
       jacobianMatrix.reshape(SpatialVectorReadOnly.SIZE, numberOfDegreesOfFreedom);
+      boolean isGoingUpstream = commonAncestor != base;
 
       int column = 0;
 
@@ -293,9 +267,14 @@ public class GeometricJacobianCalculator
          for (int dofIndex = 0; dofIndex < joint.getDegreesOfFreedom(); dofIndex++)
          {
             jointUnitTwist.setIncludingFrame(joint.getUnitTwists().get(dofIndex));
+            if (isGoingUpstream)
+               jointUnitTwist.invert();
             jointUnitTwist.changeFrame(jacobianFrame);
             jointUnitTwist.get(0, column++, jacobianMatrix);
          }
+
+         if (isGoingUpstream)
+            isGoingUpstream = joint.getPredecessor() != commonAncestor;
       }
       isJacobianUpToDate = true;
    }
@@ -344,20 +323,41 @@ public class GeometricJacobianCalculator
 
       MovingReferenceFrame baseFrame = base.getBodyFixedFrame();
       endEffectorCoriolisAcceleration.setToZero(baseFrame, baseFrame, baseFrame);
+      boolean isGoingUpstream = commonAncestor != base;
 
-      for (int i = 1; i < bodyPathFromBaseToEndEffector.size(); i++)
+      for (int i = isGoingUpstream ? 0 : 1; i < bodyPathFromBaseToEndEffector.size(); i++)
       {
          RigidBodyReadOnly currentBody = bodyPathFromBaseToEndEffector.get(i);
+         if (currentBody == commonAncestor)
+            continue; // The chain is going from leaf to root.
          JointReadOnly parentJoint = currentBody.getParentJoint();
          MovingReferenceFrame currentBodyFrame = currentBody.getBodyFixedFrame();
-         MovingReferenceFrame predecessorBodyFrame = parentJoint.getPredecessor().getBodyFixedFrame();
+         RigidBodyReadOnly predecessor = parentJoint.getPredecessor();
+         MovingReferenceFrame predecessorBodyFrame = predecessor.getBodyFixedFrame();
 
-         parentJoint.getPredecessorTwist(predecessorTwist);
-         predecessorBodyFrame.getTwistRelativeToOther(baseFrame, bodyTwistRelativeToBase);
+         if (isGoingUpstream)
+         {
+            parentJoint.getSuccessorTwist(relativeJointTwist);
+            currentBodyFrame.getTwistRelativeToOther(baseFrame, bodyTwistRelativeToBase);
+            relativeJointTwist.invert();
 
-         // By changing the zero-acceleration from body to body until the end-effector, we collect Coriolis and centrifugal accelerations.
-         endEffectorCoriolisAcceleration.changeFrame(currentBodyFrame, predecessorTwist, bodyTwistRelativeToBase);
-         endEffectorCoriolisAcceleration.setBodyFrame(currentBodyFrame);
+            // By changing the zero-acceleration from body to body until the end-effector, we collect Coriolis and centrifugal accelerations.
+            endEffectorCoriolisAcceleration.changeFrame(predecessorBodyFrame, relativeJointTwist, bodyTwistRelativeToBase);
+            endEffectorCoriolisAcceleration.setBodyFrame(predecessorBodyFrame);
+         }
+         else
+         {
+            parentJoint.getPredecessorTwist(relativeJointTwist);
+            predecessorBodyFrame.getTwistRelativeToOther(baseFrame, bodyTwistRelativeToBase);
+
+            // By changing the zero-acceleration from body to body until the end-effector, we collect Coriolis and centrifugal accelerations.
+            endEffectorCoriolisAcceleration.changeFrame(currentBodyFrame, relativeJointTwist, bodyTwistRelativeToBase);
+            endEffectorCoriolisAcceleration.setBodyFrame(currentBodyFrame);
+         }
+
+         if (isGoingUpstream)
+            isGoingUpstream = predecessor != commonAncestor;
+
       }
 
       // The following line is where the jacobianFrame is assumed to be rigidly attached to the end-effector.
@@ -456,6 +456,21 @@ public class GeometricJacobianCalculator
    public RigidBodyReadOnly getEndEffector()
    {
       return endEffector;
+   }
+
+   /**
+    * Returns the common ancestor to both the {@code base} and the {@code endEffector}.
+    * <p>
+    * It is usually equal to the {@code base}, but it differs from both {@code base} and
+    * {@code endEffector} when expressing a Jacobian for kinematic chain that goes across branches of a
+    * tree-shaped multi-body system
+    * </p>
+    *
+    * @return the common ancestor to {@code base} and {@code endEffector}.
+    */
+   public RigidBodyReadOnly getCommonAncestor()
+   {
+      return commonAncestor;
    }
 
    /**

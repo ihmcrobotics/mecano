@@ -134,7 +134,9 @@ public class MultiBodySystemTools
     */
    public static JointBasics[] createJointPath(RigidBodyBasics start, RigidBodyBasics end)
    {
-      return filterJoints(createJointPath((RigidBodyReadOnly) start, (RigidBodyReadOnly) end), JointBasics.class);
+      List<JointBasics> jointPath = new ArrayList<>();
+      collectJointPath(start, end, jointPath);
+      return jointPath.toArray(new JointBasics[jointPath.size()]);
    }
 
    /**
@@ -151,36 +153,243 @@ public class MultiBodySystemTools
     */
    public static JointReadOnly[] createJointPath(RigidBodyReadOnly start, RigidBodyReadOnly end)
    {
-      boolean flip = false;
-      RigidBodyReadOnly descendant = start;
-      RigidBodyReadOnly ancestor = end;
-      int pathLength = computeDistanceToAncestor(descendant, ancestor);
+      List<JointReadOnly> jointPath = new ArrayList<>();
+      collectJointPath(start, end, jointPath);
+      return jointPath.toArray(new JointReadOnly[jointPath.size()]);
+   }
 
-      if (pathLength < 0)
-      {
-         flip = true;
-         descendant = end;
-         ancestor = start;
-         pathLength = computeDistanceToAncestor(end, start);
+   /**
+    * Travels the multi-body system from {@code start} to {@code end} and stores in order the joints
+    * that are in between in the given {@code jointPathToPack}.
+    * <p>
+    * The resulting joint path represent the shortest path connecting {@code start} and {@code end}. No
+    * assumption is made on the relative position of the two rigid-bodies in the multi-body system.
+    * </p>
+    * 
+    * @param start           the rigid-body where to begin collecting the joints.
+    * @param end             the rigid-body where to stop collecting the joints.
+    * @param jointPathToPack the list in which the joint path is stored. Note that the list is first
+    *                        cleared before storing the joint path.
+    * @return the nearest common ancestor of {@code start} and {@code end}.
+    */
+   public static RigidBodyReadOnly collectJointPath(RigidBodyReadOnly start, RigidBodyReadOnly end, List<JointReadOnly> jointPathToPack)
+   {
+      jointPathToPack.clear();
 
-         if (pathLength < 0)
-            return null; // The rigid-bodies are not part of the same system.
-      }
+      RigidBodyReadOnly ancestor = computeNearestCommonAncestor(start, end);
+      RigidBodyReadOnly currentBody;
 
-      JointReadOnly[] jointPath = new JointReadOnly[pathLength];
-      RigidBodyReadOnly currentBody = descendant;
-      int i = 0;
+      currentBody = start;
 
       while (currentBody != ancestor)
       {
-         int j = flip ? pathLength - 1 - i : i;
          JointReadOnly parentJoint = currentBody.getParentJoint();
-         jointPath[j] = parentJoint;
+         jointPathToPack.add(parentJoint);
          currentBody = parentJoint.getPredecessor();
-         i++;
       }
 
-      return jointPath;
+      int distance = jointPathToPack.size();
+      currentBody = end;
+
+      while (currentBody != ancestor)
+      {
+         currentBody = currentBody.getParentJoint().getPredecessor();
+         distance++;
+      }
+
+      while (jointPathToPack.size() < distance)
+         jointPathToPack.add(null);
+
+      currentBody = end;
+
+      for (int i = distance - 1; currentBody != ancestor; i--)
+      {
+         JointReadOnly parentJoint = currentBody.getParentJoint();
+         jointPathToPack.set(i, parentJoint);
+         currentBody = parentJoint.getPredecessor();
+      }
+      return ancestor;
+   }
+
+   /**
+    * Travels the multi-body system from {@code start} to {@code end} and stores in order the joints
+    * that are in between in the given {@code jointPathToPack}.
+    * <p>
+    * The resulting joint path represent the shortest path connecting {@code start} and {@code end}. No
+    * assumption is made on the relative position of the two rigid-bodies in the multi-body system.
+    * </p>
+    * 
+    * @param start           the rigid-body where to begin collecting the joints.
+    * @param end             the rigid-body where to stop collecting the joints.
+    * @param jointPathToPack the list in which the joint path is stored. Note that the list is first
+    *                        cleared before storing the joint path.
+    * @return the nearest common ancestor of {@code start} and {@code end}.
+    */
+   public static RigidBodyBasics collectJointPath(RigidBodyBasics start, RigidBodyBasics end, List<JointBasics> jointPathToPack)
+   {
+      jointPathToPack.clear();
+
+      RigidBodyBasics ancestor = computeNearestCommonAncestor(start, end);
+      RigidBodyBasics currentBody;
+
+      currentBody = start;
+
+      while (currentBody != ancestor)
+      {
+         JointBasics parentJoint = currentBody.getParentJoint();
+         jointPathToPack.add(parentJoint);
+         currentBody = parentJoint.getPredecessor();
+      }
+
+      int distance = jointPathToPack.size();
+      currentBody = end;
+
+      while (currentBody != ancestor)
+      {
+         currentBody = currentBody.getParentJoint().getPredecessor();
+         distance++;
+      }
+
+      while (jointPathToPack.size() < distance)
+         jointPathToPack.add(null);
+
+      currentBody = end;
+
+      for (int i = distance - 1; currentBody != ancestor; i--)
+      {
+         JointBasics parentJoint = currentBody.getParentJoint();
+         jointPathToPack.set(i, parentJoint);
+         currentBody = parentJoint.getPredecessor();
+      }
+      return ancestor;
+   }
+
+   /**
+    * Travels the multi-body system from {@code start} to {@code end} and stores in order the
+    * rigid-bodies that connect {@code start} to {@code end} in the given {@code rigidBodyPathToPack}.
+    * <p>
+    * The resulting resulting path includes both {@code start} and {@code end} and represent the
+    * shortest path connecting the two rigid-bodies. No assumption is made on the relative position of
+    * the two rigid-bodies in the multi-body system.
+    * </p>
+    * 
+    * @param start               the rigid-body where to begin collecting the rigid-bodies.
+    * @param end                 the rigid-body where to stop collecting the rigid-bodies.
+    * @param rigidBodyPathToPack the list in which the rigid-body path is stored. Note that the list is
+    *                            first cleared before storing the rigid-body path.
+    * @return the nearest common ancestor of {@code start} and {@code end}.
+    */
+   public static RigidBodyReadOnly collectRigidBodyPath(RigidBodyReadOnly start, RigidBodyReadOnly end, List<RigidBodyReadOnly> rigidBodyPathToPack)
+   {
+      rigidBodyPathToPack.clear();
+
+      if (start == end)
+      {
+         rigidBodyPathToPack.add(end);
+         return end;
+      }
+
+      RigidBodyReadOnly ancestor = computeNearestCommonAncestor(start, end);
+      RigidBodyReadOnly currentBody;
+
+      currentBody = start;
+
+      if (start == ancestor)
+         rigidBodyPathToPack.add(start);
+
+      while (currentBody != ancestor)
+      {
+         rigidBodyPathToPack.add(currentBody);
+         currentBody = currentBody.getParentJoint().getPredecessor();
+      }
+
+      int distance = rigidBodyPathToPack.size();
+      currentBody = end;
+
+      while (currentBody != ancestor)
+      {
+         currentBody = currentBody.getParentJoint().getPredecessor();
+         distance++;
+      }
+
+      while (rigidBodyPathToPack.size() < distance)
+         rigidBodyPathToPack.add(null);
+
+      currentBody = end;
+
+      if (end == ancestor)
+         rigidBodyPathToPack.add(end);
+
+      for (int i = distance - 1; currentBody != ancestor; i--)
+      {
+         rigidBodyPathToPack.set(i, currentBody);
+         currentBody = currentBody.getParentJoint().getPredecessor();
+      }
+      return ancestor;
+   }
+
+   /**
+    * Travels the multi-body system from {@code start} to {@code end} and stores in order the
+    * rigid-bodies that connect {@code start} to {@code end} in the given {@code rigidBodyPathToPack}.
+    * <p>
+    * The resulting resulting path includes both {@code start} and {@code end} and represent the
+    * shortest path connecting the two rigid-bodies. No assumption is made on the relative position of
+    * the two rigid-bodies in the multi-body system.
+    * </p>
+    * 
+    * @param start               the rigid-body where to begin collecting the rigid-bodies.
+    * @param end                 the rigid-body where to stop collecting the rigid-bodies.
+    * @param rigidBodyPathToPack the list in which the rigid-body path is stored. Note that the list is
+    *                            first cleared before storing the rigid-body path.
+    * @return the nearest common ancestor of {@code start} and {@code end}.
+    */
+   public static RigidBodyBasics collectRigidBodyPath(RigidBodyBasics start, RigidBodyBasics end, List<RigidBodyBasics> rigidBodyPathToPack)
+   {
+      rigidBodyPathToPack.clear();
+
+      if (start == end)
+      {
+         rigidBodyPathToPack.add(end);
+         return end;
+      }
+
+      RigidBodyBasics ancestor = computeNearestCommonAncestor(start, end);
+      RigidBodyBasics currentBody;
+
+      currentBody = start;
+
+      if (start == ancestor)
+         rigidBodyPathToPack.add(start);
+
+      while (currentBody != ancestor)
+      {
+         rigidBodyPathToPack.add(currentBody);
+         currentBody = currentBody.getParentJoint().getPredecessor();
+      }
+
+      int distance = rigidBodyPathToPack.size();
+      currentBody = end;
+
+      while (currentBody != ancestor)
+      {
+         currentBody = currentBody.getParentJoint().getPredecessor();
+         distance++;
+      }
+
+      while (rigidBodyPathToPack.size() < distance)
+         rigidBodyPathToPack.add(null);
+
+      currentBody = end;
+
+      if (end == ancestor)
+         rigidBodyPathToPack.add(end);
+
+      for (int i = distance - 1; currentBody != ancestor; i--)
+      {
+         rigidBodyPathToPack.set(i, currentBody);
+         currentBody = currentBody.getParentJoint().getPredecessor();
+      }
+      return ancestor;
    }
 
    /**
@@ -208,6 +417,27 @@ public class MultiBodySystemTools
       }
 
       return currentBody == ancestor;
+   }
+
+   /**
+    * Computes the number of joints that separates the {@code rigidBody} from its root body.
+    *
+    * @param rigidBody the query.
+    * @return the distance in number of joints between the {@code rigidBody} and the root body. This
+    *         method returns {@code 0} if the {@code rigidBody} is the root body.
+    */
+   public static int computeDistanceToRoot(RigidBodyReadOnly rigidBody)
+   {
+      int distance = 0;
+      RigidBodyReadOnly currentBody = rigidBody;
+
+      while (!currentBody.isRootBody())
+      {
+         distance++;
+         currentBody = currentBody.getParentJoint().getPredecessor();
+      }
+
+      return distance;
    }
 
    /**
@@ -242,30 +472,56 @@ public class MultiBodySystemTools
    }
 
    /**
-    * Calculates the number of degrees of freedom of the kinematic chain that starts from
-    * {@code ancestor} to end to {@code descendant}.
-    * 
-    * @param ancestor   the base of the kinematic chain.
-    * @param descendant the end-effector of the kinematic chain.
-    * @return the number of degrees of freedom.
-    * @throws RuntimeException if the given ancestor and descendant are swapped, or if the do not
-    *                          belong to the same system.
-    * @throws RuntimeException this method does not support in kinematic trees to go through different
-    *                          branches.
+    * Computes the number of joints that separates the two rigid-bodies {@code firstBody} and
+    * {@code secondBody}.
+    * <p>
+    * Unlike {@link #computeDistanceToAncestor(RigidBodyReadOnly, RigidBodyReadOnly)}, no assumption is
+    * made regarding the relative position of the two bodies within the multi-body system.
+    * </p>
+    *
+    * @param firstBody  the first end of the kinematic chain to compute the distance of.
+    * @param secondBody the second end of the kinematic chain to compute the distance of.
+    * @return the distance in number of joints between the {@code firstBody} and the
+    *         {@code secondBody}. This method returns {@code 0} if the two rigid-bodies are the same.
+    * @throws IllegalArgumentException if the two rigid-bodies do not belong to the same multi-body
+    *                                  system.
     */
-   public static int computeDegreesOfFreedom(RigidBodyReadOnly ancestor, RigidBodyReadOnly descendant)
+   public static int computeDistance(RigidBodyReadOnly firstBody, RigidBodyReadOnly secondBody)
+   {
+      RigidBodyReadOnly ancestor = computeNearestCommonAncestor(firstBody, secondBody);
+      return computeDistanceToAncestor(firstBody, ancestor) + computeDistanceToAncestor(secondBody, ancestor);
+   }
+
+   /**
+    * Calculates the number of degrees of freedom of the kinematic chain that connects
+    * {@code firstBody} and {@code secondBody}.
+    * 
+    * @param firstBody  the first end of the kinematic chain.
+    * @param secondBody the second end of the kinematic chain.
+    * @return the number of degrees of freedom.
+    * @throws IllegalArgumentException if the two rigid-bodies do not belong to the same multi-body
+    *                                  system.
+    */
+   public static int computeDegreesOfFreedom(RigidBodyReadOnly firstBody, RigidBodyReadOnly secondBody)
    {
       int nDoFs = 0;
 
-      RigidBodyReadOnly currentBody = descendant;
+      RigidBodyReadOnly ancestor = computeNearestCommonAncestor(firstBody, secondBody);
+
+      RigidBodyReadOnly currentBody = firstBody;
 
       while (currentBody != ancestor)
       {
          JointReadOnly parentJoint = currentBody.getParentJoint();
+         nDoFs += parentJoint.getDegreesOfFreedom();
+         currentBody = parentJoint.getPredecessor();
+      }
 
-         if (parentJoint == null)
-            throw new RuntimeException("Could not find the ancestor: " + ancestor.getName() + ", to the descendant: " + descendant.getName());
+      currentBody = secondBody;
 
+      while (currentBody != ancestor)
+      {
+         JointReadOnly parentJoint = currentBody.getParentJoint();
          nDoFs += parentJoint.getDegreesOfFreedom();
          currentBody = parentJoint.getPredecessor();
       }
@@ -307,6 +563,96 @@ public class MultiBodySystemTools
       }
 
       return numberOfDegreesOfFreedom;
+   }
+
+   /**
+    * Finds the common ancestor of {@code firstBody} and {@code secondBody} that minimizes the distance
+    * {@code d}:
+    * 
+    * <pre>
+    * d = <i>computeDistanceToAncestor</i>(firstBody, ancestor) + <i>computeDistanceToAncestor</i>(secondBody, ancestor)
+    * </pre>
+    * 
+    * @param firstBody  the first rigid-body of the query.
+    * @param secondBody the second rigid-body of the query.
+    * @return the nearest common ancestor.
+    * @throws IllegalArgumentException if the two rigid-bodies do not belong to the same multi-body
+    *                                  system.
+    */
+   public static RigidBodyBasics computeNearestCommonAncestor(RigidBodyBasics firstBody, RigidBodyBasics secondBody)
+   {
+      return (RigidBodyBasics) computeNearestCommonAncestor((RigidBodyReadOnly) firstBody, (RigidBodyReadOnly) secondBody);
+   }
+
+   /**
+    * Finds the common ancestor of {@code firstBody} and {@code secondBody} that minimizes the distance
+    * {@code d}:
+    * 
+    * <pre>
+    * d = <i>computeDistanceToAncestor</i>(firstBody, ancestor) + <i>computeDistanceToAncestor</i>(secondBody, ancestor)
+    * </pre>
+    * 
+    * @param firstBody  the first rigid-body of the query.
+    * @param secondBody the second rigid-body of the query.
+    * @return the nearest common ancestor.
+    * @throws IllegalArgumentException if the two rigid-bodies do not belong to the same multi-body
+    *                                  system.
+    */
+   public static RigidBodyReadOnly computeNearestCommonAncestor(RigidBodyReadOnly firstBody, RigidBodyReadOnly secondBody)
+   {
+      if (firstBody == secondBody)
+         return firstBody;
+
+      RigidBodyReadOnly firstAncestor = firstBody;
+      int firstDistanceToRoot = computeDistanceToRoot(firstBody);
+      RigidBodyReadOnly secondAncestor = secondBody;
+      int secondDistanceToRoot = computeDistanceToRoot(secondBody);
+
+      int distanceToRoot;
+
+      if (firstDistanceToRoot > secondDistanceToRoot)
+      {
+         distanceToRoot = firstDistanceToRoot;
+         while (distanceToRoot > secondDistanceToRoot)
+         {
+            firstAncestor = firstAncestor.getParentJoint().getPredecessor();
+            distanceToRoot--;
+         }
+      }
+      else if (secondDistanceToRoot > firstDistanceToRoot)
+      {
+         distanceToRoot = secondDistanceToRoot;
+         while (distanceToRoot > firstDistanceToRoot)
+         {
+            secondAncestor = secondAncestor.getParentJoint().getPredecessor();
+            distanceToRoot--;
+         }
+      }
+      else
+      {
+         distanceToRoot = firstDistanceToRoot;
+      }
+
+      if (firstAncestor == secondAncestor)
+         return firstAncestor;
+
+      // The multi-body system has a tree structure and the 2 bodies are on 2 distinct branches of that tree.
+      // Knowing that both firstAncestor and secondAncestor are at the same distance from the root, we go up the tree until they match.
+
+      while (distanceToRoot > 0)
+      {
+         firstAncestor = firstAncestor.getParentJoint().getPredecessor();
+         secondAncestor = secondAncestor.getParentJoint().getPredecessor();
+
+         if (firstAncestor == secondAncestor)
+            return firstAncestor;
+
+         distanceToRoot--;
+      }
+
+      // We are at the root and the ancestors still do not match => we are dealing with 2 distinct multi-body systems.
+      throw new IllegalArgumentException("The two rigid-bodies are not part of the same multi-body system: first root: " + firstAncestor.getName()
+            + ", second root: " + secondAncestor.getName());
    }
 
    /**
@@ -475,6 +821,9 @@ public class MultiBodySystemTools
    /**
     * Combines {@link #collectSupportJoints(RigidBodyReadOnly)} with
     * {@link #collectSubtreeJoints(RigidBodyReadOnly...)}.
+    * <p>
+    * WARNING: This method generates garbage.
+    * </p>
     * 
     * @param rigidBody the rigid-body to collect the support and subtree joints of.
     * @return the array containing the support and subtree joints.
@@ -489,6 +838,9 @@ public class MultiBodySystemTools
    /**
     * Combines {@link #collectSupportJoints(RigidBodyBasics)} with
     * {@link #collectSubtreeJoints(RigidBodyBasics...)}.
+    * <p>
+    * WARNING: This method generates garbage.
+    * </p>
     * 
     * @param rigidBody the rigid-body to collect the support and subtree joints of.
     * @return the array containing the support and subtree joints.
@@ -505,6 +857,9 @@ public class MultiBodySystemTools
     * Combines {@link #collectSupportJoints(RigidBodyReadOnly...)} with
     * {@link #collectSubtreeJoints(RigidBodyReadOnly...)}, and returns an array containing no duplicate
     * elements.
+    * <p>
+    * WARNING: This method generates garbage.
+    * </p>
     * 
     * @param rigidBodies the rigid-bodies to collect the support and subtree joints of.
     * @return the array containing the support and subtree joints.
@@ -518,6 +873,9 @@ public class MultiBodySystemTools
     * Combines {@link #collectSupportJoints(RigidBodyBasics...)} with
     * {@link #collectSubtreeJoints(RigidBodyBasics...)}, and returns an array containing no duplicate
     * elements.
+    * <p>
+    * WARNING: This method generates garbage.
+    * </p>
     * 
     * @param rigidBodies the rigid-bodies to collect the support and subtree joints of.
     * @return the array containing the support and subtree joints.
@@ -525,6 +883,36 @@ public class MultiBodySystemTools
    public static JointBasics[] collectSupportAndSubtreeJoints(RigidBodyBasics... rigidBodies)
    {
       return Stream.of(rigidBodies).map(MultiBodySystemTools::collectSupportAndSubtreeJoints).flatMap(Stream::of).distinct().toArray(JointBasics[]::new);
+   }
+
+   /**
+    * Collects starting from the given {@code rigidBody} all descendant that has no children, i.e. all
+    * end-effector.
+    * <p>
+    * WARNING: This method generates garbage.
+    * </p>
+    * 
+    * @param rigidBody the rigid-body to collect of descendant end-effectors of.
+    * @return the array containing the end-effectors.
+    */
+   public static RigidBodyBasics[] collectSubtreeEndEffectors(RigidBodyBasics rigidBody)
+   {
+      return rigidBody.subtreeStream().filter(body -> body.getChildrenJoints().isEmpty()).toArray(RigidBodyBasics[]::new);
+   }
+
+   /**
+    * Collects starting from the given {@code rigidBody} all descendant that has no children, i.e. all
+    * end-effector.
+    * <p>
+    * WARNING: This method generates garbage.
+    * </p>
+    * 
+    * @param rigidBody the rigid-body to collect of descendant end-effectors of.
+    * @return the array containing the end-effectors.
+    */
+   public static RigidBodyReadOnly[] collectSubtreeEndEffectors(RigidBodyReadOnly rigidBody)
+   {
+      return rigidBody.subtreeStream().filter(body -> body.getChildrenJoints().isEmpty()).toArray(RigidBodyReadOnly[]::new);
    }
 
    /**
