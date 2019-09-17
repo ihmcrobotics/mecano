@@ -650,7 +650,7 @@ public class MultiBodySystemTools
          distanceToRoot--;
       }
 
-      // We are at the root and the ancestor still do not match => we are dealing with 2 distinct multi-body systems.
+      // We are at the root and the ancestors still do not match => we are dealing with 2 distinct multi-body systems.
       throw new IllegalArgumentException("The two rigid-bodies are not part of the same multi-body system: first root: " + firstAncestor.getName()
             + ", second root: " + secondAncestor.getName());
    }
@@ -821,6 +821,9 @@ public class MultiBodySystemTools
    /**
     * Combines {@link #collectSupportJoints(RigidBodyReadOnly)} with
     * {@link #collectSubtreeJoints(RigidBodyReadOnly...)}.
+    * <p>
+    * WARNING: This method generates garbage.
+    * </p>
     * 
     * @param rigidBody the rigid-body to collect the support and subtree joints of.
     * @return the array containing the support and subtree joints.
@@ -835,6 +838,9 @@ public class MultiBodySystemTools
    /**
     * Combines {@link #collectSupportJoints(RigidBodyBasics)} with
     * {@link #collectSubtreeJoints(RigidBodyBasics...)}.
+    * <p>
+    * WARNING: This method generates garbage.
+    * </p>
     * 
     * @param rigidBody the rigid-body to collect the support and subtree joints of.
     * @return the array containing the support and subtree joints.
@@ -851,6 +857,9 @@ public class MultiBodySystemTools
     * Combines {@link #collectSupportJoints(RigidBodyReadOnly...)} with
     * {@link #collectSubtreeJoints(RigidBodyReadOnly...)}, and returns an array containing no duplicate
     * elements.
+    * <p>
+    * WARNING: This method generates garbage.
+    * </p>
     * 
     * @param rigidBodies the rigid-bodies to collect the support and subtree joints of.
     * @return the array containing the support and subtree joints.
@@ -864,6 +873,9 @@ public class MultiBodySystemTools
     * Combines {@link #collectSupportJoints(RigidBodyBasics...)} with
     * {@link #collectSubtreeJoints(RigidBodyBasics...)}, and returns an array containing no duplicate
     * elements.
+    * <p>
+    * WARNING: This method generates garbage.
+    * </p>
     * 
     * @param rigidBodies the rigid-bodies to collect the support and subtree joints of.
     * @return the array containing the support and subtree joints.
@@ -876,6 +888,9 @@ public class MultiBodySystemTools
    /**
     * Collects starting from the given {@code rigidBody} all descendant that has no children, i.e. all
     * end-effector.
+    * <p>
+    * WARNING: This method generates garbage.
+    * </p>
     * 
     * @param rigidBody the rigid-body to collect of descendant end-effectors of.
     * @return the array containing the end-effectors.
@@ -888,6 +903,9 @@ public class MultiBodySystemTools
    /**
     * Collects starting from the given {@code rigidBody} all descendant that has no children, i.e. all
     * end-effector.
+    * <p>
+    * WARNING: This method generates garbage.
+    * </p>
     * 
     * @param rigidBody the rigid-body to collect of descendant end-effectors of.
     * @return the array containing the end-effectors.
