@@ -258,7 +258,8 @@ public class ForwardDynamicsCalculator
     */
    public FixedFrameWrenchBasics getExternalWrench(RigidBodyReadOnly rigidBody)
    {
-      return rigidBodyToRecursionStepMap.get(rigidBody).externalWrench;
+      ArticulatedBodyRecursionStep recursionStep = rigidBodyToRecursionStepMap.get(rigidBody);
+      return recursionStep == null ? null : recursionStep.externalWrench;
    }
 
    /**
