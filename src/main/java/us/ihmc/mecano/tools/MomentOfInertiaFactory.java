@@ -63,14 +63,42 @@ public class MomentOfInertiaFactory
    public static Matrix3D solidEllipsoid(double mass, double xRadius, double yRadius, double zRadius)
    {
       checkMassAndDimensions(mass, xRadius, yRadius, zRadius);
-      double ixx = 1.0 / 5.0 * mass * (yRadius * yRadius + zRadius * zRadius);
-      double iyy = 1.0 / 5.0 * mass * (zRadius * zRadius + xRadius * xRadius);
-      double izz = 1.0 / 5.0 * mass * (xRadius * xRadius + yRadius * yRadius);
+      double ixx = 0.2 * mass * (yRadius * yRadius + zRadius * zRadius);
+      double iyy = 0.2 * mass * (zRadius * zRadius + xRadius * xRadius);
+      double izz = 0.2 * mass * (xRadius * xRadius + yRadius * yRadius);
 
       Matrix3D momentOfInertia = new Matrix3D();
       momentOfInertia.setM00(ixx);
       momentOfInertia.setM11(iyy);
       momentOfInertia.setM22(izz);
+      return momentOfInertia;
+   }
+
+   /**
+    * Compute the moment of inertia of are computed as follows:
+    * 
+    * <pre>
+    * Ixx = mass * (radiusOfGyrationY * radiusOfGyrationY + radiusOfGyrationZ * radiusOfGyrationY)
+    * Iyy = mass * (radiusOfGyrationX * radiusOfGyrationX + radiusOfGyrationZ * radiusOfGyrationZ)
+    * Izz = mass * (radiusOfGyrationX * radiusOfGyrationX + radiusOfGyrationY * radiusOfGyrationY)
+    * </pre>
+    * 
+    * This is equivalent to the mass being concentrated on the surface of a thin ellipsoid with the
+    * given radii of gyration.
+    *
+    * @param mass              Mass of the body.
+    * @param radiusOfGyrationX Radius of gyration in the x direction.
+    * @param radiusOfGyrationY Radius of gyration in the y direction.
+    * @param radiusOfGyrationZ Radius of gyration in the z direction.
+    */
+   public static Matrix3D fromMassAndRadiiOfGyration(double mass, double radiusOfGyrationX, double radiusOfGyrationY, double radiusOfGyrationZ)
+   {
+      checkMassAndDimensions(mass, radiusOfGyrationX, radiusOfGyrationY, radiusOfGyrationZ);
+
+      Matrix3D momentOfInertia = new Matrix3D();
+      momentOfInertia.setM00(mass * (radiusOfGyrationY * radiusOfGyrationY + radiusOfGyrationZ * radiusOfGyrationZ));
+      momentOfInertia.setM11(mass * (radiusOfGyrationX * radiusOfGyrationX + radiusOfGyrationZ * radiusOfGyrationZ));
+      momentOfInertia.setM22(mass * (radiusOfGyrationX * radiusOfGyrationX + radiusOfGyrationY * radiusOfGyrationY));
       return momentOfInertia;
    }
 
