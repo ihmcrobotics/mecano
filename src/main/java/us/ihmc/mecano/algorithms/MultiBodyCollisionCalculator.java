@@ -56,7 +56,7 @@ public class MultiBodyCollisionCalculator
     * Extension of this algorithm into an acceleration provider that can be used to retrieve change in
     * acceleration to any rigid-body of the system.
     */
-   private final RigidBodyAccelerationProvider accelerationProvider;
+   private final RigidBodyAccelerationProvider accelerationChangeProvider;
 
    public MultiBodyCollisionCalculator(MultiBodySystemReadOnly input)
    {
@@ -84,7 +84,7 @@ public class MultiBodyCollisionCalculator
          recursionStep.rigidBodyAccelerationChange.changeFrame(body.getBodyFixedFrame());
          return recursionStep.rigidBodyAccelerationChange;
       };
-      accelerationProvider = RigidBodyAccelerationProvider.toRigidBodyAccelerationProvider(accelerationFunction, input.getInertialFrame());
+      accelerationChangeProvider = RigidBodyAccelerationProvider.toRigidBodyAccelerationProvider(accelerationFunction, input.getInertialFrame());
    }
 
    private void buildMultiBodyTree(CollisionRecursionStep recursionStep)
@@ -153,7 +153,7 @@ public class MultiBodyCollisionCalculator
     */
    public RigidBodyAccelerationProvider getAccelerationChangeProvider()
    {
-      return accelerationProvider;
+      return accelerationChangeProvider;
    }
 
    class CollisionRecursionStep
