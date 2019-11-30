@@ -63,7 +63,7 @@ public class ForwardDynamicsCalculator
    private final DenseMatrix64F jointAccelerationMatrix;
 
    /**
-    * Extension of this algorithm into an acceleration provider that be used instead of a
+    * Extension of this algorithm into an acceleration provider that can be used instead of a
     * {@link SpatialAccelerationCalculator}.
     */
    private final RigidBodyAccelerationProvider accelerationProvider;
@@ -672,7 +672,7 @@ public class ForwardDynamicsCalculator
       /**
        * Joint indices for storing {@code qdd} in the main matrix {@code jointAccelerationMatrix}.
        */
-      private final int[] jointIndices;
+      final int[] jointIndices;
 
       private ArticulatedBodyRecursionStep(RigidBodyReadOnly rigidBody, ArticulatedBodyRecursionStep parent, int[] jointIndices)
       {
