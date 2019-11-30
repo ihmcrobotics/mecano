@@ -308,13 +308,20 @@ public class MultiBodyCollisionCalculator
          // Going bottom-up in the tree.
          isOnCollisionBranch = true;
 
-         if (sourceChild != null)
-            testWrenchPlus.setIncludingFrame(sourceChild.testWrenchPlusForParent);
-
          DenseMatrix64F S = articulatedBodyRecursionStep.S;
          DenseMatrix64F U_Dinv = articulatedBodyRecursionStep.U_Dinv;
 
-         testWrenchPlus.changeFrame(getFrameAfterJoint());
+         if (sourceChild != null)
+         {
+            testWrenchPlus.setIncludingFrame(sourceChild.testWrenchPlusForParent);
+            testWrenchPlus.applyTransform(sourceChild.articulatedBodyRecursionStep.transformToParentJointFrame);
+            testWrenchPlus.setReferenceFrame(getFrameAfterJoint());
+         }
+         else
+         {
+            testWrenchPlus.changeFrame(getFrameAfterJoint());
+         }
+
          testWrenchPlus.get(pAPlus);
          if (sourceChild == null)
          { // p+ = -f_ext.
@@ -350,7 +357,8 @@ public class MultiBodyCollisionCalculator
 
             // Going top-down in the tree.
             parentAccelerationChange.setIncludingFrame(parent.rigidBodyAccelerationChange);
-            parentAccelerationChange.changeFrame(getFrameAfterJoint());
+            parentAccelerationChange.applyInverseTransform(articulatedBodyRecursionStep.transformToParentJointFrame);
+            parentAccelerationChange.setReferenceFrame(getFrameAfterJoint());
             parentAccelerationChange.get(aParentPlus);
 
             if (isOnCollisionBranch)
