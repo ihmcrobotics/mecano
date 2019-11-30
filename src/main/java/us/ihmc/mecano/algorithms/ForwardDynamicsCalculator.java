@@ -6,6 +6,7 @@ import java.util.Collection;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.function.Function;
 
 import org.ejml.alg.dense.misc.UnrolledInverseFromMinor;
 import org.ejml.data.DenseMatrix64F;
@@ -132,8 +133,18 @@ public class ForwardDynamicsCalculator
       int nDoFs = MultiBodySystemTools.computeDegreesOfFreedom(input.getJointsToConsider());
       jointTauMatrix = new DenseMatrix64F(nDoFs, 1);
       jointAccelerationMatrix = new DenseMatrix64F(nDoFs, 1);
-      accelerationProvider = RigidBodyAccelerationProvider.toRigidBodyAccelerationProvider(body -> rigidBodyToRecursionStepMap.get(body).rigidBodyAcceleration,
-                                                                                           input.getInertialFrame());
+
+      Function<RigidBodyReadOnly, SpatialAccelerationReadOnly> accelerationFunction = body ->
+      {
+         ArticulatedBodyRecursionStep recursionStep = rigidBodyToRecursionStepMap.get(body);
+         if (recursionStep == null)
+            return null;
+         // The algorithm computes the acceleration expressed in the parent joint frame.
+         // To prevent unnecessary computation, let's only change the frame when needed.
+         recursionStep.rigidBodyAcceleration.changeFrame(body.getBodyFixedFrame());
+         return recursionStep.rigidBodyAcceleration;
+      };
+      accelerationProvider = RigidBodyAccelerationProvider.toRigidBodyAccelerationProvider(accelerationFunction, input.getInertialFrame());
    }
 
    private void buildMultiBodyTree(ArticulatedBodyRecursionStep parent, Collection<? extends JointReadOnly> jointsToIgnore)
@@ -346,6 +357,16 @@ public class ForwardDynamicsCalculator
          return null;
       else
          return recursionStep.qdd;
+   }
+
+   /**
+    * Gets the internal recursion step for the root body.
+    * 
+    * @return the root body recursion step.
+    */
+   ArticulatedBodyRecursionStep getInitialRecursionStep()
+   {
+      return initialRecursionStep;
    }
 
    /**
@@ -889,7 +910,7 @@ public class ForwardDynamicsCalculator
             // Computing a_i = a'_i + S_i * qdd_i
             CommonOps.mult(S, qdd, a);
             CommonOps.addEquals(a, aPrime);
-            rigidBodyAcceleration.setIncludingFrame(getBodyFixedFrame(), parent.getBodyFixedFrame(), getFrameAfterJoint(), a);
+            rigidBodyAcceleration.setIncludingFrame(getBodyFixedFrame(), input.getInertialFrame(), getFrameAfterJoint(), a);
 
             for (int dofIndex = 0; dofIndex < getJoint().getDegreesOfFreedom(); dofIndex++)
             {

@@ -25,8 +25,11 @@ import us.ihmc.mecano.multiBodySystem.interfaces.JointReadOnly;
 import us.ihmc.mecano.multiBodySystem.interfaces.MultiBodySystemReadOnly;
 import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
 import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyReadOnly;
+import us.ihmc.mecano.spatial.SpatialAcceleration;
+import us.ihmc.mecano.spatial.interfaces.SpatialAccelerationReadOnly;
 import us.ihmc.mecano.spatial.interfaces.WrenchReadOnly;
 import us.ihmc.mecano.tools.JointStateType;
+import us.ihmc.mecano.tools.MecanoTestTools;
 import us.ihmc.mecano.tools.MultiBodySystemRandomTools;
 import us.ihmc.mecano.tools.MultiBodySystemRandomTools.RandomFloatingRevoluteJointChain;
 import us.ihmc.mecano.tools.MultiBodySystemTools;
@@ -242,55 +245,82 @@ public class ForwardDynamicsCalculatorTest
 
       int numberOfDoFs = joints.stream().mapToInt(JointReadOnly::getDegreesOfFreedom).sum();
 
-      int numberOfTicks = 5;
-
-      for (int i = 0; i < numberOfTicks; i++)
+      DenseMatrix64F qdd_expected = new DenseMatrix64F(numberOfDoFs, 1);
+      int index = 0;
+      for (JointBasics joint : joints)
       {
-         DenseMatrix64F qdd_expected = new DenseMatrix64F(numberOfDoFs, 1);
-         int index = 0;
-         for (JointBasics joint : joints)
+         joint.getJointAcceleration(index, qdd_expected);
+         index += joint.getDegreesOfFreedom();
+      }
+
+      externalWrenches.forEach(inverseDynamicsCalculator::setExternalWrench);
+
+      inverseDynamicsCalculator.compute();
+
+      inverseDynamicsCalculator.writeComputedJointWrenches(joints);
+
+      externalWrenches.forEach(forwardDynamicsCalculator::setExternalWrench);
+
+      forwardDynamicsCalculator.compute();
+      joints.forEach(forwardDynamicsCalculator::writeComputedJointAcceleration);
+
+      DenseMatrix64F qdd_actual = new DenseMatrix64F(numberOfDoFs, 1);
+      index = 0;
+      for (JointBasics joint : joints)
+      {
+         joint.getJointAcceleration(index, qdd_actual);
+         index += joint.getDegreesOfFreedom();
+      }
+
+      boolean areEqual = MatrixFeatures.isEquals(qdd_expected, qdd_actual, epsilon);
+      if (!areEqual)
+      {
+         System.out.println("iteration: " + iteration);
+         double maxError = 0.0;
+         DenseMatrix64F output = new DenseMatrix64F(numberOfDoFs, 3);
+         for (int row = 0; row < numberOfDoFs; row++)
          {
-            joint.getJointAcceleration(index, qdd_expected);
-            index += joint.getDegreesOfFreedom();
+            output.set(row, 0, qdd_expected.get(row, 0));
+            output.set(row, 1, qdd_actual.get(row, 0));
+            double error = qdd_expected.get(row, 0) - qdd_actual.get(row, 0);
+            output.set(row, 2, error);
+            maxError = Math.max(maxError, Math.abs(error));
          }
+         output.print(EuclidCoreIOTools.getStringFormat(9, 6));
+         System.out.println("Max error: " + maxError);
+      }
+      assertTrue(areEqual);
 
-         externalWrenches.forEach(inverseDynamicsCalculator::setExternalWrench);
+      List<? extends RigidBodyBasics> allRigidBodies = rootBody.subtreeList();
 
-         inverseDynamicsCalculator.compute();
-
-         inverseDynamicsCalculator.writeComputedJointWrenches(joints);
-
-         externalWrenches.forEach(forwardDynamicsCalculator::setExternalWrench);
-
-         forwardDynamicsCalculator.compute();
-         joints.forEach(forwardDynamicsCalculator::writeComputedJointAcceleration);
-
-         DenseMatrix64F qdd_actual = new DenseMatrix64F(numberOfDoFs, 1);
-         index = 0;
-         for (JointBasics joint : joints)
+      for (RigidBodyReadOnly rigidBody : allRigidBodies)
+      {
+         SpatialAccelerationReadOnly expectedAccelerationOfBody = inverseDynamicsCalculator.getAccelerationProvider().getAccelerationOfBody(rigidBody);
+         if (expectedAccelerationOfBody == null)
          {
-            joint.getJointAcceleration(index, qdd_actual);
-            index += joint.getDegreesOfFreedom();
+            assertNull(forwardDynamicsCalculator.getAccelerationProvider().getAccelerationOfBody(rigidBody));
          }
-
-         boolean areEqual = MatrixFeatures.isEquals(qdd_expected, qdd_actual, epsilon);
-         if (!areEqual)
+         else
          {
-            System.out.println("iteration: " + iteration);
-            double maxError = 0.0;
-            DenseMatrix64F output = new DenseMatrix64F(numberOfDoFs, 3);
-            for (int row = 0; row < numberOfDoFs; row++)
+            SpatialAcceleration actualAccelerationOfBody = new SpatialAcceleration(forwardDynamicsCalculator.getAccelerationProvider().getAccelerationOfBody(rigidBody));
+            actualAccelerationOfBody.changeFrame(expectedAccelerationOfBody.getReferenceFrame());
+            MecanoTestTools.assertSpatialAccelerationEquals(expectedAccelerationOfBody, actualAccelerationOfBody, epsilon);
+            
+            for (int i = 0; i < 5; i++)
             {
-               output.set(row, 0, qdd_expected.get(row, 0));
-               output.set(row, 1, qdd_actual.get(row, 0));
-               double error = qdd_expected.get(row, 0) - qdd_actual.get(row, 0);
-               output.set(row, 2, error);
-               maxError = Math.max(maxError, Math.abs(error));
+               RigidBodyBasics otherRigidBody = allRigidBodies.get(random.nextInt(allRigidBodies.size()));
+               SpatialAccelerationReadOnly expectedRelativeAcceleration = inverseDynamicsCalculator.getAccelerationProvider().getRelativeAcceleration(rigidBody, otherRigidBody);
+               if (expectedAccelerationOfBody == null)
+               {
+                  assertNull(forwardDynamicsCalculator.getAccelerationProvider().getRelativeAcceleration(otherRigidBody, rigidBody));
+               }
+               else
+               {
+                  SpatialAccelerationReadOnly actualRelativeAcceleration = forwardDynamicsCalculator.getAccelerationProvider().getRelativeAcceleration(rigidBody, otherRigidBody);
+                  MecanoTestTools.assertSpatialAccelerationEquals(expectedRelativeAcceleration, actualRelativeAcceleration, epsilon);
+               }
             }
-            output.print(EuclidCoreIOTools.getStringFormat(9, 6));
-            System.out.println("Max error: " + maxError);
          }
-         assertTrue(areEqual);
       }
    }
 
@@ -373,7 +403,7 @@ public class ForwardDynamicsCalculatorTest
       assertTrue(areEqual);
    }
 
-   private static Map<RigidBodyReadOnly, WrenchReadOnly> nextExternalWrenches(Random random, List<? extends JointReadOnly> joints)
+   public static Map<RigidBodyReadOnly, WrenchReadOnly> nextExternalWrenches(Random random, List<? extends JointReadOnly> joints)
    {
       return joints.stream().filter(j -> random.nextBoolean()).map(j -> j.getSuccessor())
                    .collect(Collectors.toMap(b -> b, b -> nextWrench(random, b.getBodyFixedFrame(), b.getBodyFixedFrame())));

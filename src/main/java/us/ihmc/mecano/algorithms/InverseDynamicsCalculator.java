@@ -5,6 +5,7 @@ import java.util.Collection;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.function.Function;
 
 import org.ejml.data.DenseMatrix64F;
 import org.ejml.ops.CommonOps;
@@ -208,7 +209,12 @@ public class InverseDynamicsCalculator
       jointAccelerationMatrix = new DenseMatrix64F(nDoFs, 1);
       jointTauMatrix = new DenseMatrix64F(nDoFs, 1);
 
-      accelerationProvider = RigidBodyAccelerationProvider.toRigidBodyAccelerationProvider(body -> rigidBodyToRecursionStepMap.get(body).rigidBodyAcceleration,
+      Function<RigidBodyReadOnly, SpatialAccelerationReadOnly> accelerationFunction = body ->
+      {
+         RecursionStep recursionStep = rigidBodyToRecursionStepMap.get(body);
+         return recursionStep == null ? null : recursionStep.rigidBodyAcceleration;
+      };
+      accelerationProvider = RigidBodyAccelerationProvider.toRigidBodyAccelerationProvider(accelerationFunction,
                                                                                            input.getInertialFrame(),
                                                                                            considerCoriolisAndCentrifugalForces,
                                                                                            considerJointAccelerations);
