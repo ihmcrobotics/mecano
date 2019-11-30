@@ -71,10 +71,13 @@ public interface SpatialAccelerationReadOnly extends SpatialMotionReadOnly
     * of this spatial acceleration, &omega;<sub>twist</sub> and &nu;<sub>twist</sub> represent the
     * angular and linear parts of the body twist, and {@code P} is the {@code bodyFixedPoint}.
     * </p>
+    * <p>
+    * When the {@code bodyTwist} is equal to {@code null}, it is then assumed to be equal to zero.
+    * </p>
     *
     * @param bodyTwist                the twist of {@code this.bodyFrame} with respect to
     *                                 {@code this.baseFrame} and expressed in
-    *                                 {@code this.expressedInFrame}. Not modified.
+    *                                 {@code this.expressedInFrame}. Can be {@code null}. Not modified.
     * @param bodyFixedPoint           the position on the body where the linear acceleration is to be
     *                                 estimated. Not modified.
     * @param linearAccelerationToPack the vector used to store the result. Modified.
@@ -105,13 +108,22 @@ public interface SpatialAccelerationReadOnly extends SpatialMotionReadOnly
        * coordinate system.
        */
       checkExpressedInFrameMatch(bodyFixedPoint.getReferenceFrame());
-      checkReferenceFrameMatch(bodyTwist);
 
-      linearAccelerationToPack.setIncludingFrame(bodyTwist.getLinearPart()); // v
-      MecanoTools.addCrossToVector(bodyTwist.getAngularPart(), bodyFixedPoint, linearAccelerationToPack); // (w x p) + v
-      linearAccelerationToPack.cross(bodyTwist.getAngularPart(), linearAccelerationToPack); // w x ((w x p) + v)
-      MecanoTools.addCrossToVector(getAngularPart(), bodyFixedPoint, linearAccelerationToPack); // (wDot x p) + w x ((w x p) + v)
-      linearAccelerationToPack.add(getLinearPart()); // vDot + (wDot x p) + w x ((w x p) + v)
+      if (bodyTwist != null)
+      {
+         checkReferenceFrameMatch(bodyTwist);
+
+         linearAccelerationToPack.setIncludingFrame(bodyTwist.getLinearPart()); // v
+         MecanoTools.addCrossToVector(bodyTwist.getAngularPart(), bodyFixedPoint, linearAccelerationToPack); // (w x p) + v
+         linearAccelerationToPack.cross(bodyTwist.getAngularPart(), linearAccelerationToPack); // w x ((w x p) + v)
+         MecanoTools.addCrossToVector(getAngularPart(), bodyFixedPoint, linearAccelerationToPack); // (wDot x p) + w x ((w x p) + v)
+         linearAccelerationToPack.add(getLinearPart()); // vDot + (wDot x p) + w x ((w x p) + v)
+      }
+      else
+      {
+         linearAccelerationToPack.setIncludingFrame(getLinearPart()); // vDot
+         MecanoTools.addCrossToVector(getAngularPart(), bodyFixedPoint, linearAccelerationToPack); // vDot + (wDot x p)
+      }
    }
 
    /**
