@@ -9,6 +9,12 @@ import java.util.function.Function;
 import org.ejml.data.DenseMatrix64F;
 import org.ejml.ops.CommonOps;
 
+import us.ihmc.euclid.Axis;
+import us.ihmc.euclid.matrix.interfaces.Matrix3DBasics;
+import us.ihmc.euclid.referenceFrame.FrameVector3D;
+import us.ihmc.euclid.referenceFrame.ReferenceFrame;
+import us.ihmc.euclid.referenceFrame.interfaces.FramePoint3DReadOnly;
+import us.ihmc.euclid.tools.EuclidCoreTools;
 import us.ihmc.mecano.algorithms.ForwardDynamicsCalculator.ArticulatedBodyRecursionStep;
 import us.ihmc.mecano.algorithms.interfaces.RigidBodyAccelerationProvider;
 import us.ihmc.mecano.frames.MovingReferenceFrame;
@@ -143,6 +149,32 @@ public class MultiBodyCollisionCalculator
       if (accelerationChangeToPack != null)
          accelerationChangeToPack.setIncludingFrame(recursionStep.rigidBodyAccelerationChange);
       return jointAccelerationChangeMatrix;
+   }
+
+   private final FrameVector3D linearAccelerationChange = new FrameVector3D();
+
+   public boolean computeApparentInertia(RigidBodyReadOnly target, FramePoint3DReadOnly pointInTargetFrame, Matrix3DBasics apparentLinearInertiaToPack)
+   {
+      pointInTargetFrame.checkReferenceFrameMatch(target.getBodyFixedFrame());
+
+      CollisionRecursionStep recursionStep = rigidBodyToRecursionStepMap.get(target);
+
+      if (recursionStep == null)
+         return false;
+
+      reset();
+      ReferenceFrame bodyFrame = target.getBodyFixedFrame();
+
+      for (int axis = 0; axis < 3; axis++)
+      {
+         recursionStep.testWrenchPlus.setIncludingFrame(bodyFrame, bodyFrame, EuclidCoreTools.zeroVector3D, Axis.values[axis]);
+         recursionStep.quickTest(null);
+         recursionStep.rigidBodyAccelerationChange.getLinearAccelerationAt(null, pointInTargetFrame, linearAccelerationChange);
+         linearAccelerationChange.changeFrame(bodyFrame.getRootFrame());
+         apparentLinearInertiaToPack.setColumn(axis, linearAccelerationChange);
+      }
+
+      return true;
    }
 
    /**
@@ -296,6 +328,22 @@ public class MultiBodyCollisionCalculator
       }
 
       /**
+       * Propagates the test wrench from the solicited body through up the system then comes back down to
+       * the test body to computed its resulting change in acceleration.
+       * 
+       * @param sourceChild the child that is located between this and the target of the test wrench.
+       */
+      public void quickTest(CollisionRecursionStep sourceChild)
+      {
+         if (isRoot())
+            return;
+
+         singleStepUp(sourceChild);
+         quickTest(this);
+         singleStepDown();
+      }
+
+      /**
        * Propagates the test wrench from the solicited body through up the system until reaching the root.
        * 
        * @param sourceChild the child that is located between this and the target of the test wrench.
@@ -307,7 +355,12 @@ public class MultiBodyCollisionCalculator
 
          // Going bottom-up in the tree.
          isOnCollisionBranch = true;
+         singleStepUp(sourceChild);
+         parent.passOne(this);
+      }
 
+      private void singleStepUp(CollisionRecursionStep sourceChild)
+      {
          DenseMatrix64F S = articulatedBodyRecursionStep.S;
          DenseMatrix64F U_Dinv = articulatedBodyRecursionStep.U_Dinv;
 
@@ -340,14 +393,30 @@ public class MultiBodyCollisionCalculator
          {
             testWrenchPlusForParent.setIncludingFrame(testWrenchPlus.getReferenceFrame(), paPlus);
          }
-
-         parent.passOne(this);
       }
 
       /**
        * Propagates the change in acceleration from the root down to the leaves.
        */
       public void passTwo()
+      {
+         singleStepDown();
+
+         if (!isRoot())
+         {
+            int[] jointIndices = articulatedBodyRecursionStep.jointIndices;
+
+            for (int dofIndex = 0; dofIndex < getJoint().getDegreesOfFreedom(); dofIndex++)
+            {
+               jointAccelerationChangeMatrix.set(jointIndices[dofIndex], 0, qddPlus.get(dofIndex, 0));
+            }
+         }
+
+         for (int childIndex = 0; childIndex < children.size(); childIndex++)
+            children.get(childIndex).passTwo();
+      }
+
+      private void singleStepDown()
       {
          if (!isRoot())
          {
@@ -378,17 +447,7 @@ public class MultiBodyCollisionCalculator
             CommonOps.mult(S, qddPlus, aPlus);
             CommonOps.addEquals(aPlus, aParentPlus);
             rigidBodyAccelerationChange.setIncludingFrame(getBodyFixedFrame(), input.getInertialFrame(), getFrameAfterJoint(), aPlus);
-
-            int[] jointIndices = articulatedBodyRecursionStep.jointIndices;
-
-            for (int dofIndex = 0; dofIndex < getJoint().getDegreesOfFreedom(); dofIndex++)
-            {
-               jointAccelerationChangeMatrix.set(jointIndices[dofIndex], 0, qddPlus.get(dofIndex, 0));
-            }
          }
-
-         for (int childIndex = 0; childIndex < children.size(); childIndex++)
-            children.get(childIndex).passTwo();
       }
 
       public boolean isRoot()
