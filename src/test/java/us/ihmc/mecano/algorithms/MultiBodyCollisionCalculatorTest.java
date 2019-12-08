@@ -51,8 +51,6 @@ public class MultiBodyCollisionCalculatorTest
          int numberOfJoints = random.nextInt(50) + 1;
          List<PrismaticJoint> joints = MultiBodySystemRandomTools.nextPrismaticJointChain(random, numberOfJoints);
          compareAgainstForwardDynamicsCalculator(random, i, joints, Collections.emptyMap(), Collections.emptyList(), EPSILON);
-         double scaleTestWrench = EuclidCoreRandomTools.nextDouble(random, 10.0);
-         compareAgainstForwardDynamicsCalculator(random, i, scaleTestWrench, joints, Collections.emptyMap(), Collections.emptyList(), EPSILON);
       }
    }
 
@@ -66,8 +64,6 @@ public class MultiBodyCollisionCalculatorTest
          int numberOfJoints = random.nextInt(50) + 1;
          List<PrismaticJoint> joints = MultiBodySystemRandomTools.nextPrismaticJointTree(random, numberOfJoints);
          compareAgainstForwardDynamicsCalculator(random, i, joints, Collections.emptyMap(), Collections.emptyList(), EPSILON);
-         double scaleTestWrench = EuclidCoreRandomTools.nextDouble(random, 10.0);
-         compareAgainstForwardDynamicsCalculator(random, i, scaleTestWrench, joints, Collections.emptyMap(), Collections.emptyList(), EPSILON);
       }
    }
 
@@ -81,8 +77,6 @@ public class MultiBodyCollisionCalculatorTest
          int numberOfJoints = random.nextInt(50) + 1;
          List<RevoluteJoint> joints = MultiBodySystemRandomTools.nextRevoluteJointChain(random, numberOfJoints);
          compareAgainstForwardDynamicsCalculator(random, i, joints, Collections.emptyMap(), Collections.emptyList(), EPSILON);
-         double scaleTestWrench = EuclidCoreRandomTools.nextDouble(random, 10.0);
-         compareAgainstForwardDynamicsCalculator(random, i, scaleTestWrench, joints, Collections.emptyMap(), Collections.emptyList(), EPSILON);
       }
    }
 
@@ -95,8 +89,6 @@ public class MultiBodyCollisionCalculatorTest
       {
          List<RevoluteJoint> joints = MultiBodySystemRandomTools.nextRevoluteJointTree(random, random.nextInt(50) + 1);
          compareAgainstForwardDynamicsCalculator(random, i, joints, Collections.emptyMap(), Collections.emptyList(), EPSILON);
-         double scaleTestWrench = EuclidCoreRandomTools.nextDouble(random, 10.0);
-         compareAgainstForwardDynamicsCalculator(random, i, scaleTestWrench, joints, Collections.emptyMap(), Collections.emptyList(), EPSILON);
       }
    }
 
@@ -110,8 +102,6 @@ public class MultiBodyCollisionCalculatorTest
          int numberOfJoints = random.nextInt(50) + 1;
          List<OneDoFJoint> joints = MultiBodySystemRandomTools.nextOneDoFJointChain(random, numberOfJoints);
          compareAgainstForwardDynamicsCalculator(random, i, joints, Collections.emptyMap(), Collections.emptyList(), EPSILON);
-         double scaleTestWrench = EuclidCoreRandomTools.nextDouble(random, 10.0);
-         compareAgainstForwardDynamicsCalculator(random, i, scaleTestWrench, joints, Collections.emptyMap(), Collections.emptyList(), EPSILON);
       }
    }
 
@@ -125,8 +115,6 @@ public class MultiBodyCollisionCalculatorTest
          int numberOfJoints = random.nextInt(50) + 1;
          List<OneDoFJoint> joints = MultiBodySystemRandomTools.nextOneDoFJointTree(random, numberOfJoints);
          compareAgainstForwardDynamicsCalculator(random, i, joints, Collections.emptyMap(), Collections.emptyList(), EPSILON);
-         double scaleTestWrench = EuclidCoreRandomTools.nextDouble(random, 10.0);
-         compareAgainstForwardDynamicsCalculator(random, i, scaleTestWrench, joints, Collections.emptyMap(), Collections.emptyList(), EPSILON);
       }
    }
 
@@ -140,8 +128,6 @@ public class MultiBodyCollisionCalculatorTest
          int numberOfJoints = random.nextInt(40) + 1;
          List<Joint> joints = new RandomFloatingRevoluteJointChain(random, numberOfJoints).getJoints();
          compareAgainstForwardDynamicsCalculator(random, i, joints, Collections.emptyMap(), Collections.emptyList(), EPSILON);
-         double scaleTestWrench = EuclidCoreRandomTools.nextDouble(random, 10.0);
-         compareAgainstForwardDynamicsCalculator(random, i, scaleTestWrench, joints, Collections.emptyMap(), Collections.emptyList(), EPSILON);
       }
    }
 
@@ -191,8 +177,10 @@ public class MultiBodyCollisionCalculatorTest
       multiBodyCollisionCalculator.getForwardDynamicsCalculator().setExternalWrenchesToZero();
       externalWrenches.forEach(multiBodyCollisionCalculator.getForwardDynamicsCalculator()::setExternalWrench);
       multiBodyCollisionCalculator.getForwardDynamicsCalculator().compute();
-      SpatialAcceleration accelerationChange = new SpatialAcceleration();
-      DenseMatrix64F qdd_change = multiBodyCollisionCalculator.compute(target, testWrench, accelerationChange);
+      DenseMatrix64F qdd_change = new DenseMatrix64F(numberOfDoFs, 1);
+      multiBodyCollisionCalculator.applyWrench(target, testWrench, qdd_change);
+      SpatialAcceleration accelerationChange = new SpatialAcceleration(multiBodyCollisionCalculator.getAccelerationChangeProvider()
+                                                                                                   .getAccelerationOfBody(target));
       accelerationChange.changeFrame(target.getBodyFixedFrame());
       SpatialAccelerationReadOnly originalTargetAcceleration = multiBodyCollisionCalculator.getForwardDynamicsCalculator().getAccelerationProvider()
                                                                                            .getAccelerationOfBody(target);
@@ -204,80 +192,6 @@ public class MultiBodyCollisionCalculatorTest
       DenseMatrix64F qdd_actual = new DenseMatrix64F(numberOfDoFs, 1);
       DenseMatrix64F qdd_original = multiBodyCollisionCalculator.getForwardDynamicsCalculator().getJointAccelerationMatrix();
       CommonOps.add(qdd_original, qdd_change, qdd_actual);
-
-      boolean areEqual = MatrixFeatures.isEquals(qdd_expected, qdd_actual, epsilon);
-      if (!areEqual)
-      {
-         System.out.println("iteration: " + iteration);
-         double maxError = 0.0;
-         DenseMatrix64F output = new DenseMatrix64F(numberOfDoFs, 5);
-
-         for (int row = 0; row < numberOfDoFs; row++)
-         {
-            double error = qdd_expected.get(row, 0) - qdd_actual.get(row, 0);
-
-            output.set(row, 0, qdd_expected.get(row, 0));
-            output.set(row, 1, qdd_original.get(row, 0));
-            output.set(row, 2, qdd_change.get(row, 0));
-            output.set(row, 3, qdd_actual.get(row, 0));
-            output.set(row, 4, error);
-            maxError = Math.max(maxError, Math.abs(error));
-         }
-         output.print(EuclidCoreIOTools.getStringFormat(9, 6));
-         System.out.println("Max error: " + maxError);
-      }
-      assertTrue(areEqual);
-   }
-
-   private static void compareAgainstForwardDynamicsCalculator(Random random, int iteration, double scaleTestWrench, List<? extends JointBasics> joints,
-                                                               Map<RigidBodyReadOnly, WrenchReadOnly> externalWrenches,
-                                                               List<? extends JointReadOnly> jointsToIgnore, double epsilon)
-   {
-      MultiBodySystemRandomTools.nextState(random, JointStateType.CONFIGURATION, joints);
-      MultiBodySystemRandomTools.nextState(random, JointStateType.VELOCITY, joints);
-      MultiBodySystemRandomTools.nextState(random, JointStateType.EFFORT, joints);
-
-      int numberOfDoFs = joints.stream().mapToInt(JointReadOnly::getDegreesOfFreedom).sum();
-
-      RigidBodyBasics target = joints.get(random.nextInt(joints.size())).getSuccessor();
-      Wrench testWrench = MecanoRandomTools.nextWrench(random, target.getBodyFixedFrame(), target.getBodyFixedFrame());
-
-      RigidBodyBasics rootBody = MultiBodySystemTools.getRootBody(joints.get(0).getPredecessor());
-      MultiBodySystemReadOnly multiBodySystemInput = MultiBodySystemReadOnly.toMultiBodySystemInput(rootBody, jointsToIgnore);
-      rootBody.updateFramesRecursively();
-
-      double gravity = EuclidCoreRandomTools.nextDouble(random, -10.0, -1.0);
-      ForwardDynamicsCalculator forwardDynamicsCalculator = new ForwardDynamicsCalculator(multiBodySystemInput);
-      forwardDynamicsCalculator.setGravitionalAcceleration(gravity);
-      MultiBodyCollisionCalculator multiBodyCollisionCalculator = new MultiBodyCollisionCalculator(multiBodySystemInput);
-      multiBodyCollisionCalculator.getForwardDynamicsCalculator().setGravitionalAcceleration(gravity);
-
-      forwardDynamicsCalculator.setExternalWrenchesToZero();
-      externalWrenches.forEach(forwardDynamicsCalculator::setExternalWrench);
-      Wrench scaledTestWrench = new Wrench(testWrench);
-      scaledTestWrench.scale(scaleTestWrench);
-      forwardDynamicsCalculator.getExternalWrench(target).add(scaledTestWrench);
-      forwardDynamicsCalculator.compute();
-      SpatialAcceleration expectedTargetAcceleration = new SpatialAcceleration(forwardDynamicsCalculator.getAccelerationProvider()
-                                                                                                        .getAccelerationOfBody(target));
-
-      multiBodyCollisionCalculator.getForwardDynamicsCalculator().setExternalWrenchesToZero();
-      externalWrenches.forEach(multiBodyCollisionCalculator.getForwardDynamicsCalculator()::setExternalWrench);
-      multiBodyCollisionCalculator.getForwardDynamicsCalculator().compute();
-      SpatialAcceleration accelerationChange = new SpatialAcceleration();
-      DenseMatrix64F qdd_change = multiBodyCollisionCalculator.compute(target, testWrench, accelerationChange);
-      accelerationChange.changeFrame(target.getBodyFixedFrame());
-      accelerationChange.scale(scaleTestWrench);
-      SpatialAccelerationReadOnly originalTargetAcceleration = multiBodyCollisionCalculator.getForwardDynamicsCalculator().getAccelerationProvider()
-                                                                                           .getAccelerationOfBody(target);
-      SpatialAcceleration actualTargetAcceleration = new SpatialAcceleration(originalTargetAcceleration);
-      actualTargetAcceleration.add((SpatialVectorReadOnly) accelerationChange);
-      MecanoTestTools.assertSpatialAccelerationEquals("Iteration: " + iteration, expectedTargetAcceleration, actualTargetAcceleration, epsilon);
-
-      DenseMatrix64F qdd_expected = forwardDynamicsCalculator.getJointAccelerationMatrix();
-      DenseMatrix64F qdd_actual = new DenseMatrix64F(numberOfDoFs, 1);
-      DenseMatrix64F qdd_original = multiBodyCollisionCalculator.getForwardDynamicsCalculator().getJointAccelerationMatrix();
-      CommonOps.add(scaleTestWrench, qdd_change, qdd_original, qdd_actual);
 
       boolean areEqual = MatrixFeatures.isEquals(qdd_expected, qdd_actual, epsilon);
       if (!areEqual)
