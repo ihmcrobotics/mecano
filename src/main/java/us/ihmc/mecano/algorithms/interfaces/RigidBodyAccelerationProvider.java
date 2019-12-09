@@ -115,10 +115,7 @@ public interface RigidBodyAccelerationProvider
     *
     * @return the inertial frame.
     */
-   default ReferenceFrame getInertialFrame()
-   {
-      return ReferenceFrame.getWorldFrame();
-   }
+   ReferenceFrame getInertialFrame();
 
    /**
     * Factory for implementing a {@link RigidBodyAccelerationProvider} from a given function that

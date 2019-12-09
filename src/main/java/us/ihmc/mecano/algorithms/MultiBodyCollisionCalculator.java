@@ -17,12 +17,15 @@ import us.ihmc.euclid.referenceFrame.interfaces.FramePoint3DReadOnly;
 import us.ihmc.euclid.tools.EuclidCoreTools;
 import us.ihmc.mecano.algorithms.ForwardDynamicsCalculator.ArticulatedBodyRecursionStep;
 import us.ihmc.mecano.algorithms.interfaces.RigidBodyAccelerationProvider;
+import us.ihmc.mecano.algorithms.interfaces.RigidBodyTwistProvider;
 import us.ihmc.mecano.frames.MovingReferenceFrame;
 import us.ihmc.mecano.multiBodySystem.interfaces.JointReadOnly;
 import us.ihmc.mecano.multiBodySystem.interfaces.MultiBodySystemReadOnly;
 import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyReadOnly;
 import us.ihmc.mecano.spatial.SpatialAcceleration;
 import us.ihmc.mecano.spatial.SpatialForce;
+import us.ihmc.mecano.spatial.SpatialImpulse;
+import us.ihmc.mecano.spatial.Twist;
 import us.ihmc.mecano.spatial.Wrench;
 import us.ihmc.mecano.spatial.interfaces.SpatialAccelerationReadOnly;
 import us.ihmc.mecano.spatial.interfaces.SpatialImpulseReadOnly;
@@ -53,6 +56,8 @@ public class MultiBodyCollisionCalculator
    private final CollisionRecursionStep[] allRecursionSteps;
    /** The output of this algorithm: the acceleration matrix for all the joints to consider. */
    private final DenseMatrix64F jointAccelerationChangeMatrix;
+   /** The output of this algorithm: the velocity matrix for all the joints to consider. */
+   private final DenseMatrix64F jointVelocityChangeMatrix;
    /**
     * This algorithm relies on the pre-computed internal data from a forward dynamics algorithm.
     */
@@ -63,6 +68,11 @@ public class MultiBodyCollisionCalculator
     * acceleration to any rigid-body of the system.
     */
    private final RigidBodyAccelerationProvider accelerationChangeProvider;
+   /**
+    * Extension of this algorithm into an twist provider that can be used to retrieve change in twist
+    * to any rigid-body of the system.
+    */
+   private final RigidBodyTwistProvider twistChangeProvider;
 
    public MultiBodyCollisionCalculator(MultiBodySystemReadOnly input)
    {
@@ -79,18 +89,33 @@ public class MultiBodyCollisionCalculator
 
       int nDoFs = MultiBodySystemTools.computeDegreesOfFreedom(input.getJointsToConsider());
       jointAccelerationChangeMatrix = new DenseMatrix64F(nDoFs, 1);
+      jointVelocityChangeMatrix = new DenseMatrix64F(nDoFs, 1);
 
       Function<RigidBodyReadOnly, SpatialAccelerationReadOnly> accelerationFunction = body ->
       {
          CollisionRecursionStep recursionStep = rigidBodyToRecursionStepMap.get(body);
          if (recursionStep == null)
             return null;
+         recursionStep.updateRigidBodyAccelerationChange();
          // The algorithm computes the acceleration expressed in the parent joint frame.
          // To prevent unnecessary computation, let's only change the frame when needed.
          recursionStep.rigidBodyAccelerationChange.changeFrame(body.getBodyFixedFrame());
          return recursionStep.rigidBodyAccelerationChange;
       };
       accelerationChangeProvider = RigidBodyAccelerationProvider.toRigidBodyAccelerationProvider(accelerationFunction, input.getInertialFrame());
+
+      Function<RigidBodyReadOnly, TwistReadOnly> twistFunction = body ->
+      {
+         CollisionRecursionStep recursionStep = rigidBodyToRecursionStepMap.get(body);
+         if (recursionStep == null)
+            return null;
+         recursionStep.updateRigidBodyTwistChange();
+         // The algorithm computes the twist expressed in the parent joint frame.
+         // To prevent unnecessary computation, let's only change the frame when needed.
+         recursionStep.rigidBodyTwistChange.changeFrame(body.getBodyFixedFrame());
+         return recursionStep.rigidBodyTwistChange;
+      };
+      twistChangeProvider = RigidBodyTwistProvider.toRigidBodyTwistProvider(twistFunction, input.getInertialFrame());
    }
 
    private void buildMultiBodyTree(CollisionRecursionStep recursionStep)
@@ -161,11 +186,64 @@ public class MultiBodyCollisionCalculator
       for (int axis = 0; axis < 3; axis++)
       {
          recursionStep.testWrenchPlus.setIncludingFrame(bodyFrame, bodyFrame, EuclidCoreTools.zeroVector3D, Axis.values[axis], pointInTargetFrame);
-         recursionStep.quickTest(null);
+         recursionStep.initializeWrench(null);
+         recursionStep.updateRigidBodyAccelerationChange();
          recursionStep.rigidBodyAccelerationChange.changeFrame(bodyFrame);
          recursionStep.rigidBodyAccelerationChange.getLinearAccelerationAt(null, pointInTargetFrame, linearAccelerationChange);
          linearAccelerationChange.changeFrame(inertiaFrame);
          apparentLinearInertiaToPack.setColumn(axis, linearAccelerationChange);
+      }
+
+      return true;
+   }
+
+   /**
+    * Computes the matrix representing the inverse of the apparent linear inertia expressed at
+    * {@code pointInTargetFrame} such that:
+    * 
+    * <pre>
+    * &Delta;&alpha;<sub>target</sub> = (I<sup>A</sup>)<sup>-1</sup> F<sub>target</sub>
+    * </pre>
+    * 
+    * where:
+    * <ul>
+    * <li><tt>(I<sup>A</sup>)<sup>-1</sup></tt> is the inverse of the 3-by-3 linear part of the
+    * apparent inertia matrix.
+    * <li><tt>F<sub>target</sub></tt> is a linear force applied at {@code pointInTargetFrame}.
+    * <li><tt>&Delta;&alpha;<sub>target</sub></tt> is the resulting change in linear acceleration of
+    * {@code target} at {@code pointInTargetFrame} due a force <tt>F<sub>target</sub></tt>.
+    * </ul>
+    * 
+    * @param target                      the rigid-body to compute the apparent inertia at.
+    * @param pointInTargetFrame          the location where the apparent inertia is to computed.
+    * @param inertiaFrame                the frame in which the output is to be expressed.
+    * @param apparentLinearInertiaToPack the matrix in which to store the result.
+    * @return {@code true} is the apparent inertia matrix was successfully computed, {@code false}
+    *         otherwise.
+    */
+   public boolean computeApparentInertia(RigidBodyReadOnly target, FramePoint3DReadOnly pointInTargetFrame, ReferenceFrame inertiaFrame,
+                                         DenseMatrix64F apparentLinearInertiaToPack)
+   {
+      pointInTargetFrame.checkReferenceFrameMatch(target.getBodyFixedFrame());
+
+      CollisionRecursionStep recursionStep = rigidBodyToRecursionStepMap.get(target);
+
+      if (recursionStep == null)
+         return false;
+
+      reset();
+      ReferenceFrame bodyFrame = target.getBodyFixedFrame();
+      apparentLinearInertiaToPack.reshape(3, 3);
+
+      for (int axis = 0; axis < 3; axis++)
+      {
+         recursionStep.testWrenchPlus.setIncludingFrame(bodyFrame, bodyFrame, EuclidCoreTools.zeroVector3D, Axis.values[axis], pointInTargetFrame);
+         recursionStep.initializeWrench(null);
+         recursionStep.updateRigidBodyAccelerationChange();
+         recursionStep.rigidBodyAccelerationChange.changeFrame(bodyFrame);
+         recursionStep.rigidBodyAccelerationChange.getLinearAccelerationAt(null, pointInTargetFrame, linearAccelerationChange);
+         linearAccelerationChange.changeFrame(inertiaFrame);
+         linearAccelerationChange.get(0, axis, apparentLinearInertiaToPack);
       }
 
       return true;
@@ -184,17 +262,9 @@ public class MultiBodyCollisionCalculator
     */
    public boolean applyWrench(RigidBodyReadOnly target, WrenchReadOnly wrench, DenseMatrix64F jointAccelerationChangeMatrix)
    {
-      CollisionRecursionStep recursionStep = rigidBodyToRecursionStepMap.get(target);
-
-      if (recursionStep == null)
+      if (!applyWrenchLazy(target, wrench))
          return false;
-
-      reset();
-      ReferenceFrame bodyFrame = target.getBodyFixedFrame();
-
-      recursionStep.testWrenchPlus.setIncludingFrame(bodyFrame, wrench);
-      recursionStep.passOne(null);
-      initialRecursionStep.passTwo();
+      initialRecursionStep.propagateDownWrench();
       jointAccelerationChangeMatrix.set(this.jointAccelerationChangeMatrix);
       return true;
    }
@@ -212,6 +282,26 @@ public class MultiBodyCollisionCalculator
     */
    public boolean applyImpulse(RigidBodyReadOnly target, SpatialImpulseReadOnly impulse, DenseMatrix64F jointVelocityChangeMatrix)
    {
+      if (!applyImpulseLazy(target, impulse))
+         return false;
+
+      initialRecursionStep.propagateDownImpulse();
+      jointVelocityChangeMatrix.set(jointAccelerationChangeMatrix);
+      return true;
+   }
+
+   /**
+    * Applies a 6-D wrench to {@code target} and propagates the effect up to the root,
+    * {@link #getAccelerationChangeProvider()} can then be used to access the resulting change in
+    * acceleration to any other rigid-body in the system.
+    * 
+    * @param target the rigid-body to which the wrench is applied to.
+    * @param wrench the wrench to be applied.
+    * @return {@code true} is the wrench was successfully applied and the response computed,
+    *         {@code false} otherwise.
+    */
+   public boolean applyWrenchLazy(RigidBodyReadOnly target, WrenchReadOnly wrench)
+   {
       CollisionRecursionStep recursionStep = rigidBodyToRecursionStepMap.get(target);
 
       if (recursionStep == null)
@@ -219,23 +309,64 @@ public class MultiBodyCollisionCalculator
 
       reset();
       ReferenceFrame bodyFrame = target.getBodyFixedFrame();
+      recursionStep.testWrenchPlus.setIncludingFrame(bodyFrame, wrench);
+      recursionStep.initializeWrench(null);
+      return true;
+   }
 
-      recursionStep.testWrenchPlus.setIncludingFrame(bodyFrame, impulse);
-      recursionStep.passOne(null);
-      initialRecursionStep.passTwo();
-      jointVelocityChangeMatrix.set(jointAccelerationChangeMatrix);
+   /**
+    * Applies a 6-D impulse to {@code target} and propagates the effect to the rest of the multi-body
+    * system.
+    * 
+    * @param target  the rigid-body to which the wrench is applied to.
+    * @param impulse the wrench to be applied.
+    * @return {@code true} is the wrench was successfully applied and the response computed,
+    *         {@code false} otherwise.
+    */
+   public boolean applyImpulseLazy(RigidBodyReadOnly target, SpatialImpulseReadOnly impulse)
+   {
+      CollisionRecursionStep recursionStep = rigidBodyToRecursionStepMap.get(target);
+
+      if (recursionStep == null)
+         return false;
+
+      reset();
+      ReferenceFrame bodyFrame = target.getBodyFixedFrame();
+      recursionStep.testImpulsePlus.setIncludingFrame(bodyFrame, impulse);
+      recursionStep.initializeImpulse(null);
       return true;
    }
 
    /**
     * Gets the rigid-body acceleration provider that can be used to access change in acceleration of
     * any rigid-body in the system due to the test wrench.
+    * <p>
+    * The provider is initialized only after calling either
+    * {@link #applyWrenchLazy(RigidBodyReadOnly, WrenchReadOnly)} or
+    * {@link #applyWrench(RigidBodyReadOnly, WrenchReadOnly, DenseMatrix64F)}.
+    * </p>
     * 
     * @return the acceleration change provider.
     */
    public RigidBodyAccelerationProvider getAccelerationChangeProvider()
    {
       return accelerationChangeProvider;
+   }
+
+   /**
+    * Gets the rigid-body twist provider that can be used to access change in twist of
+    * any rigid-body in the system due to the test impulse.
+    * <p>
+    * The provider is initialized only after calling either
+    * {@link #applyWrenchLazy(RigidBodyReadOnly, WrenchReadOnly)} or
+    * {@link #applyWrench(RigidBodyReadOnly, WrenchReadOnly, DenseMatrix64F)}.
+    * </p>
+    * 
+    * @return the twist change provider.
+    */
+   public RigidBodyTwistProvider getTwistChangeProvider()
+   {
+      return twistChangeProvider;
    }
 
    class CollisionRecursionStep
@@ -257,6 +388,23 @@ public class MultiBodyCollisionCalculator
        * Change of acceleration of this rigid-body's direct predecessor.
        */
       final SpatialAcceleration parentAccelerationChange;
+      /**
+       * Test wrench containing external force applied to this body to test the resulting change
+       * acceleration with.
+       */
+      final SpatialImpulse testImpulsePlus;
+      /**
+       * Pre-transformed test wrench for the parent.
+       */
+      final SpatialForce testImpulsePlusForParent;
+      /**
+       * Change of acceleration of this rigid-body.
+       */
+      final Twist rigidBodyTwistChange = new Twist();
+      /**
+       * Change of acceleration of this rigid-body's direct predecessor.
+       */
+      final Twist parentTwistChange;
       /**
        * This is the apparent force for this joint resulting from {@code testWrenchPlus}:
        * 
@@ -332,6 +480,10 @@ public class MultiBodyCollisionCalculator
        * body.
        */
       private boolean isOnCollisionBranch = false;
+      /**
+       * Flag used for lazy update.
+       */
+      private boolean isUpToDate = false;
 
       public CollisionRecursionStep(ArticulatedBodyRecursionStep articulatedBodyRecursionStep, CollisionRecursionStep parent)
       {
@@ -344,6 +496,10 @@ public class MultiBodyCollisionCalculator
             testWrenchPlusForParent = null;
             parentAccelerationChange = null;
             rigidBodyAccelerationChange.setToZero(getBodyFixedFrame(), input.getInertialFrame(), getBodyFixedFrame());
+            testImpulsePlus = null;
+            testImpulsePlusForParent = null;
+            parentTwistChange = null;
+            rigidBodyTwistChange.setToZero(getBodyFixedFrame(), input.getInertialFrame(), getBodyFixedFrame());
 
             pAPlus = null;
             uPlus = null;
@@ -362,6 +518,10 @@ public class MultiBodyCollisionCalculator
             testWrenchPlusForParent = parent.isRoot() ? null : new SpatialForce();
             parentAccelerationChange = new SpatialAcceleration();
 
+            testImpulsePlus = new SpatialImpulse();
+            testImpulsePlusForParent = parent.isRoot() ? null : new SpatialForce();
+            parentTwistChange = new Twist();
+
             pAPlus = new DenseMatrix64F(SpatialVectorReadOnly.SIZE, 1);
             uPlus = new DenseMatrix64F(nDoFs, 1);
             paPlus = new DenseMatrix64F(SpatialVectorReadOnly.SIZE, 1);
@@ -375,23 +535,7 @@ public class MultiBodyCollisionCalculator
       public void reset()
       {
          isOnCollisionBranch = false;
-      }
-
-      /**
-       * Propagates the test wrench from the solicited body through up the system then comes back down to
-       * the test body to computed its resulting change in acceleration.
-       * 
-       * @param sourceChild the child that is located between this and the target of the test wrench.
-       */
-      public void quickTest(CollisionRecursionStep sourceChild)
-      {
-         if (isRoot())
-            return;
-
-         isOnCollisionBranch = true;
-         singleStepUp(sourceChild);
-         parent.quickTest(this);
-         singleStepDown();
+         isUpToDate = false;
       }
 
       /**
@@ -399,21 +543,37 @@ public class MultiBodyCollisionCalculator
        * 
        * @param sourceChild the child that is located between this and the target of the test wrench.
        */
-      public void passOne(CollisionRecursionStep sourceChild)
+      public void initializeWrench(CollisionRecursionStep sourceChild)
       {
          if (isRoot())
             return;
 
          // Going bottom-up in the tree.
          isOnCollisionBranch = true;
-         singleStepUp(sourceChild);
-         parent.passOne(this);
+         stepUpWrench(sourceChild);
+         parent.initializeWrench(this);
       }
 
-      private void singleStepUp(CollisionRecursionStep sourceChild)
+      /**
+       * Propagates the test impulse from the solicited body through up the system until reaching the
+       * root.
+       * 
+       * @param sourceChild the child that is located between this and the target of the test impulse.
+       */
+      public void initializeImpulse(CollisionRecursionStep sourceChild)
       {
-         DenseMatrix64F S = articulatedBodyRecursionStep.S;
-         DenseMatrix64F U_Dinv = articulatedBodyRecursionStep.U_Dinv;
+         if (isRoot())
+            return;
+
+         // Going bottom-up in the tree.
+         isOnCollisionBranch = true;
+         stepUpImpulse(sourceChild);
+         parent.initializeImpulse(this);
+      }
+
+      public void stepUpWrench(CollisionRecursionStep sourceChild)
+      {
+         isUpToDate = false;
 
          if (sourceChild != null)
          {
@@ -425,33 +585,56 @@ public class MultiBodyCollisionCalculator
          {
             testWrenchPlus.changeFrame(getFrameAfterJoint());
          }
-
          testWrenchPlus.get(pAPlus);
          if (sourceChild == null)
-         { // p+ = -f_ext.
-            CommonOps.multTransA(S, pAPlus, uPlus);
-            CommonOps.mult(U_Dinv, uPlus, paPlus);
-            CommonOps.subtractEquals(paPlus, pAPlus);
-         }
-         else
-         {
-            CommonOps.multTransA(-1.0, S, pAPlus, uPlus);
-            CommonOps.mult(U_Dinv, uPlus, paPlus);
-            CommonOps.addEquals(paPlus, pAPlus);
-         }
+            CommonOps.changeSign(pAPlus);
+
+         DenseMatrix64F S = articulatedBodyRecursionStep.S;
+         CommonOps.multTransA(-1.0, S, pAPlus, uPlus);
 
          if (!parent.isRoot())
          {
+            DenseMatrix64F U_Dinv = articulatedBodyRecursionStep.U_Dinv;
+            CommonOps.mult(U_Dinv, uPlus, paPlus);
+            CommonOps.addEquals(paPlus, pAPlus);
             testWrenchPlusForParent.setIncludingFrame(testWrenchPlus.getReferenceFrame(), paPlus);
+         }
+      }
+
+      public void stepUpImpulse(CollisionRecursionStep sourceChild)
+      {
+         if (sourceChild != null)
+         {
+            testImpulsePlus.setIncludingFrame(sourceChild.testImpulsePlusForParent);
+            testImpulsePlus.applyTransform(sourceChild.articulatedBodyRecursionStep.transformToParentJointFrame);
+            testImpulsePlus.setReferenceFrame(getFrameAfterJoint());
+         }
+         else
+         {
+            testImpulsePlus.changeFrame(getFrameAfterJoint());
+         }
+         testImpulsePlus.get(pAPlus);
+         if (sourceChild == null)
+            CommonOps.changeSign(pAPlus);
+
+         DenseMatrix64F S = articulatedBodyRecursionStep.S;
+         CommonOps.multTransA(-1.0, S, pAPlus, uPlus);
+
+         if (!parent.isRoot())
+         {
+            DenseMatrix64F U_Dinv = articulatedBodyRecursionStep.U_Dinv;
+            CommonOps.mult(U_Dinv, uPlus, paPlus);
+            CommonOps.addEquals(paPlus, pAPlus);
+            testImpulsePlusForParent.setIncludingFrame(testImpulsePlus.getReferenceFrame(), paPlus);
          }
       }
 
       /**
        * Propagates the change in acceleration from the root down to the leaves.
        */
-      public void passTwo()
+      public void propagateDownWrench()
       {
-         singleStepDown();
+         stepDownWrench();
 
          if (!isRoot())
          {
@@ -464,11 +647,53 @@ public class MultiBodyCollisionCalculator
          }
 
          for (int childIndex = 0; childIndex < children.size(); childIndex++)
-            children.get(childIndex).passTwo();
+            children.get(childIndex).propagateDownWrench();
       }
 
-      private void singleStepDown()
+      /**
+       * Propagates the change in twist from the root down to the leaves.
+       */
+      public void propagateDownImpulse()
       {
+         stepDownImpulse();
+
+         if (!isRoot())
+         {
+            int[] jointIndices = articulatedBodyRecursionStep.jointIndices;
+
+            for (int dofIndex = 0; dofIndex < getJoint().getDegreesOfFreedom(); dofIndex++)
+            {
+               jointVelocityChangeMatrix.set(jointIndices[dofIndex], 0, qddPlus.get(dofIndex, 0));
+            }
+         }
+
+         for (int childIndex = 0; childIndex < children.size(); childIndex++)
+            children.get(childIndex).propagateDownWrench();
+      }
+
+      public void updateRigidBodyAccelerationChange()
+      {
+         if (isUpToDate || isRoot())
+            return;
+
+         parent.updateRigidBodyAccelerationChange();
+         stepDownWrench();
+      }
+
+      public void updateRigidBodyTwistChange()
+      {
+         if (isUpToDate || isRoot())
+            return;
+
+         parent.updateRigidBodyAccelerationChange();
+         stepDownWrench();
+      }
+
+      private void stepDownWrench()
+      {
+         if (isUpToDate)
+            return;
+
          if (!isRoot())
          {
             DenseMatrix64F S = articulatedBodyRecursionStep.S;
@@ -499,6 +724,47 @@ public class MultiBodyCollisionCalculator
             CommonOps.addEquals(aPlus, aParentPlus);
             rigidBodyAccelerationChange.setIncludingFrame(getBodyFixedFrame(), input.getInertialFrame(), getFrameAfterJoint(), aPlus);
          }
+
+         isUpToDate = true;
+      }
+
+      private void stepDownImpulse()
+      {
+         if (isUpToDate)
+            return;
+
+         if (!isRoot())
+         {
+            DenseMatrix64F S = articulatedBodyRecursionStep.S;
+            DenseMatrix64F U = articulatedBodyRecursionStep.U;
+            DenseMatrix64F Dinv = articulatedBodyRecursionStep.Dinv;
+
+            // Going top-down in the tree.
+            parentTwistChange.setIncludingFrame(parent.rigidBodyTwistChange);
+            parentTwistChange.applyInverseTransform(articulatedBodyRecursionStep.transformToParentJointFrame);
+            parentTwistChange.setReferenceFrame(getFrameAfterJoint());
+            parentTwistChange.get(aParentPlus);
+
+            if (isOnCollisionBranch)
+            {
+               // Computing qdd = D^-1 * ( u - U^T * a_parent )
+               CommonOps.multTransA(-1.0, U, aParentPlus, qddPlus_intermediate);
+               CommonOps.addEquals(qddPlus_intermediate, uPlus);
+               CommonOps.mult(Dinv, qddPlus_intermediate, qddPlus);
+            }
+            else
+            {
+               // Computing qdd = -D^-1 * U^T * a_parent )
+               CommonOps.multTransA(-1.0, U, aParentPlus, qddPlus_intermediate);
+               CommonOps.mult(Dinv, qddPlus_intermediate, qddPlus);
+            }
+
+            CommonOps.mult(S, qddPlus, aPlus);
+            CommonOps.addEquals(aPlus, aParentPlus);
+            rigidBodyTwistChange.setIncludingFrame(getBodyFixedFrame(), input.getInertialFrame(), getFrameAfterJoint(), aPlus);
+         }
+
+         isUpToDate = true;
       }
 
       public boolean isRoot()
