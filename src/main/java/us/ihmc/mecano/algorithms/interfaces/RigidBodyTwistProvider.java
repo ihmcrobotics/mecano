@@ -24,6 +24,8 @@ public interface RigidBodyTwistProvider
 
    FrameVector3DReadOnly getLinearVelocityOfBodyFixedPoint(RigidBodyReadOnly base, RigidBodyReadOnly body, FramePoint3DReadOnly bodyFixedPoint);
 
+   ReferenceFrame getInertialFrame();
+
    public static RigidBodyTwistProvider toRigidBodyTwistProvider(Function<RigidBodyReadOnly, TwistReadOnly> twistFunction, ReferenceFrame inertialFrame)
    {
       return new RigidBodyTwistProvider()
@@ -67,6 +69,12 @@ public interface RigidBodyTwistProvider
             else
                getTwistOfBody(body).getLinearVelocityAt(bodyFixedPoint, linearVelocity);
             return linearVelocity;
+         }
+
+         @Override
+         public ReferenceFrame getInertialFrame()
+         {
+            return inertialFrame;
          }
       };
    }

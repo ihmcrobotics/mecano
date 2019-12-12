@@ -11,7 +11,6 @@ import org.ejml.ops.CommonOps;
 
 import us.ihmc.euclid.Axis;
 import us.ihmc.euclid.matrix.interfaces.Matrix3DBasics;
-import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.referenceFrame.interfaces.FramePoint3DReadOnly;
 import us.ihmc.euclid.tools.EuclidCoreTools;
@@ -96,10 +95,17 @@ public class MultiBodyCollisionCalculator
          CollisionRecursionStep recursionStep = rigidBodyToRecursionStepMap.get(body);
          if (recursionStep == null)
             return null;
-         recursionStep.updateRigidBodyAccelerationChange();
-         // The algorithm computes the acceleration expressed in the parent joint frame.
-         // To prevent unnecessary computation, let's only change the frame when needed.
-         recursionStep.rigidBodyAccelerationChange.changeFrame(body.getBodyFixedFrame());
+         if (!initialRecursionStep.isOnCollisionBranch)
+         { // This calculator has not been initialized with an wrench yet.
+            recursionStep.rigidBodyAccelerationChange.setToZero(body.getBodyFixedFrame(), input.getInertialFrame(), body.getBodyFixedFrame());
+         }
+         else
+         {
+            recursionStep.updateRigidBodyAccelerationChange();
+            // The algorithm computes the acceleration expressed in the parent joint frame.
+            // To prevent unnecessary computation, let's only change the frame when needed.
+            recursionStep.rigidBodyAccelerationChange.changeFrame(body.getBodyFixedFrame());
+         }
          return recursionStep.rigidBodyAccelerationChange;
       };
       accelerationChangeProvider = RigidBodyAccelerationProvider.toRigidBodyAccelerationProvider(accelerationFunction, input.getInertialFrame());
@@ -109,10 +115,18 @@ public class MultiBodyCollisionCalculator
          CollisionRecursionStep recursionStep = rigidBodyToRecursionStepMap.get(body);
          if (recursionStep == null)
             return null;
-         recursionStep.updateRigidBodyTwistChange();
-         // The algorithm computes the twist expressed in the parent joint frame.
-         // To prevent unnecessary computation, let's only change the frame when needed.
-         recursionStep.rigidBodyTwistChange.changeFrame(body.getBodyFixedFrame());
+
+         if (!initialRecursionStep.isOnCollisionBranch)
+         { // This calculator has not been initialized with an impulse yet.
+            recursionStep.rigidBodyTwistChange.setToZero(body.getBodyFixedFrame(), input.getInertialFrame(), body.getBodyFixedFrame());
+         }
+         else
+         {
+            recursionStep.updateRigidBodyTwistChange();
+            // The algorithm computes the twist expressed in the parent joint frame.
+            // To prevent unnecessary computation, let's only change the frame when needed.
+            recursionStep.rigidBodyTwistChange.changeFrame(body.getBodyFixedFrame());
+         }
          return recursionStep.rigidBodyTwistChange;
       };
       twistChangeProvider = RigidBodyTwistProvider.toRigidBodyTwistProvider(twistFunction, input.getInertialFrame());
@@ -143,8 +157,6 @@ public class MultiBodyCollisionCalculator
       for (CollisionRecursionStep recursionStep : allRecursionSteps)
          recursionStep.reset();
    }
-
-   private final FrameVector3D linearAccelerationChange = new FrameVector3D();
 
    /**
     * Computes the matrix representing the inverse of the apparent linear inertia expressed at
@@ -185,13 +197,11 @@ public class MultiBodyCollisionCalculator
 
       for (int axis = 0; axis < 3; axis++)
       {
-         recursionStep.testWrenchPlus.setIncludingFrame(bodyFrame, bodyFrame, EuclidCoreTools.zeroVector3D, Axis.values[axis], pointInTargetFrame);
+         recursionStep.testWrenchPlus.setIncludingFrame(bodyFrame, inertiaFrame, EuclidCoreTools.zeroVector3D, Axis.values[axis], EuclidCoreTools.origin3D);
          recursionStep.initializeWrench(null);
          recursionStep.updateRigidBodyAccelerationChange();
-         recursionStep.rigidBodyAccelerationChange.changeFrame(bodyFrame);
-         recursionStep.rigidBodyAccelerationChange.getLinearAccelerationAt(null, pointInTargetFrame, linearAccelerationChange);
-         linearAccelerationChange.changeFrame(inertiaFrame);
-         apparentLinearInertiaToPack.setColumn(axis, linearAccelerationChange);
+         recursionStep.rigidBodyAccelerationChange.changeFrame(inertiaFrame);
+         apparentLinearInertiaToPack.setColumn(axis, recursionStep.rigidBodyAccelerationChange.getLinearPart());
       }
 
       return true;
@@ -237,13 +247,11 @@ public class MultiBodyCollisionCalculator
 
       for (int axis = 0; axis < 3; axis++)
       {
-         recursionStep.testWrenchPlus.setIncludingFrame(bodyFrame, bodyFrame, EuclidCoreTools.zeroVector3D, Axis.values[axis], pointInTargetFrame);
+         recursionStep.testWrenchPlus.setIncludingFrame(bodyFrame, inertiaFrame, EuclidCoreTools.zeroVector3D, Axis.values[axis], EuclidCoreTools.origin3D);
          recursionStep.initializeWrench(null);
          recursionStep.updateRigidBodyAccelerationChange();
-         recursionStep.rigidBodyAccelerationChange.changeFrame(bodyFrame);
-         recursionStep.rigidBodyAccelerationChange.getLinearAccelerationAt(null, pointInTargetFrame, linearAccelerationChange);
-         linearAccelerationChange.changeFrame(inertiaFrame);
-         linearAccelerationChange.get(0, axis, apparentLinearInertiaToPack);
+         recursionStep.rigidBodyAccelerationChange.changeFrame(inertiaFrame);
+         recursionStep.rigidBodyAccelerationChange.getLinearPart().get(0, axis, apparentLinearInertiaToPack);
       }
 
       return true;
@@ -354,8 +362,8 @@ public class MultiBodyCollisionCalculator
    }
 
    /**
-    * Gets the rigid-body twist provider that can be used to access change in twist of
-    * any rigid-body in the system due to the test impulse.
+    * Gets the rigid-body twist provider that can be used to access change in twist of any rigid-body
+    * in the system due to the test impulse.
     * <p>
     * The provider is initialized only after calling either
     * {@link #applyWrenchLazy(RigidBodyReadOnly, WrenchReadOnly)} or
