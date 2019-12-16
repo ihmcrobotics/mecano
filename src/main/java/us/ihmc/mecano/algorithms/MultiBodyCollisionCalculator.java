@@ -21,16 +21,8 @@ import us.ihmc.mecano.frames.MovingReferenceFrame;
 import us.ihmc.mecano.multiBodySystem.interfaces.JointReadOnly;
 import us.ihmc.mecano.multiBodySystem.interfaces.MultiBodySystemReadOnly;
 import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyReadOnly;
-import us.ihmc.mecano.spatial.SpatialAcceleration;
-import us.ihmc.mecano.spatial.SpatialForce;
-import us.ihmc.mecano.spatial.SpatialImpulse;
-import us.ihmc.mecano.spatial.Twist;
-import us.ihmc.mecano.spatial.Wrench;
-import us.ihmc.mecano.spatial.interfaces.SpatialAccelerationReadOnly;
-import us.ihmc.mecano.spatial.interfaces.SpatialImpulseReadOnly;
-import us.ihmc.mecano.spatial.interfaces.SpatialVectorReadOnly;
-import us.ihmc.mecano.spatial.interfaces.TwistReadOnly;
-import us.ihmc.mecano.spatial.interfaces.WrenchReadOnly;
+import us.ihmc.mecano.spatial.*;
+import us.ihmc.mecano.spatial.interfaces.*;
 import us.ihmc.mecano.tools.MultiBodySystemTools;
 
 /**
@@ -51,8 +43,6 @@ public class MultiBodyCollisionCalculator
    private final CollisionRecursionStep initialRecursionStep;
    /** Map to quickly retrieve information for each rigid-body. */
    private final Map<RigidBodyReadOnly, CollisionRecursionStep> rigidBodyToRecursionStepMap = new HashMap<>();
-   /** Array of all the recursion steps to quickly performs independent operations on all of them. */
-   private final CollisionRecursionStep[] allRecursionSteps;
    /** The output of this algorithm: the acceleration matrix for all the joints to consider. */
    private final DenseMatrix64F jointAccelerationChangeMatrix;
    /** The output of this algorithm: the velocity matrix for all the joints to consider. */
@@ -84,7 +74,6 @@ public class MultiBodyCollisionCalculator
       input = forwardDynamicsCalculator.getInput();
       initialRecursionStep = new CollisionRecursionStep(forwardDynamicsCalculator.getInitialRecursionStep(), null);
       buildMultiBodyTree(initialRecursionStep);
-      allRecursionSteps = rigidBodyToRecursionStepMap.values().toArray(new CollisionRecursionStep[0]);
 
       int nDoFs = MultiBodySystemTools.computeDegreesOfFreedom(input.getJointsToConsider());
       jointAccelerationChangeMatrix = new DenseMatrix64F(nDoFs, 1);
@@ -154,8 +143,7 @@ public class MultiBodyCollisionCalculator
 
    private void reset()
    {
-      for (CollisionRecursionStep recursionStep : allRecursionSteps)
-         recursionStep.reset();
+      initialRecursionStep.reset();
    }
 
    /**
@@ -544,6 +532,8 @@ public class MultiBodyCollisionCalculator
       {
          isOnCollisionBranch = false;
          isUpToDate = false;
+         for (CollisionRecursionStep child : children)
+            child.reset();
       }
 
       /**
@@ -553,11 +543,12 @@ public class MultiBodyCollisionCalculator
        */
       public void initializeWrench(CollisionRecursionStep sourceChild)
       {
+         // Going bottom-up in the tree.
+         isOnCollisionBranch = true;
+
          if (isRoot())
             return;
 
-         // Going bottom-up in the tree.
-         isOnCollisionBranch = true;
          stepUpWrench(sourceChild);
          parent.initializeWrench(this);
       }
@@ -570,11 +561,12 @@ public class MultiBodyCollisionCalculator
        */
       public void initializeImpulse(CollisionRecursionStep sourceChild)
       {
+         // Going bottom-up in the tree.
+         isOnCollisionBranch = true;
+
          if (isRoot())
             return;
 
-         // Going bottom-up in the tree.
-         isOnCollisionBranch = true;
          stepUpImpulse(sourceChild);
          parent.initializeImpulse(this);
       }
@@ -693,8 +685,8 @@ public class MultiBodyCollisionCalculator
          if (isUpToDate || isRoot())
             return;
 
-         parent.updateRigidBodyAccelerationChange();
-         stepDownWrench();
+         parent.updateRigidBodyTwistChange();
+         stepDownImpulse();
       }
 
       private void stepDownWrench()
