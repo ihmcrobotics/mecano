@@ -79,6 +79,14 @@ public class MultiBodyCollisionCalculator
       jointAccelerationChangeMatrix = new DenseMatrix64F(nDoFs, 1);
       jointVelocityChangeMatrix = new DenseMatrix64F(nDoFs, 1);
 
+      accelerationChangeProvider = RigidBodyAccelerationProvider.toRigidBodyAccelerationProvider(buildAccelerationSupplier(), input.getInertialFrame());
+      twistChangeProvider = RigidBodyTwistProvider.toRigidBodyTwistProvider(buildTwistSupplier(), input.getInertialFrame());
+   }
+
+   private Function<RigidBodyReadOnly, SpatialAccelerationReadOnly> buildAccelerationSupplier()
+   {
+      SpatialAcceleration bodyAcceleration = new SpatialAcceleration();
+
       Function<RigidBodyReadOnly, SpatialAccelerationReadOnly> accelerationFunction = body ->
       {
          CollisionRecursionStep recursionStep = rigidBodyToRecursionStepMap.get(body);
@@ -86,18 +94,24 @@ public class MultiBodyCollisionCalculator
             return null;
          if (!initialRecursionStep.isOnCollisionBranch)
          { // This calculator has not been initialized with an wrench yet.
-            recursionStep.rigidBodyAccelerationChange.setToZero(body.getBodyFixedFrame(), input.getInertialFrame(), body.getBodyFixedFrame());
+            bodyAcceleration.setToZero(body.getBodyFixedFrame(), input.getInertialFrame(), body.getBodyFixedFrame());
          }
          else
          {
             recursionStep.updateRigidBodyAccelerationChange();
             // The algorithm computes the acceleration expressed in the parent joint frame.
             // To prevent unnecessary computation, let's only change the frame when needed.
-            recursionStep.rigidBodyAccelerationChange.changeFrame(body.getBodyFixedFrame());
+            bodyAcceleration.setIncludingFrame(recursionStep.rigidBodyAccelerationChange);
+            bodyAcceleration.changeFrame(body.getBodyFixedFrame());
          }
-         return recursionStep.rigidBodyAccelerationChange;
+         return bodyAcceleration;
       };
-      accelerationChangeProvider = RigidBodyAccelerationProvider.toRigidBodyAccelerationProvider(accelerationFunction, input.getInertialFrame());
+      return accelerationFunction;
+   }
+
+   private Function<RigidBodyReadOnly, TwistReadOnly> buildTwistSupplier()
+   {
+      Twist bodyTwist = new Twist();
 
       Function<RigidBodyReadOnly, TwistReadOnly> twistFunction = body ->
       {
@@ -107,18 +121,19 @@ public class MultiBodyCollisionCalculator
 
          if (!initialRecursionStep.isOnCollisionBranch)
          { // This calculator has not been initialized with an impulse yet.
-            recursionStep.rigidBodyTwistChange.setToZero(body.getBodyFixedFrame(), input.getInertialFrame(), body.getBodyFixedFrame());
+            bodyTwist.setToZero(body.getBodyFixedFrame(), input.getInertialFrame(), body.getBodyFixedFrame());
          }
          else
          {
             recursionStep.updateRigidBodyTwistChange();
             // The algorithm computes the twist expressed in the parent joint frame.
             // To prevent unnecessary computation, let's only change the frame when needed.
-            recursionStep.rigidBodyTwistChange.changeFrame(body.getBodyFixedFrame());
+            bodyTwist.setIncludingFrame(recursionStep.rigidBodyTwistChange);
+            bodyTwist.changeFrame(body.getBodyFixedFrame());
          }
-         return recursionStep.rigidBodyTwistChange;
+         return bodyTwist;
       };
-      twistChangeProvider = RigidBodyTwistProvider.toRigidBodyTwistProvider(twistFunction, input.getInertialFrame());
+      return twistFunction;
    }
 
    private void buildMultiBodyTree(CollisionRecursionStep recursionStep)
