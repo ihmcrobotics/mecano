@@ -156,7 +156,7 @@ public class MultiBodyCollisionCalculator
       return forwardDynamicsCalculator;
    }
 
-   private void reset()
+   public void reset()
    {
       initialRecursionStep.reset();
    }
