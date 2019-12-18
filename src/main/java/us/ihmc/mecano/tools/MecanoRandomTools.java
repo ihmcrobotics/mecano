@@ -1,6 +1,7 @@
 package us.ihmc.mecano.tools;
 
-import static us.ihmc.euclid.tools.EuclidCoreRandomTools.*;
+import static us.ihmc.euclid.tools.EuclidCoreRandomTools.nextDiagonalMatrix3D;
+import static us.ihmc.euclid.tools.EuclidCoreRandomTools.nextVector3D;
 
 import java.util.Random;
 import java.util.stream.IntStream;
@@ -16,13 +17,7 @@ import us.ihmc.euclid.tools.EuclidCoreTools;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.mecano.frames.MovingReferenceFrame;
-import us.ihmc.mecano.spatial.Momentum;
-import us.ihmc.mecano.spatial.SpatialAcceleration;
-import us.ihmc.mecano.spatial.SpatialForce;
-import us.ihmc.mecano.spatial.SpatialInertia;
-import us.ihmc.mecano.spatial.SpatialVector;
-import us.ihmc.mecano.spatial.Twist;
-import us.ihmc.mecano.spatial.Wrench;
+import us.ihmc.mecano.spatial.*;
 
 /**
  * This class provides random generators to generate random spatial vectors.
@@ -365,6 +360,47 @@ public class MecanoRandomTools
                         expressedInFrame,
                         nextVector3D(random, -angularPartMinMax, angularPartMinMax),
                         nextVector3D(random, -linearPartMinMax, linearPartMinMax));
+   }
+
+   /**
+    * Generates a random spatial impulse vector.
+    * <p>
+    * {@code spatialImpulseVector}<sub>i=0,5</sub> &in; [-1.0; 1.0].
+    * </p>
+    *
+    * @param random           the random generator to use.
+    * @param bodyFrame        the frame of the body on which the impulse is exerted.
+    * @param expressedInFrame the frame in which the generated vector is expressed.
+    * @return the random spatial impuse vector.
+    */
+   public static SpatialImpulse nextSpatialImpulse(Random random, ReferenceFrame bodyFrame, ReferenceFrame expressedInFrame)
+   {
+      return nextSpatialImpulse(random, bodyFrame, expressedInFrame, 1.0, 1.0);
+   }
+
+   /**
+    * Generates a random spatial impulse vector.
+    * <p>
+    * {@code spatialImpulseVector}<sub>i=0,2</sub> &in; [-{@code angularPartMinMax};
+    * {@code angularPartMinMax}].<br>
+    * {@code spatialImpulseVector}<sub>i=3,5</sub> &in; [-{@code linearPartMinMax};
+    * {@code linearPartMinMax}].
+    * </p>
+    *
+    * @param random            the random generator to use.
+    * @param bodyFrame         the frame of the body on which the impulse is exerted.
+    * @param expressedInFrame  the frame in which the generated vector is expressed.
+    * @param angularPartMinMax the maximum absolute value for each component of the angular part.
+    * @param linearPartMinMax  the maximum absolute value for each component of the linear part.
+    * @return the random spatial impulse vector.
+    */
+   public static SpatialImpulse nextSpatialImpulse(Random random, ReferenceFrame bodyFrame, ReferenceFrame expressedInFrame, double angularPartMinMax,
+                                                   double linearPartMinMax)
+   {
+      return new SpatialImpulse(bodyFrame,
+                                expressedInFrame,
+                                nextVector3D(random, -angularPartMinMax, angularPartMinMax),
+                                nextVector3D(random, -linearPartMinMax, linearPartMinMax));
    }
 
    /**
