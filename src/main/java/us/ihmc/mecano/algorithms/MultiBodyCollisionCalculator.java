@@ -234,8 +234,8 @@ public class MultiBodyCollisionCalculator
     * @return {@code true} is the apparent inertia matrix was successfully computed, {@code false}
     *         otherwise.
     */
-   public boolean computeApparentInertia(RigidBodyReadOnly target, FramePoint3DReadOnly pointInTargetFrame, ReferenceFrame inertiaFrame,
-                                         DenseMatrix64F apparentLinearInertiaToPack)
+   public boolean computeApparentInertiaInverse(RigidBodyReadOnly target, FramePoint3DReadOnly pointInTargetFrame, ReferenceFrame inertiaFrame,
+                                                DenseMatrix64F apparentLinearInertiaToPack)
    {
       pointInTargetFrame.checkReferenceFrameMatch(target.getBodyFixedFrame());
 
