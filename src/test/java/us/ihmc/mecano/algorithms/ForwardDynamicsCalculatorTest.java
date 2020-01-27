@@ -94,7 +94,7 @@ public class ForwardDynamicsCalculatorTest
 
       for (int i = 0; i < ITERATIONS; i++)
       {
-         int numberOfJoints = 3; //random.nextInt(3) + 1;
+         int numberOfJoints = random.nextInt(50) + 1;
          List<RevoluteJoint> joints = MultiBodySystemRandomTools.nextRevoluteJointChain(random, numberOfJoints);
          compareAgainstInverseDynamicsCalculator(random, i, joints, Collections.emptyMap(), Collections.emptyList(), ONE_DOF_JOINT_EPSILON);
          compareAgainstCompositeRigidBodyMassMatrixCalculator(random, 0, joints, ONE_DOF_JOINT_EPSILON);
@@ -129,7 +129,7 @@ public class ForwardDynamicsCalculatorTest
                                                  joints,
                                                  Collections.emptyMap(),
                                                  Collections.singletonList(joints.get(random.nextInt(joints.size()))),
-                                                 ONE_DOF_JOINT_EPSILON);
+                                                 2.0 * ONE_DOF_JOINT_EPSILON);
       }
    }
 
