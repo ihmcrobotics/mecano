@@ -422,16 +422,12 @@ public class MecanoTools
          dynamicMomentToPack.cross(angularVelocity, dynamicMomentToPack);
       }
 
-      double mx = dynamicMomentToPack.getX();
-      double my = dynamicMomentToPack.getY();
-      double mz = dynamicMomentToPack.getZ();
 
-      if (angularAcceleration == null)
+      if (angularAcceleration != null)
       {
-         dynamicMomentToPack.set(mx, my, mz);
-      }
-      else
-      {
+         double mx = dynamicMomentToPack.getX();
+         double my = dynamicMomentToPack.getY();
+         double mz = dynamicMomentToPack.getZ();
          // J wDot
          momentOfInertia.transform(angularAcceleration, dynamicMomentToPack);
          // J wDot + w x J w

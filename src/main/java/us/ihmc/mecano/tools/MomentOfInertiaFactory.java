@@ -63,14 +63,89 @@ public class MomentOfInertiaFactory
    public static Matrix3D solidEllipsoid(double mass, double xRadius, double yRadius, double zRadius)
    {
       checkMassAndDimensions(mass, xRadius, yRadius, zRadius);
-      double ixx = 1.0 / 5.0 * mass * (yRadius * yRadius + zRadius * zRadius);
-      double iyy = 1.0 / 5.0 * mass * (zRadius * zRadius + xRadius * xRadius);
-      double izz = 1.0 / 5.0 * mass * (xRadius * xRadius + yRadius * yRadius);
+      Matrix3D momentOfInertia = new Matrix3D();
+      double scale = 0.2 * mass;
+      momentOfInertia.setM00(scale * (yRadius * yRadius + zRadius * zRadius));
+      momentOfInertia.setM11(scale * (zRadius * zRadius + xRadius * xRadius));
+      momentOfInertia.setM22(scale * (xRadius * xRadius + yRadius * yRadius));
+      return momentOfInertia;
+   }
+
+   /**
+    * Computes the moment of inertia matrix for a solid sphere.
+    * 
+    * @param mass   the sphere mass.
+    * @param radius radius of the sphere.
+    * @return the moment of inertia of the sphere.
+    */
+   public static Matrix3D solidSphere(double mass, double radius)
+   {
+      checkMassAndDimensions(mass, radius);
+      Matrix3D momentOfInertia = new Matrix3D();
+      double inertia = 0.4 * mass * radius * radius;
+      momentOfInertia.setM00(inertia);
+      momentOfInertia.setM11(inertia);
+      momentOfInertia.setM22(inertia);
+      return momentOfInertia;
+   }
+
+   /**
+    * Computes the moment of inertia matrix for a solid box.
+    * 
+    * @param mass the box mass.
+    * @param size 3D size of the box along each axis.
+    * @return the moment of inertia of the box.
+    */
+   public static Matrix3D solidBox(double mass, Tuple3DReadOnly size)
+   {
+      return solidBox(mass, size.getX(), size.getY(), size.getZ());
+   }
+
+   /**
+    * Computes the moment of inertia matrix for a solid box.
+    * 
+    * @param mass  the box mass.
+    * @param xSize size of the box along the x-axis.
+    * @param ySize size of the box along the y-axis.
+    * @param zSize size of the box along the z-axis.
+    * @return the moment of inertia of the box.
+    */
+   public static Matrix3D solidBox(double mass, double xSize, double ySize, double zSize)
+   {
+      checkMassAndDimensions(mass, xSize, ySize, zSize);
+      Matrix3D momentOfInertia = new Matrix3D();
+      double scale = mass / 12.0;
+      momentOfInertia.setM00(scale * (ySize * ySize + zSize * zSize));
+      momentOfInertia.setM11(scale * (zSize * zSize + xSize * xSize));
+      momentOfInertia.setM22(scale * (xSize * xSize + ySize * ySize));
+      return momentOfInertia;
+   }
+
+   /**
+    * Compute the moment of inertia of are computed as follows:
+    * 
+    * <pre>
+    * Ixx = mass * (radiusOfGyrationY * radiusOfGyrationY + radiusOfGyrationZ * radiusOfGyrationY)
+    * Iyy = mass * (radiusOfGyrationX * radiusOfGyrationX + radiusOfGyrationZ * radiusOfGyrationZ)
+    * Izz = mass * (radiusOfGyrationX * radiusOfGyrationX + radiusOfGyrationY * radiusOfGyrationY)
+    * </pre>
+    * 
+    * This is equivalent to the mass being concentrated on the surface of a thin ellipsoid with the
+    * given radii of gyration.
+    *
+    * @param mass              Mass of the body.
+    * @param radiusOfGyrationX Radius of gyration in the x direction.
+    * @param radiusOfGyrationY Radius of gyration in the y direction.
+    * @param radiusOfGyrationZ Radius of gyration in the z direction.
+    */
+   public static Matrix3D fromMassAndRadiiOfGyration(double mass, double radiusOfGyrationX, double radiusOfGyrationY, double radiusOfGyrationZ)
+   {
+      checkMassAndDimensions(mass, radiusOfGyrationX, radiusOfGyrationY, radiusOfGyrationZ);
 
       Matrix3D momentOfInertia = new Matrix3D();
-      momentOfInertia.setM00(ixx);
-      momentOfInertia.setM11(iyy);
-      momentOfInertia.setM22(izz);
+      momentOfInertia.setM00(mass * (radiusOfGyrationY * radiusOfGyrationY + radiusOfGyrationZ * radiusOfGyrationZ));
+      momentOfInertia.setM11(mass * (radiusOfGyrationX * radiusOfGyrationX + radiusOfGyrationZ * radiusOfGyrationZ));
+      momentOfInertia.setM22(mass * (radiusOfGyrationX * radiusOfGyrationX + radiusOfGyrationY * radiusOfGyrationY));
       return momentOfInertia;
    }
 

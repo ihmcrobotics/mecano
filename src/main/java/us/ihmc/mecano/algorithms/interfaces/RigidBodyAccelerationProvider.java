@@ -177,8 +177,14 @@ public interface RigidBodyAccelerationProvider
             MovingReferenceFrame baseFrame = base.getBodyFixedFrame();
             MovingReferenceFrame bodyFrame = body.getBodyFixedFrame();
 
-            baseAcceleration.setIncludingFrame(getAccelerationOfBody(base));
-            acceleration.setIncludingFrame(getAccelerationOfBody(body));
+            SpatialAccelerationReadOnly immutableBaseAcceleration = getAccelerationOfBody(base);
+            if (immutableBaseAcceleration == null)
+               return null;
+            baseAcceleration.setIncludingFrame(immutableBaseAcceleration);
+            SpatialAccelerationReadOnly immutableAcceleration = getAccelerationOfBody(body);
+            if (immutableAcceleration == null)
+               return null;
+            acceleration.setIncludingFrame(immutableAcceleration);
 
             if (areVelocitiesConsidered())
             {
@@ -203,6 +209,9 @@ public interface RigidBodyAccelerationProvider
          public FrameVector3DReadOnly getLinearAccelerationOfBodyFixedPoint(RigidBodyReadOnly base, RigidBodyReadOnly body, FramePoint3DReadOnly bodyFixedPoint)
          {
             SpatialAccelerationReadOnly accelerationToUse = base != null ? getRelativeAcceleration(base, body) : getAccelerationOfBody(body);
+
+            if (accelerationToUse == null)
+               return null;
 
             MovingReferenceFrame bodyFrame = body.getBodyFixedFrame();
             ReferenceFrame baseFrame = accelerationToUse.getBaseFrame();

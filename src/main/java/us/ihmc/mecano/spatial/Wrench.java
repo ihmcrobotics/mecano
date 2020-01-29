@@ -8,6 +8,7 @@ import us.ihmc.euclid.referenceFrame.exceptions.ReferenceFrameMismatchException;
 import us.ihmc.euclid.referenceFrame.interfaces.FixedFrameVector3DBasics;
 import us.ihmc.euclid.transform.interfaces.Transform;
 import us.ihmc.euclid.tuple3D.interfaces.Vector3DReadOnly;
+import us.ihmc.mecano.spatial.interfaces.SpatialVectorReadOnly;
 import us.ihmc.mecano.spatial.interfaces.WrenchBasics;
 import us.ihmc.mecano.spatial.interfaces.WrenchReadOnly;
 import us.ihmc.mecano.tools.MecanoIOTools;
@@ -63,7 +64,7 @@ public class Wrench implements WrenchBasics, GeometryObject<Wrench>
     */
    public Wrench()
    {
-      this(null, null);
+      setToZero(null, null);
    }
 
    /**
@@ -122,6 +123,17 @@ public class Wrench implements WrenchBasics, GeometryObject<Wrench>
    public Wrench(ReferenceFrame bodyFrame, ReferenceFrame expressedInFrame, double[] array)
    {
       setIncludingFrame(bodyFrame, expressedInFrame, array);
+   }
+
+   /**
+    * Creates a new wrench from the given {@code bodyFrame} and spatial vector.
+    * 
+    * @param bodyFrame     the frame rigidly attached to the body on which this wrench is applied.
+    * @param spatialVector the vector used to initialize this wrench value. Not modified.
+    */
+   public Wrench(ReferenceFrame bodyFrame, SpatialVectorReadOnly spatialVector)
+   {
+      setIncludingFrame(bodyFrame, spatialVector);
    }
 
    /**
