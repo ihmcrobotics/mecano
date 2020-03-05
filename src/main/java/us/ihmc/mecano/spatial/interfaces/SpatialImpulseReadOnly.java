@@ -7,9 +7,9 @@ import us.ihmc.mecano.spatial.SpatialImpulse;
 import us.ihmc.mecano.spatial.Wrench;
 
 /**
- * Read-only interface for a impulse. An impulse is the integral of a wrench, i.e. force and/or
- * torque, over a time interval. While applying a wrench on a body causes it to accelerate, applying
- * an impulse results in a change of velocity of the body.
+ * Read-only interface for a spatial impulse. An impulse is the integral of a wrench, i.e. force
+ * and/or torque, over a time interval. While applying a wrench on a body causes it to accelerate,
+ * applying an impulse results in a change of velocity of the body.
  * <p>
  * A spatial impulse is a vector composed of 6 components with an angular part and a linear part.
  * </p>

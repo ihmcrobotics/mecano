@@ -71,7 +71,7 @@ public interface FixedFrameWrenchBasics extends WrenchReadOnly, FixedFrameSpatia
     * {@code other} once transformed to be expressed in {@code this.getReferenceFrame()}.
     * </p>
     *
-    * @param other the other vector to copy. Not modified.
+    * @param other the other wrench to copy. Not modified.
     * @throws ReferenceFrameMismatchException if either the body frame or base frame in {@code other}
     *                                         does not match {@code this}.
     */
@@ -126,7 +126,7 @@ public interface FixedFrameWrenchBasics extends WrenchReadOnly, FixedFrameSpatia
    }
 
    /**
-    * Sets this spatial force given a 3D moment and 3D force that are exerted at
+    * Sets this wrench given a 3D moment and 3D force that are exerted at
     * {@code pointOfApplication}.
     * <p>
     * Effectively, this wrench is updated as follow:
