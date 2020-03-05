@@ -64,10 +64,10 @@ public interface WrenchBasics extends FixedFrameWrenchBasics, SpatialForceBasics
    void setBodyFrame(ReferenceFrame bodyFrame);
 
    /**
-    * Sets all the components of this vector to zero and updates its reference frames.
+    * Sets all the components of this wrench to zero and updates its reference frames.
     *
     * @param bodyFrame        the new body frame.
-    * @param expressedInFrame the new reference frame in which this motion is expressed.
+    * @param expressedInFrame the new reference frame in which this wrench is expressed.
     */
    default void setToZero(ReferenceFrame bodyFrame, ReferenceFrame expressedInFrame)
    {
@@ -76,7 +76,7 @@ public interface WrenchBasics extends FixedFrameWrenchBasics, SpatialForceBasics
    }
 
    /**
-    * Sets all the components of this vector to {@link Double#NaN} and sets its reference frames.
+    * Sets all the components of this wrench to {@link Double#NaN} and sets its reference frames.
     *
     * @param bodyFrame        the new body frame.
     * @param expressedInFrame the new reference frame.
@@ -125,7 +125,7 @@ public interface WrenchBasics extends FixedFrameWrenchBasics, SpatialForceBasics
    }
 
    /**
-    * Sets this motion vector given an angular part and linear part and updates all its reference
+    * Sets this wrench given an angular part and linear part and updates all its reference
     * frames.
     *
     * @param bodyFrame        the body frame associated with the given spatial force.
@@ -309,7 +309,7 @@ public interface WrenchBasics extends FixedFrameWrenchBasics, SpatialForceBasics
    }
 
    /**
-    * Sets this spatial force given a 3D moment and 3D force that are exerted at
+    * Sets this wrench given a 3D moment and 3D force that are exerted at
     * {@code pointOfApplication} and updates this vector reference frame.
     * <p>
     * Effectively, this wrench is updated as follow:
@@ -331,8 +331,6 @@ public interface WrenchBasics extends FixedFrameWrenchBasics, SpatialForceBasics
     * @param angularPart        the 3D moment that is applied. Can be {@code null}. Not modified.
     * @param linearPart         the 3D force that is applied. Not modified.
     * @param pointOfApplication the location where the force is exerted. Not modified.
-    * @throws ReferenceFrameMismatchException if the arguments are not expressed in the same reference
-    *                                         frame.
     */
    default void setIncludingFrame(ReferenceFrame bodyFrame, FrameVector3DReadOnly angularPart, FrameVector3DReadOnly linearPart,
                                   FramePoint3DReadOnly pointOfApplication)

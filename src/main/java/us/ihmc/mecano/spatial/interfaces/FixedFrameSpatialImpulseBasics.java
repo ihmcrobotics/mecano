@@ -22,9 +22,9 @@ import us.ihmc.mecano.spatial.Wrench;
  * This reference frame is always assumed to be rigidly attached to the body.
  * </p>
  * <p>
- * When using a {@code SpatialImpulseBasics}, it is important to note that the reference frame in
- * which it is expressed does not only refer to the coordinate system in which the angular and
- * linear 3D vectors are expressed. The origin of the reference frame is also used as the point
+ * When using a {@code FixedFrameSpatialImpulseBasics}, it is important to note that the reference
+ * frame in which it is expressed does not only refer to the coordinate system in which the angular
+ * and linear 3D vectors are expressed. The origin of the reference frame is also used as the point
  * where the impulse is measured. Let's consider two reference frames A and B which axes are
  * parallel but have different origins, changing the frame of a spatial impulse from A to B will not
  * affect the linear part but will affect the value of the angular part. See
