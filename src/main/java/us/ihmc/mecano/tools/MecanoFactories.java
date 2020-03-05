@@ -955,7 +955,7 @@ public class MecanoFactories
     *
     * @param scaleSupplier   the supplier to get the scale.
     * @param referenceWrench the reference wrench to scale. Not modified.
-    * @return the new wrench linked to the {@code referenceTwist}.
+    * @return the new wrench linked to the {@code referenceWrench}.
     */
    public static WrenchReadOnly newWrenchReadOnly(DoubleSupplier scaleSupplier, WrenchReadOnly referenceWrench)
    {
@@ -1043,6 +1043,20 @@ public class MecanoFactories
       };
    }
 
+   /**
+    * Creates a new spatial impulse that is linked to the given {@code referenceSpatialImpulse} as
+    * follows:
+    *
+    * <pre>
+    * newWrench = scale * referenceSpatialImpulse
+    * </pre>
+    *
+    * where the scale is obtained from the given {@code scaleSupplier}.
+    *
+    * @param scaleSupplier   the supplier to get the scale.
+    * @param referenceWrench the reference spatial impulse to scale. Not modified.
+    * @return the new spatial impulse linked to the {@code referenceSpatialImpulse}.
+    */
    public static SpatialImpulseReadOnly newSpatialImpulseReadOnly(DoubleSupplier scaleSupplier, SpatialImpulseReadOnly referenceSpatialImpulse)
    {
       return new SpatialImpulseReadOnly()
