@@ -136,12 +136,12 @@ public interface WrenchReadOnly extends SpatialForceReadOnly
    }
 
    /**
-    * Tests on a per component basis if this vector is equal to the given {@code other} to an
-    * {@code epsilon} and both vectors have the same frames.
+    * Tests on a per component basis if this wrench is equal to the given {@code other} to an
+    * {@code epsilon} and both wrenches have the same frames.
     *
     * @param other   the other wrench to compare against this. Not modified.
     * @param epsilon the tolerance to use when comparing each component.
-    * @return {@code true} if the two vectors are equal, {@code false} otherwise.
+    * @return {@code true} if the two wrenches are equal, {@code false} otherwise.
     */
    default boolean epsilonEquals(WrenchReadOnly other, double epsilon)
    {
