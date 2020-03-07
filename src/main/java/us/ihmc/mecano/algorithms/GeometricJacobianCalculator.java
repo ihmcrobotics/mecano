@@ -580,6 +580,12 @@ public class GeometricJacobianCalculator
       return builder.toString();
    }
 
+   /**
+    * Creates a short descriptive {@code String} for this Jacobian containing information such as the
+    * {@code jacobianFrame}, the {@code base} and {@code endEffector}.
+    * 
+    * @return a short description {@code String} for this Jacobian.
+    */
    public String getShortInfo()
    {
       return "Jacobian, end effector = " + getEndEffector() + ", base = " + getBase() + ", expressed in " + getJacobianFrame();
