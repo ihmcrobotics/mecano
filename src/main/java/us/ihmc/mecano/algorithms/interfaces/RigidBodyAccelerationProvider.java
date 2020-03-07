@@ -17,7 +17,7 @@ import us.ihmc.mecano.spatial.Twist;
 import us.ihmc.mecano.spatial.interfaces.SpatialAccelerationReadOnly;
 
 /**
- * Interface for algorithms that can compute and provide the rigid-body spatial acceleration of
+ * Interface for algorithms that can compute and provide the rigid-body spatial accelerations of a
  * multi-body system.
  * <p>
  * While the common calculator to compute rigid-body accelerations is the
@@ -43,9 +43,12 @@ public interface RigidBodyAccelerationProvider
 
    /**
     * Computes and packs the spatial acceleration of the {@code body} relative to the given
-    * {@code base}. The resulting spatial acceleration is the acceleration of the
-    * {@code body.getBodyFixedFrame()} with respect to the {@code base.getBodyFixedFrame()}, expressed
-    * in {@code body.getBodyFixedFrame()}.
+    * {@code base}.
+    * <p>
+    * The resulting spatial acceleration is the acceleration of the {@code body.getBodyFixedFrame()}
+    * with respect to the {@code base.getBodyFixedFrame()}, expressed in
+    * {@code body.getBodyFixedFrame()}.
+    * </p>
     * <p>
     * The relative acceleration between the two rigid-bodies is calculated knowing their accelerations
     * with respect to the inertial frame using the method
@@ -119,7 +122,7 @@ public interface RigidBodyAccelerationProvider
 
    /**
     * Factory for implementing a {@link RigidBodyAccelerationProvider} from a given function that
-    * computes spatial acceleration any given rigid-body.
+    * computes spatial acceleration for any given rigid-body.
     * <p>
     * The function is used to implement {@link #getAccelerationOfBody(RigidBodyReadOnly)} and is enough
     * to implement the other acceleration getters of this interface.
@@ -138,7 +141,7 @@ public interface RigidBodyAccelerationProvider
 
    /**
     * Factory for implementing a {@link RigidBodyAccelerationProvider} from a given function that
-    * computes spatial acceleration any given rigid-body.
+    * computes spatial acceleration for any given rigid-body.
     * <p>
     * The function is used to implement {@link #getAccelerationOfBody(RigidBodyReadOnly)} and is enough
     * to implement the other acceleration getters of this interface.
