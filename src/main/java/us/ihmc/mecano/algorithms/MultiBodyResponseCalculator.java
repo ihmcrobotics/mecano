@@ -10,9 +10,7 @@ import org.ejml.data.DenseMatrix64F;
 import org.ejml.ops.CommonOps;
 
 import us.ihmc.euclid.Axis;
-import us.ihmc.euclid.matrix.interfaces.Matrix3DBasics;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
-import us.ihmc.euclid.referenceFrame.interfaces.FramePoint3DReadOnly;
 import us.ihmc.euclid.tools.EuclidCoreTools;
 import us.ihmc.mecano.algorithms.ForwardDynamicsCalculator.ArticulatedBodyRecursionStep;
 import us.ihmc.mecano.algorithms.interfaces.RigidBodyAccelerationProvider;
@@ -27,15 +25,28 @@ import us.ihmc.mecano.tools.MultiBodySystemTools;
 
 /**
  * Inspired from Mirtich's thesis, this calculator allows to evaluate the perturbation in terms of
- * change in acceleration due to a wrench applied on a rigid-body.
+ * change in acceleration (or twist) due to a wrench (or impulse) applied on a rigid-body.
  * <p>
- * This can be used to compute an adequate wrench to apply on a contacting rigid-body that is in
- * contact with another body.
+ * This can be used to compute an adequate wrench (or impulse) to apply on a rigid-body to obtain a
+ * given resulting acceleration (or twist).
+ * </p>
+ * <p>
+ * Example of how to use this calculator:
+ * 
+ * <pre>
+ * MultiBodyResponseCalculator calculator = new MultiBodyResponseCalculator(multiBodySystem);
+ * calculator.getForwardDynamicsCalculator().compute();
+ * // To compute the linear part of apparent inertia 
+ * calculator.computeApparentInertia(targetRigidBody, pointInTarget, externalWrenchFrame);
+ * calculator.applyWrench(targetRigidBody, externalWrench);
+ * // To obtain the resulting change in acceleration caused by the externalWrench on another rigid-body:
+ * SpatialAccelerationReadOnly resultingAccelerationChangeOnOtherBody = calculator.getAccelerationChangeProvider().getAccelerationOfBody(anotherRigidBody);
+ * </pre>
  * </p>
  * 
  * @author Sylvain Bertrand
  */
-public class MultiBodyCollisionCalculator
+public class MultiBodyResponseCalculator
 {
    /** Defines the multi-body system to use with this calculator. */
    private final MultiBodySystemReadOnly input;
@@ -63,12 +74,19 @@ public class MultiBodyCollisionCalculator
     */
    private final RigidBodyTwistProvider twistChangeProvider;
 
-   public MultiBodyCollisionCalculator(MultiBodySystemReadOnly input)
+   private enum Mode
+   {
+      ACCELERATION, TWIST
+   };
+
+   private Mode currentMode = null;
+
+   public MultiBodyResponseCalculator(MultiBodySystemReadOnly input)
    {
       this(new ForwardDynamicsCalculator(input));
    }
 
-   public MultiBodyCollisionCalculator(ForwardDynamicsCalculator forwardDynamicsCalculator)
+   public MultiBodyResponseCalculator(ForwardDynamicsCalculator forwardDynamicsCalculator)
    {
       this.forwardDynamicsCalculator = forwardDynamicsCalculator;
       input = forwardDynamicsCalculator.getInput();
@@ -89,10 +107,13 @@ public class MultiBodyCollisionCalculator
 
       Function<RigidBodyReadOnly, SpatialAccelerationReadOnly> accelerationFunction = body ->
       {
+         if (currentMode == Mode.TWIST)
+            throw new IllegalStateException("This calculator is currently setup for calculating twists.");
+
          CollisionRecursionStep recursionStep = rigidBodyToRecursionStepMap.get(body);
          if (recursionStep == null)
             return null;
-         if (!initialRecursionStep.isOnCollisionBranch)
+         if (currentMode == null || !initialRecursionStep.isUpToDate)
          { // This calculator has not been initialized with an wrench yet.
             bodyAcceleration.setToZero(body.getBodyFixedFrame(), input.getInertialFrame(), body.getBodyFixedFrame());
          }
@@ -115,11 +136,14 @@ public class MultiBodyCollisionCalculator
 
       Function<RigidBodyReadOnly, TwistReadOnly> twistFunction = body ->
       {
+         if (currentMode == Mode.ACCELERATION)
+            throw new IllegalStateException("This calculator is currently setup for calculating accelerations.");
+
          CollisionRecursionStep recursionStep = rigidBodyToRecursionStepMap.get(body);
          if (recursionStep == null)
             return null;
 
-         if (!initialRecursionStep.isOnCollisionBranch)
+         if (!initialRecursionStep.isUpToDate)
          { // This calculator has not been initialized with an impulse yet.
             bodyTwist.setToZero(body.getBodyFixedFrame(), input.getInertialFrame(), body.getBodyFixedFrame());
          }
@@ -156,63 +180,81 @@ public class MultiBodyCollisionCalculator
       return forwardDynamicsCalculator;
    }
 
+   /**
+    * Clears the internal state of this calculator.
+    */
    public void reset()
    {
+      currentMode = null;
       initialRecursionStep.reset();
    }
 
-   /**
-    * Computes the matrix representing the inverse of the apparent linear inertia expressed at
-    * {@code pointInTargetFrame} such that:
-    * 
-    * <pre>
-    * &Delta;&alpha;<sub>target</sub> = (I<sup>A</sup>)<sup>-1</sup> F<sub>target</sub>
-    * </pre>
-    * 
-    * where:
-    * <ul>
-    * <li><tt>(I<sup>A</sup>)<sup>-1</sup></tt> is the inverse of the 3-by-3 linear part of the
-    * apparent inertia matrix.
-    * <li><tt>F<sub>target</sub></tt> is a linear force applied at {@code pointInTargetFrame}.
-    * <li><tt>&Delta;&alpha;<sub>target</sub></tt> is the resulting change in linear acceleration of
-    * {@code target} at {@code pointInTargetFrame} due a force <tt>F<sub>target</sub></tt>.
-    * </ul>
-    * 
-    * @param target                      the rigid-body to compute the apparent inertia at.
-    * @param pointInTargetFrame          the location where the apparent inertia is to computed.
-    * @param inertiaFrame                the frame in which the output is to be expressed.
-    * @param apparentLinearInertiaToPack the matrix in which to store the result.
-    * @return {@code true} is the apparent inertia matrix was successfully computed, {@code false}
-    *         otherwise.
-    */
-   public boolean computeApparentInertia(RigidBodyReadOnly target, FramePoint3DReadOnly pointInTargetFrame, ReferenceFrame inertiaFrame,
-                                         Matrix3DBasics apparentLinearInertiaToPack)
+   public boolean computeApparentSpatialInertiaInverse(RigidBodyReadOnly target, ReferenceFrame inertiaFrame, DenseMatrix64F apparentSpatialInertiaToPack)
    {
-      pointInTargetFrame.checkReferenceFrameMatch(target.getBodyFixedFrame());
+      return computeApparentSpatialInertiaInverse(target, inertiaFrame, null, apparentSpatialInertiaToPack);
+   }
 
+   public boolean computeApparentSpatialInertiaInverse(RigidBodyReadOnly target, ReferenceFrame inertiaFrame, boolean[] selectedAxes,
+                                                DenseMatrix64F apparentSpatialInertiaToPack)
+   {
       CollisionRecursionStep recursionStep = rigidBodyToRecursionStepMap.get(target);
 
       if (recursionStep == null)
          return false;
 
-      reset();
       ReferenceFrame bodyFrame = target.getBodyFixedFrame();
+
+      apparentSpatialInertiaToPack.reshape(6, 6);
 
       for (int axis = 0; axis < 3; axis++)
       {
-         recursionStep.testWrenchPlus.setIncludingFrame(bodyFrame, inertiaFrame, EuclidCoreTools.zeroVector3D, Axis.values[axis], EuclidCoreTools.origin3D);
-         recursionStep.initializeWrench(null);
-         recursionStep.updateRigidBodyAccelerationChange();
-         recursionStep.rigidBodyAccelerationChange.changeFrame(inertiaFrame);
-         apparentLinearInertiaToPack.setColumn(axis, recursionStep.rigidBodyAccelerationChange.getLinearPart());
+         if (selectedAxes == null || selectedAxes[axis])
+         {
+            recursionStep.testWrenchPlus.setIncludingFrame(bodyFrame, inertiaFrame, Axis.values[axis], EuclidCoreTools.zeroVector3D);
+            recursionStep.initializeWrench(null);
+            recursionStep.updateRigidBodyAccelerationChange();
+            recursionStep.rigidBodyAccelerationChange.changeFrame(inertiaFrame);
+            recursionStep.rigidBodyAccelerationChange.get(0, axis, apparentSpatialInertiaToPack);
+         }
+         else
+         {
+            apparentSpatialInertiaToPack.unsafe_set(0, axis, 0.0);
+            apparentSpatialInertiaToPack.unsafe_set(1, axis, 0.0);
+            apparentSpatialInertiaToPack.unsafe_set(2, axis, 0.0);
+            apparentSpatialInertiaToPack.unsafe_set(0, axis + 3, 0.0);
+            apparentSpatialInertiaToPack.unsafe_set(2, axis + 3, 0.0);
+            apparentSpatialInertiaToPack.unsafe_set(3, axis + 3, 0.0);
+         }
       }
+
+      for (int axis = 0; axis < 3; axis++)
+      {
+         if (selectedAxes == null || selectedAxes[axis + 3])
+         {
+            recursionStep.testWrenchPlus.setIncludingFrame(bodyFrame, inertiaFrame, EuclidCoreTools.zeroVector3D, Axis.values[axis]);
+            recursionStep.initializeWrench(null);
+            recursionStep.updateRigidBodyAccelerationChange();
+            recursionStep.rigidBodyAccelerationChange.changeFrame(inertiaFrame);
+            recursionStep.rigidBodyAccelerationChange.get(0, axis + 3, apparentSpatialInertiaToPack);
+         }
+         else
+         {
+            apparentSpatialInertiaToPack.unsafe_set(3, axis, 0.0);
+            apparentSpatialInertiaToPack.unsafe_set(4, axis, 0.0);
+            apparentSpatialInertiaToPack.unsafe_set(5, axis, 0.0);
+            apparentSpatialInertiaToPack.unsafe_set(3, axis + 3, 0.0);
+            apparentSpatialInertiaToPack.unsafe_set(4, axis + 3, 0.0);
+            apparentSpatialInertiaToPack.unsafe_set(5, axis + 3, 0.0);
+         }
+      }
+      reset();
 
       return true;
    }
 
    /**
-    * Computes the matrix representing the inverse of the apparent linear inertia expressed at
-    * {@code pointInTargetFrame} such that:
+    * Computes the matrix representing the inverse of the linear part of the apparent inertia expressed
+    * at {@code inertiaFrame} such that:
     * 
     * <pre>
     * &Delta;&alpha;<sub>target</sub> = (I<sup>A</sup>)<sup>-1</sup> F<sub>target</sub>
@@ -222,29 +264,24 @@ public class MultiBodyCollisionCalculator
     * <ul>
     * <li><tt>(I<sup>A</sup>)<sup>-1</sup></tt> is the inverse of the 3-by-3 linear part of the
     * apparent inertia matrix.
-    * <li><tt>F<sub>target</sub></tt> is a linear force applied at {@code pointInTargetFrame}.
+    * <li><tt>F<sub>target</sub></tt> is a linear force applied at {@code inertiaFrame}.
     * <li><tt>&Delta;&alpha;<sub>target</sub></tt> is the resulting change in linear acceleration of
-    * {@code target} at {@code pointInTargetFrame} due a force <tt>F<sub>target</sub></tt>.
+    * {@code target} at {@code inertiaFrame} due a force <tt>F<sub>target</sub></tt>.
     * </ul>
     * 
     * @param target                      the rigid-body to compute the apparent inertia at.
-    * @param pointInTargetFrame          the location where the apparent inertia is to computed.
-    * @param inertiaFrame                the frame in which the output is to be expressed.
+    * @param inertiaFrame                the frame at which the output is to be expressed.
     * @param apparentLinearInertiaToPack the matrix in which to store the result.
     * @return {@code true} is the apparent inertia matrix was successfully computed, {@code false}
     *         otherwise.
     */
-   public boolean computeApparentInertiaInverse(RigidBodyReadOnly target, FramePoint3DReadOnly pointInTargetFrame, ReferenceFrame inertiaFrame,
-                                                DenseMatrix64F apparentLinearInertiaToPack)
+   public boolean computeApparentLinearInertiaInverse(RigidBodyReadOnly target, ReferenceFrame inertiaFrame, DenseMatrix64F apparentLinearInertiaToPack)
    {
-      pointInTargetFrame.checkReferenceFrameMatch(target.getBodyFixedFrame());
-
       CollisionRecursionStep recursionStep = rigidBodyToRecursionStepMap.get(target);
 
       if (recursionStep == null)
          return false;
 
-      reset();
       ReferenceFrame bodyFrame = target.getBodyFixedFrame();
       apparentLinearInertiaToPack.reshape(3, 3);
 
@@ -256,6 +293,7 @@ public class MultiBodyCollisionCalculator
          recursionStep.rigidBodyAccelerationChange.changeFrame(inertiaFrame);
          recursionStep.rigidBodyAccelerationChange.getLinearPart().get(0, axis, apparentLinearInertiaToPack);
       }
+      reset();
 
       return true;
    }
@@ -264,54 +302,59 @@ public class MultiBodyCollisionCalculator
     * Applies a 6-D wrench to {@code target} and propagates the effect to the rest of the multi-body
     * system.
     * 
-    * @param target                        the rigid-body to which the wrench is applied to.
-    * @param wrench                        the wrench to be applied.
-    * @param jointAccelerationChangeMatrix the response to the wrench on the multi-body system in terms
-    *                                      of change of joint accelerations.
-    * @return {@code true} is the wrench was successfully applied and the response computed,
-    *         {@code false} otherwise.
+    * @param target the rigid-body to which the wrench is applied to.
+    * @param wrench the wrench to be applied.
+    * @return the response to the wrench on the multi-body system in terms of change of joint
+    *         accelerations, or {@code null} if this methods failed.
     */
-   public boolean applyWrench(RigidBodyReadOnly target, WrenchReadOnly wrench, DenseMatrix64F jointAccelerationChangeMatrix)
+   public DenseMatrix64F applyAndPropagateWrench(RigidBodyReadOnly target, WrenchReadOnly wrench)
    {
-      if (!applyWrenchLazy(target, wrench))
-         return false;
-      initialRecursionStep.propagateDownWrench();
-      jointAccelerationChangeMatrix.set(this.jointAccelerationChangeMatrix);
-      return true;
+      if (!applyWrench(target, wrench))
+         return null;
+
+      return propagateWrench();
    }
 
    /**
     * Applies a 6-D impulse to {@code target} and propagates the effect to the rest of the multi-body
     * system.
     * 
-    * @param target                    the rigid-body to which the impulse is applied to.
-    * @param impulse                   the impulse to be applied.
-    * @param jointVelocityChangeMatrix the response to the impulse on the multi-body system in terms of
-    *                                  change of joint velocities.
-    * @return {@code true} is the impulse was successfully applied and the response computed,
-    *         {@code false} otherwise.
+    * @param target  the rigid-body to which the impulse is applied to.
+    * @param impulse the impulse to be applied.
+    * @return the response to the impulse on the multi-body system in terms of change of joint
+    *         velocities, or {@code null} if this methods failed.
     */
-   public boolean applyImpulse(RigidBodyReadOnly target, SpatialImpulseReadOnly impulse, DenseMatrix64F jointVelocityChangeMatrix)
+   public DenseMatrix64F applyAndPropagateImpulse(RigidBodyReadOnly target, SpatialImpulseReadOnly impulse)
    {
-      if (!applyImpulseLazy(target, impulse))
-         return false;
+      if (!applyImpulse(target, impulse))
+         return null;
 
-      initialRecursionStep.propagateDownImpulse();
-      jointVelocityChangeMatrix.set(jointAccelerationChangeMatrix);
-      return true;
+      return propagateImpulse();
    }
 
    /**
-    * Applies a 6-D wrench to {@code target} and propagates the effect up to the root,
-    * {@link #getAccelerationChangeProvider()} can then be used to access the resulting change in
-    * acceleration to any other rigid-body in the system.
+    * Applies a 6-D wrench to {@code target} and compute the apparent wrench for each rigid-body
+    * between {@code target} and the root-body of the system.
+    * <p>
+    * IMPORTANT: This calculator relies on the internal forward-dynamics calculator to be updated. It
+    * is up to the user of this calculator to do so: {@code multiBodyCollision}
+    * </p>
+    * <p>
+    * After applying a wrench, the following features are available:
+    * <ul>
+    * <li>{@link #getAccelerationChangeProvider()} can then be used to access the resulting change in
+    * acceleration to any rigid-body in the system.
+    * <li>{@link #propagateWrench()} can then be used to compute the change in acceleration caused by
+    * the wrench on all rigid-bodies and get the change in joint acceleration.
+    * </ul>
+    * </p>
     * 
     * @param target the rigid-body to which the wrench is applied to.
     * @param wrench the wrench to be applied.
-    * @return {@code true} is the wrench was successfully applied and the response computed,
+    * @return {@code true} if the wrench was successfully applied and the response computed,
     *         {@code false} otherwise.
     */
-   public boolean applyWrenchLazy(RigidBodyReadOnly target, WrenchReadOnly wrench)
+   public boolean applyWrench(RigidBodyReadOnly target, WrenchReadOnly wrench)
    {
       CollisionRecursionStep recursionStep = rigidBodyToRecursionStepMap.get(target);
 
@@ -322,19 +365,28 @@ public class MultiBodyCollisionCalculator
       ReferenceFrame bodyFrame = target.getBodyFixedFrame();
       recursionStep.testWrenchPlus.setIncludingFrame(bodyFrame, wrench);
       recursionStep.initializeWrench(null);
+      currentMode = Mode.ACCELERATION;
       return true;
    }
 
    /**
-    * Applies a 6-D impulse to {@code target} and propagates the effect to the rest of the multi-body
-    * system.
+    * Applies a 6-D impulse to {@code target} and compute the apparent impulse for each rigid-body
+    * between {@code target} and the root-body of the system.
+    * <p>
+    * After applying an impulse, the following features are available:
+    * <ul>
+    * <li>{@link #getTwistChangeProvider()} can then be used to access the resulting change in twist to
+    * any rigid-body in the system.
+    * <li>{@link #propagateImpulse()} can then be used to compute the change in twist caused by the
+    * impulse on all rigid-bodies and get the change in joint velocity.
+    * </ul>
+    * </p>
     * 
-    * @param target  the rigid-body to which the wrench is applied to.
-    * @param impulse the wrench to be applied.
-    * @return {@code true} is the wrench was successfully applied and the response computed,
-    *         {@code false} otherwise.
+    * @param target  the rigid-body to which the impulse is applied to.
+    * @param impulse the impulse to be applied.
+    * @return {@code true} if the impulse was successfully applied, {@code false} otherwise.
     */
-   public boolean applyImpulseLazy(RigidBodyReadOnly target, SpatialImpulseReadOnly impulse)
+   public boolean applyImpulse(RigidBodyReadOnly target, SpatialImpulseReadOnly impulse)
    {
       CollisionRecursionStep recursionStep = rigidBodyToRecursionStepMap.get(target);
 
@@ -345,7 +397,40 @@ public class MultiBodyCollisionCalculator
       ReferenceFrame bodyFrame = target.getBodyFixedFrame();
       recursionStep.testImpulsePlus.setIncludingFrame(bodyFrame, impulse);
       recursionStep.initializeImpulse(null);
+      currentMode = Mode.TWIST;
       return true;
+   }
+
+   /**
+    * Propagates a <b>previously</b> applied wrench to all rigid-bodies in the system and computes the
+    * resulting change in acceleration.
+    * 
+    * @return the matrix with the resulting change in joint acceleration, or {@code null} if
+    *         {@link #applyWrench(RigidBodyReadOnly, WrenchReadOnly)} was not called last.
+    */
+   public DenseMatrix64F propagateWrench()
+   {
+      if (currentMode != Mode.ACCELERATION || !initialRecursionStep.isUpToDate)
+         return null;
+
+      initialRecursionStep.propagateDownWrench();
+      return jointAccelerationChangeMatrix;
+   }
+
+   /**
+    * Propagates a <b>previously</b> applied impulse to all rigid-bodies in the system and computes the
+    * resulting change in twist.
+    * 
+    * @return the matrix with the resulting change in joint velocity, or {@code null} if
+    *         {@link #applyImpulse(RigidBodyReadOnly, SpatialImpulseReadOnly)} was not called last.
+    */
+   public DenseMatrix64F propagateImpulse()
+   {
+      if (currentMode != Mode.TWIST || !initialRecursionStep.isUpToDate)
+         return null;
+
+      initialRecursionStep.propagateDownImpulse();
+      return jointVelocityChangeMatrix;
    }
 
    /**
@@ -353,8 +438,8 @@ public class MultiBodyCollisionCalculator
     * any rigid-body in the system due to the test wrench.
     * <p>
     * The provider is initialized only after calling either
-    * {@link #applyWrenchLazy(RigidBodyReadOnly, WrenchReadOnly)} or
-    * {@link #applyWrench(RigidBodyReadOnly, WrenchReadOnly, DenseMatrix64F)}.
+    * {@link #applyWrench(RigidBodyReadOnly, WrenchReadOnly)} or
+    * {@link #applyAndPropagateWrench(RigidBodyReadOnly, WrenchReadOnly)}.
     * </p>
     * 
     * @return the acceleration change provider.
@@ -369,8 +454,8 @@ public class MultiBodyCollisionCalculator
     * in the system due to the test impulse.
     * <p>
     * The provider is initialized only after calling either
-    * {@link #applyWrenchLazy(RigidBodyReadOnly, WrenchReadOnly)} or
-    * {@link #applyWrench(RigidBodyReadOnly, WrenchReadOnly, DenseMatrix64F)}.
+    * {@link #applyWrench(RigidBodyReadOnly, WrenchReadOnly)} or
+    * {@link #applyAndPropagateWrench(RigidBodyReadOnly, WrenchReadOnly)}.
     * </p>
     * 
     * @return the twist change provider.
@@ -493,6 +578,11 @@ public class MultiBodyCollisionCalculator
       private boolean isOnCollisionBranch = false;
       /**
        * Flag used for lazy update.
+       * <p>
+       * When {@code true}, this means that the twist or acceleration of this step is up-to-date. When
+       * {@code false}, either the calculator has been reset, or a wrench/impulse has been applied but not
+       * propagated down the tree.
+       * </p>
        */
       private boolean isUpToDate = false;
 
@@ -562,7 +652,10 @@ public class MultiBodyCollisionCalculator
          isOnCollisionBranch = true;
 
          if (isRoot())
+         {
+            isUpToDate = true;
             return;
+         }
 
          stepUpWrench(sourceChild);
          parent.initializeWrench(this);
@@ -580,7 +673,10 @@ public class MultiBodyCollisionCalculator
          isOnCollisionBranch = true;
 
          if (isRoot())
+         {
+            isUpToDate = true;
             return;
+         }
 
          stepUpImpulse(sourceChild);
          parent.initializeImpulse(this);
@@ -683,7 +779,7 @@ public class MultiBodyCollisionCalculator
          }
 
          for (int childIndex = 0; childIndex < children.size(); childIndex++)
-            children.get(childIndex).propagateDownWrench();
+            children.get(childIndex).propagateDownImpulse();
       }
 
       public void updateRigidBodyAccelerationChange()
