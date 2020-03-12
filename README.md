@@ -51,7 +51,7 @@ This library includes the following:
 	- Geometric Jacobian: GeometricJacobianCalculator.
 	- Inverse and forward dynamics: InverseDynamicsCalculator, ForwardDynamicsCalculator.
 	- The mass matrix: CompositeRigidBodyMassMatrixCalculator.
-	- (Under development) Impulse propagation: MultiBodyImpulseCalculator.
+	- Response to external disturbance (wrench or impulse): MultiBodyResponseCalculator.
 
 ## Using Mecano from .jar releases with Maven/Gradle
 The releases .jars for Mecano are hosted on Bintray.
