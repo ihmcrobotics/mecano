@@ -84,11 +84,32 @@ public class MultiBodyResponseCalculator
 
    private Mode currentMode = null;
 
+   /**
+    * Creates a calculator for computing the response to external disturbances for a system defined by
+    * the given {@code input}.
+    * <p>
+    * This calculator creates a {@link ForwardDynamicsCalculator} that needs to configured and updated
+    * manually by the user before using the features of this calculator.
+    * </p>
+    * 
+    * @param input the definition of the system to be evaluated by this calculator.
+    */
    public MultiBodyResponseCalculator(MultiBodySystemReadOnly input)
    {
       this(new ForwardDynamicsCalculator(input));
    }
 
+   /**
+    * Creates a calculator for computing the response to external disturbances for a system defined by
+    * the given {@code forwardDynamicsCalculator.getInput()}.
+    * <p>
+    * This calculator does not manage the given {@code forwardDynamicsCalculator}. It is on the user to
+    * update the forward dynamics before accessing features of this calculator.
+    * </p>
+    * 
+    * @param forwardDynamicsCalculator the forward dynamics calculator required to perform additional
+    *                                  calculation in this calculator.
+    */
    public MultiBodyResponseCalculator(ForwardDynamicsCalculator forwardDynamicsCalculator)
    {
       this.forwardDynamicsCalculator = forwardDynamicsCalculator;
@@ -191,11 +212,116 @@ public class MultiBodyResponseCalculator
       initialRecursionStep.reset();
    }
 
+   /**
+    * Computes the matrix representing the inverse of the apparent inertia expressed at
+    * {@code inertiaFrame} such that:
+    * 
+    * <pre>
+    * / &Delta;&omega;Dot<sub>target</sub> \     <sup> </sup> <sup>  </sup> / &tau;<sub>target</sub> \
+    * |   <sub>      </sub>    | = (I<sup>A</sup>)<sup>-1</sup> |  <sub>      </sub> |
+    * \ &Delta;&alpha;<sub>target</sub>    /     <sup> </sup> <sup>  </sup> \ F<sub>target</sub> /
+    * </pre>
+    * 
+    * where:
+    * <ul>
+    * <li><tt>(I<sup>A</sup>)<sup>-1</sup></tt> is the inverse of the 6-by-6 linear part of the
+    * apparent inertia matrix.
+    * <li><tt>&tau;<sub>target</sub></tt> is a torque applied at {@code inertiaFrame}.
+    * <li><tt>F<sub>target</sub></tt> is a force applied at {@code inertiaFrame}.
+    * <li><tt>&Delta;&omega;Dot<sub>target</sub></tt> is the resulting change in angular acceleration
+    * of {@code target} at {@code inertiaFrame} due to a wrench (torque and force).
+    * <li><tt>&Delta;&alpha;<sub>target</sub></tt> is the resulting change in linear acceleration of
+    * {@code target} at {@code inertiaFrame} due to a wrench (torque and force).
+    * </ul>
+    * <p>
+    * Note that the apparent inertia can also be used to relate an impulse to a change in twist as
+    * follows:
+    * </p>
+    * 
+    * <pre>
+    * / &Delta;&omega;<sub>target</sub> \     <sup> </sup> <sup>  </sup> / Y<sup>ang</sup><sub>target</sub> \
+    * |   <sub>      </sub> | = (I<sup>A</sup>)<sup>-1</sup> |  <sub>      </sub><sup>   </sup> |
+    * \ &Delta;&nu;<sub>target</sub> /     <sup> </sup> <sup>  </sup> \ Y<sup>lin</sup><sub>target</sub> /
+    * </pre>
+    * 
+    * where:
+    * <ul>
+    * <li><tt>Y<sup>ang</sup><sub>target</sub></sub></tt> is the angular part of an impulse applied at
+    * {@code inertiaFrame}.
+    * <li><tt>Y<sup>lin</sup><sub>target</sub></tt> is the linear part of an impulse applied at
+    * {@code inertiaFrame}.
+    * <li><tt>&Delta;&omega;<sub>target</sub></tt> is the resulting change in angular velocity of
+    * {@code target} at {@code inertiaFrame} due to an impulse.
+    * <li><tt>&Delta;&nu;<sub>target</sub></tt> is the resulting change in linear velocity of
+    * {@code target} at {@code inertiaFrame} due to an impulse.
+    * </ul>
+    * 
+    * @param target                       the rigid-body to compute the apparent inertia at.
+    * @param inertiaFrame                 the frame at which the apparent inertia is to be expressed.
+    * @param apparentSpatialInertiaToPack the matrix in which to store the result. Modified.
+    * @return {@code true} is the apparent inertia matrix was successfully computed, {@code false}
+    *         otherwise.
+    */
    public boolean computeApparentSpatialInertiaInverse(RigidBodyReadOnly target, ReferenceFrame inertiaFrame, DenseMatrix64F apparentSpatialInertiaToPack)
    {
       return computeApparentSpatialInertiaInverse(target, inertiaFrame, null, apparentSpatialInertiaToPack);
    }
 
+   /**
+    * Computes the matrix representing the inverse of the apparent inertia expressed at
+    * {@code inertiaFrame} such that:
+    * 
+    * <pre>
+    * / &Delta;&omega;Dot<sub>target</sub> \     <sup> </sup> <sup>  </sup> / &tau;<sub>target</sub> \
+    * |   <sub>      </sub>    | = (I<sup>A</sup>)<sup>-1</sup> |  <sub>      </sub> |
+    * \ &Delta;&alpha;<sub>target</sub>    /     <sup> </sup> <sup>  </sup> \ F<sub>target</sub> /
+    * </pre>
+    * 
+    * where:
+    * <ul>
+    * <li><tt>(I<sup>A</sup>)<sup>-1</sup></tt> is the inverse of the 6-by-6 linear part of the
+    * apparent inertia matrix.
+    * <li><tt>&tau;<sub>target</sub></tt> is a torque applied at {@code inertiaFrame}.
+    * <li><tt>F<sub>target</sub></tt> is a force applied at {@code inertiaFrame}.
+    * <li><tt>&Delta;&omega;Dot<sub>target</sub></tt> is the resulting change in angular acceleration
+    * of {@code target} at {@code inertiaFrame} due to a wrench (torque and force).
+    * <li><tt>&Delta;&alpha;<sub>target</sub></tt> is the resulting change in linear acceleration of
+    * {@code target} at {@code inertiaFrame} due to a wrench (torque and force).
+    * </ul>
+    * <p>
+    * Note that the apparent inertia can also be used to relate an impulse to a change in twist as
+    * follows:
+    * </p>
+    * 
+    * <pre>
+    * / &Delta;&omega;<sub>target</sub> \     <sup> </sup> <sup>  </sup> / Y<sup>ang</sup><sub>target</sub> \
+    * |   <sub>      </sub> | = (I<sup>A</sup>)<sup>-1</sup> |  <sub>      </sub><sup>   </sup> |
+    * \ &Delta;&nu;<sub>target</sub> /     <sup> </sup> <sup>  </sup> \ Y<sup>lin</sup><sub>target</sub> /
+    * </pre>
+    * 
+    * where:
+    * <ul>
+    * <li><tt>Y<sup>ang</sup><sub>target</sub></sub></tt> is the angular part of an impulse applied at
+    * {@code inertiaFrame}.
+    * <li><tt>Y<sup>lin</sup><sub>target</sub></tt> is the linear part of an impulse applied at
+    * {@code inertiaFrame}.
+    * <li><tt>&Delta;&omega;<sub>target</sub></tt> is the resulting change in angular velocity of
+    * {@code target} at {@code inertiaFrame} due to an impulse.
+    * <li><tt>&Delta;&nu;<sub>target</sub></tt> is the resulting change in linear velocity of
+    * {@code target} at {@code inertiaFrame} due to an impulse.
+    * </ul>
+    * 
+    * @param target                       the rigid-body to compute the apparent inertia at.
+    * @param inertiaFrame                 the frame at which the apparent inertia is to be expressed.
+    * @param selectedAxes                 a 6-element array of boolean allowing to specify for which
+    *                                     axes the apparent inertia is to be computed. The resulting
+    *                                     matrix is a 6-by-6 matrix regardless of whether all axes are
+    *                                     selected or not. This allows to skip calculation for axes
+    *                                     that are not of interest.
+    * @param apparentSpatialInertiaToPack the matrix in which to store the result. Modified.
+    * @return {@code true} is the apparent inertia matrix was successfully computed, {@code false}
+    *         otherwise.
+    */
    public boolean computeApparentSpatialInertiaInverse(RigidBodyReadOnly target, ReferenceFrame inertiaFrame, boolean[] selectedAxes,
                                                        DenseMatrix64F apparentSpatialInertiaToPack)
    {
@@ -273,7 +399,7 @@ public class MultiBodyResponseCalculator
     * 
     * @param target                      the rigid-body to compute the apparent inertia at.
     * @param inertiaFrame                the frame at which the output is to be expressed.
-    * @param apparentLinearInertiaToPack the matrix in which to store the result.
+    * @param apparentLinearInertiaToPack the matrix in which to store the result. Modified.
     * @return {@code true} is the apparent inertia matrix was successfully computed, {@code false}
     *         otherwise.
     */
@@ -309,9 +435,11 @@ public class MultiBodyResponseCalculator
     * system.
     * 
     * @param target the rigid-body to which the wrench is applied to.
-    * @param wrench the wrench to be applied.
+    * @param wrench the wrench to be applied. Not modified.
     * @return the response to the wrench on the multi-body system in terms of change of joint
     *         accelerations, or {@code null} if this methods failed.
+    * @see #applyWrench(RigidBodyReadOnly, WrenchReadOnly)
+    * @see #propagateWrench()
     */
    public DenseMatrix64F applyAndPropagateWrench(RigidBodyReadOnly target, WrenchReadOnly wrench)
    {
@@ -326,9 +454,11 @@ public class MultiBodyResponseCalculator
     * system.
     * 
     * @param target  the rigid-body to which the impulse is applied to.
-    * @param impulse the impulse to be applied.
+    * @param impulse the impulse to be applied. Not modified.
     * @return the response to the impulse on the multi-body system in terms of change of joint
     *         velocities, or {@code null} if this methods failed.
+    * @see #applyImpulse(RigidBodyReadOnly, SpatialImpulseReadOnly)
+    * @see #propagateImpulse()
     */
    public DenseMatrix64F applyAndPropagateImpulse(RigidBodyReadOnly target, SpatialImpulseReadOnly impulse)
    {
@@ -356,7 +486,7 @@ public class MultiBodyResponseCalculator
     * </p>
     * 
     * @param target the rigid-body to which the wrench is applied to.
-    * @param wrench the wrench to be applied.
+    * @param wrench the wrench to be applied. Not modified.
     * @return {@code true} if the wrench was successfully applied and the response computed,
     *         {@code false} otherwise.
     */
@@ -369,7 +499,6 @@ public class MultiBodyResponseCalculator
       }
       else
       {
-         reset();
          return false;
       }
    }
@@ -388,7 +517,7 @@ public class MultiBodyResponseCalculator
     * </p>
     * 
     * @param target  the rigid-body to which the impulse is applied to.
-    * @param impulse the impulse to be applied.
+    * @param impulse the impulse to be applied. Not modified.
     * @return {@code true} if the impulse was successfully applied, {@code false} otherwise.
     */
    public boolean applyImpulse(RigidBodyReadOnly target, SpatialImpulseReadOnly impulse)
@@ -400,7 +529,6 @@ public class MultiBodyResponseCalculator
       }
       else
       {
-         reset();
          return false;
       }
    }
