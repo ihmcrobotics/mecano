@@ -46,6 +46,10 @@ import us.ihmc.mecano.tools.MultiBodySystemTools;
  * SpatialAccelerationReadOnly resultingAccelerationChangeOnOtherBody = calculator.getAccelerationChangeProvider().getAccelerationOfBody(anotherRigidBody);
  * </pre>
  * </p>
+ * <p>
+ * Mirtich, Brian Vincent. <i>Impulse-based dynamic simulation of rigid body systems</i>. University
+ * of California, Berkeley, 1996.
+ * </p>
  * 
  * @author Sylvain Bertrand
  */
