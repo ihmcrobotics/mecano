@@ -1054,7 +1054,7 @@ public class MecanoFactories
     * where the scale is obtained from the given {@code scaleSupplier}.
     *
     * @param scaleSupplier   the supplier to get the scale.
-    * @param referenceWrench the reference spatial impulse to scale. Not modified.
+    * @param referenceSpatialImpulse the reference spatial impulse to scale. Not modified.
     * @return the new spatial impulse linked to the {@code referenceSpatialImpulse}.
     */
    public static SpatialImpulseReadOnly newSpatialImpulseReadOnly(DoubleSupplier scaleSupplier, SpatialImpulseReadOnly referenceSpatialImpulse)

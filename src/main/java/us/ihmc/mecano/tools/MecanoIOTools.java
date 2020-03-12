@@ -217,11 +217,36 @@ public class MecanoIOTools
             + "] - " + expressedInFrame;
    }
 
+   /**
+    * Gets a representative {@code String} of {@code spatialImpulse} as follows:
+    *
+    * <pre>
+    * Spatial impulse exerted on bodyFrame: [angular = ( 0.174,  0.732, -0.222 ), linear = ( 0.174,  0.732, -0.222 )] - expressedInFrame
+    * </pre>
+    * </p>
+    *
+    * @param spatialImpulse the object to get the {@code String} of. Not modified.
+    * @return the representative {@code String}.
+    */
    public static String getSpatialImpulseString(SpatialImpulseReadOnly spatialImpulse)
    {
       return getSpatialImpulseString(DEFAULT_FORMAT, spatialImpulse);
    }
 
+   /**
+    * Gets a representative {@code String} of {@code spatialImpulse} given a specific format to use.
+    * <p>
+    * Using the default format {@link #DEFAULT_FORMAT}, this provides a {@code String} as follows:
+    *
+    * <pre>
+    * Spatial impulse exerted on bodyFrame: [angular = ( 0.174,  0.732, -0.222 ), linear = ( 0.174,  0.732, -0.222 )] - expressedInFrame
+    * </pre>
+    * </p>
+    *
+    * @param format         the format to use for each number.
+    * @param spatialImpulse the object to get the {@code String} of. Not modified.
+    * @return the representative {@code String}.
+    */
    public static String getSpatialImpulseString(String format, SpatialImpulseReadOnly spatialImpulse)
    {
       if (spatialImpulse == null)
@@ -234,6 +259,25 @@ public class MecanoIOTools
                                         spatialImpulse.getLinearPart());
    }
 
+   /**
+    * Gets a representative {@code String} of {@code spatialImpulse} given a specific format to use.
+    * <p>
+    * Using the default format {@link #DEFAULT_FORMAT}, this provides a {@code String} as follows:
+    *
+    * <pre>
+    * Spatial impulse exerted on bodyFrame: [angular = ( 0.174,  0.732, -0.222 ), linear = ( 0.174,  0.732, -0.222 )] - expressedInFrame
+    * </pre>
+    * </p>
+    *
+    * @param format           the format to use for each number.
+    * @param bodyFrame        the frame of the body on which the wrench is exerted.
+    * @param expressedInFrame the reference frame in which the wrench is expressed.
+    * @param angularPart      the angular part of the impulse to get the {@code String} of. Not
+    *                         modified.
+    * @param linearPart       the linear part of the impulse to get the {@code String} of. Not
+    *                         modified.
+    * @return the representative {@code String}.
+    */
    public static String getSpatialImpulseString(String format, ReferenceFrame bodyFrame, ReferenceFrame expressedInFrame, Vector3DReadOnly angularPart,
                                                 Vector3DReadOnly linearPart)
    {
