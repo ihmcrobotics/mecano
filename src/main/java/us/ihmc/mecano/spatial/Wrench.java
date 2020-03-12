@@ -264,7 +264,7 @@ public class Wrench implements WrenchBasics, GeometryObject<Wrench>
 
    /**
     * Tests if the given {@code object}'s class is the same as this, in which case the method returns
-    * {@link #equals(WrenchReadOnly)}, it returns {@code false} otherwise.
+    * {@code this.equals((WrenchReadOnly) object)}, it returns {@code false} otherwise.
     *
     * @param object the object to compare against this. Not modified.
     * @return {@code true} if {@code object} and this are exactly equal, {@code false} otherwise.
@@ -272,7 +272,9 @@ public class Wrench implements WrenchBasics, GeometryObject<Wrench>
    @Override
    public boolean equals(Object object)
    {
-      if (object instanceof WrenchReadOnly)
+      if (object == this)
+         return true;
+      else if (object instanceof WrenchReadOnly)
          return WrenchBasics.super.equals((WrenchReadOnly) object);
       else
          return false;

@@ -12,7 +12,6 @@ import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.interfaces.Vector3DReadOnly;
 import us.ihmc.mecano.spatial.interfaces.SpatialForceBasics;
 import us.ihmc.mecano.spatial.interfaces.SpatialForceReadOnly;
-import us.ihmc.mecano.spatial.interfaces.SpatialVectorReadOnly;
 import us.ihmc.mecano.tools.MecanoIOTools;
 
 /**
@@ -322,7 +321,7 @@ public class SpatialForce implements SpatialForceBasics, GeometryObject<SpatialF
 
    /**
     * Tests if the given {@code object}'s class is the same as this, in which case the method returns
-    * {@link #equals(SpatialVectorReadOnly)}, it returns {@code false} otherwise.
+    * {@code this.equals((SpatialForceReadOnly) object)}, it returns {@code false} otherwise.
     *
     * @param object the object to compare against this. Not modified.
     * @return {@code true} if {@code object} and this are exactly equal, {@code false} otherwise.
@@ -330,8 +329,10 @@ public class SpatialForce implements SpatialForceBasics, GeometryObject<SpatialF
    @Override
    public boolean equals(Object object)
    {
-      if (object instanceof SpatialForceReadOnly)
-         return SpatialForceBasics.super.equals((SpatialVectorReadOnly) object);
+      if (object == this)
+         return true;
+      else if (object instanceof SpatialForceReadOnly)
+         return SpatialForceBasics.super.equals((SpatialForceReadOnly) object);
       else
          return false;
    }
