@@ -223,7 +223,7 @@ public class Wrench implements WrenchBasics, GeometryObject<Wrench>
    }
 
    /**
-    * Tests on a per component basis if this vector is equal to the given {@code other} to an
+    * Tests on a per component basis if this wrench is equal to the given {@code other} to an
     * {@code epsilon} and both vectors have the same frames.
     *
     * @param other   the other wrench to compare against this. Not modified.
@@ -279,10 +279,10 @@ public class Wrench implements WrenchBasics, GeometryObject<Wrench>
    }
 
    /**
-    * Provides a {@code String} representation of this spatial force vector as follows:<br>
+    * Provides a {@code String} representation of this wrench as follows:<br>
     * Wrench exerted on bodyFrame: [angular = (x, y, z), linear = (x, y, z)] - expressedInFrame
     *
-    * @return the {@code String} representing this spatial force vector.
+    * @return the {@code String} representing this wrench.
     */
    @Override
    public String toString()

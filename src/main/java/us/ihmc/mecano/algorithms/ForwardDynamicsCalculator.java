@@ -85,7 +85,7 @@ public class ForwardDynamicsCalculator
    }
 
    /**
-    * Creates a calculator for computing the joint accelerations for system defined by the given
+    * Creates a calculator for computing the joint accelerations for a system defined by the given
     * {@code input}.
     * <p>
     * Do not forgot to set the gravitational acceleration so this calculator can properly account for
@@ -100,7 +100,7 @@ public class ForwardDynamicsCalculator
    }
 
    /**
-    * Creates a calculator for computing the joint accelerations for system defined by the given
+    * Creates a calculator for computing the joint accelerations for a system defined by the given
     * {@code input}.
     * <p>
     * Do not forgot to set the gravitational acceleration so this calculator can properly account for

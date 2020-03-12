@@ -8,33 +8,34 @@ import us.ihmc.euclid.referenceFrame.interfaces.FramePoint3DReadOnly;
 import us.ihmc.euclid.referenceFrame.interfaces.FrameVector3DReadOnly;
 import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
 import us.ihmc.euclid.tuple3D.interfaces.Vector3DReadOnly;
+import us.ihmc.mecano.spatial.SpatialImpulse;
 import us.ihmc.mecano.spatial.Wrench;
 
 /**
- * Write and read interface for a wrench which reference frames can be changed.
+ * Write and read interface for a spatial impulse which reference frames can be changed. An impulse
+ * is the integral of a wrench, i.e. force and/or torque, over a time interval. While applying a
+ * wrench on a body causes it to accelerate, applying an impulse results in a change of velocity of
+ * the body.
  * <p>
- * A wrench is a vector composed of 6 components with an angular part and a linear part. The angular
- * part represents a 3D torque and the linear part a 3D force.
+ * A spatial impulse is a vector composed of 6 components with an angular part and a linear part.
  * </p>
  * <p>
- * The concept of a wrench is to describe an external spatial force, i.e. 3D torque and 3D force,
- * that is applied to a body. In this framework, the body on which the force is applied is referred
- * to using a reference frame commonly named {@code bodyFrame}. This reference frame is always
- * assumed to be rigidly attached to the body. As a result, a wrench is nothing more than a spatial
- * force to which a {@code bodyFrame} is associated.
+ * As a {@link Wrench}, a spatial impulse is applied to a body. In this framework, the body on which
+ * the impulse is applied is referred to using a reference frame commonly named {@code bodyFrame}.
+ * This reference frame is always assumed to be rigidly attached to the body.
  * </p>
  * <p>
- * When using a {@code WrenchBasics}, it is important to note that the reference frame in which it
- * is expressed does not only refer to the coordinate system in which the angular and linear 3D
- * vectors are expressed. The origin of the reference frame is also used as the point where the
- * spatial force is measured. Let's consider two reference frames A and B which axes are parallel
- * but have different origins, changing the frame of a spatial force vector from A to B will not
- * affect the linear part, i.e. the 3D force, but will still affect the value of the angular part,
- * i.e. the 3D moment. See {@link Wrench#changeFrame(ReferenceFrame)} for more information.
+ * When using a {@code SpatialImpulseBasics}, it is important to note that the reference frame in
+ * which it is expressed does not only refer to the coordinate system in which the angular and
+ * linear 3D vectors are expressed. The origin of the reference frame is also used as the point
+ * where the impulse is measured. Let's consider two reference frames A and B which axes are
+ * parallel but have different origins, changing the frame of a spatial impulse from A to B will not
+ * affect the linear part but will affect the value of the angular part. See
+ * {@link SpatialImpulse#changeFrame(ReferenceFrame)} for more information.
  * </p>
  * <p>
- * The convention when using a wrench in matrix operations is that the angular part occupies the 3
- * first rows and the linear part the 3 last as follows:<br>
+ * The convention when using a spatial impulse in matrix operations is that the angular part
+ * occupies the 3 first rows and the linear part the 3 last as follows:<br>
  *
  * <pre>
  *     / angularX \
@@ -46,17 +47,16 @@ import us.ihmc.mecano.spatial.Wrench;
  * </pre>
  * </p>
  *
- * @author Twan Koolen
  * @author Sylvain Bertrand
  */
-public interface WrenchBasics extends FixedFrameWrenchBasics, SpatialForceBasics
+public interface SpatialImpulseBasics extends FixedFrameSpatialImpulseBasics, SpatialForceBasics
 {
    /**
-    * Sets the frame attached to the body that the wrench is applied to.
+    * Sets the frame attached to the body that the spatial impulse is applied to.
     * <p>
     * This method does not modify anything but the body frame. If the new body frame is rigidly
-    * attached to the same body, then and only then this wrench remains valid. Otherwise, the values of
-    * this wrench should immediately be updated.
+    * attached to the same body, then and only then this spatial impulse remains valid. Otherwise, the
+    * values of this spatial impulse should immediately be updated.
     * </p>
     *
     * @param bodyFrame the new body frame.
@@ -64,10 +64,10 @@ public interface WrenchBasics extends FixedFrameWrenchBasics, SpatialForceBasics
    void setBodyFrame(ReferenceFrame bodyFrame);
 
    /**
-    * Sets all the components of this wrench to zero and updates its reference frames.
+    * Sets all the components of this spatial impulse to zero and updates its reference frames.
     *
     * @param bodyFrame        the new body frame.
-    * @param expressedInFrame the new reference frame in which this wrench is expressed.
+    * @param expressedInFrame the new reference frame in which this spatial impulse is expressed.
     */
    default void setToZero(ReferenceFrame bodyFrame, ReferenceFrame expressedInFrame)
    {
@@ -76,7 +76,8 @@ public interface WrenchBasics extends FixedFrameWrenchBasics, SpatialForceBasics
    }
 
    /**
-    * Sets all the components of this wrench to {@link Double#NaN} and sets its reference frames.
+    * Sets all the components of this spatial impulse to {@link Double#NaN} and sets its reference
+    * frames.
     *
     * @param bodyFrame        the new body frame.
     * @param expressedInFrame the new reference frame.
@@ -88,17 +89,17 @@ public interface WrenchBasics extends FixedFrameWrenchBasics, SpatialForceBasics
    }
 
    /**
-    * Sets this wrench to {@code other} including the reference frames.
+    * Sets this spatial impulse to {@code other} including the reference frames.
     *
-    * @param other the other wrench used to update {@code this}. Not modified.
+    * @param other the other spatial impulse used to update {@code this}. Not modified.
     */
-   default void setIncludingFrame(WrenchReadOnly other)
+   default void setIncludingFrame(SpatialImpulseReadOnly other)
    {
       setIncludingFrame(other.getBodyFrame(), other);
    }
 
    /**
-    * Sets this wrench to {@code spatialVector} and updates all its reference frames.
+    * Sets this spatial impulse to {@code spatialVector} and updates all its reference frames.
     *
     * @param bodyFrame     the body frame associated with the given spatial force.
     * @param spatialVector the spatial vector to copy values from. Not modified.
@@ -110,7 +111,8 @@ public interface WrenchBasics extends FixedFrameWrenchBasics, SpatialForceBasics
    }
 
    /**
-    * Sets this wrench given an angular part and linear part and updates all its reference frames.
+    * Sets this spatial impulse given an angular part and linear part and updates all its reference
+    * frames.
     *
     * @param bodyFrame   the body frame associated with the given spatial force.
     * @param angularPart the vector holding the new values for the angular part. Not modified.
@@ -125,7 +127,7 @@ public interface WrenchBasics extends FixedFrameWrenchBasics, SpatialForceBasics
    }
 
    /**
-    * Sets this wrench given an angular part and linear part and updates all its reference
+    * Sets this spatial impulse given an angular part and linear part and updates all its reference
     * frames.
     *
     * @param bodyFrame        the body frame associated with the given spatial force.
@@ -140,8 +142,8 @@ public interface WrenchBasics extends FixedFrameWrenchBasics, SpatialForceBasics
    }
 
    /**
-    * Sets this wrench's components from the given array {@code array} and updates all its reference
-    * frames.
+    * Sets this spatial impulse's components from the given array {@code array} and updates all its
+    * reference frames.
     * <p>
     * The components are read in the following order: {@code angularPartX}, {@code angularPartY},
     * {@code angularPartZ}, {@code linearPartX}, {@code linearPartY}, {@code linearPartZ}.
@@ -159,8 +161,8 @@ public interface WrenchBasics extends FixedFrameWrenchBasics, SpatialForceBasics
    }
 
    /**
-    * Sets this wrench's components from the given array {@code array} and updates all its reference
-    * frames.
+    * Sets this spatial impulse's components from the given array {@code array} and updates all its
+    * reference frames.
     * <p>
     * The components are read in the following order: {@code angularPartX}, {@code angularPartY},
     * {@code angularPartZ}, {@code linearPartX}, {@code linearPartY}, {@code linearPartZ}.
@@ -179,8 +181,8 @@ public interface WrenchBasics extends FixedFrameWrenchBasics, SpatialForceBasics
    }
 
    /**
-    * Sets this wrench's components from the given array {@code array} and updates all its reference
-    * frames.
+    * Sets this spatial impulse's components from the given array {@code array} and updates all its
+    * reference frames.
     * <p>
     * The components are read in the following order: {@code angularPartX}, {@code angularPartY},
     * {@code angularPartZ}, {@code linearPartX}, {@code linearPartY}, {@code linearPartZ}.
@@ -198,8 +200,8 @@ public interface WrenchBasics extends FixedFrameWrenchBasics, SpatialForceBasics
    }
 
    /**
-    * Sets this wrench's components from the given array {@code array} and updates all its reference
-    * frames.
+    * Sets this spatial impulse's components from the given array {@code array} and updates all its
+    * reference frames.
     * <p>
     * The components are read in the following order: {@code angularPartX}, {@code angularPartY},
     * {@code angularPartZ}, {@code linearPartX}, {@code linearPartY}, {@code linearPartZ}.
@@ -218,8 +220,8 @@ public interface WrenchBasics extends FixedFrameWrenchBasics, SpatialForceBasics
    }
 
    /**
-    * Sets this wrench's components from the given column vector starting to read from {@code startRow}
-    * and updates all its reference frames.
+    * Sets this spatial impulse's components from the given column vector starting to read from
+    * {@code startRow} and updates all its reference frames.
     * <p>
     * The components are read in the following order: {@code angularPartX}, {@code angularPartY},
     * {@code angularPartZ}, {@code linearPartX}, {@code linearPartY}, {@code linearPartZ}.
@@ -237,8 +239,8 @@ public interface WrenchBasics extends FixedFrameWrenchBasics, SpatialForceBasics
    }
 
    /**
-    * Sets this wrench's components from the given column vector starting to read from {@code startRow}
-    * at the column index {@code column} and updates all its reference frames.
+    * Sets this spatial impulse's components from the given column vector starting to read from
+    * {@code startRow} at the column index {@code column} and updates all its reference frames.
     * <p>
     * The components are read in the following order: {@code angularPartX}, {@code angularPartY},
     * {@code angularPartZ}, {@code linearPartX}, {@code linearPartY}, {@code linearPartZ}.
@@ -257,8 +259,8 @@ public interface WrenchBasics extends FixedFrameWrenchBasics, SpatialForceBasics
    }
 
    /**
-    * Sets this wrench's components from the given column vector starting to read from its first row
-    * index and updates all its reference frames.
+    * Sets this spatial impulse's components from the given column vector starting to read from its
+    * first row index and updates all its reference frames.
     * <p>
     * The components are read in the following order: {@code angularPartX}, {@code angularPartY},
     * {@code angularPartZ}, {@code linearPartX}, {@code linearPartY}, {@code linearPartZ}.
@@ -278,10 +280,10 @@ public interface WrenchBasics extends FixedFrameWrenchBasics, SpatialForceBasics
    }
 
    /**
-    * Sets this wrench given a 3D moment and 3D force that are exerted at {@code pointOfApplication}
-    * and updates this vector reference frame.
+    * Sets this spatial impulse given a 3D moment and 3D force that are exerted at
+    * {@code pointOfApplication} and updates this vector reference frame.
     * <p>
-    * Effectively, this wrench is updated as follow:
+    * Effectively, this spatial impulse is updated as follow:
     *
     * <pre>
     * &tau;<sub>this</sub> = &tau;<sub>new</sub> + P &times; f<sub>new</sub>
@@ -309,10 +311,10 @@ public interface WrenchBasics extends FixedFrameWrenchBasics, SpatialForceBasics
    }
 
    /**
-    * Sets this wrench given a 3D moment and 3D force that are exerted at
+    * Sets this spatial impulse given a 3D moment and 3D force that are exerted at
     * {@code pointOfApplication} and updates this vector reference frame.
     * <p>
-    * Effectively, this wrench is updated as follow:
+    * Effectively, this spatial impulse is updated as follow:
     *
     * <pre>
     * &tau;<sub>this</sub> = &tau;<sub>new</sub> + P &times; f<sub>new</sub>
