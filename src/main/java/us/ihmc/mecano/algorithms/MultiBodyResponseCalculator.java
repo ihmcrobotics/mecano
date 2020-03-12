@@ -39,12 +39,20 @@ import us.ihmc.mecano.tools.MultiBodySystemTools;
  * <pre>
  * MultiBodyResponseCalculator calculator = new MultiBodyResponseCalculator(multiBodySystem);
  * calculator.getForwardDynamicsCalculator().compute();
- * // To compute the linear part of apparent inertia 
- * calculator.computeApparentInertia(targetRigidBody, pointInTarget, externalWrenchFrame);
+ * // To compute the linear part of the inverse of the apparent inertia for targetRigidBody: 
+ * calculator.computeApparentLinearInertiaInverse(targetRigidBody, pointInTarget, externalWrenchFrame);
+ * 
+ * // The following is for propagating a disturbance to the multi-body system and evaluate the resulting change in motion:
+ * // First apply the disturbance:
  * calculator.applyWrench(targetRigidBody, externalWrench);
  * // To obtain the resulting change in acceleration caused by the externalWrench on another rigid-body:
  * SpatialAccelerationReadOnly resultingAccelerationChangeOnOtherBody = calculator.getAccelerationChangeProvider().getAccelerationOfBody(anotherRigidBody);
+ * // To obtain the change in joint accelerationL
+ * DenseMatrix64F jointAccelerationChange = calculator.propagateWrench();
  * </pre>
+ * 
+ * The equivalent calculations can be done using an impulse as disturbance the change in motion then
+ * being in the velocity space.
  * </p>
  * <p>
  * Mirtich, Brian Vincent. <i>Impulse-based dynamic simulation of rigid body systems</i>. University
