@@ -5,33 +5,34 @@ import us.ihmc.euclid.referenceFrame.exceptions.ReferenceFrameMismatchException;
 import us.ihmc.euclid.referenceFrame.interfaces.FrameVector3DReadOnly;
 import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
 import us.ihmc.euclid.tuple3D.interfaces.Vector3DReadOnly;
+import us.ihmc.mecano.spatial.SpatialImpulse;
 import us.ihmc.mecano.spatial.Wrench;
 
 /**
- * Write and read interface for a wrench which reference frames can not be changed.
+ * Write and read interface for a spatial impulse which reference frames can not be changed. An
+ * impulse is the integral of a wrench, i.e. force and/or torque, over a time interval. While
+ * applying a wrench on a body causes it to accelerate, applying an impulse results in a change of
+ * velocity of the body.
  * <p>
- * A wrench is a vector composed of 6 components with an angular part and a linear part. The angular
- * part represents a 3D torque and the linear part a 3D force.
+ * A spatial impulse is a vector composed of 6 components with an angular part and a linear part.
  * </p>
  * <p>
- * The concept of a wrench is to describe an external spatial force, i.e. 3D torque and 3D force,
- * that is applied to a body. In this framework, the body on which the force is applied is referred
- * to using a reference frame commonly named {@code bodyFrame}. This reference frame is always
- * assumed to be rigidly attached to the body. As a result, a wrench is nothing more than a spatial
- * force to which a {@code bodyFrame} is associated.
+ * As a {@link Wrench}, a spatial impulse is applied to a body. In this framework, the body on which
+ * the impulse is applied is referred to using a reference frame commonly named {@code bodyFrame}.
+ * This reference frame is always assumed to be rigidly attached to the body.
  * </p>
  * <p>
- * When using a {@code WrenchBasics}, it is important to note that the reference frame in which it
- * is expressed does not only refer to the coordinate system in which the angular and linear 3D
- * vectors are expressed. The origin of the reference frame is also used as the point where the
- * spatial force is measured. Let's consider two reference frames A and B which axes are parallel
- * but have different origins, changing the frame of a spatial force vector from A to B will not
- * affect the linear part, i.e. the 3D force, but will still affect the value of the angular part,
- * i.e. the 3D moment. See {@link Wrench#changeFrame(ReferenceFrame)} for more information.
+ * When using a {@code FixedFrameSpatialImpulseBasics}, it is important to note that the reference
+ * frame in which it is expressed does not only refer to the coordinate system in which the angular
+ * and linear 3D vectors are expressed. The origin of the reference frame is also used as the point
+ * where the impulse is measured. Let's consider two reference frames A and B which axes are
+ * parallel but have different origins, changing the frame of a spatial impulse from A to B will not
+ * affect the linear part but will affect the value of the angular part. See
+ * {@link SpatialImpulse#changeFrame(ReferenceFrame)} for more information.
  * </p>
  * <p>
- * The convention when using a wrench in matrix operations is that the angular part occupies the 3
- * first rows and the linear part the 3 last as follows:<br>
+ * The convention when using a spatial impulse in matrix operations is that the angular part
+ * occupies the 3 first rows and the linear part the 3 last as follows:<br>
  *
  * <pre>
  *     / angularX \
@@ -43,46 +44,45 @@ import us.ihmc.mecano.spatial.Wrench;
  * </pre>
  * </p>
  *
- * @author Twan Koolen
  * @author Sylvain Bertrand
  */
-public interface FixedFrameWrenchBasics extends WrenchReadOnly, FixedFrameSpatialForceBasics
+public interface FixedFrameSpatialImpulseBasics extends SpatialImpulseReadOnly, FixedFrameSpatialForceBasics
 {
    /**
-    * Sets this wrench to {@code other}.
+    * Sets this spatial impulse to {@code other}.
     *
-    * @param other the other wrench to copy. Not modified.
+    * @param other the other spatial impulse to copy. Not modified.
     * @throws ReferenceFrameMismatchException if any of the reference frames in {@code other} do not
     *                                         match {@code this}.
     */
-   default void set(WrenchReadOnly other)
+   default void set(SpatialImpulseReadOnly other)
    {
       set(other.getBodyFrame(), other.getReferenceFrame(), other.getAngularPart(), other.getLinearPart());
    }
 
    /**
-    * Sets this wrench to {@code other}.
+    * Sets this spatial impulse to {@code other}.
     * <p>
     * If {@code other} is expressed in the frame as {@code this}, then this method is equivalent to
-    * {@link #set(WrenchReadOnly)}.
+    * {@link #set(SpatialImpulseReadOnly)}.
     * </p>
     * <p>
     * If {@code other} is expressed in a different frame than {@code this}, then {@code this} is set to
     * {@code other} once transformed to be expressed in {@code this.getReferenceFrame()}.
     * </p>
     *
-    * @param other the other wrench to copy. Not modified.
+    * @param other the other spatial impulse to copy. Not modified.
     * @throws ReferenceFrameMismatchException if either the body frame or base frame in {@code other}
     *                                         does not match {@code this}.
     */
-   default void setMatchingFrame(WrenchReadOnly other)
+   default void setMatchingFrame(SpatialImpulseReadOnly other)
    {
       other.checkBodyFrameMatch(getBodyFrame());
       FixedFrameSpatialForceBasics.super.setMatchingFrame(other);
    }
 
    /**
-    * Sets this wrench to {@code spatialVector}.
+    * Sets this spatial impulse to {@code spatialVector}.
     *
     * @param bodyFrame     the body frame associated with the given spatial force.
     * @param spatialVector the spatial vector to copy values from. Not modified.
@@ -95,7 +95,7 @@ public interface FixedFrameWrenchBasics extends WrenchReadOnly, FixedFrameSpatia
    }
 
    /**
-    * Sets this wrench given an angular part and linear part.
+    * Sets this spatial impulse given an angular part and linear part.
     *
     * @param bodyFrame   the body frame associated with the given spatial force.
     * @param angularPart the vector holding the new values for the angular part. Not modified.
@@ -110,7 +110,7 @@ public interface FixedFrameWrenchBasics extends WrenchReadOnly, FixedFrameSpatia
    }
 
    /**
-    * Sets this wrench given an angular part and linear part.
+    * Sets this spatial impulse given an angular part and linear part.
     *
     * @param bodyFrame        the body frame associated with the given spatial force.
     * @param expressedInFrame the reference frame in which the spatial force is expressed.
@@ -126,10 +126,10 @@ public interface FixedFrameWrenchBasics extends WrenchReadOnly, FixedFrameSpatia
    }
 
    /**
-    * Sets this wrench given a 3D moment and 3D force that are exerted at
+    * Sets this spatial impulse given a 3D moment and 3D force that are exerted at
     * {@code pointOfApplication}.
     * <p>
-    * Effectively, this wrench is updated as follow:
+    * Effectively, this spatial impulse is updated as follow:
     *
     * <pre>
     * &tau;<sub>this</sub> = &tau;<sub>new</sub> + P &times; f<sub>new</sub>
@@ -160,16 +160,16 @@ public interface FixedFrameWrenchBasics extends WrenchReadOnly, FixedFrameSpatia
    }
 
    /**
-    * Adds the given wrench to {@code this} after performing the usual reference frame checks.
+    * Adds the given spatial impulse to {@code this} after performing the usual reference frame checks.
     * <p>
     * {@code this += other}
     * </p>
     *
-    * @param other the other wrench to add to this. Not modified.
+    * @param other the other spatial impulse to add to this. Not modified.
     * @throws ReferenceFrameMismatchException if the reference frame of {@code other} do not match this
     *                                         wrench's reference frames.
     */
-   default void add(WrenchReadOnly other)
+   default void add(SpatialImpulseReadOnly other)
    {
       add(other.getBodyFrame(), other);
    }
@@ -215,16 +215,17 @@ public interface FixedFrameWrenchBasics extends WrenchReadOnly, FixedFrameSpatia
    }
 
    /**
-    * Subtracts the given wrench to {@code this} after performing the usual reference frame checks.
+    * Subtracts the given spatial impulse to {@code this} after performing the usual reference frame
+    * checks.
     * <p>
     * {@code this -= other}
     * </p>
     *
-    * @param other the other wrench to subtract to this. Not modified.
+    * @param other the other spatial impulse to subtract to this. Not modified.
     * @throws ReferenceFrameMismatchException if the reference frame of {@code other} do not match this
     *                                         wrench's reference frames.
     */
-   default void sub(WrenchReadOnly other)
+   default void sub(SpatialImpulseReadOnly other)
    {
       sub(other.getBodyFrame(), other);
    }

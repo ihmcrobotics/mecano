@@ -371,7 +371,7 @@ public class SpatialInertia implements SpatialInertiaBasics, GeometryObject<Spat
 
    /**
     * Tests if the given {@code object}'s class is the same as this, in which case the method returns
-    * {@link #equals(SpatialInertiaReadOnly)}, it returns {@code false} otherwise.
+    * {@code this.equals((SpatialInertiaReadOnly) object)}, it returns {@code false} otherwise.
     *
     * @param object the object to compare against this. Not modified.
     * @return {@code true} if {@code object} and this are exactly equal, {@code false} otherwise.
@@ -379,7 +379,9 @@ public class SpatialInertia implements SpatialInertiaBasics, GeometryObject<Spat
    @Override
    public boolean equals(Object object)
    {
-      if (object instanceof SpatialInertiaReadOnly)
+      if (object == this)
+         return true;
+      else if (object instanceof SpatialInertiaReadOnly)
          return SpatialInertiaBasics.super.equals((SpatialInertiaReadOnly) object);
       else
          return false;

@@ -195,6 +195,24 @@ public class Momentum implements MomentumBasics, GeometryObject<Momentum>
    }
 
    /**
+    * Tests if the given {@code object}'s class is the same as this, in which case the method returns
+    * {@code this.equals((MomentumReadOnly) object)}, it returns {@code false} otherwise.
+    *
+    * @param object the object to compare against this. Not modified.
+    * @return {@code true} if {@code object} and this are exactly equal, {@code false} otherwise.
+    */
+   @Override
+   public boolean equals(Object object)
+   {
+      if (object == this)
+         return true;
+      else if (object instanceof MomentumReadOnly)
+         return equals((MomentumReadOnly) object);
+      else
+         return false;
+   }
+
+   /**
     * Provides a {@code String} representation of this momentum vector as follows:<br>
     * Momentum: [angular = (x, y, z), linear = (x, y, z)] - expressedInFrame
     *

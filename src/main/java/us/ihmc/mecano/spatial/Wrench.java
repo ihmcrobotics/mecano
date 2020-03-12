@@ -223,7 +223,7 @@ public class Wrench implements WrenchBasics, GeometryObject<Wrench>
    }
 
    /**
-    * Tests on a per component basis if this vector is equal to the given {@code other} to an
+    * Tests on a per component basis if this wrench is equal to the given {@code other} to an
     * {@code epsilon} and both vectors have the same frames.
     *
     * @param other   the other wrench to compare against this. Not modified.
@@ -264,7 +264,7 @@ public class Wrench implements WrenchBasics, GeometryObject<Wrench>
 
    /**
     * Tests if the given {@code object}'s class is the same as this, in which case the method returns
-    * {@link #equals(WrenchReadOnly)}, it returns {@code false} otherwise.
+    * {@code this.equals((WrenchReadOnly) object)}, it returns {@code false} otherwise.
     *
     * @param object the object to compare against this. Not modified.
     * @return {@code true} if {@code object} and this are exactly equal, {@code false} otherwise.
@@ -272,17 +272,19 @@ public class Wrench implements WrenchBasics, GeometryObject<Wrench>
    @Override
    public boolean equals(Object object)
    {
-      if (object instanceof WrenchReadOnly)
+      if (object == this)
+         return true;
+      else if (object instanceof WrenchReadOnly)
          return WrenchBasics.super.equals((WrenchReadOnly) object);
       else
          return false;
    }
 
    /**
-    * Provides a {@code String} representation of this spatial force vector as follows:<br>
+    * Provides a {@code String} representation of this wrench as follows:<br>
     * Wrench exerted on bodyFrame: [angular = (x, y, z), linear = (x, y, z)] - expressedInFrame
     *
-    * @return the {@code String} representing this spatial force vector.
+    * @return the {@code String} representing this wrench.
     */
    @Override
    public String toString()

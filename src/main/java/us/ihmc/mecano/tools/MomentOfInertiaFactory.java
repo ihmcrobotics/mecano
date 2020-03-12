@@ -137,6 +137,7 @@ public class MomentOfInertiaFactory
     * @param radiusOfGyrationX Radius of gyration in the x direction.
     * @param radiusOfGyrationY Radius of gyration in the y direction.
     * @param radiusOfGyrationZ Radius of gyration in the z direction.
+    * @return the moment of inertia matrix.
     */
    public static Matrix3D fromMassAndRadiiOfGyration(double mass, double radiusOfGyrationX, double radiusOfGyrationY, double radiusOfGyrationZ)
    {

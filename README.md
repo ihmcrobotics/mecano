@@ -4,9 +4,6 @@
 
 ## Minutiae
 
-### Tested Platforms
-We test all of our software on OS X 10.11 El Capitan, Windows 7/8/10, and Ubuntu 16.04 LTS Desktop and Server.
-
 ### Branches
 This repository uses the git-flow branching model. You can find more about git-flow [here](https://www.atlassian.com/git/tutorials/comparing-workflows/feature-branch-workflow).
 
@@ -51,7 +48,7 @@ This library includes the following:
 	- Geometric Jacobian: GeometricJacobianCalculator.
 	- Inverse and forward dynamics: InverseDynamicsCalculator, ForwardDynamicsCalculator.
 	- The mass matrix: CompositeRigidBodyMassMatrixCalculator.
-	- (Under development) Impulse propagation: MultiBodyImpulseCalculator.
+	- Response to external disturbance (wrench or impulse): MultiBodyResponseCalculator.
 
 ## Using Mecano from .jar releases with Maven/Gradle
 The releases .jars for Mecano are hosted on Bintray.

@@ -123,7 +123,7 @@ public class SpatialVector implements SpatialVectorBasics
 
    /**
     * Tests if the given {@code object}'s class is the same as this, in which case the method returns
-    * {@link #equals(SpatialVectorReadOnly)}, it returns {@code false} otherwise.
+    * {@code this.equals((SpatialVectorReadOnly) object)}, it returns {@code false} otherwise.
     *
     * @param object the object to compare against this. Not modified.
     * @return {@code true} if {@code object} and this are exactly equal, {@code false} otherwise.
@@ -131,7 +131,9 @@ public class SpatialVector implements SpatialVectorBasics
    @Override
    public boolean equals(Object object)
    {
-      if (object instanceof SpatialVectorReadOnly)
+      if (object == this)
+         return true;
+      else if (object instanceof SpatialVectorReadOnly)
          return SpatialVectorBasics.super.equals((SpatialVectorReadOnly) object);
       else
          return super.equals(object);
