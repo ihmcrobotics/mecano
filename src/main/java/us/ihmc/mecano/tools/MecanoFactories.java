@@ -5,14 +5,12 @@ import java.util.function.DoubleSupplier;
 import us.ihmc.euclid.Axis;
 import us.ihmc.euclid.axisAngle.AxisAngle;
 import us.ihmc.euclid.geometry.interfaces.Pose3DBasics;
+import us.ihmc.euclid.geometry.interfaces.Pose3DReadOnly;
+import us.ihmc.euclid.geometry.tools.EuclidGeometryIOTools;
 import us.ihmc.euclid.matrix.interfaces.Matrix3DBasics;
 import us.ihmc.euclid.matrix.interfaces.Matrix3DReadOnly;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
-import us.ihmc.euclid.referenceFrame.interfaces.FixedFrameVector3DBasics;
-import us.ihmc.euclid.referenceFrame.interfaces.FramePoint3DReadOnly;
-import us.ihmc.euclid.referenceFrame.interfaces.FrameTuple3DReadOnly;
-import us.ihmc.euclid.referenceFrame.interfaces.FrameVector3DReadOnly;
-import us.ihmc.euclid.referenceFrame.interfaces.ReferenceFrameHolder;
+import us.ihmc.euclid.referenceFrame.interfaces.*;
 import us.ihmc.euclid.tools.EuclidCoreIOTools;
 import us.ihmc.euclid.tools.Matrix3DTools;
 import us.ihmc.euclid.transform.RigidBodyTransform;
@@ -24,6 +22,7 @@ import us.ihmc.euclid.tuple3D.interfaces.Point3DBasics;
 import us.ihmc.euclid.tuple3D.interfaces.Tuple3DBasics;
 import us.ihmc.euclid.tuple3D.interfaces.Tuple3DReadOnly;
 import us.ihmc.euclid.tuple4D.interfaces.QuaternionBasics;
+import us.ihmc.euclid.tuple4D.interfaces.Tuple4DReadOnly;
 import us.ihmc.euclid.tuple4D.interfaces.Vector4DBasics;
 import us.ihmc.euclid.tuple4D.interfaces.Vector4DReadOnly;
 import us.ihmc.mecano.frames.MovingReferenceFrame;
@@ -32,13 +31,7 @@ import us.ihmc.mecano.multiBodySystem.interfaces.RevoluteJointReadOnly;
 import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyReadOnly;
 import us.ihmc.mecano.spatial.SpatialAcceleration;
 import us.ihmc.mecano.spatial.Twist;
-import us.ihmc.mecano.spatial.interfaces.FixedFrameSpatialAccelerationBasics;
-import us.ihmc.mecano.spatial.interfaces.FixedFrameTwistBasics;
-import us.ihmc.mecano.spatial.interfaces.FixedFrameWrenchBasics;
-import us.ihmc.mecano.spatial.interfaces.SpatialAccelerationReadOnly;
-import us.ihmc.mecano.spatial.interfaces.SpatialImpulseReadOnly;
-import us.ihmc.mecano.spatial.interfaces.TwistReadOnly;
-import us.ihmc.mecano.spatial.interfaces.WrenchReadOnly;
+import us.ihmc.mecano.spatial.interfaces.*;
 
 /**
  * This class provides a varieties of factories to create Euclid types and vectors.
@@ -225,6 +218,17 @@ public class MecanoFactories
          }
 
          @Override
+         public boolean equals(Object object)
+         {
+            if (object == this)
+               return true;
+            else if (object instanceof Tuple4DReadOnly)
+               return equals((Tuple4DReadOnly) object);
+            else
+               return false;
+         }
+
+         @Override
          public String toString()
          {
             return EuclidCoreIOTools.getTuple4DString(this);
@@ -276,6 +280,17 @@ public class MecanoFactories
          public void setZ(double z)
          {
             this.z = z;
+         }
+
+         @Override
+         public boolean equals(Object object)
+         {
+            if (object == this)
+               return true;
+            else if (object instanceof Tuple3DReadOnly)
+               return equals((Tuple3DReadOnly) object);
+            else
+               return false;
          }
 
          @Override
@@ -340,6 +355,17 @@ public class MecanoFactories
          }
 
          @Override
+         public boolean equals(Object object)
+         {
+            if (object == this)
+               return true;
+            else if (object instanceof FrameTuple3DReadOnly)
+               return equals((FrameTuple3DReadOnly) object);
+            else
+               return false;
+         }
+
+         @Override
          public String toString()
          {
             return EuclidCoreIOTools.getTuple3DString(this);
@@ -397,6 +423,17 @@ public class MecanoFactories
          @Override
          public void setZ(double z)
          {
+         }
+
+         @Override
+         public boolean equals(Object object)
+         {
+            if (object == this)
+               return true;
+            else if (object instanceof FrameTuple3DReadOnly)
+               return equals((FrameTuple3DReadOnly) object);
+            else
+               return false;
          }
 
          @Override
@@ -465,8 +502,10 @@ public class MecanoFactories
          @Override
          public boolean equals(Object object)
          {
-            if (object instanceof FixedFrameVector3DBasics)
-               return super.equals(object);
+            if (object == this)
+               return true;
+            else if (object instanceof FrameTuple3DReadOnly)
+               return equals((FrameTuple3DReadOnly) object);
             else
                return false;
          }
@@ -521,6 +560,17 @@ public class MecanoFactories
          }
 
          @Override
+         public boolean equals(Object object)
+         {
+            if (object == this)
+               return true;
+            else if (object instanceof FrameTuple3DReadOnly)
+               return equals((FrameTuple3DReadOnly) object);
+            else
+               return false;
+         }
+
+         @Override
          public String toString()
          {
             return EuclidCoreIOTools.getTuple3DString(this) + "-" + getReferenceFrame();
@@ -570,6 +620,17 @@ public class MecanoFactories
          }
 
          @Override
+         public boolean equals(Object object)
+         {
+            if (object == this)
+               return true;
+            else if (object instanceof FrameTuple3DReadOnly)
+               return equals((FrameTuple3DReadOnly) object);
+            else
+               return false;
+         }
+
+         @Override
          public String toString()
          {
             return EuclidCoreIOTools.getTuple3DString(this) + "-" + getReferenceFrame();
@@ -599,6 +660,23 @@ public class MecanoFactories
          public QuaternionBasics getOrientation()
          {
             return jointRotation;
+         }
+
+         @Override
+         public boolean equals(Object object)
+         {
+            if (object == this)
+               return true;
+            else if (object instanceof Pose3DReadOnly)
+               return equals((Pose3DReadOnly) object);
+            else
+               return false;
+         }
+
+         @Override
+         public String toString()
+         {
+            return EuclidGeometryIOTools.getPose3DString(this);
          }
       };
    }
@@ -651,6 +729,17 @@ public class MecanoFactories
          public FrameVector3DReadOnly getLinearPart()
          {
             return linearPart;
+         }
+
+         @Override
+         public boolean equals(Object object)
+         {
+            if (object == this)
+               return true;
+            else if (object instanceof TwistReadOnly)
+               return equals((TwistReadOnly) object);
+            else
+               return false;
          }
 
          @Override
@@ -709,6 +798,17 @@ public class MecanoFactories
          }
 
          @Override
+         public boolean equals(Object object)
+         {
+            if (object == this)
+               return true;
+            else if (object instanceof TwistReadOnly)
+               return equals((TwistReadOnly) object);
+            else
+               return false;
+         }
+
+         @Override
          public String toString()
          {
             return MecanoIOTools.getTwistString(this);
@@ -762,6 +862,17 @@ public class MecanoFactories
          public FixedFrameVector3DBasics getLinearPart()
          {
             return linearPart;
+         }
+
+         @Override
+         public boolean equals(Object object)
+         {
+            if (object == this)
+               return true;
+            else if (object instanceof TwistReadOnly)
+               return equals((TwistReadOnly) object);
+            else
+               return false;
          }
 
          @Override
@@ -824,6 +935,17 @@ public class MecanoFactories
          }
 
          @Override
+         public boolean equals(Object object)
+         {
+            if (object == this)
+               return true;
+            else if (object instanceof SpatialAccelerationReadOnly)
+               return equals((SpatialAccelerationReadOnly) object);
+            else
+               return false;
+         }
+
+         @Override
          public String toString()
          {
             return MecanoIOTools.getSpatialAccelerationString(this);
@@ -877,6 +999,17 @@ public class MecanoFactories
          public FrameVector3DReadOnly getLinearPart()
          {
             return linearPart;
+         }
+
+         @Override
+         public boolean equals(Object object)
+         {
+            if (object == this)
+               return true;
+            else if (object instanceof SpatialAccelerationReadOnly)
+               return equals((SpatialAccelerationReadOnly) object);
+            else
+               return false;
          }
 
          @Override
@@ -937,6 +1070,17 @@ public class MecanoFactories
          }
 
          @Override
+         public boolean equals(Object object)
+         {
+            if (object == this)
+               return true;
+            else if (object instanceof SpatialAccelerationReadOnly)
+               return equals((SpatialAccelerationReadOnly) object);
+            else
+               return false;
+         }
+
+         @Override
          public String toString()
          {
             return MecanoIOTools.getSpatialAccelerationString(this);
@@ -989,6 +1133,17 @@ public class MecanoFactories
          }
 
          @Override
+         public boolean equals(Object object)
+         {
+            if (object == this)
+               return true;
+            else if (object instanceof WrenchReadOnly)
+               return equals((WrenchReadOnly) object);
+            else
+               return false;
+         }
+
+         @Override
          public String toString()
          {
             return MecanoIOTools.getWrenchString(this);
@@ -1036,6 +1191,17 @@ public class MecanoFactories
          }
 
          @Override
+         public boolean equals(Object object)
+         {
+            if (object == this)
+               return true;
+            else if (object instanceof WrenchReadOnly)
+               return equals((WrenchReadOnly) object);
+            else
+               return false;
+         }
+
+         @Override
          public String toString()
          {
             return MecanoIOTools.getWrenchString(this);
@@ -1053,7 +1219,7 @@ public class MecanoFactories
     *
     * where the scale is obtained from the given {@code scaleSupplier}.
     *
-    * @param scaleSupplier   the supplier to get the scale.
+    * @param scaleSupplier           the supplier to get the scale.
     * @param referenceSpatialImpulse the reference spatial impulse to scale. Not modified.
     * @return the new spatial impulse linked to the {@code referenceSpatialImpulse}.
     */
@@ -1086,6 +1252,17 @@ public class MecanoFactories
          public FrameVector3DReadOnly getLinearPart()
          {
             return linearPart;
+         }
+
+         @Override
+         public boolean equals(Object object)
+         {
+            if (object == this)
+               return true;
+            else if (object instanceof SpatialImpulseReadOnly)
+               return equals((SpatialImpulseReadOnly) object);
+            else
+               return false;
          }
 
          @Override
@@ -1135,6 +1312,17 @@ public class MecanoFactories
          public FixedFrameVector3DBasics getLinearPart()
          {
             return linearPart;
+         }
+
+         @Override
+         public boolean equals(Object object)
+         {
+            if (object == this)
+               return true;
+            else if (object instanceof WrenchReadOnly)
+               return equals((WrenchReadOnly) object);
+            else
+               return false;
          }
 
          @Override
@@ -1254,6 +1442,17 @@ public class MecanoFactories
          public void inverseTransform(Matrix3DReadOnly matrixOriginal, Matrix3DBasics matrixTransformed)
          {
             Matrix3DTools.inverseTransform(this, matrixOriginal, matrixTransformed);
+         }
+
+         @Override
+         public boolean equals(Object object)
+         {
+            if (object == this)
+               return true;
+            else if (object instanceof Matrix3DReadOnly)
+               return equals((Matrix3DReadOnly) object);
+            else
+               return false;
          }
 
          @Override
