@@ -18,6 +18,7 @@ import us.ihmc.mecano.algorithms.interfaces.RigidBodyTwistProvider;
 import us.ihmc.mecano.frames.MovingReferenceFrame;
 import us.ihmc.mecano.multiBodySystem.interfaces.JointReadOnly;
 import us.ihmc.mecano.multiBodySystem.interfaces.MultiBodySystemReadOnly;
+import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointReadOnly;
 import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyReadOnly;
 import us.ihmc.mecano.spatial.SpatialAcceleration;
 import us.ihmc.mecano.spatial.SpatialForce;
@@ -89,12 +90,18 @@ public class MultiBodyResponseCalculator
     */
    private final RigidBodyTwistProvider twistChangeProvider;
 
-   private enum Mode
+   private enum DisturbanceSource
+   {
+      RIGID_BODY, JOINT;
+   }
+
+   private enum ResponseType
    {
       ACCELERATION, TWIST
    };
 
-   private Mode currentMode = null;
+   private DisturbanceSource currentDisturbanceSource = null;
+   private ResponseType currentResponseType = null;
 
    /**
     * Creates a calculator for computing the response to external disturbances for a system defined by
@@ -142,13 +149,13 @@ public class MultiBodyResponseCalculator
 
       Function<RigidBodyReadOnly, SpatialAccelerationReadOnly> accelerationFunction = body ->
       {
-         if (currentMode == Mode.TWIST)
+         if (currentResponseType == ResponseType.TWIST)
             throw new IllegalStateException("This calculator is currently setup for calculating twists.");
 
          ResponseRecursionStep recursionStep = rigidBodyToRecursionStepMap.get(body);
          if (recursionStep == null)
             return null;
-         if (currentMode == null || !initialRecursionStep.isUpToDate)
+         if (currentResponseType == null || !initialRecursionStep.isUpToDate)
          { // This calculator has not been initialized with an wrench yet.
             bodyAcceleration.setToZero(body.getBodyFixedFrame(), input.getInertialFrame(), body.getBodyFixedFrame());
          }
@@ -171,7 +178,7 @@ public class MultiBodyResponseCalculator
 
       Function<RigidBodyReadOnly, TwistReadOnly> twistFunction = body ->
       {
-         if (currentMode == Mode.ACCELERATION)
+         if (currentResponseType == ResponseType.ACCELERATION)
             throw new IllegalStateException("This calculator is currently setup for calculating accelerations.");
 
          ResponseRecursionStep recursionStep = rigidBodyToRecursionStepMap.get(body);
@@ -220,7 +227,7 @@ public class MultiBodyResponseCalculator
     */
    public void reset()
    {
-      currentMode = null;
+      currentResponseType = null;
       initialRecursionStep.reset();
    }
 
@@ -442,6 +449,17 @@ public class MultiBodyResponseCalculator
       return true;
    }
 
+   public double computeApparentInertiaInverse(OneDoFJointReadOnly target, ReferenceFrame inertiaFrame)
+   {
+      ResponseRecursionStep recursionStep = rigidBodyToRecursionStepMap.get(target.getSuccessor());
+
+      if (recursionStep == null)
+         return Double.NaN;
+
+      // TODO
+      return Double.NaN;
+   }
+
    /**
     * Applies a 6-D wrench to {@code target} and propagates the effect to the rest of the multi-body
     * system.
@@ -506,7 +524,7 @@ public class MultiBodyResponseCalculator
    {
       if (applyDisturbance(target, wrench))
       {
-         currentMode = Mode.ACCELERATION;
+         currentResponseType = ResponseType.ACCELERATION;
          return true;
       }
       else
@@ -536,7 +554,7 @@ public class MultiBodyResponseCalculator
    {
       if (applyDisturbance(target, impulse))
       {
-         currentMode = Mode.TWIST;
+         currentResponseType = ResponseType.TWIST;
          return true;
       }
       else
@@ -556,6 +574,62 @@ public class MultiBodyResponseCalculator
       ReferenceFrame bodyFrame = target.getBodyFixedFrame();
       recursionStep.testDisturbancePlus.setIncludingFrame(bodyFrame, disturbance);
       recursionStep.initializeDisturbance(null);
+      currentDisturbanceSource = DisturbanceSource.RIGID_BODY;
+      return true;
+   }
+
+   public DenseMatrix64F applyAndPropagateWrench(OneDoFJointReadOnly target, double effort)
+   {
+      if (!applyWrench(target, effort))
+         return null;
+
+      return propagateWrench();
+   }
+
+   public DenseMatrix64F applyAndPropagateImpulse(OneDoFJointReadOnly target, double impulse)
+   {
+      if (!applyImpulse(target, impulse))
+         return null;
+
+      return propagateImpulse();
+   }
+
+   public boolean applyWrench(OneDoFJointReadOnly target, double effort)
+   {
+      if (applyDisturbance(target, effort))
+      {
+         currentResponseType = ResponseType.ACCELERATION;
+         return true;
+      }
+      else
+      {
+         return false;
+      }
+   }
+
+   public boolean applyImpulse(OneDoFJointReadOnly target, double impulse)
+   {
+      if (applyDisturbance(target, impulse))
+      {
+         currentResponseType = ResponseType.TWIST;
+         return true;
+      }
+      else
+      {
+         return false;
+      }
+   }
+
+   private boolean applyDisturbance(OneDoFJointReadOnly target, double disturbance)
+   {
+      ResponseRecursionStep recursionStep = rigidBodyToRecursionStepMap.get(target.getSuccessor());
+
+      if (recursionStep == null)
+         return false;
+
+      reset();
+      // TODO
+      currentDisturbanceSource = DisturbanceSource.JOINT;
       return true;
    }
 
@@ -568,7 +642,7 @@ public class MultiBodyResponseCalculator
     */
    public DenseMatrix64F propagateWrench()
    {
-      if (currentMode != Mode.ACCELERATION)
+      if (currentResponseType != ResponseType.ACCELERATION)
          return null;
       return propagateDisturbance();
    }
@@ -582,7 +656,7 @@ public class MultiBodyResponseCalculator
     */
    public DenseMatrix64F propagateImpulse()
    {
-      if (currentMode != Mode.TWIST)
+      if (currentResponseType != ResponseType.TWIST)
          return null;
 
       return propagateDisturbance();
