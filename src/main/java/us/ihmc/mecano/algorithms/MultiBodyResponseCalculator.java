@@ -100,8 +100,8 @@ public class MultiBodyResponseCalculator
       ACCELERATION, TWIST
    };
 
-   private DisturbanceSource currentDisturbanceSource = null;
    private ResponseType currentResponseType = null;
+   private final DenseMatrix64F singleElementMatrix = new DenseMatrix64F(1, 1);
 
    /**
     * Creates a calculator for computing the response to external disturbances for a system defined by
@@ -358,7 +358,7 @@ public class MultiBodyResponseCalculator
          if (selectedAxes == null || selectedAxes[axis])
          {
             recursionStep.testDisturbancePlus.setIncludingFrame(bodyFrame, inertiaFrame, Axis.values[axis], EuclidCoreTools.zeroVector3D);
-            recursionStep.initializeDisturbance(null);
+            recursionStep.initializeDisturbance(null, DisturbanceSource.RIGID_BODY);
             recursionStep.updateRigidBodyMotionChange();
             recursionStep.rigidBodyMotionChange.changeFrame(inertiaFrame);
             recursionStep.rigidBodyMotionChange.get(0, axis, apparentSpatialInertiaToPack);
@@ -379,7 +379,7 @@ public class MultiBodyResponseCalculator
          if (selectedAxes == null || selectedAxes[axis + 3])
          {
             recursionStep.testDisturbancePlus.setIncludingFrame(bodyFrame, inertiaFrame, EuclidCoreTools.zeroVector3D, Axis.values[axis]);
-            recursionStep.initializeDisturbance(null);
+            recursionStep.initializeDisturbance(null, DisturbanceSource.RIGID_BODY);
             recursionStep.updateRigidBodyMotionChange();
             recursionStep.rigidBodyMotionChange.changeFrame(inertiaFrame);
             recursionStep.rigidBodyMotionChange.get(0, axis + 3, apparentSpatialInertiaToPack);
@@ -439,7 +439,7 @@ public class MultiBodyResponseCalculator
                                                              EuclidCoreTools.zeroVector3D,
                                                              Axis.values[axis],
                                                              EuclidCoreTools.origin3D);
-         recursionStep.initializeDisturbance(null);
+         recursionStep.initializeDisturbance(null, DisturbanceSource.RIGID_BODY);
          recursionStep.updateRigidBodyMotionChange();
          recursionStep.rigidBodyMotionChange.changeFrame(inertiaFrame);
          recursionStep.rigidBodyMotionChange.getLinearPart().get(0, axis, apparentLinearInertiaToPack);
@@ -468,12 +468,12 @@ public class MultiBodyResponseCalculator
     * @param wrench the wrench to be applied. Not modified.
     * @return the response to the wrench on the multi-body system in terms of change of joint
     *         accelerations, or {@code null} if this methods failed.
-    * @see #applyWrench(RigidBodyReadOnly, WrenchReadOnly)
+    * @see #applyRigidBodyWrench(RigidBodyReadOnly, WrenchReadOnly)
     * @see #propagateWrench()
     */
-   public DenseMatrix64F applyAndPropagateWrench(RigidBodyReadOnly target, WrenchReadOnly wrench)
+   public DenseMatrix64F applyAndPropagateRigidBodyWrench(RigidBodyReadOnly target, WrenchReadOnly wrench)
    {
-      if (!applyWrench(target, wrench))
+      if (!applyRigidBodyWrench(target, wrench))
          return null;
 
       return propagateWrench();
@@ -487,12 +487,12 @@ public class MultiBodyResponseCalculator
     * @param impulse the impulse to be applied. Not modified.
     * @return the response to the impulse on the multi-body system in terms of change of joint
     *         velocities, or {@code null} if this methods failed.
-    * @see #applyImpulse(RigidBodyReadOnly, SpatialImpulseReadOnly)
+    * @see #applyRigidBodyImpulse(RigidBodyReadOnly, SpatialImpulseReadOnly)
     * @see #propagateImpulse()
     */
-   public DenseMatrix64F applyAndPropagateImpulse(RigidBodyReadOnly target, SpatialImpulseReadOnly impulse)
+   public DenseMatrix64F applyAndPropagateRigidBodyImpulse(RigidBodyReadOnly target, SpatialImpulseReadOnly impulse)
    {
-      if (!applyImpulse(target, impulse))
+      if (!applyRigidBodyImpulse(target, impulse))
          return null;
 
       return propagateImpulse();
@@ -520,17 +520,13 @@ public class MultiBodyResponseCalculator
     * @return {@code true} if the wrench was successfully applied and the response computed,
     *         {@code false} otherwise.
     */
-   public boolean applyWrench(RigidBodyReadOnly target, WrenchReadOnly wrench)
+   public boolean applyRigidBodyWrench(RigidBodyReadOnly target, WrenchReadOnly wrench)
    {
-      if (applyDisturbance(target, wrench))
-      {
-         currentResponseType = ResponseType.ACCELERATION;
-         return true;
-      }
-      else
-      {
+      if (!applyRigidBodyDisturbance(target, wrench))
          return false;
-      }
+
+      currentResponseType = ResponseType.ACCELERATION;
+      return true;
    }
 
    /**
@@ -550,20 +546,16 @@ public class MultiBodyResponseCalculator
     * @param impulse the impulse to be applied. Not modified.
     * @return {@code true} if the impulse was successfully applied, {@code false} otherwise.
     */
-   public boolean applyImpulse(RigidBodyReadOnly target, SpatialImpulseReadOnly impulse)
+   public boolean applyRigidBodyImpulse(RigidBodyReadOnly target, SpatialImpulseReadOnly impulse)
    {
-      if (applyDisturbance(target, impulse))
-      {
-         currentResponseType = ResponseType.TWIST;
-         return true;
-      }
-      else
-      {
+      if (!applyRigidBodyDisturbance(target, impulse))
          return false;
-      }
+
+      currentResponseType = ResponseType.TWIST;
+      return true;
    }
 
-   private boolean applyDisturbance(RigidBodyReadOnly target, SpatialForceReadOnly disturbance)
+   private boolean applyRigidBodyDisturbance(RigidBodyReadOnly target, SpatialForceReadOnly disturbance)
    {
       ResponseRecursionStep recursionStep = rigidBodyToRecursionStepMap.get(target);
 
@@ -573,63 +565,97 @@ public class MultiBodyResponseCalculator
       reset();
       ReferenceFrame bodyFrame = target.getBodyFixedFrame();
       recursionStep.testDisturbancePlus.setIncludingFrame(bodyFrame, disturbance);
-      recursionStep.initializeDisturbance(null);
-      currentDisturbanceSource = DisturbanceSource.RIGID_BODY;
+      recursionStep.initializeDisturbance(null, DisturbanceSource.RIGID_BODY);
       return true;
    }
 
-   public DenseMatrix64F applyAndPropagateWrench(OneDoFJointReadOnly target, double effort)
+   public DenseMatrix64F applyAndPropagateJointWrench(OneDoFJointReadOnly target, double effort)
    {
-      if (!applyWrench(target, effort))
-         return null;
-
-      return propagateWrench();
-   }
-
-   public DenseMatrix64F applyAndPropagateImpulse(OneDoFJointReadOnly target, double impulse)
-   {
-      if (!applyImpulse(target, impulse))
-         return null;
-
-      return propagateImpulse();
-   }
-
-   public boolean applyWrench(OneDoFJointReadOnly target, double effort)
-   {
-      if (applyDisturbance(target, effort))
-      {
-         currentResponseType = ResponseType.ACCELERATION;
-         return true;
-      }
+      if (applyJointWrench(target, effort))
+         return propagateWrench();
       else
-      {
-         return false;
-      }
+         return null;
    }
 
-   public boolean applyImpulse(OneDoFJointReadOnly target, double impulse)
+   public DenseMatrix64F applyAndPropagateJointWrench(JointReadOnly target, DenseMatrix64F wrench)
    {
-      if (applyDisturbance(target, impulse))
-      {
-         currentResponseType = ResponseType.TWIST;
-         return true;
-      }
+      if (applyJointWrench(target, wrench))
+         return propagateWrench();
       else
-      {
-         return false;
-      }
+         return null;
    }
 
-   private boolean applyDisturbance(OneDoFJointReadOnly target, double disturbance)
+   public DenseMatrix64F applyAndPropagateJointImpulse(OneDoFJointReadOnly target, double impulse)
+   {
+      if (applyJointImpulse(target, impulse))
+         return propagateImpulse();
+      else
+         return null;
+   }
+
+   public DenseMatrix64F applyAndPropagateJointImpulse(JointReadOnly target, DenseMatrix64F impulse)
+   {
+      if (applyJointImpulse(target, impulse))
+         return propagateImpulse();
+      else
+         return null;
+   }
+
+   public boolean applyJointWrench(OneDoFJointReadOnly target, double effort)
+   {
+      if (!applyJointDisturbance(target, effort))
+         return false;
+
+      currentResponseType = ResponseType.ACCELERATION;
+      return true;
+   }
+
+   public boolean applyJointWrench(JointReadOnly target, DenseMatrix64F wrench)
+   {
+      if (!applyJointDisturbance(target, wrench))
+         return false;
+
+      currentResponseType = ResponseType.ACCELERATION;
+      return true;
+   }
+
+   public boolean applyJointImpulse(OneDoFJointReadOnly target, double impulse)
+   {
+      if (!applyJointDisturbance(target, impulse))
+         return false;
+
+      currentResponseType = ResponseType.TWIST;
+      return true;
+   }
+
+   public boolean applyJointImpulse(JointReadOnly target, DenseMatrix64F impulse)
+   {
+      if (!applyJointDisturbance(target, impulse))
+         return false;
+
+      currentResponseType = ResponseType.TWIST;
+      return true;
+   }
+
+   private boolean applyJointDisturbance(OneDoFJointReadOnly target, double disturbance)
+   {
+      singleElementMatrix.set(0, disturbance);
+      return applyJointDisturbance(target, singleElementMatrix);
+   }
+
+   private boolean applyJointDisturbance(JointReadOnly target, DenseMatrix64F disturbance)
    {
       ResponseRecursionStep recursionStep = rigidBodyToRecursionStepMap.get(target.getSuccessor());
 
       if (recursionStep == null)
          return false;
+      if (disturbance.getNumRows() != recursionStep.getJoint().getDegreesOfFreedom() || disturbance.getNumCols() != 1)
+         throw new IllegalArgumentException("Matrix dimension mismatch: expected " + recursionStep.getJoint().getDegreesOfFreedom() + "-by-1, was "
+               + disturbance.getNumRows() + "-by-" + disturbance.getNumCols());
 
       reset();
-      // TODO
-      currentDisturbanceSource = DisturbanceSource.JOINT;
+      recursionStep.tauPlus.set(disturbance);
+      recursionStep.initializeDisturbance(null, DisturbanceSource.JOINT);
       return true;
    }
 
@@ -638,13 +664,11 @@ public class MultiBodyResponseCalculator
     * resulting change in acceleration.
     * 
     * @return the matrix with the resulting change in joint acceleration, or {@code null} if
-    *         {@link #applyWrench(RigidBodyReadOnly, WrenchReadOnly)} was not called last.
+    *         {@link #applyRigidBodyWrench(RigidBodyReadOnly, WrenchReadOnly)} was not called last.
     */
    public DenseMatrix64F propagateWrench()
    {
-      if (currentResponseType != ResponseType.ACCELERATION)
-         return null;
-      return propagateDisturbance();
+      return currentResponseType == ResponseType.ACCELERATION ? propagateDisturbance() : null;
    }
 
    /**
@@ -652,14 +676,12 @@ public class MultiBodyResponseCalculator
     * resulting change in twist.
     * 
     * @return the matrix with the resulting change in joint velocity, or {@code null} if
-    *         {@link #applyImpulse(RigidBodyReadOnly, SpatialImpulseReadOnly)} was not called last.
+    *         {@link #applyRigidBodyImpulse(RigidBodyReadOnly, SpatialImpulseReadOnly)} was not called
+    *         last.
     */
    public DenseMatrix64F propagateImpulse()
    {
-      if (currentResponseType != ResponseType.TWIST)
-         return null;
-
-      return propagateDisturbance();
+      return currentResponseType == ResponseType.TWIST ? propagateDisturbance() : null;
    }
 
    private DenseMatrix64F propagateDisturbance()
@@ -676,8 +698,8 @@ public class MultiBodyResponseCalculator
     * any rigid-body in the system due to the test wrench.
     * <p>
     * The provider is initialized only after calling either
-    * {@link #applyWrench(RigidBodyReadOnly, WrenchReadOnly)} or
-    * {@link #applyAndPropagateWrench(RigidBodyReadOnly, WrenchReadOnly)}.
+    * {@link #applyRigidBodyWrench(RigidBodyReadOnly, WrenchReadOnly)} or
+    * {@link #applyAndPropagateRigidBodyWrench(RigidBodyReadOnly, WrenchReadOnly)}.
     * </p>
     * 
     * @return the acceleration change provider.
@@ -692,8 +714,8 @@ public class MultiBodyResponseCalculator
     * in the system due to the test impulse.
     * <p>
     * The provider is initialized only after calling either
-    * {@link #applyWrench(RigidBodyReadOnly, WrenchReadOnly)} or
-    * {@link #applyAndPropagateWrench(RigidBodyReadOnly, WrenchReadOnly)}.
+    * {@link #applyRigidBodyWrench(RigidBodyReadOnly, WrenchReadOnly)} or
+    * {@link #applyAndPropagateRigidBodyWrench(RigidBodyReadOnly, WrenchReadOnly)}.
     * </p>
     * 
     * @return the twist change provider.
@@ -736,6 +758,15 @@ public class MultiBodyResponseCalculator
        * </p>
        */
       final SpatialAcceleration parentMotionChange;
+      /**
+       * Test effort containing the additional disturbance at the joint to test the resulting change in
+       * motion with.
+       * <p>
+       * The matrix is a N-by-1 vector representing either an extra effort or impulse, where N is equal to
+       * the number of DoFs that the joint has.
+       * </p>
+       */
+      final DenseMatrix64F tauPlus;
       /**
        * This is the apparent force for this joint resulting from {@code testWrenchPlus}:
        * 
@@ -846,6 +877,7 @@ public class MultiBodyResponseCalculator
             parentMotionChange = null;
             rigidBodyMotionChange.setToZero(getBodyFixedFrame(), input.getInertialFrame(), getBodyFixedFrame());
 
+            tauPlus = null;
             pAPlus = null;
             uPlus = null;
             paPlus = null;
@@ -863,6 +895,7 @@ public class MultiBodyResponseCalculator
             testDisturbancePlusForParent = parent.isRoot() ? null : new SpatialForce();
             parentMotionChange = new SpatialAcceleration();
 
+            tauPlus = new DenseMatrix64F(nDoFs, 1);
             pAPlus = new DenseMatrix64F(SpatialVectorReadOnly.SIZE, 1);
             uPlus = new DenseMatrix64F(nDoFs, 1);
             paPlus = new DenseMatrix64F(SpatialVectorReadOnly.SIZE, 1);
@@ -890,7 +923,7 @@ public class MultiBodyResponseCalculator
        * 
        * @param sourceChild the child that is located between this and the target of the test wrench.
        */
-      public void initializeDisturbance(ResponseRecursionStep sourceChild)
+      public void initializeDisturbance(ResponseRecursionStep sourceChild, DisturbanceSource source)
       {
          // Going bottom-up in the tree.
          isOnDisturbedBranch = true;
@@ -901,11 +934,11 @@ public class MultiBodyResponseCalculator
             return;
          }
 
-         stepUpDisturbance(sourceChild);
-         parent.initializeDisturbance(this);
+         stepUpDisturbance(sourceChild, source);
+         parent.initializeDisturbance(this, source);
       }
 
-      public void stepUpDisturbance(ResponseRecursionStep sourceChild)
+      public void stepUpDisturbance(ResponseRecursionStep sourceChild, DisturbanceSource source)
       {
          isUpToDate = false;
 
@@ -914,17 +947,30 @@ public class MultiBodyResponseCalculator
             testDisturbancePlus.setIncludingFrame(sourceChild.testDisturbancePlusForParent);
             testDisturbancePlus.applyTransform(sourceChild.articulatedBodyRecursionStep.transformToParentJointFrame);
             testDisturbancePlus.setReferenceFrame(getFrameAfterJoint());
+            testDisturbancePlus.get(pAPlus);
+            DenseMatrix64F S = articulatedBodyRecursionStep.S;
+            CommonOps.multTransA(-1.0, S, pAPlus, uPlus);
          }
          else
          {
-            testDisturbancePlus.changeFrame(getFrameAfterJoint());
+            if (source == DisturbanceSource.RIGID_BODY)
+            {
+               testDisturbancePlus.changeFrame(getFrameAfterJoint());
+               testDisturbancePlus.get(pAPlus);
+               CommonOps.changeSign(pAPlus);
+               DenseMatrix64F S = articulatedBodyRecursionStep.S;
+               CommonOps.multTransA(-1.0, S, pAPlus, uPlus);
+            }
+            else if (source == DisturbanceSource.JOINT)
+            {
+               pAPlus.zero();
+               uPlus.set(tauPlus);
+            }
+            else
+            {
+               throw new IllegalStateException("Unexpected DisturbanceSource: " + source);
+            }
          }
-         testDisturbancePlus.get(pAPlus);
-         if (sourceChild == null)
-            CommonOps.changeSign(pAPlus);
-
-         DenseMatrix64F S = articulatedBodyRecursionStep.S;
-         CommonOps.multTransA(-1.0, S, pAPlus, uPlus);
 
          if (!parent.isRoot())
          {

@@ -6,11 +6,11 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.Random;
-import java.util.stream.Collectors;
 
 import org.ejml.data.DenseMatrix64F;
 import org.ejml.ops.CommonOps;
 import org.ejml.ops.MatrixFeatures;
+import org.ejml.ops.RandomMatrices;
 import org.junit.jupiter.api.Test;
 
 import us.ihmc.euclid.referenceFrame.FrameVector3D;
@@ -179,7 +179,7 @@ public class MultiBodyResponseCalculatorTest
          assertRigidBodyApparentInertiaInverse(random, i, joints, JOINT_EPSILON);
          assertRigidBodyApparentLinearInertiaInverse(random, i, joints, JOINT_EPSILON);
 
-         assertApplyAndPropagateJointEffort(random, i, joints, EPSILON);
+         assertApplyAndPropagateJointEffort(random, i, joints, JOINT_EPSILON);
       }
    }
 
@@ -217,7 +217,7 @@ public class MultiBodyResponseCalculatorTest
       multiBodyResponseCalculator.getForwardDynamicsCalculator().setExternalWrenchesToZero();
       externalWrenches.forEach(multiBodyResponseCalculator.getForwardDynamicsCalculator()::setExternalWrench);
       multiBodyResponseCalculator.getForwardDynamicsCalculator().compute();
-      multiBodyResponseCalculator.applyWrench(target, testWrench);
+      multiBodyResponseCalculator.applyRigidBodyWrench(target, testWrench);
 
       for (int i = 0; i < 10; i++)
       {
@@ -238,7 +238,7 @@ public class MultiBodyResponseCalculatorTest
 
       DenseMatrix64F qdd_expected = forwardDynamicsCalculator.getJointAccelerationMatrix();
       DenseMatrix64F qdd_original = multiBodyResponseCalculator.getForwardDynamicsCalculator().getJointAccelerationMatrix();
-      DenseMatrix64F qdd_change = multiBodyResponseCalculator.applyAndPropagateWrench(target, testWrench);
+      DenseMatrix64F qdd_change = multiBodyResponseCalculator.applyAndPropagateRigidBodyWrench(target, testWrench);
       assertJointAccelerationMatrixEquals(iteration, qdd_expected, qdd_original, qdd_change, epsilon);
    }
 
@@ -276,7 +276,7 @@ public class MultiBodyResponseCalculatorTest
       multiBodyResponseCalculator.getForwardDynamicsCalculator().setExternalWrenchesToZero();
       externalWrenches.forEach(multiBodyResponseCalculator.getForwardDynamicsCalculator()::setExternalWrench);
       multiBodyResponseCalculator.getForwardDynamicsCalculator().compute();
-      multiBodyResponseCalculator.applyImpulse(target, testImpulse);
+      multiBodyResponseCalculator.applyRigidBodyImpulse(target, testImpulse);
 
       for (int i = 0; i < 10; i++)
       {
@@ -297,7 +297,7 @@ public class MultiBodyResponseCalculatorTest
 
       DenseMatrix64F qdd_expected = forwardDynamicsCalculator.getJointAccelerationMatrix();
       DenseMatrix64F qdd_original = multiBodyResponseCalculator.getForwardDynamicsCalculator().getJointAccelerationMatrix();
-      DenseMatrix64F qdd_change = multiBodyResponseCalculator.applyAndPropagateImpulse(target, testImpulse); // <= Same equations as for the accelerations.
+      DenseMatrix64F qdd_change = multiBodyResponseCalculator.applyAndPropagateRigidBodyImpulse(target, testImpulse); // <= Same equations as for the accelerations.
       assertJointAccelerationMatrixEquals(iteration, qdd_expected, qdd_original, qdd_change, epsilon);
    }
 
@@ -341,7 +341,7 @@ public class MultiBodyResponseCalculatorTest
                                                                              accelerationChangeMatrix);
       actualAccelerationChange.changeFrame(target.getBodyFixedFrame());
 
-      multiBodyResponseCalculator.applyWrench(target, testWrench);
+      multiBodyResponseCalculator.applyRigidBodyWrench(target, testWrench);
       SpatialAcceleration expectedAccelerationChange = new SpatialAcceleration(multiBodyResponseCalculator.getAccelerationChangeProvider()
                                                                                                           .getAccelerationOfBody(target));
 
@@ -386,7 +386,7 @@ public class MultiBodyResponseCalculatorTest
       FrameVector3D actualLinearAccelerationChange = new FrameVector3D(testWrenchFrame);
       actualLinearAccelerationChange.set(accelerationChangeMatrix);
 
-      multiBodyResponseCalculator.applyWrench(target, testWrench);
+      multiBodyResponseCalculator.applyRigidBodyWrench(target, testWrench);
       SpatialAcceleration expectedAccelerationChange = new SpatialAcceleration(multiBodyResponseCalculator.getAccelerationChangeProvider()
                                                                                                           .getAccelerationOfBody(target));
       expectedAccelerationChange.changeFrame(testWrenchFrame);
@@ -408,10 +408,8 @@ public class MultiBodyResponseCalculatorTest
 
       int numberOfDoFs = joints.stream().mapToInt(JointReadOnly::getDegreesOfFreedom).sum();
 
-      List<OneDoFJointBasics> oneDoFJoints = joints.stream().filter(OneDoFJointBasics.class::isInstance).map(OneDoFJointBasics.class::cast)
-                                                   .collect(Collectors.toList());
-      OneDoFJointBasics target = oneDoFJoints.get(random.nextInt(oneDoFJoints.size()));
-      double testJointEffort = EuclidCoreRandomTools.nextDouble(random, 100.0);
+      JointBasics target = joints.get(random.nextInt(joints.size()));
+      DenseMatrix64F testJointEffort = RandomMatrices.createRandom(target.getDegreesOfFreedom(), 1, -100.0, 100.0, random);
 
       RigidBodyBasics rootBody = MultiBodySystemTools.getRootBody(joints.get(0).getPredecessor());
       MultiBodySystemReadOnly multiBodySystemInput = MultiBodySystemReadOnly.toMultiBodySystemInput(rootBody, jointsToIgnore);
@@ -425,7 +423,11 @@ public class MultiBodyResponseCalculatorTest
 
       DenseMatrix64F tau_FwdDyn = new DenseMatrix64F(numberOfDoFs, 1);
       MultiBodySystemTools.extractJointsState(joints, JointStateType.EFFORT, tau_FwdDyn);
-      tau_FwdDyn.add(forwardDynamicsCalculator.getInput().getJointMatrixIndexProvider().getJointConfigurationIndices(target)[0], 0, testJointEffort);
+      JointMatrixIndexProvider jointMatrixIndexProvider = forwardDynamicsCalculator.getInput().getJointMatrixIndexProvider();
+      for (int i = 0; i < target.getDegreesOfFreedom(); i++)
+      {
+         tau_FwdDyn.add(jointMatrixIndexProvider.getJointDoFIndices(target)[i], 0, testJointEffort.get(i));
+      }
       forwardDynamicsCalculator.setExternalWrenchesToZero();
       externalWrenches.forEach(forwardDynamicsCalculator::setExternalWrench);
       forwardDynamicsCalculator.compute(tau_FwdDyn);
@@ -433,7 +435,10 @@ public class MultiBodyResponseCalculatorTest
       multiBodyResponseCalculator.getForwardDynamicsCalculator().setExternalWrenchesToZero();
       externalWrenches.forEach(multiBodyResponseCalculator.getForwardDynamicsCalculator()::setExternalWrench);
       multiBodyResponseCalculator.getForwardDynamicsCalculator().compute();
-      multiBodyResponseCalculator.applyWrench(target, testJointEffort);
+      if (target instanceof OneDoFJointBasics && random.nextBoolean())
+         multiBodyResponseCalculator.applyJointWrench((OneDoFJointReadOnly) target, testJointEffort.get(0));
+      else
+         multiBodyResponseCalculator.applyJointWrench(target, testJointEffort);
 
       for (int i = 0; i < 10; i++)
       {
@@ -454,7 +459,7 @@ public class MultiBodyResponseCalculatorTest
 
       DenseMatrix64F qdd_expected = forwardDynamicsCalculator.getJointAccelerationMatrix();
       DenseMatrix64F qdd_original = multiBodyResponseCalculator.getForwardDynamicsCalculator().getJointAccelerationMatrix();
-      DenseMatrix64F qdd_change = multiBodyResponseCalculator.applyAndPropagateWrench(target, testJointEffort);
+      DenseMatrix64F qdd_change = multiBodyResponseCalculator.applyAndPropagateJointWrench(target, testJointEffort);
       assertJointAccelerationMatrixEquals(iteration, qdd_expected, qdd_original, qdd_change, epsilon);
    }
 
