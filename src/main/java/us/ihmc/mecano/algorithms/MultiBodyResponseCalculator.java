@@ -281,9 +281,9 @@ public class MultiBodyResponseCalculator
     * @return {@code true} is the apparent inertia matrix was successfully computed, {@code false}
     *         otherwise.
     */
-   public boolean computeApparentSpatialInertiaInverse(RigidBodyReadOnly target, ReferenceFrame inertiaFrame, DenseMatrix64F apparentSpatialInertiaToPack)
+   public boolean computeRigidBodyApparentSpatialInertiaInverse(RigidBodyReadOnly target, ReferenceFrame inertiaFrame, DenseMatrix64F apparentSpatialInertiaToPack)
    {
-      return computeApparentSpatialInertiaInverse(target, inertiaFrame, null, apparentSpatialInertiaToPack);
+      return computeRigidBodyApparentSpatialInertiaInverse(target, inertiaFrame, null, apparentSpatialInertiaToPack);
    }
 
    /**
@@ -341,8 +341,8 @@ public class MultiBodyResponseCalculator
     * @return {@code true} is the apparent inertia matrix was successfully computed, {@code false}
     *         otherwise.
     */
-   public boolean computeApparentSpatialInertiaInverse(RigidBodyReadOnly target, ReferenceFrame inertiaFrame, boolean[] selectedAxes,
-                                                       DenseMatrix64F apparentSpatialInertiaToPack)
+   public boolean computeRigidBodyApparentSpatialInertiaInverse(RigidBodyReadOnly target, ReferenceFrame inertiaFrame, boolean[] selectedAxes,
+                                                                DenseMatrix64F apparentSpatialInertiaToPack)
    {
       ResponseRecursionStep recursionStep = rigidBodyToRecursionStepMap.get(target);
 
@@ -422,7 +422,8 @@ public class MultiBodyResponseCalculator
     * @return {@code true} is the apparent inertia matrix was successfully computed, {@code false}
     *         otherwise.
     */
-   public boolean computeApparentLinearInertiaInverse(RigidBodyReadOnly target, ReferenceFrame inertiaFrame, DenseMatrix64F apparentLinearInertiaToPack)
+   public boolean computeRigidBodyApparentLinearInertiaInverse(RigidBodyReadOnly target, ReferenceFrame inertiaFrame,
+                                                               DenseMatrix64F apparentLinearInertiaToPack)
    {
       ResponseRecursionStep recursionStep = rigidBodyToRecursionStepMap.get(target);
 
@@ -449,15 +450,41 @@ public class MultiBodyResponseCalculator
       return true;
    }
 
-   public double computeApparentInertiaInverse(OneDoFJointReadOnly target, ReferenceFrame inertiaFrame)
+   public boolean computeJointApparentInertiaInverse(JointReadOnly target, DenseMatrix64F inertiaToPack)
+   {
+      ResponseRecursionStep recursionStep = rigidBodyToRecursionStepMap.get(target.getSuccessor());
+
+      if (recursionStep == null)
+         return false;
+
+      inertiaToPack.reshape(target.getDegreesOfFreedom(), target.getDegreesOfFreedom());
+
+      for (int i = 0; i < target.getDegreesOfFreedom(); i++)
+      {
+         recursionStep.tauPlus.set(i, 0, 1.0);
+         recursionStep.initializeDisturbance(null, DisturbanceSource.JOINT);
+         recursionStep.updateRigidBodyMotionChange();
+         CommonOps.insert(recursionStep.qddPlus, inertiaToPack, 0, i);
+         recursionStep.tauPlus.set(i, 0, 0.0);
+      }
+      reset();
+
+      return true;
+   }
+
+   public double computeJointApparentInertiaInverse(OneDoFJointReadOnly target)
    {
       ResponseRecursionStep recursionStep = rigidBodyToRecursionStepMap.get(target.getSuccessor());
 
       if (recursionStep == null)
          return Double.NaN;
 
-      // TODO
-      return Double.NaN;
+      recursionStep.tauPlus.set(0, 1.0);
+      recursionStep.initializeDisturbance(null, DisturbanceSource.JOINT);
+      recursionStep.updateRigidBodyMotionChange();
+      reset();
+
+      return recursionStep.qddPlus.get(0);
    }
 
    /**
@@ -723,6 +750,46 @@ public class MultiBodyResponseCalculator
    public RigidBodyTwistProvider getTwistChangeProvider()
    {
       return twistChangeProvider;
+   }
+
+   public double getJointAccelerationChange(OneDoFJointReadOnly joint)
+   {
+      return currentResponseType != ResponseType.ACCELERATION ? Double.NaN : getJointMotionChange(joint);
+   }
+
+   public DenseMatrix64F getJointAccelerationChange(JointReadOnly joint)
+   {
+      return currentResponseType != ResponseType.ACCELERATION ? null : getJointMotionChange(joint);
+   }
+
+   public double getJointTwistChange(OneDoFJointReadOnly joint)
+   {
+      return currentResponseType != ResponseType.TWIST ? Double.NaN : getJointMotionChange(joint);
+   }
+
+   public DenseMatrix64F getJointTwistChange(JointReadOnly joint)
+   {
+      return currentResponseType != ResponseType.TWIST ? null : getJointMotionChange(joint);
+   }
+
+   private double getJointMotionChange(OneDoFJointReadOnly joint)
+   {
+      ResponseRecursionStep recursionStep = rigidBodyToRecursionStepMap.get(joint.getSuccessor());
+      if (recursionStep == null)
+         return Double.NaN;
+
+      recursionStep.updateRigidBodyMotionChange();
+      return recursionStep.qddPlus.get(0);
+   }
+
+   private DenseMatrix64F getJointMotionChange(JointReadOnly joint)
+   {
+      ResponseRecursionStep recursionStep = rigidBodyToRecursionStepMap.get(joint.getSuccessor());
+      if (recursionStep == null)
+         return null;
+
+      recursionStep.updateRigidBodyMotionChange();
+      return recursionStep.qddPlus;
    }
 
    class ResponseRecursionStep
