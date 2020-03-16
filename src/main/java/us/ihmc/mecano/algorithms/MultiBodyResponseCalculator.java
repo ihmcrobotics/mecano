@@ -29,10 +29,11 @@ import us.ihmc.mecano.tools.MultiBodySystemTools;
 
 /**
  * Inspired from Mirtich's thesis, this calculator allows to evaluate the perturbation in terms of
- * change in acceleration (or twist) due to a wrench (or impulse) applied on a rigid-body.
+ * change in acceleration (or twist) due to a wrench (or impulse) applied on a rigid-body or a
+ * joint.
  * <p>
- * This can be used to compute an adequate wrench (or impulse) to apply on a rigid-body to obtain a
- * given resulting acceleration (or twist).
+ * This can be used to compute an adequate wrench (or impulse) to apply on a rigid-body or joint to
+ * obtain a given resulting acceleration (or twist).
  * </p>
  * <p>
  * Example of how to use this calculator:
@@ -281,7 +282,8 @@ public class MultiBodyResponseCalculator
     * @return {@code true} is the apparent inertia matrix was successfully computed, {@code false}
     *         otherwise.
     */
-   public boolean computeRigidBodyApparentSpatialInertiaInverse(RigidBodyReadOnly target, ReferenceFrame inertiaFrame, DenseMatrix64F apparentSpatialInertiaToPack)
+   public boolean computeRigidBodyApparentSpatialInertiaInverse(RigidBodyReadOnly target, ReferenceFrame inertiaFrame,
+                                                                DenseMatrix64F apparentSpatialInertiaToPack)
    {
       return computeRigidBodyApparentSpatialInertiaInverse(target, inertiaFrame, null, apparentSpatialInertiaToPack);
    }
@@ -415,6 +417,21 @@ public class MultiBodyResponseCalculator
     * <li><tt>&Delta;&alpha;<sub>target</sub></tt> is the resulting change in linear acceleration of
     * {@code target} at {@code inertiaFrame} due a force <tt>F<sub>target</sub></tt>.
     * </ul>
+    * <p>
+    * Note that the apparent inertia can also be used to relate an impulse to a change in twist as
+    * follows:
+    * </p>
+    * 
+    * <pre>
+    * &Delta;&nu;<sub>target</sub> = (I<sup>A</sup>)<sup>-1</sup> Y<sub>target</sub>
+    * </pre>
+    * 
+    * where:
+    * <ul>
+    * <li><tt>Y<sub>target</sub></tt> is a linear impulse applied at {@code inertiaFrame}.
+    * <li><tt>&Delta;&nu;<sub>target</sub></tt> is the resulting change in linear velocity of
+    * {@code target} at {@code inertiaFrame} due a linear impulse <tt>Y<sub>target</sub></tt>.
+    * </ul>
     * 
     * @param target                      the rigid-body to compute the apparent inertia at.
     * @param inertiaFrame                the frame at which the output is to be expressed.
@@ -450,6 +467,39 @@ public class MultiBodyResponseCalculator
       return true;
    }
 
+   /**
+    * Computes the matrix that is the equivalent of the inverse of the apparent inertia but for the
+    * joint, such that:
+    * 
+    * <pre>
+    * &Delta;qdd<sub>target</sub> = (I<sup>A</sup>)<sup>-1</sup> &tau;<sub>target</sub>
+    * </pre>
+    * 
+    * where:
+    * <ul>
+    * <li><tt>(I<sup>A</sup>)<sup>-1</sup></tt> is the N-by-N inverse of the pseudo inertia matrix,
+    * with N being the number of DoFs of the joint.
+    * <li><tt>&tau;<sub>target</sub></tt> is a joint wrench.
+    * <li><tt>&Delta;qdd<sub>target</sub></tt> is the resulting change in joint acceleration.
+    * </ul>
+    * <p>
+    * Note that the pseudo apparent inertia can also be used to relate a joint impulse to a change in
+    * joint twist as follows:
+    * </p>
+    * 
+    * <pre>
+    * &Delta;qd<sub>target</sub> = (I<sup>A</sup>)<sup>-1</sup> y<sub>target</sub>
+    * </pre>
+    * 
+    * where:
+    * <ul>
+    * <li><tt>&y;<sub>target</sub></tt> is a joint impulse.
+    * <li><tt>&Delta;qd<sub>target</sub></tt> is the resulting change in joint twist.
+    * </ul>
+    * 
+    * @param target the joint to compute the pseudo apparent inertia for.
+    * @return {@code true} is the matrix was successfully computed, {@code false} otherwise.
+    */
    public boolean computeJointApparentInertiaInverse(JointReadOnly target, DenseMatrix64F inertiaToPack)
    {
       ResponseRecursionStep recursionStep = rigidBodyToRecursionStepMap.get(target.getSuccessor());
@@ -472,6 +522,37 @@ public class MultiBodyResponseCalculator
       return true;
    }
 
+   /**
+    * Computes the value the inverse of the pseudo apparent inertia for the joint, such that:
+    * 
+    * <pre>
+    * &Delta;qdd<sub>target</sub> = (I<sup>A</sup>)<sup>-1</sup> &tau;<sub>target</sub>
+    * </pre>
+    * 
+    * where:
+    * <ul>
+    * <li><tt>(I<sup>A</sup>)<sup>-1</sup></tt> is the inverse of the pseudo inertia matrix.
+    * <li><tt>&tau;<sub>target</sub></tt> is a joint effort.
+    * <li><tt>&Delta;qdd<sub>target</sub></tt> is the resulting change in joint acceleration.
+    * </ul>
+    * <p>
+    * Note that the pseudo apparent inertia can also be used to relate a joint impulse to a change in
+    * joint velocity as follows:
+    * </p>
+    * 
+    * <pre>
+    * &Delta;qd<sub>target</sub> = (I<sup>A</sup>)<sup>-1</sup> y<sub>target</sub>
+    * </pre>
+    * 
+    * where:
+    * <ul>
+    * <li><tt>&y;<sub>target</sub></tt> is a joint impulse.
+    * <li><tt>&Delta;qd<sub>target</sub></tt> is the resulting change in joint velocity.
+    * </ul>
+    * 
+    * @param target the joint to compute the pseudo apparent inertia for.
+    * @return {@code true} is the matrix was successfully computed, {@code false} otherwise.
+    */
    public double computeJointApparentInertiaInverse(OneDoFJointReadOnly target)
    {
       ResponseRecursionStep recursionStep = rigidBodyToRecursionStepMap.get(target.getSuccessor());
@@ -538,7 +619,10 @@ public class MultiBodyResponseCalculator
     * <li>{@link #getAccelerationChangeProvider()} can then be used to access the resulting change in
     * acceleration to any rigid-body in the system.
     * <li>{@link #propagateWrench()} can then be used to compute the change in acceleration caused by
-    * the wrench on all rigid-bodies and get the change in joint acceleration.
+    * the impulse on all rigid-bodies and get the change in joint velocity.
+    * <li>{@link #getJointAccelerationChange(JointReadOnly)} or
+    * {@link #getJointAccelerationChange(OneDoFJointReadOnly)} can then be used to compute the change
+    * in acceleration for any joint.
     * </ul>
     * </p>
     * 
@@ -566,6 +650,9 @@ public class MultiBodyResponseCalculator
     * any rigid-body in the system.
     * <li>{@link #propagateImpulse()} can then be used to compute the change in twist caused by the
     * impulse on all rigid-bodies and get the change in joint velocity.
+    * <li>{@link #getJointTwistChange(JointReadOnly)} or
+    * {@link #getJointTwistChange(OneDoFJointReadOnly)} can then be used to compute the change in twist
+    * for any joint.
     * </ul>
     * </p>
     * 
@@ -628,6 +715,26 @@ public class MultiBodyResponseCalculator
          return null;
    }
 
+   /**
+    * Applies a 1-D effort to the joint {@code target} and compute the apparent wrench for each
+    * rigid-body between {@code target} and the root-body of the system.
+    * <p>
+    * After applying an effort, the following features are available:
+    * <ul>
+    * <li>{@link #getAccelerationChangeProvider()} can then be used to access the resulting change in
+    * acceleration to any rigid-body in the system.
+    * <li>{@link #propagateWrench()} can then be used to compute the change in acceleration caused by
+    * the impulse on all rigid-bodies and get the change in joint velocity.
+    * <li>{@link #getJointAccelerationChange(JointReadOnly)} or
+    * {@link #getJointAccelerationChange(OneDoFJointReadOnly)} can then be used to compute the change
+    * in acceleration for any joint.
+    * </ul>
+    * </p>
+    * 
+    * @param target the joint at which the effort is applied.
+    * @param effort the effort to be applied. Not modified.
+    * @return {@code true} if the effort was successfully applied, {@code false} otherwise.
+    */
    public boolean applyJointWrench(OneDoFJointReadOnly target, double effort)
    {
       if (!applyJointDisturbance(target, effort))
@@ -637,6 +744,27 @@ public class MultiBodyResponseCalculator
       return true;
    }
 
+   /**
+    * Applies a N-dimensional wrench to the joint {@code target} and compute the apparent wrench for
+    * each rigid-body between {@code target} and the root-body of the system, where N is the number of
+    * degrees of freedom of {@code target}.
+    * <p>
+    * After applying an wrench, the following features are available:
+    * <ul>
+    * <li>{@link #getAccelerationChangeProvider()} can then be used to access the resulting change in
+    * acceleration to any rigid-body in the system.
+    * <li>{@link #propagateWrench()} can then be used to compute the change in acceleration caused by
+    * the impulse on all rigid-bodies and get the change in joint velocity.
+    * <li>{@link #getJointAccelerationChange(JointReadOnly)} or
+    * {@link #getJointAccelerationChange(OneDoFJointReadOnly)} can then be used to compute the change
+    * in acceleration for any joint.
+    * </ul>
+    * </p>
+    * 
+    * @param target the joint at which the wrench is applied.
+    * @param wrench the wrench to be applied. Not modified.
+    * @return {@code true} if the wrench was successfully applied, {@code false} otherwise.
+    */
    public boolean applyJointWrench(JointReadOnly target, DenseMatrix64F wrench)
    {
       if (!applyJointDisturbance(target, wrench))
@@ -646,6 +774,26 @@ public class MultiBodyResponseCalculator
       return true;
    }
 
+   /**
+    * Applies a 1-D impulse to the joint {@code target} and compute the apparent impulse for each
+    * rigid-body between {@code target} and the root-body of the system.
+    * <p>
+    * After applying an impulse, the following features are available:
+    * <ul>
+    * <li>{@link #getTwistChangeProvider()} can then be used to access the resulting change in twist to
+    * any rigid-body in the system.
+    * <li>{@link #propagateImpulse()} can then be used to compute the change in twist caused by the
+    * impulse on all rigid-bodies and get the change in joint velocity.
+    * <li>{@link #getJointTwistChange(JointReadOnly)} or
+    * {@link #getJointTwistChange(OneDoFJointReadOnly)} can then be used to compute the change in twist
+    * for any joint.
+    * </ul>
+    * </p>
+    * 
+    * @param target  the joint at which the impulse is applied.
+    * @param impulse the impulse to be applied. Not modified.
+    * @return {@code true} if the impulse was successfully applied, {@code false} otherwise.
+    */
    public boolean applyJointImpulse(OneDoFJointReadOnly target, double impulse)
    {
       if (!applyJointDisturbance(target, impulse))
@@ -655,6 +803,27 @@ public class MultiBodyResponseCalculator
       return true;
    }
 
+   /**
+    * Applies a N-dimensional impulse to the joint {@code target} and compute the apparent impulse for
+    * each rigid-body between {@code target} and the root-body of the system, where N is the number of
+    * degrees of freedom of {@code target}.
+    * <p>
+    * After applying an impulse, the following features are available:
+    * <ul>
+    * <li>{@link #getTwistChangeProvider()} can then be used to access the resulting change in twist to
+    * any rigid-body in the system.
+    * <li>{@link #propagateImpulse()} can then be used to compute the change in twist caused by the
+    * impulse on all rigid-bodies and get the change in joint velocity.
+    * <li>{@link #getJointTwistChange(JointReadOnly)} or
+    * {@link #getJointTwistChange(OneDoFJointReadOnly)} can then be used to compute the change in twist
+    * for any joint.
+    * </ul>
+    * </p>
+    * 
+    * @param target  the joint at which the impulse is applied.
+    * @param impulse the impulse to be applied. Not modified.
+    * @return {@code true} if the impulse was successfully applied, {@code false} otherwise.
+    */
    public boolean applyJointImpulse(JointReadOnly target, DenseMatrix64F impulse)
    {
       if (!applyJointDisturbance(target, impulse))
@@ -752,21 +921,57 @@ public class MultiBodyResponseCalculator
       return twistChangeProvider;
    }
 
+   /**
+    * Gets the change in joint acceleration due to the test wrench.
+    * <p>
+    * This method requires that an wrench was applied.
+    * </p>
+    * 
+    * @param joint the joint to get the change in acceleration for.
+    * @return the change in acceleration of the {@code joint}.
+    */
    public double getJointAccelerationChange(OneDoFJointReadOnly joint)
    {
       return currentResponseType != ResponseType.ACCELERATION ? Double.NaN : getJointMotionChange(joint);
    }
 
+   /**
+    * Gets the change in joint acceleration due to the test wrench.
+    * <p>
+    * This method requires that an wrench was applied.
+    * </p>
+    * 
+    * @param joint the joint to get the change in acceleration for.
+    * @return the N-by-1 matrix containing the change in acceleration of the {@code joint}.
+    */
    public DenseMatrix64F getJointAccelerationChange(JointReadOnly joint)
    {
       return currentResponseType != ResponseType.ACCELERATION ? null : getJointMotionChange(joint);
    }
 
+   /**
+    * Gets the change in joint velocity due to the test impulse.
+    * <p>
+    * This method requires that an impulse was applied.
+    * </p>
+    * 
+    * @param joint the joint to get the change in velocity for.
+    * @return the change in velocity of the {@code joint}.
+    */
    public double getJointTwistChange(OneDoFJointReadOnly joint)
    {
       return currentResponseType != ResponseType.TWIST ? Double.NaN : getJointMotionChange(joint);
    }
 
+   /**
+    * Gets the change in joint twist due to the test impulse.
+    * <p>
+    * This method requires that an impulse was applied.
+    * </p>
+    * 
+    * @param joint the joint to get the change in twist for.
+    * @return the N-by-1 matrix containing the change in twist of the {@code joint}.
+    */
    public DenseMatrix64F getJointTwistChange(JointReadOnly joint)
    {
       return currentResponseType != ResponseType.TWIST ? null : getJointMotionChange(joint);
