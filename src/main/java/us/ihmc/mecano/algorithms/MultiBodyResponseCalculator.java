@@ -81,13 +81,13 @@ public class MultiBodyResponseCalculator
    private final ForwardDynamicsCalculator forwardDynamicsCalculator;
 
    /**
-    * Extension of this algorithm into an acceleration provider that can be used to retrieve change in
-    * acceleration to any rigid-body of the system.
+    * Extension of this algorithm into a rigid-body acceleration provider that can be used to retrieve
+    * change in acceleration for any rigid-body of the system.
     */
    private final RigidBodyAccelerationProvider accelerationChangeProvider;
    /**
-    * Extension of this algorithm into an twist provider that can be used to retrieve change in twist
-    * to any rigid-body of the system.
+    * Extension of this algorithm into a rigid-body twist provider that can be used to retrieve change
+    * in twist for any rigid-body of the system.
     */
    private final RigidBodyTwistProvider twistChangeProvider;
 
@@ -893,9 +893,7 @@ public class MultiBodyResponseCalculator
     * Gets the rigid-body acceleration provider that can be used to access change in acceleration of
     * any rigid-body in the system due to the test wrench.
     * <p>
-    * The provider is initialized only after calling either
-    * {@link #applyRigidBodyWrench(RigidBodyReadOnly, WrenchReadOnly)} or
-    * {@link #applyAndPropagateRigidBodyWrench(RigidBodyReadOnly, WrenchReadOnly)}.
+    * This provider requires that a wrench was applied before performing queries.
     * </p>
     * 
     * @return the acceleration change provider.
@@ -909,9 +907,7 @@ public class MultiBodyResponseCalculator
     * Gets the rigid-body twist provider that can be used to access change in twist of any rigid-body
     * in the system due to the test impulse.
     * <p>
-    * The provider is initialized only after calling either
-    * {@link #applyRigidBodyWrench(RigidBodyReadOnly, WrenchReadOnly)} or
-    * {@link #applyAndPropagateRigidBodyWrench(RigidBodyReadOnly, WrenchReadOnly)}.
+    * This provider requires that an impulse was applied before performing queries.
     * </p>
     * 
     * @return the twist change provider.
@@ -924,7 +920,7 @@ public class MultiBodyResponseCalculator
    /**
     * Gets the change in joint acceleration due to the test wrench.
     * <p>
-    * This method requires that an wrench was applied.
+    * This method requires that a wrench was applied.
     * </p>
     * 
     * @param joint the joint to get the change in acceleration for.
@@ -938,7 +934,7 @@ public class MultiBodyResponseCalculator
    /**
     * Gets the change in joint acceleration due to the test wrench.
     * <p>
-    * This method requires that an wrench was applied.
+    * This method requires that a wrench was applied.
     * </p>
     * 
     * @param joint the joint to get the change in acceleration for.
@@ -983,6 +979,11 @@ public class MultiBodyResponseCalculator
       if (recursionStep == null)
          return Double.NaN;
 
+      if (currentResponseType == null || !initialRecursionStep.isUpToDate)
+      { // This calculator has not been initialized with a disturbance yet.
+         return Double.NaN;
+      }
+
       recursionStep.updateRigidBodyMotionChange();
       return recursionStep.qddPlus.get(0);
    }
@@ -992,6 +993,11 @@ public class MultiBodyResponseCalculator
       ResponseRecursionStep recursionStep = rigidBodyToRecursionStepMap.get(joint.getSuccessor());
       if (recursionStep == null)
          return null;
+
+      if (currentResponseType == null || !initialRecursionStep.isUpToDate)
+      { // This calculator has not been initialized with a disturbance yet.
+         return null;
+      }
 
       recursionStep.updateRigidBodyMotionChange();
       return recursionStep.qddPlus;
