@@ -355,6 +355,8 @@ public class MultiBodyResponseCalculator
 
       apparentSpatialInertiaToPack.reshape(6, 6);
 
+      reset();
+
       for (int axis = 0; axis < 3; axis++)
       {
          if (selectedAxes == null || selectedAxes[axis])
@@ -364,6 +366,7 @@ public class MultiBodyResponseCalculator
             recursionStep.updateRigidBodyMotionChange();
             recursionStep.rigidBodyMotionChange.changeFrame(inertiaFrame);
             recursionStep.rigidBodyMotionChange.get(0, axis, apparentSpatialInertiaToPack);
+            reset();
          }
          else
          {
@@ -385,6 +388,7 @@ public class MultiBodyResponseCalculator
             recursionStep.updateRigidBodyMotionChange();
             recursionStep.rigidBodyMotionChange.changeFrame(inertiaFrame);
             recursionStep.rigidBodyMotionChange.get(0, axis + 3, apparentSpatialInertiaToPack);
+            reset();
          }
          else
          {
@@ -396,7 +400,6 @@ public class MultiBodyResponseCalculator
             apparentSpatialInertiaToPack.unsafe_set(5, axis + 3, 0.0);
          }
       }
-      reset();
 
       return true;
    }
@@ -450,6 +453,8 @@ public class MultiBodyResponseCalculator
       ReferenceFrame bodyFrame = target.getBodyFixedFrame();
       apparentLinearInertiaToPack.reshape(3, 3);
 
+      reset();
+
       for (int axis = 0; axis < 3; axis++)
       {
          recursionStep.testDisturbancePlus.setIncludingFrame(bodyFrame,
@@ -461,8 +466,8 @@ public class MultiBodyResponseCalculator
          recursionStep.updateRigidBodyMotionChange();
          recursionStep.rigidBodyMotionChange.changeFrame(inertiaFrame);
          recursionStep.rigidBodyMotionChange.getLinearPart().get(0, axis, apparentLinearInertiaToPack);
+         reset();
       }
-      reset();
 
       return true;
    }
@@ -509,6 +514,8 @@ public class MultiBodyResponseCalculator
 
       inertiaToPack.reshape(target.getDegreesOfFreedom(), target.getDegreesOfFreedom());
 
+      reset();
+
       for (int i = 0; i < target.getDegreesOfFreedom(); i++)
       {
          recursionStep.tauPlus.set(i, 0, 1.0);
@@ -516,8 +523,8 @@ public class MultiBodyResponseCalculator
          recursionStep.updateRigidBodyMotionChange();
          CommonOps.insert(recursionStep.qddPlus, inertiaToPack, 0, i);
          recursionStep.tauPlus.set(i, 0, 0.0);
+         reset();
       }
-      reset();
 
       return true;
    }
@@ -560,6 +567,7 @@ public class MultiBodyResponseCalculator
       if (recursionStep == null)
          return Double.NaN;
 
+      reset();
       recursionStep.tauPlus.set(0, 1.0);
       recursionStep.initializeDisturbance(null, DisturbanceSource.JOINT);
       recursionStep.updateRigidBodyMotionChange();
@@ -676,7 +684,6 @@ public class MultiBodyResponseCalculator
       if (recursionStep == null)
          return false;
 
-      reset();
       ReferenceFrame bodyFrame = target.getBodyFixedFrame();
       recursionStep.testDisturbancePlus.setIncludingFrame(bodyFrame, disturbance);
       recursionStep.initializeDisturbance(null, DisturbanceSource.RIGID_BODY);
@@ -849,7 +856,6 @@ public class MultiBodyResponseCalculator
          throw new IllegalArgumentException("Matrix dimension mismatch: expected " + recursionStep.getJoint().getDegreesOfFreedom() + "-by-1, was "
                + disturbance.getNumRows() + "-by-" + disturbance.getNumCols());
 
-      reset();
       recursionStep.tauPlus.set(disturbance);
       recursionStep.initializeDisturbance(null, DisturbanceSource.JOINT);
       return true;
@@ -1014,12 +1020,20 @@ public class MultiBodyResponseCalculator
        */
       final Wrench testDisturbancePlus;
       /**
+       * Wrench containing all external disturbance applied to this body to test the resulting change
+       * motion with.
+       * <p>
+       * This can either represent a wrench or impulse. The equations are the same either way.
+       * </p>
+       */
+      final Wrench totalDisturbancePlus;
+      /**
        * Pre-transformed test disturbance for the parent.
        * <p>
        * This can either represent a wrench or impulse. The equations are the same either way.
        * </p>
        */
-      final SpatialForce testDisturbancePlusForParent;
+      final SpatialForce totalDisturbancePlusForParent;
       /**
        * Change of motion of this rigid-body.
        * <p>
@@ -1151,7 +1165,8 @@ public class MultiBodyResponseCalculator
          if (parent == null)
          {
             testDisturbancePlus = null;
-            testDisturbancePlusForParent = null;
+            totalDisturbancePlus = null;
+            totalDisturbancePlusForParent = null;
             parentMotionChange = null;
             rigidBodyMotionChange.setToZero(getBodyFixedFrame(), input.getInertialFrame(), getBodyFixedFrame());
 
@@ -1169,8 +1184,9 @@ public class MultiBodyResponseCalculator
             parent.children.add(this);
             int nDoFs = getJoint().getDegreesOfFreedom();
 
-            testDisturbancePlus = new Wrench();
-            testDisturbancePlusForParent = parent.isRoot() ? null : new SpatialForce();
+            testDisturbancePlus = new Wrench(getBodyFixedFrame(), getBodyFixedFrame());
+            totalDisturbancePlus = new Wrench(getBodyFixedFrame(), getFrameAfterJoint());
+            totalDisturbancePlusForParent = parent.isRoot() ? null : new SpatialForce();
             parentMotionChange = new SpatialAcceleration();
 
             tauPlus = new DenseMatrix64F(nDoFs, 1);
@@ -1186,6 +1202,9 @@ public class MultiBodyResponseCalculator
 
       public void reset()
       {
+         if (!isOnDisturbedBranch && !isUpToDate)
+            return; // Early termination for this branch.
+
          isOnDisturbedBranch = false;
          isUpToDate = false;
          for (ResponseRecursionStep child : children)
@@ -1204,15 +1223,16 @@ public class MultiBodyResponseCalculator
       public void initializeDisturbance(ResponseRecursionStep sourceChild, DisturbanceSource source)
       {
          // Going bottom-up in the tree.
-         isOnDisturbedBranch = true;
 
          if (isRoot())
          {
             isUpToDate = true;
+            isOnDisturbedBranch = true;
             return;
          }
 
          stepUpDisturbance(sourceChild, source);
+         isOnDisturbedBranch = true;
          parent.initializeDisturbance(this, source);
       }
 
@@ -1220,13 +1240,20 @@ public class MultiBodyResponseCalculator
       {
          isUpToDate = false;
 
+         DenseMatrix64F S = articulatedBodyRecursionStep.S;
+
          if (sourceChild != null)
          {
-            testDisturbancePlus.setIncludingFrame(sourceChild.testDisturbancePlusForParent);
+            testDisturbancePlus.setIncludingFrame(sourceChild.totalDisturbancePlusForParent);
             testDisturbancePlus.applyTransform(sourceChild.articulatedBodyRecursionStep.transformToParentJointFrame);
             testDisturbancePlus.setReferenceFrame(getFrameAfterJoint());
-            testDisturbancePlus.get(pAPlus);
-            DenseMatrix64F S = articulatedBodyRecursionStep.S;
+
+            // Check if a disturbance was previously applied, in which case it needs to be added.
+            if (isOnDisturbedBranch)
+               totalDisturbancePlus.add(testDisturbancePlus);
+            else
+               totalDisturbancePlus.set(testDisturbancePlus);
+            totalDisturbancePlus.get(pAPlus);
             CommonOps.multTransA(-1.0, S, pAPlus, uPlus);
          }
          else
@@ -1234,15 +1261,28 @@ public class MultiBodyResponseCalculator
             if (source == DisturbanceSource.RIGID_BODY)
             {
                testDisturbancePlus.changeFrame(getFrameAfterJoint());
-               testDisturbancePlus.get(pAPlus);
+               // Check if a disturbance was previously applied, in which case it needs to be added.
+               if (isOnDisturbedBranch)
+                  totalDisturbancePlus.add(testDisturbancePlus);
+               else
+                  totalDisturbancePlus.set(testDisturbancePlus);
+               totalDisturbancePlus.get(pAPlus);
                CommonOps.changeSign(pAPlus);
-               DenseMatrix64F S = articulatedBodyRecursionStep.S;
                CommonOps.multTransA(-1.0, S, pAPlus, uPlus);
             }
             else if (source == DisturbanceSource.JOINT)
             {
-               pAPlus.zero();
-               uPlus.set(tauPlus);
+               // Check if a disturbance was previously applied, in which case it needs to be added.
+               if (isOnDisturbedBranch)
+               {
+                  CommonOps.multTransA(-1.0, S, pAPlus, uPlus);
+                  CommonOps.addEquals(uPlus, tauPlus);
+               }
+               else
+               {
+                  pAPlus.zero();
+                  uPlus.set(tauPlus);
+               }
             }
             else
             {
@@ -1255,7 +1295,7 @@ public class MultiBodyResponseCalculator
             DenseMatrix64F U_Dinv = articulatedBodyRecursionStep.U_Dinv;
             CommonOps.mult(U_Dinv, uPlus, paPlus);
             CommonOps.addEquals(paPlus, pAPlus);
-            testDisturbancePlusForParent.setIncludingFrame(testDisturbancePlus.getReferenceFrame(), paPlus);
+            totalDisturbancePlusForParent.setIncludingFrame(totalDisturbancePlus.getReferenceFrame(), paPlus);
          }
       }
 
