@@ -940,12 +940,7 @@ public class ForwardDynamicsCalculator
             // Computing a_i = a'_i + S_i * qdd_i
             CommonOps.mult(S, qdd, a);
 
-            rigidBodyZeroVelocityAcceleration.getAngularPart().addX(a.get(0));
-            rigidBodyZeroVelocityAcceleration.getAngularPart().addY(a.get(1));
-            rigidBodyZeroVelocityAcceleration.getAngularPart().addZ(a.get(2));
-            rigidBodyZeroVelocityAcceleration.getLinearPart().addX(a.get(3));
-            rigidBodyZeroVelocityAcceleration.getLinearPart().addY(a.get(4));
-            rigidBodyZeroVelocityAcceleration.getLinearPart().addZ(a.get(5));
+            rigidBodyZeroVelocityAcceleration.add(a);
 
             CommonOps.addEquals(a, aPrime);
             rigidBodyAcceleration.setIncludingFrame(getBodyFixedFrame(), input.getInertialFrame(), getFrameAfterJoint(), a);

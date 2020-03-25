@@ -5,6 +5,7 @@ import java.util.Collections;
 import java.util.List;
 
 import org.ejml.data.DenseMatrix64F;
+import org.ejml.ops.MatrixDimensionException;
 
 import us.ihmc.euclid.matrix.interfaces.Matrix3DBasics;
 import us.ihmc.euclid.matrix.interfaces.Matrix3DReadOnly;
@@ -138,6 +139,24 @@ public class MecanoTools
    {
       if (!isMatrix3DSymmetric(matrixToTest, epsilon))
          throw new RuntimeException("The matrix is not symmetric:\n" + matrixToTest.toString());
+   }
+
+   /**
+    * Checks that the given {@code matrixToTest} has a minimum size of [{@code minRows},
+    * {@code minColumns}].
+    * 
+    * @param minRows      the minimum number of rows that the matrix should have.
+    * @param minColumns   the minimum number of columns that the matrix should have.
+    * @param matrixToTest the matrix which size is to be tested.
+    * @throws MatrixDimensionException if the matrix does not meet the minimum size.
+    */
+   public static void checkMatrixMinimumSize(int minRows, int minColumns, DenseMatrix64F matrixToTest)
+   {
+      if (!matrixToTest.isInBounds(minRows - 1, minColumns - 1))
+      {
+         throw new MatrixDimensionException("The matrix is too small, expected: [nRows >= " + minRows + ", nColumns >= " + minColumns + "], was: [nRows = "
+               + matrixToTest.getNumRows() + ", nCols = " + matrixToTest.getNumCols() + "].");
+      }
    }
 
    /**
@@ -421,7 +440,6 @@ public class MecanoTools
          // w x J w
          dynamicMomentToPack.cross(angularVelocity, dynamicMomentToPack);
       }
-
 
       if (angularAcceleration != null)
       {
