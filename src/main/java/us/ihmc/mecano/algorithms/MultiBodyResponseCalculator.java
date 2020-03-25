@@ -91,11 +91,6 @@ public class MultiBodyResponseCalculator
     */
    private final RigidBodyTwistProvider twistChangeProvider;
 
-   private enum DisturbanceSource
-   {
-      RIGID_BODY, JOINT;
-   }
-
    private enum ResponseType
    {
       ACCELERATION, TWIST
@@ -362,7 +357,7 @@ public class MultiBodyResponseCalculator
          if (selectedAxes == null || selectedAxes[axis])
          {
             recursionStep.testDisturbancePlus.setIncludingFrame(bodyFrame, inertiaFrame, Axis.values[axis], EuclidCoreTools.zeroVector3D);
-            recursionStep.initializeDisturbance(null, DisturbanceSource.RIGID_BODY);
+            recursionStep.initializeDisturbance();
             recursionStep.updateRigidBodyMotionChange();
             recursionStep.rigidBodyMotionChange.changeFrame(inertiaFrame);
             recursionStep.rigidBodyMotionChange.get(0, axis, apparentSpatialInertiaToPack);
@@ -384,7 +379,7 @@ public class MultiBodyResponseCalculator
          if (selectedAxes == null || selectedAxes[axis + 3])
          {
             recursionStep.testDisturbancePlus.setIncludingFrame(bodyFrame, inertiaFrame, EuclidCoreTools.zeroVector3D, Axis.values[axis]);
-            recursionStep.initializeDisturbance(null, DisturbanceSource.RIGID_BODY);
+            recursionStep.initializeDisturbance();
             recursionStep.updateRigidBodyMotionChange();
             recursionStep.rigidBodyMotionChange.changeFrame(inertiaFrame);
             recursionStep.rigidBodyMotionChange.get(0, axis + 3, apparentSpatialInertiaToPack);
@@ -462,7 +457,7 @@ public class MultiBodyResponseCalculator
                                                              EuclidCoreTools.zeroVector3D,
                                                              Axis.values[axis],
                                                              EuclidCoreTools.origin3D);
-         recursionStep.initializeDisturbance(null, DisturbanceSource.RIGID_BODY);
+         recursionStep.initializeDisturbance();
          recursionStep.updateRigidBodyMotionChange();
          recursionStep.rigidBodyMotionChange.changeFrame(inertiaFrame);
          recursionStep.rigidBodyMotionChange.getLinearPart().get(0, axis, apparentLinearInertiaToPack);
@@ -519,7 +514,7 @@ public class MultiBodyResponseCalculator
       for (int i = 0; i < target.getDegreesOfFreedom(); i++)
       {
          recursionStep.tauPlus.set(i, 0, 1.0);
-         recursionStep.initializeDisturbance(null, DisturbanceSource.JOINT);
+         recursionStep.initializeDisturbance();
          recursionStep.updateRigidBodyMotionChange();
          CommonOps.insert(recursionStep.qddPlus, inertiaToPack, 0, i);
          recursionStep.tauPlus.set(i, 0, 0.0);
@@ -569,7 +564,7 @@ public class MultiBodyResponseCalculator
 
       reset();
       recursionStep.tauPlus.set(0, 1.0);
-      recursionStep.initializeDisturbance(null, DisturbanceSource.JOINT);
+      recursionStep.initializeDisturbance();
       recursionStep.updateRigidBodyMotionChange();
       reset();
 
@@ -654,7 +649,7 @@ public class MultiBodyResponseCalculator
 
       ReferenceFrame bodyFrame = target.getBodyFixedFrame();
       recursionStep.testDisturbancePlus.setIncludingFrame(bodyFrame, disturbance);
-      recursionStep.initializeDisturbance(null, DisturbanceSource.RIGID_BODY);
+      recursionStep.initializeDisturbance();
       return true;
    }
 
@@ -805,7 +800,7 @@ public class MultiBodyResponseCalculator
                + disturbance.getNumRows() + "-by-" + disturbance.getNumCols());
 
       recursionStep.tauPlus.set(disturbance);
-      recursionStep.initializeDisturbance(null, DisturbanceSource.JOINT);
+      recursionStep.initializeDisturbance();
       return true;
    }
 
@@ -1183,10 +1178,8 @@ public class MultiBodyResponseCalculator
        * <p>
        * The disturbance can either be a wrench or impulse.
        * </p>
-       * 
-       * @param sourceChild the child that is located between this and the target of the test wrench.
        */
-      public void initializeDisturbance(ResponseRecursionStep sourceChild, DisturbanceSource source)
+      public void initializeDisturbance()
       {
          // Going bottom-up in the tree.
          if (isRoot())
@@ -1198,7 +1191,7 @@ public class MultiBodyResponseCalculator
 
          stepUpDisturbance();
          isOnDisturbedBranch = true;
-         parent.initializeDisturbance(this, source);
+         parent.initializeDisturbance();
       }
 
       public void stepUpDisturbance()
