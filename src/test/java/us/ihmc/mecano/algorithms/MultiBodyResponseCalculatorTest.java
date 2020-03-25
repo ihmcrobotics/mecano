@@ -19,6 +19,7 @@ import us.ihmc.euclid.referenceFrame.tools.EuclidFrameRandomTools;
 import us.ihmc.euclid.referenceFrame.tools.EuclidFrameTestTools;
 import us.ihmc.euclid.tools.EuclidCoreIOTools;
 import us.ihmc.euclid.tools.EuclidCoreRandomTools;
+import us.ihmc.mecano.algorithms.TablePrinter.Alignment;
 import us.ihmc.mecano.algorithms.interfaces.RigidBodyAccelerationProvider;
 import us.ihmc.mecano.algorithms.interfaces.RigidBodyTwistProvider;
 import us.ihmc.mecano.multiBodySystem.Joint;
@@ -332,7 +333,12 @@ public class MultiBodyResponseCalculatorTest
       DenseMatrix64F qdd_expected = forwardDynamicsCalculator.getJointAccelerationMatrix();
       DenseMatrix64F qdd_original = multiBodyResponseCalculator.getForwardDynamicsCalculator().getJointAccelerationMatrix();
       DenseMatrix64F qdd_change = multiBodyResponseCalculator.propagateWrench();
-      assertJointAccelerationMatrixEquals(iteration, qdd_expected, qdd_original, qdd_change, Math.max(1.0, CommonOps.elementMaxAbs(qdd_expected)) * epsilon);
+      assertJointAccelerationMatrixEquals(multiBodySystemInput,
+                                          iteration,
+                                          qdd_expected,
+                                          qdd_original,
+                                          qdd_change,
+                                          Math.max(1.0, CommonOps.elementMaxAbs(qdd_expected)) * epsilon);
    }
 
    private static void assertApplySingleRigidBodyImpulse(Random random, int iteration, List<? extends JointBasics> joints, double epsilon)
@@ -369,7 +375,12 @@ public class MultiBodyResponseCalculatorTest
       DenseMatrix64F qdd_expected = forwardDynamicsCalculator.getJointAccelerationMatrix();
       DenseMatrix64F qdd_original = multiBodyResponseCalculator.getForwardDynamicsCalculator().getJointAccelerationMatrix();
       DenseMatrix64F qdd_change = multiBodyResponseCalculator.propagateImpulse();
-      assertJointAccelerationMatrixEquals(iteration, qdd_expected, qdd_original, qdd_change, Math.max(1.0, CommonOps.elementMaxAbs(qdd_expected)) * epsilon);
+      assertJointAccelerationMatrixEquals(multiBodySystemInput,
+                                          iteration,
+                                          qdd_expected,
+                                          qdd_original,
+                                          qdd_change,
+                                          Math.max(1.0, CommonOps.elementMaxAbs(qdd_expected)) * epsilon);
    }
 
    private static void assertApplySingleRigidBodyImpulseViaIntegration(Random random, int iteration, List<? extends JointBasics> joints, double dt,
@@ -387,8 +398,8 @@ public class MultiBodyResponseCalculatorTest
       for (JointStateType state : JointStateType.values())
          MultiBodySystemRandomTools.nextState(random, state, joints);
 
-      int numberOfJoints = joints.stream().mapToInt(JointReadOnly::getDegreesOfFreedom).sum();
-      DenseMatrix64F qd_original = new DenseMatrix64F(numberOfJoints, 1);
+      int numberOfDoFs = joints.stream().mapToInt(JointReadOnly::getDegreesOfFreedom).sum();
+      DenseMatrix64F qd_original = new DenseMatrix64F(numberOfDoFs, 1);
       MultiBodySystemTools.extractJointsState(joints, JointStateType.VELOCITY, qd_original);
 
       RigidBodyBasics target = joints.get(random.nextInt(joints.size())).getSuccessor();
@@ -397,7 +408,7 @@ public class MultiBodyResponseCalculatorTest
       MultiBodySystemReadOnly multiBodySystemInput = MultiBodySystemReadOnly.toMultiBodySystemInput(rootBody, jointsToIgnore);
       rootBody.updateFramesRecursively();
 
-      Wrench externalWrench = MecanoRandomTools.nextWrench(random, target.getBodyFixedFrame(), target.getBodyFixedFrame(), 100.0, 100.0);
+      Wrench externalWrench = MecanoRandomTools.nextWrench(random, target.getBodyFixedFrame(), target.getBodyFixedFrame(), 1000.0, 1000.0);
       SpatialImpulse externalImpulse = new SpatialImpulse(target.getBodyFixedFrame(), externalWrench);
       externalImpulse.scale(dt);
 
@@ -410,18 +421,18 @@ public class MultiBodyResponseCalculatorTest
       multiBodyResponseCalculator.applyRigidBodyImpulse(target, externalImpulse);
 
       DenseMatrix64F qdd = forwardDynamicsCalculator.getJointAccelerationMatrix();
-      DenseMatrix64F qd_expected = new DenseMatrix64F(numberOfJoints, 1);
+      DenseMatrix64F qd_expected = new DenseMatrix64F(numberOfDoFs, 1);
       CommonOps.add(qd_original, dt, qdd, qd_expected);
 
       DenseMatrix64F qd_change = multiBodyResponseCalculator.propagateImpulse();
-      DenseMatrix64F qd_noImpulse = new DenseMatrix64F(numberOfJoints, 1);
+      DenseMatrix64F qd_noImpulse = new DenseMatrix64F(numberOfDoFs, 1);
       CommonOps.add(qd_original, dt, multiBodyResponseCalculator.getForwardDynamicsCalculator().getJointAccelerationMatrix(), qd_noImpulse);
-      assertJointAccelerationMatrixEquals(iteration, qd_expected, qd_noImpulse, qd_change, epsilon);
+      assertJointAccelerationMatrixEquals(multiBodySystemInput, iteration, qd_expected, qd_noImpulse, qd_change, epsilon);
 
       TwistReadOnly targetTwistChangeActual = multiBodyResponseCalculator.getTwistChangeProvider().getTwistOfBody(target);
       Twist targetTwistOld = new Twist(target.getBodyFixedFrame().getTwistOfFrame());
       Twist targetAccelerationIntegrated = new Twist(multiBodyResponseCalculator.getForwardDynamicsCalculator().getAccelerationProvider(false)
-                                                                                .getAccelerationOfBody(target));
+                                                                                .getRelativeAcceleration(rootBody, target));
       targetAccelerationIntegrated.scale(dt);
 
       Twist targetTwistNewActual = new Twist(targetTwistOld);
@@ -433,10 +444,10 @@ public class MultiBodyResponseCalculatorTest
       TwistReadOnly targetTwistNewExpected = target.getBodyFixedFrame().getTwistOfFrame();
 
       Twist targetTwistChangeExpected = new Twist(targetTwistNewExpected);
+      targetTwistChangeExpected.sub((SpatialVectorReadOnly) targetAccelerationIntegrated);
       targetTwistChangeExpected.sub((SpatialVectorReadOnly) targetTwistOld);
 
       MecanoTestTools.assertTwistEquals("Iteration: " + iteration, targetTwistChangeExpected, targetTwistChangeActual, epsilon);
-
       MecanoTestTools.assertTwistEquals("Iteration: " + iteration, targetTwistNewExpected, targetTwistNewActual, epsilon);
    }
 
@@ -562,7 +573,12 @@ public class MultiBodyResponseCalculatorTest
       DenseMatrix64F qdd_expected = forwardDynamicsCalculator.getJointAccelerationMatrix();
       DenseMatrix64F qdd_original = multiBodyResponseCalculator.getForwardDynamicsCalculator().getJointAccelerationMatrix();
       DenseMatrix64F qdd_change = multiBodyResponseCalculator.propagateWrench();
-      assertJointAccelerationMatrixEquals(iteration, qdd_expected, qdd_original, qdd_change, Math.max(1.0, CommonOps.elementMaxAbs(qdd_expected)) * epsilon);
+      assertJointAccelerationMatrixEquals(multiBodySystemInput,
+                                          iteration,
+                                          qdd_expected,
+                                          qdd_original,
+                                          qdd_change,
+                                          Math.max(1.0, CommonOps.elementMaxAbs(qdd_expected)) * epsilon);
    }
 
    private static void assertApplySingleJointImpulse(Random random, int iteration, List<? extends JointBasics> joints, double epsilon)
@@ -601,7 +617,12 @@ public class MultiBodyResponseCalculatorTest
       DenseMatrix64F qdd_expected = forwardDynamicsCalculator.getJointAccelerationMatrix();
       DenseMatrix64F qdd_original = multiBodyResponseCalculator.getForwardDynamicsCalculator().getJointAccelerationMatrix();
       DenseMatrix64F qdd_change = multiBodyResponseCalculator.propagateImpulse();
-      assertJointAccelerationMatrixEquals(iteration, qdd_expected, qdd_original, qdd_change, Math.max(1.0, CommonOps.elementMaxAbs(qdd_expected)) * epsilon);
+      assertJointAccelerationMatrixEquals(multiBodySystemInput,
+                                          iteration,
+                                          qdd_expected,
+                                          qdd_original,
+                                          qdd_change,
+                                          Math.max(1.0, CommonOps.elementMaxAbs(qdd_expected)) * epsilon);
    }
 
    private static void assertApplySingleJointImpulseViaIntegration(Random random, int iteration, List<? extends JointBasics> joints, double dt, double epsilon)
@@ -618,8 +639,8 @@ public class MultiBodyResponseCalculatorTest
       for (JointStateType state : JointStateType.values())
          MultiBodySystemRandomTools.nextState(random, state, joints);
 
-      int numberOfJoints = joints.stream().mapToInt(JointReadOnly::getDegreesOfFreedom).sum();
-      DenseMatrix64F qd_original = new DenseMatrix64F(numberOfJoints, 1);
+      int numberOfDoFs = joints.stream().mapToInt(JointReadOnly::getDegreesOfFreedom).sum();
+      DenseMatrix64F qd_original = new DenseMatrix64F(numberOfDoFs, 1);
       MultiBodySystemTools.extractJointsState(joints, JointStateType.VELOCITY, qd_original);
 
       JointBasics target = joints.get(random.nextInt(joints.size()));
@@ -641,13 +662,13 @@ public class MultiBodyResponseCalculatorTest
       multiBodyResponseCalculator.applyJointImpulse(target, testJointImpulse);
 
       DenseMatrix64F qdd = forwardDynamicsCalculator.getJointAccelerationMatrix();
-      DenseMatrix64F qd_expected = new DenseMatrix64F(numberOfJoints, 1);
+      DenseMatrix64F qd_expected = new DenseMatrix64F(numberOfDoFs, 1);
       CommonOps.add(qd_original, dt, qdd, qd_expected);
 
       DenseMatrix64F qd_change = multiBodyResponseCalculator.propagateImpulse();
-      DenseMatrix64F qd_noImpulse = new DenseMatrix64F(numberOfJoints, 1);
+      DenseMatrix64F qd_noImpulse = new DenseMatrix64F(numberOfDoFs, 1);
       CommonOps.add(qd_original, dt, multiBodyResponseCalculator.getForwardDynamicsCalculator().getJointAccelerationMatrix(), qd_noImpulse);
-      assertJointAccelerationMatrixEquals(iteration, qd_expected, qd_noImpulse, qd_change, epsilon);
+      assertJointAccelerationMatrixEquals(multiBodySystemInput, iteration, qd_expected, qd_noImpulse, qd_change, epsilon);
    }
 
    private static void assertJointApparentInertiaInverse(Random random, int iteration, List<? extends JointBasics> joints, double epsilon)
@@ -747,7 +768,12 @@ public class MultiBodyResponseCalculatorTest
       DenseMatrix64F qdd_expected = forwardDynamicsCalculator.getJointAccelerationMatrix();
       DenseMatrix64F qdd_original = multiBodyResponseCalculator.getForwardDynamicsCalculator().getJointAccelerationMatrix();
       DenseMatrix64F qdd_change = multiBodyResponseCalculator.propagateWrench();
-      assertJointAccelerationMatrixEquals(iteration, qdd_expected, qdd_original, qdd_change, Math.max(1.0, CommonOps.elementMaxAbs(qdd_expected)) * epsilon);
+      assertJointAccelerationMatrixEquals(multiBodySystemInput,
+                                          iteration,
+                                          qdd_expected,
+                                          qdd_original,
+                                          qdd_change,
+                                          Math.max(1.0, CommonOps.elementMaxAbs(qdd_expected)) * epsilon);
    }
 
    private static void assertApplyMultipleImpulses(Random random, int iteration, List<? extends JointBasics> joints, double epsilon)
@@ -804,7 +830,12 @@ public class MultiBodyResponseCalculatorTest
       DenseMatrix64F qdd_expected = forwardDynamicsCalculator.getJointAccelerationMatrix();
       DenseMatrix64F qdd_original = multiBodyResponseCalculator.getForwardDynamicsCalculator().getJointAccelerationMatrix();
       DenseMatrix64F qdd_change = multiBodyResponseCalculator.propagateImpulse();
-      assertJointAccelerationMatrixEquals(iteration, qdd_expected, qdd_original, qdd_change, Math.max(1.0, CommonOps.elementMaxAbs(qdd_expected)) * epsilon);
+      assertJointAccelerationMatrixEquals(multiBodySystemInput,
+                                          iteration,
+                                          qdd_expected,
+                                          qdd_original,
+                                          qdd_change,
+                                          Math.max(1.0, CommonOps.elementMaxAbs(qdd_expected)) * epsilon);
    }
 
    private static void runAssertionViaTwistProvider(Random random, int iteration, List<? extends JointBasics> joints, double epsilon,
@@ -917,8 +948,8 @@ public class MultiBodyResponseCalculatorTest
       return multiBodyResponseCalculator;
    }
 
-   private static void assertJointAccelerationMatrixEquals(int iteration, DenseMatrix64F qdd_expected, DenseMatrix64F qdd_original, DenseMatrix64F qdd_change,
-                                                           double epsilon)
+   private static void assertJointAccelerationMatrixEquals(MultiBodySystemReadOnly input, int iteration, DenseMatrix64F qdd_expected,
+                                                           DenseMatrix64F qdd_original, DenseMatrix64F qdd_change, double epsilon)
    {
       DenseMatrix64F qdd_actual = new DenseMatrix64F(qdd_change.getNumRows(), 1);
       CommonOps.add(qdd_original, qdd_change, qdd_actual);
@@ -934,14 +965,31 @@ public class MultiBodyResponseCalculatorTest
          {
             double error = qdd_expected.get(row, 0) - qdd_actual.get(row, 0);
 
-            output.set(row, 0, qdd_expected.get(row, 0));
-            output.set(row, 1, qdd_original.get(row, 0));
-            output.set(row, 2, qdd_change.get(row, 0));
+            output.set(row, 0, qdd_original.get(row, 0));
+            output.set(row, 1, qdd_change.get(row, 0));
+            output.set(row, 2, qdd_expected.get(row, 0));
             output.set(row, 3, qdd_actual.get(row, 0));
             output.set(row, 4, error);
             maxError = Math.max(maxError, Math.abs(error));
          }
-         output.print(EuclidCoreIOTools.getStringFormat(9, 6));
+
+         TablePrinter tablePrinter = new TablePrinter();
+         tablePrinter.setColumnSeparator("   ");
+         tablePrinter.setRow(0, "Joint", "Successor", "original", "change", "expected", "actual", "error");
+         tablePrinter.setSubTable(1, 2, output);
+
+         int row = 1;
+
+         for (JointReadOnly joint : input.getJointMatrixIndexProvider().getIndexedJointsInOrder())
+         {
+            for (int dof = 0; dof < joint.getDegreesOfFreedom(); dof++)
+            {
+               tablePrinter.setCell(row, 0, joint.getName(), Alignment.LEFT);
+               tablePrinter.setCell(row, 1, joint.getSuccessor().getName(), Alignment.LEFT);
+               row++;
+            }
+         }
+         System.out.println(tablePrinter.toString());
          System.out.println("Max error: " + maxError);
       }
       assertTrue(areEqual);
