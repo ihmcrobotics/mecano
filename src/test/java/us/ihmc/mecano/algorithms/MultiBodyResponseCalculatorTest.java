@@ -51,6 +51,7 @@ public class MultiBodyResponseCalculatorTest
 
       for (int i = 0; i < ITERATIONS; i++)
       {
+         double gravity = EuclidCoreRandomTools.nextDouble(random, -20.0, -1.0);
          double dt = EuclidCoreRandomTools.nextDouble(random, 1.0e-7, 1.0e-2);
 
          int numberOfJoints = random.nextInt(50) + 1;
@@ -68,11 +69,13 @@ public class MultiBodyResponseCalculatorTest
           */
          boolean considerVelocities = false;
          SpatialAccelerationCalculator spatialAccelerationCalculator = new SpatialAccelerationCalculator(rootBody, worldFrame, considerVelocities);
+         spatialAccelerationCalculator.setGravitionalAcceleration(gravity);
 
          RigidBodyBasics rigidBody = joints.get(random.nextInt(numberOfJoints)).getSuccessor();
 
          Twist bodyTwistOld = new Twist(rigidBody.getBodyFixedFrame().getTwistOfFrame());
-         Twist bodyAccelerationIntegrated = new Twist(spatialAccelerationCalculator.getAccelerationOfBody(rigidBody));
+         // When integrating, need to ignore the gravitational acceleration of the root body.
+         Twist bodyAccelerationIntegrated = new Twist(spatialAccelerationCalculator.getRelativeAcceleration(rootBody, rigidBody));
          bodyAccelerationIntegrated.scale(dt);
 
          Twist bodyTwistNewActual = new Twist(bodyTwistOld);
