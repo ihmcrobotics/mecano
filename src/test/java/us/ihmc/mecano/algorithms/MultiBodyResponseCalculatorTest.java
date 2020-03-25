@@ -28,9 +28,11 @@ import us.ihmc.mecano.multiBodySystem.RevoluteJoint;
 import us.ihmc.mecano.multiBodySystem.interfaces.*;
 import us.ihmc.mecano.spatial.SpatialAcceleration;
 import us.ihmc.mecano.spatial.SpatialImpulse;
+import us.ihmc.mecano.spatial.Twist;
 import us.ihmc.mecano.spatial.Wrench;
 import us.ihmc.mecano.spatial.interfaces.SpatialForceReadOnly;
 import us.ihmc.mecano.spatial.interfaces.SpatialVectorReadOnly;
+import us.ihmc.mecano.spatial.interfaces.TwistReadOnly;
 import us.ihmc.mecano.spatial.interfaces.WrenchReadOnly;
 import us.ihmc.mecano.tools.*;
 import us.ihmc.mecano.tools.MultiBodySystemRandomTools.RandomFloatingRevoluteJointChain;
@@ -42,6 +44,50 @@ public class MultiBodyResponseCalculatorTest
    private static final double JOINT_EPSILON = 1.0e-9;
 
    @Test
+   public void testSpatialAccelerationIntegration()
+   { // Test used to demonstrate how to integrate spatial acceleration to predict the twist of a rigid-body.
+      Random random = new Random(4757);
+      ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
+
+      for (int i = 0; i < ITERATIONS; i++)
+      {
+         double dt = EuclidCoreRandomTools.nextDouble(random, 1.0e-7, 1.0e-2);
+
+         int numberOfJoints = random.nextInt(50) + 1;
+         List<OneDoFJoint> joints = MultiBodySystemRandomTools.nextOneDoFJointChain(random, numberOfJoints);
+
+         for (JointStateType state : JointStateType.values())
+            MultiBodySystemRandomTools.nextState(random, state, joints);
+
+         RigidBodyBasics rootBody = MultiBodySystemTools.getRootBody(joints.get(0).getPredecessor());
+         rootBody.updateFramesRecursively();
+
+         /*
+          * When integrating, the centrifugal and Coriolis accelerations have to be ignored. Still the option
+          * that there's another way to do this while considering bias acceleration.
+          */
+         boolean considerVelocities = false;
+         SpatialAccelerationCalculator spatialAccelerationCalculator = new SpatialAccelerationCalculator(rootBody, worldFrame, considerVelocities);
+
+         RigidBodyBasics rigidBody = joints.get(random.nextInt(numberOfJoints)).getSuccessor();
+
+         Twist bodyTwistOld = new Twist(rigidBody.getBodyFixedFrame().getTwistOfFrame());
+         Twist bodyAccelerationIntegrated = new Twist(spatialAccelerationCalculator.getAccelerationOfBody(rigidBody));
+         bodyAccelerationIntegrated.scale(dt);
+
+         Twist bodyTwistNewActual = new Twist(bodyTwistOld);
+         bodyTwistNewActual.add((SpatialVectorReadOnly) bodyAccelerationIntegrated);
+
+         joints.forEach(joint -> joint.setQd(joint.getQd() + dt * joint.getQdd()));
+         rootBody.updateFramesRecursively();
+
+         TwistReadOnly bodyTwistNewExpected = rigidBody.getBodyFixedFrame().getTwistOfFrame();
+
+         MecanoTestTools.assertTwistEquals("Iteration " + i, bodyTwistNewExpected, bodyTwistNewActual, EPSILON);
+      }
+   }
+
+   @Test
    public void testPrismaticJointChain()
    {
       Random random = new Random(435346);
@@ -50,13 +96,16 @@ public class MultiBodyResponseCalculatorTest
       {
          int numberOfJoints = random.nextInt(50) + 1;
          List<PrismaticJoint> joints = MultiBodySystemRandomTools.nextPrismaticJointChain(random, numberOfJoints);
+         double dt = EuclidCoreRandomTools.nextDouble(random, 1.0e-7, 1.0e-2);
          assertApplySingleRigidBodyWrench(random, i, joints, EPSILON);
          assertApplySingleRigidBodyImpulse(random, i, joints, EPSILON);
+         assertApplySingleRigidBodyImpulseViaIntegration(random, i, joints, dt, EPSILON);
          assertRigidBodyApparentInertiaInverse(random, i, joints, EPSILON);
          assertRigidBodyApparentLinearInertiaInverse(random, i, joints, EPSILON);
 
          assertApplySingleJointWrench(random, i, joints, EPSILON);
          assertApplySingleJointImpulse(random, i, joints, EPSILON);
+         assertApplySingleJointImpulseViaIntegration(random, i, joints, dt, EPSILON);
          assertJointApparentInertiaInverse(random, i, joints, EPSILON);
 
          assertApplyMultipleWrenches(random, i, joints, EPSILON);
@@ -73,13 +122,16 @@ public class MultiBodyResponseCalculatorTest
       {
          int numberOfJoints = random.nextInt(50) + 1;
          List<PrismaticJoint> joints = MultiBodySystemRandomTools.nextPrismaticJointTree(random, numberOfJoints);
+         double dt = EuclidCoreRandomTools.nextDouble(random, 1.0e-7, 1.0e-2);
          assertApplySingleRigidBodyWrench(random, i, joints, EPSILON);
          assertApplySingleRigidBodyImpulse(random, i, joints, EPSILON);
+         assertApplySingleRigidBodyImpulseViaIntegration(random, i, joints, dt, EPSILON);
          assertRigidBodyApparentInertiaInverse(random, i, joints, EPSILON);
          assertRigidBodyApparentLinearInertiaInverse(random, i, joints, EPSILON);
 
          assertApplySingleJointWrench(random, i, joints, EPSILON);
          assertApplySingleJointImpulse(random, i, joints, EPSILON);
+         assertApplySingleJointImpulseViaIntegration(random, i, joints, dt, EPSILON);
          assertJointApparentInertiaInverse(random, i, joints, EPSILON);
 
          assertApplyMultipleWrenches(random, i, joints, EPSILON);
@@ -96,13 +148,16 @@ public class MultiBodyResponseCalculatorTest
       {
          int numberOfJoints = random.nextInt(50) + 1;
          List<RevoluteJoint> joints = MultiBodySystemRandomTools.nextRevoluteJointChain(random, numberOfJoints);
+         double dt = EuclidCoreRandomTools.nextDouble(random, 1.0e-7, 1.0e-2);
          assertApplySingleRigidBodyWrench(random, i, joints, EPSILON);
          assertApplySingleRigidBodyImpulse(random, i, joints, EPSILON);
+         assertApplySingleRigidBodyImpulseViaIntegration(random, i, joints, dt, EPSILON);
          assertRigidBodyApparentInertiaInverse(random, i, joints, EPSILON);
          assertRigidBodyApparentLinearInertiaInverse(random, i, joints, EPSILON);
 
          assertApplySingleJointWrench(random, i, joints, EPSILON);
          assertApplySingleJointImpulse(random, i, joints, EPSILON);
+         assertApplySingleJointImpulseViaIntegration(random, i, joints, dt, EPSILON);
          assertJointApparentInertiaInverse(random, i, joints, EPSILON);
 
          assertApplyMultipleWrenches(random, i, joints, EPSILON);
@@ -119,13 +174,16 @@ public class MultiBodyResponseCalculatorTest
       {
          int numberOfJoints = random.nextInt(50) + 1;
          List<RevoluteJoint> joints = MultiBodySystemRandomTools.nextRevoluteJointTree(random, numberOfJoints);
+         double dt = EuclidCoreRandomTools.nextDouble(random, 1.0e-7, 1.0e-2);
          assertApplySingleRigidBodyWrench(random, i, joints, EPSILON);
          assertApplySingleRigidBodyImpulse(random, i, joints, EPSILON);
+         assertApplySingleRigidBodyImpulseViaIntegration(random, i, joints, dt, EPSILON);
          assertRigidBodyApparentInertiaInverse(random, i, joints, EPSILON);
          assertRigidBodyApparentLinearInertiaInverse(random, i, joints, EPSILON);
 
          assertApplySingleJointWrench(random, i, joints, EPSILON);
          assertApplySingleJointImpulse(random, i, joints, EPSILON);
+         assertApplySingleJointImpulseViaIntegration(random, i, joints, dt, EPSILON);
          assertJointApparentInertiaInverse(random, i, joints, EPSILON);
 
          assertApplyMultipleWrenches(random, i, joints, EPSILON);
@@ -142,13 +200,16 @@ public class MultiBodyResponseCalculatorTest
       {
          int numberOfJoints = random.nextInt(50) + 1;
          List<OneDoFJoint> joints = MultiBodySystemRandomTools.nextOneDoFJointChain(random, numberOfJoints);
+         double dt = EuclidCoreRandomTools.nextDouble(random, 1.0e-7, 1.0e-2);
          assertApplySingleRigidBodyWrench(random, i, joints, EPSILON);
          assertApplySingleRigidBodyImpulse(random, i, joints, EPSILON);
+         assertApplySingleRigidBodyImpulseViaIntegration(random, i, joints, dt, EPSILON);
          assertRigidBodyApparentInertiaInverse(random, i, joints, EPSILON);
          assertRigidBodyApparentLinearInertiaInverse(random, i, joints, EPSILON);
 
          assertApplySingleJointWrench(random, i, joints, EPSILON);
          assertApplySingleJointImpulse(random, i, joints, EPSILON);
+         assertApplySingleJointImpulseViaIntegration(random, i, joints, dt, EPSILON);
          assertJointApparentInertiaInverse(random, i, joints, EPSILON);
 
          assertApplyMultipleWrenches(random, i, joints, EPSILON);
@@ -165,13 +226,16 @@ public class MultiBodyResponseCalculatorTest
       {
          int numberOfJoints = random.nextInt(50) + 1;
          List<OneDoFJoint> joints = MultiBodySystemRandomTools.nextOneDoFJointTree(random, numberOfJoints);
+         double dt = EuclidCoreRandomTools.nextDouble(random, 1.0e-7, 1.0e-2);
          assertApplySingleRigidBodyWrench(random, i, joints, EPSILON);
          assertApplySingleRigidBodyImpulse(random, i, joints, EPSILON);
+         assertApplySingleRigidBodyImpulseViaIntegration(random, i, joints, dt, EPSILON);
          assertRigidBodyApparentInertiaInverse(random, i, joints, EPSILON);
          assertRigidBodyApparentLinearInertiaInverse(random, i, joints, EPSILON);
 
          assertApplySingleJointWrench(random, i, joints, EPSILON);
          assertApplySingleJointImpulse(random, i, joints, EPSILON);
+         assertApplySingleJointImpulseViaIntegration(random, i, joints, dt, EPSILON);
          assertJointApparentInertiaInverse(random, i, joints, EPSILON);
 
          assertApplyMultipleWrenches(random, i, joints, EPSILON);
@@ -188,13 +252,16 @@ public class MultiBodyResponseCalculatorTest
       {
          int numberOfJoints = random.nextInt(40) + 1;
          List<Joint> joints = new RandomFloatingRevoluteJointChain(random, numberOfJoints).getJoints();
+         double dt = EuclidCoreRandomTools.nextDouble(random, 1.0e-7, 1.0e-2);
          assertApplySingleRigidBodyWrench(random, i, joints, EPSILON);
          assertApplySingleRigidBodyImpulse(random, i, joints, EPSILON);
+         assertApplySingleRigidBodyImpulseViaIntegration(random, i, joints, dt, EPSILON);
          assertRigidBodyApparentInertiaInverse(random, i, joints, EPSILON);
          assertRigidBodyApparentLinearInertiaInverse(random, i, joints, EPSILON);
 
          assertApplySingleJointWrench(random, i, joints, EPSILON);
          assertApplySingleJointImpulse(random, i, joints, EPSILON);
+         assertApplySingleJointImpulseViaIntegration(random, i, joints, dt, EPSILON);
          assertJointApparentInertiaInverse(random, i, joints, EPSILON);
 
          assertApplyMultipleWrenches(random, i, joints, EPSILON);
@@ -211,13 +278,16 @@ public class MultiBodyResponseCalculatorTest
       {
          int numberOfJoints = random.nextInt(20) + 1;
          List<JointBasics> joints = MultiBodySystemRandomTools.nextJointChain(random, numberOfJoints);
+         double dt = EuclidCoreRandomTools.nextDouble(random, 1.0e-7, 1.0e-2);
          assertApplySingleRigidBodyWrench(random, i, joints, JOINT_EPSILON);
          assertApplySingleRigidBodyImpulse(random, i, joints, JOINT_EPSILON);
+         assertApplySingleRigidBodyImpulseViaIntegration(random, i, joints, dt, JOINT_EPSILON);
          assertRigidBodyApparentInertiaInverse(random, i, joints, JOINT_EPSILON);
          assertRigidBodyApparentLinearInertiaInverse(random, i, joints, JOINT_EPSILON);
 
          assertApplySingleJointWrench(random, i, joints, JOINT_EPSILON);
          assertApplySingleJointImpulse(random, i, joints, JOINT_EPSILON);
+         assertApplySingleJointImpulseViaIntegration(random, i, joints, dt, JOINT_EPSILON);
          assertJointApparentInertiaInverse(random, i, joints, JOINT_EPSILON);
 
          assertApplyMultipleWrenches(random, i, joints, JOINT_EPSILON);
@@ -234,9 +304,8 @@ public class MultiBodyResponseCalculatorTest
                                                         Map<RigidBodyReadOnly, WrenchReadOnly> externalWrenches, List<? extends JointReadOnly> jointsToIgnore,
                                                         double epsilon)
    {
-      MultiBodySystemRandomTools.nextState(random, JointStateType.CONFIGURATION, joints);
-      MultiBodySystemRandomTools.nextState(random, JointStateType.VELOCITY, joints);
-      MultiBodySystemRandomTools.nextState(random, JointStateType.EFFORT, joints);
+      for (JointStateType state : JointStateType.values())
+         MultiBodySystemRandomTools.nextState(random, state, joints);
 
       RigidBodyBasics target = joints.get(random.nextInt(joints.size())).getSuccessor();
       Wrench testWrench = MecanoRandomTools.nextWrench(random, target.getBodyFixedFrame(), target.getBodyFixedFrame());
@@ -272,9 +341,8 @@ public class MultiBodyResponseCalculatorTest
                                                          Map<RigidBodyReadOnly, WrenchReadOnly> externalWrenches, List<? extends JointReadOnly> jointsToIgnore,
                                                          double epsilon)
    {
-      MultiBodySystemRandomTools.nextState(random, JointStateType.CONFIGURATION, joints);
-      MultiBodySystemRandomTools.nextState(random, JointStateType.VELOCITY, joints);
-      MultiBodySystemRandomTools.nextState(random, JointStateType.EFFORT, joints);
+      for (JointStateType state : JointStateType.values())
+         MultiBodySystemRandomTools.nextState(random, state, joints);
 
       RigidBodyBasics target = joints.get(random.nextInt(joints.size())).getSuccessor();
       SpatialImpulse testImpulse = MecanoRandomTools.nextSpatialImpulse(random, target.getBodyFixedFrame(), target.getBodyFixedFrame());
@@ -301,6 +369,74 @@ public class MultiBodyResponseCalculatorTest
       assertJointAccelerationMatrixEquals(iteration, qdd_expected, qdd_original, qdd_change, Math.max(1.0, CommonOps.elementMaxAbs(qdd_expected)) * epsilon);
    }
 
+   private static void assertApplySingleRigidBodyImpulseViaIntegration(Random random, int iteration, List<? extends JointBasics> joints, double dt,
+                                                                       double epsilon)
+   {
+      assertApplySingleRigidBodyImpulseViaIntegration(random, iteration, joints, dt, Collections.emptyMap(), Collections.emptyList(), epsilon);
+   }
+
+   private static void assertApplySingleRigidBodyImpulseViaIntegration(Random random, int iteration, List<? extends JointBasics> joints, double dt,
+                                                                       Map<RigidBodyReadOnly, WrenchReadOnly> externalWrenches,
+                                                                       List<? extends JointReadOnly> jointsToIgnore, double epsilon)
+   {
+      double gravity = EuclidCoreRandomTools.nextDouble(random, -10.0, -1.0);
+
+      for (JointStateType state : JointStateType.values())
+         MultiBodySystemRandomTools.nextState(random, state, joints);
+
+      int numberOfJoints = joints.stream().mapToInt(JointReadOnly::getDegreesOfFreedom).sum();
+      DenseMatrix64F qd_original = new DenseMatrix64F(numberOfJoints, 1);
+      MultiBodySystemTools.extractJointsState(joints, JointStateType.VELOCITY, qd_original);
+
+      RigidBodyBasics target = joints.get(random.nextInt(joints.size())).getSuccessor();
+
+      RigidBodyBasics rootBody = MultiBodySystemTools.getRootBody(joints.get(0).getPredecessor());
+      MultiBodySystemReadOnly multiBodySystemInput = MultiBodySystemReadOnly.toMultiBodySystemInput(rootBody, jointsToIgnore);
+      rootBody.updateFramesRecursively();
+
+      Wrench externalWrench = MecanoRandomTools.nextWrench(random, target.getBodyFixedFrame(), target.getBodyFixedFrame(), 100.0, 100.0);
+      SpatialImpulse externalImpulse = new SpatialImpulse(target.getBodyFixedFrame(), externalWrench);
+      externalImpulse.scale(dt);
+
+      ForwardDynamicsCalculator forwardDynamicsCalculator = setupForwardDynamicsCalculator(multiBodySystemInput,
+                                                                                           gravity,
+                                                                                           externalWrenches,
+                                                                                           Collections.singletonMap(target, externalWrench),
+                                                                                           Collections.emptyMap());
+      MultiBodyResponseCalculator multiBodyResponseCalculator = setupMultiBodyResponseCalculator(multiBodySystemInput, gravity, externalWrenches);
+      multiBodyResponseCalculator.applyRigidBodyImpulse(target, externalImpulse);
+
+      DenseMatrix64F qdd = forwardDynamicsCalculator.getJointAccelerationMatrix();
+      DenseMatrix64F qd_expected = new DenseMatrix64F(numberOfJoints, 1);
+      CommonOps.add(qd_original, dt, qdd, qd_expected);
+
+      DenseMatrix64F qd_change = multiBodyResponseCalculator.propagateImpulse();
+      DenseMatrix64F qd_noImpulse = new DenseMatrix64F(numberOfJoints, 1);
+      CommonOps.add(qd_original, dt, multiBodyResponseCalculator.getForwardDynamicsCalculator().getJointAccelerationMatrix(), qd_noImpulse);
+      assertJointAccelerationMatrixEquals(iteration, qd_expected, qd_noImpulse, qd_change, epsilon);
+
+      TwistReadOnly targetTwistChangeActual = multiBodyResponseCalculator.getTwistChangeProvider().getTwistOfBody(target);
+      Twist targetTwistOld = new Twist(target.getBodyFixedFrame().getTwistOfFrame());
+      Twist targetAccelerationIntegrated = new Twist(multiBodyResponseCalculator.getForwardDynamicsCalculator().getAccelerationProvider(false)
+                                                                                .getAccelerationOfBody(target));
+      targetAccelerationIntegrated.scale(dt);
+
+      Twist targetTwistNewActual = new Twist(targetTwistOld);
+      targetTwistNewActual.add((SpatialVectorReadOnly) targetAccelerationIntegrated);
+      targetTwistNewActual.add((SpatialVectorReadOnly) targetTwistChangeActual);
+
+      MultiBodySystemTools.insertJointsState(joints, JointStateType.VELOCITY, qd_expected);
+      rootBody.updateFramesRecursively();
+      TwistReadOnly targetTwistNewExpected = target.getBodyFixedFrame().getTwistOfFrame();
+
+      Twist targetTwistChangeExpected = new Twist(targetTwistNewExpected);
+      targetTwistChangeExpected.sub((SpatialVectorReadOnly) targetTwistOld);
+
+      MecanoTestTools.assertTwistEquals("Iteration: " + iteration, targetTwistChangeExpected, targetTwistChangeActual, epsilon);
+
+      MecanoTestTools.assertTwistEquals("Iteration: " + iteration, targetTwistNewExpected, targetTwistNewActual, epsilon);
+   }
+
    private static void assertRigidBodyApparentInertiaInverse(Random random, int iteration, List<? extends JointBasics> joints, double epsilon)
    {
       assertRigidBodyApparentInertiaInverse(random, iteration, joints, Collections.emptyMap(), Collections.emptyList(), epsilon);
@@ -310,9 +446,8 @@ public class MultiBodyResponseCalculatorTest
                                                              Map<RigidBodyReadOnly, WrenchReadOnly> externalWrenches,
                                                              List<? extends JointReadOnly> jointsToIgnore, double epsilon)
    {
-      MultiBodySystemRandomTools.nextState(random, JointStateType.CONFIGURATION, joints);
-      MultiBodySystemRandomTools.nextState(random, JointStateType.VELOCITY, joints);
-      MultiBodySystemRandomTools.nextState(random, JointStateType.EFFORT, joints);
+      for (JointStateType state : JointStateType.values())
+         MultiBodySystemRandomTools.nextState(random, state, joints);
 
       RigidBodyBasics target = joints.get(random.nextInt(joints.size())).getSuccessor();
       ReferenceFrame testWrenchFrame = EuclidFrameRandomTools.nextReferenceFrame(random, target.getBodyFixedFrame());
@@ -355,9 +490,8 @@ public class MultiBodyResponseCalculatorTest
                                                                    Map<RigidBodyReadOnly, WrenchReadOnly> externalWrenches,
                                                                    List<? extends JointReadOnly> jointsToIgnore, double epsilon)
    {
-      MultiBodySystemRandomTools.nextState(random, JointStateType.CONFIGURATION, joints);
-      MultiBodySystemRandomTools.nextState(random, JointStateType.VELOCITY, joints);
-      MultiBodySystemRandomTools.nextState(random, JointStateType.EFFORT, joints);
+      for (JointStateType state : JointStateType.values())
+         MultiBodySystemRandomTools.nextState(random, state, joints);
 
       RigidBodyBasics target = joints.get(random.nextInt(joints.size())).getSuccessor();
       ReferenceFrame testWrenchFrame = EuclidFrameRandomTools.nextReferenceFrame(random, target.getBodyFixedFrame());
@@ -398,9 +532,8 @@ public class MultiBodyResponseCalculatorTest
                                                     Map<RigidBodyReadOnly, WrenchReadOnly> externalWrenches, List<? extends JointReadOnly> jointsToIgnore,
                                                     double epsilon)
    {
-      MultiBodySystemRandomTools.nextState(random, JointStateType.CONFIGURATION, joints);
-      MultiBodySystemRandomTools.nextState(random, JointStateType.VELOCITY, joints);
-      MultiBodySystemRandomTools.nextState(random, JointStateType.EFFORT, joints);
+      for (JointStateType state : JointStateType.values())
+         MultiBodySystemRandomTools.nextState(random, state, joints);
 
       JointBasics target = joints.get(random.nextInt(joints.size()));
       DenseMatrix64F testJointWrench = RandomMatrices.createRandom(target.getDegreesOfFreedom(), 1, -10.0, 10.0, random);
@@ -438,9 +571,8 @@ public class MultiBodyResponseCalculatorTest
                                                      Map<RigidBodyReadOnly, WrenchReadOnly> externalWrenches, List<? extends JointReadOnly> jointsToIgnore,
                                                      double epsilon)
    {
-      MultiBodySystemRandomTools.nextState(random, JointStateType.CONFIGURATION, joints);
-      MultiBodySystemRandomTools.nextState(random, JointStateType.VELOCITY, joints);
-      MultiBodySystemRandomTools.nextState(random, JointStateType.EFFORT, joints);
+      for (JointStateType state : JointStateType.values())
+         MultiBodySystemRandomTools.nextState(random, state, joints);
 
       JointBasics target = joints.get(random.nextInt(joints.size()));
       DenseMatrix64F testJointImpulse = RandomMatrices.createRandom(target.getDegreesOfFreedom(), 1, -10.0, 10.0, random);
@@ -469,6 +601,52 @@ public class MultiBodyResponseCalculatorTest
       assertJointAccelerationMatrixEquals(iteration, qdd_expected, qdd_original, qdd_change, Math.max(1.0, CommonOps.elementMaxAbs(qdd_expected)) * epsilon);
    }
 
+   private static void assertApplySingleJointImpulseViaIntegration(Random random, int iteration, List<? extends JointBasics> joints, double dt, double epsilon)
+   {
+      assertApplySingleJointImpulseViaIntegration(random, iteration, joints, dt, Collections.emptyMap(), Collections.emptyList(), epsilon);
+   }
+
+   private static void assertApplySingleJointImpulseViaIntegration(Random random, int iteration, List<? extends JointBasics> joints, double dt,
+                                                                   Map<RigidBodyReadOnly, WrenchReadOnly> externalWrenches,
+                                                                   List<? extends JointReadOnly> jointsToIgnore, double epsilon)
+   {
+      double gravity = EuclidCoreRandomTools.nextDouble(random, -10.0, -1.0);
+
+      for (JointStateType state : JointStateType.values())
+         MultiBodySystemRandomTools.nextState(random, state, joints);
+
+      int numberOfJoints = joints.stream().mapToInt(JointReadOnly::getDegreesOfFreedom).sum();
+      DenseMatrix64F qd_original = new DenseMatrix64F(numberOfJoints, 1);
+      MultiBodySystemTools.extractJointsState(joints, JointStateType.VELOCITY, qd_original);
+
+      JointBasics target = joints.get(random.nextInt(joints.size()));
+
+      RigidBodyBasics rootBody = MultiBodySystemTools.getRootBody(joints.get(0).getPredecessor());
+      MultiBodySystemReadOnly multiBodySystemInput = MultiBodySystemReadOnly.toMultiBodySystemInput(rootBody, jointsToIgnore);
+      rootBody.updateFramesRecursively();
+
+      DenseMatrix64F testJointEffort = RandomMatrices.createRandom(target.getDegreesOfFreedom(), 1, -10.0, 10.0, random);
+      DenseMatrix64F testJointImpulse = new DenseMatrix64F(testJointEffort);
+      CommonOps.scale(dt, testJointImpulse);
+
+      ForwardDynamicsCalculator forwardDynamicsCalculator = setupForwardDynamicsCalculator(multiBodySystemInput,
+                                                                                           gravity,
+                                                                                           externalWrenches,
+                                                                                           Collections.emptyMap(),
+                                                                                           Collections.singletonMap(target, testJointEffort));
+      MultiBodyResponseCalculator multiBodyResponseCalculator = setupMultiBodyResponseCalculator(multiBodySystemInput, gravity, externalWrenches);
+      multiBodyResponseCalculator.applyJointImpulse(target, testJointImpulse);
+
+      DenseMatrix64F qdd = forwardDynamicsCalculator.getJointAccelerationMatrix();
+      DenseMatrix64F qd_expected = new DenseMatrix64F(numberOfJoints, 1);
+      CommonOps.add(qd_original, dt, qdd, qd_expected);
+
+      DenseMatrix64F qd_change = multiBodyResponseCalculator.propagateImpulse();
+      DenseMatrix64F qd_noImpulse = new DenseMatrix64F(numberOfJoints, 1);
+      CommonOps.add(qd_original, dt, multiBodyResponseCalculator.getForwardDynamicsCalculator().getJointAccelerationMatrix(), qd_noImpulse);
+      assertJointAccelerationMatrixEquals(iteration, qd_expected, qd_noImpulse, qd_change, epsilon);
+   }
+
    private static void assertJointApparentInertiaInverse(Random random, int iteration, List<? extends JointBasics> joints, double epsilon)
    {
       assertJointApparentInertiaInverse(random, iteration, joints, Collections.emptyMap(), Collections.emptyList(), epsilon);
@@ -478,9 +656,8 @@ public class MultiBodyResponseCalculatorTest
                                                          Map<RigidBodyReadOnly, WrenchReadOnly> externalWrenches, List<? extends JointReadOnly> jointsToIgnore,
                                                          double epsilon)
    {
-      MultiBodySystemRandomTools.nextState(random, JointStateType.CONFIGURATION, joints);
-      MultiBodySystemRandomTools.nextState(random, JointStateType.VELOCITY, joints);
-      MultiBodySystemRandomTools.nextState(random, JointStateType.EFFORT, joints);
+      for (JointStateType state : JointStateType.values())
+         MultiBodySystemRandomTools.nextState(random, state, joints);
 
       JointBasics target = joints.get(random.nextInt(joints.size()));
       DenseMatrix64F testWrench = RandomMatrices.createRandom(target.getDegreesOfFreedom(), 1, -10.0, 10.0, random);
@@ -522,9 +699,8 @@ public class MultiBodyResponseCalculatorTest
                                                    Map<RigidBodyReadOnly, WrenchReadOnly> externalWrenches, List<? extends JointReadOnly> jointsToIgnore,
                                                    double epsilon)
    {
-      MultiBodySystemRandomTools.nextState(random, JointStateType.CONFIGURATION, joints);
-      MultiBodySystemRandomTools.nextState(random, JointStateType.VELOCITY, joints);
-      MultiBodySystemRandomTools.nextState(random, JointStateType.EFFORT, joints);
+      for (JointStateType state : JointStateType.values())
+         MultiBodySystemRandomTools.nextState(random, state, joints);
 
       int numberOfRigidBodyDisturbances = random.nextInt(joints.size()) + 1;
       Map<RigidBodyBasics, Wrench> rigidBodyDisturbances = new HashMap<>();
@@ -580,9 +756,8 @@ public class MultiBodyResponseCalculatorTest
                                                   Map<RigidBodyReadOnly, WrenchReadOnly> externalWrenches, List<? extends JointReadOnly> jointsToIgnore,
                                                   double epsilon)
    {
-      MultiBodySystemRandomTools.nextState(random, JointStateType.CONFIGURATION, joints);
-      MultiBodySystemRandomTools.nextState(random, JointStateType.VELOCITY, joints);
-      MultiBodySystemRandomTools.nextState(random, JointStateType.EFFORT, joints);
+      for (JointStateType state : JointStateType.values())
+         MultiBodySystemRandomTools.nextState(random, state, joints);
 
       int numberOfRigidBodyDisturbances = random.nextInt(joints.size()) + 1;
       Map<RigidBodyBasics, SpatialImpulse> rigidBodyDisturbances = new HashMap<>();
