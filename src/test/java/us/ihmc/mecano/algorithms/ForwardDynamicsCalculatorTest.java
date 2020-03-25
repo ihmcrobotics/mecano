@@ -1,7 +1,7 @@
 package us.ihmc.mecano.algorithms;
 
 import static org.junit.jupiter.api.Assertions.*;
-import static us.ihmc.mecano.tools.MecanoRandomTools.*;
+import static us.ihmc.mecano.tools.MecanoRandomTools.nextWrench;
 
 import java.util.Collections;
 import java.util.List;
@@ -16,15 +16,12 @@ import org.junit.jupiter.api.Test;
 
 import us.ihmc.euclid.tools.EuclidCoreIOTools;
 import us.ihmc.euclid.tools.EuclidCoreRandomTools;
+import us.ihmc.mecano.algorithms.interfaces.RigidBodyAccelerationProvider;
 import us.ihmc.mecano.multiBodySystem.Joint;
 import us.ihmc.mecano.multiBodySystem.OneDoFJoint;
 import us.ihmc.mecano.multiBodySystem.PrismaticJoint;
 import us.ihmc.mecano.multiBodySystem.RevoluteJoint;
-import us.ihmc.mecano.multiBodySystem.interfaces.JointBasics;
-import us.ihmc.mecano.multiBodySystem.interfaces.JointReadOnly;
-import us.ihmc.mecano.multiBodySystem.interfaces.MultiBodySystemReadOnly;
-import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
-import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyReadOnly;
+import us.ihmc.mecano.multiBodySystem.interfaces.*;
 import us.ihmc.mecano.spatial.SpatialAcceleration;
 import us.ihmc.mecano.spatial.interfaces.SpatialAccelerationReadOnly;
 import us.ihmc.mecano.spatial.interfaces.WrenchReadOnly;
@@ -59,8 +56,10 @@ public class ForwardDynamicsCalculatorTest
                                                  i,
                                                  joints,
                                                  Collections.emptyMap(),
-                                                 Collections.singletonList(joints.get(random.nextInt(joints.size()))),
+                                                 Collections.singletonList(joints.get(random.nextInt(numberOfJoints))),
                                                  ONE_DOF_JOINT_EPSILON);
+
+         compareAgainstSpatialAccelerationCalculator(random, i, joints, nextExternalWrenches(random, joints), Collections.emptyList(), ONE_DOF_JOINT_EPSILON);
       }
    }
 
@@ -82,8 +81,10 @@ public class ForwardDynamicsCalculatorTest
                                                  i,
                                                  joints,
                                                  Collections.emptyMap(),
-                                                 Collections.singletonList(joints.get(random.nextInt(joints.size()))),
+                                                 Collections.singletonList(joints.get(random.nextInt(numberOfJoints))),
                                                  ONE_DOF_JOINT_EPSILON);
+
+         compareAgainstSpatialAccelerationCalculator(random, i, joints, nextExternalWrenches(random, joints), Collections.emptyList(), ONE_DOF_JOINT_EPSILON);
       }
    }
 
@@ -105,8 +106,10 @@ public class ForwardDynamicsCalculatorTest
                                                  i,
                                                  joints,
                                                  Collections.emptyMap(),
-                                                 Collections.singletonList(joints.get(random.nextInt(joints.size()))),
+                                                 Collections.singletonList(joints.get(random.nextInt(numberOfJoints))),
                                                  2.0 * ONE_DOF_JOINT_EPSILON);
+
+         compareAgainstSpatialAccelerationCalculator(random, i, joints, nextExternalWrenches(random, joints), Collections.emptyList(), ONE_DOF_JOINT_EPSILON);
       }
    }
 
@@ -117,19 +120,21 @@ public class ForwardDynamicsCalculatorTest
 
       for (int i = 0; i < ITERATIONS; i++)
       {
-         List<RevoluteJoint> joints = MultiBodySystemRandomTools.nextRevoluteJointTree(random, random.nextInt(50) + 1);
+         int numberOfJoints = random.nextInt(50) + 1;
+         List<RevoluteJoint> joints = MultiBodySystemRandomTools.nextRevoluteJointTree(random, numberOfJoints);
          compareAgainstInverseDynamicsCalculator(random, i, joints, Collections.emptyMap(), Collections.emptyList(), ONE_DOF_JOINT_EPSILON);
          compareAgainstCompositeRigidBodyMassMatrixCalculator(random, i, joints, ONE_DOF_JOINT_EPSILON);
 
          compareAgainstInverseDynamicsCalculator(random, i, joints, nextExternalWrenches(random, joints), Collections.emptyList(), ONE_DOF_JOINT_EPSILON);
 
-         joints = MultiBodySystemRandomTools.nextRevoluteJointTree(random, random.nextInt(40) + 1);
          compareAgainstInverseDynamicsCalculator(random,
                                                  i,
                                                  joints,
                                                  Collections.emptyMap(),
-                                                 Collections.singletonList(joints.get(random.nextInt(joints.size()))),
+                                                 Collections.singletonList(joints.get(random.nextInt(numberOfJoints))),
                                                  2.0 * ONE_DOF_JOINT_EPSILON);
+
+         compareAgainstSpatialAccelerationCalculator(random, i, joints, nextExternalWrenches(random, joints), Collections.emptyList(), ONE_DOF_JOINT_EPSILON);
       }
    }
 
@@ -151,8 +156,10 @@ public class ForwardDynamicsCalculatorTest
                                                  i,
                                                  joints,
                                                  Collections.emptyMap(),
-                                                 Collections.singletonList(joints.get(random.nextInt(joints.size()))),
+                                                 Collections.singletonList(joints.get(random.nextInt(numberOfJoints))),
                                                  ONE_DOF_JOINT_EPSILON);
+
+         compareAgainstSpatialAccelerationCalculator(random, i, joints, nextExternalWrenches(random, joints), Collections.emptyList(), ONE_DOF_JOINT_EPSILON);
       }
    }
 
@@ -174,8 +181,10 @@ public class ForwardDynamicsCalculatorTest
                                                  i,
                                                  joints,
                                                  Collections.emptyMap(),
-                                                 Collections.singletonList(joints.get(random.nextInt(joints.size()))),
+                                                 Collections.singletonList(joints.get(random.nextInt(numberOfJoints))),
                                                  ONE_DOF_JOINT_EPSILON);
+
+         compareAgainstSpatialAccelerationCalculator(random, i, joints, nextExternalWrenches(random, joints), Collections.emptyList(), ONE_DOF_JOINT_EPSILON);
       }
    }
 
@@ -197,8 +206,10 @@ public class ForwardDynamicsCalculatorTest
                                                  i,
                                                  joints,
                                                  Collections.emptyMap(),
-                                                 Collections.singletonList(joints.get(random.nextInt(joints.size()))),
+                                                 Collections.singletonList(joints.get(random.nextInt(numberOfJoints))),
                                                  2.0 * FLOATING_JOINT_EPSILON);
+
+         compareAgainstSpatialAccelerationCalculator(random, i, joints, nextExternalWrenches(random, joints), Collections.emptyList(), FLOATING_JOINT_EPSILON);
       }
    }
 
@@ -220,8 +231,10 @@ public class ForwardDynamicsCalculatorTest
                                                  i,
                                                  joints,
                                                  Collections.emptyMap(),
-                                                 Collections.singletonList(joints.get(random.nextInt(joints.size()))),
+                                                 Collections.singletonList(joints.get(random.nextInt(numberOfJoints))),
                                                  ALL_JOINT_EPSILON);
+
+         compareAgainstSpatialAccelerationCalculator(random, i, joints, nextExternalWrenches(random, joints), Collections.emptyList(), ALL_JOINT_EPSILON);
       }
    }
 
@@ -302,21 +315,24 @@ public class ForwardDynamicsCalculatorTest
          }
          else
          {
-            SpatialAcceleration actualAccelerationOfBody = new SpatialAcceleration(forwardDynamicsCalculator.getAccelerationProvider().getAccelerationOfBody(rigidBody));
+            SpatialAcceleration actualAccelerationOfBody = new SpatialAcceleration(forwardDynamicsCalculator.getAccelerationProvider()
+                                                                                                            .getAccelerationOfBody(rigidBody));
             actualAccelerationOfBody.changeFrame(expectedAccelerationOfBody.getReferenceFrame());
             MecanoTestTools.assertSpatialAccelerationEquals(expectedAccelerationOfBody, actualAccelerationOfBody, epsilon);
-            
+
             for (int i = 0; i < 5; i++)
             {
                RigidBodyBasics otherRigidBody = allRigidBodies.get(random.nextInt(allRigidBodies.size()));
-               SpatialAccelerationReadOnly expectedRelativeAcceleration = inverseDynamicsCalculator.getAccelerationProvider().getRelativeAcceleration(rigidBody, otherRigidBody);
+               SpatialAccelerationReadOnly expectedRelativeAcceleration = inverseDynamicsCalculator.getAccelerationProvider()
+                                                                                                   .getRelativeAcceleration(rigidBody, otherRigidBody);
                if (expectedAccelerationOfBody == null)
                {
                   assertNull(forwardDynamicsCalculator.getAccelerationProvider().getRelativeAcceleration(otherRigidBody, rigidBody));
                }
                else
                {
-                  SpatialAccelerationReadOnly actualRelativeAcceleration = forwardDynamicsCalculator.getAccelerationProvider().getRelativeAcceleration(rigidBody, otherRigidBody);
+                  SpatialAccelerationReadOnly actualRelativeAcceleration = forwardDynamicsCalculator.getAccelerationProvider()
+                                                                                                    .getRelativeAcceleration(rigidBody, otherRigidBody);
                   MecanoTestTools.assertSpatialAccelerationEquals(expectedRelativeAcceleration, actualRelativeAcceleration, epsilon);
                }
             }
@@ -401,6 +417,93 @@ public class ForwardDynamicsCalculatorTest
          System.out.println("Max error: " + maxError);
       }
       assertTrue(areEqual);
+   }
+
+   private static void compareAgainstSpatialAccelerationCalculator(Random random, int iteration, List<? extends JointBasics> joints,
+                                                                   Map<RigidBodyReadOnly, WrenchReadOnly> externalWrenches,
+                                                                   List<? extends JointReadOnly> jointsToIgnore, double epsilon)
+   {
+      MultiBodySystemRandomTools.nextState(random, JointStateType.CONFIGURATION, joints);
+      MultiBodySystemRandomTools.nextState(random, JointStateType.VELOCITY, joints);
+      MultiBodySystemRandomTools.nextState(random, JointStateType.ACCELERATION, joints);
+
+      RigidBodyBasics rootBody = MultiBodySystemTools.getRootBody(joints.get(0).getPredecessor());
+      MultiBodySystemReadOnly multiBodySystemInput = MultiBodySystemReadOnly.toMultiBodySystemInput(rootBody, jointsToIgnore);
+      rootBody.updateFramesRecursively();
+
+      double gravity = EuclidCoreRandomTools.nextDouble(random, -10.0, -1.0);
+      ForwardDynamicsCalculator forwardDynamicsCalculator = new ForwardDynamicsCalculator(multiBodySystemInput);
+      forwardDynamicsCalculator.setGravitionalAcceleration(gravity);
+      externalWrenches.forEach(forwardDynamicsCalculator::setExternalWrench);
+      forwardDynamicsCalculator.compute();
+      joints.forEach(forwardDynamicsCalculator::writeComputedJointAcceleration);
+      RigidBodyAccelerationProvider fwdDynAccelerationProvider = forwardDynamicsCalculator.getAccelerationProvider();
+      RigidBodyAccelerationProvider fwdDynZeroVelocityAccelerationProvider = forwardDynamicsCalculator.getAccelerationProvider(false);
+
+      assertTrue(fwdDynAccelerationProvider.areAccelerationsConsidered());
+      assertTrue(fwdDynAccelerationProvider.areVelocitiesConsidered());
+      assertTrue(fwdDynZeroVelocityAccelerationProvider.areAccelerationsConsidered());
+      assertFalse(fwdDynZeroVelocityAccelerationProvider.areVelocitiesConsidered());
+
+      SpatialAccelerationCalculator accelerationCalculator = new SpatialAccelerationCalculator(rootBody, multiBodySystemInput.getInertialFrame());
+      SpatialAccelerationCalculator zeroVelocityAccelerationCalculator = new SpatialAccelerationCalculator(rootBody,
+                                                                                                           multiBodySystemInput.getInertialFrame(),
+                                                                                                           false);
+      accelerationCalculator.setGravitionalAcceleration(gravity);
+      zeroVelocityAccelerationCalculator.setGravitionalAcceleration(gravity);
+
+      List<? extends RigidBodyBasics> allRigidBodies = rootBody.subtreeList();
+
+      for (RigidBodyReadOnly rigidBody : allRigidBodies)
+      {
+         SpatialAccelerationReadOnly expectedAccelerationOfBody = accelerationCalculator.getAccelerationOfBody(rigidBody);
+         SpatialAccelerationReadOnly expectedZeroVelocityAccelerationOfBody = zeroVelocityAccelerationCalculator.getAccelerationOfBody(rigidBody);
+
+         if (expectedAccelerationOfBody == null)
+         {
+            assertNull(fwdDynAccelerationProvider.getAccelerationOfBody(rigidBody));
+            assertNull(fwdDynZeroVelocityAccelerationProvider.getAccelerationOfBody(rigidBody));
+         }
+         else
+         {
+            SpatialAcceleration actualAccelerationOfBody = new SpatialAcceleration(fwdDynAccelerationProvider.getAccelerationOfBody(rigidBody));
+            MecanoTestTools.assertSpatialAccelerationEquals(expectedAccelerationOfBody,
+                                                            actualAccelerationOfBody,
+                                                            Math.max(1.0, expectedAccelerationOfBody.length()) * epsilon);
+
+            SpatialAcceleration actualZeroVelocityAccelerationOfBody = new SpatialAcceleration(fwdDynZeroVelocityAccelerationProvider.getAccelerationOfBody(rigidBody));
+            MecanoTestTools.assertSpatialAccelerationEquals(expectedZeroVelocityAccelerationOfBody,
+                                                            actualZeroVelocityAccelerationOfBody,
+                                                            Math.max(1.0, expectedZeroVelocityAccelerationOfBody.length()) * epsilon);
+
+            for (int i = 0; i < 5; i++)
+            {
+               RigidBodyBasics otherRigidBody = allRigidBodies.get(random.nextInt(allRigidBodies.size()));
+               SpatialAccelerationReadOnly expectedRelativeAcceleration = accelerationCalculator.getRelativeAcceleration(rigidBody, otherRigidBody);
+               SpatialAccelerationReadOnly expectedRelativeZeroVelocityAcceleration = zeroVelocityAccelerationCalculator.getRelativeAcceleration(rigidBody,
+                                                                                                                                                 otherRigidBody);
+
+               if (expectedAccelerationOfBody == null)
+               {
+                  assertNull(fwdDynAccelerationProvider.getRelativeAcceleration(otherRigidBody, rigidBody));
+                  assertNull(fwdDynZeroVelocityAccelerationProvider.getRelativeAcceleration(otherRigidBody, rigidBody));
+               }
+               else
+               {
+                  SpatialAccelerationReadOnly actualRelativeAcceleration = fwdDynAccelerationProvider.getRelativeAcceleration(rigidBody, otherRigidBody);
+                  MecanoTestTools.assertSpatialAccelerationEquals(expectedRelativeAcceleration,
+                                                                  actualRelativeAcceleration,
+                                                                  Math.max(1.0, expectedRelativeAcceleration.length()) * epsilon);
+
+                  SpatialAccelerationReadOnly actualRelativeZeroVelocityAcceleration = fwdDynZeroVelocityAccelerationProvider.getRelativeAcceleration(rigidBody,
+                                                                                                                                                      otherRigidBody);
+                  MecanoTestTools.assertSpatialAccelerationEquals(expectedRelativeZeroVelocityAcceleration,
+                                                                  actualRelativeZeroVelocityAcceleration,
+                                                                  Math.max(1.0, expectedRelativeZeroVelocityAcceleration.length()) * epsilon);
+               }
+            }
+         }
+      }
    }
 
    public static Map<RigidBodyReadOnly, WrenchReadOnly> nextExternalWrenches(Random random, List<? extends JointReadOnly> joints)
