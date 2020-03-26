@@ -1,6 +1,7 @@
 package us.ihmc.mecano.spatial.interfaces;
 
 import us.ihmc.euclid.referenceFrame.exceptions.ReferenceFrameMismatchException;
+import us.ihmc.euclid.referenceFrame.interfaces.FixedFrameVector3DBasics;
 import us.ihmc.euclid.referenceFrame.interfaces.FramePoint3DReadOnly;
 import us.ihmc.euclid.referenceFrame.interfaces.FrameVector3DBasics;
 import us.ihmc.euclid.tuple3D.interfaces.Vector3DReadOnly;
@@ -89,6 +90,48 @@ public interface SpatialAccelerationReadOnly extends SpatialMotionReadOnly
     */
    default void getLinearAccelerationAt(TwistReadOnly bodyTwist, FramePoint3DReadOnly bodyFixedPoint, FrameVector3DBasics linearAccelerationToPack)
    {
+      linearAccelerationToPack.setReferenceFrame(getReferenceFrame());
+      getLinearAccelerationAt(bodyTwist, bodyFixedPoint, (FixedFrameVector3DBasics) linearAccelerationToPack);
+   }
+
+   /**
+    * Calculates the linear acceleration of a body-fixed point {@code bodyFixedPoint} perceived from
+    * the base frame.
+    * <p>
+    * The "perceived from the base frame" means that the body-fixed point is observed from the base,
+    * such that Coriolis acceleration resulting from the body velocity with respect to the base is
+    * considered.
+    * </p>
+    * <p>
+    * Effectively, the resulting linear acceleration &alpha;<sub>result</sub> is calculated as follows:
+    *
+    * <pre>
+    * &alpha;<sub>result</sub> = &alpha;<sub>this</sub> + &omega;'<sub>this</sub> &times; P + &omega;<sub>twist</sub> &times; ((&omega;<sub>twist</sub> &times; P) + &nu;<sub>twist</sub>)
+    * </pre>
+    *
+    * where &alpha;<sub>this</sub> and &omega;'<sub>this</sub> represent the angular and linear parts
+    * of this spatial acceleration, &omega;<sub>twist</sub> and &nu;<sub>twist</sub> represent the
+    * angular and linear parts of the body twist, and {@code P} is the {@code bodyFixedPoint}.
+    * </p>
+    * <p>
+    * When the {@code bodyTwist} is equal to {@code null}, it is then assumed to be equal to zero.
+    * </p>
+    *
+    * @param bodyTwist                the twist of {@code this.bodyFrame} with respect to
+    *                                 {@code this.baseFrame} and expressed in
+    *                                 {@code this.expressedInFrame}. Can be {@code null}. Not modified.
+    * @param bodyFixedPoint           the position on the body where the linear acceleration is to be
+    *                                 estimated. Not modified.
+    * @param linearAccelerationToPack the vector used to store the result. Modified.
+    * @throws ReferenceFrameMismatchException if the {@code bodyTwist} does not have the same reference
+    *                                         frames as {@code this}, if either {@code bodyFixedPoint}
+    *                                         or {@code linearAccelerationToPack} is not expressed in
+    *                                         the same reference frame as {@code this}, or if this
+    *                                         spatial acceleration is not expressed in either the body
+    *                                         frame of the base frame.
+    */
+   default void getLinearAccelerationAt(TwistReadOnly bodyTwist, FramePoint3DReadOnly bodyFixedPoint, FixedFrameVector3DBasics linearAccelerationToPack)
+   {
       /*
        * Without this check, the "expressed-in-frame" could possibly be moving with respect to both the
        * base and the body. In such context, this acceleration would consider additional acceleration
@@ -113,7 +156,7 @@ public interface SpatialAccelerationReadOnly extends SpatialMotionReadOnly
       {
          checkReferenceFrameMatch(bodyTwist);
 
-         linearAccelerationToPack.setIncludingFrame(bodyTwist.getLinearPart()); // v
+         linearAccelerationToPack.set(bodyTwist.getLinearPart()); // v
          MecanoTools.addCrossToVector(bodyTwist.getAngularPart(), bodyFixedPoint, linearAccelerationToPack); // (w x p) + v
          linearAccelerationToPack.cross(bodyTwist.getAngularPart(), linearAccelerationToPack); // w x ((w x p) + v)
          MecanoTools.addCrossToVector(getAngularPart(), bodyFixedPoint, linearAccelerationToPack); // (wDot x p) + w x ((w x p) + v)
@@ -121,7 +164,7 @@ public interface SpatialAccelerationReadOnly extends SpatialMotionReadOnly
       }
       else
       {
-         linearAccelerationToPack.setIncludingFrame(getLinearPart()); // vDot
+         linearAccelerationToPack.set(getLinearPart()); // vDot
          MecanoTools.addCrossToVector(getAngularPart(), bodyFixedPoint, linearAccelerationToPack); // vDot + (wDot x p)
       }
    }

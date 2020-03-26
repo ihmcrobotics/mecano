@@ -15,6 +15,8 @@ import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.referenceFrame.exceptions.ReferenceFrameMismatchException;
+import us.ihmc.euclid.referenceFrame.tools.EuclidFrameRandomTools;
+import us.ihmc.euclid.referenceFrame.tools.EuclidFrameTestTools;
 import us.ihmc.euclid.referenceFrame.tools.ReferenceFrameTools;
 import us.ihmc.euclid.tools.EuclidCoreRandomTools;
 import us.ihmc.euclid.tools.EuclidCoreTestTools;
@@ -23,11 +25,15 @@ import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple3D.interfaces.Vector3DBasics;
 import us.ihmc.euclid.tuple3D.interfaces.Vector3DReadOnly;
 import us.ihmc.mecano.spatial.interfaces.SpatialMotionTest;
+import us.ihmc.mecano.tools.MecanoRandomTools;
 import us.ihmc.mecano.tools.MecanoTestTools;
 import us.ihmc.mecano.tools.MecanoTools;
 
 public class TwistTest extends SpatialMotionTest<Twist>
 {
+   private static final int ITERATIONS = 1000;
+   private static final double EPSILON = 1.0e-12;
+
    @Override
    public Twist createSpatialMotionVector(ReferenceFrame bodyFrame, ReferenceFrame baseFrame, ReferenceFrame expressedInFrame, Vector3DReadOnly angularPart,
                                           Vector3DReadOnly linearPart)
@@ -449,6 +455,35 @@ public class TwistTest extends SpatialMotionTest<Twist>
          // Verify that they are the same
          bodyFixedPointLinearVelocityInBody.changeFrame(baseFrame);
          EuclidCoreTestTools.assertTuple3DEquals(bodyFixedPointLinearVelocityInBase, bodyFixedPointLinearVelocityInBody, 1.0e-12);
+      }
+   }
+
+   @Test
+   public void testGetLinearVelocityAt()
+   {
+      Random random = new Random(4788);
+
+      for (int i = 0; i < ITERATIONS; i++)
+      {
+         ReferenceFrame expressedInFrame = EuclidFrameRandomTools.nextReferenceFrame(random);
+         ReferenceFrame bodyFrame = EuclidFrameRandomTools.nextReferenceFrame(random);
+         ReferenceFrame frameAtObserverPosition = EuclidFrameRandomTools.nextReferenceFrame(random);
+         Twist twist = MecanoRandomTools.nextTwist(random, bodyFrame, ReferenceFrame.getWorldFrame(), expressedInFrame);
+
+         FramePoint3D observerPosition = new FramePoint3D(frameAtObserverPosition);
+         observerPosition.changeFrame(expressedInFrame);
+         FrameVector3D actualLinearVelocity = new FrameVector3D();
+         twist.getLinearVelocityAt(observerPosition, actualLinearVelocity);
+
+         FrameVector3D expectedLinearVelocity = new FrameVector3D();
+         twist.changeFrame(frameAtObserverPosition);
+         expectedLinearVelocity.setIncludingFrame(twist.getLinearPart());
+         expectedLinearVelocity.changeFrame(expressedInFrame);
+
+         EuclidFrameTestTools.assertFrameTuple3DEquals(expectedLinearVelocity, actualLinearVelocity, EPSILON);
+
+         assertThrows(ReferenceFrameMismatchException.class,
+                      () -> twist.getLinearVelocityAt(new FramePoint3D(EuclidFrameRandomTools.nextReferenceFrame(random)), new FrameVector3D()));
       }
    }
 
