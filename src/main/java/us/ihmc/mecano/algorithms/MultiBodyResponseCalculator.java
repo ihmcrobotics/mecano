@@ -18,6 +18,7 @@ import us.ihmc.mecano.algorithms.interfaces.RigidBodyTwistProvider;
 import us.ihmc.mecano.frames.MovingReferenceFrame;
 import us.ihmc.mecano.multiBodySystem.interfaces.JointReadOnly;
 import us.ihmc.mecano.multiBodySystem.interfaces.MultiBodySystemReadOnly;
+import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointReadOnly;
 import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyReadOnly;
 import us.ihmc.mecano.spatial.SpatialAcceleration;
 import us.ihmc.mecano.spatial.SpatialForce;
@@ -28,10 +29,11 @@ import us.ihmc.mecano.tools.MultiBodySystemTools;
 
 /**
  * Inspired from Mirtich's thesis, this calculator allows to evaluate the perturbation in terms of
- * change in acceleration (or twist) due to a wrench (or impulse) applied on a rigid-body.
+ * change in acceleration (or twist) due to a wrench (or impulse) applied on a rigid-body or a
+ * joint.
  * <p>
- * This can be used to compute an adequate wrench (or impulse) to apply on a rigid-body to obtain a
- * given resulting acceleration (or twist).
+ * This can be used to compute an adequate wrench (or impulse) to apply on a rigid-body or joint to
+ * obtain a given resulting acceleration (or twist).
  * </p>
  * <p>
  * Example of how to use this calculator:
@@ -79,22 +81,23 @@ public class MultiBodyResponseCalculator
    private final ForwardDynamicsCalculator forwardDynamicsCalculator;
 
    /**
-    * Extension of this algorithm into an acceleration provider that can be used to retrieve change in
-    * acceleration to any rigid-body of the system.
+    * Extension of this algorithm into a rigid-body acceleration provider that can be used to retrieve
+    * change in acceleration for any rigid-body of the system.
     */
    private final RigidBodyAccelerationProvider accelerationChangeProvider;
    /**
-    * Extension of this algorithm into an twist provider that can be used to retrieve change in twist
-    * to any rigid-body of the system.
+    * Extension of this algorithm into a rigid-body twist provider that can be used to retrieve change
+    * in twist for any rigid-body of the system.
     */
    private final RigidBodyTwistProvider twistChangeProvider;
 
-   private enum Mode
+   private enum ResponseType
    {
       ACCELERATION, TWIST
    };
 
-   private Mode currentMode = null;
+   private ResponseType currentResponseType = null;
+   private final DenseMatrix64F singleElementMatrix = new DenseMatrix64F(1, 1);
 
    /**
     * Creates a calculator for computing the response to external disturbances for a system defined by
@@ -142,13 +145,13 @@ public class MultiBodyResponseCalculator
 
       Function<RigidBodyReadOnly, SpatialAccelerationReadOnly> accelerationFunction = body ->
       {
-         if (currentMode == Mode.TWIST)
+         if (currentResponseType == ResponseType.TWIST)
             throw new IllegalStateException("This calculator is currently setup for calculating twists.");
 
          ResponseRecursionStep recursionStep = rigidBodyToRecursionStepMap.get(body);
          if (recursionStep == null)
             return null;
-         if (currentMode == null || !initialRecursionStep.isUpToDate)
+         if (currentResponseType == null || !initialRecursionStep.isUpToDate)
          { // This calculator has not been initialized with an wrench yet.
             bodyAcceleration.setToZero(body.getBodyFixedFrame(), input.getInertialFrame(), body.getBodyFixedFrame());
          }
@@ -171,7 +174,7 @@ public class MultiBodyResponseCalculator
 
       Function<RigidBodyReadOnly, TwistReadOnly> twistFunction = body ->
       {
-         if (currentMode == Mode.ACCELERATION)
+         if (currentResponseType == ResponseType.ACCELERATION)
             throw new IllegalStateException("This calculator is currently setup for calculating accelerations.");
 
          ResponseRecursionStep recursionStep = rigidBodyToRecursionStepMap.get(body);
@@ -220,7 +223,7 @@ public class MultiBodyResponseCalculator
     */
    public void reset()
    {
-      currentMode = null;
+      currentResponseType = null;
       initialRecursionStep.reset();
    }
 
@@ -274,9 +277,10 @@ public class MultiBodyResponseCalculator
     * @return {@code true} is the apparent inertia matrix was successfully computed, {@code false}
     *         otherwise.
     */
-   public boolean computeApparentSpatialInertiaInverse(RigidBodyReadOnly target, ReferenceFrame inertiaFrame, DenseMatrix64F apparentSpatialInertiaToPack)
+   public boolean computeRigidBodyApparentSpatialInertiaInverse(RigidBodyReadOnly target, ReferenceFrame inertiaFrame,
+                                                                DenseMatrix64F apparentSpatialInertiaToPack)
    {
-      return computeApparentSpatialInertiaInverse(target, inertiaFrame, null, apparentSpatialInertiaToPack);
+      return computeRigidBodyApparentSpatialInertiaInverse(target, inertiaFrame, null, apparentSpatialInertiaToPack);
    }
 
    /**
@@ -334,8 +338,8 @@ public class MultiBodyResponseCalculator
     * @return {@code true} is the apparent inertia matrix was successfully computed, {@code false}
     *         otherwise.
     */
-   public boolean computeApparentSpatialInertiaInverse(RigidBodyReadOnly target, ReferenceFrame inertiaFrame, boolean[] selectedAxes,
-                                                       DenseMatrix64F apparentSpatialInertiaToPack)
+   public boolean computeRigidBodyApparentSpatialInertiaInverse(RigidBodyReadOnly target, ReferenceFrame inertiaFrame, boolean[] selectedAxes,
+                                                                DenseMatrix64F apparentSpatialInertiaToPack)
    {
       ResponseRecursionStep recursionStep = rigidBodyToRecursionStepMap.get(target);
 
@@ -346,15 +350,18 @@ public class MultiBodyResponseCalculator
 
       apparentSpatialInertiaToPack.reshape(6, 6);
 
+      reset();
+
       for (int axis = 0; axis < 3; axis++)
       {
          if (selectedAxes == null || selectedAxes[axis])
          {
             recursionStep.testDisturbancePlus.setIncludingFrame(bodyFrame, inertiaFrame, Axis.values[axis], EuclidCoreTools.zeroVector3D);
-            recursionStep.initializeDisturbance(null);
+            recursionStep.initializeDisturbance();
             recursionStep.updateRigidBodyMotionChange();
             recursionStep.rigidBodyMotionChange.changeFrame(inertiaFrame);
             recursionStep.rigidBodyMotionChange.get(0, axis, apparentSpatialInertiaToPack);
+            reset();
          }
          else
          {
@@ -372,10 +379,11 @@ public class MultiBodyResponseCalculator
          if (selectedAxes == null || selectedAxes[axis + 3])
          {
             recursionStep.testDisturbancePlus.setIncludingFrame(bodyFrame, inertiaFrame, EuclidCoreTools.zeroVector3D, Axis.values[axis]);
-            recursionStep.initializeDisturbance(null);
+            recursionStep.initializeDisturbance();
             recursionStep.updateRigidBodyMotionChange();
             recursionStep.rigidBodyMotionChange.changeFrame(inertiaFrame);
             recursionStep.rigidBodyMotionChange.get(0, axis + 3, apparentSpatialInertiaToPack);
+            reset();
          }
          else
          {
@@ -387,7 +395,6 @@ public class MultiBodyResponseCalculator
             apparentSpatialInertiaToPack.unsafe_set(5, axis + 3, 0.0);
          }
       }
-      reset();
 
       return true;
    }
@@ -408,6 +415,21 @@ public class MultiBodyResponseCalculator
     * <li><tt>&Delta;&alpha;<sub>target</sub></tt> is the resulting change in linear acceleration of
     * {@code target} at {@code inertiaFrame} due a force <tt>F<sub>target</sub></tt>.
     * </ul>
+    * <p>
+    * Note that the apparent inertia can also be used to relate an impulse to a change in twist as
+    * follows:
+    * </p>
+    * 
+    * <pre>
+    * &Delta;&nu;<sub>target</sub> = (I<sup>A</sup>)<sup>-1</sup> Y<sub>target</sub>
+    * </pre>
+    * 
+    * where:
+    * <ul>
+    * <li><tt>Y<sub>target</sub></tt> is a linear impulse applied at {@code inertiaFrame}.
+    * <li><tt>&Delta;&nu;<sub>target</sub></tt> is the resulting change in linear velocity of
+    * {@code target} at {@code inertiaFrame} due a linear impulse <tt>Y<sub>target</sub></tt>.
+    * </ul>
     * 
     * @param target                      the rigid-body to compute the apparent inertia at.
     * @param inertiaFrame                the frame at which the output is to be expressed.
@@ -415,7 +437,8 @@ public class MultiBodyResponseCalculator
     * @return {@code true} is the apparent inertia matrix was successfully computed, {@code false}
     *         otherwise.
     */
-   public boolean computeApparentLinearInertiaInverse(RigidBodyReadOnly target, ReferenceFrame inertiaFrame, DenseMatrix64F apparentLinearInertiaToPack)
+   public boolean computeRigidBodyApparentLinearInertiaInverse(RigidBodyReadOnly target, ReferenceFrame inertiaFrame,
+                                                               DenseMatrix64F apparentLinearInertiaToPack)
    {
       ResponseRecursionStep recursionStep = rigidBodyToRecursionStepMap.get(target);
 
@@ -425,6 +448,8 @@ public class MultiBodyResponseCalculator
       ReferenceFrame bodyFrame = target.getBodyFixedFrame();
       apparentLinearInertiaToPack.reshape(3, 3);
 
+      reset();
+
       for (int axis = 0; axis < 3; axis++)
       {
          recursionStep.testDisturbancePlus.setIncludingFrame(bodyFrame,
@@ -432,52 +457,118 @@ public class MultiBodyResponseCalculator
                                                              EuclidCoreTools.zeroVector3D,
                                                              Axis.values[axis],
                                                              EuclidCoreTools.origin3D);
-         recursionStep.initializeDisturbance(null);
+         recursionStep.initializeDisturbance();
          recursionStep.updateRigidBodyMotionChange();
          recursionStep.rigidBodyMotionChange.changeFrame(inertiaFrame);
          recursionStep.rigidBodyMotionChange.getLinearPart().get(0, axis, apparentLinearInertiaToPack);
+         reset();
       }
-      reset();
 
       return true;
    }
 
    /**
-    * Applies a 6-D wrench to {@code target} and propagates the effect to the rest of the multi-body
-    * system.
+    * Computes the matrix that is the equivalent of the inverse of the apparent inertia but for the
+    * joint, such that:
     * 
-    * @param target the rigid-body to which the wrench is applied to.
-    * @param wrench the wrench to be applied. Not modified.
-    * @return the response to the wrench on the multi-body system in terms of change of joint
-    *         accelerations, or {@code null} if this methods failed.
-    * @see #applyWrench(RigidBodyReadOnly, WrenchReadOnly)
-    * @see #propagateWrench()
+    * <pre>
+    * &Delta;qdd<sub>target</sub> = (I<sup>A</sup>)<sup>-1</sup> &tau;<sub>target</sub>
+    * </pre>
+    * 
+    * where:
+    * <ul>
+    * <li><tt>(I<sup>A</sup>)<sup>-1</sup></tt> is the N-by-N inverse of the pseudo inertia matrix,
+    * with N being the number of DoFs of the joint.
+    * <li><tt>&tau;<sub>target</sub></tt> is a joint wrench.
+    * <li><tt>&Delta;qdd<sub>target</sub></tt> is the resulting change in joint acceleration.
+    * </ul>
+    * <p>
+    * Note that the pseudo apparent inertia can also be used to relate a joint impulse to a change in
+    * joint twist as follows:
+    * </p>
+    * 
+    * <pre>
+    * &Delta;qd<sub>target</sub> = (I<sup>A</sup>)<sup>-1</sup> y<sub>target</sub>
+    * </pre>
+    * 
+    * where:
+    * <ul>
+    * <li><tt>&y;<sub>target</sub></tt> is a joint impulse.
+    * <li><tt>&Delta;qd<sub>target</sub></tt> is the resulting change in joint twist.
+    * </ul>
+    * 
+    * @param target the joint to compute the pseudo apparent inertia for.
+    * @return {@code true} is the matrix was successfully computed, {@code false} otherwise.
     */
-   public DenseMatrix64F applyAndPropagateWrench(RigidBodyReadOnly target, WrenchReadOnly wrench)
+   public boolean computeJointApparentInertiaInverse(JointReadOnly target, DenseMatrix64F inertiaToPack)
    {
-      if (!applyWrench(target, wrench))
-         return null;
+      ResponseRecursionStep recursionStep = rigidBodyToRecursionStepMap.get(target.getSuccessor());
 
-      return propagateWrench();
+      if (recursionStep == null)
+         return false;
+
+      inertiaToPack.reshape(target.getDegreesOfFreedom(), target.getDegreesOfFreedom());
+
+      reset();
+
+      for (int i = 0; i < target.getDegreesOfFreedom(); i++)
+      {
+         recursionStep.tauPlus.set(i, 0, 1.0);
+         recursionStep.initializeDisturbance();
+         recursionStep.updateRigidBodyMotionChange();
+         CommonOps.insert(recursionStep.qddPlus, inertiaToPack, 0, i);
+         recursionStep.tauPlus.set(i, 0, 0.0);
+         reset();
+      }
+
+      return true;
    }
 
    /**
-    * Applies a 6-D impulse to {@code target} and propagates the effect to the rest of the multi-body
-    * system.
+    * Computes the value the inverse of the pseudo apparent inertia for the joint, such that:
     * 
-    * @param target  the rigid-body to which the impulse is applied to.
-    * @param impulse the impulse to be applied. Not modified.
-    * @return the response to the impulse on the multi-body system in terms of change of joint
-    *         velocities, or {@code null} if this methods failed.
-    * @see #applyImpulse(RigidBodyReadOnly, SpatialImpulseReadOnly)
-    * @see #propagateImpulse()
+    * <pre>
+    * &Delta;qdd<sub>target</sub> = (I<sup>A</sup>)<sup>-1</sup> &tau;<sub>target</sub>
+    * </pre>
+    * 
+    * where:
+    * <ul>
+    * <li><tt>(I<sup>A</sup>)<sup>-1</sup></tt> is the inverse of the pseudo inertia matrix.
+    * <li><tt>&tau;<sub>target</sub></tt> is a joint effort.
+    * <li><tt>&Delta;qdd<sub>target</sub></tt> is the resulting change in joint acceleration.
+    * </ul>
+    * <p>
+    * Note that the pseudo apparent inertia can also be used to relate a joint impulse to a change in
+    * joint velocity as follows:
+    * </p>
+    * 
+    * <pre>
+    * &Delta;qd<sub>target</sub> = (I<sup>A</sup>)<sup>-1</sup> y<sub>target</sub>
+    * </pre>
+    * 
+    * where:
+    * <ul>
+    * <li><tt>&y;<sub>target</sub></tt> is a joint impulse.
+    * <li><tt>&Delta;qd<sub>target</sub></tt> is the resulting change in joint velocity.
+    * </ul>
+    * 
+    * @param target the joint to compute the pseudo apparent inertia for.
+    * @return {@code true} is the matrix was successfully computed, {@code false} otherwise.
     */
-   public DenseMatrix64F applyAndPropagateImpulse(RigidBodyReadOnly target, SpatialImpulseReadOnly impulse)
+   public double computeJointApparentInertiaInverse(OneDoFJointReadOnly target)
    {
-      if (!applyImpulse(target, impulse))
-         return null;
+      ResponseRecursionStep recursionStep = rigidBodyToRecursionStepMap.get(target.getSuccessor());
 
-      return propagateImpulse();
+      if (recursionStep == null)
+         return Double.NaN;
+
+      reset();
+      recursionStep.tauPlus.set(0, 1.0);
+      recursionStep.initializeDisturbance();
+      recursionStep.updateRigidBodyMotionChange();
+      reset();
+
+      return recursionStep.qddPlus.get(0);
    }
 
    /**
@@ -493,7 +584,10 @@ public class MultiBodyResponseCalculator
     * <li>{@link #getAccelerationChangeProvider()} can then be used to access the resulting change in
     * acceleration to any rigid-body in the system.
     * <li>{@link #propagateWrench()} can then be used to compute the change in acceleration caused by
-    * the wrench on all rigid-bodies and get the change in joint acceleration.
+    * the impulse on all rigid-bodies and get the change in joint velocity.
+    * <li>{@link #getJointAccelerationChange(JointReadOnly)} or
+    * {@link #getJointAccelerationChange(OneDoFJointReadOnly)} can then be used to compute the change
+    * in acceleration for any joint.
     * </ul>
     * </p>
     * 
@@ -502,17 +596,16 @@ public class MultiBodyResponseCalculator
     * @return {@code true} if the wrench was successfully applied and the response computed,
     *         {@code false} otherwise.
     */
-   public boolean applyWrench(RigidBodyReadOnly target, WrenchReadOnly wrench)
+   public boolean applyRigidBodyWrench(RigidBodyReadOnly target, WrenchReadOnly wrench)
    {
-      if (applyDisturbance(target, wrench))
-      {
-         currentMode = Mode.ACCELERATION;
-         return true;
-      }
-      else
-      {
+      if (currentResponseType == ResponseType.TWIST)
          return false;
-      }
+
+      if (!applyRigidBodyDisturbance(target, wrench))
+         return false;
+
+      currentResponseType = ResponseType.ACCELERATION;
+      return true;
    }
 
    /**
@@ -525,6 +618,9 @@ public class MultiBodyResponseCalculator
     * any rigid-body in the system.
     * <li>{@link #propagateImpulse()} can then be used to compute the change in twist caused by the
     * impulse on all rigid-bodies and get the change in joint velocity.
+    * <li>{@link #getJointTwistChange(JointReadOnly)} or
+    * {@link #getJointTwistChange(OneDoFJointReadOnly)} can then be used to compute the change in twist
+    * for any joint.
     * </ul>
     * </p>
     * 
@@ -532,30 +628,179 @@ public class MultiBodyResponseCalculator
     * @param impulse the impulse to be applied. Not modified.
     * @return {@code true} if the impulse was successfully applied, {@code false} otherwise.
     */
-   public boolean applyImpulse(RigidBodyReadOnly target, SpatialImpulseReadOnly impulse)
+   public boolean applyRigidBodyImpulse(RigidBodyReadOnly target, SpatialImpulseReadOnly impulse)
    {
-      if (applyDisturbance(target, impulse))
-      {
-         currentMode = Mode.TWIST;
-         return true;
-      }
-      else
-      {
+      if (currentResponseType == ResponseType.ACCELERATION)
          return false;
-      }
+
+      if (!applyRigidBodyDisturbance(target, impulse))
+         return false;
+
+      currentResponseType = ResponseType.TWIST;
+      return true;
    }
 
-   private boolean applyDisturbance(RigidBodyReadOnly target, SpatialForceReadOnly disturbance)
+   private boolean applyRigidBodyDisturbance(RigidBodyReadOnly target, SpatialForceReadOnly disturbance)
    {
       ResponseRecursionStep recursionStep = rigidBodyToRecursionStepMap.get(target);
 
       if (recursionStep == null)
          return false;
 
-      reset();
       ReferenceFrame bodyFrame = target.getBodyFixedFrame();
       recursionStep.testDisturbancePlus.setIncludingFrame(bodyFrame, disturbance);
-      recursionStep.initializeDisturbance(null);
+      recursionStep.initializeDisturbance();
+      return true;
+   }
+
+   /**
+    * Applies a 1-D effort to the joint {@code target} and compute the apparent wrench for each
+    * rigid-body between {@code target} and the root-body of the system.
+    * <p>
+    * After applying an effort, the following features are available:
+    * <ul>
+    * <li>{@link #getAccelerationChangeProvider()} can then be used to access the resulting change in
+    * acceleration to any rigid-body in the system.
+    * <li>{@link #propagateWrench()} can then be used to compute the change in acceleration caused by
+    * the impulse on all rigid-bodies and get the change in joint velocity.
+    * <li>{@link #getJointAccelerationChange(JointReadOnly)} or
+    * {@link #getJointAccelerationChange(OneDoFJointReadOnly)} can then be used to compute the change
+    * in acceleration for any joint.
+    * </ul>
+    * </p>
+    * 
+    * @param target the joint at which the effort is applied.
+    * @param effort the effort to be applied. Not modified.
+    * @return {@code true} if the effort was successfully applied, {@code false} otherwise.
+    */
+   public boolean applyJointWrench(OneDoFJointReadOnly target, double effort)
+   {
+      if (currentResponseType == ResponseType.TWIST)
+         return false;
+
+      if (!applyJointDisturbance(target, effort))
+         return false;
+
+      currentResponseType = ResponseType.ACCELERATION;
+      return true;
+   }
+
+   /**
+    * Applies a N-dimensional wrench to the joint {@code target} and compute the apparent wrench for
+    * each rigid-body between {@code target} and the root-body of the system, where N is the number of
+    * degrees of freedom of {@code target}.
+    * <p>
+    * After applying an wrench, the following features are available:
+    * <ul>
+    * <li>{@link #getAccelerationChangeProvider()} can then be used to access the resulting change in
+    * acceleration to any rigid-body in the system.
+    * <li>{@link #propagateWrench()} can then be used to compute the change in acceleration caused by
+    * the impulse on all rigid-bodies and get the change in joint velocity.
+    * <li>{@link #getJointAccelerationChange(JointReadOnly)} or
+    * {@link #getJointAccelerationChange(OneDoFJointReadOnly)} can then be used to compute the change
+    * in acceleration for any joint.
+    * </ul>
+    * </p>
+    * 
+    * @param target the joint at which the wrench is applied.
+    * @param wrench the wrench to be applied. Not modified.
+    * @return {@code true} if the wrench was successfully applied, {@code false} otherwise.
+    */
+   public boolean applyJointWrench(JointReadOnly target, DenseMatrix64F wrench)
+   {
+      if (currentResponseType == ResponseType.TWIST)
+         return false;
+
+      if (!applyJointDisturbance(target, wrench))
+         return false;
+
+      currentResponseType = ResponseType.ACCELERATION;
+      return true;
+   }
+
+   /**
+    * Applies a 1-D impulse to the joint {@code target} and compute the apparent impulse for each
+    * rigid-body between {@code target} and the root-body of the system.
+    * <p>
+    * After applying an impulse, the following features are available:
+    * <ul>
+    * <li>{@link #getTwistChangeProvider()} can then be used to access the resulting change in twist to
+    * any rigid-body in the system.
+    * <li>{@link #propagateImpulse()} can then be used to compute the change in twist caused by the
+    * impulse on all rigid-bodies and get the change in joint velocity.
+    * <li>{@link #getJointTwistChange(JointReadOnly)} or
+    * {@link #getJointTwistChange(OneDoFJointReadOnly)} can then be used to compute the change in twist
+    * for any joint.
+    * </ul>
+    * </p>
+    * 
+    * @param target  the joint at which the impulse is applied.
+    * @param impulse the impulse to be applied. Not modified.
+    * @return {@code true} if the impulse was successfully applied, {@code false} otherwise.
+    */
+   public boolean applyJointImpulse(OneDoFJointReadOnly target, double impulse)
+   {
+      if (currentResponseType == ResponseType.ACCELERATION)
+         return false;
+
+      if (!applyJointDisturbance(target, impulse))
+         return false;
+
+      currentResponseType = ResponseType.TWIST;
+      return true;
+   }
+
+   /**
+    * Applies a N-dimensional impulse to the joint {@code target} and compute the apparent impulse for
+    * each rigid-body between {@code target} and the root-body of the system, where N is the number of
+    * degrees of freedom of {@code target}.
+    * <p>
+    * After applying an impulse, the following features are available:
+    * <ul>
+    * <li>{@link #getTwistChangeProvider()} can then be used to access the resulting change in twist to
+    * any rigid-body in the system.
+    * <li>{@link #propagateImpulse()} can then be used to compute the change in twist caused by the
+    * impulse on all rigid-bodies and get the change in joint velocity.
+    * <li>{@link #getJointTwistChange(JointReadOnly)} or
+    * {@link #getJointTwistChange(OneDoFJointReadOnly)} can then be used to compute the change in twist
+    * for any joint.
+    * </ul>
+    * </p>
+    * 
+    * @param target  the joint at which the impulse is applied.
+    * @param impulse the impulse to be applied. Not modified.
+    * @return {@code true} if the impulse was successfully applied, {@code false} otherwise.
+    */
+   public boolean applyJointImpulse(JointReadOnly target, DenseMatrix64F impulse)
+   {
+      if (currentResponseType == ResponseType.ACCELERATION)
+         return false;
+
+      if (!applyJointDisturbance(target, impulse))
+         return false;
+
+      currentResponseType = ResponseType.TWIST;
+      return true;
+   }
+
+   private boolean applyJointDisturbance(OneDoFJointReadOnly target, double disturbance)
+   {
+      singleElementMatrix.set(0, disturbance);
+      return applyJointDisturbance(target, singleElementMatrix);
+   }
+
+   private boolean applyJointDisturbance(JointReadOnly target, DenseMatrix64F disturbance)
+   {
+      ResponseRecursionStep recursionStep = rigidBodyToRecursionStepMap.get(target.getSuccessor());
+
+      if (recursionStep == null)
+         return false;
+      if (disturbance.getNumRows() != recursionStep.getJoint().getDegreesOfFreedom() || disturbance.getNumCols() != 1)
+         throw new IllegalArgumentException("Matrix dimension mismatch: expected " + recursionStep.getJoint().getDegreesOfFreedom() + "-by-1, was "
+               + disturbance.getNumRows() + "-by-" + disturbance.getNumCols());
+
+      recursionStep.tauPlus.set(disturbance);
+      recursionStep.initializeDisturbance();
       return true;
    }
 
@@ -564,13 +809,11 @@ public class MultiBodyResponseCalculator
     * resulting change in acceleration.
     * 
     * @return the matrix with the resulting change in joint acceleration, or {@code null} if
-    *         {@link #applyWrench(RigidBodyReadOnly, WrenchReadOnly)} was not called last.
+    *         {@link #applyRigidBodyWrench(RigidBodyReadOnly, WrenchReadOnly)} was not called last.
     */
    public DenseMatrix64F propagateWrench()
    {
-      if (currentMode != Mode.ACCELERATION)
-         return null;
-      return propagateDisturbance();
+      return currentResponseType == ResponseType.ACCELERATION ? propagateDisturbance() : null;
    }
 
    /**
@@ -578,14 +821,12 @@ public class MultiBodyResponseCalculator
     * resulting change in twist.
     * 
     * @return the matrix with the resulting change in joint velocity, or {@code null} if
-    *         {@link #applyImpulse(RigidBodyReadOnly, SpatialImpulseReadOnly)} was not called last.
+    *         {@link #applyRigidBodyImpulse(RigidBodyReadOnly, SpatialImpulseReadOnly)} was not called
+    *         last.
     */
    public DenseMatrix64F propagateImpulse()
    {
-      if (currentMode != Mode.TWIST)
-         return null;
-
-      return propagateDisturbance();
+      return currentResponseType == ResponseType.TWIST ? propagateDisturbance() : null;
    }
 
    private DenseMatrix64F propagateDisturbance()
@@ -601,9 +842,7 @@ public class MultiBodyResponseCalculator
     * Gets the rigid-body acceleration provider that can be used to access change in acceleration of
     * any rigid-body in the system due to the test wrench.
     * <p>
-    * The provider is initialized only after calling either
-    * {@link #applyWrench(RigidBodyReadOnly, WrenchReadOnly)} or
-    * {@link #applyAndPropagateWrench(RigidBodyReadOnly, WrenchReadOnly)}.
+    * This provider requires that a wrench was applied before performing queries.
     * </p>
     * 
     * @return the acceleration change provider.
@@ -617,9 +856,7 @@ public class MultiBodyResponseCalculator
     * Gets the rigid-body twist provider that can be used to access change in twist of any rigid-body
     * in the system due to the test impulse.
     * <p>
-    * The provider is initialized only after calling either
-    * {@link #applyWrench(RigidBodyReadOnly, WrenchReadOnly)} or
-    * {@link #applyAndPropagateWrench(RigidBodyReadOnly, WrenchReadOnly)}.
+    * This provider requires that an impulse was applied before performing queries.
     * </p>
     * 
     * @return the twist change provider.
@@ -627,6 +864,92 @@ public class MultiBodyResponseCalculator
    public RigidBodyTwistProvider getTwistChangeProvider()
    {
       return twistChangeProvider;
+   }
+
+   /**
+    * Gets the change in joint acceleration due to the test wrench.
+    * <p>
+    * This method requires that a wrench was applied.
+    * </p>
+    * 
+    * @param joint the joint to get the change in acceleration for.
+    * @return the change in acceleration of the {@code joint}.
+    */
+   public double getJointAccelerationChange(OneDoFJointReadOnly joint)
+   {
+      return currentResponseType != ResponseType.ACCELERATION ? Double.NaN : getJointMotionChange(joint);
+   }
+
+   /**
+    * Gets the change in joint acceleration due to the test wrench.
+    * <p>
+    * This method requires that a wrench was applied.
+    * </p>
+    * 
+    * @param joint the joint to get the change in acceleration for.
+    * @return the N-by-1 matrix containing the change in acceleration of the {@code joint}.
+    */
+   public DenseMatrix64F getJointAccelerationChange(JointReadOnly joint)
+   {
+      return currentResponseType != ResponseType.ACCELERATION ? null : getJointMotionChange(joint);
+   }
+
+   /**
+    * Gets the change in joint velocity due to the test impulse.
+    * <p>
+    * This method requires that an impulse was applied.
+    * </p>
+    * 
+    * @param joint the joint to get the change in velocity for.
+    * @return the change in velocity of the {@code joint}.
+    */
+   public double getJointTwistChange(OneDoFJointReadOnly joint)
+   {
+      return currentResponseType != ResponseType.TWIST ? Double.NaN : getJointMotionChange(joint);
+   }
+
+   /**
+    * Gets the change in joint twist due to the test impulse.
+    * <p>
+    * This method requires that an impulse was applied.
+    * </p>
+    * 
+    * @param joint the joint to get the change in twist for.
+    * @return the N-by-1 matrix containing the change in twist of the {@code joint}.
+    */
+   public DenseMatrix64F getJointTwistChange(JointReadOnly joint)
+   {
+      return currentResponseType != ResponseType.TWIST ? null : getJointMotionChange(joint);
+   }
+
+   private double getJointMotionChange(OneDoFJointReadOnly joint)
+   {
+      ResponseRecursionStep recursionStep = rigidBodyToRecursionStepMap.get(joint.getSuccessor());
+      if (recursionStep == null)
+         return Double.NaN;
+
+      if (currentResponseType == null || !initialRecursionStep.isUpToDate)
+      { // This calculator has not been initialized with a disturbance yet.
+         return Double.NaN;
+      }
+
+      recursionStep.updateRigidBodyMotionChange();
+      return recursionStep.qddPlus.get(0);
+   }
+
+   private DenseMatrix64F getJointMotionChange(JointReadOnly joint)
+   {
+      ResponseRecursionStep recursionStep = rigidBodyToRecursionStepMap.get(joint.getSuccessor());
+      if (recursionStep == null)
+         return null;
+
+      if (currentResponseType == null || !initialRecursionStep.isUpToDate)
+      { // This calculator has not been initialized with a disturbance yet.
+         return null;
+      }
+
+      recursionStep.updateRigidBodyMotionChange();
+      return recursionStep.qddPlus;
    }
 
    class ResponseRecursionStep
@@ -640,12 +963,20 @@ public class MultiBodyResponseCalculator
        */
       final Wrench testDisturbancePlus;
       /**
+       * Wrench containing all external disturbance applied to this body to test the resulting change
+       * motion with.
+       * <p>
+       * This can either represent a wrench or impulse. The equations are the same either way.
+       * </p>
+       */
+      final Wrench totalDisturbancePlus;
+      /**
        * Pre-transformed test disturbance for the parent.
        * <p>
        * This can either represent a wrench or impulse. The equations are the same either way.
        * </p>
        */
-      final SpatialForce testDisturbancePlusForParent;
+      final SpatialForce totalDisturbancePlusForParent;
       /**
        * Change of motion of this rigid-body.
        * <p>
@@ -662,6 +993,15 @@ public class MultiBodyResponseCalculator
        * </p>
        */
       final SpatialAcceleration parentMotionChange;
+      /**
+       * Test effort containing the additional disturbance at the joint to test the resulting change in
+       * motion with.
+       * <p>
+       * The matrix is a N-by-1 vector representing either an extra effort or impulse, where N is equal to
+       * the number of DoFs that the joint has.
+       * </p>
+       */
+      final DenseMatrix64F tauPlus;
       /**
        * This is the apparent force for this joint resulting from {@code testWrenchPlus}:
        * 
@@ -768,10 +1108,12 @@ public class MultiBodyResponseCalculator
          if (parent == null)
          {
             testDisturbancePlus = null;
-            testDisturbancePlusForParent = null;
+            totalDisturbancePlus = null;
+            totalDisturbancePlusForParent = null;
             parentMotionChange = null;
             rigidBodyMotionChange.setToZero(getBodyFixedFrame(), input.getInertialFrame(), getBodyFixedFrame());
 
+            tauPlus = null;
             pAPlus = null;
             uPlus = null;
             paPlus = null;
@@ -785,10 +1127,12 @@ public class MultiBodyResponseCalculator
             parent.children.add(this);
             int nDoFs = getJoint().getDegreesOfFreedom();
 
-            testDisturbancePlus = new Wrench();
-            testDisturbancePlusForParent = parent.isRoot() ? null : new SpatialForce();
+            testDisturbancePlus = new Wrench(getBodyFixedFrame(), getBodyFixedFrame());
+            totalDisturbancePlus = new Wrench(getBodyFixedFrame(), getFrameAfterJoint());
+            totalDisturbancePlusForParent = parent.isRoot() ? null : new SpatialForce();
             parentMotionChange = new SpatialAcceleration();
 
+            tauPlus = new DenseMatrix64F(nDoFs, 1);
             pAPlus = new DenseMatrix64F(SpatialVectorReadOnly.SIZE, 1);
             uPlus = new DenseMatrix64F(nDoFs, 1);
             paPlus = new DenseMatrix64F(SpatialVectorReadOnly.SIZE, 1);
@@ -801,63 +1145,88 @@ public class MultiBodyResponseCalculator
 
       public void reset()
       {
+         if (!isOnDisturbedBranch && !isUpToDate)
+            return; // Early termination for this branch.
+
          isOnDisturbedBranch = false;
          isUpToDate = false;
+
+         if (!isRoot())
+         {
+            testDisturbancePlus.setToZero();
+            tauPlus.zero();
+         }
+
          for (ResponseRecursionStep child : children)
             child.reset();
+      }
+
+      public void markDirty()
+      {
+         if (!isUpToDate)
+            return;
+
+         isUpToDate = false;
+
+         for (ResponseRecursionStep child : children)
+            child.markDirty();
       }
 
       /**
        * Propagates the test disturbance from the solicited body through up the system until reaching the
        * root.
        * <p>
-       * The disturbance can either be a wrenhc or impulse.
+       * The disturbance can either be a wrench or impulse.
        * </p>
-       * 
-       * @param sourceChild the child that is located between this and the target of the test wrench.
        */
-      public void initializeDisturbance(ResponseRecursionStep sourceChild)
+      public void initializeDisturbance()
       {
          // Going bottom-up in the tree.
-         isOnDisturbedBranch = true;
-
          if (isRoot())
          {
             isUpToDate = true;
+            isOnDisturbedBranch = true;
             return;
          }
 
-         stepUpDisturbance(sourceChild);
-         parent.initializeDisturbance(this);
+         stepUpDisturbance();
+         isOnDisturbedBranch = true;
+         parent.initializeDisturbance();
       }
 
-      public void stepUpDisturbance(ResponseRecursionStep sourceChild)
+      public void stepUpDisturbance()
       {
          isUpToDate = false;
 
-         if (sourceChild != null)
-         {
-            testDisturbancePlus.setIncludingFrame(sourceChild.testDisturbancePlusForParent);
-            testDisturbancePlus.applyTransform(sourceChild.articulatedBodyRecursionStep.transformToParentJointFrame);
-            testDisturbancePlus.setReferenceFrame(getFrameAfterJoint());
-         }
-         else
-         {
-            testDisturbancePlus.changeFrame(getFrameAfterJoint());
-         }
-         testDisturbancePlus.get(pAPlus);
-         if (sourceChild == null)
-            CommonOps.changeSign(pAPlus);
-
          DenseMatrix64F S = articulatedBodyRecursionStep.S;
+
+         totalDisturbancePlus.setToZero();
+
+         for (int i = 0; i < children.size(); i++)
+         {
+            ResponseRecursionStep child = children.get(i);
+
+            if (child.isOnDisturbedBranch)
+               totalDisturbancePlus.add(child.totalDisturbancePlusForParent);
+
+            child.markDirty();
+         }
+
+         testDisturbancePlus.changeFrame(getFrameAfterJoint());
+         totalDisturbancePlus.sub(testDisturbancePlus);
+
+         totalDisturbancePlus.get(pAPlus);
          CommonOps.multTransA(-1.0, S, pAPlus, uPlus);
+         CommonOps.addEquals(uPlus, tauPlus);
 
          if (!parent.isRoot())
          {
             DenseMatrix64F U_Dinv = articulatedBodyRecursionStep.U_Dinv;
             CommonOps.mult(U_Dinv, uPlus, paPlus);
             CommonOps.addEquals(paPlus, pAPlus);
-            testDisturbancePlusForParent.setIncludingFrame(testDisturbancePlus.getReferenceFrame(), paPlus);
+            totalDisturbancePlusForParent.setIncludingFrame(totalDisturbancePlus.getReferenceFrame(), paPlus);
+            totalDisturbancePlusForParent.applyTransform(articulatedBodyRecursionStep.transformToParentJointFrame);
+            totalDisturbancePlusForParent.setReferenceFrame(parent.getFrameAfterJoint());
          }
       }
 

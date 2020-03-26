@@ -2,9 +2,7 @@ package us.ihmc.mecano.spatial.interfaces;
 
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.referenceFrame.exceptions.ReferenceFrameMismatchException;
-import us.ihmc.euclid.referenceFrame.interfaces.FrameChangeable;
-import us.ihmc.euclid.referenceFrame.interfaces.FramePoint3DReadOnly;
-import us.ihmc.euclid.referenceFrame.interfaces.FrameVector3DReadOnly;
+import us.ihmc.euclid.referenceFrame.interfaces.*;
 import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
 import us.ihmc.euclid.tuple3D.interfaces.Vector3DReadOnly;
 import us.ihmc.mecano.spatial.SpatialForce;
@@ -118,5 +116,60 @@ public interface SpatialForceBasics extends FixedFrameSpatialForceBasics, Spatia
          linearPart.checkReferenceFrameMatch(angularPart);
       linearPart.checkReferenceFrameMatch(pointOfApplication);
       setIncludingFrame(linearPart.getReferenceFrame(), angularPart, linearPart, pointOfApplication);
+   }
+
+   /**
+    * Calculates the angular part of this spatial force measured at a given position
+    * {@code observerPosition} on the body.
+    * <p>
+    * Effectively, the resulting angular vector &tau;<sub>result</sub> is calculated as follows:
+    *
+    * <pre>
+    * &tau;<sub>result</sub> = &tau;<sub>this</sub> - P &times; f<sub>this</sub>
+    * </pre>
+    *
+    * where <tt>&tau;</tt> and <tt>f</tt> represent the angular and linear parts respectively, and
+    * {@code P} is the {@code observerPosition}.
+    * </p>
+    *
+    * @param observerPosition  the position on the body where the angular part is to be estimated. Not
+    *                          modified.
+    * @param angularPartToPack the vector used to store the result. Modified.
+    * @throws ReferenceFrameMismatchException if {@code observerPosition} is not expressed in the same
+    *                                         reference frame as {@code this}.
+    */
+   default void getAngularPartAt(FramePoint3DReadOnly observerPosition, FrameVector3DBasics angularPartToPack)
+   {
+      angularPartToPack.setReferenceFrame(getReferenceFrame());
+      getAngularPartAt(observerPosition, (FixedFrameVector3DBasics) angularPartToPack);
+   }
+
+   /**
+    * Calculates the angular part of this spatial force measured at a given position
+    * {@code observerPosition} on the body.
+    * <p>
+    * Effectively, the resulting angular vector &tau;<sub>result</sub> is calculated as follows:
+    *
+    * <pre>
+    * &tau;<sub>result</sub> = &tau;<sub>this</sub> - P &times; f<sub>this</sub>
+    * </pre>
+    *
+    * where <tt>&tau;</tt> and <tt>f</tt> represent the angular and linear parts respectively, and
+    * {@code P} is the {@code observerPosition}.
+    * </p>
+    *
+    * @param observerPosition  the position on the body where the angular part is to be estimated. Not
+    *                          modified.
+    * @param angularPartToPack the vector used to store the result. Modified.
+    * @throws ReferenceFrameMismatchException if either {@code observerPosition} or
+    *                                         {@code angularPartToPack} is not expressed in the same
+    *                                         reference frame as {@code this}.
+    */
+   default void getAngularPartAt(FramePoint3DReadOnly observerPosition, FixedFrameVector3DBasics angularPartToPack)
+   {
+      observerPosition.checkReferenceFrameMatch(getReferenceFrame());
+      angularPartToPack.set(observerPosition);
+      angularPartToPack.cross(getLinearPart(), angularPartToPack);
+      angularPartToPack.add(getAngularPart());
    }
 }

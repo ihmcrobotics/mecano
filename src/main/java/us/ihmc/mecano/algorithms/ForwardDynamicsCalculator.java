@@ -1,11 +1,6 @@
 package us.ihmc.mecano.algorithms;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.LinkedHashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.function.Function;
 
 import org.ejml.alg.dense.misc.UnrolledInverseFromMinor;
@@ -20,20 +15,12 @@ import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.interfaces.Tuple3DReadOnly;
 import us.ihmc.mecano.algorithms.interfaces.RigidBodyAccelerationProvider;
 import us.ihmc.mecano.frames.MovingReferenceFrame;
-import us.ihmc.mecano.multiBodySystem.interfaces.JointBasics;
-import us.ihmc.mecano.multiBodySystem.interfaces.JointMatrixIndexProvider;
-import us.ihmc.mecano.multiBodySystem.interfaces.JointReadOnly;
-import us.ihmc.mecano.multiBodySystem.interfaces.MultiBodySystemReadOnly;
-import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyReadOnly;
+import us.ihmc.mecano.multiBodySystem.interfaces.*;
 import us.ihmc.mecano.spatial.SpatialAcceleration;
 import us.ihmc.mecano.spatial.SpatialForce;
 import us.ihmc.mecano.spatial.SpatialInertia;
 import us.ihmc.mecano.spatial.Wrench;
-import us.ihmc.mecano.spatial.interfaces.FixedFrameWrenchBasics;
-import us.ihmc.mecano.spatial.interfaces.SpatialAccelerationReadOnly;
-import us.ihmc.mecano.spatial.interfaces.SpatialVectorReadOnly;
-import us.ihmc.mecano.spatial.interfaces.TwistReadOnly;
-import us.ihmc.mecano.spatial.interfaces.WrenchReadOnly;
+import us.ihmc.mecano.spatial.interfaces.*;
 import us.ihmc.mecano.tools.JointStateType;
 import us.ihmc.mecano.tools.MultiBodySystemTools;
 
@@ -67,6 +54,12 @@ public class ForwardDynamicsCalculator
     * {@link SpatialAccelerationCalculator}.
     */
    private final RigidBodyAccelerationProvider accelerationProvider;
+
+   /**
+    * Extension of this algorithm into an acceleration provider that can be used instead of a
+    * {@link SpatialAccelerationCalculator}.
+    */
+   private final RigidBodyAccelerationProvider zeroVelocityAccelerationProvider;
 
    /**
     * Creates a calculator for computing the joint accelerations for all the descendants of the given
@@ -145,6 +138,21 @@ public class ForwardDynamicsCalculator
          return recursionStep.rigidBodyAcceleration;
       };
       accelerationProvider = RigidBodyAccelerationProvider.toRigidBodyAccelerationProvider(accelerationFunction, input.getInertialFrame());
+
+      Function<RigidBodyReadOnly, SpatialAccelerationReadOnly> zeroVelocityAccelerationFunction = body ->
+      {
+         ArticulatedBodyRecursionStep recursionStep = rigidBodyToRecursionStepMap.get(body);
+         if (recursionStep == null)
+            return null;
+         // The algorithm computes the acceleration expressed in the parent joint frame.
+         // To prevent unnecessary computation, let's only change the frame when needed.
+         recursionStep.rigidBodyZeroVelocityAcceleration.changeFrame(body.getBodyFixedFrame());
+         return recursionStep.rigidBodyZeroVelocityAcceleration;
+      };
+      zeroVelocityAccelerationProvider = RigidBodyAccelerationProvider.toRigidBodyAccelerationProvider(zeroVelocityAccelerationFunction,
+                                                                                                       input.getInertialFrame(),
+                                                                                                       false,
+                                                                                                       true);
    }
 
    private void buildMultiBodyTree(ArticulatedBodyRecursionStep parent, Collection<? extends JointReadOnly> jointsToIgnore)
@@ -422,10 +430,22 @@ public class ForwardDynamicsCalculator
     * 
     * @return the acceleration provider backed by this calculator.
     */
-
    public RigidBodyAccelerationProvider getAccelerationProvider()
    {
       return accelerationProvider;
+   }
+
+   /**
+    * Gets the rigid-body acceleration provider that uses accelerations computed in this calculator.
+    * 
+    * @param considerVelocities whether the provider should consider bias accelerations, i.e.
+    *                           centrifugal and Coriolis accelerations, resulting from joint
+    *                           velocities.
+    * @return the acceleration provider backed by this calculator.
+    */
+   public RigidBodyAccelerationProvider getAccelerationProvider(boolean considerVelocities)
+   {
+      return considerVelocities ? accelerationProvider : zeroVelocityAccelerationProvider;
    }
 
    /**
@@ -484,9 +504,9 @@ public class ForwardDynamicsCalculator
        */
       final SpatialAcceleration rigidBodyAcceleration = new SpatialAcceleration();
       /**
-       * The spatial acceleration of this rigid-body's direct predecessor.
+       * Spatial acceleration of this rigid-body ignoring joint velocities.
        */
-      final SpatialAcceleration parentAcceleration;
+      final SpatialAcceleration rigidBodyZeroVelocityAcceleration = new SpatialAcceleration();
       /**
        * <tt>IA</tt> is the 6-by-6 articulated-body inertia for this body.
        */
@@ -692,8 +712,8 @@ public class ForwardDynamicsCalculator
             articulatedBiasWrench = null;
             articulatedInertiaForParent = null;
             articulatedBiasWrenchForParent = null;
-            parentAcceleration = null;
             rigidBodyAcceleration.setToZero(getBodyFixedFrame(), input.getInertialFrame(), getBodyFixedFrame());
+            rigidBodyZeroVelocityAcceleration.setToZero(getBodyFixedFrame(), input.getInertialFrame(), getBodyFixedFrame());
 
             IA = null;
             S = null;
@@ -728,7 +748,6 @@ public class ForwardDynamicsCalculator
             articulatedBiasWrench = new SpatialForce();
             articulatedInertiaForParent = parent.isRoot() ? null : new ArticulatedBodyInertia();
             articulatedBiasWrenchForParent = parent.isRoot() ? null : new SpatialForce();
-            parentAcceleration = new SpatialAcceleration();
 
             IA = new DenseMatrix64F(SpatialVectorReadOnly.SIZE, SpatialVectorReadOnly.SIZE);
             S = new DenseMatrix64F(SpatialVectorReadOnly.SIZE, nDoFs);
@@ -778,7 +797,12 @@ public class ForwardDynamicsCalculator
        */
       public void passOne()
       {
-         if (!isRoot())
+         if (isRoot())
+         {
+            // Need to set the zero-velocity acceleration to account for gravity.
+            rigidBodyZeroVelocityAcceleration.setIncludingFrame(rigidBodyAcceleration);
+         }
+         else
          {
             MovingReferenceFrame frameAfterJoint = getFrameAfterJoint();
             MovingReferenceFrame frameBeforeJoint = getJoint().getFrameBeforeJoint();
@@ -895,12 +919,18 @@ public class ForwardDynamicsCalculator
       {
          if (!isRoot())
          {
+            rigidBodyZeroVelocityAcceleration.setIncludingFrame(parent.rigidBodyZeroVelocityAcceleration);
+            rigidBodyZeroVelocityAcceleration.applyInverseTransform(transformToParentJointFrame);
+            rigidBodyZeroVelocityAcceleration.setBodyFrame(getBodyFixedFrame());
+            rigidBodyZeroVelocityAcceleration.setBaseFrame(input.getInertialFrame());
+            rigidBodyZeroVelocityAcceleration.setReferenceFrame(getFrameAfterJoint());
+
             // Computing a'_i = a_{lambda(i)} + c_i
-            parentAcceleration.setIncludingFrame(parent.rigidBodyAcceleration);
-            parentAcceleration.applyInverseTransform(transformToParentJointFrame);
-            parentAcceleration.setReferenceFrame(getFrameAfterJoint());
-            parentAcceleration.add((SpatialVectorReadOnly) biasAcceleration);
-            parentAcceleration.get(aPrime);
+            rigidBodyAcceleration.setIncludingFrame(parent.rigidBodyAcceleration);
+            rigidBodyAcceleration.applyInverseTransform(transformToParentJointFrame);
+            rigidBodyAcceleration.setReferenceFrame(getFrameAfterJoint());
+            rigidBodyAcceleration.add((SpatialVectorReadOnly) biasAcceleration);
+            rigidBodyAcceleration.get(aPrime);
 
             // Computing qdd_i = D_i^-1 * ( u_i - U_i^T * a'_i )
             CommonOps.multTransA(-1.0, U, aPrime, qdd_intermediate);
@@ -909,6 +939,9 @@ public class ForwardDynamicsCalculator
 
             // Computing a_i = a'_i + S_i * qdd_i
             CommonOps.mult(S, qdd, a);
+
+            rigidBodyZeroVelocityAcceleration.add(a);
+
             CommonOps.addEquals(a, aPrime);
             rigidBodyAcceleration.setIncludingFrame(getBodyFixedFrame(), input.getInertialFrame(), getFrameAfterJoint(), a);
 

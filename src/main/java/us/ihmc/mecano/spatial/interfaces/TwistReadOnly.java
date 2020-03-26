@@ -2,6 +2,7 @@ package us.ihmc.mecano.spatial.interfaces;
 
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.referenceFrame.exceptions.ReferenceFrameMismatchException;
+import us.ihmc.euclid.referenceFrame.interfaces.FixedFrameVector3DBasics;
 import us.ihmc.euclid.referenceFrame.interfaces.FramePoint3DReadOnly;
 import us.ihmc.euclid.referenceFrame.interfaces.FrameVector3DBasics;
 import us.ihmc.euclid.tuple3D.interfaces.Vector3DReadOnly;
@@ -79,8 +80,35 @@ public interface TwistReadOnly extends SpatialMotionReadOnly
     */
    default void getLinearVelocityAt(FramePoint3DReadOnly observerPosition, FrameVector3DBasics linearVelocityToPack)
    {
+      linearVelocityToPack.setReferenceFrame(getReferenceFrame());
+      getLinearVelocityAt(observerPosition, (FixedFrameVector3DBasics) linearVelocityToPack);
+   }
+
+   /**
+    * Calculates the linear velocity resulting from this twist but measured at a given position
+    * {@code observerPosition} on the body.
+    * <p>
+    * Effectively, the resulting linear velocity &nu;<sub>result</sub> is calculated as follows:
+    *
+    * <pre>
+    * &nu;<sub>result</sub> = &nu;<sub>this</sub> - P &times; &omega;<sub>this</sub>
+    * </pre>
+    *
+    * where &omega; and &nu; represent the angular and linear parts respectively, and {@code P} is the
+    * {@code observerPosition}.
+    * </p>
+    *
+    * @param observerPosition     the position on the body where the linear velocity is to be
+    *                             estimated. Not modified.
+    * @param linearVelocityToPack the vector used to store the result. Modified.
+    * @throws ReferenceFrameMismatchException if either {@code observerPosition} or
+    *                                         {@code linearVelocityToPack} is not expressed in the same
+    *                                         reference frame as {@code this}.
+    */
+   default void getLinearVelocityAt(FramePoint3DReadOnly observerPosition, FixedFrameVector3DBasics linearVelocityToPack)
+   {
       observerPosition.checkReferenceFrameMatch(getReferenceFrame());
-      linearVelocityToPack.setIncludingFrame(observerPosition);
+      linearVelocityToPack.set(observerPosition);
       linearVelocityToPack.cross((Vector3DReadOnly) getAngularPart(), (Vector3DReadOnly) linearVelocityToPack);
       linearVelocityToPack.add(getLinearPart());
    }
