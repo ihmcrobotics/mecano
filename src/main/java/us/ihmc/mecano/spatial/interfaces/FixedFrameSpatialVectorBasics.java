@@ -298,8 +298,9 @@ public interface FixedFrameSpatialVectorBasics extends SpatialVectorReadOnly, Cl
     */
    default void set(int startRow, int column, DenseMatrix64F matrix)
    {
-      getAngularPart().set(startRow, column, matrix);
-      getLinearPart().set(startRow + 3, column, matrix);
+      MecanoTools.checkMatrixMinimumSize(startRow + 6, column + 1, matrix);
+      getAngularPart().set(matrix.unsafe_get(startRow++, column), matrix.unsafe_get(startRow++, column), matrix.unsafe_get(startRow++, column));
+      getLinearPart().set(matrix.unsafe_get(startRow++, column), matrix.unsafe_get(startRow++, column), matrix.unsafe_get(startRow++, column));
    }
 
    /**
@@ -449,6 +450,58 @@ public interface FixedFrameSpatialVectorBasics extends SpatialVectorReadOnly, Cl
    }
 
    /**
+    * Adds to this vector's components the given column vector starting to read from its first row
+    * index.
+    * <p>
+    * The components are read in the following order: {@code angularPartX}, {@code angularPartY},
+    * {@code angularPartZ}, {@code linearPartX}, {@code linearPartY}, {@code linearPartZ}.
+    * </p>
+    * 
+    * @param matrix the column vector containing the values to add to this vector's components. Not
+    *               modified.
+    */
+   default void add(DenseMatrix64F matrix)
+   {
+      add(0, matrix);
+   }
+
+   /**
+    * Adds to this vector's components the given column vector starting to read from {@code startRow}.
+    * <p>
+    * The components are read in the following order: {@code angularPartX}, {@code angularPartY},
+    * {@code angularPartZ}, {@code linearPartX}, {@code linearPartY}, {@code linearPartZ}.
+    * </p>
+    * 
+    * @param startRow the first row index to start reading in the dense-matrix.
+    * @param matrix   the column vector containing the values to add to this vector's components. Not
+    *                 modified.
+    */
+   default void add(int startRow, DenseMatrix64F matrix)
+   {
+      add(startRow, 0, matrix);
+   }
+
+   /**
+    * Adds to this vector's components the given column vector starting to read from {@code startRow}
+    * at the column index {@code column}.
+    * <p>
+    * The components are read in the following order: {@code angularPartX}, {@code angularPartY},
+    * {@code angularPartZ}, {@code linearPartX}, {@code linearPartY}, {@code linearPartZ}.
+    * </p>
+    * 
+    * @param startRow the first row index to start reading in the dense-matrix.
+    * @param column   the column index to read in the dense-matrix.
+    * @param matrix   the column vector containing the values to add to this vector's components. Not
+    *                 modified.
+    */
+   default void add(int startRow, int column, DenseMatrix64F matrix)
+   {
+      MecanoTools.checkMatrixMinimumSize(startRow + 6, column + 1, matrix);
+      getAngularPart().add(matrix.unsafe_get(startRow++, column), matrix.unsafe_get(startRow++, column), matrix.unsafe_get(startRow++, column));
+      getLinearPart().add(matrix.unsafe_get(startRow++, column), matrix.unsafe_get(startRow++, column), matrix.unsafe_get(startRow++, column));
+   }
+
+   /**
     * Adds the given vectors to this vector angular and linear parts.
     * <p>
     * {@code this.angularPart += angular}<br>
@@ -496,6 +549,59 @@ public interface FixedFrameSpatialVectorBasics extends SpatialVectorReadOnly, Cl
    {
       checkReferenceFrameMatch(other);
       sub((Vector3DReadOnly) other.getAngularPart(), (Vector3DReadOnly) other.getLinearPart());
+   }
+
+   /**
+    * Subtracts from this vector's components the given column vector starting to read from its first
+    * row index.
+    * <p>
+    * The components are read in the following order: {@code angularPartX}, {@code angularPartY},
+    * {@code angularPartZ}, {@code linearPartX}, {@code linearPartY}, {@code linearPartZ}.
+    * </p>
+    * 
+    * @param matrix the column vector containing the values to subtract from this vector's components.
+    *               Not modified.
+    */
+   default void sub(DenseMatrix64F matrix)
+   {
+      sub(0, matrix);
+   }
+
+   /**
+    * Subtracts from this vector's components the given column vector starting to read from
+    * {@code startRow}.
+    * <p>
+    * The components are read in the following order: {@code angularPartX}, {@code angularPartY},
+    * {@code angularPartZ}, {@code linearPartX}, {@code linearPartY}, {@code linearPartZ}.
+    * </p>
+    * 
+    * @param startRow the first row index to start reading in the dense-matrix.
+    * @param matrix   the column vector containing the values to subtract from this vector's
+    *                 components. Not modified.
+    */
+   default void sub(int startRow, DenseMatrix64F matrix)
+   {
+      sub(startRow, 0, matrix);
+   }
+
+   /**
+    * Subtracts from this vector's components the given column vector starting to read from
+    * {@code startRow} at the column index {@code column}.
+    * <p>
+    * The components are read in the following order: {@code angularPartX}, {@code angularPartY},
+    * {@code angularPartZ}, {@code linearPartX}, {@code linearPartY}, {@code linearPartZ}.
+    * </p>
+    * 
+    * @param startRow the first row index to start reading in the dense-matrix.
+    * @param column   the column index to read in the dense-matrix.
+    * @param matrix   the column vector containing the values to subtract from this vector's
+    *                 components. Not modified.
+    */
+   default void sub(int startRow, int column, DenseMatrix64F matrix)
+   {
+      MecanoTools.checkMatrixMinimumSize(startRow + 6, column + 1, matrix);
+      getAngularPart().sub(matrix.unsafe_get(startRow++, column), matrix.unsafe_get(startRow++, column), matrix.unsafe_get(startRow++, column));
+      getLinearPart().sub(matrix.unsafe_get(startRow++, column), matrix.unsafe_get(startRow++, column), matrix.unsafe_get(startRow++, column));
    }
 
    /**

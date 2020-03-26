@@ -13,7 +13,12 @@ import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
+import us.ihmc.euclid.referenceFrame.FramePoint3D;
+import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
+import us.ihmc.euclid.referenceFrame.exceptions.ReferenceFrameMismatchException;
+import us.ihmc.euclid.referenceFrame.tools.EuclidFrameRandomTools;
+import us.ihmc.euclid.referenceFrame.tools.EuclidFrameTestTools;
 import us.ihmc.euclid.referenceFrame.tools.ReferenceFrameTools;
 import us.ihmc.euclid.tools.EuclidCoreRandomTools;
 import us.ihmc.euclid.tools.EuclidCoreTestTools;
@@ -368,5 +373,34 @@ public class WrenchTest
       assertTrue(NormOps.normP2(matrix) > epsilon);
       wrench.get(matrix);
       assertTrue(NormOps.normP2(matrix) == 0.0);
+   }
+
+   @Test
+   public void testGetAngularPartAt()
+   {
+      Random random = new Random(4788);
+
+      for (int i = 0; i < ITERATIONS; i++)
+      {
+         ReferenceFrame expressedInFrame = EuclidFrameRandomTools.nextReferenceFrame(random);
+         ReferenceFrame bodyFrame = EuclidFrameRandomTools.nextReferenceFrame(random);
+         ReferenceFrame frameAtObserverPosition = EuclidFrameRandomTools.nextReferenceFrame(random);
+         Wrench wrench = MecanoRandomTools.nextWrench(random, bodyFrame, expressedInFrame);
+
+         FramePoint3D observerPosition = new FramePoint3D(frameAtObserverPosition);
+         observerPosition.changeFrame(expressedInFrame);
+         FrameVector3D actualAngularPart = new FrameVector3D();
+         wrench.getAngularPartAt(observerPosition, actualAngularPart);
+
+         FrameVector3D expectedAngularPart = new FrameVector3D();
+         wrench.changeFrame(frameAtObserverPosition);
+         expectedAngularPart.setIncludingFrame(wrench.getAngularPart());
+         expectedAngularPart.changeFrame(expressedInFrame);
+
+         EuclidFrameTestTools.assertFrameTuple3DEquals(expectedAngularPart, actualAngularPart, EPSILON);
+
+         assertThrows(ReferenceFrameMismatchException.class,
+                      () -> wrench.getAngularPartAt(new FramePoint3D(EuclidFrameRandomTools.nextReferenceFrame(random)), new FrameVector3D()));
+      }
    }
 }
