@@ -497,7 +497,8 @@ public class MultiBodyResponseCalculator
     * <li><tt>&Delta;qd<sub>target</sub></tt> is the resulting change in joint twist.
     * </ul>
     * 
-    * @param target the joint to compute the pseudo apparent inertia for.
+    * @param target        the joint to compute the pseudo apparent inertia for.
+    * @param inertiaToPack the matrix in which to store the result. Modified.
     * @return {@code true} is the matrix was successfully computed, {@code false} otherwise.
     */
    public boolean computeJointApparentInertiaInverse(JointReadOnly target, DenseMatrix64F inertiaToPack)

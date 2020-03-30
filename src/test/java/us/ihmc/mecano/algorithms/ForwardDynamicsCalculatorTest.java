@@ -49,6 +49,11 @@ public class ForwardDynamicsCalculatorTest
          List<PrismaticJoint> joints = MultiBodySystemRandomTools.nextPrismaticJointChain(random, numberOfJoints);
          compareAgainstInverseDynamicsCalculator(random, i, joints, Collections.emptyMap(), Collections.emptyList(), ONE_DOF_JOINT_EPSILON);
          compareAgainstCompositeRigidBodyMassMatrixCalculator(random, i, joints, ONE_DOF_JOINT_EPSILON);
+         compareAgainstCompositeRigidBodyMassMatrixCalculator(random,
+                                                              i,
+                                                              joints,
+                                                              Collections.singletonList(joints.get(random.nextInt(numberOfJoints))),
+                                                              ONE_DOF_JOINT_EPSILON);
 
          compareAgainstInverseDynamicsCalculator(random, i, joints, nextExternalWrenches(random, joints), Collections.emptyList(), ONE_DOF_JOINT_EPSILON);
 
@@ -74,6 +79,11 @@ public class ForwardDynamicsCalculatorTest
          List<PrismaticJoint> joints = MultiBodySystemRandomTools.nextPrismaticJointTree(random, numberOfJoints);
          compareAgainstInverseDynamicsCalculator(random, i, joints, Collections.emptyMap(), Collections.emptyList(), ONE_DOF_JOINT_EPSILON);
          compareAgainstCompositeRigidBodyMassMatrixCalculator(random, i, joints, ONE_DOF_JOINT_EPSILON);
+         compareAgainstCompositeRigidBodyMassMatrixCalculator(random,
+                                                              i,
+                                                              joints,
+                                                              Collections.singletonList(joints.get(random.nextInt(numberOfJoints))),
+                                                              ONE_DOF_JOINT_EPSILON);
 
          compareAgainstInverseDynamicsCalculator(random, i, joints, nextExternalWrenches(random, joints), Collections.emptyList(), ONE_DOF_JOINT_EPSILON);
 
@@ -99,6 +109,11 @@ public class ForwardDynamicsCalculatorTest
          List<RevoluteJoint> joints = MultiBodySystemRandomTools.nextRevoluteJointChain(random, numberOfJoints);
          compareAgainstInverseDynamicsCalculator(random, i, joints, Collections.emptyMap(), Collections.emptyList(), 2.0 * ONE_DOF_JOINT_EPSILON);
          compareAgainstCompositeRigidBodyMassMatrixCalculator(random, 0, joints, ONE_DOF_JOINT_EPSILON);
+         compareAgainstCompositeRigidBodyMassMatrixCalculator(random,
+                                                              i,
+                                                              joints,
+                                                              Collections.singletonList(joints.get(random.nextInt(numberOfJoints))),
+                                                              ONE_DOF_JOINT_EPSILON);
 
          compareAgainstInverseDynamicsCalculator(random, i, joints, nextExternalWrenches(random, joints), Collections.emptyList(), 2.0 * ONE_DOF_JOINT_EPSILON);
 
@@ -124,6 +139,11 @@ public class ForwardDynamicsCalculatorTest
          List<RevoluteJoint> joints = MultiBodySystemRandomTools.nextRevoluteJointTree(random, numberOfJoints);
          compareAgainstInverseDynamicsCalculator(random, i, joints, Collections.emptyMap(), Collections.emptyList(), ONE_DOF_JOINT_EPSILON);
          compareAgainstCompositeRigidBodyMassMatrixCalculator(random, i, joints, ONE_DOF_JOINT_EPSILON);
+         compareAgainstCompositeRigidBodyMassMatrixCalculator(random,
+                                                              i,
+                                                              joints,
+                                                              Collections.singletonList(joints.get(random.nextInt(numberOfJoints))),
+                                                              ONE_DOF_JOINT_EPSILON);
 
          compareAgainstInverseDynamicsCalculator(random, i, joints, nextExternalWrenches(random, joints), Collections.emptyList(), ONE_DOF_JOINT_EPSILON);
 
@@ -149,6 +169,11 @@ public class ForwardDynamicsCalculatorTest
          List<OneDoFJoint> joints = MultiBodySystemRandomTools.nextOneDoFJointChain(random, numberOfJoints);
          compareAgainstInverseDynamicsCalculator(random, i, joints, Collections.emptyMap(), Collections.emptyList(), ONE_DOF_JOINT_EPSILON);
          compareAgainstCompositeRigidBodyMassMatrixCalculator(random, i, joints, ONE_DOF_JOINT_EPSILON);
+         compareAgainstCompositeRigidBodyMassMatrixCalculator(random,
+                                                              i,
+                                                              joints,
+                                                              Collections.singletonList(joints.get(random.nextInt(numberOfJoints))),
+                                                              ONE_DOF_JOINT_EPSILON);
 
          compareAgainstInverseDynamicsCalculator(random, i, joints, nextExternalWrenches(random, joints), Collections.emptyList(), ONE_DOF_JOINT_EPSILON);
 
@@ -174,6 +199,11 @@ public class ForwardDynamicsCalculatorTest
          List<OneDoFJoint> joints = MultiBodySystemRandomTools.nextOneDoFJointTree(random, numberOfJoints);
          compareAgainstInverseDynamicsCalculator(random, i, joints, Collections.emptyMap(), Collections.emptyList(), ONE_DOF_JOINT_EPSILON);
          compareAgainstCompositeRigidBodyMassMatrixCalculator(random, i, joints, ONE_DOF_JOINT_EPSILON);
+         compareAgainstCompositeRigidBodyMassMatrixCalculator(random,
+                                                              i,
+                                                              joints,
+                                                              Collections.singletonList(joints.get(random.nextInt(numberOfJoints))),
+                                                              ONE_DOF_JOINT_EPSILON);
 
          compareAgainstInverseDynamicsCalculator(random, i, joints, nextExternalWrenches(random, joints), Collections.emptyList(), ONE_DOF_JOINT_EPSILON);
 
@@ -199,6 +229,11 @@ public class ForwardDynamicsCalculatorTest
          List<Joint> joints = new RandomFloatingRevoluteJointChain(random, numberOfJoints).getJoints();
          compareAgainstInverseDynamicsCalculator(random, i, joints, Collections.emptyMap(), Collections.emptyList(), FLOATING_JOINT_EPSILON);
          compareAgainstCompositeRigidBodyMassMatrixCalculator(random, i, joints, FLOATING_JOINT_EPSILON);
+         compareAgainstCompositeRigidBodyMassMatrixCalculator(random,
+                                                              i,
+                                                              joints,
+                                                              Collections.singletonList(joints.get(random.nextInt(numberOfJoints))),
+                                                              FLOATING_JOINT_EPSILON);
 
          compareAgainstInverseDynamicsCalculator(random, i, joints, nextExternalWrenches(random, joints), Collections.emptyList(), FLOATING_JOINT_EPSILON);
 
@@ -224,6 +259,11 @@ public class ForwardDynamicsCalculatorTest
          List<JointBasics> joints = MultiBodySystemRandomTools.nextJointChain(random, numberOfJoints);
          compareAgainstInverseDynamicsCalculator(random, i, joints, Collections.emptyMap(), Collections.emptyList(), ALL_JOINT_EPSILON);
          compareAgainstCompositeRigidBodyMassMatrixCalculator(random, i, joints, ALL_JOINT_EPSILON);
+         compareAgainstCompositeRigidBodyMassMatrixCalculator(random,
+                                                              i,
+                                                              joints,
+                                                              Collections.singletonList(joints.get(random.nextInt(numberOfJoints))),
+                                                              ALL_JOINT_EPSILON);
 
          compareAgainstInverseDynamicsCalculator(random, i, joints, nextExternalWrenches(random, joints), Collections.emptyList(), ALL_JOINT_EPSILON);
 
@@ -342,18 +382,26 @@ public class ForwardDynamicsCalculatorTest
 
    private static void compareAgainstCompositeRigidBodyMassMatrixCalculator(Random random, int iteration, List<? extends JointBasics> joints, double epsilon)
    {
+      compareAgainstCompositeRigidBodyMassMatrixCalculator(random, iteration, joints, Collections.emptyList(), epsilon);
+   }
+
+   private static void compareAgainstCompositeRigidBodyMassMatrixCalculator(Random random, int iteration, List<? extends JointBasics> joints,
+                                                                            List<? extends JointBasics> jointsToIgnore, double epsilon)
+   {
       MultiBodySystemRandomTools.nextState(random, JointStateType.CONFIGURATION, joints);
       MultiBodySystemRandomTools.nextState(random, JointStateType.VELOCITY, joints);
       MultiBodySystemRandomTools.nextState(random, JointStateType.ACCELERATION, joints);
 
       RigidBodyBasics rootBody = MultiBodySystemTools.getRootBody(joints.get(0).getPredecessor());
       rootBody.updateFramesRecursively();
+      MultiBodySystemBasics input = MultiBodySystemBasics.toMultiBodySystemBasics(rootBody, jointsToIgnore);
 
-      int numberOfDoFs = joints.stream().mapToInt(JointReadOnly::getDegreesOfFreedom).sum();
+      int numberOfDoFs = MultiBodySystemTools.computeDegreesOfFreedom(input.getJointsToConsider());
 
       DenseMatrix64F qdd_expected = new DenseMatrix64F(numberOfDoFs, 1);
       int index = 0;
-      for (JointBasics joint : joints)
+
+      for (JointBasics joint : input.getJointsToConsider())
       {
          joint.getJointAcceleration(index, qdd_expected);
          joint.setJointAccelerationToZero();
@@ -361,9 +409,9 @@ public class ForwardDynamicsCalculatorTest
       }
 
       double gravity = EuclidCoreRandomTools.nextDouble(random, -10.0, -1.0);
-      InverseDynamicsCalculator inverseDynamicsCalculator = new InverseDynamicsCalculator(rootBody);
+      InverseDynamicsCalculator inverseDynamicsCalculator = new InverseDynamicsCalculator(input);
       inverseDynamicsCalculator.setGravitionalAcceleration(gravity);
-      CompositeRigidBodyMassMatrixCalculator massMatrixCalculator = new CompositeRigidBodyMassMatrixCalculator(rootBody);
+      CompositeRigidBodyMassMatrixCalculator massMatrixCalculator = new CompositeRigidBodyMassMatrixCalculator(input);
 
       inverseDynamicsCalculator.compute();
       massMatrixCalculator.reset();
@@ -374,7 +422,7 @@ public class ForwardDynamicsCalculatorTest
       DenseMatrix64F biasMatrix = new DenseMatrix64F(numberOfDoFs, 1);
 
       index = 0;
-      for (JointReadOnly joint : massMatrixCalculator.getInput().getJointsToConsider())
+      for (JointReadOnly joint : input.getJointsToConsider())
       {
          joint.getJointTau(index, biasMatrix);
          index += joint.getDegreesOfFreedom();
@@ -386,13 +434,13 @@ public class ForwardDynamicsCalculatorTest
       CommonOps.addEquals(tauMatrix, biasMatrix);
 
       index = 0;
-      for (JointBasics joint : joints)
+      for (JointBasics joint : input.getJointsToConsider())
       {
          joint.setJointTau(index, tauMatrix);
          index += joint.getDegreesOfFreedom();
       }
 
-      ForwardDynamicsCalculator forwardDynamicsCalculator = new ForwardDynamicsCalculator(rootBody);
+      ForwardDynamicsCalculator forwardDynamicsCalculator = new ForwardDynamicsCalculator(input);
       forwardDynamicsCalculator.setGravitionalAcceleration(gravity);
 
       forwardDynamicsCalculator.compute();

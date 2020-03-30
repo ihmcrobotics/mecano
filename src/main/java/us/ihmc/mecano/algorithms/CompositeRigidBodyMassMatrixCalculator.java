@@ -1,6 +1,7 @@
 package us.ihmc.mecano.algorithms;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 import java.util.stream.IntStream;
 
@@ -11,7 +12,6 @@ import us.ihmc.mecano.frames.MovingReferenceFrame;
 import us.ihmc.mecano.multiBodySystem.interfaces.JointReadOnly;
 import us.ihmc.mecano.multiBodySystem.interfaces.MultiBodySystemReadOnly;
 import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyReadOnly;
-import us.ihmc.mecano.multiBodySystem.iterators.SubtreeStreams;
 import us.ihmc.mecano.spatial.Momentum;
 import us.ihmc.mecano.spatial.SpatialAcceleration;
 import us.ihmc.mecano.spatial.SpatialForce;
@@ -195,24 +195,27 @@ public class CompositeRigidBodyMassMatrixCalculator
 
       RigidBodyReadOnly rootBody = input.getRootBody();
       rootCompositeInertia = new CompositeRigidBodyInertia(rootBody, null, null);
-      List<CompositeRigidBodyInertia> inertiaList = buildMultiBodyTree(rootCompositeInertia);
+      List<CompositeRigidBodyInertia> inertiaList = buildMultiBodyTree(rootCompositeInertia, input.getJointsToIgnore());
       if (considerIgnoredSubtreesInertia)
          rootCompositeInertia.includeIgnoredSubtreeInertia();
       compositeInertias = inertiaList.toArray(new CompositeRigidBodyInertia[0]);
 
-      int nDoFs = SubtreeStreams.from(rootBody.getChildrenJoints()).mapToInt(JointReadOnly::getDegreesOfFreedom).sum();
+      int nDoFs = MultiBodySystemTools.computeDegreesOfFreedom(input.getJointsToConsider());
       massMatrix = new DenseMatrix64F(nDoFs, nDoFs);
 
       centroidalMomentumMatrix = new DenseMatrix64F(6, nDoFs);
       setCentroidalMomentumFrame(centroidalMomentumFrame);
    }
 
-   private List<CompositeRigidBodyInertia> buildMultiBodyTree(CompositeRigidBodyInertia parent)
+   private List<CompositeRigidBodyInertia> buildMultiBodyTree(CompositeRigidBodyInertia parent, Collection<? extends JointReadOnly> jointsToIgnore)
    {
       List<CompositeRigidBodyInertia> inertiaList = new ArrayList<>();
 
       for (JointReadOnly childJoint : parent.rigidBody.getChildrenJoints())
       {
+         if (jointsToIgnore.contains(childJoint))
+            continue;
+
          RigidBodyReadOnly childBody = childJoint.getSuccessor();
 
          if (childBody != null)
@@ -220,7 +223,7 @@ public class CompositeRigidBodyMassMatrixCalculator
             int[] jointIndices = input.getJointMatrixIndexProvider().getJointDoFIndices(childJoint);
             CompositeRigidBodyInertia child = new CompositeRigidBodyInertia(childBody, parent, jointIndices);
             inertiaList.add(child);
-            inertiaList.addAll(buildMultiBodyTree(child));
+            inertiaList.addAll(buildMultiBodyTree(child, jointsToIgnore));
          }
       }
       return inertiaList;
