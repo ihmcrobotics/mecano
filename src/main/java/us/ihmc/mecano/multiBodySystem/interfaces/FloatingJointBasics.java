@@ -129,14 +129,14 @@ public interface FloatingJointBasics extends FloatingJointReadOnly, JointBasics
    @Override
    default void setJointOrientation(Orientation3DReadOnly jointOrientation)
    {
-      getJointPose().setOrientation(jointOrientation);
+      getJointPose().getOrientation().set(jointOrientation);
    }
 
    /** {@inheritDoc} */
    @Override
    default void setJointPosition(Tuple3DReadOnly jointTranslation)
    {
-      getJointPose().setPosition(jointTranslation);
+      getJointPose().getPosition().set(jointTranslation);
    }
 
    /** {@inheritDoc} */
