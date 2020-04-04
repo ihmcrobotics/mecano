@@ -2,7 +2,7 @@ package us.ihmc.mecano.tools;
 
 import java.util.function.DoubleSupplier;
 
-import us.ihmc.euclid.Axis;
+import us.ihmc.euclid.Axis3D;
 import us.ihmc.euclid.axisAngle.AxisAngle;
 import us.ihmc.euclid.geometry.interfaces.Pose3DBasics;
 import us.ihmc.euclid.geometry.interfaces.Pose3DReadOnly;
@@ -129,15 +129,15 @@ public class MecanoFactories
 
       RevoluteJointTransformUpdater jointTransformUpdater;
 
-      if (jointAxis.geometricallyEquals(Axis.X, TRANSFORM_UPDATER_EPSILON))
+      if (jointAxis.geometricallyEquals(Axis3D.X, TRANSFORM_UPDATER_EPSILON))
       {
          jointTransformUpdater = transform -> transform.setRotationRollAndZeroTranslation(joint.getQ());
       }
-      else if (jointAxis.geometricallyEquals(Axis.Y, TRANSFORM_UPDATER_EPSILON))
+      else if (jointAxis.geometricallyEquals(Axis3D.Y, TRANSFORM_UPDATER_EPSILON))
       {
          jointTransformUpdater = transform -> transform.setRotationPitchAndZeroTranslation(joint.getQ());
       }
-      else if (jointAxis.geometricallyEquals(Axis.Z, TRANSFORM_UPDATER_EPSILON))
+      else if (jointAxis.geometricallyEquals(Axis3D.Z, TRANSFORM_UPDATER_EPSILON))
       {
          jointTransformUpdater = transform -> transform.setRotationYawAndZeroTranslation(joint.getQ());
       }
