@@ -163,7 +163,7 @@ public class GeometricJacobianCalculatorTest
 
          // Test with a random Jacobian frame attached to end effector
          RigidBodyTransform transformToParent = new RigidBodyTransform();
-         transformToParent.setTranslation(EuclidCoreRandomTools.nextPoint3D(random, 10.0));
+         transformToParent.getTranslation().set(EuclidCoreRandomTools.nextPoint3D(random, 10.0));
          ReferenceFrame fixedInEndEffector = ReferenceFrameTools.constructFrameWithUnchangingTransformToParent("fixedFrame" + i,
                                                                                                                randomEndEffector.getBodyFixedFrame(),
                                                                                                                transformToParent);
@@ -250,7 +250,7 @@ public class GeometricJacobianCalculatorTest
          RigidBodyBasics randomBase = joints.get(random.nextInt(randomEndEffectorIndex + 1)).getPredecessor();
 
          RigidBodyTransform transformToParent = new RigidBodyTransform();
-         transformToParent.setTranslation(EuclidCoreRandomTools.nextPoint3D(random, 10.0));
+         transformToParent.getTranslation().set(EuclidCoreRandomTools.nextPoint3D(random, 10.0));
          ReferenceFrame fixedInEndEffector = ReferenceFrameTools.constructFrameWithUnchangingTransformToParent("fixedFrame" + i,
                                                                                                                randomEndEffector.getBodyFixedFrame(),
                                                                                                                transformToParent);

@@ -46,6 +46,6 @@ public class CenterOfMassReferenceFrame extends ReferenceFrame
    {
       centerOfMassCalculator.reset();
       transformToParent.setIdentity();
-      transformToParent.setTranslation(centerOfMassCalculator.getCenterOfMass());
+      transformToParent.getTranslation().set(centerOfMassCalculator.getCenterOfMass());
    }
 }
