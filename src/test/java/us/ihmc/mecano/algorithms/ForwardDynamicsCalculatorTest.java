@@ -35,7 +35,7 @@ public class ForwardDynamicsCalculatorTest
 {
    private static final int ITERATIONS = 500;
    private static final double ONE_DOF_JOINT_EPSILON = 8.0e-12;
-   private static final double FLOATING_JOINT_EPSILON = 2.0e-11;
+   private static final double FLOATING_JOINT_EPSILON = 4.0e-11;
    private static final double ALL_JOINT_EPSILON = 1.0e-4;
 
    @Test
