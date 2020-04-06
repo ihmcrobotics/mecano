@@ -10,12 +10,12 @@ import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.referenceFrame.exceptions.ReferenceFrameMismatchException;
 import us.ihmc.euclid.referenceFrame.interfaces.FrameChangeable;
 import us.ihmc.euclid.referenceFrame.interfaces.ReferenceFrameHolder;
+import us.ihmc.euclid.tools.EuclidCoreFactories;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.transform.interfaces.Transform;
 import us.ihmc.euclid.tuple3D.interfaces.Vector3DReadOnly;
 import us.ihmc.mecano.spatial.SpatialInertia;
 import us.ihmc.mecano.spatial.interfaces.SpatialInertiaReadOnly;
-import us.ihmc.mecano.tools.MecanoFactories;
 import us.ihmc.mecano.tools.MecanoIOTools;
 import us.ihmc.mecano.tools.MecanoTools;
 
@@ -50,7 +50,7 @@ public class ArticulatedBodyInertia implements GeometryObject<ArticulatedBodyIne
     * The transpose of the cross part of this inertia, i.e. the 3-by-3 bottom left block of the 6-by-6
     * spatial matrix.
     */
-   private final Matrix3DReadOnly crossInertiaTranspose = MecanoFactories.createTransposeLinkedMatrix3DReadOnly(crossInertia);
+   private final Matrix3DReadOnly crossInertiaTranspose = EuclidCoreFactories.newTransposeLinkedMatrix3DReadOnly(crossInertia);
    /** Variable to store intermediate results for garbage-free operations. */
    private final RigidBodyTransform transformToDesiredFrame = new RigidBodyTransform();
 

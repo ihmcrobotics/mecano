@@ -1,9 +1,9 @@
 package us.ihmc.mecano.multiBodySystem.interfaces;
 
 import us.ihmc.euclid.orientation.interfaces.Orientation3DReadOnly;
+import us.ihmc.euclid.tools.TupleTools;
 import us.ihmc.euclid.tuple3D.interfaces.Tuple3DReadOnly;
 import us.ihmc.euclid.tuple3D.interfaces.Vector3DReadOnly;
-import us.ihmc.mecano.tools.MecanoTools;
 
 /**
  * Write and read interface for a prismatic joint.
@@ -28,7 +28,7 @@ public interface PrismaticJointBasics extends PrismaticJointReadOnly, OneDoFJoin
    @Override
    default void setJointPosition(Tuple3DReadOnly jointPosition)
    {
-      setQ(MecanoTools.tuple3DDotProduct(getJointAxis(), jointPosition));
+      setQ(TupleTools.dot(getJointAxis(), jointPosition));
    }
 
    /**

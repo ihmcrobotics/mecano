@@ -17,9 +17,7 @@ public interface PrismaticJointReadOnly extends OneDoFJointReadOnly
    @Override
    default void getJointConfiguration(RigidBodyTransform jointTransform)
    {
-      jointTransform.setRotationToZero();
-      jointTransform.setTranslationX(getQ() * getJointAxis().getX());
-      jointTransform.setTranslationY(getQ() * getJointAxis().getY());
-      jointTransform.setTranslationZ(getQ() * getJointAxis().getZ());
+      jointTransform.getRotation().setToZero();
+      jointTransform.getTranslation().setAndScale(getQ(), getJointAxis());
    }
 }

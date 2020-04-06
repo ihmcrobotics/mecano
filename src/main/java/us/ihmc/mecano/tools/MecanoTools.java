@@ -5,7 +5,6 @@ import java.util.Collections;
 import java.util.List;
 
 import org.ejml.data.DenseMatrix64F;
-import org.ejml.ops.MatrixDimensionException;
 
 import us.ihmc.euclid.matrix.interfaces.Matrix3DBasics;
 import us.ihmc.euclid.matrix.interfaces.Matrix3DReadOnly;
@@ -14,6 +13,7 @@ import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.referenceFrame.tools.ReferenceFrameTools;
 import us.ihmc.euclid.tools.EuclidCoreTools;
 import us.ihmc.euclid.tools.Matrix3DTools;
+import us.ihmc.euclid.tools.TupleTools;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.interfaces.Tuple3DReadOnly;
 import us.ihmc.euclid.tuple3D.interfaces.Vector3DBasics;
@@ -55,10 +55,12 @@ public class MecanoTools
     * @param tuple1 the first tuple in the dot product. Not modified.
     * @param tuple2 the second tuple in the dot product. Not modified.
     * @return the value of the dot product of the two tuples.
+    * @deprecated Use {@code TupleTools.dot(tuple1, tuple2)} instead.
     */
+   @Deprecated
    public static double tuple3DDotProduct(Tuple3DReadOnly tuple1, Tuple3DReadOnly tuple2)
    {
-      return tuple1.getX() * tuple2.getX() + tuple1.getY() * tuple2.getY() + tuple1.getZ() * tuple2.getZ();
+      return TupleTools.dot(tuple1, tuple2);
    }
 
    /**
@@ -149,14 +151,13 @@ public class MecanoTools
     * @param minColumns   the minimum number of columns that the matrix should have.
     * @param matrixToTest the matrix which size is to be tested.
     * @throws MatrixDimensionException if the matrix does not meet the minimum size.
+    * @deprecated Use {@code EuclidCoreTools.checkMatrixMinimumSize(minRows, minColumns, matrixToTest)}
+    *             instead.
     */
+   @Deprecated
    public static void checkMatrixMinimumSize(int minRows, int minColumns, DenseMatrix64F matrixToTest)
    {
-      if (!matrixToTest.isInBounds(minRows - 1, minColumns - 1))
-      {
-         throw new MatrixDimensionException("The matrix is too small, expected: [nRows >= " + minRows + ", nColumns >= " + minColumns + "], was: [nRows = "
-               + matrixToTest.getNumRows() + ", nCols = " + matrixToTest.getNumCols() + "].");
-      }
+      EuclidCoreTools.checkMatrixMinimumSize(minRows, minColumns, matrixToTest);
    }
 
    /**

@@ -47,7 +47,7 @@ public class WrenchTest
          {
             transformToParent.setRotationEulerAndZeroTranslation(1.0, 2.0, 3.0);
             RigidBodyTransform translation = new RigidBodyTransform();
-            translation.setTranslation(new Vector3D(3.0, 4.0, 5.0));
+            translation.getTranslation().set(new Vector3D(3.0, 4.0, 5.0));
             transformToParent.multiply(translation);
          }
       };
@@ -59,7 +59,7 @@ public class WrenchTest
          {
             transformToParent.setRotationEulerAndZeroTranslation(1.0, 2.0, 3.0);
             RigidBodyTransform translation = new RigidBodyTransform();
-            translation.setTranslation(new Vector3D(3.0, 4.0, 5.0));
+            translation.getTranslation().set(new Vector3D(3.0, 4.0, 5.0));
             transformToParent.multiply(translation);
          }
       };

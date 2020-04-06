@@ -9,7 +9,7 @@ import java.util.function.Function;
 import org.ejml.data.DenseMatrix64F;
 import org.ejml.ops.CommonOps;
 
-import us.ihmc.euclid.Axis;
+import us.ihmc.euclid.Axis3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.tools.EuclidCoreTools;
 import us.ihmc.mecano.algorithms.ForwardDynamicsCalculator.ArticulatedBodyRecursionStep;
@@ -356,7 +356,7 @@ public class MultiBodyResponseCalculator
       {
          if (selectedAxes == null || selectedAxes[axis])
          {
-            recursionStep.testDisturbancePlus.setIncludingFrame(bodyFrame, inertiaFrame, Axis.values[axis], EuclidCoreTools.zeroVector3D);
+            recursionStep.testDisturbancePlus.setIncludingFrame(bodyFrame, inertiaFrame, Axis3D.values[axis], EuclidCoreTools.zeroVector3D);
             recursionStep.initializeDisturbance();
             recursionStep.updateRigidBodyMotionChange();
             recursionStep.rigidBodyMotionChange.changeFrame(inertiaFrame);
@@ -378,7 +378,7 @@ public class MultiBodyResponseCalculator
       {
          if (selectedAxes == null || selectedAxes[axis + 3])
          {
-            recursionStep.testDisturbancePlus.setIncludingFrame(bodyFrame, inertiaFrame, EuclidCoreTools.zeroVector3D, Axis.values[axis]);
+            recursionStep.testDisturbancePlus.setIncludingFrame(bodyFrame, inertiaFrame, EuclidCoreTools.zeroVector3D, Axis3D.values[axis]);
             recursionStep.initializeDisturbance();
             recursionStep.updateRigidBodyMotionChange();
             recursionStep.rigidBodyMotionChange.changeFrame(inertiaFrame);
@@ -455,7 +455,7 @@ public class MultiBodyResponseCalculator
          recursionStep.testDisturbancePlus.setIncludingFrame(bodyFrame,
                                                              inertiaFrame,
                                                              EuclidCoreTools.zeroVector3D,
-                                                             Axis.values[axis],
+                                                             Axis3D.values[axis],
                                                              EuclidCoreTools.origin3D);
          recursionStep.initializeDisturbance();
          recursionStep.updateRigidBodyMotionChange();
