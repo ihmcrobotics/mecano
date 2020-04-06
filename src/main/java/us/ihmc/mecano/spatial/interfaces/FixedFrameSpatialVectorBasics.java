@@ -8,6 +8,7 @@ import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.referenceFrame.exceptions.ReferenceFrameMismatchException;
 import us.ihmc.euclid.referenceFrame.interfaces.FixedFrameVector3DBasics;
 import us.ihmc.euclid.referenceFrame.interfaces.FrameVector3DReadOnly;
+import us.ihmc.euclid.tools.EuclidCoreTools;
 import us.ihmc.euclid.transform.interfaces.Transform;
 import us.ihmc.euclid.tuple3D.interfaces.Tuple3DReadOnly;
 import us.ihmc.euclid.tuple3D.interfaces.Vector3DReadOnly;
@@ -298,7 +299,7 @@ public interface FixedFrameSpatialVectorBasics extends SpatialVectorReadOnly, Cl
     */
    default void set(int startRow, int column, DenseMatrix64F matrix)
    {
-      MecanoTools.checkMatrixMinimumSize(startRow + 6, column + 1, matrix);
+      EuclidCoreTools.checkMatrixMinimumSize(startRow + 6, column + 1, matrix);
       getAngularPart().set(matrix.unsafe_get(startRow++, column), matrix.unsafe_get(startRow++, column), matrix.unsafe_get(startRow++, column));
       getLinearPart().set(matrix.unsafe_get(startRow++, column), matrix.unsafe_get(startRow++, column), matrix.unsafe_get(startRow++, column));
    }
@@ -496,7 +497,7 @@ public interface FixedFrameSpatialVectorBasics extends SpatialVectorReadOnly, Cl
     */
    default void add(int startRow, int column, DenseMatrix64F matrix)
    {
-      MecanoTools.checkMatrixMinimumSize(startRow + 6, column + 1, matrix);
+      EuclidCoreTools.checkMatrixMinimumSize(startRow + 6, column + 1, matrix);
       getAngularPart().add(matrix.unsafe_get(startRow++, column), matrix.unsafe_get(startRow++, column), matrix.unsafe_get(startRow++, column));
       getLinearPart().add(matrix.unsafe_get(startRow++, column), matrix.unsafe_get(startRow++, column), matrix.unsafe_get(startRow++, column));
    }
@@ -599,7 +600,7 @@ public interface FixedFrameSpatialVectorBasics extends SpatialVectorReadOnly, Cl
     */
    default void sub(int startRow, int column, DenseMatrix64F matrix)
    {
-      MecanoTools.checkMatrixMinimumSize(startRow + 6, column + 1, matrix);
+      EuclidCoreTools.checkMatrixMinimumSize(startRow + 6, column + 1, matrix);
       getAngularPart().sub(matrix.unsafe_get(startRow++, column), matrix.unsafe_get(startRow++, column), matrix.unsafe_get(startRow++, column));
       getLinearPart().sub(matrix.unsafe_get(startRow++, column), matrix.unsafe_get(startRow++, column), matrix.unsafe_get(startRow++, column));
    }
