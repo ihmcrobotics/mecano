@@ -27,13 +27,13 @@ testDependencies {
 }
 
 graphvizDependencies {
-   compile ihmc.sourceSetProject("main")
+   api(ihmc.sourceSetProject("main"))
 
    api("guru.nidi:graphviz-java:0.5.4")
 }
 
 yovariablesDependencies {
-   compile ihmc.sourceSetProject("main")
+   api(ihmc.sourceSetProject("main"))
 
    api("us.ihmc:ihmc-yovariables:0.5.0")
 }
