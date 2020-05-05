@@ -61,6 +61,20 @@ public interface JointBasics extends JointReadOnly
    void setSuccessor(RigidBodyBasics successor);
 
    /**
+    * Configures this joint as closing a kinematic loop in the multi-body system.
+    * <p>
+    * Requires the successor to be set beforehand.
+    * </p>
+    * 
+    * @param transformFromSuccessorParentJoint specifies the transform from
+    *                                          {@code this.getFrameAfterJoint()} to
+    *                                          {@code successor.getParentJoint().getFrameAfterJoint()}.
+    *                                          The transform represents the pose of this joint with
+    *                                          respect to the {@code successor}'s parent joint.
+    */
+   void setupLoopClosure(RigidBodyTransformReadOnly transformFromSuccessorParentJoint);
+
+   /**
     * Resets this joint's configuration to zero.
     * <p>
     * For instance, for a {@code SphericalJoint}, this will reset the orientation as follows:

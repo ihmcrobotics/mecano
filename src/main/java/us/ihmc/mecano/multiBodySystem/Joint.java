@@ -5,6 +5,7 @@ import us.ihmc.mecano.frames.MovingReferenceFrame;
 import us.ihmc.mecano.multiBodySystem.interfaces.JointBasics;
 import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
 import us.ihmc.mecano.tools.MecanoFactories;
+import us.ihmc.mecano.tools.MecanoTools;
 
 /**
  * Base implementation for any {@link JointBasics} that gathers all the basic setup for a joint.
@@ -57,6 +58,8 @@ public abstract class Joint implements JointBasics
     */
    protected final MovingReferenceFrame afterJointFrame;
 
+   protected MovingReferenceFrame loopClosureFrame = null;
+
    /**
     * Creates the abstract layer for a new joint.
     * <p>
@@ -98,6 +101,14 @@ public abstract class Joint implements JointBasics
       predecessor.addChildJoint(this);
    }
 
+   @Override
+   public void setupLoopClosure(RigidBodyTransformReadOnly transformFromSuccessorParentJoint)
+   {
+      loopClosureFrame = MovingReferenceFrame.constructFrameFixedInParent(MecanoTools.capitalize(getName()) + "LoopClosureFrame",
+                                                                          getFrameAfterJoint(),
+                                                                          transformFromSuccessorParentJoint);
+   }
+
    /** {@inheritDoc} */
    @Override
    public final MovingReferenceFrame getFrameBeforeJoint()
@@ -124,6 +135,12 @@ public abstract class Joint implements JointBasics
    public final RigidBodyBasics getSuccessor()
    {
       return successor;
+   }
+
+   @Override
+   public MovingReferenceFrame getLoopClosureFrame()
+   {
+      return loopClosureFrame;
    }
 
    /** {@inheritDoc} */
