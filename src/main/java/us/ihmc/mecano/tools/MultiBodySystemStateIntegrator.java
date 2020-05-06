@@ -6,6 +6,7 @@ import us.ihmc.euclid.geometry.interfaces.Pose3DBasics;
 import us.ihmc.euclid.geometry.interfaces.Pose3DReadOnly;
 import us.ihmc.euclid.orientation.interfaces.Orientation3DBasics;
 import us.ihmc.euclid.orientation.interfaces.Orientation3DReadOnly;
+import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.referenceFrame.exceptions.ReferenceFrameMismatchException;
 import us.ihmc.euclid.referenceFrame.interfaces.FixedFrameVector3DBasics;
 import us.ihmc.euclid.referenceFrame.interfaces.FrameVector3DReadOnly;
@@ -25,8 +26,8 @@ import us.ihmc.mecano.multiBodySystem.interfaces.JointBasics;
 import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointBasics;
 import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
 import us.ihmc.mecano.multiBodySystem.interfaces.SphericalJointBasics;
+import us.ihmc.mecano.spatial.interfaces.FixedFrameSpatialAccelerationBasics;
 import us.ihmc.mecano.spatial.interfaces.FixedFrameTwistBasics;
-import us.ihmc.mecano.spatial.interfaces.SpatialAccelerationReadOnly;
 import us.ihmc.mecano.spatial.interfaces.TwistReadOnly;
 
 /**
@@ -55,6 +56,8 @@ public class MultiBodySystemStateIntegrator
    private final Vector3D rotationVector = new Vector3D();
    /** Intermediate variable used to perform garbage-free operations. */
    private final Quaternion integrated = new Quaternion();
+   /** Intermediate variable used to perform garbage-free operations. */
+   private final FrameVector3D linearAcceleration = new FrameVector3D();
 
    /**
     * Creates a new integrator and initializes the internal time increment to {@link Double#NaN}. It
@@ -470,7 +473,7 @@ public class MultiBodySystemStateIntegrator
     * </pre>
     * </p>
     * 
-    * @param spatialAcceleration the angular and linear acceleration to integrate. Not modified.
+    * @param spatialAcceleration the angular and linear acceleration to integrate. Modified.
     * @param twistToIntegrate    the angular and linear velocity to integrate and update. Modified.
     * @param poseToIntegrate     the pose to update. Modified.
     * @throws ReferenceFrameMismatchException if the given {@code spatialAcceleration} is not expressed
@@ -479,7 +482,7 @@ public class MultiBodySystemStateIntegrator
     *                                         {@code initialTwist}, and {@code finalTwist} do not have
     *                                         the same reference frame.
     */
-   public void doubleIntegrate(SpatialAccelerationReadOnly spatialAcceleration, FixedFrameTwistBasics twistToIntegrate, Pose3DBasics poseToIntegrate)
+   public void doubleIntegrate(FixedFrameSpatialAccelerationBasics spatialAcceleration, FixedFrameTwistBasics twistToIntegrate, Pose3DBasics poseToIntegrate)
    {
       doubleIntegrate(spatialAcceleration, twistToIntegrate, poseToIntegrate, twistToIntegrate, poseToIntegrate);
    }
@@ -496,7 +499,7 @@ public class MultiBodySystemStateIntegrator
     * </pre>
     * </p>
     * 
-    * @param spatialAcceleration the angular and linear acceleration to integrate. Not modified.
+    * @param spatialAcceleration the angular and linear acceleration to integrate. Modified.
     * @param initialTwist        the initial angular and linear velocity to integrate. Not modified.
     * @param initialPose         the initial pose to append the integrated term to. Not modified.
     * @param finalTwist          the estimated twist after integration. Modified.
@@ -507,7 +510,7 @@ public class MultiBodySystemStateIntegrator
     *                                         {@code initialTwist}, and {@code finalTwist} do not have
     *                                         the same reference frame.
     */
-   public void doubleIntegrate(SpatialAccelerationReadOnly spatialAcceleration, TwistReadOnly initialTwist, Pose3DReadOnly initialPose,
+   public void doubleIntegrate(FixedFrameSpatialAccelerationBasics spatialAcceleration, TwistReadOnly initialTwist, Pose3DReadOnly initialPose,
                                FixedFrameTwistBasics finalTwist, Pose3DBasics finalPose)
    {
       spatialAcceleration.checkReferenceFrameMatch(initialTwist);
@@ -515,23 +518,53 @@ public class MultiBodySystemStateIntegrator
       if (finalTwist != initialTwist)
          finalTwist.checkReferenceFrameMatch(initialTwist);
 
-      FrameVector3DReadOnly angularAcceleration = spatialAcceleration.getAngularPart();
-      FrameVector3DReadOnly linearAcceleration = spatialAcceleration.getLinearPart();
-
-      FrameVector3DReadOnly initialAngularVelocity = initialTwist.getAngularPart();
-      FrameVector3DReadOnly initialLinearVelocity = initialTwist.getLinearPart();
-
       QuaternionReadOnly initialOrientation = initialPose.getOrientation();
-      Point3DReadOnly initialPosition = initialPose.getPosition();
-
-      FixedFrameVector3DBasics finalAngularVelocity = finalTwist.getAngularPart();
-      FixedFrameVector3DBasics finalLinearVelocity = finalTwist.getLinearPart();
-
       QuaternionBasics finalOrientation = finalPose.getOrientation();
+      Point3DReadOnly initialPosition = initialPose.getPosition();
       Point3DBasics finalPosition = finalPose.getPosition();
 
-      doubleIntegrate(angularAcceleration, initialAngularVelocity, initialOrientation, finalAngularVelocity, finalOrientation);
-      doubleIntegrate(initialOrientation, linearAcceleration, initialLinearVelocity, initialPosition, finalLinearVelocity, finalPosition);
+      FrameVector3DReadOnly initialAngularVelocity = initialTwist.getAngularPart();
+      FixedFrameVector3DBasics finalAngularVelocity = finalTwist.getAngularPart();
+      FrameVector3DReadOnly initialLinearVelocity = initialTwist.getLinearPart();
+      FixedFrameVector3DBasics finalLinearVelocity = finalTwist.getLinearPart();
+
+      FixedFrameVector3DBasics angularAcceleration = spatialAcceleration.getAngularPart();
+      spatialAcceleration.getLinearAccelerationAtBodyOrigin(initialTwist, linearAcceleration);
+
+      rotationVector.setAndScale(dt, initialAngularVelocity);
+      rotationVector.scaleAdd(half_dt_dt, angularAcceleration, rotationVector);
+      integrated.setRotationVector(rotationVector);
+
+      if (finalAngularVelocity != null)
+      {
+         finalAngularVelocity.scaleAdd(dt, angularAcceleration, initialAngularVelocity);
+      }
+
+      if (finalPosition != null)
+      {
+         deltaPosition.setAndScale(dt, initialLinearVelocity);
+         deltaPosition.scaleAdd(half_dt_dt, linearAcceleration, deltaPosition);
+         if (initialOrientation != null)
+            initialOrientation.transform(deltaPosition);
+
+         finalPosition.add(initialPosition, deltaPosition);
+      }
+
+      if (finalLinearVelocity != null)
+      {
+         finalLinearVelocity.scaleAdd(dt, linearAcceleration, initialLinearVelocity);
+         integrated.inverseTransform(finalLinearVelocity);
+      }
+
+      if (finalOrientation != null)
+      {
+         if (finalOrientation != initialOrientation)
+            finalOrientation.set(initialOrientation);
+         finalOrientation.append(integrated);
+      }
+
+      integrated.inverseTransform(linearAcceleration);
+      spatialAcceleration.setBasedOnOriginAcceleration(angularAcceleration, linearAcceleration, finalTwist);
    }
 
    /**
@@ -615,6 +648,8 @@ public class MultiBodySystemStateIntegrator
     * @param linearAcceleration        the linear acceleration to integrate. Not modified.
     * @param linearVelocityToIntegrate the linear velocity to integrate and update. Modified.
     * @param positionToIntegrate       the position to update. Modified.
+    * @deprecated This integration method is inaccurate and does not account for the interdependency
+    *             between angular and linear states properly.
     */
    public void doubleIntegrate(Orientation3DReadOnly orientation, Vector3DReadOnly linearAcceleration, Vector3DBasics linearVelocityToIntegrate,
                                Tuple3DBasics positionToIntegrate)
@@ -643,6 +678,8 @@ public class MultiBodySystemStateIntegrator
     * @param initialPosition       the initial position to add the integrated term to. Not modified.
     * @param finalLinearVelocity   the estimated linear velocity after integration. Modified.
     * @param finalPosition         the estimated position after integration. Modified.
+    * @deprecated This integration method is inaccurate and does not account for the interdependency
+    *             between angular and linear states properly.
     */
    public void doubleIntegrate(Orientation3DReadOnly orientation, Vector3DReadOnly linearAcceleration, Vector3DReadOnly initialLinearVelocity,
                                Tuple3DReadOnly initialPosition, Vector3DBasics finalLinearVelocity, Tuple3DBasics finalPosition)

@@ -5,6 +5,7 @@ import java.util.Collections;
 import java.util.List;
 
 import org.ejml.data.DenseMatrix64F;
+import org.ejml.ops.MatrixDimensionException;
 
 import us.ihmc.euclid.matrix.interfaces.Matrix3DBasics;
 import us.ihmc.euclid.matrix.interfaces.Matrix3DReadOnly;
