@@ -17,9 +17,9 @@ ihmc {
 mainDependencies {
    api("org.ejml:dense64:0.30")
 
-   api("us.ihmc:euclid:0.14.1")
-   api("us.ihmc:euclid-frame:0.14.1")
-   api("us.ihmc:euclid-geometry:0.14.1")
+   api("us.ihmc:euclid:0.14.2")
+   api("us.ihmc:euclid-frame:0.14.2")
+   api("us.ihmc:euclid-geometry:0.14.2")
 }
 
 testDependencies {
