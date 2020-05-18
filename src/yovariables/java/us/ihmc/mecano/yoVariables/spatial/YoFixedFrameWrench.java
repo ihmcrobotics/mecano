@@ -59,7 +59,7 @@ public class YoFixedFrameWrench implements FixedFrameWrenchBasics, GeometryObjec
     * <p>
     * Note that the reference frames are final.
     * </p>
-    * 
+    *
     * @param namePrefix       a unique name string to use as the prefix for child variable names.
     * @param bodyFrame        the frame rigidly attached to the body on which this wrench is applied.
     * @param expressedInFrame the frame in which this wrench is expressed.
@@ -75,7 +75,7 @@ public class YoFixedFrameWrench implements FixedFrameWrenchBasics, GeometryObjec
     * <p>
     * Note that the reference frames are final.
     * </p>
-    * 
+    *
     * @param namePrefix       a unique name string to use as the prefix for child variable names.
     * @param nameSuffix       a string to use as the suffix for child variable names.
     * @param bodyFrame        the frame rigidly attached to the body on which this wrench is applied.
@@ -92,7 +92,7 @@ public class YoFixedFrameWrench implements FixedFrameWrenchBasics, GeometryObjec
     * <p>
     * Note that the reference frames are final.
     * </p>
-    * 
+    *
     * @param bodyFrame   the frame rigidly attached to the body on which this wrench is applied.
     * @param angularPart the vector to use for the angular part.
     * @param linearPart  the vector to use for the linear part.
@@ -107,14 +107,14 @@ public class YoFixedFrameWrench implements FixedFrameWrenchBasics, GeometryObjec
     * <p>
     * Note that the reference frames are final.
     * </p>
-    * 
+    *
     * @param bodyFrame     the frame rigidly attached to the body on which this wrench is applied.
     * @param spatialVector the spatial vector to use for holding data.
     */
    public YoFixedFrameWrench(ReferenceFrame bodyFrame, YoFixedFrameSpatialVector spatialVector)
    {
       this.bodyFrame = bodyFrame;
-      this.spatialForceVector = new YoFixedFrameSpatialForce(spatialVector);
+      spatialForceVector = new YoFixedFrameSpatialForce(spatialVector);
    }
 
    /** {@inheritDoc} */

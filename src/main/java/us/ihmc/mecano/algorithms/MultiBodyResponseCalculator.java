@@ -24,7 +24,12 @@ import us.ihmc.mecano.spatial.SpatialAcceleration;
 import us.ihmc.mecano.spatial.SpatialForce;
 import us.ihmc.mecano.spatial.Twist;
 import us.ihmc.mecano.spatial.Wrench;
-import us.ihmc.mecano.spatial.interfaces.*;
+import us.ihmc.mecano.spatial.interfaces.SpatialAccelerationReadOnly;
+import us.ihmc.mecano.spatial.interfaces.SpatialForceReadOnly;
+import us.ihmc.mecano.spatial.interfaces.SpatialImpulseReadOnly;
+import us.ihmc.mecano.spatial.interfaces.SpatialVectorReadOnly;
+import us.ihmc.mecano.spatial.interfaces.TwistReadOnly;
+import us.ihmc.mecano.spatial.interfaces.WrenchReadOnly;
 import us.ihmc.mecano.tools.MultiBodySystemTools;
 
 /**
@@ -37,13 +42,13 @@ import us.ihmc.mecano.tools.MultiBodySystemTools;
  * </p>
  * <p>
  * Example of how to use this calculator:
- * 
+ *
  * <pre>
  * MultiBodyResponseCalculator calculator = new MultiBodyResponseCalculator(multiBodySystem);
  * calculator.getForwardDynamicsCalculator().compute();
- * // To compute the linear part of the inverse of the apparent inertia for targetRigidBody: 
+ * // To compute the linear part of the inverse of the apparent inertia for targetRigidBody:
  * calculator.computeApparentLinearInertiaInverse(targetRigidBody, pointInTarget, externalWrenchFrame);
- * 
+ *
  * // The following is for propagating a disturbance to the multi-body system and evaluate the resulting change in motion:
  * // First apply the disturbance:
  * calculator.applyWrench(targetRigidBody, externalWrench);
@@ -52,7 +57,7 @@ import us.ihmc.mecano.tools.MultiBodySystemTools;
  * // To obtain the change in joint accelerationL
  * DenseMatrix64F jointAccelerationChange = calculator.propagateWrench();
  * </pre>
- * 
+ *
  * The equivalent calculations can be done using an impulse as disturbance the change in motion then
  * being in the velocity space.
  * </p>
@@ -60,7 +65,7 @@ import us.ihmc.mecano.tools.MultiBodySystemTools;
  * Mirtich, Brian Vincent. <i>Impulse-based dynamic simulation of rigid body systems</i>. University
  * of California, Berkeley, 1996.
  * </p>
- * 
+ *
  * @author Sylvain Bertrand
  */
 public class MultiBodyResponseCalculator
@@ -94,7 +99,7 @@ public class MultiBodyResponseCalculator
    private enum ResponseType
    {
       ACCELERATION, TWIST
-   };
+   }
 
    private ResponseType currentResponseType = null;
    private final DenseMatrix64F singleElementMatrix = new DenseMatrix64F(1, 1);
@@ -106,7 +111,7 @@ public class MultiBodyResponseCalculator
     * This calculator creates a {@link ForwardDynamicsCalculator} that needs to configured and updated
     * manually by the user before using the features of this calculator.
     * </p>
-    * 
+    *
     * @param input the definition of the system to be evaluated by this calculator.
     */
    public MultiBodyResponseCalculator(MultiBodySystemReadOnly input)
@@ -121,7 +126,7 @@ public class MultiBodyResponseCalculator
     * This calculator does not manage the given {@code forwardDynamicsCalculator}. It is on the user to
     * update the forward dynamics before accessing features of this calculator.
     * </p>
-    * 
+    *
     * @param forwardDynamicsCalculator the forward dynamics calculator required to perform additional
     *                                  calculation in this calculator.
     */
@@ -210,7 +215,7 @@ public class MultiBodyResponseCalculator
 
    /**
     * Gets the internal forward-dynamics calculator that this calculator is using.
-    * 
+    *
     * @return the forward dynamics calculator.
     */
    public ForwardDynamicsCalculator getForwardDynamicsCalculator()
@@ -230,13 +235,13 @@ public class MultiBodyResponseCalculator
    /**
     * Computes the matrix representing the inverse of the apparent inertia expressed at
     * {@code inertiaFrame} such that:
-    * 
+    *
     * <pre>
     * / &Delta;&omega;Dot<sub>target</sub> \     <sup> </sup> <sup>  </sup> / &tau;<sub>target</sub> \
     * |   <sub>      </sub>    | = (I<sup>A</sup>)<sup>-1</sup> |  <sub>      </sub> |
     * \ &Delta;&alpha;<sub>target</sub>    /     <sup> </sup> <sup>  </sup> \ F<sub>target</sub> /
     * </pre>
-    * 
+    *
     * where:
     * <ul>
     * <li><tt>(I<sup>A</sup>)<sup>-1</sup></tt> is the inverse of the 6-by-6 linear part of the
@@ -252,13 +257,13 @@ public class MultiBodyResponseCalculator
     * Note that the apparent inertia can also be used to relate an impulse to a change in twist as
     * follows:
     * </p>
-    * 
+    *
     * <pre>
     * / &Delta;&omega;<sub>target</sub> \     <sup> </sup> <sup>  </sup> / Y<sup>ang</sup><sub>target</sub> \
     * |   <sub>      </sub> | = (I<sup>A</sup>)<sup>-1</sup> |  <sub>      </sub><sup>   </sup> |
     * \ &Delta;&nu;<sub>target</sub> /     <sup> </sup> <sup>  </sup> \ Y<sup>lin</sup><sub>target</sub> /
     * </pre>
-    * 
+    *
     * where:
     * <ul>
     * <li><tt>Y<sup>ang</sup><sub>target</sub></sub></tt> is the angular part of an impulse applied at
@@ -270,7 +275,7 @@ public class MultiBodyResponseCalculator
     * <li><tt>&Delta;&nu;<sub>target</sub></tt> is the resulting change in linear velocity of
     * {@code target} at {@code inertiaFrame} due to an impulse.
     * </ul>
-    * 
+    *
     * @param target                       the rigid-body to compute the apparent inertia at.
     * @param inertiaFrame                 the frame at which the apparent inertia is to be expressed.
     * @param apparentSpatialInertiaToPack the matrix in which to store the result. Modified.
@@ -286,13 +291,13 @@ public class MultiBodyResponseCalculator
    /**
     * Computes the matrix representing the inverse of the apparent inertia expressed at
     * {@code inertiaFrame} such that:
-    * 
+    *
     * <pre>
     * / &Delta;&omega;Dot<sub>target</sub> \     <sup> </sup> <sup>  </sup> / &tau;<sub>target</sub> \
     * |   <sub>      </sub>    | = (I<sup>A</sup>)<sup>-1</sup> |  <sub>      </sub> |
     * \ &Delta;&alpha;<sub>target</sub>    /     <sup> </sup> <sup>  </sup> \ F<sub>target</sub> /
     * </pre>
-    * 
+    *
     * where:
     * <ul>
     * <li><tt>(I<sup>A</sup>)<sup>-1</sup></tt> is the inverse of the 6-by-6 linear part of the
@@ -308,13 +313,13 @@ public class MultiBodyResponseCalculator
     * Note that the apparent inertia can also be used to relate an impulse to a change in twist as
     * follows:
     * </p>
-    * 
+    *
     * <pre>
     * / &Delta;&omega;<sub>target</sub> \     <sup> </sup> <sup>  </sup> / Y<sup>ang</sup><sub>target</sub> \
     * |   <sub>      </sub> | = (I<sup>A</sup>)<sup>-1</sup> |  <sub>      </sub><sup>   </sup> |
     * \ &Delta;&nu;<sub>target</sub> /     <sup> </sup> <sup>  </sup> \ Y<sup>lin</sup><sub>target</sub> /
     * </pre>
-    * 
+    *
     * where:
     * <ul>
     * <li><tt>Y<sup>ang</sup><sub>target</sub></sub></tt> is the angular part of an impulse applied at
@@ -326,7 +331,7 @@ public class MultiBodyResponseCalculator
     * <li><tt>&Delta;&nu;<sub>target</sub></tt> is the resulting change in linear velocity of
     * {@code target} at {@code inertiaFrame} due to an impulse.
     * </ul>
-    * 
+    *
     * @param target                       the rigid-body to compute the apparent inertia at.
     * @param inertiaFrame                 the frame at which the apparent inertia is to be expressed.
     * @param selectedAxes                 a 6-element array of boolean allowing to specify for which
@@ -402,11 +407,11 @@ public class MultiBodyResponseCalculator
    /**
     * Computes the matrix representing the inverse of the linear part of the apparent inertia expressed
     * at {@code inertiaFrame} such that:
-    * 
+    *
     * <pre>
     * &Delta;&alpha;<sub>target</sub> = (I<sup>A</sup>)<sup>-1</sup> F<sub>target</sub>
     * </pre>
-    * 
+    *
     * where:
     * <ul>
     * <li><tt>(I<sup>A</sup>)<sup>-1</sup></tt> is the inverse of the 3-by-3 linear part of the
@@ -419,18 +424,18 @@ public class MultiBodyResponseCalculator
     * Note that the apparent inertia can also be used to relate an impulse to a change in twist as
     * follows:
     * </p>
-    * 
+    *
     * <pre>
     * &Delta;&nu;<sub>target</sub> = (I<sup>A</sup>)<sup>-1</sup> Y<sub>target</sub>
     * </pre>
-    * 
+    *
     * where:
     * <ul>
     * <li><tt>Y<sub>target</sub></tt> is a linear impulse applied at {@code inertiaFrame}.
     * <li><tt>&Delta;&nu;<sub>target</sub></tt> is the resulting change in linear velocity of
     * {@code target} at {@code inertiaFrame} due a linear impulse <tt>Y<sub>target</sub></tt>.
     * </ul>
-    * 
+    *
     * @param target                      the rigid-body to compute the apparent inertia at.
     * @param inertiaFrame                the frame at which the output is to be expressed.
     * @param apparentLinearInertiaToPack the matrix in which to store the result. Modified.
@@ -470,11 +475,11 @@ public class MultiBodyResponseCalculator
    /**
     * Computes the matrix that is the equivalent of the inverse of the apparent inertia but for the
     * joint, such that:
-    * 
+    *
     * <pre>
     * &Delta;qdd<sub>target</sub> = (I<sup>A</sup>)<sup>-1</sup> &tau;<sub>target</sub>
     * </pre>
-    * 
+    *
     * where:
     * <ul>
     * <li><tt>(I<sup>A</sup>)<sup>-1</sup></tt> is the N-by-N inverse of the pseudo inertia matrix,
@@ -486,17 +491,17 @@ public class MultiBodyResponseCalculator
     * Note that the pseudo apparent inertia can also be used to relate a joint impulse to a change in
     * joint twist as follows:
     * </p>
-    * 
+    *
     * <pre>
     * &Delta;qd<sub>target</sub> = (I<sup>A</sup>)<sup>-1</sup> y<sub>target</sub>
     * </pre>
-    * 
+    *
     * where:
     * <ul>
     * <li><tt>&y;<sub>target</sub></tt> is a joint impulse.
     * <li><tt>&Delta;qd<sub>target</sub></tt> is the resulting change in joint twist.
     * </ul>
-    * 
+    *
     * @param target        the joint to compute the pseudo apparent inertia for.
     * @param inertiaToPack the matrix in which to store the result. Modified.
     * @return {@code true} is the matrix was successfully computed, {@code false} otherwise.
@@ -527,11 +532,11 @@ public class MultiBodyResponseCalculator
 
    /**
     * Computes the value the inverse of the pseudo apparent inertia for the joint, such that:
-    * 
+    *
     * <pre>
     * &Delta;qdd<sub>target</sub> = (I<sup>A</sup>)<sup>-1</sup> &tau;<sub>target</sub>
     * </pre>
-    * 
+    *
     * where:
     * <ul>
     * <li><tt>(I<sup>A</sup>)<sup>-1</sup></tt> is the inverse of the pseudo inertia matrix.
@@ -542,17 +547,17 @@ public class MultiBodyResponseCalculator
     * Note that the pseudo apparent inertia can also be used to relate a joint impulse to a change in
     * joint velocity as follows:
     * </p>
-    * 
+    *
     * <pre>
     * &Delta;qd<sub>target</sub> = (I<sup>A</sup>)<sup>-1</sup> y<sub>target</sub>
     * </pre>
-    * 
+    *
     * where:
     * <ul>
     * <li><tt>&y;<sub>target</sub></tt> is a joint impulse.
     * <li><tt>&Delta;qd<sub>target</sub></tt> is the resulting change in joint velocity.
     * </ul>
-    * 
+    *
     * @param target the joint to compute the pseudo apparent inertia for.
     * @return {@code true} is the matrix was successfully computed, {@code false} otherwise.
     */
@@ -591,7 +596,7 @@ public class MultiBodyResponseCalculator
     * in acceleration for any joint.
     * </ul>
     * </p>
-    * 
+    *
     * @param target the rigid-body to which the wrench is applied to.
     * @param wrench the wrench to be applied. Not modified.
     * @return {@code true} if the wrench was successfully applied and the response computed,
@@ -624,7 +629,7 @@ public class MultiBodyResponseCalculator
     * for any joint.
     * </ul>
     * </p>
-    * 
+    *
     * @param target  the rigid-body to which the impulse is applied to.
     * @param impulse the impulse to be applied. Not modified.
     * @return {@code true} if the impulse was successfully applied, {@code false} otherwise.
@@ -669,7 +674,7 @@ public class MultiBodyResponseCalculator
     * in acceleration for any joint.
     * </ul>
     * </p>
-    * 
+    *
     * @param target the joint at which the effort is applied.
     * @param effort the effort to be applied. Not modified.
     * @return {@code true} if the effort was successfully applied, {@code false} otherwise.
@@ -702,7 +707,7 @@ public class MultiBodyResponseCalculator
     * in acceleration for any joint.
     * </ul>
     * </p>
-    * 
+    *
     * @param target the joint at which the wrench is applied.
     * @param wrench the wrench to be applied. Not modified.
     * @return {@code true} if the wrench was successfully applied, {@code false} otherwise.
@@ -734,7 +739,7 @@ public class MultiBodyResponseCalculator
     * for any joint.
     * </ul>
     * </p>
-    * 
+    *
     * @param target  the joint at which the impulse is applied.
     * @param impulse the impulse to be applied. Not modified.
     * @return {@code true} if the impulse was successfully applied, {@code false} otherwise.
@@ -767,7 +772,7 @@ public class MultiBodyResponseCalculator
     * for any joint.
     * </ul>
     * </p>
-    * 
+    *
     * @param target  the joint at which the impulse is applied.
     * @param impulse the impulse to be applied. Not modified.
     * @return {@code true} if the impulse was successfully applied, {@code false} otherwise.
@@ -808,7 +813,7 @@ public class MultiBodyResponseCalculator
    /**
     * Propagates a <b>previously</b> applied wrench to all rigid-bodies in the system and computes the
     * resulting change in acceleration.
-    * 
+    *
     * @return the matrix with the resulting change in joint acceleration, or {@code null} if
     *         {@link #applyRigidBodyWrench(RigidBodyReadOnly, WrenchReadOnly)} was not called last.
     */
@@ -820,7 +825,7 @@ public class MultiBodyResponseCalculator
    /**
     * Propagates a <b>previously</b> applied impulse to all rigid-bodies in the system and computes the
     * resulting change in twist.
-    * 
+    *
     * @return the matrix with the resulting change in joint velocity, or {@code null} if
     *         {@link #applyRigidBodyImpulse(RigidBodyReadOnly, SpatialImpulseReadOnly)} was not called
     *         last.
@@ -845,7 +850,7 @@ public class MultiBodyResponseCalculator
     * <p>
     * This provider requires that a wrench was applied before performing queries.
     * </p>
-    * 
+    *
     * @return the acceleration change provider.
     */
    public RigidBodyAccelerationProvider getAccelerationChangeProvider()
@@ -859,7 +864,7 @@ public class MultiBodyResponseCalculator
     * <p>
     * This provider requires that an impulse was applied before performing queries.
     * </p>
-    * 
+    *
     * @return the twist change provider.
     */
    public RigidBodyTwistProvider getTwistChangeProvider()
@@ -872,7 +877,7 @@ public class MultiBodyResponseCalculator
     * <p>
     * This method requires that a wrench was applied.
     * </p>
-    * 
+    *
     * @param joint the joint to get the change in acceleration for.
     * @return the change in acceleration of the {@code joint}.
     */
@@ -886,7 +891,7 @@ public class MultiBodyResponseCalculator
     * <p>
     * This method requires that a wrench was applied.
     * </p>
-    * 
+    *
     * @param joint the joint to get the change in acceleration for.
     * @return the N-by-1 matrix containing the change in acceleration of the {@code joint}.
     */
@@ -900,7 +905,7 @@ public class MultiBodyResponseCalculator
     * <p>
     * This method requires that an impulse was applied.
     * </p>
-    * 
+    *
     * @param joint the joint to get the change in velocity for.
     * @return the change in velocity of the {@code joint}.
     */
@@ -914,7 +919,7 @@ public class MultiBodyResponseCalculator
     * <p>
     * This method requires that an impulse was applied.
     * </p>
-    * 
+    *
     * @param joint the joint to get the change in twist for.
     * @return the N-by-1 matrix containing the change in twist of the {@code joint}.
     */
@@ -1005,7 +1010,7 @@ public class MultiBodyResponseCalculator
       final DenseMatrix64F tauPlus;
       /**
        * This is the apparent force for this joint resulting from {@code testWrenchPlus}:
-       * 
+       *
        * <pre>
        * p<sup>A+</sup> = p<sup>+</sup> + </sub> p<sup>a+</sup><sub>child</sub>
        * </pre>
@@ -1013,11 +1018,11 @@ public class MultiBodyResponseCalculator
       final DenseMatrix64F pAPlus;
       /**
        * Intermediate result to save computation:
-       * 
+       *
        * <pre>
        * u<sup>+</sup> = - S<sup>T</sup> p<sup>A+</sup>
        * </pre>
-       * 
+       *
        * where <tt>&tau;</tt> is the N-by-1 vector representing the joint effort, N being the number of
        * DoFs for this joint, <tt>S</tt> is the joint motion subspace, and <tt>p<sup>A+</sup></tt> the
        * apparent force resulting from {@code testWrenchPlus}.
@@ -1026,12 +1031,12 @@ public class MultiBodyResponseCalculator
       /**
        * The apparent bias forces/impulses of this joint for the parent resulting from the
        * {@code testWrenchPlus}:
-       * 
+       *
        * <pre>
        * p<sup>a+</sup> = p<sup>A+</sup> + U D<sup>-1</sup> u<sup>+</sup>
        *  <sup>  </sup> = p<sup>A+</sup> - I<sup>A</sup> S ( S<sup>T</sup> I<sup>A</sup> S )<sup>-1</sup> S<sup>T</sup> p<sup>A+</sup>
        * </pre>
-       * 
+       *
        * where <tt>p<sup>A+</sup></tt> is {@code testDisturbancePlus} acting on this joint, <tt>S</tt> is
        * the joint motion subspace, <tt>I<sup>A</sup></tt> this handle's articulated-body inertia,
        * <tt>&tau;</tt> this joint effort.
@@ -1047,7 +1052,7 @@ public class MultiBodyResponseCalculator
       final DenseMatrix64F aParentPlus;
       /**
        * <b>Output of this algorithm: the change in body motion:</b>
-       * 
+       *
        * <pre>
        * a<sup>+</sup> = a<sup>+</sup><sub>parent</sub> + S qDDot<sup>+</sup>
        * </pre>
@@ -1063,7 +1068,7 @@ public class MultiBodyResponseCalculator
       final DenseMatrix64F qddPlus_intermediate;
       /**
        * <b>Output of this algorithm: the change in joint motion:</b>
-       * 
+       *
        * <pre>
        * qDDot<sup>+</sup> = D<sup>-1</sup> ( u<sup>+</sup> - U<sup>T</sup> a<sup>+</sup><sub>parent</sub> )
        * </pre>
@@ -1139,8 +1144,8 @@ public class MultiBodyResponseCalculator
             paPlus = new DenseMatrix64F(SpatialVectorReadOnly.SIZE, 1);
             qddPlus_intermediate = new DenseMatrix64F(nDoFs, 1);
             qddPlus = new DenseMatrix64F(nDoFs, 1);
-            aParentPlus = new DenseMatrix64F(SpatialAccelerationReadOnly.SIZE, 1);
-            aPlus = new DenseMatrix64F(SpatialAccelerationReadOnly.SIZE, 1);
+            aParentPlus = new DenseMatrix64F(SpatialVectorReadOnly.SIZE, 1);
+            aPlus = new DenseMatrix64F(SpatialVectorReadOnly.SIZE, 1);
          }
       }
 

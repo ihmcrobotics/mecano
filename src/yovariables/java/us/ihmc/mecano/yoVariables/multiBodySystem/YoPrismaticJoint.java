@@ -14,7 +14,7 @@ import us.ihmc.yoVariables.registry.YoVariableRegistry;
 /**
  * A {@code YoPrismaticJoint} is a joint has 1 degree of freedom of translation and has its state
  * backed by {@code YoVariable}s.
- * 
+ *
  * @author Sylvain Bertrand
  */
 public class YoPrismaticJoint extends YoOneDoFJoint implements PrismaticJointBasics
@@ -25,7 +25,7 @@ public class YoPrismaticJoint extends YoOneDoFJoint implements PrismaticJointBas
    /**
     * Creates a new prismatic joint which has only a translation offset with respect to its parent and
     * which state is backed by {@code YoVariable}s.
-    * 
+    *
     * @param name        the name for the new joint.
     * @param predecessor the rigid-body connected to and preceding this joint.
     * @param jointOffset the offset in translation with respect to the frame after the parent joint.
@@ -40,7 +40,7 @@ public class YoPrismaticJoint extends YoOneDoFJoint implements PrismaticJointBas
 
    /**
     * Creates a new prismatic joint which state is backed by {@code YoVariable}s.
-    * 
+    *
     * @param name              the name for the new joint.
     * @param predecessor       the rigid-body connected to and preceding this joint.
     * @param transformToParent the transform to the frame after the parent joint. Not modified.

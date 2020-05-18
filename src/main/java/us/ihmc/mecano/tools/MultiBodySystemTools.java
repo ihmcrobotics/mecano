@@ -30,7 +30,7 @@ public class MultiBodySystemTools
     * <p>
     * WARNING: This method generates garbage.
     * </p>
-    * 
+    *
     * @param joint the root of the subtree.
     * @return the subtree total inertia.
     */
@@ -45,7 +45,7 @@ public class MultiBodySystemTools
     * <p>
     * WARNING: This method generates garbage.
     * </p>
-    * 
+    *
     * @param rootBody the root of the subtree.
     * @return the subtree total inertia.
     */
@@ -165,7 +165,7 @@ public class MultiBodySystemTools
     * The resulting joint path represent the shortest path connecting {@code start} and {@code end}. No
     * assumption is made on the relative position of the two rigid-bodies in the multi-body system.
     * </p>
-    * 
+    *
     * @param start           the rigid-body where to begin collecting the joints.
     * @param end             the rigid-body where to stop collecting the joints.
     * @param jointPathToPack the list in which the joint path is stored. Note that the list is first
@@ -218,7 +218,7 @@ public class MultiBodySystemTools
     * The resulting joint path represent the shortest path connecting {@code start} and {@code end}. No
     * assumption is made on the relative position of the two rigid-bodies in the multi-body system.
     * </p>
-    * 
+    *
     * @param start           the rigid-body where to begin collecting the joints.
     * @param end             the rigid-body where to stop collecting the joints.
     * @param jointPathToPack the list in which the joint path is stored. Note that the list is first
@@ -272,7 +272,7 @@ public class MultiBodySystemTools
     * shortest path connecting the two rigid-bodies. No assumption is made on the relative position of
     * the two rigid-bodies in the multi-body system.
     * </p>
-    * 
+    *
     * @param start               the rigid-body where to begin collecting the rigid-bodies.
     * @param end                 the rigid-body where to stop collecting the rigid-bodies.
     * @param rigidBodyPathToPack the list in which the rigid-body path is stored. Note that the list is
@@ -336,7 +336,7 @@ public class MultiBodySystemTools
     * shortest path connecting the two rigid-bodies. No assumption is made on the relative position of
     * the two rigid-bodies in the multi-body system.
     * </p>
-    * 
+    *
     * @param start               the rigid-body where to begin collecting the rigid-bodies.
     * @param end                 the rigid-body where to stop collecting the rigid-bodies.
     * @param rigidBodyPathToPack the list in which the rigid-body path is stored. Note that the list is
@@ -395,7 +395,7 @@ public class MultiBodySystemTools
    /**
     * Traverses up the kinematic chain from the candidate descendant towards the root body, checking to
     * see if each parent body is the ancestor in question.
-    * 
+    *
     * @param candidateDescendant the query for the descendant. A rigid-body is the descendant of
     *                            another rigid-body if it is between the other rigid-body and an
     *                            end-effector.
@@ -495,7 +495,7 @@ public class MultiBodySystemTools
    /**
     * Calculates the number of degrees of freedom of the kinematic chain that connects
     * {@code firstBody} and {@code secondBody}.
-    * 
+    *
     * @param firstBody  the first end of the kinematic chain.
     * @param secondBody the second end of the kinematic chain.
     * @return the number of degrees of freedom.
@@ -531,7 +531,7 @@ public class MultiBodySystemTools
 
    /**
     * Iterates through the given joints and sums their number degrees of freedom.
-    * 
+    *
     * @param joints the kinematic chain to compute the total number of degrees of freedom of.
     * @return the total number of degrees of freedom.
     */
@@ -549,7 +549,7 @@ public class MultiBodySystemTools
 
    /**
     * Iterates through the given joints and sums their number degrees of freedom.
-    * 
+    *
     * @param joints the kinematic chain to compute the total number of degrees of freedom of.
     * @return the total number of degrees of freedom.
     */
@@ -568,11 +568,11 @@ public class MultiBodySystemTools
    /**
     * Finds the common ancestor of {@code firstBody} and {@code secondBody} that minimizes the distance
     * {@code d}:
-    * 
+    *
     * <pre>
     * d = <i>computeDistanceToAncestor</i>(firstBody, ancestor) + <i>computeDistanceToAncestor</i>(secondBody, ancestor)
     * </pre>
-    * 
+    *
     * @param firstBody  the first rigid-body of the query.
     * @param secondBody the second rigid-body of the query.
     * @return the nearest common ancestor.
@@ -587,11 +587,11 @@ public class MultiBodySystemTools
    /**
     * Finds the common ancestor of {@code firstBody} and {@code secondBody} that minimizes the distance
     * {@code d}:
-    * 
+    *
     * <pre>
     * d = <i>computeDistanceToAncestor</i>(firstBody, ancestor) + <i>computeDistanceToAncestor</i>(secondBody, ancestor)
     * </pre>
-    * 
+    *
     * @param firstBody  the first rigid-body of the query.
     * @param secondBody the second rigid-body of the query.
     * @return the nearest common ancestor.
@@ -689,7 +689,7 @@ public class MultiBodySystemTools
     * <p>
     * WARNING: This method generates garbage.
     * </p>
-    * 
+    *
     * @param joints the joints indicating the start of each subtree to collect.
     * @return the array containing all the rigid-bodies composing the subtrees.
     */
@@ -704,7 +704,7 @@ public class MultiBodySystemTools
     * <p>
     * WARNING: This method generates garbage.
     * </p>
-    * 
+    *
     * @param joints the joints indicating the start of each subtree to collect.
     * @return the array containing all the rigid-bodies composing the subtrees.
     */
@@ -719,7 +719,7 @@ public class MultiBodySystemTools
     * <p>
     * WARNING: This method generates garbage.
     * </p>
-    * 
+    *
     * @param rigidBody the rigid-body to collect the support joints of.
     * @return the array containing the support joints of the given rigid-body.
     */
@@ -734,7 +734,7 @@ public class MultiBodySystemTools
     * <p>
     * WARNING: This method generates garbage.
     * </p>
-    * 
+    *
     * @param rigidBody the rigid-body to collect the support joints of.
     * @return the array containing the support joints of the given rigid-body.
     */
@@ -749,7 +749,7 @@ public class MultiBodySystemTools
     * <p>
     * WARNING: This method generates garbage.
     * </p>
-    * 
+    *
     * @param rigidBodies the rigid-bodies to collect the support joints of.
     * @return the array containing the support joints of all the given rigid-bodies.
     */
@@ -764,7 +764,7 @@ public class MultiBodySystemTools
     * <p>
     * WARNING: This method generates garbage.
     * </p>
-    * 
+    *
     * @param rigidBodies the rigid-bodies to collect the support joints of.
     * @return the array containing the support joints of all the given rigid-bodies.
     */
@@ -779,7 +779,7 @@ public class MultiBodySystemTools
     * <p>
     * WARNING: This method generates garbage.
     * </p>
-    * 
+    *
     * @param rootBodies the rigid-bodies from which the subtree to collect start off.
     * @return the array containing all the joint composing the subtrees.
     */
@@ -794,7 +794,7 @@ public class MultiBodySystemTools
     * <p>
     * WARNING: This method generates garbage.
     * </p>
-    * 
+    *
     * @param rootBodies the rigid-bodies from which the subtree to collect start off.
     * @return the array containing all the joint composing the subtrees.
     */
@@ -809,7 +809,7 @@ public class MultiBodySystemTools
     * <p>
     * WARNING: This method generates garbage.
     * </p>
-    * 
+    *
     * @param rootBodies the rigid-bodies from which the subtree to collect start off.
     * @return the array containing all the joint composing the subtrees.
     */
@@ -824,7 +824,7 @@ public class MultiBodySystemTools
     * <p>
     * WARNING: This method generates garbage.
     * </p>
-    * 
+    *
     * @param rigidBody the rigid-body to collect the support and subtree joints of.
     * @return the array containing the support and subtree joints.
     */
@@ -841,7 +841,7 @@ public class MultiBodySystemTools
     * <p>
     * WARNING: This method generates garbage.
     * </p>
-    * 
+    *
     * @param rigidBody the rigid-body to collect the support and subtree joints of.
     * @return the array containing the support and subtree joints.
     */
@@ -860,7 +860,7 @@ public class MultiBodySystemTools
     * <p>
     * WARNING: This method generates garbage.
     * </p>
-    * 
+    *
     * @param rigidBodies the rigid-bodies to collect the support and subtree joints of.
     * @return the array containing the support and subtree joints.
     */
@@ -876,7 +876,7 @@ public class MultiBodySystemTools
     * <p>
     * WARNING: This method generates garbage.
     * </p>
-    * 
+    *
     * @param rigidBodies the rigid-bodies to collect the support and subtree joints of.
     * @return the array containing the support and subtree joints.
     */
@@ -891,7 +891,7 @@ public class MultiBodySystemTools
     * <p>
     * WARNING: This method generates garbage.
     * </p>
-    * 
+    *
     * @param rigidBody the rigid-body to collect of descendant end-effectors of.
     * @return the array containing the end-effectors.
     */
@@ -906,7 +906,7 @@ public class MultiBodySystemTools
     * <p>
     * WARNING: This method generates garbage.
     * </p>
-    * 
+    *
     * @param rigidBody the rigid-body to collect of descendant end-effectors of.
     * @return the array containing the end-effectors.
     */
@@ -921,7 +921,7 @@ public class MultiBodySystemTools
     * <p>
     * WARNING: This method generates garbage.
     * </p>
-    * 
+    *
     * @param source the original collection of joints to filter. Not modified.
     * @param clazz  the class that the filtered joints have to implement.
     * @return the filtered joints.
@@ -1028,7 +1028,7 @@ public class MultiBodySystemTools
     * {@code joints.length - 1}].
     * </ul>
     * </p>
-    * 
+    *
     * @param joints the query. Not modified.
     * @return {@code true} if the joints are stored in a continuous manner from root to leaf,
     *         {@code false} otherwise.
@@ -1060,7 +1060,7 @@ public class MultiBodySystemTools
     * {@code joints.size() - 1}].
     * </ul>
     * </p>
-    * 
+    *
     * @param joints the query. Not modified.
     * @return {@code true} if the joints are stored in a continuous manner from root to leaf,
     *         {@code false} otherwise.
@@ -1078,7 +1078,7 @@ public class MultiBodySystemTools
 
    /**
     * Iterates through the given array and compute how many do implement the given {@code clazz}.
-    * 
+    *
     * @param clazz  the query for the joint type.
     * @param joints the array containing the joints to be tested.
     * @return the number of joints in the array that implement the given class.
@@ -1101,7 +1101,7 @@ public class MultiBodySystemTools
     * The two lists should be of same length and each pair (source, destination) joint for any given
     * index should be of the same type.
     * </p>
-    * 
+    *
     * @param source         the joints holding the state to copy over. Not modified.
     * @param destination    the joints which state is to be be updated. Modified.
     * @param stateSelection the state that is to be copied over.
@@ -1173,7 +1173,7 @@ public class MultiBodySystemTools
    /**
     * Iterates through the given {@code joints}, extract the requested state {@code stateSelection} for
     * each joint, and finally stores the states in order in the given matrix {@code matrixToPack}.
-    * 
+    *
     * @param joints         the joints to extract the state of. Not modified.
     * @param stateSelection indicates what state is to be extract, i.e. it can be either configuration,
     *                       velocity, acceleration, or tau (or effort).
@@ -1244,7 +1244,7 @@ public class MultiBodySystemTools
    /**
     * Iterates through the given {@code joints}, extract the requested state {@code stateSelection} for
     * each joint, and finally stores the states in order in the given matrix {@code matrixToPack}.
-    * 
+    *
     * @param joints         the joints to extract the state of. Not modified.
     * @param stateSelection indicates what state is to be extract, i.e. it can be either configuration,
     *                       velocity, acceleration, or tau (or effort).
@@ -1316,7 +1316,7 @@ public class MultiBodySystemTools
     * Iterates through the given {@code joints}, and update their requested state
     * {@code stateSelection} using the given {@code matrix} assuming the state has been previously
     * stored in the proper order.
-    * 
+    *
     * @param joints         the joints to update the state of. Modified.
     * @param stateSelection indicates what state is to be updated, i.e. it can be either configuration,
     *                       velocity, acceleration, or tau (or effort).
@@ -1390,7 +1390,7 @@ public class MultiBodySystemTools
     * Iterates through the given {@code joints}, and update their requested state
     * {@code stateSelection} using the given {@code matrix} assuming the state has been previously
     * stored in the proper order.
-    * 
+    *
     * @param joints         the joints to update the state of. Modified.
     * @param stateSelection indicates what state is to be updated, i.e. it can be either configuration,
     *                       velocity, acceleration, or tau (or effort).

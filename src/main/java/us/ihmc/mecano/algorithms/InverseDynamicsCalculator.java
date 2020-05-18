@@ -40,7 +40,7 @@ import us.ihmc.mecano.tools.MultiBodySystemTools;
  * Body Dynamics Algorithms (2008): <a href=
  * "https://books.google.com/books?id=GJRGBQAAQBAJ&lpg=PR5&ots=XoFXvnJZLH&dq=rigid%20body%20dynamics%20algorithms&lr&pg=PR1#v=onepage&q=rigid%20body%20dynamics%20algorithms&f=false">link</a>
  * </p>
- * 
+ *
  * @author Twan Koolen
  * @author Sylvain Bertrand
  */
@@ -76,7 +76,7 @@ public class InverseDynamicsCalculator
     * Do not forgot to set the gravitational acceleration so this calculator can properly account for
     * it.
     * </p>
-    * 
+    *
     * @param rootBody the supporting body of the subtree to be evaluated by this calculator. Not
     *                 modified.
     */
@@ -92,7 +92,7 @@ public class InverseDynamicsCalculator
     * Do not forgot to set the gravitational acceleration so this calculator can properly account for
     * it.
     * </p>
-    * 
+    *
     * @param rootBody                             the supporting body of the subtree to be evaluated by
     *                                             this calculator. Not modified.
     * @param considerCoriolisAndCentrifugalForces whether the effort resulting from the Coriolis and
@@ -112,7 +112,7 @@ public class InverseDynamicsCalculator
     * Do not forgot to set the gravitational acceleration so this calculator can properly account for
     * it.
     * </p>
-    * 
+    *
     * @param input the definition of the system to be evaluated by this calculator.
     */
    public InverseDynamicsCalculator(MultiBodySystemReadOnly input)
@@ -127,7 +127,7 @@ public class InverseDynamicsCalculator
     * Do not forgot to set the gravitational acceleration so this calculator can properly account for
     * it.
     * </p>
-    * 
+    *
     * @param input                          the definition of the system to be evaluated by this
     *                                       calculator.
     * @param considerIgnoredSubtreesInertia whether the inertia of the ignored part(s) of the given
@@ -152,7 +152,7 @@ public class InverseDynamicsCalculator
     * Do not forgot to set the gravitational acceleration so this calculator can properly account for
     * it.
     * </p>
-    * 
+    *
     * @param input                                the definition of the system to be evaluated by this
     *                                             calculator.
     * @param considerCoriolisAndCentrifugalForces whether the effort resulting from the Coriolis and
@@ -172,7 +172,7 @@ public class InverseDynamicsCalculator
     * Do not forgot to set the gravitational acceleration so this calculator can properly account for
     * it.
     * </p>
-    * 
+    *
     * @param input                                the definition of the system to be evaluated by this
     *                                             calculator.
     * @param considerCoriolisAndCentrifugalForces whether the effort resulting from the Coriolis and
@@ -245,7 +245,7 @@ public class InverseDynamicsCalculator
     * The acceleration of the root body is set to the opposite of the gravitational acceleration such
     * that it gets naturally propagated to the whole system.
     * </p>
-    * 
+    *
     * @param gravity the gravitational linear acceleration, it is usually equal to
     *                {@code (0, 0, -9.81)}.
     */
@@ -261,7 +261,7 @@ public class InverseDynamicsCalculator
     * The acceleration of the root body is set to the opposite of the gravitational acceleration such
     * that it gets naturally propagated to the whole system.
     * </p>
-    * 
+    *
     * @param gravity the gravitational linear acceleration, it is usually equal to
     *                {@code (0, 0, -9.81)}.
     */
@@ -278,7 +278,7 @@ public class InverseDynamicsCalculator
     * The acceleration of the root body is set to the opposite of the gravitational acceleration such
     * that it gets naturally propagated to the whole system.
     * </p>
-    * 
+    *
     * @param gravity the gravitational linear acceleration along the z-axis, it is usually equal to
     *                {@code -9.81}.
     */
@@ -293,7 +293,7 @@ public class InverseDynamicsCalculator
     * The acceleration of the root body is set to the opposite of the gravitational acceleration such
     * that it gets naturally propagated to the whole system.
     * </p>
-    * 
+    *
     * @param gravityX the gravitational linear acceleration along the x-axis, it is usually equal to
     *                 {@code 0}.
     * @param gravityY the gravitational linear acceleration along the y-axis, it is usually equal to
@@ -313,7 +313,7 @@ public class InverseDynamicsCalculator
     * Changes the spatial acceleration of the root. Even though the root is assumed to be non-moving,
     * the {@code rootAcceleration} is usually set to the opposite of the gravitational acceleration,
     * such that the effect of the gravity is naturally propagated to the entire system.
-    * 
+    *
     * @param newRootAcceleration the new spatial acceleration of the root.
     * @throws ReferenceFrameMismatchException if any of the reference frames of
     *                                         {@code newRootAcceleration} does not match this
@@ -337,7 +337,7 @@ public class InverseDynamicsCalculator
     * <p>
     * Modify the return wrench to configure the wrench to be applied on this rigid-body.
     * </p>
-    * 
+    *
     * @param rigidBody the query. Not modified.
     * @return the wrench associated to the query.
     */
@@ -348,7 +348,7 @@ public class InverseDynamicsCalculator
 
    /**
     * Sets external wrench to apply to the given {@code rigidBody}.
-    * 
+    *
     * @param rigidBody      the rigid-body to which the wrench is to applied. Not modified.
     * @param externalWrench the external wrench to apply to the rigid-body.
     */
@@ -375,7 +375,7 @@ public class InverseDynamicsCalculator
     * The given matrix is expected to have been configured using the same
     * {@link JointMatrixIndexProvider} that was used to configure this calculator.
     * </p>
-    * 
+    *
     * @param jointAccelerationMatrix the matrix containing the joint accelerations to use. Not
     *                                modified.
     */
@@ -397,7 +397,7 @@ public class InverseDynamicsCalculator
 
    /**
     * Gets the definition of the multi-body system that was used to create this calculator.
-    * 
+    *
     * @return this calculator input.
     */
    public MultiBodySystemReadOnly getInput()
@@ -407,7 +407,7 @@ public class InverseDynamicsCalculator
 
    /**
     * Gets the computed joint efforts.
-    * 
+    *
     * @return this calculator output: the joint efforts.
     */
    public DenseMatrix64F getJointTauMatrix()
@@ -417,7 +417,7 @@ public class InverseDynamicsCalculator
 
    /**
     * Gets the computed wrench for the given {@code joint}.
-    * 
+    *
     * @param joint the query. Not modified.
     * @return the joint wrench or {@code null} if this calculator does not consider the given joint.
     */
@@ -433,7 +433,7 @@ public class InverseDynamicsCalculator
    /**
     * Gets the computed N-by-1 effort vector for the given {@code joint}, where N is the number of
     * degrees of freedom the joint has.
-    * 
+    *
     * @param joint the query. Not modify.
     * @return the tau matrix.
     */
@@ -452,7 +452,7 @@ public class InverseDynamicsCalculator
     * <p>
     * Any joint that is not considered by this calculator remains unchanged.
     * </p>
-    * 
+    *
     * @param joints the array of joints to write the effort into. Modified.
     */
    public void writeComputedJointWrenches(JointBasics[] joints)
@@ -466,7 +466,7 @@ public class InverseDynamicsCalculator
     * <p>
     * Any joint that is not considered by this calculator remains unchanged.
     * </p>
-    * 
+    *
     * @param joints the list of joints to write the effort into. Modified.
     */
    public void writeComputedJointWrenches(List<? extends JointBasics> joints)
@@ -480,7 +480,7 @@ public class InverseDynamicsCalculator
     * <p>
     * If this calculator does not consider this joint, it remains unchanged.
     * </p>
-    * 
+    *
     * @param joint the joint to retrieve the acceleration of and to store it. Modified.
     * @return {@code true} if the joint effort was modified, {@code false} otherwise.
     */
@@ -497,7 +497,7 @@ public class InverseDynamicsCalculator
 
    /**
     * Gets the rigid-body acceleration provider that uses accelerations computed in this calculator.
-    * 
+    *
     * @return the acceleration provider backed by this calculator.
     */
    public RigidBodyAccelerationProvider getAccelerationProvider()
@@ -510,7 +510,7 @@ public class InverseDynamicsCalculator
 
    /**
     * Represents a single recursion step with all the intermediate variables needed.
-    * 
+    *
     * @author Sylvain Bertrand
     */
    private final class RecursionStep

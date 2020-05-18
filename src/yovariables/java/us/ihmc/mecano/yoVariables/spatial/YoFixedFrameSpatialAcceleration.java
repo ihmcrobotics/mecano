@@ -76,7 +76,7 @@ public class YoFixedFrameSpatialAcceleration implements FixedFrameSpatialAcceler
     * <p>
     * Note that the reference frames are final.
     * </p>
-    * 
+    *
     * @param namePrefix       a unique name string to use as the prefix for child variable names.
     * @param bodyFrame        what we are specifying the spatial acceleration of.
     * @param baseFrame        with respect to what we are specifying the spatial acceleration.
@@ -95,7 +95,7 @@ public class YoFixedFrameSpatialAcceleration implements FixedFrameSpatialAcceler
     * <p>
     * Note that the reference frames are final.
     * </p>
-    * 
+    *
     * @param namePrefix       a unique name string to use as the prefix for child variable names.
     * @param nameSuffix       a string to use as the suffix for child variable names.
     * @param bodyFrame        what we are specifying the spatial acceleration of.
@@ -115,7 +115,7 @@ public class YoFixedFrameSpatialAcceleration implements FixedFrameSpatialAcceler
     * <p>
     * Note that the reference frames are final.
     * </p>
-    * 
+    *
     * @param bodyFrame   what we are specifying the spatial acceleration of.
     * @param baseFrame   with respect to what we are specifying the spatial acceleration.
     * @param angularPart the vector to use for the angular part.
@@ -132,7 +132,7 @@ public class YoFixedFrameSpatialAcceleration implements FixedFrameSpatialAcceler
     * <p>
     * Note that the reference frames are final.
     * </p>
-    * 
+    *
     * @param bodyFrame     what we are specifying the spatial acceleration of.
     * @param baseFrame     with respect to what we are specifying the spatial acceleration.
     * @param spatialVector the spatial vector to use for holding data.

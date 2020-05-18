@@ -246,7 +246,7 @@ public interface FixedFrameSpatialMotionBasics extends SpatialMotionReadOnly, Fi
     * <li>R and P are the rotation and translation parts of the given transform.
     * </ul>
     * </p>
-    * 
+    *
     * @throws UnsupportedOperationException if the given transform is not a {@code RigidBodyTransform}.
     */
    @Override
@@ -276,7 +276,7 @@ public interface FixedFrameSpatialMotionBasics extends SpatialMotionReadOnly, Fi
     * <li>R and P are the rotation and translation parts of the given transform.
     * </ul>
     * </p>
-    * 
+    *
     * @throws UnsupportedOperationException if the given transform is not a {@code RigidBodyTransform}.
     */
    @Override
@@ -305,7 +305,7 @@ public interface FixedFrameSpatialMotionBasics extends SpatialMotionReadOnly, Fi
     * <li>R and P are the rotation and translation parts of the given transform.
     * </ul>
     * </p>
-    * 
+    *
     * @param transform the transform to use on this. Not modified.
     */
    default void applyTransform(RigidBodyTransformReadOnly transform)
@@ -337,7 +337,7 @@ public interface FixedFrameSpatialMotionBasics extends SpatialMotionReadOnly, Fi
     * <li>R and P are the rotation and translation parts of the given transform.
     * </ul>
     * </p>
-    * 
+    *
     * @param transform the transform to use on this. Not modified.
     */
    default void applyInverseTransform(RigidBodyTransformReadOnly transform)

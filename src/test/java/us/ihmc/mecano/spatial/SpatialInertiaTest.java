@@ -1,6 +1,7 @@
 package us.ihmc.mecano.spatial;
 
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.util.Arrays;
 import java.util.Random;
@@ -337,11 +338,11 @@ public class SpatialInertiaTest
 
    /**
     * The kinetic co-energy U is calculated as follows:
-    * 
+    *
     * <pre>
     * U = 1/2 T<sup>T</sup> I T
     * </pre>
-    * 
+    *
     * where T is a twist and I a spatial inertia matrix.
     */
    private static double computeKineticCoEnergy(Twist twist, SpatialInertia inertia)

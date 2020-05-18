@@ -49,7 +49,7 @@ public class MecanoToolsTest
       }
 
       for (int i = 0; i < ITERATIONS; i++)
-      { // Let's test against the matrix expression: 
+      { // Let's test against the matrix expression:
          double mass = random.nextDouble();
          Vector3D centerOfMass = EuclidCoreRandomTools.nextVector3D(random);
          Vector3D translation = EuclidCoreRandomTools.nextVector3D(random);

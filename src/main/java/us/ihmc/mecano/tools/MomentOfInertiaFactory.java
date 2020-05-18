@@ -12,7 +12,7 @@ public class MomentOfInertiaFactory
 {
    /**
     * Computes the moment of inertia matrix for a solid cylinder.
-    * 
+    *
     * @param mass           the cylinder mass.
     * @param radius         the radius of the cylinder.
     * @param height         the height, or length, of the cylinder.
@@ -41,7 +41,7 @@ public class MomentOfInertiaFactory
 
    /**
     * Computes the moment of inertia matrix for a solid ellipsoid.
-    * 
+    *
     * @param mass  the ellipsoid mass.
     * @param radii the three radii of the ellipsoid. Not modified.
     * @return the moment of inertia of the ellipsoid.
@@ -53,7 +53,7 @@ public class MomentOfInertiaFactory
 
    /**
     * Computes the moment of inertia matrix for a solid ellipsoid.
-    * 
+    *
     * @param mass    the ellipsoid mass.
     * @param xRadius radius of the ellipsoid along the x-axis.
     * @param yRadius radius of the ellipsoid along the y-axis.
@@ -73,7 +73,7 @@ public class MomentOfInertiaFactory
 
    /**
     * Computes the moment of inertia matrix for a solid sphere.
-    * 
+    *
     * @param mass   the sphere mass.
     * @param radius radius of the sphere.
     * @return the moment of inertia of the sphere.
@@ -91,7 +91,7 @@ public class MomentOfInertiaFactory
 
    /**
     * Computes the moment of inertia matrix for a solid box.
-    * 
+    *
     * @param mass the box mass.
     * @param size 3D size of the box along each axis.
     * @return the moment of inertia of the box.
@@ -103,7 +103,7 @@ public class MomentOfInertiaFactory
 
    /**
     * Computes the moment of inertia matrix for a solid box.
-    * 
+    *
     * @param mass  the box mass.
     * @param xSize size of the box along the x-axis.
     * @param ySize size of the box along the y-axis.
@@ -123,13 +123,13 @@ public class MomentOfInertiaFactory
 
    /**
     * Compute the moment of inertia of are computed as follows:
-    * 
+    *
     * <pre>
     * Ixx = mass * (radiusOfGyrationY * radiusOfGyrationY + radiusOfGyrationZ * radiusOfGyrationY)
     * Iyy = mass * (radiusOfGyrationX * radiusOfGyrationX + radiusOfGyrationZ * radiusOfGyrationZ)
     * Izz = mass * (radiusOfGyrationX * radiusOfGyrationX + radiusOfGyrationY * radiusOfGyrationY)
     * </pre>
-    * 
+    *
     * This is equivalent to the mass being concentrated on the surface of a thin ellipsoid with the
     * given radii of gyration.
     *

@@ -16,7 +16,7 @@ import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyReadOnly;
  * This iterable can be used to iterate through the all the bodies of the subtree that starts at
  * {@code root}.
  * </p>
- * 
+ *
  * @author Sylvain Bertrand
  * @param <B> the type of the {@code Iterable}.
  */
@@ -28,7 +28,7 @@ public class RigidBodyIterable<B extends RigidBodyReadOnly> implements Iterable<
 
    /**
     * Creates a new iterable for a single subtree.
-    * 
+    *
     * @param filteringClass the class of the type of rigid-body to iterate through. If a rigid-body is
     *                       not an instance of the {@code filteringClass}, then it will not be part of
     *                       the iteration.
@@ -46,7 +46,7 @@ public class RigidBodyIterable<B extends RigidBodyReadOnly> implements Iterable<
 
    /**
     * Creates a new iterable for multiple subtrees.
-    * 
+    *
     * @param filteringClass the class of the type of rigid-body to iterate through. If a rigid-body is
     *                       not an instance of the {@code filteringClass}, then it will not be part of
     *                       the iteration.
@@ -71,7 +71,7 @@ public class RigidBodyIterable<B extends RigidBodyReadOnly> implements Iterable<
 
    /**
     * Creates a {@code Stream} representative of this {@code RigidBodyIterable}.
-    * 
+    *
     * @return the subtree stream.
     */
    public Stream<B> toStream()

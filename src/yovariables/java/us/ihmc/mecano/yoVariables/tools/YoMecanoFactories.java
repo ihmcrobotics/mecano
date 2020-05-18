@@ -23,7 +23,7 @@ public class YoMecanoFactories
    /**
     * Creates a new pose 3D that is restricted to the XZ-plane and which components are backed by
     * {@code YoVariable}s.
-    * 
+    *
     * @param yoPitch the {@code YoVariable} used for the pitch-component of the orientation.
     * @param yoX     the {@code YoVariable} used for the x-component of the position.
     * @param yoZ     the {@code YoVariable} used for the z-component of the position.

@@ -13,7 +13,7 @@ import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
 
 /**
  * A {@code PrismaticJoint} is a joint has 1 degree of freedom of translation.
- * 
+ *
  * @author Twan Koolen
  * @author Sylvain Bertrand
  */
@@ -24,7 +24,7 @@ public class PrismaticJoint extends OneDoFJoint implements PrismaticJointBasics
 
    /**
     * Creates a new prismatic joint which has only a translation offset with respect to its parent.
-    * 
+    *
     * @param name        the name for the new joint.
     * @param predecessor the rigid-body connected to and preceding this joint.
     * @param jointOffset the offset in translation with respect to the frame after the parent joint.
@@ -38,7 +38,7 @@ public class PrismaticJoint extends OneDoFJoint implements PrismaticJointBasics
 
    /**
     * Creates a new prismatic joint.
-    * 
+    *
     * @param name              the name for the new joint.
     * @param predecessor       the rigid-body connected to and preceding this joint.
     * @param transformToParent the transform to the frame after the parent joint. Not modified.

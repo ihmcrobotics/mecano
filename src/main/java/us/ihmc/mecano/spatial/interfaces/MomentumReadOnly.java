@@ -28,7 +28,7 @@ import us.ihmc.euclid.referenceFrame.exceptions.ReferenceFrameMismatchException;
  *     \ linearX  /
  * </pre>
  * </p>
- * 
+ *
  * @author Twan Koolen
  * @author Sylvain Bertrand
  */
@@ -36,14 +36,14 @@ public interface MomentumReadOnly extends SpatialForceReadOnly
 {
    /**
     * Calculates the kinetic co-energy as follows:
-    * 
+    *
     * <pre>
     * E = h &middot; T
     *   = &sum;<sub>i=1:6</sub>(h<sub>i</sub> * T<sub>i</sub>)
     * </pre>
-    * 
+    *
     * where <tt>h</tt> is the momentum and <tt>T</tt> is the given twist.
-    * 
+    *
     * @param twist the twist to use for computing the kinetic co-energy. Not modified.
     * @return the value of the kinetic co-energy.
     * @throws ReferenceFrameMismatchException if the given {@code twist} is not expressed in the same

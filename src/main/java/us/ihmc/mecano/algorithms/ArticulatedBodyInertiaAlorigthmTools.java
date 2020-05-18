@@ -7,7 +7,7 @@ import us.ihmc.mecano.tools.MecanoTools;
 
 /**
  * This class provides tools for the articulated-body inertia algorithm.
- * 
+ *
  * @author Sylvain Bertrand
  */
 public class ArticulatedBodyInertiaAlorigthmTools
@@ -21,7 +21,7 @@ public class ArticulatedBodyInertiaAlorigthmTools
     * this method doesn't assume the linear inertia and cross inertia to have properties allowing for
     * simplification of the transformation.
     * </p>
-    * 
+    *
     * @param negateTranslation         whether to negate the translation before transforming the
     *                                  angular inertia.
     * @param translation               the translation to be applied. Not modified.
@@ -103,7 +103,7 @@ public class ArticulatedBodyInertiaAlorigthmTools
 
    /**
     * Applies a translation to the cross part of a complex inertia.
-    * 
+    *
     * @param negateTranslation       whether to negate the translation before transforming the cross
     *                                inertia.
     * @param translation             the translation to be applied. Not modified.

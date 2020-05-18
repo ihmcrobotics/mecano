@@ -1,6 +1,6 @@
 package us.ihmc.mecano.algorithms;
 
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.util.Random;
 

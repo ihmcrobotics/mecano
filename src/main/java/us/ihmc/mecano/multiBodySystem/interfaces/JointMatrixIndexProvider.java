@@ -10,7 +10,7 @@ import java.util.Map;
 /**
  * Provides an interface to reliably store and extract joint information in and from a matrix that
  * is used for the whole system.
- * 
+ *
  * @author Sylvain Bertrand
  */
 public interface JointMatrixIndexProvider
@@ -22,14 +22,14 @@ public interface JointMatrixIndexProvider
     * When this {@code JointMatrixIndexProvider} is obtained from a {@link MultiBodySystemReadOnly},
     * the returned list only contains the joints considered and is expected to preserve the ordering.
     * </p>
-    * 
+    *
     * @return the ordered joint list.
     */
    List<? extends JointReadOnly> getIndexedJointsInOrder();
 
    /**
     * Gets the corresponding matrix indices for each degree of freedom of the given joint.
-    * 
+    *
     * @param joint the joint to get the indices for. Not modified.
     * @return an array of length equal to {@code joint.getDegreesOfFreedom()}, containing the matrix
     *         index for each degree of freedom.
@@ -44,7 +44,7 @@ public interface JointMatrixIndexProvider
     * configuration is 1-element larger than the number of degrees of freedom. This is due to using
     * quaternion to represent the joint orientation.
     * </p>
-    * 
+    *
     * @param joint the joint to get the indices for. Not modified.
     * @return an array of length equal to {@code joint.getConfigurationMatrixSize()}, containing the
     *         matrix index for each component of the joint's configuration.
@@ -53,7 +53,7 @@ public interface JointMatrixIndexProvider
 
    /**
     * Creates a new {@link JointMatrixIndexProvider} indexing all the given joints.
-    * 
+    *
     * @param jointsToIndex the array of joints to be indexed. Not modified.
     * @return the index provider for the given joints.
     */
@@ -64,7 +64,7 @@ public interface JointMatrixIndexProvider
 
    /**
     * Creates a new {@link JointMatrixIndexProvider} indexing all the given joints.
-    * 
+    *
     * @param jointsToIndex the collection of joints to be indexed. Not modified.
     * @return the index provider for the given joints.
     */

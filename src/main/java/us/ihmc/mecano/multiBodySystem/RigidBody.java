@@ -105,7 +105,7 @@ public class RigidBody implements RigidBodyBasics
 
    /**
     * Creates a new rigid-body that is setup as the successor of the given {@code parentJoint}.
-    * 
+    *
     * @param bodyName           the name for this rigid-body.
     * @param parentJoint        the joint directly attached to this rigid-body and located between this
     *                           rigid-body and the root body of the robot.

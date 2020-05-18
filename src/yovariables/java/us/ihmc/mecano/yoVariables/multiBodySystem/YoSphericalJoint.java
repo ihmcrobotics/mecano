@@ -62,7 +62,7 @@ public class YoSphericalJoint extends Joint implements SphericalJointBasics
 
    /**
     * Creates a new spherical joint.
-    * 
+    *
     * @param name        the name for the new joint.
     * @param predecessor the rigid-body connected to and preceding this joint.
     * @param jointOffset the offset in translation with respect to the frame after the parent joint.
@@ -76,7 +76,7 @@ public class YoSphericalJoint extends Joint implements SphericalJointBasics
 
    /**
     * Creates a new spherical joint.
-    * 
+    *
     * @param name              the name for the new joint.
     * @param predecessor       the rigid-body connected to and preceding this joint.
     * @param transformToParent the transform to the frame after the parent joint. Not modified.

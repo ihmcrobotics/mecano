@@ -1,6 +1,11 @@
 package us.ihmc.mecano.spatial;
 
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertArrayEquals;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotSame;
+import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.fail;
 
 import java.util.Random;
 
@@ -25,6 +30,7 @@ import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple3D.interfaces.Vector3DBasics;
 import us.ihmc.euclid.tuple3D.interfaces.Vector3DReadOnly;
 import us.ihmc.mecano.spatial.interfaces.SpatialMotionTest;
+import us.ihmc.mecano.spatial.interfaces.SpatialVectorReadOnly;
 import us.ihmc.mecano.tools.MecanoRandomTools;
 import us.ihmc.mecano.tools.MecanoTestTools;
 import us.ihmc.mecano.tools.MecanoTools;
@@ -105,14 +111,14 @@ public class TwistTest extends SpatialMotionTest<Twist>
    @Test
    public void testConstructUsingArray()
    {
-      double[] array = new double[Twist.SIZE];
+      double[] array = new double[SpatialVectorReadOnly.SIZE];
       for (int i = 0; i < array.length; i++)
       {
          array[i] = random.nextDouble();
       }
 
       Twist twist = new Twist(frameC, frameD, frameA, array);
-      DenseMatrix64F matrixBack = new DenseMatrix64F(Twist.SIZE, 1);
+      DenseMatrix64F matrixBack = new DenseMatrix64F(SpatialVectorReadOnly.SIZE, 1);
       twist.get(matrixBack);
       double[] arrayBack = matrixBack.getData();
       assertArrayEquals(array, arrayBack);
@@ -123,7 +129,7 @@ public class TwistTest extends SpatialMotionTest<Twist>
    {
       Assertions.assertThrows(RuntimeException.class, () ->
       {
-         double[] array = new double[Twist.SIZE - 1];
+         double[] array = new double[SpatialVectorReadOnly.SIZE - 1];
          new Twist(frameC, frameD, frameA, array);
       });
    }
@@ -135,14 +141,14 @@ public class TwistTest extends SpatialMotionTest<Twist>
    @Test
    public void testCopyConstructor()
    {
-      DenseMatrix64F inputMatrix = RandomMatrices.createRandom(Twist.SIZE, 1, random);
+      DenseMatrix64F inputMatrix = RandomMatrices.createRandom(SpatialVectorReadOnly.SIZE, 1, random);
       Twist twist = new Twist(frameC, frameD, frameA, inputMatrix);
       Twist twistCopy = new Twist(twist);
 
-      DenseMatrix64F twistMatrix = new DenseMatrix64F(Twist.SIZE, 1);
+      DenseMatrix64F twistMatrix = new DenseMatrix64F(SpatialVectorReadOnly.SIZE, 1);
       twist.get(twistMatrix);
 
-      DenseMatrix64F twistCopyMatrix = new DenseMatrix64F(Twist.SIZE, 1);
+      DenseMatrix64F twistCopyMatrix = new DenseMatrix64F(SpatialVectorReadOnly.SIZE, 1);
       twistCopy.get(twistCopyMatrix);
 
       // test that they're the same
@@ -152,7 +158,7 @@ public class TwistTest extends SpatialMotionTest<Twist>
       assertEquals(twist.getBaseFrame(), twistCopy.getBaseFrame());
 
       // test that we're actually copying, not just using references
-      inputMatrix = RandomMatrices.createRandom(Twist.SIZE, 1, random);
+      inputMatrix = RandomMatrices.createRandom(SpatialVectorReadOnly.SIZE, 1, random);
       twist.setIncludingFrame(frameD, frameA, frameC, inputMatrix);
       twist.get(twistMatrix);
       twistCopy.get(twistCopyMatrix);
@@ -382,10 +388,10 @@ public class TwistTest extends SpatialMotionTest<Twist>
       Twist twist2 = new Twist(twist1);
       twist1.changeFrame(twist1.getReferenceFrame());
 
-      DenseMatrix64F twist1Matrix = new DenseMatrix64F(Twist.SIZE, 1);
+      DenseMatrix64F twist1Matrix = new DenseMatrix64F(SpatialVectorReadOnly.SIZE, 1);
       twist1.get(twist1Matrix);
 
-      DenseMatrix64F twist2Matrix = new DenseMatrix64F(Twist.SIZE, 1);
+      DenseMatrix64F twist2Matrix = new DenseMatrix64F(SpatialVectorReadOnly.SIZE, 1);
       twist2.get(twist2Matrix);
 
       // test that they're the same

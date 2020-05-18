@@ -23,7 +23,7 @@ public class MovingCenterOfMassReferenceFrame extends MovingReferenceFrame
    /**
     * Creates a new moving center of mass reference frame for the subtree defined by its root:
     * {@code rootBody}.
-    * 
+    *
     * @param frameName   the name of this new frame.
     * @param parentFrame the parent frame of the new reference frame.
     * @param rootBody    the center of mass position and velocity are computed given {@code rootBody}
@@ -37,7 +37,7 @@ public class MovingCenterOfMassReferenceFrame extends MovingReferenceFrame
    /**
     * Creates a new center of mass reference frame that uses the given {@code centerOfMassCalculator}
     * to update its position.
-    * 
+    *
     * @param frameName            the name of this new frame.
     * @param centerOfMassJacobian the calculator to use to update the position and velocity of this
     *                             frame.

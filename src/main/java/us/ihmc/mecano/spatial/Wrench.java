@@ -127,7 +127,7 @@ public class Wrench implements WrenchBasics, GeometryObject<Wrench>
 
    /**
     * Creates a new wrench from the given {@code bodyFrame} and spatial vector.
-    * 
+    *
     * @param bodyFrame     the frame rigidly attached to the body on which this wrench is applied.
     * @param spatialVector the vector used to initialize this wrench value. Not modified.
     */

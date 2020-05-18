@@ -27,19 +27,19 @@ import us.ihmc.mecano.tools.MultiBodySystemTools;
  * <p>
  * In addition, by using the convective term, the mapping from joint acceleration space to
  * end-effector spatial acceleration space can be formulated as follows:
- * 
+ *
  * <pre>
  *                   / d  \
  * xDDot = J qDDot + |-- J| qDot = J qDDot + b
  *                   \dt  /
  * </pre>
- * 
+ *
  * where <tt>qDot</tt> and <tt>qDDot</tt> are the joint velocity and acceleration vectors,
  * <tt>xDDot</tt> is the end-effector spatial acceleration, and <tt>J</tt> is the geometric
  * Jacobian. The term <tt>b</tt> introduced on the right-hand side is called here the convective
  * term.
  * </p>
- * 
+ *
  * @author Sylvain Bertrand
  */
 public class GeometricJacobianCalculator
@@ -139,7 +139,7 @@ public class GeometricJacobianCalculator
     * <p>
     * The internal memory is automatically cleared with {@link #reset()}.
     * </p>
-    * 
+    *
     * @param base        the new base to use. Not modified.
     * @param endEffector the new end-effector to use. Not modified.
     * @throws IllegalArgumentException if the {@code base} is not an ancestor of {@code endEffector}.
@@ -168,7 +168,7 @@ public class GeometricJacobianCalculator
     * This method orders if necessary the joints such that the resulting kinematic chain starts from
     * the base and ends at the end-effector.
     * </p>
-    * 
+    *
     * @param joints the array of joints to use for computing the Jacobian. Not modified.
     * @throws IllegalArgumentException if the number of joints is equal to 0.
     */
@@ -227,7 +227,7 @@ public class GeometricJacobianCalculator
     * Usually the Jacobian frame is set to match the frame on the end-effector that is to be
     * controlled.
     * </p>
-    * 
+    *
     * @param jacobianFrame the new frame for the Jacobian matrix.
     */
    public void setJacobianFrame(ReferenceFrame jacobianFrame)
@@ -244,7 +244,7 @@ public class GeometricJacobianCalculator
     * The base, end-effector, and jacobian frame, have all to be properly set before calling this
     * method.
     * </p>
-    * 
+    *
     * @throws RuntimeException if either the base or the end-effector has not been provided beforehand.
     */
    private void updateJacobianMatrix()
@@ -310,7 +310,7 @@ public class GeometricJacobianCalculator
     * The base, end-effector, and jacobian frame, have all to be properly set before calling this
     * method.
     * </p>
-    * 
+    *
     * @throws RuntimeException if either the base or the end-effector has not been provided beforehand.
     */
    private void updateConvectiveTerm()
@@ -372,7 +372,7 @@ public class GeometricJacobianCalculator
    /**
     * Computes and packs the twist of the end-effector relative to the base that is induced by the
     * given joint velocity vector.
-    * 
+    *
     * @param jointVelocities        the joint velocity column vector, starting from base child joint
     *                               velocity. Not modified.
     * @param endEffectorTwistToPack the twist of the end effector with respect to the base, expressed
@@ -388,7 +388,7 @@ public class GeometricJacobianCalculator
    /**
     * Computes and packs the spatial acceleration of the end-effector relative to the base that is
     * induced by the given joint acceleration vector.
-    * 
+    *
     * @param jointAccelerations        the joint acceleration column vector, starting from base child
     *                                  joint acceleration. Not modified.
     * @param spatialAccelerationToPack the spatial acceleration of the end effector with respect to the
@@ -404,7 +404,7 @@ public class GeometricJacobianCalculator
 
    /**
     * Computes and packs the joint torque vector that corresponds to the given wrench.
-    * 
+    *
     * @param endEffectorWrench  the resulting wrench at the end effector. The wrench should be
     *                           expressed in {@code jacobianFrame} and the wrench's {@code bodyFrame}
     *                           should be the body fixed frame of the end-effector. Not modified.
@@ -428,7 +428,7 @@ public class GeometricJacobianCalculator
    /**
     * Returns the base {@code RigidBody} of the current Jacobian. The base is the predecessor of the
     * first joint that the Jacobian considers.
-    * 
+    *
     * @return the base of the Jacobian.
     */
    public RigidBodyReadOnly getBase()
@@ -439,7 +439,7 @@ public class GeometricJacobianCalculator
    /**
     * Returns the body fixed frame of the base {@code RigidBody} of the current Jacobian. The base is
     * the predecessor of the first joint that the Jacobian considers.
-    * 
+    *
     * @return the body fixed frame of the base.
     */
    public ReferenceFrame getBaseFrame()
@@ -450,7 +450,7 @@ public class GeometricJacobianCalculator
    /**
     * Returns the end-effector {@code RigidBody} of the current Jacobian. The end-effector is the
     * successor of the last joint the Jacobian considers.
-    * 
+    *
     * @return the end-effector of the jacobian.
     */
    public RigidBodyReadOnly getEndEffector()
@@ -476,7 +476,7 @@ public class GeometricJacobianCalculator
    /**
     * Returns the body fixed frame of the end-effector {@code RigidBody} of the current Jacobian. The
     * end-effector is the successor of the last joint the Jacobian considers.
-    * 
+    *
     * @return the body fixed frame of the end-effector.
     */
    public ReferenceFrame getEndEffectorFrame()
@@ -503,7 +503,7 @@ public class GeometricJacobianCalculator
    /**
     * Gets the list of joints considered by the current Jacobian ordered from the base to the
     * end-effector.
-    * 
+    *
     * @return the list of joints.
     */
    public List<JointReadOnly> getJointsFromBaseToEndEffector()
@@ -513,7 +513,7 @@ public class GeometricJacobianCalculator
 
    /**
     * Gets the current value of the Jacobian matrix.
-    * 
+    *
     * @return the current value of the Jacobian matrix.
     * @throws RuntimeException if either the base or the end-effector has not been provided beforehand.
     */
@@ -528,7 +528,7 @@ public class GeometricJacobianCalculator
     * <p>
     * As for the Jacobian matrix, the convective term is computed in {@link #jacobianFrame}.
     * </p>
-    * 
+    *
     * @return the current value of the convective term.
     * @throws RuntimeException if either the base or the end-effector has not been provided beforehand.
     */
@@ -543,7 +543,7 @@ public class GeometricJacobianCalculator
     * <p>
     * As for the Jacobian matrix, the convective term is computed in {@link #jacobianFrame}.
     * </p>
-    * 
+    *
     * @return the current value of the convective term.
     * @throws RuntimeException if either the base or the end-effector has not been provided beforehand.
     */
@@ -556,7 +556,7 @@ public class GeometricJacobianCalculator
    /**
     * Creates a descriptive {@code String} for this Jacobian containing information such as the
     * {@code jacobianFrame}, the list of the joint names, and the current value of the Jacobian matrix.
-    * 
+    *
     * @return a descriptive {@code String} for this Jacobian.
     */
    @Override
@@ -583,7 +583,7 @@ public class GeometricJacobianCalculator
    /**
     * Creates a short descriptive {@code String} for this Jacobian containing information such as the
     * {@code jacobianFrame}, the {@code base} and {@code endEffector}.
-    * 
+    *
     * @return a short description {@code String} for this Jacobian.
     */
    public String getShortInfo()

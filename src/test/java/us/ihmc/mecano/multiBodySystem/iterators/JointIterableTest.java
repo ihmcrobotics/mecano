@@ -1,6 +1,6 @@
 package us.ihmc.mecano.multiBodySystem.iterators;
 
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.util.Iterator;
 import java.util.List;
@@ -46,7 +46,7 @@ public class JointIterableTest
       { // Testing the filtering class with OneDoFJointReadOnly
          int numberOfJoints = random.nextInt(50) + 1;
          List<JointBasics> joints = MultiBodySystemRandomTools.nextJointChain(random, numberOfJoints);
-         JointIterable<OneDoFJointReadOnly> jointIterable = new JointIterable<OneDoFJointReadOnly>(OneDoFJointReadOnly.class, null, joints.get(0));
+         JointIterable<OneDoFJointReadOnly> jointIterable = new JointIterable<>(OneDoFJointReadOnly.class, null, joints.get(0));
          for (int j = 0; j < 2; j++) // Doing 2 calls to JointIterable.iterator() to make sure the second time the iterator is brand new.
          {
             Iterator<OneDoFJointReadOnly> iterator = jointIterable.iterator();

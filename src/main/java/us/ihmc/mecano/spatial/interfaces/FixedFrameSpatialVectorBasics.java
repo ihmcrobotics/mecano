@@ -457,7 +457,7 @@ public interface FixedFrameSpatialVectorBasics extends SpatialVectorReadOnly, Cl
     * The components are read in the following order: {@code angularPartX}, {@code angularPartY},
     * {@code angularPartZ}, {@code linearPartX}, {@code linearPartY}, {@code linearPartZ}.
     * </p>
-    * 
+    *
     * @param matrix the column vector containing the values to add to this vector's components. Not
     *               modified.
     */
@@ -472,7 +472,7 @@ public interface FixedFrameSpatialVectorBasics extends SpatialVectorReadOnly, Cl
     * The components are read in the following order: {@code angularPartX}, {@code angularPartY},
     * {@code angularPartZ}, {@code linearPartX}, {@code linearPartY}, {@code linearPartZ}.
     * </p>
-    * 
+    *
     * @param startRow the first row index to start reading in the dense-matrix.
     * @param matrix   the column vector containing the values to add to this vector's components. Not
     *                 modified.
@@ -489,7 +489,7 @@ public interface FixedFrameSpatialVectorBasics extends SpatialVectorReadOnly, Cl
     * The components are read in the following order: {@code angularPartX}, {@code angularPartY},
     * {@code angularPartZ}, {@code linearPartX}, {@code linearPartY}, {@code linearPartZ}.
     * </p>
-    * 
+    *
     * @param startRow the first row index to start reading in the dense-matrix.
     * @param column   the column index to read in the dense-matrix.
     * @param matrix   the column vector containing the values to add to this vector's components. Not
@@ -559,7 +559,7 @@ public interface FixedFrameSpatialVectorBasics extends SpatialVectorReadOnly, Cl
     * The components are read in the following order: {@code angularPartX}, {@code angularPartY},
     * {@code angularPartZ}, {@code linearPartX}, {@code linearPartY}, {@code linearPartZ}.
     * </p>
-    * 
+    *
     * @param matrix the column vector containing the values to subtract from this vector's components.
     *               Not modified.
     */
@@ -575,7 +575,7 @@ public interface FixedFrameSpatialVectorBasics extends SpatialVectorReadOnly, Cl
     * The components are read in the following order: {@code angularPartX}, {@code angularPartY},
     * {@code angularPartZ}, {@code linearPartX}, {@code linearPartY}, {@code linearPartZ}.
     * </p>
-    * 
+    *
     * @param startRow the first row index to start reading in the dense-matrix.
     * @param matrix   the column vector containing the values to subtract from this vector's
     *                 components. Not modified.
@@ -592,7 +592,7 @@ public interface FixedFrameSpatialVectorBasics extends SpatialVectorReadOnly, Cl
     * The components are read in the following order: {@code angularPartX}, {@code angularPartY},
     * {@code angularPartZ}, {@code linearPartX}, {@code linearPartY}, {@code linearPartZ}.
     * </p>
-    * 
+    *
     * @param startRow the first row index to start reading in the dense-matrix.
     * @param column   the column index to read in the dense-matrix.
     * @param matrix   the column vector containing the values to subtract from this vector's

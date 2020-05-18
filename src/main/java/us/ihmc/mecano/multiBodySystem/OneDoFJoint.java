@@ -90,68 +90,68 @@ public abstract class OneDoFJoint extends Joint implements OneDoFJointBasics
 
    /**
     * The minimum value {@link #q} can have:
-    * 
+    *
     * <pre>
     * this.q &in; [this.jointLimitLower; this.jointLimitUpper]
     * </pre>
-    * 
+    *
     * It is initialized to -&infin;.
     */
    private double jointLimitLower = Double.NEGATIVE_INFINITY;
    /**
     * The maximum value {@link #q} can have:
-    * 
+    *
     * <pre>
     * this.q &in; [this.jointLimitLower; this.jointLimitUpper]
     * </pre>
-    * 
+    *
     * It is initialized to +&infin;.
     */
    private double jointLimitUpper = Double.POSITIVE_INFINITY;
    /**
     * The minimum value {@link #qd} can have:
-    * 
+    *
     * <pre>
     * this.qd &in; [this.velocityLimitLower; this.velocityLimitUpper]
     * </pre>
-    * 
+    *
     * It is initialized to -&infin;.
     */
    private double velocityLimitLower = Double.NEGATIVE_INFINITY;
    /**
     * The maximum value {@link #qd} can have:
-    * 
+    *
     * <pre>
     * this.qd &in; [this.velocityLimitLower; this.velocityLimitUpper]
     * </pre>
-    * 
+    *
     * It is initialized to +&infin;.
     */
    private double velocityLimitUpper = Double.POSITIVE_INFINITY;
    /**
     * The minimum value {@link #tau} can have:
-    * 
+    *
     * <pre>
     * this.tau &in; [this.effortLimitLower; this.effortLimitUpper]
     * </pre>
-    * 
+    *
     * It is initialized to -&infin;.
     */
    private double effortLimitLower = Double.NEGATIVE_INFINITY;
    /**
     * The maximum value {@link #tau} can have:
-    * 
+    *
     * <pre>
     * this.tau &in; [this.effortLimitLower; this.effortLimitUpper]
     * </pre>
-    * 
+    *
     * It is initialized to +&infin;.
     */
    private double effortLimitUpper = Double.POSITIVE_INFINITY;
 
    /**
     * Creates the abstract layer for a new 1-DoF joint.
-    * 
+    *
     * @param name                 the name for the new joint.
     * @param predecessor          the rigid-body connected to and preceding this joint.
     * @param jointAxisAngularPart the unit-vector if this joint is a revolute joint. A zero vector

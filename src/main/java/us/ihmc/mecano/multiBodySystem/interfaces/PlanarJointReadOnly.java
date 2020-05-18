@@ -7,7 +7,7 @@ import org.ejml.data.DenseMatrix64F;
  * <p>
  * A planar joint can be used to represent a 2D floating joint in the XZ-plane.
  * </p>
- * 
+ *
  * @author Robert Griffin
  * @author Sylvain Bertrand
  */

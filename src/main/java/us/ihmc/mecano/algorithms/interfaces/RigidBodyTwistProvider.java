@@ -14,7 +14,7 @@ import us.ihmc.mecano.spatial.interfaces.TwistReadOnly;
 /**
  * Interface for algorithms that can compute and provide the rigid-body twists of a multi-body
  * system.
- * 
+ *
  * @author Sylvain Bertrand
  */
 public interface RigidBodyTwistProvider
@@ -25,7 +25,7 @@ public interface RigidBodyTwistProvider
     * The result is the twist of the {@code body.getBodyFixedFrame()}, with respect to the
     * {@code inertialFrame}, expressed in the {@code body.getBodyFixedFrame()}.
     * </p>
-    * 
+    *
     * @param body the rigid-body to get the twist of.
     * @return the twist of the {@code body}.
     */
@@ -44,7 +44,7 @@ public interface RigidBodyTwistProvider
     * </br>
     * with 'b1' being the {@code base}, 'b2' the {@code body}, and 'i' the {@code inertialFrame}.
     * </p>
-    * 
+    *
     * @param base the rigid-body with respect to which the twist is to be computed.
     * @param body the rigid-body to compute the twist of.
     * @return the twist of {@code body} with respect to {@code base}.
@@ -54,7 +54,7 @@ public interface RigidBodyTwistProvider
    /**
     * Computes and packs the linear twist of the point {@code bodyFixedPoint} that is attached to
     * {@code body} with respect to {@code inertialFrame}.
-    * 
+    *
     * @param body           the rigid-body to which {@code bodyFixedPoint} belongs.
     * @param bodyFixedPoint the point to compute the linear twist of. Not modified.
     * @return the linear twist of the body fixed point.
@@ -67,7 +67,7 @@ public interface RigidBodyTwistProvider
    /**
     * Computes and packs the linear twist of the point {@code bodyFixedPoint} that is attached to
     * {@code body} with respect to {@code base}.
-    * 
+    *
     * @param base           the rigid-body with respect to which the twist is to be computed.
     * @param body           the rigid-body to which {@code bodyFixedPoint} belongs.
     * @param bodyFixedPoint the point to compute the linear twist of. Not modified.
@@ -87,13 +87,13 @@ public interface RigidBodyTwistProvider
    ReferenceFrame getInertialFrame();
 
    /**
-    * Factory for implementing a {@link RigidBodyTwistProvider} from a given function that
-    * computes twist for any given rigid-body.
+    * Factory for implementing a {@link RigidBodyTwistProvider} from a given function that computes
+    * twist for any given rigid-body.
     * <p>
-    * The function is used to implement {@link #getTwistOfBody(RigidBodyReadOnly)} and is enough
-    * to implement the other twist getters of this interface.
+    * The function is used to implement {@link #getTwistOfBody(RigidBodyReadOnly)} and is enough to
+    * implement the other twist getters of this interface.
     * </p>
-    * 
+    *
     * @param twistFunction the function that computes rigid-body twists.
     * @param inertialFrame the inertial frame with respect to which the body twists are expressed.
     * @return a new instance of {@code RigidBodyTwistProvider}.

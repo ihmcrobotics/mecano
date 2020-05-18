@@ -33,7 +33,7 @@ import us.ihmc.mecano.tools.MultiBodySystemTools;
 /**
  * Computes the centroidal momentum matrix that maps from joint velocity space to the system linear
  * and angular momentum.
- * 
+ *
  * @author Sylvain Bertrand
  */
 public class CentroidalMomentumCalculator implements ReferenceFrameHolder
@@ -90,7 +90,7 @@ public class CentroidalMomentumCalculator implements ReferenceFrameHolder
 
    /**
     * Creates a new calculator for the subtree that starts off the given {@code rootBody}.
-    * 
+    *
     * @param rootBody    the start of subtree for which the centroidal momentum matrix is to be
     *                    computed. Not modified.
     * @param matrixFrame the frame in which the centroidal momentum matrix is to be expressed.
@@ -194,7 +194,7 @@ public class CentroidalMomentumCalculator implements ReferenceFrameHolder
 
    /**
     * Iterative method that calls {@link IterativeStep#passOne()}.
-    * 
+    *
     * @see IterativeStep#passOne()
     */
    private void passOne()
@@ -205,7 +205,7 @@ public class CentroidalMomentumCalculator implements ReferenceFrameHolder
 
    /**
     * Iterative method that calls {@link IterativeStep#passTwo()}.
-    * 
+    *
     * @see IterativeStep#passTwo()
     */
    private void passTwo()
@@ -227,7 +227,7 @@ public class CentroidalMomentumCalculator implements ReferenceFrameHolder
 
    /**
     * Gets the definition of the multi-body system that was used to create this calculator.
-    * 
+    *
     * @return this calculator input.
     */
    public MultiBodySystemReadOnly getInput()
@@ -277,7 +277,7 @@ public class CentroidalMomentumCalculator implements ReferenceFrameHolder
     * The given matrix is expected to have been configured using the same
     * {@link JointMatrixIndexProvider} that was used to configure this calculator.
     * </p>
-    * 
+    *
     * @param jointVelocityMatrix        the matrix containing the joint velocities to use. Not
     *                                   modified.
     * @param centerOfMassVelocityToPack the vector used to stored the computed center of mass velocity.
@@ -312,7 +312,7 @@ public class CentroidalMomentumCalculator implements ReferenceFrameHolder
     * The given matrix is expected to have been configured using the same
     * {@link JointMatrixIndexProvider} that was used to configure this calculator.
     * </p>
-    * 
+    *
     * @param jointVelocityMatrix the matrix containing the joint velocities to use. Not modified.
     * @param momentumToPack      the vector used to stored the computed momentum. Modified.
     */
@@ -330,7 +330,7 @@ public class CentroidalMomentumCalculator implements ReferenceFrameHolder
     * in the frame {@link #getReferenceFrame()}. The latter implies that when multiplied to the joint
     * velocity matrix, the result is the momentum expressed in {@link #getReferenceFrame()}.
     * </p>
-    * 
+    *
     * @return the centroidal momentum matrix.
     */
    public DenseMatrix64F getCentroidalMomentumMatrix()
@@ -352,7 +352,7 @@ public class CentroidalMomentumCalculator implements ReferenceFrameHolder
 
    /**
     * Represents a single iteration step with all the intermediate variables needed.
-    * 
+    *
     * @author Sylvain Bertrand
     */
    private class IterativeStep
@@ -476,14 +476,14 @@ public class CentroidalMomentumCalculator implements ReferenceFrameHolder
        * frame of each spatial inertia matrix which results in heavy computation, the right-hand side only
        * requires to change the frame of the unit-twist.
        * </p>
-       * 
+       *
        * <pre>
        * h = (&sum;<sub>i=0:n</sub> I<sub>i</sub>) * T &equiv; &sum;<sub>i=0:n</sub> (I<sub>i</sub> * T)
        * </pre>
-       * 
+       *
        * where <tt>h</tt> is the resulting unit-momentum, <tt>I<sub>i</sub></tt> is the spatial inertia of
        * the i<sup>th</sup> body, and <tt>T</tt> is the unit-twist.
-       * 
+       *
        * @param ancestorUnitTwist   the unit-twist to use for computing a the unit-momentum for this body
        *                            that is then added to {@code unitMomentumToAddTo}. Not modified.
        * @param unitMomentumToAddTo the unit-momentum to build up. Modified.

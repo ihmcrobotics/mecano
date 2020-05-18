@@ -25,7 +25,7 @@ public interface PlanarJointBasics extends PlanarJointReadOnly, FloatingJointBas
 
    /**
     * Sets this joint configuration from the other joint.
-    * 
+    *
     * @param other the other to get the configuration from. Not modified.
     */
    default void setJointConfiguration(PlanarJointReadOnly other)
@@ -42,7 +42,7 @@ public interface PlanarJointBasics extends PlanarJointReadOnly, FloatingJointBas
 
    /**
     * Sets this joint velocity from the other joint.
-    * 
+    *
     * @param other the other to get the velocity from. Not modified.
     */
    default void setJointTwist(PlanarJointReadOnly other)
@@ -64,7 +64,7 @@ public interface PlanarJointBasics extends PlanarJointReadOnly, FloatingJointBas
 
    /**
     * Sets this joint acceleration from the other joint.
-    * 
+    *
     * @param other the other to get the acceleration from. Not modified.
     */
    default void setJointAcceleration(PlanarJointReadOnly other)
@@ -86,7 +86,7 @@ public interface PlanarJointBasics extends PlanarJointReadOnly, FloatingJointBas
 
    /**
     * Sets this joint force/torque from the other joint.
-    * 
+    *
     * @param other the other to get the force/torque from. Not modified.
     */
    default void setJointWrench(PlanarJointReadOnly other)

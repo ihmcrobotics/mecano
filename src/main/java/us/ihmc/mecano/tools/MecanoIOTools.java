@@ -1,6 +1,8 @@
 package us.ihmc.mecano.tools;
 
-import static us.ihmc.euclid.tools.EuclidCoreIOTools.*;
+import static us.ihmc.euclid.tools.EuclidCoreIOTools.DEFAULT_FORMAT;
+import static us.ihmc.euclid.tools.EuclidCoreIOTools.getStringOf;
+import static us.ihmc.euclid.tools.EuclidCoreIOTools.getTuple3DString;
 
 import org.ejml.data.DenseMatrix64F;
 
@@ -483,7 +485,7 @@ public class MecanoIOTools
 
    /**
     * Gets a representative {@code String} of {@code spatialInertia} as follows:
-    * 
+    *
     * <pre>
     * Spatial inertia of bodyFrame expressed in World:
     * / 0.253,  0.000,  0.000,  0.000,  0.554, -0.247 \
@@ -493,7 +495,7 @@ public class MecanoIOTools
     * | 0.554,  0.000, -0.387,  0.000,  0.773,  0.000 |
     * \-0.247,  0.387,  0.000,  0.000,  0.000,  0.773 /
     * </pre>
-    * 
+    *
     * @param spatialInertia the object to get the {@code String} of. Not modified.
     * @return the representative {@code String}.
     */
@@ -518,7 +520,7 @@ public class MecanoIOTools
     * \-0.247,  0.387,  0.000,  0.000,  0.000,  0.773 /
     * </pre>
     * </p>
-    * 
+    *
     * @param format         the format to use for each number.
     * @param spatialInertia the object to get the {@code String} of. Not modified.
     * @return the representative {@code String}.
@@ -551,7 +553,7 @@ public class MecanoIOTools
     * \-0.247,  0.387,  0.000,  0.000,  0.000,  0.773 /
     * </pre>
     * </p>
-    * 
+    *
     * @param format              the format to use for each number.
     * @param bodyFrame           what we are specifying the inertia of.
     * @param expressedInFrame    the reference frame in which the inertia is expressed.
@@ -584,7 +586,7 @@ public class MecanoIOTools
     * | 0.554,  0.000, -0.387,  0.000,  0.773,  0.000 |
     * \-0.247,  0.387,  0.000,  0.000,  0.000,  0.773 /
     * </pre>
-    * 
+    *
     * @param denseMatrix64F the object to get the {@code String} of. Not modified.
     * @return the representative {@code String}.
     */
@@ -607,7 +609,7 @@ public class MecanoIOTools
     * \-0.247,  0.387,  0.000,  0.000,  0.000,  0.773 /
     * </pre>
     * </p>
-    * 
+    *
     * @param format         the format to use for each number.
     * @param denseMatrix64F the object to get the {@code String} of. Not modified.
     * @return the representative {@code String}.

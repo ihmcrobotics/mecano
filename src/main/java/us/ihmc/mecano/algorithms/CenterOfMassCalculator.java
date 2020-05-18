@@ -92,7 +92,7 @@ public class CenterOfMassCalculator implements ReferenceFrameHolder
 
    /**
     * Gets the definition of the multi-body system that was used to create this calculator.
-    * 
+    *
     * @return this calculator input.
     */
    public MultiBodySystemReadOnly getInput()

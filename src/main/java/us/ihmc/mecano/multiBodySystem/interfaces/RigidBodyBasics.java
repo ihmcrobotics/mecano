@@ -103,9 +103,10 @@ public interface RigidBodyBasics extends RigidBodyReadOnly
       return new RigidBodyIterable<>(RigidBodyBasics.class, null, this);
    }
 
+   @Override
    default Iterable<? extends JointBasics> childrenSubtreeIterable()
    {
-      return new JointIterable<>(JointBasics.class, null, this.getChildrenJoints());
+      return new JointIterable<>(JointBasics.class, null, getChildrenJoints());
    }
 
    @Override

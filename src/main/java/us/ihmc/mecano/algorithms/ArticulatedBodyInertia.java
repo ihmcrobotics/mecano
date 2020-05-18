@@ -108,7 +108,7 @@ public class ArticulatedBodyInertia implements GeometryObject<ArticulatedBodyIne
    /**
     * Sets all the coefficients of this inertia to {@link Double#NaN} and sets the reference frame in
     * which it is expressed.
-    * 
+    *
     * @param expressedInFrame the new reference frame for this inertia.
     */
    public void setToNaN(ReferenceFrame expressedInFrame)
@@ -129,7 +129,7 @@ public class ArticulatedBodyInertia implements GeometryObject<ArticulatedBodyIne
    /**
     * Sets all the coefficients of this inertia to zero and sets the reference frame in which it is
     * expressed.
-    * 
+    *
     * @param expressedInFrame the new reference frame for this inertia.
     */
    public void setToZero(ReferenceFrame expressedInFrame)
@@ -140,7 +140,7 @@ public class ArticulatedBodyInertia implements GeometryObject<ArticulatedBodyIne
 
    /**
     * {@inheritDoc}
-    * 
+    *
     * @throws ReferenceFrameMismatchException if {@code other} is not expressed in the same frame as
     *                                         {@code this}.
     */
@@ -155,7 +155,7 @@ public class ArticulatedBodyInertia implements GeometryObject<ArticulatedBodyIne
 
    /**
     * Sets this inertia to {@code other}.
-    * 
+    *
     * @param other the other inertia to copy values and reference frames from. Not modified.
     */
    public void setIncludingFrame(ArticulatedBodyInertia other)
@@ -168,7 +168,7 @@ public class ArticulatedBodyInertia implements GeometryObject<ArticulatedBodyIne
 
    /**
     * Sets this inertia to be equivalent to the given {@code spatialInertiaReadOnly}.
-    * 
+    *
     * @param spatialInertiaReadOnly the spatial inertia to copy. Not modified.
     */
    public void setIncludingFrame(SpatialInertiaReadOnly spatialInertiaReadOnly)
@@ -185,7 +185,7 @@ public class ArticulatedBodyInertia implements GeometryObject<ArticulatedBodyIne
 
    /**
     * Adds {@code other} to this inertia.
-    * 
+    *
     * @param other the other inertia to add. Not modified.
     * @throws ReferenceFrameMismatchException if {@code other} is not expressed in the same frame as
     *                                         {@code this}.
@@ -200,7 +200,7 @@ public class ArticulatedBodyInertia implements GeometryObject<ArticulatedBodyIne
 
    /**
     * Assuming {@code matrix} represents a proper 6-by-6 inertia matrix, it is added to this inertia.
-    * 
+    *
     * @param matrix the inertia matrix to add. Not modified.
     */
    public void add(DenseMatrix64F matrix)
@@ -212,7 +212,7 @@ public class ArticulatedBodyInertia implements GeometryObject<ArticulatedBodyIne
 
    /**
     * Subtracts {@code other} to this inertia.
-    * 
+    *
     * @param other the other inertia to subtract. Not modified.
     * @throws ReferenceFrameMismatchException if {@code other} is not expressed in the same frame as
     *                                         {@code this}.
@@ -228,7 +228,7 @@ public class ArticulatedBodyInertia implements GeometryObject<ArticulatedBodyIne
    /**
     * Assuming {@code matrix} represents a proper 6-by-6 inertia matrix, it is subtracted to this
     * inertia.
-    * 
+    *
     * @param matrix the inertia matrix to subtract. Not modified.
     */
    public void sub(DenseMatrix64F matrix)
@@ -255,7 +255,7 @@ public class ArticulatedBodyInertia implements GeometryObject<ArticulatedBodyIne
     * <p>
     * In the 6-by-6 inertia matrix, the angular part is the top left 3-by-3 block.
     * </p>
-    * 
+    *
     * @return the angular part of this inertia.
     */
    public Matrix3D getAngularInertia()
@@ -268,7 +268,7 @@ public class ArticulatedBodyInertia implements GeometryObject<ArticulatedBodyIne
     * <p>
     * In the 6-by-6 inertia matrix, the linear part is the bottom right 3-by-3 block.
     * </p>
-    * 
+    *
     * @return the linear part of this inertia.
     */
    public Matrix3D getLinearInertia()
@@ -281,7 +281,7 @@ public class ArticulatedBodyInertia implements GeometryObject<ArticulatedBodyIne
     * <p>
     * In the 6-by-6 inertia matrix, the cross part is the top right 3-by-3 block.
     * </p>
-    * 
+    *
     * @return the cross part of this inertia.
     */
    public Matrix3D getCrossInertia()
@@ -294,7 +294,7 @@ public class ArticulatedBodyInertia implements GeometryObject<ArticulatedBodyIne
     * <p>
     * In the 6-by-6 inertia matrix, the transpose of the cross part is the bottom left 3-by-3 block.
     * </p>
-    * 
+    *
     * @return the transpose of the cross part of this inertia.
     */
    public Matrix3DReadOnly getCrossInertiaTranspose()
@@ -304,7 +304,7 @@ public class ArticulatedBodyInertia implements GeometryObject<ArticulatedBodyIne
 
    /**
     * Gets this articulated-body inertia as a 6-by-6 matrix.
-    * 
+    *
     * @param matrixToPack the matrix in which this inertia is stored. Modified.
     */
    public void get(DenseMatrix64F matrixToPack)
@@ -351,7 +351,7 @@ public class ArticulatedBodyInertia implements GeometryObject<ArticulatedBodyIne
     * See the Word&trade; document located in the document folder of this project for more information
     * about the transformation rule for spatial inertia.
     * </p>
-    * 
+    *
     * @param transform the transform to use on this. Not modified.
     */
    public void applyTransform(RigidBodyTransform transform)
@@ -378,7 +378,7 @@ public class ArticulatedBodyInertia implements GeometryObject<ArticulatedBodyIne
     * See the Word&trade; document located in the document folder of this project for more information
     * about the transformation rule for spatial inertia.
     * </p>
-    * 
+    *
     * @param transform the transform to use on this. Not modified.
     */
    public void applyInverseTransform(RigidBodyTransform transform)
@@ -417,7 +417,7 @@ public class ArticulatedBodyInertia implements GeometryObject<ArticulatedBodyIne
    /**
     * Checks that {@code other} is expressed in the same reference frame as this and then returns
     * {@link #epsilonEquals(ArticulatedBodyInertia, double)}.
-    * 
+    *
     * @throws ReferenceFrameMismatchException if {@code other} is not expressed in the same frame as
     *                                         {@code this}.
     */
@@ -430,7 +430,7 @@ public class ArticulatedBodyInertia implements GeometryObject<ArticulatedBodyIne
 
    /**
     * Returns a representative for this articulated-body inertia as follows:
-    * 
+    *
     * <pre>
     * Articulated-body inertia expressed in frameName
     * / 0.253,  0.000,  0.000,  0.000,  0.554, -0.247 \
@@ -440,7 +440,7 @@ public class ArticulatedBodyInertia implements GeometryObject<ArticulatedBodyIne
     * | 0.554,  0.000, -0.387,  0.000,  0.773,  0.000 |
     * \-0.247,  0.387,  0.000,  0.000,  0.000,  0.773 /
     * </pre>
-    * 
+    *
     * @return the representative string for this inertia.
     */
    @Override

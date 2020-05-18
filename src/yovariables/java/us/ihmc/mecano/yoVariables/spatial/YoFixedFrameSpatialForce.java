@@ -36,7 +36,7 @@ import us.ihmc.yoVariables.variable.YoVariable;
  *     \ linearX  /
  * </pre>
  * </p>
- * 
+ *
  * @author Sylvain Bertrand
  */
 public class YoFixedFrameSpatialForce implements FixedFrameSpatialForceBasics, GeometryObject<YoFixedFrameSpatialForce>
@@ -51,7 +51,7 @@ public class YoFixedFrameSpatialForce implements FixedFrameSpatialForceBasics, G
     * <p>
     * Note that the reference frame is final.
     * </p>
-    * 
+    *
     * @param namePrefix       a unique name string to use as the prefix for child variable names.
     * @param expressedInFrame in which reference frame the spatial force is expressed.
     * @param registry         the registry to register child variables to.
@@ -66,7 +66,7 @@ public class YoFixedFrameSpatialForce implements FixedFrameSpatialForceBasics, G
     * <p>
     * Note that the reference frame is final.
     * </p>
-    * 
+    *
     * @param namePrefix       a unique name string to use as the prefix for child variable names.
     * @param nameSuffix       a string to use as the suffix for child variable names.
     * @param expressedInFrame in which reference frame the spatial force is expressed.
@@ -83,7 +83,7 @@ public class YoFixedFrameSpatialForce implements FixedFrameSpatialForceBasics, G
     * <p>
     * Note that the reference frame is final.
     * </p>
-    * 
+    *
     * @param angularPart the vector to use for the angular part.
     * @param linearPart  the vector to use for the linear part.
     */
@@ -98,7 +98,7 @@ public class YoFixedFrameSpatialForce implements FixedFrameSpatialForceBasics, G
     * <p>
     * Note that the reference frames are final.
     * </p>
-    * 
+    *
     * @param spatialVector the spatial vector to use for holding data.
     */
    public YoFixedFrameSpatialForce(YoFixedFrameSpatialVector spatialVector)

@@ -26,7 +26,7 @@ package us.ihmc.mecano.spatial.interfaces;
  *     \ linearX  /
  * </pre>
  * </p>
- * 
+ *
  * @author Twan Koolen
  * @author Sylvain Bertrand
  */

@@ -20,7 +20,7 @@ import us.ihmc.mecano.spatial.interfaces.TwistReadOnly;
  * A 1-DoF joint is usually actuated, has limits describing the range of motion and actuator
  * capabilities.
  * </p>
- * 
+ *
  * @author Twan Koolen
  * @author Sylvain Bertrand
  */
@@ -34,101 +34,101 @@ public interface OneDoFJointReadOnly extends JointReadOnly
     * <p>
     * This joint either translates along or rotates around its joint axis.
     * </p>
-    * 
+    *
     * @return the read-only reference to this joint axis.
     */
    FrameVector3DReadOnly getJointAxis();
 
    /**
     * Gets the current position/angle of this joint.
-    * 
+    *
     * @return this joint current position/angle.
     */
    double getQ();
 
    /**
     * Gets the current velocity of this joint.
-    * 
+    *
     * @return this joint current velocity.
     */
    double getQd();
 
    /**
     * Gets the current acceleration of this joint.
-    * 
+    *
     * @return this joint current acceleration.
     */
    double getQdd();
 
    /**
     * Gets the current force/torque of this joint.
-    * 
+    *
     * @return this joint force/torque.
     */
    double getTau();
 
    /**
     * Gets the lower limit of this joint range of motion:
-    * 
+    *
     * <pre>
     * this.q &in; [this.jointLimitLower; this.jointLimitUpper]
     * </pre>
-    * 
+    *
     * @return the lower position/angle limit for this joint.
     */
    double getJointLimitLower();
 
    /**
     * Gets the upper limit of this joint range of motion:
-    * 
+    *
     * <pre>
     * this.q &in; [this.jointLimitLower; this.jointLimitUpper]
     * </pre>
-    * 
+    *
     * @return the upper position/angle limit for this joint.
     */
    double getJointLimitUpper();
 
    /**
     * Gets the lower limit of this joint velocity:
-    * 
+    *
     * <pre>
     * this.qd &in; [this.velocityLimitLower; this.velocityLimitUpper]
     * </pre>
-    * 
+    *
     * @return the lower velocity limit for this joint.
     */
    double getVelocityLimitLower();
 
    /**
     * Gets the upper limit of this joint velocity:
-    * 
+    *
     * <pre>
     * this.qd &in; [this.velocityLimitLower; this.velocityLimitUpper]
     * </pre>
-    * 
+    *
     * @return the upper velocity limit for this joint.
     */
    double getVelocityLimitUpper();
 
    /**
     * Gets the lower limit of this joint force/torque:
-    * 
+    *
     * <pre>
     * this.tau &in; [this.effortLimitLower; this.effortLimitUpper]
     * </pre>
-    * 
+    *
     * @return the lower force/torque limit for this joint.
     */
    double getEffortLimitLower();
 
    /**
     * Gets the upper limit of this joint force/torque:
-    * 
+    *
     * <pre>
     * this.tau &in; [this.effortLimitLower; this.effortLimitUpper]
     * </pre>
-    * 
+    *
     * @return the upper force/torque limit for this joint.
     */
    double getEffortLimitUpper();
@@ -154,7 +154,7 @@ public interface OneDoFJointReadOnly extends JointReadOnly
     * <li>{@code expressedInFrame} is {@code afterJointFrame}.
     * </ul>
     * </p>
-    * 
+    *
     * @return the read-only reference to this joint unit-twist.
     */
    TwistReadOnly getUnitJointTwist();
@@ -169,7 +169,7 @@ public interface OneDoFJointReadOnly extends JointReadOnly
     * <li>{@code expressedInFrame} is {@code successorFrame}.
     * </ul>
     * </p>
-    * 
+    *
     * @return the read-only reference to this joint unit-twist.
     */
    TwistReadOnly getUnitSuccessorTwist();
@@ -184,7 +184,7 @@ public interface OneDoFJointReadOnly extends JointReadOnly
     * <li>{@code expressedInFrame} is {@code predecessorFrame}.
     * </ul>
     * </p>
-    * 
+    *
     * @return the read-only reference to this joint unit-twist.
     */
    TwistReadOnly getUnitPredecessorTwist();
@@ -210,7 +210,7 @@ public interface OneDoFJointReadOnly extends JointReadOnly
     * <li>{@code expressedInFrame} is {@code afterJointFrame}.
     * </ul>
     * </p>
-    * 
+    *
     * @return the read-only reference to this joint unit spatial acceleration.
     */
    SpatialAccelerationReadOnly getUnitJointAcceleration();
@@ -226,7 +226,7 @@ public interface OneDoFJointReadOnly extends JointReadOnly
     * <li>{@code expressedInFrame} is {@code successorFrame}.
     * </ul>
     * </p>
-    * 
+    *
     * @return the read-only reference to this joint unit spatial acceleration.
     */
    SpatialAccelerationReadOnly getUnitSuccessorAcceleration();
@@ -242,7 +242,7 @@ public interface OneDoFJointReadOnly extends JointReadOnly
     * <li>{@code expressedInFrame} is {@code predecessorFrame}.
     * </ul>
     * </p>
-    * 
+    *
     * @return the read-only reference to this joint unit spatial acceleration.
     */
    SpatialAccelerationReadOnly getUnitPredecessorAcceleration();

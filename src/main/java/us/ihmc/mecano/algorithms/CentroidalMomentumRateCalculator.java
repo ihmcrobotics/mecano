@@ -363,7 +363,7 @@ public class CentroidalMomentumRateCalculator implements ReferenceFrameHolder
     * The given matrix is expected to have been configured using the same
     * {@link JointMatrixIndexProvider} that was used to configure this calculator.
     * </p>
-    * 
+    *
     * @param jointVelocityMatrix        the matrix containing the joint velocities to use. Not
     *                                   modified.
     * @param centerOfMassVelocityToPack the vector used to stored the computed center of mass velocity.
@@ -398,7 +398,7 @@ public class CentroidalMomentumRateCalculator implements ReferenceFrameHolder
     * The given matrix is expected to have been configured using the same
     * {@link JointMatrixIndexProvider} that was used to configure this calculator.
     * </p>
-    * 
+    *
     * @param jointAccelerationMatrix        the matrix containing the joint accelerations to use. Not
     *                                       modified.
     * @param centerOfMassAccelerationToPack the vector used to stored the computed center of mass
@@ -434,7 +434,7 @@ public class CentroidalMomentumRateCalculator implements ReferenceFrameHolder
     * The given matrix is expected to have been configured using the same
     * {@link JointMatrixIndexProvider} that was used to configure this calculator.
     * </p>
-    * 
+    *
     * @param jointVelocityMatrix the matrix containing the joint velocities to use. Not modified.
     * @param momentumToPack      the vector used to stored the computed momentum. Modified.
     */
@@ -467,7 +467,7 @@ public class CentroidalMomentumRateCalculator implements ReferenceFrameHolder
     * The given matrix is expected to have been configured using the same
     * {@link JointMatrixIndexProvider} that was used to configure this calculator.
     * </p>
-    * 
+    *
     * @param jointAccelerationMatrix the matrix containing the joint accelerations to use. Not
     *                                modified.
     * @param momentumRateToPack      the vector used to stored the computed rate of change of momentum.
@@ -488,7 +488,7 @@ public class CentroidalMomentumRateCalculator implements ReferenceFrameHolder
     * in the frame {@link #getReferenceFrame()}. The latter implies that when multiplied to the joint
     * velocity matrix, the result is the momentum expressed in {@link #getReferenceFrame()}.
     * </p>
-    * 
+    *
     * @return the centroidal momentum matrix.
     * @see CentroidalMomentumRateCalculator
     */
@@ -500,7 +500,7 @@ public class CentroidalMomentumRateCalculator implements ReferenceFrameHolder
 
    /**
     * Gets the convective term resulting from the Coriolis and centrifugal forces acting on the system.
-    * 
+    *
     * @return the bias spatial force.
     * @see CentroidalMomentumRateCalculator
     */
@@ -512,7 +512,7 @@ public class CentroidalMomentumRateCalculator implements ReferenceFrameHolder
 
    /**
     * Gets the convective term resulting from the Coriolis and centrifugal forces acting on the system.
-    * 
+    *
     * @return the bias spatial force.
     * @see CentroidalMomentumRateCalculator
     */
@@ -535,7 +535,7 @@ public class CentroidalMomentumRateCalculator implements ReferenceFrameHolder
 
    /**
     * Represents a single recursion step with all the intermediate variables needed.
-    * 
+    *
     * @author Sylvain Bertrand
     */
    private class RecursionStep
@@ -676,14 +676,14 @@ public class CentroidalMomentumRateCalculator implements ReferenceFrameHolder
        * frame of each spatial inertia matrix which results in heavy computation, the right-hand side only
        * requires to change the frame of the unit-twist.
        * </p>
-       * 
+       *
        * <pre>
        * h = (&sum;<sub>i=0:n</sub> I<sub>i</sub>) * T &equiv; &sum;<sub>i=0:n</sub> (I<sub>i</sub> * T)
        * </pre>
-       * 
+       *
        * where <tt>h</tt> is the resulting unit-momentum, <tt>I<sub>i</sub></tt> is the spatial inertia of
        * the i<sup>th</sup> body, and <tt>T</tt> is the unit-twist.
-       * 
+       *
        * @param ancestorUnitTwist   the unit-twist to use for computing a the unit-momentum for this body
        *                            that is then added to {@code unitMomentumToAddTo}. Not modified.
        * @param unitMomentumToAddTo the unit-momentum to build up. Modified.

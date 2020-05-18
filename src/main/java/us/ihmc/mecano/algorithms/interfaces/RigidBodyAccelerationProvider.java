@@ -24,7 +24,7 @@ import us.ihmc.mecano.spatial.interfaces.SpatialAccelerationReadOnly;
  * {@link SpatialAccelerationCalculator}, a rigid-body provider can also be obtained from other
  * algorithms such as {@link InverseDynamicsCalculator} and {@link ForwardDynamicsCalculator}.
  * </p>
- * 
+ *
  * @author Sylvain Bertrand
  */
 public interface RigidBodyAccelerationProvider
@@ -35,7 +35,7 @@ public interface RigidBodyAccelerationProvider
     * The result is the acceleration of the {@code body.getBodyFixedFrame()}, with respect to the
     * {@code inertialFrame}, expressed in the {@code body.getBodyFixedFrame()}.
     * </p>
-    * 
+    *
     * @param body the rigid-body to get the acceleration of.
     * @return the acceleration of the {@code body}.
     */
@@ -57,7 +57,7 @@ public interface RigidBodyAccelerationProvider
     * </br>
     * with 'b1' being the {@code base}, 'b2' the {@code body}, and 'i' the {@code inertialFrame}.
     * </p>
-    * 
+    *
     * @param base the rigid-body with respect to which the acceleration is to be computed.
     * @param body the rigid-body to compute the acceleration of.
     * @return the acceleration of {@code body} with respect to {@code base}.
@@ -67,7 +67,7 @@ public interface RigidBodyAccelerationProvider
    /**
     * Computes and packs the linear acceleration of the point {@code bodyFixedPoint} that is attached
     * to {@code body} with respect to {@code inertialFrame}.
-    * 
+    *
     * @param body           the rigid-body to which {@code bodyFixedPoint} belongs.
     * @param bodyFixedPoint the point to compute the linear acceleration of. Not modified.
     * @return the linear acceleration of the body fixed point.
@@ -80,7 +80,7 @@ public interface RigidBodyAccelerationProvider
    /**
     * Computes and packs the linear acceleration of the point {@code bodyFixedPoint} that is attached
     * to {@code body} with respect to {@code base}.
-    * 
+    *
     * @param base           the rigid-body with respect to which the acceleration is to be computed.
     * @param body           the rigid-body to which {@code bodyFixedPoint} belongs.
     * @param bodyFixedPoint the point to compute the linear acceleration of. Not modified.
@@ -91,7 +91,7 @@ public interface RigidBodyAccelerationProvider
    /**
     * Whether rigid-body accelerations resulting from centrifugal and Coriolis effects are considered
     * or ignored.
-    * 
+    *
     * @return {@code true} if this provider considers the velocity terms, {@code false} otherwise.
     */
    default boolean areVelocitiesConsidered()
@@ -101,7 +101,7 @@ public interface RigidBodyAccelerationProvider
 
    /**
     * Whether rigid-body accelerations resulting from joint accelerations are considered or ignored.
-    * 
+    *
     * @return {@code true} if this provider considers joint accelerations, {@code false} otherwise.
     */
    default boolean areAccelerationsConsidered()
@@ -127,7 +127,7 @@ public interface RigidBodyAccelerationProvider
     * The function is used to implement {@link #getAccelerationOfBody(RigidBodyReadOnly)} and is enough
     * to implement the other acceleration getters of this interface.
     * </p>
-    * 
+    *
     * @param accelerationFunction the function that computes rigid-body accelerations.
     * @param inertialFrame        the inertial frame with respect to which the body accelerations are
     *                             expressed.
@@ -146,7 +146,7 @@ public interface RigidBodyAccelerationProvider
     * The function is used to implement {@link #getAccelerationOfBody(RigidBodyReadOnly)} and is enough
     * to implement the other acceleration getters of this interface.
     * </p>
-    * 
+    *
     * @param accelerationFunction  the function that computes rigid-body accelerations.
     * @param inertialFrame         the inertial frame with respect to which the body accelerations are
     *                              expressed.

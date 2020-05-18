@@ -86,7 +86,7 @@ public interface SphericalJointBasics extends SphericalJointReadOnly, JointBasic
 
    /**
     * Sets this joint configuration from the other joint.
-    * 
+    *
     * @param other the other to get the configuration from. Not modified.
     */
    default void setJointConfiguration(SphericalJointReadOnly other)
@@ -103,7 +103,7 @@ public interface SphericalJointBasics extends SphericalJointReadOnly, JointBasic
 
    /**
     * Sets this joint velocity from the other joint.
-    * 
+    *
     * @param other the other to get the velocity from. Not modified.
     */
    default void setJointTwist(SphericalJointReadOnly other)
@@ -122,7 +122,7 @@ public interface SphericalJointBasics extends SphericalJointReadOnly, JointBasic
 
    /**
     * Sets this joint acceleration from the other joint.
-    * 
+    *
     * @param other the other to get the acceleration from. Not modified.
     */
    default void setJointAcceleration(SphericalJointReadOnly other)
@@ -141,7 +141,7 @@ public interface SphericalJointBasics extends SphericalJointReadOnly, JointBasic
 
    /**
     * Sets this joint force/torque from the other joint.
-    * 
+    *
     * @param other the other to get the force/torque from. Not modified.
     */
    default void setJointWrench(SphericalJointReadOnly other)

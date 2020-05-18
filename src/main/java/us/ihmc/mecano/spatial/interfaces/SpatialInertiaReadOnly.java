@@ -20,7 +20,7 @@ import us.ihmc.mecano.tools.MecanoTools;
  * expressed. When the frame's origin coincides with the center of mass position and that its axes
  * are aligned with the principal directions of the inertia ellipsoid, the spatial inertia matrix
  * takes the following form:
- * 
+ *
  * <pre>
  *     / J<sub>x,x</sub> 0   0   0 0 0 \
  *     | 0   J<sub>y,y</sub> 0   0 0 0 |
@@ -29,12 +29,12 @@ import us.ihmc.mecano.tools.MecanoTools;
  *     | 0   0   0   0 m 0 |
  *     \ 0   0   0   0 0 m /
  * </pre>
- * 
+ *
  * where <tt>m</tt> is the total mass, and <tt>J<sub>x,x</sub></tt>, <tt>J<sub>y,y</sub></tt>, and
  * <tt>J<sub>z,z</sub></tt> are the moments of inertia around the axes x, y, and z. <br>
  * When the frame in which the inertia is expressed is arbitrary, the spatial inertia takes the
  * following general form:
- * 
+ *
  * <pre>
  *     / J<sub>x,x</sub> J<sub>x,y</sub> J<sub>x,z</sub>   0 -mz  my \
  *     | J<sub>x,y</sub> J<sub>y,y</sub> J<sub>y,z</sub>  mz   0 -mx |
@@ -44,7 +44,7 @@ import us.ihmc.mecano.tools.MecanoTools;
  *     \  my -mx   0   0   0   m /
  * </pre>
  * </p>
- * 
+ *
  * @author Twan Koolen
  * @author Sylvain Bertrand
  */
@@ -57,14 +57,14 @@ public interface SpatialInertiaReadOnly extends ReferenceFrameHolder
 
    /**
     * Gets the read-only reference to the moment of inertia.
-    * 
+    *
     * @return the moment of inertia matrix.
     */
    Matrix3DReadOnly getMomentOfInertia();
 
    /**
     * Gets the total mass value.
-    * 
+    *
     * @return the mass.
     */
    double getMass();
@@ -72,7 +72,7 @@ public interface SpatialInertiaReadOnly extends ReferenceFrameHolder
    /**
     * Gets the read-only reference to the center of mass offset from the origin of the frame in which
     * this spatial inertia is expressed.
-    * 
+    *
     * @return the center of mass offset.
     */
    FrameVector3DReadOnly getCenterOfMassOffset();
@@ -87,7 +87,7 @@ public interface SpatialInertiaReadOnly extends ReferenceFrameHolder
 
    /**
     * Tests whether any component of this spatial inertia matrix is equal to {@link Double#NaN}.
-    * 
+    *
     * @return {@code true} if at least one component of this inertia is {@link Double#NaN},
     *         {@code false} otherwise.
     */
@@ -98,7 +98,7 @@ public interface SpatialInertiaReadOnly extends ReferenceFrameHolder
 
    /**
     * Tests if the center of mass offset is negligible.
-    * 
+    *
     * @return {@code true} if the center of mass offset can be ignored, {@code false} otherwise.
     */
    default boolean isCenterOfMassOffsetZero()
@@ -153,7 +153,7 @@ public interface SpatialInertiaReadOnly extends ReferenceFrameHolder
 
    /**
     * Checks that the center of mass offset is negligible.
-    * 
+    *
     * @throws RuntimeException if it is not negligible.
     */
    default void checkIfCenterOfMassOffsetIsZero()
@@ -175,7 +175,7 @@ public interface SpatialInertiaReadOnly extends ReferenceFrameHolder
     * When the given {@code acceleration} or {@code twist} is {@code null}, it assumed to be equal to
     * zero.
     * </p>
-    * 
+    *
     * @param acceleration        the spatial acceleration of {@code this.bodyFrame} with respect to
     *                            world and expressed in {@code this.bodyFrame}. Can be {@code null}.
     *                            Not modified.
@@ -207,7 +207,7 @@ public interface SpatialInertiaReadOnly extends ReferenceFrameHolder
     * When the given {@code acceleration} or {@code twist} is {@code null}, it assumed to be equal to
     * zero.
     * </p>
-    * 
+    *
     * @param acceleration        the spatial acceleration of {@code this.bodyFrame} with respect to
     *                            world and expressed in {@code this.bodyFrame}. Can be {@code null}.
     *                            Not modified.
@@ -301,7 +301,7 @@ public interface SpatialInertiaReadOnly extends ReferenceFrameHolder
     * <p>
     * This method does not require this spatial inertia to be expressed in any particular frame.
     * </p>
-    * 
+    *
     * @param twist the twist of {@code this.bodyFrame} with respect to world and expressed in
     *              {@code this.expressedInFrame}. Not modified.
     * @return the value of the kinetic co-energy.
@@ -322,7 +322,7 @@ public interface SpatialInertiaReadOnly extends ReferenceFrameHolder
 
    /**
     * Packs this spatial inertia matrix into the given {@code DenseMatrix64F} as follows:
-    * 
+    *
     * <pre>
     *     / J<sub>x,x</sub> J<sub>x,y</sub> J<sub>x,z</sub>   0 -mz  my \
     *     | J<sub>x,y</sub> J<sub>y,y</sub> J<sub>y,z</sub>  mz   0 -mx |
@@ -331,7 +331,7 @@ public interface SpatialInertiaReadOnly extends ReferenceFrameHolder
     *     | -mz   0  mx   0   m   0 |
     *     \  my -mx   0   0   0   m /
     * </pre>
-    * 
+    *
     * @param matrixToPack the matrix in which this spatial inertia is stored. Modified.
     */
    default void get(DenseMatrix64F matrixToPack)
@@ -341,7 +341,7 @@ public interface SpatialInertiaReadOnly extends ReferenceFrameHolder
 
    /**
     * Packs this spatial inertia matrix into the given {@code DenseMatrix64F} as follows:
-    * 
+    *
     * <pre>
     *     / J<sub>x,x</sub> J<sub>x,y</sub> J<sub>x,z</sub>   0 -mz  my \
     *     | J<sub>x,y</sub> J<sub>y,y</sub> J<sub>y,z</sub>  mz   0 -mx |
@@ -350,7 +350,7 @@ public interface SpatialInertiaReadOnly extends ReferenceFrameHolder
     *     | -mz   0  mx   0   m   0 |
     *     \  my -mx   0   0   0   m /
     * </pre>
-    * 
+    *
     * @param startRow     the first row index to start writing in the dense-matrix.
     * @param startColumn  the first column index to start writing in the dense-matrix.
     * @param matrixToPack the matrix in which this spatial inertia is stored. Modified.
@@ -389,7 +389,7 @@ public interface SpatialInertiaReadOnly extends ReferenceFrameHolder
     * moment of inertia of both spatial inertia matrices. If any of these comparisons fails, this
     * method returns {@code false}.
     * </p>
-    * 
+    *
     * @param other   the other spatial inertia matrix to compare against this. Not modified.
     * @param epsilon the tolerance to use.
     * @return {@code true} if the two spatial inertia matrices are considered equal, {@code false}

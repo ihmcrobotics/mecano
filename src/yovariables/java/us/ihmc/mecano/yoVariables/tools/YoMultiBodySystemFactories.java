@@ -17,7 +17,7 @@ import us.ihmc.yoVariables.registry.YoVariableRegistry;
 
 /**
  * This class gathers factories useful for creating multi-body system backed by {@code YoVariable}s.
- * 
+ *
  * @author Sylvain Bertrand
  */
 public class YoMultiBodySystemFactories
@@ -31,7 +31,7 @@ public class YoMultiBodySystemFactories
     * the returned builder can be used to clone any multi-body system and upgrade the cloned joints to
     * be backed by {@code YoVariable}s.
     * </p>
-    * 
+    *
     * @param registry the registry to register child variables to.
     * @return the new joint builder.
     */
