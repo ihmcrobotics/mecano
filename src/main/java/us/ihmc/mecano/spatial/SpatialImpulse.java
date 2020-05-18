@@ -134,7 +134,7 @@ public class SpatialImpulse implements SpatialImpulseBasics, GeometryObject<Spat
 
    /**
     * Creates a new spatial impulse from the given {@code bodyFrame} and spatial vector.
-    * 
+    *
     * @param bodyFrame     the frame rigidly attached to the body on which this spatial impulse is
     *                      applied.
     * @param spatialVector the vector used to initialize this spatial impulse value. Not modified.

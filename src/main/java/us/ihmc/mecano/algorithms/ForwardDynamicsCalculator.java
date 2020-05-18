@@ -1,6 +1,11 @@
 package us.ihmc.mecano.algorithms;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.Map;
 import java.util.function.Function;
 
 import org.ejml.alg.dense.misc.UnrolledInverseFromMinor;
@@ -15,12 +20,20 @@ import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.interfaces.Tuple3DReadOnly;
 import us.ihmc.mecano.algorithms.interfaces.RigidBodyAccelerationProvider;
 import us.ihmc.mecano.frames.MovingReferenceFrame;
-import us.ihmc.mecano.multiBodySystem.interfaces.*;
+import us.ihmc.mecano.multiBodySystem.interfaces.JointBasics;
+import us.ihmc.mecano.multiBodySystem.interfaces.JointMatrixIndexProvider;
+import us.ihmc.mecano.multiBodySystem.interfaces.JointReadOnly;
+import us.ihmc.mecano.multiBodySystem.interfaces.MultiBodySystemReadOnly;
+import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyReadOnly;
 import us.ihmc.mecano.spatial.SpatialAcceleration;
 import us.ihmc.mecano.spatial.SpatialForce;
 import us.ihmc.mecano.spatial.SpatialInertia;
 import us.ihmc.mecano.spatial.Wrench;
-import us.ihmc.mecano.spatial.interfaces.*;
+import us.ihmc.mecano.spatial.interfaces.FixedFrameWrenchBasics;
+import us.ihmc.mecano.spatial.interfaces.SpatialAccelerationReadOnly;
+import us.ihmc.mecano.spatial.interfaces.SpatialVectorReadOnly;
+import us.ihmc.mecano.spatial.interfaces.TwistReadOnly;
+import us.ihmc.mecano.spatial.interfaces.WrenchReadOnly;
 import us.ihmc.mecano.tools.JointStateType;
 import us.ihmc.mecano.tools.MultiBodySystemTools;
 
@@ -31,7 +44,7 @@ import us.ihmc.mecano.tools.MultiBodySystemTools;
  * Rigid Body Dynamics Algorithms (2008): <a href=
  * "https://books.google.com/books?id=GJRGBQAAQBAJ&lpg=PR5&ots=XoFXvnJZLH&dq=rigid%20body%20dynamics%20algorithms&lr&pg=PR1#v=onepage&q=rigid%20body%20dynamics%20algorithms&f=false">link</a>
  * </p>
- * 
+ *
  * @author Sylvain Bertrand
  */
 public class ForwardDynamicsCalculator
@@ -68,7 +81,7 @@ public class ForwardDynamicsCalculator
     * Do not forgot to set the gravitational acceleration so this calculator can properly account for
     * it.
     * </p>
-    * 
+    *
     * @param rootBody the supporting body of the subtree to be evaluated by this calculator. Not
     *                 modified.
     */
@@ -84,7 +97,7 @@ public class ForwardDynamicsCalculator
     * Do not forgot to set the gravitational acceleration so this calculator can properly account for
     * it.
     * </p>
-    * 
+    *
     * @param input the definition of the system to be evaluated by this calculator.
     */
    public ForwardDynamicsCalculator(MultiBodySystemReadOnly input)
@@ -99,7 +112,7 @@ public class ForwardDynamicsCalculator
     * Do not forgot to set the gravitational acceleration so this calculator can properly account for
     * it.
     * </p>
-    * 
+    *
     * @param input                          the definition of the system to be evaluated by this
     *                                       calculator.
     * @param considerIgnoredSubtreesInertia whether the inertia of the ignored part(s) of the given
@@ -179,7 +192,7 @@ public class ForwardDynamicsCalculator
     * The acceleration of the root body is set to the opposite of the gravitational acceleration such
     * that it gets naturally propagated to the whole system.
     * </p>
-    * 
+    *
     * @param gravity the gravitational linear acceleration, it is usually equal to
     *                {@code (0, 0, -9.81)}.
     */
@@ -195,7 +208,7 @@ public class ForwardDynamicsCalculator
     * The acceleration of the root body is set to the opposite of the gravitational acceleration such
     * that it gets naturally propagated to the whole system.
     * </p>
-    * 
+    *
     * @param gravity the gravitational linear acceleration, it is usually equal to
     *                {@code (0, 0, -9.81)}.
     */
@@ -212,7 +225,7 @@ public class ForwardDynamicsCalculator
     * The acceleration of the root body is set to the opposite of the gravitational acceleration such
     * that it gets naturally propagated to the whole system.
     * </p>
-    * 
+    *
     * @param gravity the gravitational linear acceleration along the z-axis, it is usually equal to
     *                {@code -9.81}.
     */
@@ -227,7 +240,7 @@ public class ForwardDynamicsCalculator
     * The acceleration of the root body is set to the opposite of the gravitational acceleration such
     * that it gets naturally propagated to the whole system.
     * </p>
-    * 
+    *
     * @param gravityX the gravitational linear acceleration along the x-axis, it is usually equal to
     *                 {@code 0}.
     * @param gravityY the gravitational linear acceleration along the y-axis, it is usually equal to
@@ -247,7 +260,7 @@ public class ForwardDynamicsCalculator
     * Changes the spatial acceleration of the root. Even though the root is assumed to be non-moving,
     * the {@code rootAcceleration} is usually set to the opposite of the gravitational acceleration,
     * such that the effect of the gravity is naturally propagated to the entire system.
-    * 
+    *
     * @param newRootAcceleration the new spatial acceleration of the root.
     * @throws ReferenceFrameMismatchException if any of the reference frames of
     *                                         {@code newRootAcceleration} does not match this
@@ -271,7 +284,7 @@ public class ForwardDynamicsCalculator
     * <p>
     * Modify the return wrench to configure the wrench to be applied on this rigid-body.
     * </p>
-    * 
+    *
     * @param rigidBody the query. Not modified.
     * @return the wrench associated to the query.
     */
@@ -283,7 +296,7 @@ public class ForwardDynamicsCalculator
 
    /**
     * Sets external wrench to apply to the given {@code rigidBody}.
-    * 
+    *
     * @param rigidBody      the rigid-body to which the wrench is to applied. Not modified.
     * @param externalWrench the external wrench to apply to the rigid-body.
     */
@@ -310,7 +323,7 @@ public class ForwardDynamicsCalculator
     * The given matrix is expected to have been configured using the same
     * {@link JointMatrixIndexProvider} that was used to configure this calculator.
     * </p>
-    * 
+    *
     * @param jointTauMatrix the matrix containing the joint efforts to use. Not modified.
     */
    public void compute(DenseMatrix64F jointTauMatrix)
@@ -332,7 +345,7 @@ public class ForwardDynamicsCalculator
 
    /**
     * Gets the definition of the multi-body system that was used to create this calculator.
-    * 
+    *
     * @return this calculator input.
     */
    public MultiBodySystemReadOnly getInput()
@@ -342,7 +355,7 @@ public class ForwardDynamicsCalculator
 
    /**
     * Gets the computed joint accelerations.
-    * 
+    *
     * @return this calculator output: the joint accelerations.
     */
    public DenseMatrix64F getJointAccelerationMatrix()
@@ -353,7 +366,7 @@ public class ForwardDynamicsCalculator
    /**
     * Gets the computed N-by-1 acceleration vector for the given {@code joint}, where N is the number
     * of degrees of freedom the joint has.
-    * 
+    *
     * @param joint the joint to get the acceleration of. Not modified.
     * @return the computed joint acceleration matrix.
     */
@@ -369,7 +382,7 @@ public class ForwardDynamicsCalculator
 
    /**
     * Gets the internal recursion step for the root body.
-    * 
+    *
     * @return the root body recursion step.
     */
    ArticulatedBodyRecursionStep getInitialRecursionStep()
@@ -382,7 +395,7 @@ public class ForwardDynamicsCalculator
     * <p>
     * Any joint that is not considered by this calculator remains unchanged.
     * </p>
-    * 
+    *
     * @param joints the array of joints to write the acceleration into. Modified.
     */
    public void writeComputedJointAccelerations(JointBasics[] joints)
@@ -396,7 +409,7 @@ public class ForwardDynamicsCalculator
     * <p>
     * Any joint that is not considered by this calculator remains unchanged.
     * </p>
-    * 
+    *
     * @param joints the list of joints to write the acceleration into. Modified.
     */
    public void writeComputedJointAccelerations(List<? extends JointBasics> joints)
@@ -410,7 +423,7 @@ public class ForwardDynamicsCalculator
     * <p>
     * Any joint that is not considered by this calculator remains unchanged.
     * </p>
-    * 
+    *
     * @param joint the joint to retrieve the acceleration of and to store it. Modified.
     * @return whether the calculator handles the given joint or not.
     */
@@ -427,7 +440,7 @@ public class ForwardDynamicsCalculator
 
    /**
     * Gets the rigid-body acceleration provider that uses accelerations computed in this calculator.
-    * 
+    *
     * @return the acceleration provider backed by this calculator.
     */
    public RigidBodyAccelerationProvider getAccelerationProvider()
@@ -437,7 +450,7 @@ public class ForwardDynamicsCalculator
 
    /**
     * Gets the rigid-body acceleration provider that uses accelerations computed in this calculator.
-    * 
+    *
     * @param considerVelocities whether the provider should consider bias accelerations, i.e.
     *                           centrifugal and Coriolis accelerations, resulting from joint
     *                           velocities.
@@ -451,7 +464,7 @@ public class ForwardDynamicsCalculator
    /**
     * Represents a single recursion step for any of the three passes of the articulated-body algorithm
     * as introduced in R. Featherstone, <i>Rigid Body Dynamics Algorithms</i>.
-    * 
+    *
     * @author Sylvain Bertrand
     */
    class ArticulatedBodyRecursionStep
@@ -519,72 +532,72 @@ public class ForwardDynamicsCalculator
 
       /**
        * Intermediate result to save operations:
-       * 
+       *
        * <pre>
        * U = I<sup>A</sup> S
        * </pre>
-       * 
+       *
        * where <tt>I<sup>A</sup></tt> is this handle's articulated-body inertia, and <tt>S</tt> is the
        * parent joint motion subspace.
        */
       final DenseMatrix64F U;
       /**
        * Intermediate result to save operations:
-       * 
+       *
        * <pre>
        * D = S<sup>T</sup> U
        *   = S<sup>T</sup> I<sup>A</sup> S
        * </pre>
-       * 
+       *
        * where <tt>I<sup>A</sup></tt> is this handle's articulated-body inertia, and <tt>S</tt> is the
        * parent joint motion subspace.
        */
       final DenseMatrix64F D;
       /**
        * Intermediate result to save operations:
-       * 
+       *
        * <pre>
        * D<sup>-1</sup> = ( S<sup>T</sup> U )<sup>-1</sup>
        *  <sub>  </sub> = ( S<sup>T</sup> I<sup>A</sup> S )<sup>-1</sup>
        * </pre>
-       * 
+       *
        * where <tt>I<sup>A</sup></tt> is this handle's articulated-body inertia, and <tt>S</tt> is the
        * parent joint motion subspace.
        */
       final DenseMatrix64F Dinv;
       /**
        * Intermediate result to save operations:
-       * 
+       *
        * <pre>
        * U D<sup>-1</sup> = U ( S<sup>T</sup> U )<sup>-1</sup>
        *    <sub>  </sub> = I<sup>A</sup> S ( S<sup>T</sup> I<sup>A</sup> S )<sup>-1</sup>
        * </pre>
-       * 
+       *
        * where <tt>I<sup>A</sup></tt> is this handle's articulated-body inertia, and <tt>S</tt> is the
        * parent joint motion subspace.
        */
       final DenseMatrix64F U_Dinv;
       /**
        * Intermediate result:
-       * 
+       *
        * <pre>
        * U D<sup>-1</sup> U<sup>T</sup> = U ( S<sup>T</sup> U )<sup>-1</sup> U<sup>T</sup>
        *      <sub>   </sub> = I<sup>A</sup> S ( S<sup>T</sup> I<sup>A</sup> S )<sup>-1</sup> S<sup>T</sup> I<sup>A</sup>
        * </pre>
-       * 
+       *
        * where <tt>I<sup>A</sup></tt> is this handle's articulated-body inertia, and <tt>S</tt> is the
        * parent joint motion subspace.
        */
       final DenseMatrix64F U_Dinv_UT;
       /**
        * This is the apparent articulated rigid-body inertia for the parent:
-       * 
+       *
        * <pre>
        * I<sup>a</sup> = I<sup>A</sup> - U D<sup>-1</sup> U<sup>T</sup>
        *  <sup> </sup> = I<sup>A</sup> - U ( S<sup>T</sup> U )<sup>-1</sup> U<sup>T</sup>
        *  <sup> </sup> = I<sup>A</sup> - I<sup>A</sup> S ( S<sup>T</sup> I<sup>A</sup> S )<sup>-1</sup> S<sup>T</sup> I<sup>A</sup>
        * </pre>
-       * 
+       *
        * where <tt>I<sup>A</sup></tt> is this handle's articulated-body inertia, and <tt>S</tt> is the
        * parent joint motion subspace.
        */
@@ -596,7 +609,7 @@ public class ForwardDynamicsCalculator
       final DenseMatrix64F tau;
       /**
        * This is some bias force for this joint:
-       * 
+       *
        * <pre>
        * p<sup>A</sup> = p + &sum;<sub>&forall;child</sub> p<sup>a</sup>
        * </pre>
@@ -604,11 +617,11 @@ public class ForwardDynamicsCalculator
       final DenseMatrix64F pA;
       /**
        * Intermediate result to save computation:
-       * 
+       *
        * <pre>
        * u = &tau; - S<sup>T</sup> p<sup>A</sup>
        * </pre>
-       * 
+       *
        * where <tt>&tau;</tt> is the N-by-1 vector representing the joint effort, N being the number of
        * DoFs for this joint, <tt>S</tt> is the joint motion subspace, and <tt>p<sup>A</sup></tt> some
        * bias forces exerted on this joint.
@@ -616,11 +629,11 @@ public class ForwardDynamicsCalculator
       final DenseMatrix64F u;
       /**
        * Bias acceleration for this joint:
-       * 
+       *
        * <pre>
        * c = v &times; ( S qDot )
        * </pre>
-       * 
+       *
        * where <tt>v</tt> is the twist of this body, <tt>S</tt> the joint motion subspace, and
        * <tt>qDot</tt> the N-by-1 vector for this joint velocity, with N being the number of DoFs for this
        * joint.
@@ -628,12 +641,12 @@ public class ForwardDynamicsCalculator
       final DenseMatrix64F c;
       /**
        * The apparent bias forces of this joint for the parent:
-       * 
+       *
        * <pre>
        * p<sup>a</sup> = p<sup>A</sup> + I<sup>a</sup> c + U D<sup>-1</sup> u
        *  <sup> </sup> = p<sup>A</sup> + I<sup>a</sup> c + I<sup>A</sup> S ( S<sup>T</sup> I<sup>A</sup> S )<sup>-1</sup> ( &tau; - S<sup>T</sup> p<sup>A</sup> )
        * </pre>
-       * 
+       *
        * where <tt>p<sup>A</sup></tt> are the bias forces acting on this joint, <tt>I<sup>a</sup></tt> is
        * the apparent articulated-body inertia for the parent, <tt>S</tt> is the joint motion subspace,
        * <tt>I<sup>A</sup></tt> this handle's articulated-body inertia, <tt>&tau;</tt> this joint effort,
@@ -642,7 +655,7 @@ public class ForwardDynamicsCalculator
       final DenseMatrix64F pa;
       /**
        * Intermediate result to save computation:
-       * 
+       *
        * <pre>
        * a' = a<sub>parent</sub> + c
        * </pre>
@@ -650,7 +663,7 @@ public class ForwardDynamicsCalculator
       final DenseMatrix64F aPrime;
       /**
        * This body acceleration:
-       * 
+       *
        * <pre>
        * a = a' + S qDDot
        *   = a<sub>parent</sub> + c + S qDDot
@@ -663,7 +676,7 @@ public class ForwardDynamicsCalculator
       final DenseMatrix64F qdd_intermediate;
       /**
        * <b>This the output of this algorithm: the joint acceleration:</b>
-       * 
+       *
        * <pre>
        * qDDot = D<sup>-1</sup> ( u - U<sup>T</sup> a' )
        *       = D<sup>-1</sup> ( &tau; - U<sup>T</sup> ( a<sub>parent</sub> + c + S qDDot ) - S<sup>T</sup> p<sup>A</sup> )
@@ -764,8 +777,8 @@ public class ForwardDynamicsCalculator
             Ia = new DenseMatrix64F(SpatialVectorReadOnly.SIZE, SpatialVectorReadOnly.SIZE);
             qdd = new DenseMatrix64F(nDoFs, 1);
             qdd_intermediate = new DenseMatrix64F(nDoFs, 1);
-            aPrime = new DenseMatrix64F(SpatialAccelerationReadOnly.SIZE, 1);
-            a = new DenseMatrix64F(SpatialAccelerationReadOnly.SIZE, 1);
+            aPrime = new DenseMatrix64F(SpatialVectorReadOnly.SIZE, 1);
+            a = new DenseMatrix64F(SpatialVectorReadOnly.SIZE, 1);
             inverseSolver = nDoFs == 6 ? LinearSolverFactory.symmPosDef(6) : null;
             transformToParentJointFrame = new RigidBodyTransform();
             getJoint().getMotionSubspace(S);

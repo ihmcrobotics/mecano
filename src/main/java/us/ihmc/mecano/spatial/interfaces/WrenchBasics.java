@@ -125,8 +125,7 @@ public interface WrenchBasics extends FixedFrameWrenchBasics, SpatialForceBasics
    }
 
    /**
-    * Sets this wrench given an angular part and linear part and updates all its reference
-    * frames.
+    * Sets this wrench given an angular part and linear part and updates all its reference frames.
     *
     * @param bodyFrame        the body frame associated with the given spatial force.
     * @param expressedInFrame the reference frame in which the given motion is expressed.
@@ -309,8 +308,8 @@ public interface WrenchBasics extends FixedFrameWrenchBasics, SpatialForceBasics
    }
 
    /**
-    * Sets this wrench given a 3D moment and 3D force that are exerted at
-    * {@code pointOfApplication} and updates this vector reference frame.
+    * Sets this wrench given a 3D moment and 3D force that are exerted at {@code pointOfApplication}
+    * and updates this vector reference frame.
     * <p>
     * Effectively, this wrench is updated as follow:
     *

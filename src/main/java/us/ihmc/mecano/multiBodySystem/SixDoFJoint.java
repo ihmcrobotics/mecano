@@ -45,7 +45,7 @@ public class SixDoFJoint extends Joint implements SixDoFJointBasics
     * This constructor is typically used for creating a root floating joint, i.e. the first joint of
     * the multi-body system.
     * </p>
-    * 
+    *
     * @param name        the name for the new joint.
     * @param predecessor the rigid-body connected to and preceding this joint.
     */
@@ -56,7 +56,7 @@ public class SixDoFJoint extends Joint implements SixDoFJointBasics
 
    /**
     * Creates a new 6-DoF joint.
-    * 
+    *
     * @param name              the name for the new joint.
     * @param predecessor       the rigid-body connected to and preceding this joint.
     * @param transformToParent the transform to the frame after the parent joint. Not modified.

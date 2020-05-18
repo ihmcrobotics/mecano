@@ -309,7 +309,7 @@ public abstract class MovingReferenceFrame extends ReferenceFrame
 
    /**
     * Gets the twist of this frame relative to its direct parent.
-    * 
+    *
     * @return the twist relative to the parent frame.
     */
    public TwistReadOnly getTwistRelativeToParent()

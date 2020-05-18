@@ -1,7 +1,13 @@
 package us.ihmc.mecano.tools;
 
-import static us.ihmc.euclid.tools.EuclidCoreIOTools.*;
-import static us.ihmc.mecano.tools.MecanoIOTools.*;
+import static us.ihmc.euclid.tools.EuclidCoreIOTools.getStringFormat;
+import static us.ihmc.mecano.tools.MecanoIOTools.getMomentumString;
+import static us.ihmc.mecano.tools.MecanoIOTools.getSpatialAccelerationString;
+import static us.ihmc.mecano.tools.MecanoIOTools.getSpatialForceString;
+import static us.ihmc.mecano.tools.MecanoIOTools.getSpatialInertiaString;
+import static us.ihmc.mecano.tools.MecanoIOTools.getSpatialVectorString;
+import static us.ihmc.mecano.tools.MecanoIOTools.getTwistString;
+import static us.ihmc.mecano.tools.MecanoIOTools.getWrenchString;
 
 import us.ihmc.mecano.spatial.SpatialVector;
 import us.ihmc.mecano.spatial.interfaces.MomentumReadOnly;
@@ -485,7 +491,7 @@ public class MecanoTestTools
 
    /**
     * Asserts that when executing the given runnable, an specific exception is thrown.
-    * 
+    *
     * @param runnable              the code to be executed and to be throwing an exception.
     * @param expectedExceptionType the expected type of the exception to catch when executing the
     *                              runnable.

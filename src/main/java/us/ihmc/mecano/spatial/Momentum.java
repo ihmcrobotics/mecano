@@ -34,7 +34,7 @@ import us.ihmc.mecano.tools.MecanoIOTools;
  *     \ linearX  /
  * </pre>
  * </p>
- * 
+ *
  * @author Twan Koolen
  * @author Sylvain Bertrand
  */

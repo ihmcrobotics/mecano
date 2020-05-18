@@ -7,7 +7,7 @@ import org.ejml.data.DenseMatrix64F;
  * <p>
  * A 6-DoF joint can be used to represent a 3D floating joint.
  * </p>
- * 
+ *
  * @author Robert Griffin
  * @author Sylvain Bertrand
  */

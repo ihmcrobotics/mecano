@@ -38,7 +38,7 @@ import us.ihmc.mecano.spatial.interfaces.TwistReadOnly;
  * When both acceleration and velocity information are available it is preferred to perform a
  * double-integration from the acceleration to obtain a better estimate of the joint configuration.
  * </p>
- * 
+ *
  * @author Sylvain Bertrand
  */
 public class MultiBodySystemStateIntegrator
@@ -62,7 +62,7 @@ public class MultiBodySystemStateIntegrator
    /**
     * Creates a new integrator and initializes the internal time increment to {@link Double#NaN}. It
     * has to be set before this integrator can be used.
-    * 
+    *
     * @see #setIntegrationDT(double)
     */
    public MultiBodySystemStateIntegrator()
@@ -72,7 +72,7 @@ public class MultiBodySystemStateIntegrator
 
    /**
     * Creates a new integrator and initializes the internal time increment to the given {@code dt}.
-    * 
+    *
     * @param dt the time increment to use for the integration.
     */
    public MultiBodySystemStateIntegrator(double dt)
@@ -82,7 +82,7 @@ public class MultiBodySystemStateIntegrator
 
    /**
     * Changes the internal time increment to use for the integration.
-    * 
+    *
     * @param dt the new time increment.
     */
    public void setIntegrationDT(double dt)
@@ -93,7 +93,7 @@ public class MultiBodySystemStateIntegrator
 
    /**
     * Gets the time increment used to perform the integration.
-    * 
+    *
     * @return the current time increment used internally.
     */
    public double getIntegrationDT()
@@ -108,7 +108,7 @@ public class MultiBodySystemStateIntegrator
     * If the acceleration of each joint is available, it is preferable to use
     * {@link #doubleIntegrateFromAccelerationSubtree(RigidBodyBasics)}.
     * </p>
-    * 
+    *
     * @param rootBody the origin of the subtree to integrate the state of. The configuration of each
     *                 joint in the subtree is modified.
     */
@@ -134,7 +134,7 @@ public class MultiBodySystemStateIntegrator
     * If the acceleration of each joint is available, it is preferable to use
     * {@link #doubleIntegrateFromAcceleration(List)}.
     * </p>
-    * 
+    *
     * @param joints the list of the joints to integrate the state of. The configuration of each joint
     *               is modified.
     */
@@ -149,7 +149,7 @@ public class MultiBodySystemStateIntegrator
 
    /**
     * Integrates the given {@code joint}'s velocity to update its configuration.
-    * 
+    *
     * @param joint the joint to integrate the state of. The joint configuration is modified.
     */
    public void integrateFromVelocity(JointBasics joint)
@@ -168,7 +168,7 @@ public class MultiBodySystemStateIntegrator
 
    /**
     * Integrates the given {@code joint}'s velocity to update its configuration.
-    * 
+    *
     * @param joint the joint to integrate the state of. The joint configuration is modified.
     */
    public void integrateFromVelocity(FloatingJointBasics joint)
@@ -178,7 +178,7 @@ public class MultiBodySystemStateIntegrator
 
    /**
     * Integrates the given {@code joint}'s velocity to update its configuration.
-    * 
+    *
     * @param joint the joint to integrate the state of. The joint configuration is modified.
     */
    public void integrateFromVelocity(OneDoFJointBasics joint)
@@ -191,7 +191,7 @@ public class MultiBodySystemStateIntegrator
 
    /**
     * Integrates the given {@code joint}'s velocity to update its configuration.
-    * 
+    *
     * @param joint the joint to integrate the state of. The joint configuration is modified.
     */
    public void integrateFromVelocity(SphericalJointBasics joint)
@@ -203,12 +203,12 @@ public class MultiBodySystemStateIntegrator
     * Integrates the given {@code twist} to update the given {@code poseToIntegrate}.
     * <p>
     * Pseudo-code:
-    * 
+    *
     * <pre>
     * poseToIntegrate += dt * twist
     * </pre>
     * </p>
-    * 
+    *
     * @param twist           the angular and linear velocity to integrate. Not modified.
     * @param poseToIntegrate the pose to update. Modified.
     * @throws ReferenceFrameMismatchException if the given {@code twist} is not expressed in the frame
@@ -223,12 +223,12 @@ public class MultiBodySystemStateIntegrator
     * Integrates the given {@code twist} to estimate the {@code finalPose}.
     * <p>
     * Pseudo-code:
-    * 
+    *
     * <pre>
     * finalPose = initialPose + dt * twist
     * </pre>
     * </p>
-    * 
+    *
     * @param twist       the angular and linear velocity to integrate. Not modified.
     * @param initialPose the initial pose to append the integrated twist to. Not modified.
     * @param finalPose   the estimated pose after integration. Modified.
@@ -258,12 +258,12 @@ public class MultiBodySystemStateIntegrator
     * orientation.
     * <p>
     * Pseudo-code:
-    * 
+    *
     * <pre>
     * orientationToIntegrate += dt * angularVelocity
     * </pre>
     * </p>
-    * 
+    *
     * @param angularVelocity        the angular velocity to integrate. Not modified.
     * @param orientationToIntegrate the orientation to update. Modified.
     */
@@ -278,12 +278,12 @@ public class MultiBodySystemStateIntegrator
     * {@code initialOrientation}.
     * <p>
     * Pseudo-code:
-    * 
+    *
     * <pre>
     * finalOrientation = initialOrientation + dt * angularVelocity
     * </pre>
     * </p>
-    * 
+    *
     * @param angularVelocity    the angular velocity to integrate. Not modified.
     * @param initialOrientation the initial orientation to append the integrated angular velocity to.
     *                           Not modified.
@@ -302,12 +302,12 @@ public class MultiBodySystemStateIntegrator
     * given velocity is expected to be expressed in the local frame described by the given orientation.
     * <p>
     * Pseudo-code:
-    * 
+    *
     * <pre>
     * positionToIntegrate += orientation * dt * linearVelocity
     * </pre>
     * </p>
-    * 
+    *
     * @param orientation         the orientation describing the frame in which the velocity is
     *                            expressed. If equal to {@code null}, the orientation is assumed to be
     *                            identity. Not modified.
@@ -324,12 +324,12 @@ public class MultiBodySystemStateIntegrator
     * velocity is expected to be expressed in the local frame described by the given orientation.
     * <p>
     * Pseudo-code:
-    * 
+    *
     * <pre>
     * finalPosition = initialPosition + orientation * dt * linearVelocity
     * </pre>
     * </p>
-    * 
+    *
     * @param orientation     the orientation describing the frame in which the velocity is expressed.
     *                        If equal to {@code null}, the orientation is assumed to be identity. Not
     *                        modified.
@@ -350,12 +350,12 @@ public class MultiBodySystemStateIntegrator
     * Integrates the given {@code velocity} to compute the next position.
     * <p>
     * Pseudo-code:
-    * 
+    *
     * <pre>
     * finalPosition = initialPosition + dt * velocity
     * </pre>
     * </p>
-    * 
+    *
     * @param velocity        the velocity to integrate.
     * @param initialPosition the initial position to add the integrated velocity to.
     * @return the final position.
@@ -368,7 +368,7 @@ public class MultiBodySystemStateIntegrator
    /**
     * Recursively navigates the subtree that starts at the given {@code rootBody} and integrates each
     * joint acceleration and velocity to update their respective velocity and configuration.
-    * 
+    *
     * @param rootBody the origin of the subtree to integrate the state of. The configuration of each
     *                 joint in the subtree is modified.
     */
@@ -390,7 +390,7 @@ public class MultiBodySystemStateIntegrator
    /**
     * Iterates through the given {@code joints} and integrates each joint acceleration and velocity to
     * update their respective velocity and configuration.
-    * 
+    *
     * @param joints the list of the joints to integrate the state of. The configuration of each joint
     *               is modified.
     */
@@ -406,7 +406,7 @@ public class MultiBodySystemStateIntegrator
    /**
     * Integrates the given {@code joint}'s acceleration and velocity to update its velocity and
     * configuration.
-    * 
+    *
     * @param joint the joint to integrate the state of. The joint configuration is modified.
     */
    public void doubleIntegrateFromAcceleration(JointBasics joint)
@@ -426,7 +426,7 @@ public class MultiBodySystemStateIntegrator
    /**
     * Integrates the given {@code joint}'s acceleration and velocity to update its velocity and
     * configuration.
-    * 
+    *
     * @param joint the joint to integrate the state of. The joint configuration is modified.
     */
    public void doubleIntegrateFromAcceleration(FloatingJointBasics joint)
@@ -437,7 +437,7 @@ public class MultiBodySystemStateIntegrator
    /**
     * Integrates the given {@code joint}'s acceleration and velocity to update its velocity and
     * configuration.
-    * 
+    *
     * @param joint the joint to integrate the state of. The joint configuration is modified.
     */
    public void doubleIntegrateFromAcceleration(OneDoFJointBasics joint)
@@ -453,7 +453,7 @@ public class MultiBodySystemStateIntegrator
    /**
     * Integrates the given {@code joint}'s acceleration and velocity to update its velocity and
     * configuration.
-    * 
+    *
     * @param joint the joint to integrate the state of. The joint configuration is modified.
     */
    public void doubleIntegrateFromAcceleration(SphericalJointBasics joint)
@@ -466,13 +466,13 @@ public class MultiBodySystemStateIntegrator
     * {@code poseToIntegrate} and {@code twistToIntegrate}.
     * <p>
     * Pseudo-code:
-    * 
+    *
     * <pre>
     * poseToIntegrate += 0.5 * dt * dt * spatialAcceleration + dt * twistToIntegrate
     * twistToIntegrate += dt * spatialAcceleration
     * </pre>
     * </p>
-    * 
+    *
     * @param spatialAcceleration the angular and linear acceleration to integrate. Modified.
     * @param twistToIntegrate    the angular and linear velocity to integrate and update. Modified.
     * @param poseToIntegrate     the pose to update. Modified.
@@ -492,13 +492,13 @@ public class MultiBodySystemStateIntegrator
     * {@code finalPose} and {@code finalTwist}.
     * <p>
     * Pseudo-code:
-    * 
+    *
     * <pre>
     * poseToIntegrate += 0.5 * dt * dt * spatialAcceleration + dt * twistToIntegrate
     * twistToIntegrate += dt * spatialAcceleration
     * </pre>
     * </p>
-    * 
+    *
     * @param spatialAcceleration the angular and linear acceleration to integrate. Modified.
     * @param initialTwist        the initial angular and linear velocity to integrate. Not modified.
     * @param initialPose         the initial pose to append the integrated term to. Not modified.
@@ -574,13 +574,13 @@ public class MultiBodySystemStateIntegrator
     * orientation.
     * <p>
     * Pseudo-code:
-    * 
+    *
     * <pre>
     * orientationToIntegrate += 0.5 * dt * dt * angularAcceleration + dt * angularVelocityToIntegrate
     * angularVelocityToIntegrate += dt * spatialAcceleration
     * </pre>
     * </p>
-    * 
+    *
     * @param angularAcceleration        the angular acceleration to integrate. Not modified.
     * @param angularVelocityToIntegrate the angular velocity to integrate and update. Modified.
     * @param orientationToIntegrate     the orientation to update. Modified.
@@ -597,13 +597,13 @@ public class MultiBodySystemStateIntegrator
     * {@code initialOrientation}.
     * <p>
     * Pseudo-code:
-    * 
+    *
     * <pre>
     * orientationToIntegrate += 0.5 * dt * dt * angularAcceleration + dt * angularVelocityToIntegrate
     * angularVelocityToIntegrate += dt * spatialAcceleration
     * </pre>
     * </p>
-    * 
+    *
     * @param angularAcceleration    the angular acceleration to integrate. Not modified.
     * @param initialAngularVelocity the angular velocity to integrate. Not modified.
     * @param initialOrientation     the initial orientation to append the integrated term to. Not
@@ -635,13 +635,13 @@ public class MultiBodySystemStateIntegrator
     * velocity is expected to be expressed in the local frame described by the given orientation.
     * <p>
     * Pseudo-code:
-    * 
+    *
     * <pre>
     * positionToIntegrate += orientation * (0.5 * dt * dt * linearAcceleration + dt * linearVelocityToIntegrate)
     * linearVelocityToIntegrate += dt * linearAcceleration
     * </pre>
     * </p>
-    * 
+    *
     * @param orientation               the orientation describing the frame in which the acceleration
     *                                  and velocity are expressed. If equal to {@code null}, the
     *                                  orientation is assumed to be identity. Not modified.
@@ -651,6 +651,7 @@ public class MultiBodySystemStateIntegrator
     * @deprecated This integration method is inaccurate and does not account for the interdependency
     *             between angular and linear states properly.
     */
+   @Deprecated
    public void doubleIntegrate(Orientation3DReadOnly orientation, Vector3DReadOnly linearAcceleration, Vector3DBasics linearVelocityToIntegrate,
                                Tuple3DBasics positionToIntegrate)
    {
@@ -663,13 +664,13 @@ public class MultiBodySystemStateIntegrator
     * expected to be expressed in the local frame described by the given orientation.
     * <p>
     * Pseudo-code:
-    * 
+    *
     * <pre>
     * finalPosition = initialPosition + orientation * (0.5 * dt * dt * linearAcceleration + dt * initialLinearVelocity)
     * finalLinearVelocity = initialLinearVelocity + dt * linearAcceleration
     * </pre>
     * </p>
-    * 
+    *
     * @param orientation           the orientation describing the frame in which the velocity is
     *                              expressed. If equal to {@code null}, the orientation is assumed to
     *                              be identity. Not modified.
@@ -681,6 +682,7 @@ public class MultiBodySystemStateIntegrator
     * @deprecated This integration method is inaccurate and does not account for the interdependency
     *             between angular and linear states properly.
     */
+   @Deprecated
    public void doubleIntegrate(Orientation3DReadOnly orientation, Vector3DReadOnly linearAcceleration, Vector3DReadOnly initialLinearVelocity,
                                Tuple3DReadOnly initialPosition, Vector3DBasics finalLinearVelocity, Tuple3DBasics finalPosition)
    {
@@ -704,12 +706,12 @@ public class MultiBodySystemStateIntegrator
     * Integrates the given {@code acceleration} and {@code velocity} to compute the next position.
     * <p>
     * Pseudo-code:
-    * 
+    *
     * <pre>
     * finalPosition = initialPosition + 0.5 * dt * dt + acceleration + dt * initialVelocity
     * </pre>
     * </p>
-    * 
+    *
     * @param acceleration    the acceleration to integrate.
     * @param initialVelocity the velocity to integrate.
     * @param initialPosition the initial position to add the integrated term to.
@@ -724,12 +726,12 @@ public class MultiBodySystemStateIntegrator
     * Integrates the given {@code acceleration} to compute the next velocity.
     * <p>
     * Pseudo-code:
-    * 
+    *
     * <pre>
     * finalVelocity = initialVelocity + dt * acceleration
     * </pre>
     * </p>
-    * 
+    *
     * @param acceleration    the acceleration to integrate.
     * @param initialVelocity the initial velocity to add the integrated acceleration to.
     * @return the final velocity.

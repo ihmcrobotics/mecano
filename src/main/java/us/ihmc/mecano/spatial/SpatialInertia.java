@@ -23,7 +23,7 @@ import us.ihmc.mecano.tools.MecanoTools;
  * expressed. When the frame's origin coincides with the center of mass position and that its axes
  * are aligned with the principal directions of the inertia ellipsoid, the spatial inertia matrix
  * takes the following form:
- * 
+ *
  * <pre>
  *     / J<sub>x,x</sub> 0   0   0 0 0 \
  *     | 0   J<sub>y,y</sub> 0   0 0 0 |
@@ -32,12 +32,12 @@ import us.ihmc.mecano.tools.MecanoTools;
  *     | 0   0   0   0 m 0 |
  *     \ 0   0   0   0 0 m /
  * </pre>
- * 
+ *
  * where <tt>m</tt> is the total mass, and <tt>J<sub>x,x</sub></tt>, <tt>J<sub>y,y</sub></tt>, and
  * <tt>J<sub>z,z</sub></tt> are the moments of inertia around the axes x, y, and z. <br>
  * When the frame in which the inertia is expressed is arbitrary, the spatial inertia takes the
  * following general form:
- * 
+ *
  * <pre>
  *     / J<sub>x,x</sub> J<sub>x,y</sub> J<sub>x,z</sub>   0 -mz  my \
  *     | J<sub>x,y</sub> J<sub>y,y</sub> J<sub>y,z</sub>  mz   0 -mx |
@@ -46,7 +46,7 @@ import us.ihmc.mecano.tools.MecanoTools;
  *     | -mz   0  mx   0   m   0 |
  *     \  my -mx   0   0   0   m /
  * </pre>
- * 
+ *
  * @author Twan Koolen
  * @author Sylvain Bertrand
  */
@@ -87,7 +87,7 @@ public class SpatialInertia implements SpatialInertiaBasics, GeometryObject<Spat
    /**
     * Creates a new spatial inertia matrix with its components set to zero and initializes its
     * reference frames.
-    * 
+    *
     * @param bodyFrame        what we are specifying the spatial inertia of.
     * @param expressedInFrame in which reference frame the spatial inertia is expressed.
     */
@@ -121,7 +121,7 @@ public class SpatialInertia implements SpatialInertiaBasics, GeometryObject<Spat
     * {@code expressedInFrame} and that the axes of the given {@code expressedInFrame} are aligned with
     * the principal axes of the inertia ellipsoid.
     * </p>
-    * 
+    *
     * @param bodyFrame        what we are specifying the spatial inertia of.
     * @param expressedInFrame in which reference frame the spatial inertia is expressed.
     * @param Ixx              the moment of inertia around the x-axis of the given
@@ -139,7 +139,7 @@ public class SpatialInertia implements SpatialInertiaBasics, GeometryObject<Spat
 
    /**
     * Creates a new spatial inertia matrix and initializes its components and reference frames.
-    * 
+    *
     * @param bodyFrame          what we are specifying the spatial inertia of.
     * @param expressedInFrame   in which reference frame the spatial inertia is expressed.
     * @param momentOfInertia    the moment of inertia of the body expressed in
@@ -335,7 +335,7 @@ public class SpatialInertia implements SpatialInertiaBasics, GeometryObject<Spat
     * moment of inertia of both spatial inertia matrices. If any of these comparisons fails, this
     * method returns {@code false}.
     * </p>
-    * 
+    *
     * @param other   the other spatial inertia matrix to compare against this. Not modified.
     * @param epsilon the tolerance to use.
     * @return {@code true} if the two spatial inertia matrices are considered equal, {@code false}
@@ -389,7 +389,7 @@ public class SpatialInertia implements SpatialInertiaBasics, GeometryObject<Spat
 
    /**
     * Provides a {@code String} representation of this spatial inertia matrix as follows:<br>
-    * 
+    *
     * <pre>
     * Spatial inertia of bodyFrame expressed in World:
     * / 0.253,  0.000,  0.000,  0.000,  0.554, -0.247 \
@@ -399,7 +399,7 @@ public class SpatialInertia implements SpatialInertiaBasics, GeometryObject<Spat
     * | 0.554,  0.000, -0.387,  0.000,  0.773,  0.000 |
     * \-0.247,  0.387,  0.000,  0.000,  0.000,  0.773 /
     * </pre>
-    * 
+    *
     * @return the {@code String} representing this spatial inertia matrix.
     */
    @Override

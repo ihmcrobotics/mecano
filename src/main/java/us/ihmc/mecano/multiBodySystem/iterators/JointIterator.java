@@ -17,7 +17,7 @@ import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyReadOnly;
  * This iterator can be used to iterate through the all the joints of the subtree that starts at
  * {@code root}.
  * </p>
- * 
+ *
  * @author Sylvain Bertrand
  * @param <J> the type of the {@code Iterable}.
  */
@@ -29,7 +29,7 @@ public class JointIterator<J extends JointReadOnly> implements Iterator<J>
 
    /**
     * Creates a new iterator for multiple subtrees.
-    * 
+    *
     * @param filteringClass the class of the type of joint to iterate through. If a joint is not an
     *                       instance of the {@code filteringClass}, then it will not be part of the
     *                       iteration.
@@ -51,7 +51,7 @@ public class JointIterator<J extends JointReadOnly> implements Iterator<J>
 
    /**
     * Creates a new iterator for multiple subtrees.
-    * 
+    *
     * @param filteringClass the class of the type of joint to iterate through. If a joint is not an
     *                       instance of the {@code filteringClass}, then it will not be part of the
     *                       iteration.

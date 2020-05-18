@@ -131,7 +131,7 @@ public interface MultiBodySystemBasics extends MultiBodySystemReadOnly
     * <p>
     * The resulting root body and joints to ignore are automatically evaluated.
     * </p>
-    * 
+    *
     * @param jointsToConsider the joints to consider. Not modified.
     * @return the new input.
     */
@@ -145,7 +145,7 @@ public interface MultiBodySystemBasics extends MultiBodySystemReadOnly
     * <p>
     * The resulting root body and joints to ignore are automatically evaluated.
     * </p>
-    * 
+    *
     * @param jointsToConsider the joints to consider. Not modified.
     * @return the new input.
     */
@@ -198,7 +198,7 @@ public interface MultiBodySystemBasics extends MultiBodySystemReadOnly
     * A joint is ignored if it is in the given list {@code jointsToIgnore} or it is a descendant of
     * another joint to ignore.
     * </p>
-    * 
+    *
     * @param rootBody       the supporting body of the subtree to collect joints from. Not modified.
     * @param jointsToIgnore the list of joints to ignore. Not modified.
     * @return the list of joints to consider.
@@ -212,7 +212,7 @@ public interface MultiBodySystemBasics extends MultiBodySystemReadOnly
    /**
     * Performs a deep copy of {@code original}, preserving naming, root body, and the joints to ignore.
     * The clone is attached to the given {@code clonerootFrame}.
-    * 
+    *
     * @param original       the multi-body system to clone. Not modified.
     * @param cloneRootFrame the root frame to which the clone system is attached.
     * @return the clone.

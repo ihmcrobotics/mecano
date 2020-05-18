@@ -19,7 +19,7 @@ import us.ihmc.mecano.spatial.interfaces.SpatialInertiaReadOnly;
  * This class gathers notably the physical properties of the link and its position in the system,
  * i.e. its parent and children joints.
  * </p>
- * 
+ *
  * @author Twan Koolen
  * @author Sylvain Bertrand
  */
@@ -132,7 +132,7 @@ public interface RigidBodyReadOnly
     * <p>
     * This method generates garbage.
     * </p>
-    * 
+    *
     * @return the new subtree iterable.
     * @see RigidBodyIterable
     */
@@ -147,13 +147,13 @@ public interface RigidBodyReadOnly
     * <p>
     * This method generates garbage.
     * </p>
-    * 
+    *
     * @return the new joint subtree iterable.
     * @see JointIterable
     */
    default Iterable<? extends JointReadOnly> childrenSubtreeIterable()
    {
-      return new JointIterable<>(JointReadOnly.class, null, this.getChildrenJoints());
+      return new JointIterable<>(JointReadOnly.class, null, getChildrenJoints());
    }
 
    /**
@@ -166,7 +166,7 @@ public interface RigidBodyReadOnly
     * <p>
     * This method generates garbage.
     * </p>
-    * 
+    *
     * @return the new subtree stream.
     * @see SubtreeStreams
     */
@@ -185,7 +185,7 @@ public interface RigidBodyReadOnly
     * <p>
     * This method generates garbage.
     * </p>
-    * 
+    *
     * @return the new subtree list.
     */
    default List<? extends RigidBodyReadOnly> subtreeList()
@@ -203,7 +203,7 @@ public interface RigidBodyReadOnly
     * <p>
     * This method generates garbage.
     * </p>
-    * 
+    *
     * @return the new subtree array.
     */
    default RigidBodyReadOnly[] subtreeArray()
@@ -220,7 +220,7 @@ public interface RigidBodyReadOnly
     * This name ID is used to compute this rigid-body {@link #hashCode()} and can be used for the
     * {@link #equals(Object)}.
     * </p>
-    * 
+    *
     * @return the identification name for this rigid-body.
     */
    String getNameId();

@@ -38,7 +38,7 @@ public class YoFixedFrameSpatialVector implements FixedFrameSpatialVectorBasics
     * <p>
     * Note that the reference frame is final.
     * </p>
-    * 
+    *
     * @param namePrefix       a unique name string to use as the prefix for child variable names.
     * @param expressedInFrame in which reference frame the spatial vector is expressed.
     * @param registry         the registry to register child variables to.
@@ -53,7 +53,7 @@ public class YoFixedFrameSpatialVector implements FixedFrameSpatialVectorBasics
     * <p>
     * Note that the reference frame is final.
     * </p>
-    * 
+    *
     * @param namePrefix       a unique name string to use as the prefix for child variable names.
     * @param nameSuffix       a string to use as the suffix for child variable names.
     * @param expressedInFrame in which reference frame the spatial vector is expressed.
@@ -71,7 +71,7 @@ public class YoFixedFrameSpatialVector implements FixedFrameSpatialVectorBasics
     * <p>
     * Note that the reference frame is final.
     * </p>
-    * 
+    *
     * @param angularPart the vector to use for the angular part.
     * @param linearPart  the vector to use for the linear part.
     */

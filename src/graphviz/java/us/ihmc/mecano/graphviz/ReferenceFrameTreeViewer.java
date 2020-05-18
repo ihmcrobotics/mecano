@@ -1,6 +1,7 @@
 package us.ihmc.mecano.graphviz;
 
-import static guru.nidi.graphviz.model.Factory.*;
+import static guru.nidi.graphviz.model.Factory.mutGraph;
+import static guru.nidi.graphviz.model.Factory.mutNode;
 
 import java.io.File;
 import java.io.IOException;
@@ -22,7 +23,7 @@ import us.ihmc.euclid.transform.RigidBodyTransform;
 /**
  * Tool used to create a graphical representation of a tree of reference frame as a block diagram
  * saved into a file.
- * 
+ *
  * @author Sylvain Bertrand
  */
 public class ReferenceFrameTreeViewer
@@ -35,7 +36,7 @@ public class ReferenceFrameTreeViewer
    /**
     * Creates a new viewer for visualizing the frame subtree starting off the given
     * {@code rootFrameToView}.
-    * 
+    *
     * @param rootFrameToView the origin of the subtree to visualize.
     */
    public ReferenceFrameTreeViewer(ReferenceFrame rootFrameToView)
@@ -46,7 +47,7 @@ public class ReferenceFrameTreeViewer
 
    /**
     * Registers a custom label provider to display addition information about each frame.
-    * 
+    *
     * @param labelProvider the custom label provider.
     * @return {@code this} for chaining operations.
     */
@@ -58,7 +59,7 @@ public class ReferenceFrameTreeViewer
 
    /**
     * Adds information about the frame's transform to parent.
-    * 
+    *
     * @return {@code this} for chaining operations.
     */
    public ReferenceFrameTreeViewer addTransformToParentLabel()
@@ -74,7 +75,7 @@ public class ReferenceFrameTreeViewer
 
    /**
     * Sets the image format to use.
-    * 
+    *
     * @param format default value {@code Format.SVG}.
     * @return {@code this} for chaining operations.
     */
@@ -86,7 +87,7 @@ public class ReferenceFrameTreeViewer
 
    /**
     * Adds a filter for selecting the reference frame to be rendered.
-    * 
+    *
     * @param filter the new filter.
     * @return {@code this} for chaining operations.
     */
@@ -98,7 +99,7 @@ public class ReferenceFrameTreeViewer
 
    /**
     * Creates the graph and output the block diagram into a file.
-    * 
+    *
     * @param outputFileName the path to the file to create. The file extension is added internally.
     */
    public void view(String outputFileName)
@@ -155,11 +156,11 @@ public class ReferenceFrameTreeViewer
 
    /**
     * Gets a representative {@code String} of the given values as follows:
-    * 
+    *
     * <pre>
     * ( 0.123, -0.480,  1.457)
     * </pre>
-    * 
+    *
     * @param values the values to get the string of.
     * @return the representative string.
     */
@@ -171,11 +172,11 @@ public class ReferenceFrameTreeViewer
    /**
     * Gets a representative {@code String} of the given orientation using a yaw-pitch-roll
     * representation as follows:
-    * 
+    *
     * <pre>
     * (y,p,r) = ( 0.123, -0.480,  1.457)
     * </pre>
-    * 
+    *
     * @param orientation the orientation to get the string of. Not modified.
     * @return the representative string.
     */
@@ -187,12 +188,12 @@ public class ReferenceFrameTreeViewer
    /**
     * Gets a representative {@code String} of the given transform using a yaw-pitch-roll representation
     * for the orientation part as follows:
-    * 
+    *
     * <pre>
     * (x,y,z) = ( 0.123, -0.480,  1.457)
     * (y,p,r) = ( 0.123, -0.480,  1.457)
     * </pre>
-    * 
+    *
     * @param transform the transform to get the string of. Not modified.
     * @return the representative string.
     */
@@ -208,14 +209,14 @@ public class ReferenceFrameTreeViewer
     * Multiple {@code LabelProvider} can be registered to a viewer to display more information about
     * reference frames.
     * </p>
-    * 
+    *
     * @author Sylvain Bertrand
     */
    public static interface LabelProvider
    {
       /**
        * Gets the label to display for the given reference frame.
-       * 
+       *
        * @param frame the frame to make the label from.
        * @return the label to display in the graphical node.
        */
@@ -230,7 +231,7 @@ public class ReferenceFrameTreeViewer
     * {@link #addLabelProvider(LabelProvider)} and {@link #setFilter(Predicate)}, and view it using
     * {@link #view(String)}.
     * </p>
-    * 
+    *
     * @param rootFrameToView the root of the subtree to view.
     */
    public static void viewSimpleReferenceFrameTree(ReferenceFrame rootFrameToView)
@@ -246,7 +247,7 @@ public class ReferenceFrameTreeViewer
     * {@link #addLabelProvider(LabelProvider)} and {@link #setFilter(Predicate)}, and view it using
     * {@link #view(String)}.
     * </p>
-    * 
+    *
     * @param rootFrameToView the root of the subtree to view.
     */
    public static void viewReferenceFrameTree(ReferenceFrame rootFrameToView)
@@ -256,7 +257,7 @@ public class ReferenceFrameTreeViewer
 
    /**
     * Example of how to use a reference frame viewer.
-    * 
+    *
     * @param args the arguments are not used in this example.
     */
    public static void main(String[] args)

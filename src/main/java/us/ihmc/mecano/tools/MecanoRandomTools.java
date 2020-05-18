@@ -17,7 +17,14 @@ import us.ihmc.euclid.tools.EuclidCoreTools;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.mecano.frames.MovingReferenceFrame;
-import us.ihmc.mecano.spatial.*;
+import us.ihmc.mecano.spatial.Momentum;
+import us.ihmc.mecano.spatial.SpatialAcceleration;
+import us.ihmc.mecano.spatial.SpatialForce;
+import us.ihmc.mecano.spatial.SpatialImpulse;
+import us.ihmc.mecano.spatial.SpatialInertia;
+import us.ihmc.mecano.spatial.SpatialVector;
+import us.ihmc.mecano.spatial.Twist;
+import us.ihmc.mecano.spatial.Wrench;
 
 /**
  * This class provides random generators to generate random spatial vectors.
@@ -150,7 +157,7 @@ public class MecanoRandomTools
    /**
     * Creates a tree structure of 20 random moving reference frames start off
     * {@link ReferenceFrame#getWorldFrame()}.
-    * 
+    *
     * @param random          the random generator to use.
     * @param use2DTransforms whether to use a 2D or 3D rotation for the transform used to create the
     *                        random frames.
@@ -240,7 +247,7 @@ public class MecanoRandomTools
 
    /**
     * Generates an array filled with random vectors with fixed length.
-    * 
+    *
     * @param random        the random generator to use.
     * @param arrayLength   the length of the array to generate.
     * @param vectorsLength the length each random vector should have.
@@ -579,7 +586,7 @@ public class MecanoRandomTools
 
    /**
     * Generates a random symmetric matrix 3D which eigen values are all real and strictly positive.
-    * 
+    *
     * @param random the random generator to use.
     * @return the random symmetric and positive definite matrix.
     */
@@ -590,7 +597,7 @@ public class MecanoRandomTools
 
    /**
     * Generates a random symmetric matrix 3D which eigen values are all real and strictly positive.
-    * 
+    *
     * @param random            the random generator to use.
     * @param minDiagonal       the minimum value for each element on the diagonal.
     * @param maxDiagonal       the maximum value for each element on the diagonal.

@@ -1,6 +1,11 @@
 package us.ihmc.mecano.tools;
 
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertArrayEquals;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -79,13 +84,13 @@ public class MultiBodySystemToolsTest
          MultiBodySystemTools.collectJointPath(start, end, actualPathBasics);
          assertEquals(expectedPath, actualPathBasics);
          List<JointReadOnly> actualPathReadOnly = new ArrayList<>();
-         MultiBodySystemTools.collectJointPath((RigidBodyReadOnly) start, (RigidBodyReadOnly) end, actualPathReadOnly);
+         MultiBodySystemTools.collectJointPath(start, end, actualPathReadOnly);
          assertEquals(expectedPath, actualPathReadOnly);
 
          Collections.reverse(expectedPath);
          MultiBodySystemTools.collectJointPath(end, start, actualPathBasics);
          assertEquals(expectedPath, actualPathBasics);
-         MultiBodySystemTools.collectJointPath((RigidBodyReadOnly) end, (RigidBodyReadOnly) start, actualPathReadOnly);
+         MultiBodySystemTools.collectJointPath(end, start, actualPathReadOnly);
          assertEquals(expectedPath, actualPathReadOnly);
       }
 
@@ -116,13 +121,13 @@ public class MultiBodySystemToolsTest
          MultiBodySystemTools.collectJointPath(start, end, actualPath);
          assertEquals(expectedPath, actualPath);
          List<JointReadOnly> actualPathReadOnly = new ArrayList<>();
-         MultiBodySystemTools.collectJointPath((RigidBodyReadOnly) start, (RigidBodyReadOnly) end, actualPathReadOnly);
+         MultiBodySystemTools.collectJointPath(start, end, actualPathReadOnly);
          assertEquals(expectedPath, actualPathReadOnly);
 
          Collections.reverse(expectedPath);
          MultiBodySystemTools.collectJointPath(end, start, actualPath);
          assertEquals(expectedPath, actualPath);
-         MultiBodySystemTools.collectJointPath((RigidBodyReadOnly) end, (RigidBodyReadOnly) start, actualPathReadOnly);
+         MultiBodySystemTools.collectJointPath(end, start, actualPathReadOnly);
          assertEquals(expectedPath, actualPathReadOnly);
       }
 
@@ -152,13 +157,13 @@ public class MultiBodySystemToolsTest
             MultiBodySystemTools.collectJointPath(firstBody, secondBody, actualPath);
             assertEquals(expectedPath, actualPath);
             List<JointReadOnly> actualPathReadOnly = new ArrayList<>();
-            MultiBodySystemTools.collectJointPath((RigidBodyReadOnly) firstBody, (RigidBodyReadOnly) secondBody, actualPathReadOnly);
+            MultiBodySystemTools.collectJointPath(firstBody, secondBody, actualPathReadOnly);
             assertEquals(expectedPath, actualPathReadOnly);
 
             Collections.reverse(expectedPath);
             MultiBodySystemTools.collectJointPath(secondBody, firstBody, actualPath);
             assertEquals(expectedPath, actualPath);
-            MultiBodySystemTools.collectJointPath((RigidBodyReadOnly) secondBody, (RigidBodyReadOnly) firstBody, actualPathReadOnly);
+            MultiBodySystemTools.collectJointPath(secondBody, firstBody, actualPathReadOnly);
             assertEquals(expectedPath, actualPathReadOnly);
          }
       }
@@ -183,13 +188,13 @@ public class MultiBodySystemToolsTest
          MultiBodySystemTools.collectRigidBodyPath(start, end, actualPathBasics);
          assertEquals(expectedPath, actualPathBasics);
          List<RigidBodyReadOnly> actualPathReadOnly = new ArrayList<>();
-         MultiBodySystemTools.collectRigidBodyPath((RigidBodyReadOnly) start, (RigidBodyReadOnly) end, actualPathReadOnly);
+         MultiBodySystemTools.collectRigidBodyPath(start, end, actualPathReadOnly);
          assertEquals(expectedPath, actualPathReadOnly);
 
          Collections.reverse(expectedPath);
          MultiBodySystemTools.collectRigidBodyPath(end, start, actualPathBasics);
          assertEquals(expectedPath, actualPathBasics);
-         MultiBodySystemTools.collectRigidBodyPath((RigidBodyReadOnly) end, (RigidBodyReadOnly) start, actualPathReadOnly);
+         MultiBodySystemTools.collectRigidBodyPath(end, start, actualPathReadOnly);
          assertEquals(expectedPath, actualPathReadOnly);
       }
 
@@ -220,13 +225,13 @@ public class MultiBodySystemToolsTest
          MultiBodySystemTools.collectRigidBodyPath(start, end, actualPath);
          assertEquals(expectedPath, actualPath, "Iteration: " + i);
          List<RigidBodyReadOnly> actualPathReadOnly = new ArrayList<>();
-         MultiBodySystemTools.collectRigidBodyPath((RigidBodyReadOnly) start, (RigidBodyReadOnly) end, actualPathReadOnly);
+         MultiBodySystemTools.collectRigidBodyPath(start, end, actualPathReadOnly);
          assertEquals(expectedPath, actualPathReadOnly);
 
          Collections.reverse(expectedPath);
          MultiBodySystemTools.collectRigidBodyPath(end, start, actualPath);
          assertEquals(expectedPath, actualPath);
-         MultiBodySystemTools.collectRigidBodyPath((RigidBodyReadOnly) end, (RigidBodyReadOnly) start, actualPathReadOnly);
+         MultiBodySystemTools.collectRigidBodyPath(end, start, actualPathReadOnly);
          assertEquals(expectedPath, actualPathReadOnly);
       }
 
@@ -271,13 +276,13 @@ public class MultiBodySystemToolsTest
             MultiBodySystemTools.collectRigidBodyPath(firstBody, secondBody, actualPath);
             assertEquals(expectedPath, actualPath, "Iteration: " + i);
             List<RigidBodyReadOnly> actualPathReadOnly = new ArrayList<>();
-            MultiBodySystemTools.collectRigidBodyPath((RigidBodyReadOnly) firstBody, (RigidBodyReadOnly) secondBody, actualPathReadOnly);
+            MultiBodySystemTools.collectRigidBodyPath(firstBody, secondBody, actualPathReadOnly);
             assertEquals(expectedPath, actualPathReadOnly);
 
             Collections.reverse(expectedPath);
             MultiBodySystemTools.collectRigidBodyPath(secondBody, firstBody, actualPath);
             assertEquals(expectedPath, actualPath);
-            MultiBodySystemTools.collectRigidBodyPath((RigidBodyReadOnly) secondBody, (RigidBodyReadOnly) firstBody, actualPathReadOnly);
+            MultiBodySystemTools.collectRigidBodyPath(secondBody, firstBody, actualPathReadOnly);
             assertEquals(expectedPath, actualPathReadOnly);
          }
       }

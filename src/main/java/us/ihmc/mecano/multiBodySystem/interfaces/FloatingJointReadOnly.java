@@ -16,7 +16,7 @@ import us.ihmc.euclid.transform.RigidBodyTransform;
  * rotation. In this framework, the {@code PlanarJoint} can be used to represent a 2D floating joint
  * in the XZ-plane.
  * </p>
- * 
+ *
  * @author Sylvain Bertrand
  */
 public interface FloatingJointReadOnly extends JointReadOnly
@@ -24,7 +24,7 @@ public interface FloatingJointReadOnly extends JointReadOnly
    /**
     * Gets the read-only reference to the pose of this floating joint, i.e. the pose of the multi-body
     * system in world.
-    * 
+    *
     * @return this joint pose.
     */
    Pose3DReadOnly getJointPose();

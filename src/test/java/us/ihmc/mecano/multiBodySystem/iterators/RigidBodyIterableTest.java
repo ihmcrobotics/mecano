@@ -1,6 +1,6 @@
 package us.ihmc.mecano.multiBodySystem.iterators;
 
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.util.ArrayList;
 import java.util.Iterator;

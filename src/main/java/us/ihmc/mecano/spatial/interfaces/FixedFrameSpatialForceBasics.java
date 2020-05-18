@@ -183,7 +183,7 @@ public interface FixedFrameSpatialForceBasics extends SpatialForceReadOnly, Fixe
     * <li>R and P are the rotation and translation of the given transform.
     * </ul>
     * </p>
-    * 
+    *
     * @throws UnsupportedOperationException if the given transform is not a {@code RigidBodyTransform}.
     */
    @Override
@@ -213,7 +213,7 @@ public interface FixedFrameSpatialForceBasics extends SpatialForceReadOnly, Fixe
     * <li>R and P are the rotation and translation of the given transform.
     * </ul>
     * </p>
-    * 
+    *
     * @throws UnsupportedOperationException if the given transform is not a {@code RigidBodyTransform}.
     */
    @Override
@@ -243,7 +243,7 @@ public interface FixedFrameSpatialForceBasics extends SpatialForceReadOnly, Fixe
     * <li>R and P are the rotation and translation of the given transform.
     * </ul>
     * </p>
-    * 
+    *
     * @param transform the transform to use on this. Not modified.
     */
    default void applyTransform(RigidBodyTransformReadOnly transform)
@@ -275,7 +275,7 @@ public interface FixedFrameSpatialForceBasics extends SpatialForceReadOnly, Fixe
     * <li>R and P are the rotation and translation of the given transform.
     * </ul>
     * </p>
-    * 
+    *
     * @param transform the transform to use on this. Not modified.
     */
    default void applyInverseTransform(RigidBodyTransformReadOnly transform)

@@ -7,7 +7,7 @@ import us.ihmc.euclid.transform.RigidBodyTransform;
  * <p>
  * A prismatic joint is a joint has 1 degree of freedom of translation.
  * </p>
- * 
+ *
  * @author Twan Koolen
  * @author Sylvain Bertrand
  */

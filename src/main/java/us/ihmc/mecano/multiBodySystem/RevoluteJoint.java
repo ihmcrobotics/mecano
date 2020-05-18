@@ -16,7 +16,7 @@ import us.ihmc.mecano.tools.MecanoFactories.RevoluteJointTransformUpdater;
 
 /**
  * A {@code RevoluteJoint} is a joint has 1 degree of freedom of rotation.
- * 
+ *
  * @author Twan Koolen
  * @author Sylvain Bertrand
  */
@@ -34,7 +34,7 @@ public class RevoluteJoint extends OneDoFJoint implements RevoluteJointBasics
     * <p>
     * This constructor is typically used to create a root joint.
     * </p>
-    * 
+    *
     * @param name        the name for the new joint.
     * @param predecessor the rigid-body connected to and preceding this joint.
     * @param jointAxis   the axis around which this joint can rotate. Not modified.
@@ -46,7 +46,7 @@ public class RevoluteJoint extends OneDoFJoint implements RevoluteJointBasics
 
    /**
     * Creates a new revolute joint which has only a translation offset with respect to its parent.
-    * 
+    *
     * @param name        the name for the new joint.
     * @param predecessor the rigid-body connected to and preceding this joint.
     * @param jointOffset the offset in translation with respect to the frame after the parent joint.
@@ -60,7 +60,7 @@ public class RevoluteJoint extends OneDoFJoint implements RevoluteJointBasics
 
    /**
     * Creates a new revolute joint.
-    * 
+    *
     * @param name              the name for the new joint.
     * @param predecessor       the rigid-body connected to and preceding this joint.
     * @param transformToParent the transform to the frame after the parent joint. Not modified.

@@ -1,6 +1,10 @@
 package us.ihmc.mecano.spatial;
 
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.fail;
 
 import java.util.Random;
 
@@ -25,6 +29,7 @@ import us.ihmc.euclid.tools.EuclidCoreTestTools;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple3D.interfaces.Vector3DBasics;
+import us.ihmc.mecano.spatial.interfaces.SpatialVectorReadOnly;
 import us.ihmc.mecano.tools.MecanoRandomTools;
 import us.ihmc.mecano.tools.MecanoTestTools;
 
@@ -127,9 +132,9 @@ public class WrenchTest
    public void testConstructUsingMatrix()
    {
       Random random = new Random(167L);
-      DenseMatrix64F matrix = RandomMatrices.createRandom(Wrench.SIZE, 1, random);
+      DenseMatrix64F matrix = RandomMatrices.createRandom(SpatialVectorReadOnly.SIZE, 1, random);
       Wrench wrench = new Wrench(frameA, frameB, matrix);
-      DenseMatrix64F matrixBack = new DenseMatrix64F(Wrench.SIZE, 1);
+      DenseMatrix64F matrixBack = new DenseMatrix64F(SpatialVectorReadOnly.SIZE, 1);
       wrench.get(matrixBack);
       EjmlUnitTests.assertEquals(matrix, matrixBack, 0.0);
 
@@ -147,7 +152,7 @@ public class WrenchTest
       Assertions.assertThrows(RuntimeException.class, () ->
       {
          Random random = new Random(12342L);
-         DenseMatrix64F matrix = RandomMatrices.createRandom(Wrench.SIZE - 1, 1, random);
+         DenseMatrix64F matrix = RandomMatrices.createRandom(SpatialVectorReadOnly.SIZE - 1, 1, random);
          new Wrench(frameA, frameB, matrix);
       });
    }
@@ -182,7 +187,7 @@ public class WrenchTest
    {
       Assertions.assertThrows(RuntimeException.class, () ->
       {
-         new Wrench(frameA, frameB, new double[Wrench.SIZE - 1]);
+         new Wrench(frameA, frameB, new double[SpatialVectorReadOnly.SIZE - 1]);
       });
    }
 
@@ -212,8 +217,8 @@ public class WrenchTest
    public void testAdd()
    {
       Random random = new Random(187L);
-      Wrench wrench1 = new Wrench(frameA, frameB, RandomMatrices.createRandom(Wrench.SIZE, 1, random));
-      Wrench wrench2 = new Wrench(frameA, frameB, RandomMatrices.createRandom(Wrench.SIZE, 1, random));
+      Wrench wrench1 = new Wrench(frameA, frameB, RandomMatrices.createRandom(SpatialVectorReadOnly.SIZE, 1, random));
+      Wrench wrench2 = new Wrench(frameA, frameB, RandomMatrices.createRandom(SpatialVectorReadOnly.SIZE, 1, random));
       Wrench wrench3 = new Wrench(wrench1);
       wrench3.add(wrench2);
 
@@ -253,8 +258,8 @@ public class WrenchTest
    public void testSub()
    {
       Random random = new Random(187L);
-      Wrench wrench1 = new Wrench(frameA, frameB, RandomMatrices.createRandom(Wrench.SIZE, 1, random));
-      Wrench wrench2 = new Wrench(frameA, frameB, RandomMatrices.createRandom(Wrench.SIZE, 1, random));
+      Wrench wrench1 = new Wrench(frameA, frameB, RandomMatrices.createRandom(SpatialVectorReadOnly.SIZE, 1, random));
+      Wrench wrench2 = new Wrench(frameA, frameB, RandomMatrices.createRandom(SpatialVectorReadOnly.SIZE, 1, random));
       Wrench wrench3 = new Wrench(wrench1);
       wrench3.sub(wrench2);
 
@@ -317,8 +322,8 @@ public class WrenchTest
    public static void testDotProduct(ReferenceFrame frameA, ReferenceFrame frameB, ReferenceFrame frameC)
    {
       Random random = new Random(187L);
-      DenseMatrix64F twistMatrix = RandomMatrices.createRandom(Twist.SIZE, 1, random);
-      DenseMatrix64F wrenchMatrix = RandomMatrices.createRandom(Wrench.SIZE, 1, random);
+      DenseMatrix64F twistMatrix = RandomMatrices.createRandom(SpatialVectorReadOnly.SIZE, 1, random);
+      DenseMatrix64F wrenchMatrix = RandomMatrices.createRandom(SpatialVectorReadOnly.SIZE, 1, random);
       Twist twist = new Twist(frameA, frameB, frameC, twistMatrix);
       Wrench wrench = new Wrench(frameA, frameC, wrenchMatrix);
       DenseMatrix64F c = new DenseMatrix64F(1, 1);
@@ -364,11 +369,11 @@ public class WrenchTest
    public void testSetToZero()
    {
       Random random = new Random(71243L);
-      Wrench wrench = new Wrench(frameA, frameB, RandomMatrices.createRandom(Wrench.SIZE, 1, random));
+      Wrench wrench = new Wrench(frameA, frameB, RandomMatrices.createRandom(SpatialVectorReadOnly.SIZE, 1, random));
       wrench.setToZero(frameC, frameA);
       assertEquals(frameC, wrench.getBodyFrame());
       assertEquals(frameA, wrench.getReferenceFrame());
-      DenseMatrix64F matrix = RandomMatrices.createRandom(Wrench.SIZE, 1, random);
+      DenseMatrix64F matrix = RandomMatrices.createRandom(SpatialVectorReadOnly.SIZE, 1, random);
       double epsilon = 1e-12;
       assertTrue(NormOps.normP2(matrix) > epsilon);
       wrench.get(matrix);

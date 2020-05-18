@@ -67,7 +67,7 @@ public class YoFixedFrameTwist implements FixedFrameTwistBasics, GeometryObject<
     * <p>
     * Note that the reference frames are final.
     * </p>
-    * 
+    *
     * @param namePrefix       a unique name string to use as the prefix for child variable names.
     * @param bodyFrame        what we are specifying the twist of.
     * @param baseFrame        with respect to what we are specifying the twist.
@@ -84,7 +84,7 @@ public class YoFixedFrameTwist implements FixedFrameTwistBasics, GeometryObject<
     * <p>
     * Note that the reference frames are final.
     * </p>
-    * 
+    *
     * @param namePrefix       a unique name string to use as the prefix for child variable names.
     * @param nameSuffix       a string to use as the suffix for child variable names.
     * @param bodyFrame        what we are specifying the twist of.
@@ -103,7 +103,7 @@ public class YoFixedFrameTwist implements FixedFrameTwistBasics, GeometryObject<
     * <p>
     * Note that the reference frames are final.
     * </p>
-    * 
+    *
     * @param bodyFrame   what we are specifying the twist of.
     * @param baseFrame   with respect to what we are specifying the twist.
     * @param angularPart the vector to use for the angular part.
@@ -119,7 +119,7 @@ public class YoFixedFrameTwist implements FixedFrameTwistBasics, GeometryObject<
     * <p>
     * Note that the reference frames are final.
     * </p>
-    * 
+    *
     * @param bodyFrame     what we are specifying the twist of.
     * @param baseFrame     with respect to what we are specifying the twist.
     * @param spatialVector the spatial vector to use for holding data.

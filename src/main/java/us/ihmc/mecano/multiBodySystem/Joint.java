@@ -22,7 +22,7 @@ import us.ihmc.mecano.tools.MecanoFactories;
  * configuration of this joint. When the joint is at a "zero" configuration, these two reference
  * frames coincide.
  * </p>
- * 
+ *
  * @author Twan Koolen
  * @author Sylvain Bertrand
  */
@@ -65,7 +65,7 @@ public abstract class Joint implements JointBasics
     * <p>
     * Note that the {@link #beforeJointFrame} is set to {@code predecessor.getBodyFixedFrame()}.
     * </p>
-    * 
+    *
     * @param name        the name for the new joint.
     * @param predecessor the rigid-body connected to and preceding this joint.
     */
@@ -76,7 +76,7 @@ public abstract class Joint implements JointBasics
 
    /**
     * Creates the abstract layer for a new joint.
-    * 
+    *
     * @param name              the name for the new joint.
     * @param predecessor       the rigid-body connected to and preceding this joint.
     * @param transformToParent the transform to the frame after the parent joint. Not modified.

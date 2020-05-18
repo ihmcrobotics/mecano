@@ -28,7 +28,7 @@ import us.ihmc.euclid.referenceFrame.exceptions.ReferenceFrameMismatchException;
  *     \ linearX  /
  * </pre>
  * </p>
- * 
+ *
  * @author Twan Koolen
  * @author Sylvain Bertrand
  */
@@ -36,11 +36,11 @@ public interface FixedFrameMomentumBasics extends MomentumReadOnly, FixedFrameSp
 {
    /**
     * Sets this momentum to the product of the given inertia and twist:
-    * 
+    *
     * <pre>
     * h = I * T
     * </pre>
-    * 
+    *
     * @param spatialInertia the inertia to use for computing the momentum. Not modified.
     * @param twist          the twist to use for computing the momentum. Not modified.
     * @throws ReferenceFrameMismatchException if either argument is not expressed in the same reference

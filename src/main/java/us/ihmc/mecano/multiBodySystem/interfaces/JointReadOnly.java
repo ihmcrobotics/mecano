@@ -36,7 +36,7 @@ import us.ihmc.mecano.spatial.interfaces.WrenchReadOnly;
  * configuration of this joint. When the joint is at a "zero" configuration, these two reference
  * frames coincide.
  * </p>
- * 
+ *
  * @author Twan Koolen
  * @author Sylvain Bertrand
  */
@@ -51,7 +51,7 @@ public interface JointReadOnly
     * Returns the {@code RigidBody} that precedes this joint. In other words, the {@code RigidBody}
     * directly connected to this joint that sits between this joint and the root or that is the root of
     * this kinematics chain.
-    * 
+    *
     * @return the {@code predecessor} of this joint.
     */
    RigidBodyReadOnly getPredecessor();
@@ -60,7 +60,7 @@ public interface JointReadOnly
     * Returns the {@code RigidBody} that succeeds this joint. In other words, the {@code RigidBody}
     * directly connected to this joint that sits between this joint and the end-effector or that is the
     * end-effector of this kinematics chain.
-    * 
+    *
     * @return the {@code successor} of this joint.
     */
    RigidBodyReadOnly getSuccessor();
@@ -69,7 +69,7 @@ public interface JointReadOnly
     * Returns the the {@code MovingReferenceFrame} that is attached to the predecessor of this joint,
     * namely the {@code RigidBody} before this joint, and has its origin centered at the joint origin.
     * The pose of the {@code frameBeforeJoint} is independent from this joint motion.
-    * 
+    *
     * @return the {@code MovingReferenceFrame} located right before this joint.
     */
    MovingReferenceFrame getFrameBeforeJoint();
@@ -78,14 +78,14 @@ public interface JointReadOnly
     * Returns the the {@code MovingReferenceFrame} that is attached to the successor of this joint,
     * namely the {@code RigidBody} after this joint, and has its origin centered at the joint origin.
     * The pose of the {@code frameAfterJoint} will change as this joint moves.
-    * 
+    *
     * @return the {@code MovingReferenceFrame} located right after this joint.
     */
    MovingReferenceFrame getFrameAfterJoint();
 
    /**
     * Packs the configuration of this joint as a transform.
-    * 
+    *
     * @param jointConfigurationToPack transform in which the pose of the frame after joint expressed in
     *                                 the frame before joint is stored. Modified.
     */
@@ -99,7 +99,7 @@ public interface JointReadOnly
     * <li>{@code baseFrame} is {@code beforeJointFrame}.
     * <li>{@code expressedInFrame} is {@code afterJointFrame}.
     * </ul>
-    * 
+    *
     * @return the read-only reference of this joint twist.
     */
    TwistReadOnly getJointTwist();
@@ -114,7 +114,7 @@ public interface JointReadOnly
     * 0, 0, 0]<sup>T</sup> with {@code bodyFrame = frameAfterJoint},
     * {@code baseFrame = frameBeforeJoint}, and expressed in the predecessor body-fixed frame.
     * </p>
-    * 
+    *
     * @return the list of this joint unit-twists, one per degree of freedom.
     */
    List<TwistReadOnly> getUnitTwists();
@@ -126,7 +126,7 @@ public interface JointReadOnly
     * see {@link #getDegreesOfFreedom()}. The motion subspace is equivalent to the geometric Jacobian
     * of this joint only expressed in {@code frameAfterJoint}.
     * </p>
-    * 
+    *
     * @param matrixToPack the matrix used to store the motion subspace. It is reshaped to the proper
     *                     size. Modified.
     */
@@ -147,7 +147,7 @@ public interface JointReadOnly
     * <li>{@code baseFrame} is {@code predecessorFrame = predecessor.getBodyFixedFrame()}.
     * <li>{@code expressedInFrame} is {@code successorFrame}.
     * </ul>
-    * 
+    *
     * @param successorTwistToPack the object in which the velocity of this joint's {@code successor} is
     *                             stored. Modified.
     */
@@ -172,7 +172,7 @@ public interface JointReadOnly
     * <li>{@code baseFrame} is {@code successorFrame = successor.getBodyFixedFrame()}.
     * <li>{@code expressedInFrame} is {@code predecessorFrame}.
     * </ul>
-    * 
+    *
     * @param predecessorTwistToPack the object in which the velocity of this joint's
     *                               {@code predecessor} is stored. Modified.
     */
@@ -197,7 +197,7 @@ public interface JointReadOnly
     * <li>{@code baseFrame} is {@code beforeJointFrame}.
     * <li>{@code expressedInFrame} is {@code afterJointFrame}.
     * </ul>
-    * 
+    *
     * @return the read-only reference of this joint spatial acceleration.
     */
    SpatialAccelerationReadOnly getJointAcceleration();
@@ -211,7 +211,7 @@ public interface JointReadOnly
     * <li>{@code baseFrame} is {@code predecessorFrame = predecessor.getBodyFixedFrame()}.
     * <li>{@code expressedInFrame} is {@code successorFrame}.
     * </ul>
-    * 
+    *
     * @param successorAccelerationToPack the object in which the acceleration of this joint's
     *                                    {@code successor} is stored. Modified.
     */
@@ -237,7 +237,7 @@ public interface JointReadOnly
     * <li>{@code baseFrame} is {@code successorFrame = successor.getBodyFixedFrame()}.
     * <li>{@code expressedInFrame} is {@code predecessorFrame}.
     * </ul>
-    * 
+    *
     * @param predecessorAccelerationToPack the object in which the acceleration of this joint's
     *                                      {@code predecessor} resulting from this joint desired
     *                                      acceleration is stored. Modified.
@@ -262,7 +262,7 @@ public interface JointReadOnly
     * <li>{@code bodyFrame} is {@code successor.getBodyFixedFrame()}.
     * <li>{@code expressedInFrame} is {@code afterJointFrame}.
     * </ul>
-    * 
+    *
     * @return the read-only reference of this joint wrench.
     */
    WrenchReadOnly getJointWrench();
@@ -276,7 +276,7 @@ public interface JointReadOnly
     * <li>For a {@code SphericalJoint}, the actual joint configuration is a quaternion and is stored
     * from the {@code rowStart}<sup>th</sup> row to the ({@code rowStart + 3})<sup>th</sup> row.
     * </ul>
-    * 
+    *
     * @param rowStart     row index for the first component of the configuration.
     * @param matrixToPack the column vector in which this joint actual configuration is stored.
     *                     Modified.
@@ -295,7 +295,7 @@ public interface JointReadOnly
     * angular velocity. Note: the joint twist is the twist of the {@code afterJointFrame} with respect
     * to the {@code beforeJointFrame} expressed in the {@code afterJointFrame}.
     * </ul>
-    * 
+    *
     * @param rowStart     row index for the first component of the velocity.
     * @param matrixToPack the column vector in which the velocity of this joint is stored. Modified.
     * @return {@code rowStart + this.getDegreesOfFreedom()}.
@@ -312,7 +312,7 @@ public interface JointReadOnly
     * {@code rowStart}<sup>th</sup> row to the ({@code rowStart + 5})<sup>th</sup> row, starting with
     * the three components of the angular acceleration.
     * </ul>
-    * 
+    *
     * @param rowStart     row index for the first component of the acceleration.
     * @param matrixToPack the column vector in which the acceleration of this joint is stored.
     *                     Modified.
@@ -331,7 +331,7 @@ public interface JointReadOnly
     * starting with the three components of the torque. Note: the joint wrench is the wrench of
     * {@code successorFrame} expressed in {@code afterJointFrame}.
     * </ul>
-    * 
+    *
     * @param rowStart     row index for the first component of the force/torque.
     * @param matrixToPack the column vector in which the desired force/torque of this joint is stored.
     *                     Modified.
@@ -341,7 +341,7 @@ public interface JointReadOnly
 
    /**
     * Packs the offset from the frame before this joint to the frame after this parent joint.
-    * 
+    *
     * @param jointOffsetTransformToPack the transform in which this joint's offset is stored. Modified.
     */
    default void getJointOffset(RigidBodyTransform jointOffsetTransformToPack)
@@ -351,7 +351,7 @@ public interface JointReadOnly
 
    /**
     * Returns the number of degrees of freedom that this joint has.
-    * 
+    *
     * @return the number of degrees of freedom for this joint.
     */
    int getDegreesOfFreedom();
@@ -361,7 +361,7 @@ public interface JointReadOnly
     * {@code SixDoFJoint} and {@code SphericalJoint} this method will return
     * {@code getDegreesOfFreedom() + 1}. This is due to the orientation, which has 3 degrees of
     * freedom, being represented as a quaternion which has 4 components.
-    * 
+    *
     * @return the size needed to pack this joint configuration into a matrix.
     */
    int getConfigurationMatrixSize();
@@ -376,7 +376,7 @@ public interface JointReadOnly
     * <p>
     * This method generates garbage.
     * </p>
-    * 
+    *
     * @return the new subtree iterable.
     * @see JointIterable
     */
@@ -395,7 +395,7 @@ public interface JointReadOnly
     * <p>
     * This method generates garbage.
     * </p>
-    * 
+    *
     * @return the new subtree stream.
     * @see SubtreeStreams
     */
@@ -414,7 +414,7 @@ public interface JointReadOnly
     * <p>
     * This method generates garbage.
     * </p>
-    * 
+    *
     * @return the new subtree list.
     */
    default List<? extends JointReadOnly> subtreeList()
@@ -432,7 +432,7 @@ public interface JointReadOnly
     * <p>
     * This method generates garbage.
     * </p>
-    * 
+    *
     * @return the new subtree array.
     */
    default JointReadOnly[] subtreeArray()
@@ -442,7 +442,7 @@ public interface JointReadOnly
 
    /**
     * Returns the reference to the name of this joint.
-    * 
+    *
     * @return the name of this joint.
     */
    String getName();
@@ -456,7 +456,7 @@ public interface JointReadOnly
     * This name ID is used to compute this joint {@link #hashCode()} and can be used for the
     * {@link #equals(Object)}.
     * </p>
-    * 
+    *
     * @return the identification name for this joint.
     */
    String getNameId();

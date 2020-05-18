@@ -16,7 +16,7 @@ import us.ihmc.mecano.tools.MecanoTools;
  * expressed. When the frame's origin coincides with the center of mass position and that its axes
  * are aligned with the principal directions of the inertia ellipsoid, the spatial inertia matrix
  * takes the following form:
- * 
+ *
  * <pre>
  *     / J<sub>x,x</sub> 0   0   0 0 0 \
  *     | 0   J<sub>y,y</sub> 0   0 0 0 |
@@ -25,12 +25,12 @@ import us.ihmc.mecano.tools.MecanoTools;
  *     | 0   0   0   0 m 0 |
  *     \ 0   0   0   0 0 m /
  * </pre>
- * 
+ *
  * where <tt>m</tt> is the total mass, and <tt>J<sub>x,x</sub></tt>, <tt>J<sub>y,y</sub></tt>, and
  * <tt>J<sub>z,z</sub></tt> are the moments of inertia around the axes x, y, and z. <br>
  * When the frame in which the inertia is expressed is arbitrary, the spatial inertia takes the
  * following general form:
- * 
+ *
  * <pre>
  *     / J<sub>x,x</sub> J<sub>x,y</sub> J<sub>x,z</sub>   0 -mz  my \
  *     | J<sub>x,y</sub> J<sub>y,y</sub> J<sub>y,z</sub>  mz   0 -mx |
@@ -40,7 +40,7 @@ import us.ihmc.mecano.tools.MecanoTools;
  *     \  my -mx   0   0   0   m /
  * </pre>
  * </p>
- * 
+ *
  * @author Twan Koolen
  * @author Sylvain Bertrand
  */
@@ -85,7 +85,7 @@ public interface SpatialInertiaBasics extends FixedFrameSpatialInertiaBasics, Fr
 
    /**
     * Sets this spatial inertia to {@code other}.
-    * 
+    *
     * @param other the other spatial inertia to copy values and reference frames from. Not modified.
     */
    default void setIncludingFrame(SpatialInertiaReadOnly other)
@@ -104,7 +104,7 @@ public interface SpatialInertiaBasics extends FixedFrameSpatialInertiaBasics, Fr
     * Use this method if {@code expressedInFrame} has origin that coincides with the center of mass and
     * has its axes aligned with the principal directions of the inertia ellipsoid.
     * </p>
-    * 
+    *
     * @param bodyFrame        what we are specifying the inertia of.
     * @param expressedInFrame the new reference frame in which this spatial inertia is expressed.
     * @param Ixx              the moment of inertia around the x-axis.
@@ -126,7 +126,7 @@ public interface SpatialInertiaBasics extends FixedFrameSpatialInertiaBasics, Fr
     * <p>
     * Use this method if {@code expressedInFrame} has origin that coincides with the center of mass.
     * </p>
-    * 
+    *
     * @param bodyFrame        what we are specifying the inertia of.
     * @param expressedInFrame the new reference frame in which this spatial inertia is expressed.
     * @param momentOfInertia  the 3 by 3 moment of inertia matrix. Not modified.
@@ -143,7 +143,7 @@ public interface SpatialInertiaBasics extends FixedFrameSpatialInertiaBasics, Fr
 
    /**
     * Sets all the components of this spatial inertia matrix.
-    * 
+    *
     * @param bodyFrame          what we are specifying the inertia of.
     * @param expressedInFrame   the new reference frame in which this spatial inertia is expressed.
     * @param momentOfInertia    the 3 by 3 moment of inertia matrix. Not modified.
@@ -169,7 +169,7 @@ public interface SpatialInertiaBasics extends FixedFrameSpatialInertiaBasics, Fr
     * Control for Efficient Bipedal Walking Robots</i>, page 40, equation (2.57) from which the
     * equations here were derived.
     * </p>
-    * 
+    *
     * @throws UnsupportedOperationException if the given transform is not a {@code RigidBodyTransform}.
     */
    @Override
@@ -190,7 +190,7 @@ public interface SpatialInertiaBasics extends FixedFrameSpatialInertiaBasics, Fr
     * Control for Efficient Bipedal Walking Robots</i>, page 40, equation (2.57) from which the
     * equations here were derived.
     * </p>
-    * 
+    *
     * @throws UnsupportedOperationException if the given transform is not a {@code RigidBodyTransform}.
     */
    @Override
@@ -211,7 +211,7 @@ public interface SpatialInertiaBasics extends FixedFrameSpatialInertiaBasics, Fr
     * Control for Efficient Bipedal Walking Robots</i>, page 40, equation (2.57) from which the
     * equations here were derived.
     * </p>
-    * 
+    *
     * @param transform the transform to use on this. Not modified.
     */
    default void applyTransform(RigidBodyTransform transform)
@@ -239,7 +239,7 @@ public interface SpatialInertiaBasics extends FixedFrameSpatialInertiaBasics, Fr
     * Control for Efficient Bipedal Walking Robots</i>, page 40, equation (2.57) from which the
     * equations here were derived.
     * </p>
-    * 
+    *
     * @param transform the transform to use on this. Not modified.
     */
    default void applyInverseTransform(RigidBodyTransform transform)

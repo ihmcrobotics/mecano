@@ -126,8 +126,7 @@ public interface FixedFrameWrenchBasics extends WrenchReadOnly, FixedFrameSpatia
    }
 
    /**
-    * Sets this wrench given a 3D moment and 3D force that are exerted at
-    * {@code pointOfApplication}.
+    * Sets this wrench given a 3D moment and 3D force that are exerted at {@code pointOfApplication}.
     * <p>
     * Effectively, this wrench is updated as follow:
     *

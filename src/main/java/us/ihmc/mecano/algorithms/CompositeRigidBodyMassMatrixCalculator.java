@@ -33,11 +33,11 @@ import us.ihmc.mecano.tools.MultiBodySystemTools;
  * <p>
  * The mass matrix can be used in the equations of motion for a multi-body system as follows:
  * </p>
- * 
+ *
  * <pre>
  * &tau; = H(q) qDDot + C(q, qDot, f<sub>ext</sub>)
  * </pre>
- * 
+ *
  * where <tt>&tau;</tt>, <tt>q</tt>, <tt>qDot</tt>, and <tt>qDDot</tt> are the joint effort,
  * configuration, velocity, and acceleration vectors, <tt>H</tt> is the joint-space inertia matrix
  * or also called here mass matrix, and <tt>C</tt> it the joint-space bias force vector resulting
@@ -51,18 +51,18 @@ import us.ihmc.mecano.tools.MultiBodySystemTools;
  * </p>
  * <p>
  * Centroidal momentum equations:
- * 
+ *
  * <pre>
  * h  = A * qDot
  * dh               dA
  * -- = A * qDDot + -- * qDot = A * qDDot + b
  * dt               dt
  * </pre>
- * 
+ *
  * where <tt>h</tt> is the system's momentum and <tt>A</tt> is the centroidal momentum matrix, the
  * term introduce <tt>b</tt> represents the convective term.
  * </p>
- * 
+ *
  * @author Twan Koolen
  * @author Sylvain Bertrand
  */
@@ -127,7 +127,7 @@ public class CompositeRigidBodyMassMatrixCalculator
 
    /**
     * Creates a new calculator for the subtree that starts off the given {@code rootBody}.
-    * 
+    *
     * @param rootBody the start of subtree for which the mass matrix is to be computed. Not modified.
     */
    public CompositeRigidBodyMassMatrixCalculator(RigidBodyReadOnly rootBody)
@@ -137,7 +137,7 @@ public class CompositeRigidBodyMassMatrixCalculator
 
    /**
     * Creates a new calculator for the subtree that starts off the given {@code rootBody}.
-    * 
+    *
     * @param rootBody                the start of subtree for which the mass matrix is to be computed.
     *                                Not modified.
     * @param centroidalMomentumFrame the reference frame in which the centroidal momentum matrix and
@@ -152,7 +152,7 @@ public class CompositeRigidBodyMassMatrixCalculator
 
    /**
     * Creates a new calculator for the given {@code input}.
-    * 
+    *
     * @param input the definition of the system to be evaluated by this calculator.
     */
    public CompositeRigidBodyMassMatrixCalculator(MultiBodySystemReadOnly input)
@@ -162,7 +162,7 @@ public class CompositeRigidBodyMassMatrixCalculator
 
    /**
     * Creates a new calculator for the given {@code input}.
-    * 
+    *
     * @param input                   the definition of the system to be evaluated by this calculator.
     * @param centroidalMomentumFrame the reference frame in which the centroidal momentum matrix and
     *                                convective term are to be computed. Only needed when this
@@ -176,7 +176,7 @@ public class CompositeRigidBodyMassMatrixCalculator
 
    /**
     * Creates a new calculator for the given {@code input}.
-    * 
+    *
     * @param input                          the definition of the system to be evaluated by this
     *                                       calculator.
     * @param centroidalMomentumFrame        the reference frame in which the centroidal momentum matrix
@@ -275,7 +275,7 @@ public class CompositeRigidBodyMassMatrixCalculator
 
    /**
     * Gets the definition of the multi-body system that was used to create this calculator.
-    * 
+    *
     * @return this calculator input.
     */
    public MultiBodySystemReadOnly getInput()
@@ -285,7 +285,7 @@ public class CompositeRigidBodyMassMatrixCalculator
 
    /**
     * Gets the mass-matrix for this multi-body system.
-    * 
+    *
     * @return the mass-matrix.
     */
    public DenseMatrix64F getMassMatrix()
@@ -301,7 +301,7 @@ public class CompositeRigidBodyMassMatrixCalculator
     * The internal memory is invalidated when changing the frame and it will be updated next time the
     * information is being accessed.
     * </p>
-    * 
+    *
     * @param centroidalMomentumFrame the reference frame in which the centroidal momentum matrix and
     *                                convective term are to be computed. Only needed when this
     *                                calculator is used to calculate the centroidal momentum matrix and
@@ -318,7 +318,7 @@ public class CompositeRigidBodyMassMatrixCalculator
 
    /**
     * Gets the reference frame in which the centroidal momentum matrix and convective are expressed.
-    * 
+    *
     * @return the centroidal momentum frame.
     */
    public ReferenceFrame getCentroidalMomentumFrame()
@@ -335,7 +335,7 @@ public class CompositeRigidBodyMassMatrixCalculator
     * the joint velocity matrix, the result is the momentum expressed in
     * {@link #getCentroidalMomentumFrame()}.
     * </p>
-    * 
+    *
     * @return the centroidal momentum matrix.
     * @see CompositeRigidBodyMassMatrixCalculator
     */
@@ -347,7 +347,7 @@ public class CompositeRigidBodyMassMatrixCalculator
 
    /**
     * Gets the convective term resulting from the Coriolis and centrifugal forces acting on the system.
-    * 
+    *
     * @return the bias spatial force.
     * @see CompositeRigidBodyMassMatrixCalculator
     */
@@ -359,7 +359,7 @@ public class CompositeRigidBodyMassMatrixCalculator
 
    /**
     * Gets the convective term resulting from the Coriolis and centrifugal forces acting on the system.
-    * 
+    *
     * @return the bias spatial force.
     * @see CompositeRigidBodyMassMatrixCalculator
     */
@@ -371,7 +371,7 @@ public class CompositeRigidBodyMassMatrixCalculator
 
    /**
     * Represents a single iteration step with all the intermediate variables needed.
-    * 
+    *
     * @author Sylvain Bertrand
     */
    private class CompositeRigidBodyInertia

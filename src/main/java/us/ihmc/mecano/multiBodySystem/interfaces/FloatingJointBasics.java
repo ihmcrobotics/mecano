@@ -26,7 +26,7 @@ import us.ihmc.mecano.spatial.interfaces.FixedFrameWrenchBasics;
  * a floating joint. It is up to the user to enforce the non-actuation, i.e. force and torque set to
  * zero, of a floating joint when simulating a floating multi-body system.
  * </p>
- * 
+ *
  * @author Sylvain Bertrand
  */
 public interface FloatingJointBasics extends FloatingJointReadOnly, JointBasics
@@ -38,7 +38,7 @@ public interface FloatingJointBasics extends FloatingJointReadOnly, JointBasics
     * Note that for 2D floating joints, some components of the 3D pose cannot be set as set the motion
     * is constrained to a 2D plane.
     * </p>
-    * 
+    *
     * @return this joint pose.
     */
    @Override
@@ -56,7 +56,7 @@ public interface FloatingJointBasics extends FloatingJointReadOnly, JointBasics
     * Note that for 2D floating joints, some components of the twist cannot be set as set the motion is
     * constrained to a 2D plane.
     * </p>
-    * 
+    *
     * @return the reference to this joint twist.
     */
    @Override
@@ -74,7 +74,7 @@ public interface FloatingJointBasics extends FloatingJointReadOnly, JointBasics
     * Note that for 2D floating joints, some components of the spatial acceleration cannot be set as
     * set the motion is constrained to a 2D plane.
     * </p>
-    * 
+    *
     * @return the reference to this joint spatial acceleration.
     */
    @Override
@@ -91,7 +91,7 @@ public interface FloatingJointBasics extends FloatingJointReadOnly, JointBasics
     * Note that for 2D floating joints, some components of the wrench cannot be set as the motion is
     * constrained to a 2D plane.
     * </p>
-    * 
+    *
     * @return the reference to this joint wrench.
     */
    @Override

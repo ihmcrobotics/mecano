@@ -25,7 +25,7 @@ import us.ihmc.yoVariables.registry.YoVariableRegistry;
  * {@code YoVariable}s. The resulting system remains compatible with the common algorithms as it
  * implements {@code MultiBodySystemBasics}.
  * </p>
- * 
+ *
  * @author Sylvain Bertrand
  */
 public class YoMultiBodySystem implements MultiBodySystemBasics
@@ -39,7 +39,7 @@ public class YoMultiBodySystem implements MultiBodySystemBasics
    /**
     * Creates a new yo-variablelized multi-body system with the same properties as the given
     * {@code input}.
-    * 
+    *
     * @param input           the multi-body system to clone. Not modified.
     * @param stationaryFrame the root frame to which yo-multi-body system is attached.
     * @param registry        the registry to register child variables to.
@@ -52,7 +52,7 @@ public class YoMultiBodySystem implements MultiBodySystemBasics
    /**
     * Creates a new yo-variablelized multi-body system with the same properties as the given
     * {@code input}.
-    * 
+    *
     * @param input            the multi-body system to clone. Not modified.
     * @param stationaryFrame  the root frame to which yo-multi-body system is attached.
     * @param registry         the registry to register child variables to.

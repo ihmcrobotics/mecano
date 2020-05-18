@@ -12,7 +12,7 @@ import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyReadOnly;
 /**
  * {@code SubtreeStreams} provides {@code Stream} support for traversing joints and rigid-bodies of
  * a multi-body system.
- * 
+ *
  * @author Sylvain Bertrand
  */
 public class SubtreeStreams
@@ -20,7 +20,7 @@ public class SubtreeStreams
    /**
     * Creates a new {@code Stream} that consists of the entire subtree starting from the given
     * {@code root}.
-    * 
+    *
     * @param root the start of the subtree. Not modified.
     * @return the new subtree stream.
     */
@@ -31,7 +31,7 @@ public class SubtreeStreams
 
    /**
     * Creates a new {@code Stream} for multiple subtrees.
-    * 
+    *
     * @param roots the start of each subtree. Not modified.
     * @return the new subtree stream.
     */
@@ -43,7 +43,7 @@ public class SubtreeStreams
    /**
     * Creates a new {@code Stream} that consists of the entire subtree starting from the given
     * {@code root}.
-    * 
+    *
     * @param root the start of the subtree. Not modified.
     * @return the new subtree stream.
     */
@@ -55,7 +55,7 @@ public class SubtreeStreams
    /**
     * Creates a new {@code Stream} that consists of the entire subtree starting from the given
     * {@code root}.
-    * 
+    *
     * @param filteringClass the class of the type of joint to stream. If a joint is not an instance of
     *                       the {@code filteringClass}, then it will not be part of the stream.
     * @param root           the start of the subtree. Not modified.
@@ -68,7 +68,7 @@ public class SubtreeStreams
 
    /**
     * Creates a new {@code Stream} for multiple subtrees.
-    * 
+    *
     * @param filteringClass the class of the type of joint to stream. If a joint is not an instance of
     *                       the {@code filteringClass}, then it will not be part of the stream.
     * @param roots          the start of each subtree. Not modified.
@@ -82,7 +82,7 @@ public class SubtreeStreams
    /**
     * Creates a new {@code Stream} that consists of the entire subtree starting from the given
     * {@code root}.
-    * 
+    *
     * @param root the start of the subtree. Not modified.
     * @return the new subtree stream.
     */
@@ -94,7 +94,7 @@ public class SubtreeStreams
    /**
     * Creates a new {@code Stream} that consists of all the joint subtrees for each of the {@code root}
     * children.
-    * 
+    *
     * @param root the root of the joint subtree.
     * @return the new joint subtree stream.
     */
@@ -106,7 +106,7 @@ public class SubtreeStreams
    /**
     * Creates a new {@code Stream} that consists of the entire subtree starting from the given
     * {@code root}.
-    * 
+    *
     * @param root the start of the subtree. Not modified.
     * @return the new subtree stream.
     */
@@ -118,7 +118,7 @@ public class SubtreeStreams
    /**
     * Creates a new {@code Stream} that consists of all the joint subtrees for each of the {@code root}
     * children.
-    * 
+    *
     * @param root the root of the joint subtree.
     * @return the new joint subtree stream.
     */
@@ -130,7 +130,7 @@ public class SubtreeStreams
    /**
     * Creates a new {@code Stream} that consists of all the joint subtrees for each of the {@code root}
     * children.
-    * 
+    *
     * @param filteringClass the class of the type of joint to stream. If a joint is not an instance of
     *                       the {@code filteringClass}, then it will not be part of the stream.
     * @param root           the root of the joint subtree.
@@ -144,7 +144,7 @@ public class SubtreeStreams
    /**
     * Creates a new {@code Stream} that consists of the entire subtree starting from the given
     * {@code root}.
-    * 
+    *
     * @param filteringClass the class of the type of joint to stream. If a joint is not an instance of
     *                       the {@code filteringClass}, then it will not be part of the stream.
     * @param root           the start of the subtree. Not modified.

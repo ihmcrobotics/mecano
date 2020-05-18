@@ -36,7 +36,7 @@ import us.ihmc.mecano.tools.MultiBodySystemTools;
 /**
  * Tool used to create a graphical representation of a multi-body system as a block diagram saved
  * into a file.
- * 
+ *
  * @author Sylvain Bertrand
  */
 public class MultiBodySystemViewer
@@ -47,7 +47,7 @@ public class MultiBodySystemViewer
    /**
     * Display modes which are either: display rigid-bodies only, display joints only, or display both
     * rigid-bodies and joints.
-    * 
+    *
     * @author Sylvain Bertrand
     */
    public enum Display
@@ -58,7 +58,7 @@ public class MultiBodySystemViewer
       JOINTS,
       /** For displaying rigid-bodies and joints. */
       BOTH
-   };
+   }
 
    private Display display = Display.JOINTS;
    private final List<JointLabelProvider> jointLabelProviders = new ArrayList<>();
@@ -66,7 +66,7 @@ public class MultiBodySystemViewer
 
    /**
     * Creates a new viewer for visualizing the subtree starting off the given {@code rootBody}.
-    * 
+    *
     * @param rootBody the origin of the subtree to visualize.
     */
    public MultiBodySystemViewer(RigidBodyReadOnly rootBody)
@@ -78,7 +78,7 @@ public class MultiBodySystemViewer
 
    /**
     * Changes the display mode to switch between: rigid-bodies only, joints only, or both.
-    * 
+    *
     * @param display the new display mode, default value {@link Display#JOINTS}.
     * @return {@code this} for chaining operations.
     */
@@ -90,7 +90,7 @@ public class MultiBodySystemViewer
 
    /**
     * Registers a custom label provider to display addition information about each joint.
-    * 
+    *
     * @param labelProvider the custom label provider.
     * @return {@code this} for chaining operations.
     */
@@ -102,7 +102,7 @@ public class MultiBodySystemViewer
 
    /**
     * Registers a custom label provider to display addition information about each rigid-body.
-    * 
+    *
     * @param labelProvider the custom label provider.
     * @return {@code this} for chaining operations.
     */
@@ -114,7 +114,7 @@ public class MultiBodySystemViewer
 
    /**
     * Adds information about the final type of each joint.
-    * 
+    *
     * @return {@code this} for chaining operations.
     */
    public MultiBodySystemViewer showJointType()
@@ -125,7 +125,7 @@ public class MultiBodySystemViewer
 
    /**
     * Adds information about the state for each joint.
-    * 
+    *
     * @param jointStateTypes to select configuration, velocity, acceleration, and/or joint effort.
     * @return {@code this} for chaining operations.
     */
@@ -138,7 +138,7 @@ public class MultiBodySystemViewer
 
    /**
     * Adds joint axis information for one degree of freedom joints.
-    * 
+    *
     * @return {@code this} for chaining operations.
     */
    public MultiBodySystemViewer showOneDoFJointAxis()
@@ -149,7 +149,7 @@ public class MultiBodySystemViewer
 
    /**
     * Adds information about each rigid-body's mass.
-    * 
+    *
     * @return {@code this} for chaining operations.
     */
    public MultiBodySystemViewer showRigidBodyMass()
@@ -169,7 +169,7 @@ public class MultiBodySystemViewer
     * <p>
     * The displayed inertia is expressed in the body-fixed frame.
     * </p>
-    * 
+    *
     * @return {@code this} for chaining operations.
     */
    public MultiBodySystemViewer showRigidBodyInertia()
@@ -189,7 +189,7 @@ public class MultiBodySystemViewer
     * <p>
     * The center of mass position is expressed in the frame right after the parent joint.
     * </p>
-    * 
+    *
     * @return {@code this} for chaining operations.
     */
    public MultiBodySystemViewer showRigidBodyCenterOfMass()
@@ -207,7 +207,7 @@ public class MultiBodySystemViewer
 
    /**
     * Sets the image format to use.
-    * 
+    *
     * @param format default value {@code Format.SVG}.
     * @return {@code this} for chaining operations.
     */
@@ -219,7 +219,7 @@ public class MultiBodySystemViewer
 
    /**
     * Creates the graph and output the block diagram into a file.
-    * 
+    *
     * @param outputFileName the path to the file to create. The file extension is added internally.
     */
    public void view(String outputFileName)
@@ -454,14 +454,14 @@ public class MultiBodySystemViewer
     * Multiple {@code LabelProvider} can be registered to a viewer to display more information about
     * joints.
     * </p>
-    * 
+    *
     * @author Sylvain Bertrand
     */
    public static interface JointLabelProvider
    {
       /**
        * Gets the label to display for the given joint.
-       * 
+       *
        * @param joint the joint to make the label from.
        * @return the label to display in the graphical node.
        */
@@ -474,14 +474,14 @@ public class MultiBodySystemViewer
     * Multiple {@code LabelProvider} can be registered to a viewer to display more information about
     * rigid-bodies.
     * </p>
-    * 
+    *
     * @author Sylvain Bertrand
     */
    public static interface RigidBodyLabelProvider
    {
       /**
        * Gets the label to display for the given rigid-body.
-       * 
+       *
        * @param rigidBody the rigid-body to make the label from.
        * @return the label to display in the graphical node.
        */
@@ -495,7 +495,7 @@ public class MultiBodySystemViewer
     * For generating a custom view, create a new {@link MultiBodySystemViewer}, configure it using
     * {@link #addLabelProvider(JointLabelProvider)}, and view it using {@link #view(String)}.
     * </p>
-    * 
+    *
     * @param rootBody the root of the subtree to view.
     */
    public static void viewSimpleJointSubtree(RigidBodyReadOnly rootBody)
@@ -510,7 +510,7 @@ public class MultiBodySystemViewer
     * For generating a custom view, create a new {@link MultiBodySystemViewer}, configure it using
     * {@link #addLabelProvider(JointLabelProvider)}, and view it using {@link #view(String)}.
     * </p>
-    * 
+    *
     * @param rootBody the root of the subtree to view.
     */
    public static void viewJointSubtree(RigidBodyReadOnly rootBody)
@@ -526,7 +526,7 @@ public class MultiBodySystemViewer
     * For generating a custom view, create a new {@link MultiBodySystemViewer}, configure it using
     * {@link #addLabelProvider(RigidBodyLabelProvider)}, and view it using {@link #view(String)}.
     * </p>
-    * 
+    *
     * @param rootBody the root of the subtree to view.
     */
    public static void viewSimpleRigidBodySubtree(RigidBodyReadOnly rootBody)
@@ -541,7 +541,7 @@ public class MultiBodySystemViewer
     * For generating a custom view, create a new {@link MultiBodySystemViewer}, configure it using
     * {@link #addLabelProvider(RigidBodyLabelProvider)}, and view it using {@link #view(String)}.
     * </p>
-    * 
+    *
     * @param rootBody the root of the subtree to view.
     */
    public static void viewRigidBodySubtree(RigidBodyReadOnly rootBody)
@@ -552,7 +552,7 @@ public class MultiBodySystemViewer
 
    /**
     * Example of how to use a multi-body system viewer.
-    * 
+    *
     * @param args the arguments are not used in this example.
     */
    public static void main(String[] args)

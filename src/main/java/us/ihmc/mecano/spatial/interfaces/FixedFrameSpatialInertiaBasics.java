@@ -13,7 +13,7 @@ import us.ihmc.euclid.referenceFrame.interfaces.FixedFrameVector3DBasics;
  * expressed. When the frame's origin coincides with the center of mass position and that its axes
  * are aligned with the principal directions of the inertia ellipsoid, the spatial inertia matrix
  * takes the following form:
- * 
+ *
  * <pre>
  *     / J<sub>x,x</sub> 0   0   0 0 0 \
  *     | 0   J<sub>y,y</sub> 0   0 0 0 |
@@ -22,12 +22,12 @@ import us.ihmc.euclid.referenceFrame.interfaces.FixedFrameVector3DBasics;
  *     | 0   0   0   0 m 0 |
  *     \ 0   0   0   0 0 m /
  * </pre>
- * 
+ *
  * where <tt>m</tt> is the total mass, and <tt>J<sub>x,x</sub></tt>, <tt>J<sub>y,y</sub></tt>, and
  * <tt>J<sub>z,z</sub></tt> are the moments of inertia around the axes x, y, and z. <br>
  * When the frame in which the inertia is expressed is arbitrary, the spatial inertia takes the
  * following general form:
- * 
+ *
  * <pre>
  *     / J<sub>x,x</sub> J<sub>x,y</sub> J<sub>x,z</sub>   0 -mz  my \
  *     | J<sub>x,y</sub> J<sub>y,y</sub> J<sub>y,z</sub>  mz   0 -mx |
@@ -37,7 +37,7 @@ import us.ihmc.euclid.referenceFrame.interfaces.FixedFrameVector3DBasics;
  *     \  my -mx   0   0   0   m /
  * </pre>
  * </p>
- * 
+ *
  * @author Twan Koolen
  * @author Sylvain Bertrand
  */
@@ -51,7 +51,7 @@ public interface FixedFrameSpatialInertiaBasics extends SpatialInertiaReadOnly, 
 
    /**
     * Sets the mass to use with this spatial inertia matrix.
-    * 
+    *
     * @param mass the new mass value.
     */
    void setMass(double mass);
@@ -94,7 +94,7 @@ public interface FixedFrameSpatialInertiaBasics extends SpatialInertiaReadOnly, 
 
    /**
     * Sets the moment of inertia to a diagonal matrix.
-    * 
+    *
     * @param Ixx the moment of inertia around the x-axis.
     * @param Iyy the moment of inertia around the y-axis.
     * @param Izz the moment of inertia around the z-axis.
@@ -106,7 +106,7 @@ public interface FixedFrameSpatialInertiaBasics extends SpatialInertiaReadOnly, 
 
    /**
     * Sets this spatial inertia to {@code other}.
-    * 
+    *
     * @param other the other spatial inertia to copy values from. Not modified.
     * @throws ReferenceFrameMismatchException if {@code other} does not have the same frames as
     *                                         {@code this}.
@@ -121,7 +121,7 @@ public interface FixedFrameSpatialInertiaBasics extends SpatialInertiaReadOnly, 
 
    /**
     * Adds the other spatial inertia to this.
-    * 
+    *
     * @param other the other inertia to add. Not modified.
     * @throws ReferenceFrameMismatchException if {@code other} is not expressed in the same reference
     *                                         frame as {@code this}.

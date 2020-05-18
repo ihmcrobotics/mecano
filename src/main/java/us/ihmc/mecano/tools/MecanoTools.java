@@ -35,7 +35,7 @@ public class MecanoTools
 {
    /**
     * Change the first character of the given string to be upper-case only if needed.
-    * 
+    *
     * @param string the string to capitalize.
     * @return the capitalized string.
     */
@@ -52,7 +52,7 @@ public class MecanoTools
 
    /**
     * Convenience method to calculate the dot product of two tuples.
-    * 
+    *
     * @param tuple1 the first tuple in the dot product. Not modified.
     * @param tuple2 the second tuple in the dot product. Not modified.
     * @return the value of the dot product of the two tuples.
@@ -66,7 +66,7 @@ public class MecanoTools
 
    /**
     * Tests if the given matrix is symmetric.
-    * 
+    *
     * @param matrixToTest the 3D matrix to test for symmetry. Not modified.
     * @param epsilon      the tolerance to use in this test.
     * @return {@code true} if the given matrix is symmetric, {@code false} otherwise.
@@ -84,7 +84,7 @@ public class MecanoTools
 
    /**
     * Tests if the given matrix only has non-zero coefficients on its diagonal.
-    * 
+    *
     * @param matrixToTest the 3D matrix to test. Not modified.
     * @param epsilon      the tolerance used on the off-diagonal coefficients.
     * @return {@code true} if all the off-diagonal terms of the matrix are equal to zero, {@code false}
@@ -106,7 +106,7 @@ public class MecanoTools
 
    /**
     * Tests if the given matrix only has non-zero coefficients on its diagonal.
-    * 
+    *
     * @param m00     first matrix element in the first row.
     * @param m01     second matrix element in the first row.
     * @param m02     third matrix element in the first row.
@@ -133,7 +133,7 @@ public class MecanoTools
 
    /**
     * Asserts that the given matrix is symmetric.
-    * 
+    *
     * @param matrixToTest the 3D matrix to verify. Not modified.
     * @param epsilon      the tolerance to use.
     * @throws RuntimeException if the given matrix is not symmetric.
@@ -147,7 +147,7 @@ public class MecanoTools
    /**
     * Checks that the given {@code matrixToTest} has a minimum size of [{@code minRows},
     * {@code minColumns}].
-    * 
+    *
     * @param minRows      the minimum number of rows that the matrix should have.
     * @param minColumns   the minimum number of columns that the matrix should have.
     * @param matrixToTest the matrix which size is to be tested.
@@ -279,7 +279,7 @@ public class MecanoTools
 
    /**
     * Adds the given {@code matrixToAdd} to {@code matrixToModify}.
-    * 
+    *
     * @param startRow       the first row index in {@code matrixToAdd} to start reading elements.
     * @param startColumn    the first column index in {@code matrixToAdd} to start reading elements.
     * @param matrixToAdd    the matrix to be added. Not modified.
@@ -304,7 +304,7 @@ public class MecanoTools
 
    /**
     * Subtracts the given {@code matrixToAdd} to {@code matrixToModify}.
-    * 
+    *
     * @param startRow       the first row index in {@code matrixToAdd} to start reading elements.
     * @param startColumn    the first column index in {@code matrixToAdd} to start reading elements.
     * @param matrixToAdd    the matrix to be subtracted. Not modified.
@@ -332,23 +332,23 @@ public class MecanoTools
     * Applies a translation to the given moment of inertia.
     * <p>
     * The translation formula for the inertia is as follows:
-    * 
+    *
     * <pre>
     * I -= m ([p]<sub>&times;</sub>[c]<sub>&times;</sub> + [c]<sub>&times;</sub>[p]<sub>&times;</sub> + [p]<sub>&times;</sub>[p]<sub>&times;</sub>)
     * </pre>
-    * 
+    *
     * where <tt>m</tt> the mass of the body, <tt>c</tt> is the body's center of mass position expressed
     * in the same reference frame of the original inertia matrix, <tt>p</tt> is the translation to
     * apply to the inertia matrix, "[.]<sub>&times;</sub>" is the operator that maps a vector to a skew
     * symmetric matrix, for any vector w = [x y z]<sup>T</sup>:
-    * 
+    *
     * <pre>
     *    <sub> </sub>   /  0 -z  y \
     * [w]<sub>&times;</sub> = |  z  0 -x |
     *    <sub> </sub>   \ -y  x  0 /
     * </pre>
     * </p>
-    * 
+    *
     * @param mass                       the mass of the corresponding rigid body.
     * @param centerOfMass               the coordinates of the center of mass expressed in the same
     *                                   frame as the given {@code massMomentOfInertiaToTransform}. Not
@@ -417,7 +417,7 @@ public class MecanoTools
     * If the given {@code angularAcceleration} or {@code angularVelocity} is {@code null}, it is
     * assumed to be equal to zero.
     * </p>
-    * 
+    *
     * @param momentOfInertia     the moment of inertia of the rigid body expressed at its center of
     *                            mass. Not modified.
     * @param angularAcceleration the angular acceleration of the rigid-body with respect to an inertial
@@ -466,7 +466,7 @@ public class MecanoTools
     * If the given {@code angularAcceleration}, {@code linearAcceleration}, {@code angularVelocity}, or
     * {@code linearVelocity} is {@code null}, it is assumed to be equal to zero.
     * </p>
-    * 
+    *
     * @param momentOfInertia     the moment of inertia of the rigid body. Not modified.
     * @param mass                the rigid body mass.
     * @param centerOfMassOffset  the offset of the center of mass position with respect to the origin
@@ -565,7 +565,7 @@ public class MecanoTools
     * If the given {@code linearAcceleration}, {@code angularVelocity}, or {@code linearVelocity} is
     * {@code null}, it is assumed to be equal to zero.
     * </p>
-    * 
+    *
     * @param mass               the rigid body mass.
     * @param linearAcceleration the linear acceleration of the origin of the frame in which the inertia
     *                           is expressed with respect to an inertial frame and expressed in the
@@ -612,7 +612,7 @@ public class MecanoTools
     * If the given {@code angularAcceleration}, {@code linearAcceleration}, {@code angularVelocity}, or
     * {@code linearVelocity} is {@code null}, it is assumed to be equal to zero.
     * </p>
-    * 
+    *
     * @param mass                the rigid body mass.
     * @param centerOfMassOffset  the offset of the center of mass position with respect to the origin
     *                            of the frame in which the inertia is expressed. Not modified.
@@ -674,7 +674,7 @@ public class MecanoTools
     * This method does not require the moment of inertia to be expressed in any particular frame.
     * However, all the arguments should be expressed in the same frame.
     * </p>
-    * 
+    *
     * @param momentOfInertia    the moment of inertia of the rigid body. Not modified.
     * @param mass               the rigid body mass.
     * @param centerOfMassOffset the offset of the center of mass position with respect to the origin of
@@ -735,7 +735,7 @@ public class MecanoTools
 
    /**
     * Attempts to cast the given joint to the type {@code T}.
-    * 
+    *
     * @param jointToCast   the joint to be casted to the type {@code T}. Not modified.
     * @param classToCastTo the class the joint is susceptible to be an instance of.
     * @return the joint casted to the type {@code T}.
@@ -754,7 +754,7 @@ public class MecanoTools
     * <p>
     * For each degree of freedom of the joint there is one unit-twist.
     * </p>
-    * 
+    *
     * @param beforeJointFrame the frame right before the joint.
     * @param afterJointFrame  the frame right after the joint.
     * @return the list of unit-twists.
@@ -798,7 +798,7 @@ public class MecanoTools
     * <p>
     * For each degree of freedom of the joint there is one unit-twist.
     * </p>
-    * 
+    *
     * @param beforeJointFrame the frame right before the joint.
     * @param afterJointFrame  the frame right after the joint.
     * @return the list of unit-twists.
@@ -841,7 +841,7 @@ public class MecanoTools
     * <p>
     * For each degree of freedom of the joint there is one unit-twist.
     * </p>
-    * 
+    *
     * @param beforeJointFrame the frame right before the joint.
     * @param afterJointFrame  the frame right after the joint.
     * @return the list of unit-twists.
@@ -887,7 +887,7 @@ public class MecanoTools
     * {@code symmetricMatrixToRotate} = {@code rotation} * {@code symmetricMatrixToRotate} *
     * {@code rotation}<sup>-1</sup>.
     * </p>
-    * 
+    *
     * @param rotation                the rotation to apply to the given matrix. Not modified.
     * @param symmetricMatrixToRotate the symmetric matrix to be transformed. Modified.
     * @see Matrix3DTools#transform(Matrix3DReadOnly, Matrix3DReadOnly, Matrix3DBasics)
@@ -919,7 +919,7 @@ public class MecanoTools
     * {@code symmetricMatrixToRotate} = {@code rotation}<sup>-1</sup> * {@code symmetricMatrixToRotate}
     * * {@code rotation}.
     * </p>
-    * 
+    *
     * @param rotation                the rotation to apply to the given matrix. Not modified.
     * @param symmetricMatrixToRotate the symmetric matrix to be transformed. Modified.
     * @see Matrix3DTools#inverseTransform(Matrix3DReadOnly, Matrix3DReadOnly, Matrix3DBasics)

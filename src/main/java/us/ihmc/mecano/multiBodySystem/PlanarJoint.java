@@ -41,7 +41,7 @@ public class PlanarJoint extends Joint implements PlanarJointBasics
     * <p>
     * This constructor is typically used for creating a root floating joint.
     * </p>
-    * 
+    *
     * @param name        the name for the new joint.
     * @param predecessor the rigid-body connected to and preceding this joint.
     */
@@ -52,7 +52,7 @@ public class PlanarJoint extends Joint implements PlanarJointBasics
 
    /**
     * Creates a new planar joint.
-    * 
+    *
     * @param name              the name for the new joint.
     * @param predecessor       the rigid-body connected to and preceding this joint.
     * @param transformToParent the transform to the frame after the parent joint. Not modified.

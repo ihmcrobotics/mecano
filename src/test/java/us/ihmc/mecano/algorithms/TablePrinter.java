@@ -12,7 +12,7 @@ public class TablePrinter
    public enum Alignment
    {
       LEFT, RIGHT
-   };
+   }
 
    private final List<List<Cell>> tableRows = new ArrayList<>();
    private int numberOfColumns = 0;

@@ -31,7 +31,7 @@ import us.ihmc.mecano.tools.MultiBodySystemTools;
 /**
  * Computes the center of mass Jacobian that maps from joint velocity space to center of mass
  * Cartesian velocity space.
- * 
+ *
  * @author Sylvain Bertrand
  */
 public class CenterOfMassJacobian implements ReferenceFrameHolder
@@ -105,7 +105,7 @@ public class CenterOfMassJacobian implements ReferenceFrameHolder
 
    /**
     * Creates a new calculator for the subtree that starts off the given {@code rootBody}.
-    * 
+    *
     * @param rootBody      the start of subtree for which the center of mass Jacobian is to be
     *                      computed. Not modified.
     * @param jacobianFrame the frame in which the center of mass Jacobian is to be expressed.
@@ -122,7 +122,7 @@ public class CenterOfMassJacobian implements ReferenceFrameHolder
     * reference frame. The center of mass frame can then be retrieved using
     * {@link #getReferenceFrame()}.
     * </p>
-    * 
+    *
     * @param input                 the definition of the system to be evaluated by this calculator.
     * @param centerOfMassFrameName the name for the new frame at the center of mass.
     */
@@ -138,7 +138,7 @@ public class CenterOfMassJacobian implements ReferenceFrameHolder
     * reference frame. The center of mass frame can then be retrieved using
     * {@link #getReferenceFrame()}.
     * </p>
-    * 
+    *
     * @param input                          the definition of the system to be evaluated by this
     *                                       calculator.
     * @param centerOfMassFrameName          the name for the new frame at the center of mass.
@@ -266,7 +266,7 @@ public class CenterOfMassJacobian implements ReferenceFrameHolder
 
    /**
     * Recursion method that calls {@link RecursionStep#passOne()} starting with the system's leaves.
-    * 
+    *
     * @param current the current recursion step.
     * @see RecursionStep#passOne()
     */
@@ -284,7 +284,7 @@ public class CenterOfMassJacobian implements ReferenceFrameHolder
    /**
     * Iterative method that calls {@link RecursionStep#passTwo()} only if
     * {@link #isJacobianFrameAtCenterOfMass} is {@code true}.
-    * 
+    *
     * @see RecursionStep#passTwo()
     */
    private void passTwo()
@@ -300,7 +300,7 @@ public class CenterOfMassJacobian implements ReferenceFrameHolder
 
    /**
     * Iterative method that calls {@link RecursionStep#passThree(double)}.
-    * 
+    *
     * @see RecursionStep#passThree(double)
     */
    private void passThree(double inverseOfTotalMass)
@@ -323,7 +323,7 @@ public class CenterOfMassJacobian implements ReferenceFrameHolder
 
    /**
     * Gets the definition of the multi-body system that was used to create this calculator.
-    * 
+    *
     * @return this calculator input.
     */
    public MultiBodySystemReadOnly getInput()
@@ -370,7 +370,7 @@ public class CenterOfMassJacobian implements ReferenceFrameHolder
     * The given matrix is expected to have been configured using the same
     * {@link JointMatrixIndexProvider} that was used to configure this calculator.
     * </p>
-    * 
+    *
     * @param jointVelocityMatrix        the matrix containing the joint velocities to use. Not
     *                                   modified.
     * @param centerOfMassVelocityToPack the vector used to stored the computed center of mass velocity.
@@ -391,7 +391,7 @@ public class CenterOfMassJacobian implements ReferenceFrameHolder
     * multiplied to the joint velocity matrix, the result is the center of mass velocity expressed in
     * {@link #getReferenceFrame()}.
     * </p>
-    * 
+    *
     * @return the center of mass Jacobian.
     */
    public DenseMatrix64F getJacobianMatrix()
@@ -413,7 +413,7 @@ public class CenterOfMassJacobian implements ReferenceFrameHolder
 
    /**
     * Represents a single recursion step with all the intermediate variables needed.
-    * 
+    *
     * @author Sylvain Bertrand
     */
    private class RecursionStep
@@ -568,7 +568,7 @@ public class CenterOfMassJacobian implements ReferenceFrameHolder
        * <p>
        * Computes the Jacobian block corresponding to this joint.
        * </p>
-       * 
+       *
        * @param inverseOfTotalMass the inverse of the total system mass.
        */
       public void passThree(double inverseOfTotalMass)

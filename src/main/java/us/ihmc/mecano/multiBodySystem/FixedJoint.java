@@ -60,7 +60,7 @@ public class FixedJoint implements FixedJointBasics
     * This constructor is typically used for creating a root floating joint, i.e. the first joint of
     * the multi-body system.
     * </p>
-    * 
+    *
     * @param name        the name for the new joint.
     * @param predecessor the rigid-body connected to and preceding this joint.
     */
@@ -71,7 +71,7 @@ public class FixedJoint implements FixedJointBasics
 
    /**
     * Creates a new fixed joint.
-    * 
+    *
     * @param name              the name for the new joint.
     * @param predecessor       the rigid-body connected to and preceding this joint.
     * @param transformToParent the transform to the frame after the parent joint. Not modified.
