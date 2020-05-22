@@ -1,5 +1,6 @@
 package us.ihmc.mecano.multiBodySystem;
 
+import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.transform.interfaces.RigidBodyTransformReadOnly;
 import us.ihmc.mecano.frames.MovingReferenceFrame;
 import us.ihmc.mecano.multiBodySystem.interfaces.JointBasics;
@@ -102,11 +103,14 @@ public abstract class Joint implements JointBasics
    }
 
    @Override
-   public void setupLoopClosure(RigidBodyTransformReadOnly transformFromSuccessorParentJoint)
+   public void setupLoopClosure(RigidBodyBasics successor, RigidBodyTransformReadOnly transformFromSuccessorParentJoint)
    {
+      RigidBodyTransform transformToSuccessorParentJoint = new RigidBodyTransform(transformFromSuccessorParentJoint);
+      transformToSuccessorParentJoint.invert();
       loopClosureFrame = MovingReferenceFrame.constructFrameFixedInParent(MecanoTools.capitalize(getName()) + "LoopClosureFrame",
                                                                           getFrameAfterJoint(),
-                                                                          transformFromSuccessorParentJoint);
+                                                                          transformToSuccessorParentJoint);
+      setSuccessor(successor);
    }
 
    /** {@inheritDoc} */

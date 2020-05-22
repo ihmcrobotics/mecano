@@ -66,13 +66,14 @@ public interface JointBasics extends JointReadOnly
     * Requires the successor to be set beforehand.
     * </p>
     * 
+    * @param successor                         the {@code RigidBody} located after this joint.
     * @param transformFromSuccessorParentJoint specifies the transform from
     *                                          {@code this.getFrameAfterJoint()} to
     *                                          {@code successor.getParentJoint().getFrameAfterJoint()}.
     *                                          The transform represents the pose of this joint with
     *                                          respect to the {@code successor}'s parent joint.
     */
-   void setupLoopClosure(RigidBodyTransformReadOnly transformFromSuccessorParentJoint);
+   void setupLoopClosure(RigidBodyBasics successor, RigidBodyTransformReadOnly transformFromSuccessorParentJoint);
 
    /**
     * Resets this joint's configuration to zero.

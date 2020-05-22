@@ -150,7 +150,7 @@ public class FixedJoint implements FixedJointBasics
    }
 
    @Override
-   public void setupLoopClosure(RigidBodyTransformReadOnly transformToSuccessorParentJoint)
+   public void setupLoopClosure(RigidBodyBasics successor, RigidBodyTransformReadOnly transformToSuccessorParentJoint)
    {
       loopClosureFrame = MovingReferenceFrame.constructFrameFixedInParent(MecanoTools.capitalize(getName()) + "LoopClosureFrame",
                                                                           getFrameAfterJoint(),
