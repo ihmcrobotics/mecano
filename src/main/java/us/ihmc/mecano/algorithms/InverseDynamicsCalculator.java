@@ -12,6 +12,7 @@ import org.ejml.ops.CommonOps;
 
 import us.ihmc.euclid.referenceFrame.exceptions.ReferenceFrameMismatchException;
 import us.ihmc.euclid.referenceFrame.interfaces.FrameTuple3DReadOnly;
+import us.ihmc.euclid.tools.EuclidCoreIOTools;
 import us.ihmc.euclid.tuple3D.interfaces.Tuple3DReadOnly;
 import us.ihmc.mecano.algorithms.interfaces.RigidBodyAccelerationProvider;
 import us.ihmc.mecano.frames.MovingReferenceFrame;
@@ -51,16 +52,17 @@ public class InverseDynamicsCalculator
 
    /** Defines the multi-body system to use with this calculator. */
    private final MultiBodySystemReadOnly input;
-
    /** The root of the internal recursive algorithm. */
    private final RecursionStep initialRecursionStep;
    /** Map to quickly retrieve information for each rigid-body. */
    private final Map<RigidBodyReadOnly, RecursionStep> rigidBodyToRecursionStepMap = new LinkedHashMap<>();
+   /** Map to quickly retrieve information for each joint. */
+   private final Map<JointReadOnly, RecursionStepBasics> jointToRecursionStepMap = new LinkedHashMap<>();
 
    /** The input of this algorithm: the acceleration matrix for all the joints to consider. */
-   private final DenseMatrix64F jointAccelerationMatrix;
+   private final DenseMatrix64F allJointAccelerationMatrix;
    /** The output of this algorithm: the effort matrix for all the joints to consider. */
-   private final DenseMatrix64F jointTauMatrix;
+   private final DenseMatrix64F allJointTauMatrix;
 
    /** Whether the effort resulting from the joint accelerations should be considered. */
    private boolean considerJointAccelerations = DEFAULT_CONSIDER_ACCELERATIONS;
@@ -228,14 +230,14 @@ public class InverseDynamicsCalculator
       RigidBodyReadOnly rootBody = input.getRootBody();
       initialRecursionStep = new RecursionStep(rootBody, null, null);
       rigidBodyToRecursionStepMap.put(rootBody, initialRecursionStep);
-      buildMultiBodyTree(initialRecursionStep, input.getJointsToIgnore());
+      int numberOfKinematicLoops = buildMultiBodyTree(initialRecursionStep, input.getJointsToIgnore());
 
       if (considerIgnoredSubtreesInertia)
          initialRecursionStep.includeIgnoredSubtreeInertia();
 
       int nDoFs = MultiBodySystemTools.computeDegreesOfFreedom(input.getJointsToConsider());
-      jointAccelerationMatrix = new DenseMatrix64F(nDoFs, 1);
-      jointTauMatrix = new DenseMatrix64F(nDoFs, 1);
+      allJointAccelerationMatrix = new DenseMatrix64F(nDoFs, 1);
+      allJointTauMatrix = new DenseMatrix64F(nDoFs, 1);
 
       Function<RigidBodyReadOnly, SpatialAccelerationReadOnly> accelerationFunction = body ->
       {
@@ -248,8 +250,10 @@ public class InverseDynamicsCalculator
                                                                                            this::areJointAccelerationsConsidered);
    }
 
-   private void buildMultiBodyTree(RecursionStep parent, Collection<? extends JointReadOnly> jointsToIgnore)
+   private int buildMultiBodyTree(RecursionStep parent, Collection<? extends JointReadOnly> jointsToIgnore)
    {
+      int numberOfKinematicLoops = 0;
+
       for (JointReadOnly childJoint : parent.rigidBody.getChildrenJoints())
       {
          if (jointsToIgnore.contains(childJoint))
@@ -259,12 +263,25 @@ public class InverseDynamicsCalculator
 
          if (childBody != null)
          {
-            int[] jointIndices = input.getJointMatrixIndexProvider().getJointDoFIndices(childJoint);
-            RecursionStep child = new RecursionStep(childBody, parent, jointIndices);
-            rigidBodyToRecursionStepMap.put(childBody, child);
-            buildMultiBodyTree(child, jointsToIgnore);
+            if (rigidBodyToRecursionStepMap.containsKey(childBody))
+            {
+               int[] jointIndices = input.getJointMatrixIndexProvider().getJointDoFIndices(childJoint);
+               LoopClosureRecursionStep recursion = new LoopClosureRecursionStep(childJoint, parent, rigidBodyToRecursionStepMap.get(childBody), jointIndices);
+               jointToRecursionStepMap.put(childJoint, recursion);
+               numberOfKinematicLoops++;
+            }
+            else
+            {
+               int[] jointIndices = input.getJointMatrixIndexProvider().getJointDoFIndices(childJoint);
+               RecursionStep child = new RecursionStep(childBody, parent, jointIndices);
+               rigidBodyToRecursionStepMap.put(childBody, child);
+               jointToRecursionStepMap.put(childJoint, child);
+               numberOfKinematicLoops += buildMultiBodyTree(child, jointsToIgnore);
+            }
          }
       }
+
+      return numberOfKinematicLoops;
    }
 
    /**
@@ -435,12 +452,12 @@ public class InverseDynamicsCalculator
    {
       if (jointAccelerationMatrix != null)
       {
-         this.jointAccelerationMatrix.set(jointAccelerationMatrix);
+         this.allJointAccelerationMatrix.set(jointAccelerationMatrix);
       }
       else
       {
          List<? extends JointReadOnly> indexedJointsInOrder = input.getJointMatrixIndexProvider().getIndexedJointsInOrder();
-         MultiBodySystemTools.extractJointsState(indexedJointsInOrder, JointStateType.ACCELERATION, this.jointAccelerationMatrix);
+         MultiBodySystemTools.extractJointsState(indexedJointsInOrder, JointStateType.ACCELERATION, this.allJointAccelerationMatrix);
       }
 
       initialRecursionStep.passOne();
@@ -490,7 +507,7 @@ public class InverseDynamicsCalculator
     */
    public DenseMatrix64F getJointTauMatrix()
    {
-      return jointTauMatrix;
+      return allJointTauMatrix;
    }
 
    /**
@@ -501,11 +518,11 @@ public class InverseDynamicsCalculator
     */
    public WrenchReadOnly getComputedJointWrench(JointReadOnly joint)
    {
-      RecursionStep recursionStep = rigidBodyToRecursionStepMap.get(joint.getSuccessor());
+      RecursionStepBasics recursionStep = jointToRecursionStepMap.get(joint);
       if (recursionStep == null)
          return null;
       else
-         return recursionStep.jointWrench;
+         return recursionStep.getJointWrench();
    }
 
    /**
@@ -517,12 +534,12 @@ public class InverseDynamicsCalculator
     */
    public DenseMatrix64F getComputedJointTau(JointReadOnly joint)
    {
-      RecursionStep recursionStep = rigidBodyToRecursionStepMap.get(joint.getSuccessor());
+      RecursionStepBasics recursionStep = jointToRecursionStepMap.get(joint);
 
       if (recursionStep == null)
          return null;
       else
-         return recursionStep.tau;
+         return recursionStep.getTau();
    }
 
    /**
@@ -583,6 +600,42 @@ public class InverseDynamicsCalculator
       return accelerationProvider;
    }
 
+   private interface RecursionStepBasics
+   {
+      void includeIgnoredSubtreeInertia();
+
+      /**
+       * Resets the external wrenches from here down the leaves recursively.
+       */
+      void setExternalWrenchToZeroRecursive();
+
+      /**
+       * First pass going from the root to the leaves.
+       * <p>
+       * Here the rigid-body accelerations are updated and the net wrenches resulting from the rigid-body
+       * acceleration and velocity are computed.
+       * </p>
+       */
+      void passOne();
+
+      /**
+       * Second pass going from leaves to the root.
+       * <p>
+       * The net wrenches are propagated upstream and summed up at each rigid-body to compute the joint
+       * effort.
+       * </p>
+       */
+      void passTwo();
+
+      RigidBodyReadOnly getRigidBody();
+
+      Wrench getJointWrench();
+
+      DenseMatrix64F getTau();
+
+      int[] getJointIndices();
+   }
+
    /** Intermediate result used for garbage free operations. */
    private final SpatialForce jointForceFromChild = new SpatialForce();
 
@@ -591,12 +644,16 @@ public class InverseDynamicsCalculator
     *
     * @author Sylvain Bertrand
     */
-   private final class RecursionStep
+   private final class RecursionStep implements RecursionStepBasics
    {
       /**
        * The rigid-body for which this recursion is.
        */
       private final RigidBodyReadOnly rigidBody;
+      /**
+       * The parent joint of {@link #rigidBody}.
+       */
+      private final JointReadOnly joint;
       /**
        * Body inertia: usually equal to {@code rigidBody.getInertial()}. However, if at least one child of
        * {@code rigidBody} is ignored, it is equal to this rigid-body inertia and the subtree inertia
@@ -610,7 +667,7 @@ public class InverseDynamicsCalculator
       /**
        * The recursion steps holding onto the direct successor of this recursion step's rigid-body.
        */
-      private final List<RecursionStep> children = new ArrayList<>();
+      private final List<RecursionStepBasics> children = new ArrayList<>();
       /**
        * Calculated joint wrench, before projection onto the joint motion subspace.
        */
@@ -667,6 +724,7 @@ public class InverseDynamicsCalculator
 
          if (isRoot())
          {
+            joint = null;
             bodyInertia = null;
             jointWrench = null;
             externalWrench = null;
@@ -678,8 +736,9 @@ public class InverseDynamicsCalculator
          }
          else
          {
+            joint = rigidBody.getParentJoint();
             parent.children.add(this);
-            int nDoFs = getJoint().getDegreesOfFreedom();
+            int nDoFs = joint.getDegreesOfFreedom();
 
             bodyInertia = new SpatialInertia(rigidBody.getInertia());
             jointWrench = new Wrench();
@@ -689,10 +748,11 @@ public class InverseDynamicsCalculator
             a = new DenseMatrix64F(SpatialVectorReadOnly.SIZE, 1);
             tau = new DenseMatrix64F(nDoFs, 1);
             jointWrenchMatrix = new DenseMatrix64F(SpatialVectorReadOnly.SIZE, 1);
-            getJoint().getMotionSubspace(S);
+            joint.getMotionSubspace(S);
          }
       }
 
+      @Override
       public void includeIgnoredSubtreeInertia()
       {
          if (!isRoot() && children.size() != rigidBody.getChildrenJoints().size())
@@ -712,15 +772,11 @@ public class InverseDynamicsCalculator
             children.get(childIndex).includeIgnoredSubtreeInertia();
       }
 
-      /**
-       * First pass going from the root to the leaves.
-       * <p>
-       * Here the rigid-body accelerations are updated and the net wrenches resulting from the rigid-body
-       * acceleration and velocity are computed.
-       * </p>
-       */
+      @Override
       public void passOne()
       {
+         isPassTwoUpToDate = false;
+
          if (!isRoot())
          {
             rigidBodyAcceleration.setIncludingFrame(parent.rigidBodyAcceleration);
@@ -729,9 +785,9 @@ public class InverseDynamicsCalculator
 
             if (considerCoriolisAndCentrifugalForces)
             {
-               getJoint().getPredecessorTwist(localJointTwist);
+               joint.getPredecessorTwist(localJointTwist);
                rigidBodyAcceleration.changeFrame(getBodyFixedFrame(), localJointTwist, parent.getBodyFixedFrame().getTwistOfFrame());
-               bodyTwistToUse = getBodyTwist();
+               bodyTwistToUse = getBodyFixedFrame().getTwistOfFrame();
             }
             else
             {
@@ -741,10 +797,10 @@ public class InverseDynamicsCalculator
 
             if (considerJointAccelerations)
             {
-               int nDoFs = getJoint().getDegreesOfFreedom();
-               CommonOps.extract(jointAccelerationMatrix, jointIndices, nDoFs, qdd);
+               int nDoFs = joint.getDegreesOfFreedom();
+               CommonOps.extract(allJointAccelerationMatrix, jointIndices, nDoFs, qdd);
                CommonOps.mult(S, qdd, a);
-               localJointAcceleration.setIncludingFrame(getFrameAfterJoint(), getFrameBeforeJoint(), getFrameAfterJoint(), a);
+               localJointAcceleration.setIncludingFrame(joint.getFrameAfterJoint(), joint.getFrameBeforeJoint(), joint.getFrameAfterJoint(), a);
                localJointAcceleration.changeFrame(getBodyFixedFrame());
                localJointAcceleration.setBodyFrame(getBodyFixedFrame());
                localJointAcceleration.setBaseFrame(parent.getBodyFixedFrame());
@@ -764,15 +820,15 @@ public class InverseDynamicsCalculator
          }
       }
 
-      /**
-       * Second pass going from leaves to the root.
-       * <p>
-       * The net wrenches are propagated upstream and summed up at each rigid-body to compute the joint
-       * effort.
-       * </p>
-       */
+      private boolean isPassTwoUpToDate = false;
+
+      @Override
       public void passTwo()
       {
+         if (isPassTwoUpToDate)
+            return;
+         isPassTwoUpToDate = true;
+
          for (int childIndex = 0; childIndex < children.size(); childIndex++)
          {
             children.get(childIndex).passTwo();
@@ -782,27 +838,28 @@ public class InverseDynamicsCalculator
             return;
 
          jointWrench.sub(externalWrench);
-         jointWrench.changeFrame(getFrameAfterJoint());
+         jointWrench.changeFrame(joint.getFrameAfterJoint());
 
          for (int childIndex = 0; childIndex < children.size(); childIndex++)
-         {
-            jointForceFromChild.setIncludingFrame(children.get(childIndex).jointWrench);
-            jointForceFromChild.changeFrame(getFrameAfterJoint());
-            jointWrench.add(jointForceFromChild);
-         }
+            addJointWrenchFromChild(children.get(childIndex));
 
          jointWrench.get(jointWrenchMatrix);
          CommonOps.multTransA(S, jointWrenchMatrix, tau);
 
-         for (int dofIndex = 0; dofIndex < getJoint().getDegreesOfFreedom(); dofIndex++)
+         for (int dofIndex = 0; dofIndex < joint.getDegreesOfFreedom(); dofIndex++)
          {
-            jointTauMatrix.set(jointIndices[dofIndex], 0, tau.get(dofIndex, 0));
+            allJointTauMatrix.set(jointIndices[dofIndex], 0, tau.get(dofIndex, 0));
          }
       }
 
-      /**
-       * Resets the external wrenches from here down the leaves recursively.
-       */
+      private void addJointWrenchFromChild(RecursionStepBasics child)
+      {
+         jointForceFromChild.setIncludingFrame(child.getJointWrench());
+         jointForceFromChild.changeFrame(joint.getFrameAfterJoint());
+         jointWrench.add(jointForceFromChild);
+      }
+
+      @Override
       public void setExternalWrenchToZeroRecursive()
       {
          if (!isRoot())
@@ -814,34 +871,263 @@ public class InverseDynamicsCalculator
          }
       }
 
-      private MovingReferenceFrame getBodyFixedFrame()
+      @Override
+      public RigidBodyReadOnly getRigidBody()
+      {
+         return rigidBody;
+      }
+
+      public MovingReferenceFrame getBodyFixedFrame()
       {
          return rigidBody.getBodyFixedFrame();
-      }
-
-      public MovingReferenceFrame getFrameAfterJoint()
-      {
-         return getJoint().getFrameAfterJoint();
-      }
-
-      public MovingReferenceFrame getFrameBeforeJoint()
-      {
-         return getJoint().getFrameBeforeJoint();
-      }
-
-      public JointReadOnly getJoint()
-      {
-         return rigidBody.getParentJoint();
-      }
-
-      public TwistReadOnly getBodyTwist()
-      {
-         return getBodyFixedFrame().getTwistOfFrame();
       }
 
       private boolean isRoot()
       {
          return parent == null;
+      }
+
+      @Override
+      public Wrench getJointWrench()
+      {
+         return jointWrench;
+      }
+
+      @Override
+      public DenseMatrix64F getTau()
+      {
+         return tau;
+      }
+
+      @Override
+      public int[] getJointIndices()
+      {
+         return jointIndices;
+      }
+
+      @Override
+      public String toString()
+      {
+         String bodyName = rigidBody == null ? "null" : rigidBody.getName();
+         String jointName = joint == null ? "null" : joint.getName();
+         String childrenBodyNames = EuclidCoreIOTools.getCollectionString(", ", children, child -> child == null ? "null" : child.getRigidBody().getName());
+         return String.format("Body: %s, joint: %s, children bodies: [%s]", bodyName, jointName, childrenBodyNames);
+      }
+   }
+
+   /**
+    * Represents a single recursion step with all the intermediate variables needed.
+    *
+    * @author Sylvain Bertrand
+    */
+   private final class LoopClosureRecursionStep implements RecursionStepBasics
+   {
+      private final JointReadOnly joint;
+      /**
+       * Calculated joint wrench, before projection onto the joint motion subspace.
+       */
+      private final Wrench jointWrench;
+      /**
+       * <tt>S</tt> is the 6-by-N matrix representing the motion subspace of the parent joint, where N is
+       * the number of DoFs of the joint.
+       */
+      private final DenseMatrix64F S;
+      /**
+       * Computed joint effort.
+       */
+      private final DenseMatrix64F tau;
+      /**
+       * Computed joint wrench, before projection onto the joint motion subspace.
+       */
+      private final DenseMatrix64F jointWrenchMatrix;
+      /**
+       * Joint indices for storing {@code tau} in the main matrix {@code jointTauMatrix}.
+       */
+      private int[] jointIndices;
+      /**
+       * The next recursion after the loop closure. {@code successorRecursion} shares the same rigid-body
+       * as this recursion.
+       */
+      private RecursionStep successorRecursion;
+
+      public LoopClosureRecursionStep(JointReadOnly loopClosureJoint, RecursionStep parent, RecursionStep successorRecursion, int[] jointIndices)
+      {
+         if (loopClosureJoint.getSuccessor() != successorRecursion.rigidBody)
+            throw new IllegalArgumentException("Rigid-body mismatch. Joint's successor: " + loopClosureJoint.getSuccessor() + ", recursion body: "
+                  + successorRecursion.rigidBody);
+         if (loopClosureJoint == successorRecursion.joint)
+            throw new IllegalArgumentException("This recursion joint should not be equal to the successor joint, joint: " + loopClosureJoint);
+
+         joint = loopClosureJoint;
+         this.successorRecursion = successorRecursion;
+         this.jointIndices = jointIndices;
+
+         if (isRoot())
+         {
+            jointWrench = null;
+            S = null;
+            tau = null;
+            jointWrenchMatrix = null;
+         }
+         else
+         {
+            parent.children.add(this);
+            int nDoFs = joint.getDegreesOfFreedom();
+
+            jointWrench = new Wrench();
+            S = new DenseMatrix64F(SpatialVectorReadOnly.SIZE, nDoFs);
+            tau = new DenseMatrix64F(nDoFs, 1);
+            jointWrenchMatrix = new DenseMatrix64F(SpatialVectorReadOnly.SIZE, 1);
+            joint.getMotionSubspace(S);
+         }
+      }
+
+      @Override
+      public void includeIgnoredSubtreeInertia()
+      {
+         // Do nothing, it's done in the successorRecursion
+      }
+
+      @Override
+      public void passOne()
+      {
+         /*
+          * Do nothing, assume the joint acceleration satisfies the constraint such that the acceleration
+          * computed in successorRecursion is valid for this joint too.
+          */
+      }
+
+      @Override
+      public void passTwo()
+      {
+         /*
+          * The passTwo will be skipped if already up-to-date, so we can call it here to ensure the successor
+          * data can be used.
+          */
+         successorRecursion.passTwo();
+
+         if (isRoot())
+            return;
+
+         jointWrench.setIncludingFrame(successorRecursion.jointWrench);
+         jointWrench.changeFrame(joint.getFrameAfterJoint());
+         jointWrench.get(jointWrenchMatrix);
+         CommonOps.multTransA(S, jointWrenchMatrix, tau);
+
+         for (int dofIndex = 0; dofIndex < joint.getDegreesOfFreedom(); dofIndex++)
+         {
+            allJointTauMatrix.set(jointIndices[dofIndex], 0, tau.get(dofIndex, 0));
+         }
+      }
+
+      /**
+       * Resets the external wrenches from here down the leaves recursively.
+       */
+      @Override
+      public void setExternalWrenchToZeroRecursive()
+      {
+         // Do nothing here, the external wrench is stored in the successorRecursion
+      }
+
+      @Override
+      public RigidBodyReadOnly getRigidBody()
+      {
+         return successorRecursion.rigidBody;
+      }
+
+      private boolean isRoot()
+      {
+         return successorRecursion.isRoot();
+      }
+
+      @Override
+      public Wrench getJointWrench()
+      {
+         return jointWrench;
+      }
+
+      @Override
+      public DenseMatrix64F getTau()
+      {
+         return tau;
+      }
+
+      @Override
+      public int[] getJointIndices()
+      {
+         return jointIndices;
+      }
+
+      @Override
+      public String toString()
+      {
+         String bodyName = successorRecursion.rigidBody.getName();
+         String jointName = joint.getName();
+         return String.format("Body: %s, joint: %s, successor recursion: [%s]", bodyName, jointName, successorRecursion.toString());
+      }
+   }
+
+   private class KinematicLoopSubSystem
+   {
+      private final ExplicitLoopClosureFunction loopClosureFunction;
+      private final List<? extends JointReadOnly> joints;
+      private final List<RecursionStepBasics> recursionSteps = new ArrayList<>();
+      private final DenseMatrix64F tauMatrix;
+
+      public KinematicLoopSubSystem(ExplicitLoopClosureFunction loopClosureFunction)
+      {
+         this.loopClosureFunction = loopClosureFunction;
+         joints = loopClosureFunction.getKinematicLoopJoints();
+
+         for (JointReadOnly joint : joints)
+         {
+            recursionSteps.add(jointToRecursionStepMap.get(joint));
+         }
+
+         tauMatrix = new DenseMatrix64F(MultiBodySystemTools.computeDegreesOfFreedom(joints), 1);
+      }
+
+      public void passTwo()
+      {
+         int tauStartIndex = 0;
+
+         for (int i = 0; i < joints.size(); i++)
+         {
+            JointReadOnly joint = joints.get(i);
+            RecursionStepBasics recursionStep = recursionSteps.get(i);
+
+            recursionStep.passTwo();
+            CommonOps.insert(recursionStep.getTau(), tauMatrix, tauStartIndex, 0);
+            tauStartIndex += joint.getDegreesOfFreedom();
+         }
+
+         loopClosureFunction.recomputeJointEfforts(tauMatrix);
+
+         tauStartIndex = 0;
+
+         for (int i = 0; i < joints.size(); i++)
+         {
+            JointReadOnly joint = joints.get(i);
+            RecursionStepBasics recursionStep = recursionSteps.get(i);
+
+            loopClosureFunction.updateJointWrench(recursionStep.getJointWrench());
+
+            int[] jointIndices = recursionStep.getJointIndices();
+            DenseMatrix64F jointTau = recursionStep.getTau();
+
+            for (int dofIndex = 0; dofIndex < joint.getDegreesOfFreedom(); dofIndex++)
+            {
+               jointTau.set(dofIndex, 0, tauMatrix.get(tauStartIndex + dofIndex, 0));
+               allJointTauMatrix.set(jointIndices[dofIndex], 0, tauMatrix.get(tauStartIndex + dofIndex, 0));
+            }
+
+            tauStartIndex += joint.getDegreesOfFreedom();
+         }
+      }
+
+      public WrenchReadOnly getLoopWrench()
+      {
+         return loopClosureFunction.getWrenchForPredecessor();
       }
    }
 }
