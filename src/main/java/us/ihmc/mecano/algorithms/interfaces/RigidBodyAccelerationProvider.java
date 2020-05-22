@@ -1,5 +1,6 @@
 package us.ihmc.mecano.algorithms.interfaces;
 
+import java.util.function.BooleanSupplier;
 import java.util.function.Function;
 
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
@@ -159,6 +160,29 @@ public interface RigidBodyAccelerationProvider
                                                                                ReferenceFrame inertialFrame, boolean considerVelocities,
                                                                                boolean considerAccelerations)
    {
+      return toRigidBodyAccelerationProvider(accelerationFunction, inertialFrame, () -> considerVelocities, () -> considerAccelerations);
+   }
+
+   /**
+    * Factory for implementing a {@link RigidBodyAccelerationProvider} from a given function that
+    * computes spatial acceleration for any given rigid-body.
+    * <p>
+    * The function is used to implement {@link #getAccelerationOfBody(RigidBodyReadOnly)} and is enough
+    * to implement the other acceleration getters of this interface.
+    * </p>
+    *
+    * @param accelerationFunction  the function that computes rigid-body accelerations.
+    * @param inertialFrame         the inertial frame with respect to which the body accelerations are
+    *                              expressed.
+    * @param considerVelocities    whether the Coriolis and centrifugal resulting accelerations should
+    *                              be considered.
+    * @param considerAccelerations whether the joint accelerations are considered by the function.
+    * @return a new instance of {@code RigidBodyAccelerationProvider}.
+    */
+   public static RigidBodyAccelerationProvider toRigidBodyAccelerationProvider(Function<RigidBodyReadOnly, SpatialAccelerationReadOnly> accelerationFunction,
+                                                                               ReferenceFrame inertialFrame, BooleanSupplier considerVelocities,
+                                                                               BooleanSupplier considerAccelerations)
+   {
       return new RigidBodyAccelerationProvider()
       {
          private final Twist deltaTwist = new Twist();
@@ -233,13 +257,13 @@ public interface RigidBodyAccelerationProvider
          @Override
          public boolean areVelocitiesConsidered()
          {
-            return considerVelocities;
+            return considerVelocities.getAsBoolean();
          }
 
          @Override
          public boolean areAccelerationsConsidered()
          {
-            return considerAccelerations;
+            return considerAccelerations.getAsBoolean();
          }
 
          @Override

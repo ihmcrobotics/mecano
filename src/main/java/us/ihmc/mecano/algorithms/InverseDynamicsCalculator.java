@@ -46,6 +46,9 @@ import us.ihmc.mecano.tools.MultiBodySystemTools;
  */
 public class InverseDynamicsCalculator
 {
+   private static final boolean DEFAULT_CONSIDER_ACCELERATIONS = true;
+   private static final boolean DEFAULT_CONSIDER_CORIOLIS = true;
+
    /** Defines the multi-body system to use with this calculator. */
    private final MultiBodySystemReadOnly input;
 
@@ -60,30 +63,14 @@ public class InverseDynamicsCalculator
    private final DenseMatrix64F jointTauMatrix;
 
    /** Whether the effort resulting from the joint accelerations should be considered. */
-   private final boolean considerJointAccelerations;
+   private boolean considerJointAccelerations = DEFAULT_CONSIDER_ACCELERATIONS;
    /** Whether the effort resulting from the Coriolis and centrifugal forces should be considered. */
-   private final boolean considerCoriolisAndCentrifugalForces;
+   private boolean considerCoriolisAndCentrifugalForces = DEFAULT_CONSIDER_CORIOLIS;
    /**
     * Extension of this algorithm into an acceleration provider that be used instead of a
     * {@link SpatialAccelerationCalculator}.
     */
    private final RigidBodyAccelerationProvider accelerationProvider;
-
-   /**
-    * Creates a calculator for computing the joint efforts for all the descendants of the given
-    * {@code rootBody}.
-    * <p>
-    * Do not forgot to set the gravitational acceleration so this calculator can properly account for
-    * it.
-    * </p>
-    *
-    * @param rootBody the supporting body of the subtree to be evaluated by this calculator. Not
-    *                 modified.
-    */
-   public InverseDynamicsCalculator(RigidBodyReadOnly rootBody)
-   {
-      this(rootBody, true, true);
-   }
 
    /**
     * Creates a calculator for computing the joint efforts for all the descendants of the given
@@ -99,50 +86,19 @@ public class InverseDynamicsCalculator
     *                                             centrifugal forces should be considered.
     * @param considerJointAccelerations           whether the effort resulting from the joint
     *                                             accelerations should be considered.
+    * @deprecated Use the following code snippet instead:
+    * 
+    *             <pre>
+    *             InverseDynamicsCalculator calculator = new InverseDynamicsCalculator(rootBody);
+    *             calculator.setConsiderCoriolisAndCentrifugalForces(considerCoriolisAndCentrifugalForces);
+    *             calculator.setConsiderJointAccelerations(considerJointAccelerations);
+    *             </pre>
     */
    public InverseDynamicsCalculator(RigidBodyReadOnly rootBody, boolean considerCoriolisAndCentrifugalForces, boolean considerJointAccelerations)
    {
-      this(MultiBodySystemReadOnly.toMultiBodySystemInput(rootBody), considerCoriolisAndCentrifugalForces, considerJointAccelerations);
-   }
-
-   /**
-    * Creates a calculator for computing the joint efforts for system defined by the given
-    * {@code input}.
-    * <p>
-    * Do not forgot to set the gravitational acceleration so this calculator can properly account for
-    * it.
-    * </p>
-    *
-    * @param input the definition of the system to be evaluated by this calculator.
-    */
-   public InverseDynamicsCalculator(MultiBodySystemReadOnly input)
-   {
-      this(input, true, true);
-   }
-
-   /**
-    * Creates a calculator for computing the joint efforts for system defined by the given
-    * {@code input}.
-    * <p>
-    * Do not forgot to set the gravitational acceleration so this calculator can properly account for
-    * it.
-    * </p>
-    *
-    * @param input                          the definition of the system to be evaluated by this
-    *                                       calculator.
-    * @param considerIgnoredSubtreesInertia whether the inertia of the ignored part(s) of the given
-    *                                       multi-body system should be considered. When {@code true},
-    *                                       this provides more accurate joint torques as they
-    *                                       compensate for instance for the gravity acting on the
-    *                                       ignored rigid-bodies, i.e. bodies which have an ancestor
-    *                                       joint that is ignored as specified in the given
-    *                                       {@code input}. When {@code false}, the resulting joint
-    *                                       torques may be less accurate and this calculator may gain
-    *                                       slight performance improvement.
-    */
-   public InverseDynamicsCalculator(MultiBodySystemReadOnly input, boolean considerIgnoredSubtreesInertia)
-   {
-      this(input, true, true, considerIgnoredSubtreesInertia);
+      this(rootBody);
+      setConsiderCoriolisAndCentrifugalForces(considerCoriolisAndCentrifugalForces);
+      setConsiderJointAccelerations(considerJointAccelerations);
    }
 
    /**
@@ -159,10 +115,19 @@ public class InverseDynamicsCalculator
     *                                             centrifugal forces should be considered.
     * @param considerJointAccelerations           whether the effort resulting from the joint
     *                                             accelerations should be considered.
+    * @deprecated Use the following code snippet instead:
+    * 
+    *             <pre>
+    *             InverseDynamicsCalculator calculator = new InverseDynamicsCalculator(input);
+    *             calculator.setConsiderCoriolisAndCentrifugalForces(considerCoriolisAndCentrifugalForces);
+    *             calculator.setConsiderJointAccelerations(considerJointAccelerations);
+    *             </pre>
     */
    public InverseDynamicsCalculator(MultiBodySystemReadOnly input, boolean considerCoriolisAndCentrifugalForces, boolean considerJointAccelerations)
    {
-      this(input, considerCoriolisAndCentrifugalForces, considerJointAccelerations, true);
+      this(input);
+      setConsiderCoriolisAndCentrifugalForces(considerCoriolisAndCentrifugalForces);
+      setConsiderJointAccelerations(considerJointAccelerations);
    }
 
    /**
@@ -189,13 +154,76 @@ public class InverseDynamicsCalculator
     *                                             {@code false}, the resulting joint torques may be
     *                                             less accurate and this calculator may gain slight
     *                                             performance improvement.
+    * @deprecated Use the following code snippet instead:
+    * 
+    *             <pre>
+    *             InverseDynamicsCalculator calculator = new InverseDynamicsCalculator(input, considerIgnoredSubtreesInertia);
+    *             calculator.setConsiderCoriolisAndCentrifugalForces(considerCoriolisAndCentrifugalForces);
+    *             calculator.setConsiderJointAccelerations(considerJointAccelerations);
+    *             </pre>
     */
    public InverseDynamicsCalculator(MultiBodySystemReadOnly input, boolean considerCoriolisAndCentrifugalForces, boolean considerJointAccelerations,
                                     boolean considerIgnoredSubtreesInertia)
    {
+      this(input, considerIgnoredSubtreesInertia);
+      setConsiderCoriolisAndCentrifugalForces(considerCoriolisAndCentrifugalForces);
+      setConsiderJointAccelerations(considerJointAccelerations);
+   }
+
+   /**
+    * Creates a calculator for computing the joint efforts for all the descendants of the given
+    * {@code rootBody}.
+    * <p>
+    * Do not forgot to set the gravitational acceleration so this calculator can properly account for
+    * it.
+    * </p>
+    *
+    * @param rootBody the supporting body of the subtree to be evaluated by this calculator. Not
+    *                 modified.
+    */
+   public InverseDynamicsCalculator(RigidBodyReadOnly rootBody)
+   {
+      this(MultiBodySystemReadOnly.toMultiBodySystemInput(rootBody), true);
+   }
+
+   /**
+    * Creates a calculator for computing the joint efforts for system defined by the given
+    * {@code input}.
+    * <p>
+    * Do not forgot to set the gravitational acceleration so this calculator can properly account for
+    * it.
+    * </p>
+    *
+    * @param input the definition of the system to be evaluated by this calculator.
+    */
+   public InverseDynamicsCalculator(MultiBodySystemReadOnly input)
+   {
+      this(input, true);
+   }
+
+   /**
+    * Creates a calculator for computing the joint efforts for system defined by the given
+    * {@code input}.
+    * <p>
+    * Do not forgot to set the gravitational acceleration so this calculator can properly account for
+    * it.
+    * </p>
+    *
+    * @param input                          the definition of the system to be evaluated by this
+    *                                       calculator.
+    * @param considerIgnoredSubtreesInertia whether the inertia of the ignored part(s) of the given
+    *                                       multi-body system should be considered. When {@code true},
+    *                                       this provides more accurate joint torques as they
+    *                                       compensate for instance for the gravity acting on the
+    *                                       ignored rigid-bodies, i.e. bodies which have an ancestor
+    *                                       joint that is ignored as specified in the given
+    *                                       {@code input}. When {@code false}, the resulting joint
+    *                                       torques may be less accurate and this calculator may gain
+    *                                       slight performance improvement.
+    */
+   public InverseDynamicsCalculator(MultiBodySystemReadOnly input, boolean considerIgnoredSubtreesInertia)
+   {
       this.input = input;
-      this.considerJointAccelerations = considerJointAccelerations;
-      this.considerCoriolisAndCentrifugalForces = considerCoriolisAndCentrifugalForces;
 
       RigidBodyReadOnly rootBody = input.getRootBody();
       initialRecursionStep = new RecursionStep(rootBody, null, null);
@@ -216,8 +244,8 @@ public class InverseDynamicsCalculator
       };
       accelerationProvider = RigidBodyAccelerationProvider.toRigidBodyAccelerationProvider(accelerationFunction,
                                                                                            input.getInertialFrame(),
-                                                                                           considerCoriolisAndCentrifugalForces,
-                                                                                           considerJointAccelerations);
+                                                                                           this::areCoriolisAndCentrifugalForcesConsidered,
+                                                                                           this::areJointAccelerationsConsidered);
    }
 
    private void buildMultiBodyTree(RecursionStep parent, Collection<? extends JointReadOnly> jointsToIgnore)
@@ -237,6 +265,30 @@ public class InverseDynamicsCalculator
             buildMultiBodyTree(child, jointsToIgnore);
          }
       }
+   }
+
+   /**
+    * Sets whether the effort resulting from the Coriolis and centrifugal forces should be considered.
+    * 
+    * @param considerCoriolisAndCentrifugalForces {@code true} to account for Coriolis and centrifugal
+    *                                             forces, {@code false} for ignoring them. Default
+    *                                             value {@value #DEFAULT_CONSIDER_CORIOLIS}.
+    */
+   public void setConsiderCoriolisAndCentrifugalForces(boolean considerCoriolisAndCentrifugalForces)
+   {
+      this.considerCoriolisAndCentrifugalForces = considerCoriolisAndCentrifugalForces;
+   }
+
+   /**
+    * Sets whether the effort resulting from the joint accelerations should be considered.
+    * 
+    * @param considerJointAccelerations {@code true} to account for joint accelerations, {@code false}
+    *                                   for ignoring them. Default value
+    *                                   {@value #DEFAULT_CONSIDER_ACCELERATIONS}.
+    */
+   public void setConsiderJointAccelerations(boolean considerJointAccelerations)
+   {
+      this.considerJointAccelerations = considerJointAccelerations;
    }
 
    /**
@@ -403,6 +455,32 @@ public class InverseDynamicsCalculator
    public MultiBodySystemReadOnly getInput()
    {
       return input;
+   }
+
+   /**
+    * Returns whether this calculator is considering the efforts resulting from joint accelerations or
+    * not.
+    * 
+    * @return {@code true} if this calculator is accounting for joint accelerations, {@code false}
+    *         otherwise.
+    * @see #setConsiderJointAccelerations(boolean)
+    */
+   public boolean areJointAccelerationsConsidered()
+   {
+      return considerJointAccelerations;
+   }
+
+   /**
+    * Returns whether this calculator is considering the efforts resulting from Coriolis and
+    * centrifugal effects or not.
+    * 
+    * @return {@code true} if this calculator is accounting for Coriolis and centrifugal forces,
+    *         {@code false} otherwise.
+    * @see #setConsiderCoriolisAndCentrifugalForces(boolean)
+    */
+   public boolean areCoriolisAndCentrifugalForcesConsidered()
+   {
+      return considerCoriolisAndCentrifugalForces;
    }
 
    /**
