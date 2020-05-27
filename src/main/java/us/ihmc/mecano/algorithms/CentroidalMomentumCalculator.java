@@ -2,9 +2,7 @@ package us.ihmc.mecano.algorithms;
 
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.LinkedHashMap;
 import java.util.List;
-import java.util.Map;
 
 import org.ejml.data.DenseMatrix64F;
 import org.ejml.ops.CommonOps;
@@ -33,6 +31,11 @@ import us.ihmc.mecano.tools.MultiBodySystemTools;
 /**
  * Computes the centroidal momentum matrix that maps from joint velocity space to the system linear
  * and angular momentum.
+ * <p>
+ * Note on kinematic loops: the computed centroidal momentum matrix will be filled of zeros for the
+ * loop closure joints. By externally constraining the configuration and velocity of the joints
+ * composing a kinematic loop, the results from this calculator will remain accurate.
+ * </p>
  *
  * @author Sylvain Bertrand
  */
@@ -45,8 +48,6 @@ public class CentroidalMomentumCalculator implements ReferenceFrameHolder
 
    /** Array for each iteration of this algorithm. */
    private final IterativeStep[] iterativeSteps;
-   /** Map to quickly retrieve information for each rigid-body. */
-   private final Map<RigidBodyReadOnly, IterativeStep> rigidBodyToIterativeStepMap = new LinkedHashMap<>();
 
    /** Intermediate variable to store the unit-twist of the parent joint. */
    private final Twist jointUnitTwist;
@@ -131,12 +132,10 @@ public class CentroidalMomentumCalculator implements ReferenceFrameHolder
 
       RigidBodyReadOnly rootBody = input.getRootBody();
       IterativeStep initialIterativeStep = new IterativeStep(rootBody, null);
-      rigidBodyToIterativeStepMap.put(rootBody, initialIterativeStep);
+      iterativeSteps = buildMultiBodyTree(initialIterativeStep, input.getJointsToIgnore()).toArray(new IterativeStep[0]);
+
       if (considerIgnoredSubtreesInertia)
          initialIterativeStep.includeIgnoredSubtreeInertia();
-
-      buildMultiBodyTree(initialIterativeStep, input.getJointsToIgnore());
-      iterativeSteps = rigidBodyToIterativeStepMap.values().toArray(new IterativeStep[0]);
 
       jointUnitTwist = new Twist();
       unitMomentum = new Momentum(matrixFrame);
@@ -151,23 +150,36 @@ public class CentroidalMomentumCalculator implements ReferenceFrameHolder
       jointVelocityMatrix = new DenseMatrix64F(nDegreesOfFreedom, 1);
    }
 
-   private void buildMultiBodyTree(IterativeStep parent, Collection<? extends JointReadOnly> jointsToIgnore)
+   private List<IterativeStep> buildMultiBodyTree(IterativeStep parent, Collection<? extends JointReadOnly> jointsToIgnore)
    {
+      List<IterativeStep> iterativeSteps = new ArrayList<>();
+      iterativeSteps.add(parent);
+
       for (JointReadOnly childJoint : parent.rigidBody.getChildrenJoints())
       {
          if (jointsToIgnore.contains(childJoint))
             continue;
+
+         if (childJoint.isLoopClosure())
+         {
+            /*
+             * We simply skip any loop closure joint which will leave their columns in the matrix set to zero,
+             * which is what we want.
+             */
+            continue;
+         }
 
          RigidBodyReadOnly childBody = childJoint.getSuccessor();
          if (childBody != null)
          {
             int[] jointIndices = input.getJointMatrixIndexProvider().getJointDoFIndices(childJoint);
             IterativeStep child = new IterativeStep(childBody, jointIndices);
-            rigidBodyToIterativeStepMap.put(childBody, child);
             parent.children.add(child);
-            buildMultiBodyTree(child, jointsToIgnore);
+            iterativeSteps.addAll(buildMultiBodyTree(child, jointsToIgnore));
          }
       }
+
+      return iterativeSteps;
    }
 
    /**
