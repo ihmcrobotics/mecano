@@ -50,7 +50,7 @@ public interface RigidBodyReadOnly
    /**
     * Gets the reference to the parent joint of this rigid-body.
     * <p>
-    * The parent joint is the joint directed connected to this rigid-body and located between this and
+    * The parent joint is the joint directly connected to this rigid-body and located between this and
     * the root body of the robot.
     * </p>
     *
