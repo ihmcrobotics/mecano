@@ -111,6 +111,7 @@ public abstract class Joint implements JointBasics
                                                                           getFrameAfterJoint(),
                                                                           transformToSuccessorParentJoint);
       setSuccessor(successor);
+      successor.addParentLoopClosureJoint(this);
    }
 
    /** {@inheritDoc} */

@@ -1,8 +1,10 @@
 package us.ihmc.mecano.multiBodySystem.iterators;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Random;
@@ -18,6 +20,7 @@ import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
 import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyReadOnly;
 import us.ihmc.mecano.spatial.interfaces.SpatialInertiaBasics;
 import us.ihmc.mecano.tools.MultiBodySystemRandomTools;
+import us.ihmc.mecano.tools.MultiBodySystemTools;
 
 public class RigidBodyIterableTest
 {
@@ -84,6 +87,43 @@ public class RigidBodyIterableTest
                }
             }
          }
+      }
+   }
+
+   @Test
+   public void testChainWithKinematicLoop()
+   {
+      Random random = new Random(43954);
+
+      for (int i = 0; i < ITERATIONS; i++)
+      { // We only assert that the iterator returned each joint only once.
+         int numberOfJoints = random.nextInt(50) + 2;
+         List<JointBasics> joints = MultiBodySystemRandomTools.nextJointChain(random, numberOfJoints);
+         RigidBodyBasics rootBody = MultiBodySystemTools.getRootBody(joints.get(0).getPredecessor());
+         int loopStartIndex = random.nextInt(numberOfJoints);
+         int loopEndIndex = random.nextInt(numberOfJoints);
+
+         while (loopEndIndex == loopStartIndex)
+            loopEndIndex = random.nextInt(numberOfJoints);
+
+         if (loopStartIndex > loopEndIndex)
+         {
+            int temp = loopStartIndex;
+            loopStartIndex = loopEndIndex;
+            loopEndIndex = temp;
+         }
+
+         int kinematicLoopSize = random.nextInt(10) + 2;
+         RigidBodyBasics loopStart = joints.get(loopStartIndex).getSuccessor();
+         RigidBodyBasics loopEnd = joints.get(loopEndIndex).getSuccessor();
+         MultiBodySystemRandomTools.nextKinematicLoopRevoluteJoints(random, "loop", loopStart, loopEnd, kinematicLoopSize);
+
+         RigidBodyIterable<RigidBodyBasics> bodyIterable = new RigidBodyIterable<>(RigidBodyBasics.class, null, rootBody);
+         List<RigidBodyBasics> iterableBodies = new ArrayList<>();
+         bodyIterable.iterator().forEachRemaining(iterableBodies::add);
+
+         assertEquals(numberOfJoints + kinematicLoopSize, iterableBodies.size());
+         assertEquals(new HashSet<>(iterableBodies).size(), iterableBodies.size());
       }
    }
 
@@ -245,7 +285,7 @@ public class RigidBodyIterableTest
       }
 
       @Override
-      public List<? extends JointBasics> getChildrenJoints()
+      public List<JointBasics> getChildrenJoints()
       {
          return rigidBody.getChildrenJoints();
       }

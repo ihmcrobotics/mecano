@@ -4,6 +4,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Random;
@@ -13,10 +14,12 @@ import java.util.stream.Collectors;
 import org.junit.jupiter.api.Test;
 
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
+import us.ihmc.euclid.tools.EuclidCoreIOTools;
 import us.ihmc.euclid.tools.EuclidCoreTestTools;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.mecano.frames.MovingReferenceFrame;
 import us.ihmc.mecano.multiBodySystem.FixedJoint;
+import us.ihmc.mecano.multiBodySystem.RevoluteJoint;
 import us.ihmc.mecano.multiBodySystem.interfaces.JointBasics;
 import us.ihmc.mecano.multiBodySystem.interfaces.JointReadOnly;
 import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointReadOnly;
@@ -321,6 +324,117 @@ public class MultiBodySystemFactoriesTest
       }
    }
 
+   @Test
+   public void testCloneMultiBodySystemWithKinematicLoop() throws Exception
+   {
+      Random random = new Random(15641);
+
+      for (int i = 0; i < NUMBER_OF_ITERATIONS; i++)
+      {
+         int numberOfJoints = 6;
+
+         List<JointBasics> originalPrimaryBranch = MultiBodySystemRandomTools.nextJointChain(random, numberOfJoints);
+         RigidBodyReadOnly originalRootBody = MultiBodySystemTools.getRootBody(originalPrimaryBranch.get(0).getPredecessor());
+
+         int loopStartIndex = random.nextInt(numberOfJoints);
+         int loopEndIndex = random.nextInt(numberOfJoints);
+
+         while (loopEndIndex == loopStartIndex)
+            loopEndIndex = random.nextInt(numberOfJoints);
+
+         if (loopStartIndex > loopEndIndex)
+         {
+            int temp = loopStartIndex;
+            loopStartIndex = loopEndIndex;
+            loopEndIndex = temp;
+         }
+
+         int kinematicLoopSize = random.nextInt(3) + 2;
+         RigidBodyBasics loopStart = originalPrimaryBranch.get(loopStartIndex).getSuccessor();
+         RigidBodyBasics loopEnd = originalPrimaryBranch.get(loopEndIndex).getSuccessor();
+         List<RevoluteJoint> originalSecondaryBranch = MultiBodySystemRandomTools.nextKinematicLoopRevoluteJoints(random,
+                                                                                                                  "loop",
+                                                                                                                  loopStart,
+                                                                                                                  loopEnd,
+                                                                                                                  kinematicLoopSize);
+         List<JointBasics> allOriginalJoints = new ArrayList<>();
+         allOriginalJoints.addAll(originalPrimaryBranch);
+         allOriginalJoints.addAll(originalSecondaryBranch);
+
+         String cloneSuffix = "Test";
+         RigidBodyBasics cloneRootBody = MultiBodySystemFactories.cloneMultiBodySystem(originalRootBody, ReferenceFrame.getWorldFrame(), cloneSuffix);
+         List<JointBasics> allCloneJoints = SubtreeStreams.fromChildren(cloneRootBody).collect(Collectors.toList());
+
+         assertEquals(allOriginalJoints.size(), allCloneJoints.size());
+
+         for (JointBasics originalJoint : allOriginalJoints)
+         {
+            JointBasics cloneJoint = allCloneJoints.stream().filter(joint -> joint.getName().equals(originalJoint.getName() + cloneSuffix)).findFirst().get();
+
+            assertJointPropertiesEqual(originalJoint, cloneJoint, cloneSuffix);
+
+            // Test predecessor is the correct one
+            String expectedClonePredecessorName = originalJoint.getPredecessor().getName() + cloneSuffix;
+            assertEquals(expectedClonePredecessorName, cloneJoint.getPredecessor().getName());
+
+            // Test successor is the correct one
+            String expectedCloneSuccessorName = originalJoint.getSuccessor().getName() + cloneSuffix;
+            assertEquals(expectedCloneSuccessorName, cloneJoint.getSuccessor().getName());
+
+            assertEquals(originalJoint.isLoopClosure(), cloneJoint.isLoopClosure());
+
+            if (originalJoint.isLoopClosure())
+            {
+               assertTrue(cloneJoint.getFrameAfterJoint() == cloneJoint.getLoopClosureFrame().getParent());
+               EuclidCoreTestTools.assertRigidBodyTransformEquals(originalJoint.getLoopClosureFrame().getTransformToParent(),
+                                                                  cloneJoint.getLoopClosureFrame().getTransformToParent(),
+                                                                  EPSILON);
+            }
+         }
+
+         List<? extends RigidBodyReadOnly> originalBodies = originalRootBody.subtreeList();
+         List<? extends RigidBodyBasics> cloneBodies = cloneRootBody.subtreeList();
+         assertEquals(originalBodies.size(),
+                      cloneBodies.size(),
+                      EuclidCoreIOTools.getCollectionString("Name of clone bodies:\n", "\n", "\n", cloneBodies, RigidBodyBasics::getName));
+         Set<String> cloneNameSet = cloneBodies.stream().map(RigidBodyReadOnly::getName).collect(Collectors.toSet());
+         assertEquals(cloneBodies.size(), cloneNameSet.size());
+
+         for (RigidBodyReadOnly originalBody : originalBodies)
+         {
+            RigidBodyBasics cloneBody = cloneBodies.stream().filter(body -> body.getName().equals(originalBody.getName() + cloneSuffix)).findFirst().get();
+
+            assertRigidBodyPropertiesEqual(originalBody, cloneBody, cloneSuffix);
+
+            if (!originalBody.isRootBody())
+            {
+               // Test the parent joint is the correct one
+               assertEquals(originalBody.getParentJoint().getName() + cloneSuffix, cloneBody.getParentJoint().getName());
+            }
+
+            assertEquals(originalBody.getParentLoopClosureJoints().size(), cloneBody.getParentLoopClosureJoints().size());
+
+            for (int loopClosureIndex = 0; loopClosureIndex < originalBody.getParentLoopClosureJoints().size(); loopClosureIndex++)
+            {
+               assertEquals(originalBody.getParentLoopClosureJoints().get(loopClosureIndex).getName() + cloneSuffix,
+                            cloneBody.getParentLoopClosureJoints().get(loopClosureIndex).getName());
+            }
+
+            // Same test for the children joints
+            List<? extends JointReadOnly> originalChildrenJoints = originalBody.getChildrenJoints();
+            List<? extends JointReadOnly> cloneChildrenJoints = cloneBody.getChildrenJoints();
+            assertEquals(originalChildrenJoints.size(), cloneChildrenJoints.size());
+
+            for (int childIndex = 0; childIndex < originalChildrenJoints.size(); childIndex++)
+            {
+               JointReadOnly originalChildJoint = originalChildrenJoints.get(childIndex);
+               JointReadOnly cloneChildJoint = cloneChildrenJoints.get(childIndex);
+               assertEquals(originalChildJoint.getName() + cloneSuffix, cloneChildJoint.getName());
+            }
+         }
+      }
+   }
+
    public void assertRigidBodyPropertiesEqual(RigidBodyReadOnly originalBody, RigidBodyReadOnly cloneBody, String cloneSuffix)
    {
       // Test clone name
@@ -374,7 +488,7 @@ public class MultiBodySystemFactoriesTest
       ReferenceFrame frameBeforeOriginalJoint = originalJoint.getFrameBeforeJoint();
       ReferenceFrame frameBeforeCloneJoint = cloneJoint.getFrameBeforeJoint();
       // Test the frame name
-      if (originalJoint.getPredecessor().isRootBody() || (originalJoint instanceof FixedJoint && cloneJoint instanceof FixedJoint))
+      if (originalJoint.getPredecessor().isRootBody() || originalJoint instanceof FixedJoint && cloneJoint instanceof FixedJoint)
          assertEquals(frameBeforeOriginalJoint.getName().replaceAll("Frame", cloneSuffix + "Frame"), frameBeforeCloneJoint.getName());
       else
          assertEquals(frameBeforeOriginalJoint.getName() + cloneSuffix, frameBeforeCloneJoint.getName());
