@@ -787,8 +787,6 @@ public class InverseDynamicsCalculator
       @Override
       public void passOne()
       {
-         isPassTwoUpToDate = false;
-
          if (!isRoot())
          {
             rigidBodyAcceleration.setIncludingFrame(parent.rigidBodyAcceleration);
@@ -832,15 +830,9 @@ public class InverseDynamicsCalculator
          }
       }
 
-      private boolean isPassTwoUpToDate = false;
-
       @Override
       public void passTwo()
       {
-         if (isPassTwoUpToDate)
-            return;
-         isPassTwoUpToDate = true;
-
          for (int childIndex = 0; childIndex < children.size(); childIndex++)
          {
             children.get(childIndex).passTwo();
@@ -975,22 +967,13 @@ public class InverseDynamicsCalculator
          this.successorRecursion = successorRecursion;
          this.jointIndices = jointIndices;
 
-         if (isRoot())
-         {
-            jointWrench = null;
-            S = null;
-            tau = null;
-         }
-         else
-         {
-            parent.children.add(this);
-            int nDoFs = joint.getDegreesOfFreedom();
+         parent.children.add(this);
+         int nDoFs = joint.getDegreesOfFreedom();
 
-            jointWrench = new Wrench();
-            S = new DenseMatrix64F(SpatialVectorReadOnly.SIZE, nDoFs);
-            tau = new DenseMatrix64F(nDoFs, 1);
-            joint.getMotionSubspace(S);
-         }
+         jointWrench = new Wrench();
+         S = new DenseMatrix64F(SpatialVectorReadOnly.SIZE, nDoFs);
+         tau = new DenseMatrix64F(nDoFs, 1);
+         joint.getMotionSubspace(S);
       }
 
       @Override
@@ -1011,15 +994,7 @@ public class InverseDynamicsCalculator
       @Override
       public void passTwo()
       {
-         /*
-          * The passTwo will be skipped if already up-to-date, so we can call it here to ensure the successor
-          * data can be used.
-          */
-         successorRecursion.passTwo();
-
-         if (isRoot())
-            return;
-
+         // The effort at the joint is set to zero and has to be handled externally once the effort for the loop joints has been computed.
          jointWrench.setToZero(getRigidBody().getBodyFixedFrame(), joint.getFrameAfterJoint());
          tau.zero();
 
@@ -1048,11 +1023,6 @@ public class InverseDynamicsCalculator
       public RigidBodyReadOnly getRigidBody()
       {
          return successorRecursion.rigidBody;
-      }
-
-      private boolean isRoot()
-      {
-         return successorRecursion.isRoot();
       }
 
       @Override
