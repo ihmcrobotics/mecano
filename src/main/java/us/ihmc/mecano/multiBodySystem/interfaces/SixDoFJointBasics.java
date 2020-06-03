@@ -1,6 +1,6 @@
 package us.ihmc.mecano.multiBodySystem.interfaces;
 
-import org.ejml.data.DenseMatrix64F;
+import org.ejml.data.DMatrix;
 
 import us.ihmc.euclid.tuple3D.interfaces.Vector3DReadOnly;
 import us.ihmc.mecano.tools.MecanoTools;
@@ -101,7 +101,7 @@ public interface SixDoFJointBasics extends SixDoFJointReadOnly, FloatingJointBas
 
    /** {@inheritDoc} */
    @Override
-   default int setJointConfiguration(int rowStart, DenseMatrix64F matrix)
+   default int setJointConfiguration(int rowStart, DMatrix matrix)
    {
       getJointPose().getOrientation().set(rowStart, matrix);
       getJointPose().getPosition().set(rowStart + 4, matrix);
@@ -110,7 +110,7 @@ public interface SixDoFJointBasics extends SixDoFJointReadOnly, FloatingJointBas
 
    /** {@inheritDoc} */
    @Override
-   default int setJointVelocity(int rowStart, DenseMatrix64F matrix)
+   default int setJointVelocity(int rowStart, DMatrix matrix)
    {
       getJointTwist().set(rowStart, matrix);
       return rowStart + getDegreesOfFreedom();
@@ -118,7 +118,7 @@ public interface SixDoFJointBasics extends SixDoFJointReadOnly, FloatingJointBas
 
    /** {@inheritDoc} */
    @Override
-   default int setJointAcceleration(int rowStart, DenseMatrix64F matrix)
+   default int setJointAcceleration(int rowStart, DMatrix matrix)
    {
       getJointAcceleration().set(rowStart, matrix);
       return rowStart + getDegreesOfFreedom();
@@ -126,7 +126,7 @@ public interface SixDoFJointBasics extends SixDoFJointReadOnly, FloatingJointBas
 
    /** {@inheritDoc} */
    @Override
-   default int setJointTau(int rowStart, DenseMatrix64F matrix)
+   default int setJointTau(int rowStart, DMatrix matrix)
    {
       getJointWrench().set(rowStart, matrix);
       return rowStart + getDegreesOfFreedom();

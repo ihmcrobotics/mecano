@@ -6,9 +6,9 @@ import static us.ihmc.euclid.tools.EuclidCoreRandomTools.nextVector3D;
 import java.util.Random;
 import java.util.stream.IntStream;
 
-import org.ejml.data.DenseMatrix64F;
-import org.ejml.factory.DecompositionFactory;
-import org.ejml.interfaces.decomposition.EigenDecomposition;
+import org.ejml.data.DMatrixRMaj;
+import org.ejml.dense.row.factory.DecompositionFactory_DDRM;
+import org.ejml.interfaces.decomposition.EigenDecomposition_F64;
 
 import us.ihmc.euclid.matrix.Matrix3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
@@ -634,9 +634,9 @@ public class MecanoRandomTools
 
    private static void checkEigenValuesRealAndPositive(Matrix3D matrix, double epsilon)
    {
-      DenseMatrix64F denseMatrix = new DenseMatrix64F(3, 3);
+      DMatrixRMaj denseMatrix = new DMatrixRMaj(3, 3);
       matrix.get(denseMatrix);
-      EigenDecomposition<DenseMatrix64F> eig = DecompositionFactory.eig(3, false);
+      EigenDecomposition_F64<DMatrixRMaj> eig = DecompositionFactory_DDRM.eig(3, false);
       eig.decompose(denseMatrix);
 
       for (int i = 0; i < eig.getNumberOfEigenvalues(); i++)

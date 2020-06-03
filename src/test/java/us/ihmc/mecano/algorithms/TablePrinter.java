@@ -3,7 +3,7 @@ package us.ihmc.mecano.algorithms;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.ejml.data.DenseMatrix64F;
+import org.ejml.data.DMatrixRMaj;
 
 import us.ihmc.euclid.tools.EuclidCoreIOTools;
 
@@ -40,7 +40,7 @@ public class TablePrinter
          setCell(row, col, text[col], Alignment.LEFT);
    }
 
-   public void setSubTable(int startRow, int startCol, DenseMatrix64F matrix)
+   public void setSubTable(int startRow, int startCol, DMatrixRMaj matrix)
    {
       for (int row = 0; row < matrix.getNumRows(); row++)
       {

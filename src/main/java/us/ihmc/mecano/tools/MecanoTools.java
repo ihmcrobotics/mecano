@@ -4,8 +4,8 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
-import org.ejml.data.DenseMatrix64F;
-import org.ejml.ops.MatrixDimensionException;
+import org.ejml.MatrixDimensionException;
+import org.ejml.data.DMatrix;
 
 import us.ihmc.euclid.matrix.interfaces.Matrix3DBasics;
 import us.ihmc.euclid.matrix.interfaces.Matrix3DReadOnly;
@@ -156,7 +156,7 @@ public class MecanoTools
     *             instead.
     */
    @Deprecated
-   public static void checkMatrixMinimumSize(int minRows, int minColumns, DenseMatrix64F matrixToTest)
+   public static void checkMatrixMinimumSize(int minRows, int minColumns, DMatrix matrixToTest)
    {
       EuclidCoreTools.checkMatrixMinimumSize(minRows, minColumns, matrixToTest);
    }
@@ -198,7 +198,7 @@ public class MecanoTools
     *                     {@code matrixToPack}.
     * @param matrixToPack the matrix used to store the result. Modified.
     */
-   public static void toTildeForm(Tuple3DReadOnly tuple, int startRow, int startColumn, DenseMatrix64F matrixToPack)
+   public static void toTildeForm(Tuple3DReadOnly tuple, int startRow, int startColumn, DMatrix matrixToPack)
    {
       toTildeForm(tuple, false, startRow, startColumn, matrixToPack);
    }
@@ -221,7 +221,7 @@ public class MecanoTools
     *                     {@code matrixToPack}.
     * @param matrixToPack the matrix used to store the result. Modified.
     */
-   public static void toTildeForm(Tuple3DReadOnly tuple, boolean transpose, int startRow, int startColumn, DenseMatrix64F matrixToPack)
+   public static void toTildeForm(Tuple3DReadOnly tuple, boolean transpose, int startRow, int startColumn, DMatrix matrixToPack)
    {
       toTildeForm(1.0, tuple, transpose, startRow, startColumn, matrixToPack);
    }
@@ -245,7 +245,7 @@ public class MecanoTools
     *                     {@code matrixToPack}.
     * @param matrixToPack the matrix used to store the result. Modified.
     */
-   public static void toTildeForm(double scale, Tuple3DReadOnly tuple, boolean transpose, int startRow, int startColumn, DenseMatrix64F matrixToPack)
+   public static void toTildeForm(double scale, Tuple3DReadOnly tuple, boolean transpose, int startRow, int startColumn, DMatrix matrixToPack)
    {
       double x, y, z;
       if (transpose)
@@ -285,7 +285,7 @@ public class MecanoTools
     * @param matrixToAdd    the matrix to be added. Not modified.
     * @param matrixToModify the matrix to which the {@code DenseMatrix64F} is to be added. Modified.
     */
-   public static void addEquals(int startRow, int startColumn, DenseMatrix64F matrixToAdd, Matrix3DBasics matrixToModify)
+   public static void addEquals(int startRow, int startColumn, DMatrix matrixToAdd, Matrix3DBasics matrixToModify)
    {
       int row = startRow;
       double m00 = matrixToModify.getM00() + matrixToAdd.get(row, startColumn);
@@ -311,7 +311,7 @@ public class MecanoTools
     * @param matrixToModify the matrix to which the {@code DenseMatrix64F} is to be subtracted.
     *                       Modified.
     */
-   public static void subEquals(int startRow, int startColumn, DenseMatrix64F matrixToAdd, Matrix3DBasics matrixToModify)
+   public static void subEquals(int startRow, int startColumn, DMatrix matrixToAdd, Matrix3DBasics matrixToModify)
    {
       int row = startRow;
       double m00 = matrixToModify.getM00() - matrixToAdd.get(row, startColumn);

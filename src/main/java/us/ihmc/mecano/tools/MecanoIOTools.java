@@ -4,7 +4,8 @@ import static us.ihmc.euclid.tools.EuclidCoreIOTools.DEFAULT_FORMAT;
 import static us.ihmc.euclid.tools.EuclidCoreIOTools.getStringOf;
 import static us.ihmc.euclid.tools.EuclidCoreIOTools.getTuple3DString;
 
-import org.ejml.data.DenseMatrix64F;
+import org.ejml.data.DMatrix;
+import org.ejml.data.DMatrixRMaj;
 
 import us.ihmc.euclid.matrix.interfaces.Matrix3DReadOnly;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
@@ -531,10 +532,10 @@ public class MecanoIOTools
          return "null";
       else
       {
-         DenseMatrix64F inertiaMatrix = new DenseMatrix64F(6, 6);
+         DMatrixRMaj inertiaMatrix = new DMatrixRMaj(6, 6);
          spatialInertia.get(inertiaMatrix);
          return "Spatial inertia of " + spatialInertia.getBodyFrame() + " expressed in " + spatialInertia.getReferenceFrame() + ":\n"
-               + getDenseMatrix64FString(format, inertiaMatrix);
+               + getDMatrixString(format, inertiaMatrix);
       }
    }
 
@@ -566,13 +567,13 @@ public class MecanoIOTools
    public static String getSpatialInertiaString(String format, ReferenceFrame bodyFrame, ReferenceFrame expressedInFrame, double mass,
                                                 Vector3DReadOnly centerOfMassOffset, Matrix3DReadOnly massMomentOfInertia)
    {
-      DenseMatrix64F inertiaMatrix = new DenseMatrix64F(6, 6);
+      DMatrixRMaj inertiaMatrix = new DMatrixRMaj(6, 6);
       massMomentOfInertia.get(inertiaMatrix);
       MecanoTools.toTildeForm(mass, centerOfMassOffset, false, 0, 3, inertiaMatrix);
       MecanoTools.toTildeForm(mass, centerOfMassOffset, true, 3, 0, inertiaMatrix);
       for (int i = 3; i < 6; i++)
          inertiaMatrix.set(i, i, mass);
-      return "Spatial inertia of " + bodyFrame + " expressed in " + expressedInFrame + ":\n" + getDenseMatrix64FString(format, inertiaMatrix);
+      return "Spatial inertia of " + bodyFrame + " expressed in " + expressedInFrame + ":\n" + getDMatrixString(format, inertiaMatrix);
    }
 
    /**
@@ -587,12 +588,12 @@ public class MecanoIOTools
     * \-0.247,  0.387,  0.000,  0.000,  0.000,  0.773 /
     * </pre>
     *
-    * @param denseMatrix64F the object to get the {@code String} of. Not modified.
+    * @param dMatrix the object to get the {@code String} of. Not modified.
     * @return the representative {@code String}.
     */
-   public static String getDenseMatrix64FString(DenseMatrix64F denseMatrix64F)
+   public static String getDMatrixString(DMatrix dMatrix)
    {
-      return getDenseMatrix64FString(DEFAULT_FORMAT, denseMatrix64F);
+      return getDMatrixString(DEFAULT_FORMAT, dMatrix);
    }
 
    /**
@@ -610,22 +611,22 @@ public class MecanoIOTools
     * </pre>
     * </p>
     *
-    * @param format         the format to use for each number.
-    * @param denseMatrix64F the object to get the {@code String} of. Not modified.
+    * @param format  the format to use for each number.
+    * @param dMatrix the object to get the {@code String} of. Not modified.
     * @return the representative {@code String}.
     */
-   public static String getDenseMatrix64FString(String format, DenseMatrix64F denseMatrix64F)
+   public static String getDMatrixString(String format, DMatrix dMatrix)
    {
       String ret = "";
 
-      double[] rowValues = new double[denseMatrix64F.getNumCols()];
+      double[] rowValues = new double[dMatrix.getNumCols()];
 
       String separator = ", ";
 
-      for (int row = 0; row < denseMatrix64F.getNumRows(); row++)
+      for (int row = 0; row < dMatrix.getNumRows(); row++)
       {
-         for (int col = 0; col < denseMatrix64F.getNumCols(); col++)
-            rowValues[col] = denseMatrix64F.get(row, col);
+         for (int col = 0; col < dMatrix.getNumCols(); col++)
+            rowValues[col] = dMatrix.get(row, col);
 
          String prefix, suffix;
 
@@ -634,7 +635,7 @@ public class MecanoIOTools
             prefix = "/";
             suffix = " \\\n";
          }
-         else if (row == denseMatrix64F.getNumRows() - 1)
+         else if (row == dMatrix.getNumRows() - 1)
          {
             prefix = "\\";
             suffix = " /";

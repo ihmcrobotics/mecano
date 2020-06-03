@@ -1,6 +1,6 @@
 package us.ihmc.mecano.spatial.interfaces;
 
-import org.ejml.data.DenseMatrix64F;
+import org.ejml.data.DMatrix;
 
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.referenceFrame.exceptions.ReferenceFrameMismatchException;
@@ -188,7 +188,7 @@ public interface SpatialVectorBasics extends FixedFrameSpatialVectorBasics, Fram
     * @param matrix           the column vector containing the new values for this vector's components.
     *                         Not modified.
     */
-   default void setIncludingFrame(ReferenceFrame expressedInFrame, DenseMatrix64F matrix)
+   default void setIncludingFrame(ReferenceFrame expressedInFrame, DMatrix matrix)
    {
       setReferenceFrame(expressedInFrame);
       set(matrix);
@@ -207,7 +207,7 @@ public interface SpatialVectorBasics extends FixedFrameSpatialVectorBasics, Fram
     * @param matrix           the column vector containing the new values for this vector's components.
     *                         Not modified.
     */
-   default void setIncludingFrame(ReferenceFrame expressedInFrame, int startRow, DenseMatrix64F matrix)
+   default void setIncludingFrame(ReferenceFrame expressedInFrame, int startRow, DMatrix matrix)
    {
       setReferenceFrame(expressedInFrame);
       set(startRow, matrix);
@@ -227,7 +227,7 @@ public interface SpatialVectorBasics extends FixedFrameSpatialVectorBasics, Fram
     * @param matrix           the column vector containing the new values for this vector's components.
     *                         Not modified.
     */
-   default void setIncludingFrame(ReferenceFrame expressedInFrame, int startRow, int column, DenseMatrix64F matrix)
+   default void setIncludingFrame(ReferenceFrame expressedInFrame, int startRow, int column, DMatrix matrix)
    {
       setReferenceFrame(expressedInFrame);
       set(startRow, column, matrix);

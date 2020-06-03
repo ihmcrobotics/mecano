@@ -8,11 +8,12 @@ import java.util.List;
 import java.util.Map;
 import java.util.function.Function;
 
-import org.ejml.alg.dense.misc.UnrolledInverseFromMinor;
-import org.ejml.data.DenseMatrix64F;
-import org.ejml.factory.LinearSolverFactory;
-import org.ejml.interfaces.linsol.LinearSolver;
-import org.ejml.ops.CommonOps;
+import org.ejml.data.DMatrix;
+import org.ejml.data.DMatrixRMaj;
+import org.ejml.dense.row.CommonOps_DDRM;
+import org.ejml.dense.row.factory.LinearSolverFactory_DDRM;
+import org.ejml.dense.row.misc.UnrolledInverseFromMinor_DDRM;
+import org.ejml.interfaces.linsol.LinearSolverDense;
 
 import us.ihmc.euclid.referenceFrame.exceptions.ReferenceFrameMismatchException;
 import us.ihmc.euclid.referenceFrame.interfaces.FrameTuple3DReadOnly;
@@ -58,9 +59,9 @@ public class ForwardDynamicsCalculator
    private final Map<RigidBodyReadOnly, ArticulatedBodyRecursionStep> rigidBodyToRecursionStepMap = new LinkedHashMap<>();
 
    /** The input of this algorithm: the effort matrix for all the joints to consider. */
-   private final DenseMatrix64F jointTauMatrix;
+   private final DMatrixRMaj jointTauMatrix;
    /** The output of this algorithm: the acceleration matrix for all the joints to consider. */
-   private final DenseMatrix64F jointAccelerationMatrix;
+   private final DMatrixRMaj jointAccelerationMatrix;
 
    /**
     * Extension of this algorithm into an acceleration provider that can be used instead of a
@@ -137,8 +138,8 @@ public class ForwardDynamicsCalculator
          initialRecursionStep.includeIgnoredSubtreeInertia();
 
       int nDoFs = MultiBodySystemTools.computeDegreesOfFreedom(input.getJointsToConsider());
-      jointTauMatrix = new DenseMatrix64F(nDoFs, 1);
-      jointAccelerationMatrix = new DenseMatrix64F(nDoFs, 1);
+      jointTauMatrix = new DMatrixRMaj(nDoFs, 1);
+      jointAccelerationMatrix = new DMatrixRMaj(nDoFs, 1);
 
       Function<RigidBodyReadOnly, SpatialAccelerationReadOnly> accelerationFunction = body ->
       {
@@ -326,7 +327,7 @@ public class ForwardDynamicsCalculator
     *
     * @param jointTauMatrix the matrix containing the joint efforts to use. Not modified.
     */
-   public void compute(DenseMatrix64F jointTauMatrix)
+   public void compute(DMatrix jointTauMatrix)
    {
       if (jointTauMatrix != null)
       {
@@ -358,7 +359,7 @@ public class ForwardDynamicsCalculator
     *
     * @return this calculator output: the joint accelerations.
     */
-   public DenseMatrix64F getJointAccelerationMatrix()
+   public DMatrixRMaj getJointAccelerationMatrix()
    {
       return jointAccelerationMatrix;
    }
@@ -370,7 +371,7 @@ public class ForwardDynamicsCalculator
     * @param joint the joint to get the acceleration of. Not modified.
     * @return the computed joint acceleration matrix.
     */
-   public DenseMatrix64F getComputedJointAcceleration(JointReadOnly joint)
+   public DMatrixRMaj getComputedJointAcceleration(JointReadOnly joint)
    {
       ArticulatedBodyRecursionStep recursionStep = rigidBodyToRecursionStepMap.get(joint.getSuccessor());
 
@@ -523,12 +524,12 @@ public class ForwardDynamicsCalculator
       /**
        * <tt>IA</tt> is the 6-by-6 articulated-body inertia for this body.
        */
-      final DenseMatrix64F IA;
+      final DMatrixRMaj IA;
       /**
        * <tt>S</tt> is the 6-by-N matrix representing the motion subspace of the parent joint, where N is
        * the number of DoFs of the joint.
        */
-      final DenseMatrix64F S;
+      final DMatrixRMaj S;
 
       /**
        * Intermediate result to save operations:
@@ -540,7 +541,7 @@ public class ForwardDynamicsCalculator
        * where <tt>I<sup>A</sup></tt> is this handle's articulated-body inertia, and <tt>S</tt> is the
        * parent joint motion subspace.
        */
-      final DenseMatrix64F U;
+      final DMatrixRMaj U;
       /**
        * Intermediate result to save operations:
        *
@@ -552,7 +553,7 @@ public class ForwardDynamicsCalculator
        * where <tt>I<sup>A</sup></tt> is this handle's articulated-body inertia, and <tt>S</tt> is the
        * parent joint motion subspace.
        */
-      final DenseMatrix64F D;
+      final DMatrixRMaj D;
       /**
        * Intermediate result to save operations:
        *
@@ -564,7 +565,7 @@ public class ForwardDynamicsCalculator
        * where <tt>I<sup>A</sup></tt> is this handle's articulated-body inertia, and <tt>S</tt> is the
        * parent joint motion subspace.
        */
-      final DenseMatrix64F Dinv;
+      final DMatrixRMaj Dinv;
       /**
        * Intermediate result to save operations:
        *
@@ -576,7 +577,7 @@ public class ForwardDynamicsCalculator
        * where <tt>I<sup>A</sup></tt> is this handle's articulated-body inertia, and <tt>S</tt> is the
        * parent joint motion subspace.
        */
-      final DenseMatrix64F U_Dinv;
+      final DMatrixRMaj U_Dinv;
       /**
        * Intermediate result:
        *
@@ -588,7 +589,7 @@ public class ForwardDynamicsCalculator
        * where <tt>I<sup>A</sup></tt> is this handle's articulated-body inertia, and <tt>S</tt> is the
        * parent joint motion subspace.
        */
-      final DenseMatrix64F U_Dinv_UT;
+      final DMatrixRMaj U_Dinv_UT;
       /**
        * This is the apparent articulated rigid-body inertia for the parent:
        *
@@ -601,12 +602,12 @@ public class ForwardDynamicsCalculator
        * where <tt>I<sup>A</sup></tt> is this handle's articulated-body inertia, and <tt>S</tt> is the
        * parent joint motion subspace.
        */
-      final DenseMatrix64F Ia;
+      final DMatrixRMaj Ia;
       /**
        * This is the N-by-1 vector representing the joint effort, where N is equal to the number of DoFs
        * that the joint has.
        */
-      final DenseMatrix64F tau;
+      final DMatrixRMaj tau;
       /**
        * This is some bias force for this joint:
        *
@@ -614,7 +615,7 @@ public class ForwardDynamicsCalculator
        * p<sup>A</sup> = p + &sum;<sub>&forall;child</sub> p<sup>a</sup>
        * </pre>
        */
-      final DenseMatrix64F pA;
+      final DMatrixRMaj pA;
       /**
        * Intermediate result to save computation:
        *
@@ -626,7 +627,7 @@ public class ForwardDynamicsCalculator
        * DoFs for this joint, <tt>S</tt> is the joint motion subspace, and <tt>p<sup>A</sup></tt> some
        * bias forces exerted on this joint.
        */
-      final DenseMatrix64F u;
+      final DMatrixRMaj u;
       /**
        * Bias acceleration for this joint:
        *
@@ -638,7 +639,7 @@ public class ForwardDynamicsCalculator
        * <tt>qDot</tt> the N-by-1 vector for this joint velocity, with N being the number of DoFs for this
        * joint.
        */
-      final DenseMatrix64F c;
+      final DMatrixRMaj c;
       /**
        * The apparent bias forces of this joint for the parent:
        *
@@ -652,7 +653,7 @@ public class ForwardDynamicsCalculator
        * <tt>I<sup>A</sup></tt> this handle's articulated-body inertia, <tt>&tau;</tt> this joint effort,
        * <tt>c</tt> the bias acceleration for this joint.
        */
-      final DenseMatrix64F pa;
+      final DMatrixRMaj pa;
       /**
        * Intermediate result to save computation:
        *
@@ -660,7 +661,7 @@ public class ForwardDynamicsCalculator
        * a' = a<sub>parent</sub> + c
        * </pre>
        */
-      final DenseMatrix64F aPrime;
+      final DMatrixRMaj aPrime;
       /**
        * This body acceleration:
        *
@@ -669,11 +670,11 @@ public class ForwardDynamicsCalculator
        *   = a<sub>parent</sub> + c + S qDDot
        * </pre>
        */
-      final DenseMatrix64F a;
+      final DMatrixRMaj a;
       /**
        * Intermediate result for garbage-free operation.
        */
-      final DenseMatrix64F qdd_intermediate;
+      final DMatrixRMaj qdd_intermediate;
       /**
        * <b>This the output of this algorithm: the joint acceleration:</b>
        *
@@ -684,7 +685,7 @@ public class ForwardDynamicsCalculator
        *       = ( S<sup>T</sup> I<sup>A</sup> S )<sup>-1</sup> ( &tau; - S<sup>T</sup> I<sup>A</sup> ( a<sub>parent</sub> + c + S qDDot ) - S<sup>T</sup> p<sup>A</sup> )
        * </pre>
        */
-      final DenseMatrix64F qdd;
+      final DMatrixRMaj qdd;
       /**
        * The recursion step holding onto the direct predecessor of this recursion step's rigid-body.
        */
@@ -696,7 +697,7 @@ public class ForwardDynamicsCalculator
       /**
        * Solver for inverting <tt>D</tt>. Only needed for 6-DoF joints.
        */
-      final LinearSolver<DenseMatrix64F> inverseSolver;
+      final LinearSolverDense<DMatrixRMaj> inverseSolver;
       /**
        * Intermediate variable to save computation. Transform from {@code this.getFrameAfterJoint()} to
        * {@code parent.getFrameAfterJoint()}.
@@ -762,24 +763,24 @@ public class ForwardDynamicsCalculator
             articulatedInertiaForParent = parent.isRoot() ? null : new ArticulatedBodyInertia();
             articulatedBiasWrenchForParent = parent.isRoot() ? null : new SpatialForce();
 
-            IA = new DenseMatrix64F(SpatialVectorReadOnly.SIZE, SpatialVectorReadOnly.SIZE);
-            S = new DenseMatrix64F(SpatialVectorReadOnly.SIZE, nDoFs);
-            U = new DenseMatrix64F(SpatialVectorReadOnly.SIZE, nDoFs);
-            D = new DenseMatrix64F(nDoFs, nDoFs);
-            Dinv = new DenseMatrix64F(nDoFs, nDoFs);
-            U_Dinv = new DenseMatrix64F(SpatialVectorReadOnly.SIZE, nDoFs);
-            U_Dinv_UT = new DenseMatrix64F(SpatialVectorReadOnly.SIZE, SpatialVectorReadOnly.SIZE);
-            tau = new DenseMatrix64F(nDoFs, 1);
-            pA = new DenseMatrix64F(SpatialVectorReadOnly.SIZE, 1);
-            u = new DenseMatrix64F(nDoFs, 1);
-            c = new DenseMatrix64F(SpatialVectorReadOnly.SIZE, 1);
-            pa = new DenseMatrix64F(SpatialVectorReadOnly.SIZE, 1);
-            Ia = new DenseMatrix64F(SpatialVectorReadOnly.SIZE, SpatialVectorReadOnly.SIZE);
-            qdd = new DenseMatrix64F(nDoFs, 1);
-            qdd_intermediate = new DenseMatrix64F(nDoFs, 1);
-            aPrime = new DenseMatrix64F(SpatialVectorReadOnly.SIZE, 1);
-            a = new DenseMatrix64F(SpatialVectorReadOnly.SIZE, 1);
-            inverseSolver = nDoFs == 6 ? LinearSolverFactory.symmPosDef(6) : null;
+            IA = new DMatrixRMaj(SpatialVectorReadOnly.SIZE, SpatialVectorReadOnly.SIZE);
+            S = new DMatrixRMaj(SpatialVectorReadOnly.SIZE, nDoFs);
+            U = new DMatrixRMaj(SpatialVectorReadOnly.SIZE, nDoFs);
+            D = new DMatrixRMaj(nDoFs, nDoFs);
+            Dinv = new DMatrixRMaj(nDoFs, nDoFs);
+            U_Dinv = new DMatrixRMaj(SpatialVectorReadOnly.SIZE, nDoFs);
+            U_Dinv_UT = new DMatrixRMaj(SpatialVectorReadOnly.SIZE, SpatialVectorReadOnly.SIZE);
+            tau = new DMatrixRMaj(nDoFs, 1);
+            pA = new DMatrixRMaj(SpatialVectorReadOnly.SIZE, 1);
+            u = new DMatrixRMaj(nDoFs, 1);
+            c = new DMatrixRMaj(SpatialVectorReadOnly.SIZE, 1);
+            pa = new DMatrixRMaj(SpatialVectorReadOnly.SIZE, 1);
+            Ia = new DMatrixRMaj(SpatialVectorReadOnly.SIZE, SpatialVectorReadOnly.SIZE);
+            qdd = new DMatrixRMaj(nDoFs, 1);
+            qdd_intermediate = new DMatrixRMaj(nDoFs, 1);
+            aPrime = new DMatrixRMaj(SpatialVectorReadOnly.SIZE, 1);
+            a = new DMatrixRMaj(SpatialVectorReadOnly.SIZE, 1);
+            inverseSolver = nDoFs == 6 ? LinearSolverFactory_DDRM.symmPosDef(6) : null;
             transformToParentJointFrame = new RigidBodyTransform();
             getJoint().getMotionSubspace(S);
          }
@@ -875,8 +876,8 @@ public class ForwardDynamicsCalculator
 
          // Computing intermediate variables used in later calculation
          articulatedInertia.get(IA);
-         CommonOps.mult(IA, S, U);
-         CommonOps.multTransA(S, U, D);
+         CommonOps_DDRM.mult(IA, S, U);
+         CommonOps_DDRM.multTransA(S, U, D);
 
          int nDoFs = getJoint().getDegreesOfFreedom();
          if (nDoFs == 1)
@@ -889,7 +890,7 @@ public class ForwardDynamicsCalculator
          }
          else if (nDoFs <= 5)
          {
-            UnrolledInverseFromMinor.inv(D, Dinv);
+            UnrolledInverseFromMinor_DDRM.inv(D, Dinv);
          }
          else
          {
@@ -904,13 +905,13 @@ public class ForwardDynamicsCalculator
          }
 
          articulatedBiasWrench.get(pA);
-         CommonOps.multTransA(-1.0, S, pA, u);
-         CommonOps.addEquals(u, tau);
+         CommonOps_DDRM.multTransA(-1.0, S, pA, u);
+         CommonOps_DDRM.addEquals(u, tau);
 
          if (!parent.isRoot())
          {
-            CommonOps.mult(U, Dinv, U_Dinv);
-            CommonOps.multTransB(U_Dinv, U, U_Dinv_UT);
+            CommonOps_DDRM.mult(U, Dinv, U_Dinv);
+            CommonOps_DDRM.multTransB(U_Dinv, U, U_Dinv_UT);
 
             // Computing I_i^a = I_i^A - U_i * D_i^-1 * U_i^T
             articulatedInertiaForParent.setIncludingFrame(articulatedInertia);
@@ -919,8 +920,8 @@ public class ForwardDynamicsCalculator
 
             // Computing p_i^a = p_i^A + I_i^a * c_i + U_i * D_i^-1 * u_i
             articulatedBiasWrench.get(pa);
-            CommonOps.multAdd(Ia, c, pa);
-            CommonOps.multAdd(U_Dinv, u, pa);
+            CommonOps_DDRM.multAdd(Ia, c, pa);
+            CommonOps_DDRM.multAdd(U_Dinv, u, pa);
             articulatedBiasWrenchForParent.setIncludingFrame(frameAfterJoint, pa);
          }
       }
@@ -946,16 +947,16 @@ public class ForwardDynamicsCalculator
             rigidBodyAcceleration.get(aPrime);
 
             // Computing qdd_i = D_i^-1 * ( u_i - U_i^T * a'_i )
-            CommonOps.multTransA(-1.0, U, aPrime, qdd_intermediate);
-            CommonOps.addEquals(qdd_intermediate, u);
-            CommonOps.mult(Dinv, qdd_intermediate, qdd);
+            CommonOps_DDRM.multTransA(-1.0, U, aPrime, qdd_intermediate);
+            CommonOps_DDRM.addEquals(qdd_intermediate, u);
+            CommonOps_DDRM.mult(Dinv, qdd_intermediate, qdd);
 
             // Computing a_i = a'_i + S_i * qdd_i
-            CommonOps.mult(S, qdd, a);
+            CommonOps_DDRM.mult(S, qdd, a);
 
             rigidBodyZeroVelocityAcceleration.add(a);
 
-            CommonOps.addEquals(a, aPrime);
+            CommonOps_DDRM.addEquals(a, aPrime);
             rigidBodyAcceleration.setIncludingFrame(getBodyFixedFrame(), input.getInertialFrame(), getFrameAfterJoint(), a);
 
             for (int dofIndex = 0; dofIndex < getJoint().getDegreesOfFreedom(); dofIndex++)

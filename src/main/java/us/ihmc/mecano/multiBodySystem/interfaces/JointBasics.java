@@ -4,7 +4,7 @@ import java.util.List;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-import org.ejml.data.DenseMatrix64F;
+import org.ejml.data.DMatrix;
 
 import us.ihmc.euclid.geometry.interfaces.Pose3DReadOnly;
 import us.ihmc.euclid.orientation.interfaces.Orientation3DReadOnly;
@@ -129,7 +129,7 @@ public interface JointBasics extends JointReadOnly
    void setJointWrench(JointReadOnly other);
 
    /**
-    * Sets the joint current configuration from the given column vector {@code DenseMatrix64F}. Here
+    * Sets the joint current configuration from the given column vector {@code DMatrix}. Here
     * are a few examples:
     * <ul>
     * <li>For a {@code RevoluteJoint}, the {@code rowStart}<sup>th</sup> row of the given column vector
@@ -149,7 +149,7 @@ public interface JointBasics extends JointReadOnly
     *                           extracted. Not modified.
     * @return {@code rowStart + this.getConfigurationMatrixSize()}.
     */
-   int setJointConfiguration(int rowStart, DenseMatrix64F jointConfiguration);
+   int setJointConfiguration(int rowStart, DMatrix jointConfiguration);
 
    /**
     * Sets this joint current velocity from the given column vector {@code DenseMAtrix64F}. Here are a
@@ -168,7 +168,7 @@ public interface JointBasics extends JointReadOnly
     *                      extracted. Not modified.
     * @return {@code rowStart + this.getDegreesOfFreedom()}.
     */
-   int setJointVelocity(int rowStart, DenseMatrix64F jointVelocity);
+   int setJointVelocity(int rowStart, DMatrix jointVelocity);
 
    /**
     * Sets this joint acceleration from the given column vector {@code DenseMAtrix64F}. Here are a few
@@ -187,10 +187,10 @@ public interface JointBasics extends JointReadOnly
     *                          extracted. Not modified.
     * @return {@code rowStart + this.getDegreesOfFreedom()}.
     */
-   int setJointAcceleration(int rowStart, DenseMatrix64F jointAcceleration);
+   int setJointAcceleration(int rowStart, DMatrix jointAcceleration);
 
    /**
-    * Sets the joint current wrench from the given column vector {@code DenseMatrix64F}. Here are a few
+    * Sets the joint current wrench from the given column vector {@code DMatrix}. Here are a few
     * examples:
     * <ul>
     * <li>For a {@code RevoluteJoint}, the {@code rowStart}<sup>th</sup> row of the given column vector
@@ -206,7 +206,7 @@ public interface JointBasics extends JointReadOnly
     *                 Not modified.
     * @return {@code rowStart + this.getDegreesOfFreedom()}.
     */
-   int setJointTau(int rowStart, DenseMatrix64F jointTau);
+   int setJointTau(int rowStart, DMatrix jointTau);
 
    /**
     * Sets the joint current configuration from the given transform.

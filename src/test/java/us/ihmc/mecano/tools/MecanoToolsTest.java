@@ -4,8 +4,8 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 
 import java.util.Random;
 
-import org.ejml.data.DenseMatrix64F;
-import org.ejml.ops.CommonOps;
+import org.ejml.data.DMatrixRMaj;
+import org.ejml.dense.row.CommonOps_DDRM;
 import org.junit.jupiter.api.Test;
 
 import us.ihmc.euclid.matrix.Matrix3D;
@@ -407,17 +407,17 @@ public class MecanoToolsTest
                                                             twist.getLinearPart());
          double expected;
          { // Compute the matrix form
-            DenseMatrix64F inertiaMatrix = new DenseMatrix64F(6, 6);
-            DenseMatrix64F twistMatrix = new DenseMatrix64F(6, 1);
+            DMatrixRMaj inertiaMatrix = new DMatrixRMaj(6, 6);
+            DMatrixRMaj twistMatrix = new DMatrixRMaj(6, 1);
 
             twist.get(twistMatrix);
             inertia.get(inertiaMatrix);
 
-            DenseMatrix64F intermediate = new DenseMatrix64F(1, 6);
-            CommonOps.multTransA(twistMatrix, inertiaMatrix, intermediate);
+            DMatrixRMaj intermediate = new DMatrixRMaj(1, 6);
+            CommonOps_DDRM.multTransA(twistMatrix, inertiaMatrix, intermediate);
 
-            DenseMatrix64F energyMatrix = new DenseMatrix64F(1, 1);
-            CommonOps.mult(intermediate, twistMatrix, energyMatrix);
+            DMatrixRMaj energyMatrix = new DMatrixRMaj(1, 1);
+            CommonOps_DDRM.mult(intermediate, twistMatrix, energyMatrix);
 
             expected = 0.5 * energyMatrix.get(0);
          }

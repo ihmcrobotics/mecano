@@ -1,6 +1,6 @@
 package us.ihmc.mecano.multiBodySystem.interfaces;
 
-import org.ejml.data.DenseMatrix64F;
+import org.ejml.data.DMatrix;
 
 import us.ihmc.euclid.tuple3D.interfaces.Vector3DReadOnly;
 import us.ihmc.mecano.tools.MecanoTools;
@@ -101,7 +101,7 @@ public interface PlanarJointBasics extends PlanarJointReadOnly, FloatingJointBas
 
    /** {@inheritDoc} */
    @Override
-   default int setJointConfiguration(int rowStart, DenseMatrix64F matrix)
+   default int setJointConfiguration(int rowStart, DMatrix matrix)
    {
       int index = rowStart;
       double qRot = matrix.get(index++, 0);
@@ -114,7 +114,7 @@ public interface PlanarJointBasics extends PlanarJointReadOnly, FloatingJointBas
 
    /** {@inheritDoc} */
    @Override
-   default int setJointVelocity(int rowStart, DenseMatrix64F matrix)
+   default int setJointVelocity(int rowStart, DMatrix matrix)
    {
       int index = rowStart;
       double qdRot = matrix.get(index++, 0);
@@ -128,7 +128,7 @@ public interface PlanarJointBasics extends PlanarJointReadOnly, FloatingJointBas
 
    /** {@inheritDoc} */
    @Override
-   default int setJointAcceleration(int rowStart, DenseMatrix64F matrix)
+   default int setJointAcceleration(int rowStart, DMatrix matrix)
    {
       getJointAcceleration().setToZero();
       getJointAcceleration().setAngularPartY(matrix.get(rowStart + 0, 0));
@@ -139,12 +139,12 @@ public interface PlanarJointBasics extends PlanarJointReadOnly, FloatingJointBas
 
    /** {@inheritDoc} */
    @Override
-   default int setJointTau(int rowStart, DenseMatrix64F matrix)
+   default int setJointTau(int rowStart, DMatrix matrix)
    {
       getJointWrench().setToZero();
-      getJointWrench().setAngularPartY(matrix.get(rowStart + 0));
-      getJointWrench().setLinearPartX(matrix.get(rowStart + 1));
-      getJointWrench().setLinearPartZ(matrix.get(rowStart + 2));
+      getJointWrench().setAngularPartY(matrix.get(rowStart + 0, 0));
+      getJointWrench().setLinearPartX(matrix.get(rowStart + 1, 0));
+      getJointWrench().setLinearPartZ(matrix.get(rowStart + 2, 0));
       return rowStart + getDegreesOfFreedom();
    }
 }

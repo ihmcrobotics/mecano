@@ -1,6 +1,6 @@
 package us.ihmc.mecano.spatial.interfaces;
 
-import org.ejml.data.DenseMatrix64F;
+import org.ejml.data.DMatrix;
 
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.referenceFrame.exceptions.ReferenceFrameMismatchException;
@@ -340,7 +340,7 @@ public interface SpatialMotionBasics extends FixedFrameSpatialMotionBasics, Spat
     * @param matrix           the column vector containing the new values for this motion vector's
     *                         components. Not modified.
     */
-   default void setIncludingFrame(ReferenceFrame bodyFrame, ReferenceFrame baseFrame, ReferenceFrame expressedInFrame, DenseMatrix64F matrix)
+   default void setIncludingFrame(ReferenceFrame bodyFrame, ReferenceFrame baseFrame, ReferenceFrame expressedInFrame, DMatrix matrix)
    {
       setBodyFrame(bodyFrame);
       setBaseFrame(baseFrame);
@@ -362,7 +362,7 @@ public interface SpatialMotionBasics extends FixedFrameSpatialMotionBasics, Spat
     * @param matrix           the column vector containing the new values for this motion vector's
     *                         components. Not modified.
     */
-   default void setIncludingFrame(ReferenceFrame bodyFrame, ReferenceFrame baseFrame, ReferenceFrame expressedInFrame, int startRow, DenseMatrix64F matrix)
+   default void setIncludingFrame(ReferenceFrame bodyFrame, ReferenceFrame baseFrame, ReferenceFrame expressedInFrame, int startRow, DMatrix matrix)
    {
       setBodyFrame(bodyFrame);
       setBaseFrame(baseFrame);
@@ -386,7 +386,7 @@ public interface SpatialMotionBasics extends FixedFrameSpatialMotionBasics, Spat
     *                         components. Not modified.
     */
    default void setIncludingFrame(ReferenceFrame bodyFrame, ReferenceFrame baseFrame, ReferenceFrame expressedInFrame, int startRow, int column,
-                                  DenseMatrix64F matrix)
+                                  DMatrix matrix)
    {
       setBodyFrame(bodyFrame);
       setBaseFrame(baseFrame);

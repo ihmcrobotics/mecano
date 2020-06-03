@@ -4,8 +4,9 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 
-import org.ejml.data.DenseMatrix64F;
-import org.ejml.ops.CommonOps;
+import org.ejml.data.DMatrix1Row;
+import org.ejml.data.DMatrixRMaj;
+import org.ejml.dense.row.CommonOps_DDRM;
 
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.referenceFrame.exceptions.ReferenceFrameMismatchException;
@@ -65,17 +66,17 @@ public class GeometricJacobianCalculator
    /** The number of degrees of freedom of the current kinematic chain. */
    private int numberOfDegreesOfFreedom;
    /** The geometric Jacobian matrix. */
-   private final DenseMatrix64F jacobianMatrix = new DenseMatrix64F(6, 12);
+   private final DMatrixRMaj jacobianMatrix = new DMatrixRMaj(6, 12);
    /**
     * The convective term required when mapping the joint acceleration space to the end-effector
     * spatial acceleration space.
     */
-   private final DenseMatrix64F convectiveTerm = new DenseMatrix64F(6, 1);
+   private final DMatrixRMaj convectiveTerm = new DMatrixRMaj(6, 1);
 
    /** Intermediate variable to store a joint unit-twist. */
    private final Twist jointUnitTwist = new Twist();
    /** Intermediate variable for garbage free operations. */
-   private final DenseMatrix64F spatialVector = new DenseMatrix64F(6, 1);
+   private final DMatrixRMaj spatialVector = new DMatrixRMaj(6, 1);
    /** The total bias acceleration resulting Coriolis and centrifugal accelerations. */
    private final SpatialAcceleration endEffectorCoriolisAcceleration = new SpatialAcceleration();
    /**
@@ -379,9 +380,9 @@ public class GeometricJacobianCalculator
     *                               in the jacobianFrame. Modified.
     * @throws RuntimeException if either the base or the end-effector has not been provided beforehand.
     */
-   public void getEndEffectorTwist(DenseMatrix64F jointVelocities, TwistBasics endEffectorTwistToPack)
+   public void getEndEffectorTwist(DMatrix1Row jointVelocities, TwistBasics endEffectorTwistToPack)
    {
-      CommonOps.mult(getJacobianMatrix(), jointVelocities, spatialVector);
+      CommonOps_DDRM.mult(getJacobianMatrix(), jointVelocities, spatialVector);
       endEffectorTwistToPack.setIncludingFrame(getEndEffectorFrame(), getBaseFrame(), jacobianFrame, spatialVector);
    }
 
@@ -395,10 +396,10 @@ public class GeometricJacobianCalculator
     *                                  base, expressed in the jacobianFrame. Modified.
     * @throws RuntimeException if either the base or the end-effector has not been provided beforehand.
     */
-   public void getEndEffectorAcceleration(DenseMatrix64F jointAccelerations, SpatialAccelerationBasics spatialAccelerationToPack)
+   public void getEndEffectorAcceleration(DMatrix1Row jointAccelerations, SpatialAccelerationBasics spatialAccelerationToPack)
    {
-      CommonOps.mult(getJacobianMatrix(), jointAccelerations, spatialVector);
-      CommonOps.addEquals(spatialVector, getConvectiveTermMatrix());
+      CommonOps_DDRM.mult(getJacobianMatrix(), jointAccelerations, spatialVector);
+      CommonOps_DDRM.addEquals(spatialVector, getConvectiveTermMatrix());
       spatialAccelerationToPack.setIncludingFrame(getEndEffectorFrame(), getBaseFrame(), jacobianFrame, spatialVector);
    }
 
@@ -416,13 +417,13 @@ public class GeometricJacobianCalculator
     * @throws RuntimeException                if either the base or the end-effector has not been
     *                                         provided beforehand.
     */
-   public void getJointTorques(WrenchReadOnly endEffectorWrench, DenseMatrix64F jointTorquesToPack)
+   public void getJointTorques(WrenchReadOnly endEffectorWrench, DMatrix1Row jointTorquesToPack)
    {
       endEffectorWrench.checkReferenceFrameMatch(getEndEffectorFrame(), jacobianFrame);
       endEffectorWrench.get(spatialVector);
       jointTorquesToPack.reshape(1, numberOfDegreesOfFreedom);
-      CommonOps.multTransA(spatialVector, getJacobianMatrix(), jointTorquesToPack);
-      CommonOps.transpose(jointTorquesToPack);
+      CommonOps_DDRM.multTransA(spatialVector, getJacobianMatrix(), jointTorquesToPack);
+      jointTorquesToPack.reshape(numberOfDegreesOfFreedom, 1, true); // Quick way to transpose
    }
 
    /**
@@ -517,7 +518,7 @@ public class GeometricJacobianCalculator
     * @return the current value of the Jacobian matrix.
     * @throws RuntimeException if either the base or the end-effector has not been provided beforehand.
     */
-   public DenseMatrix64F getJacobianMatrix()
+   public DMatrixRMaj getJacobianMatrix()
    {
       updateJacobianMatrix();
       return jacobianMatrix;
@@ -532,7 +533,7 @@ public class GeometricJacobianCalculator
     * @return the current value of the convective term.
     * @throws RuntimeException if either the base or the end-effector has not been provided beforehand.
     */
-   public DenseMatrix64F getConvectiveTermMatrix()
+   public DMatrixRMaj getConvectiveTermMatrix()
    {
       updateConvectiveTerm();
       return convectiveTerm;

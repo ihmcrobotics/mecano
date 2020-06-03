@@ -1,6 +1,6 @@
 package us.ihmc.mecano.spatial;
 
-import org.ejml.data.DenseMatrix64F;
+import org.ejml.data.DMatrix;
 
 import us.ihmc.euclid.interfaces.GeometryObject;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
@@ -95,7 +95,7 @@ public class SpatialForce implements SpatialForceBasics, GeometryObject<SpatialF
     * @param matrix           the column vector containing the values for this vector's components. Not
     *                         modified.
     */
-   public SpatialForce(ReferenceFrame expressedInFrame, DenseMatrix64F matrix)
+   public SpatialForce(ReferenceFrame expressedInFrame, DMatrix matrix)
    {
       setIncludingFrame(expressedInFrame, matrix);
    }

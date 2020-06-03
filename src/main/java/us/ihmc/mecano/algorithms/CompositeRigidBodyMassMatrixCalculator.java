@@ -5,7 +5,8 @@ import java.util.Collection;
 import java.util.List;
 import java.util.stream.IntStream;
 
-import org.ejml.data.DenseMatrix64F;
+import org.ejml.data.DMatrix;
+import org.ejml.data.DMatrixRMaj;
 
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.mecano.frames.MovingReferenceFrame;
@@ -79,7 +80,7 @@ public class CompositeRigidBodyMassMatrixCalculator
     */
    private final CompositeRigidBodyInertia[] compositeInertias;
    /** The mass matrix of the system. */
-   private final DenseMatrix64F massMatrix;
+   private final DMatrixRMaj massMatrix;
    /** Intermediate variable to store the child inertia. */
    private final SpatialInertia childInertia = new SpatialInertia();
 
@@ -100,7 +101,7 @@ public class CompositeRigidBodyMassMatrixCalculator
     * is useful in combination of the centroidal momentum matrix to build the mapping from joint
     * acceleration space to rate of change of momentum space.
     */
-   private final DenseMatrix64F centroidalConvectiveTermMatrix = new DenseMatrix64F(6, 1);
+   private final DMatrixRMaj centroidalConvectiveTermMatrix = new DMatrixRMaj(6, 1);
 
    /** Frame in which the centroidal momentum matrix and its convective term are to be calculated. */
    private ReferenceFrame centroidalMomentumFrame;
@@ -109,7 +110,7 @@ public class CompositeRigidBodyMassMatrixCalculator
     * Used in combination with the convective term allows to make the mapping from joint acceleration
     * space to rate of change of momentum space.
     */
-   private final DenseMatrix64F centroidalMomentumMatrix;
+   private final DMatrixRMaj centroidalMomentumMatrix;
 
    /**
     * Whether the mass matrix has been updated since the last call to {@link #reset()}.
@@ -201,9 +202,9 @@ public class CompositeRigidBodyMassMatrixCalculator
       compositeInertias = inertiaList.toArray(new CompositeRigidBodyInertia[0]);
 
       int nDoFs = MultiBodySystemTools.computeDegreesOfFreedom(input.getJointsToConsider());
-      massMatrix = new DenseMatrix64F(nDoFs, nDoFs);
+      massMatrix = new DMatrixRMaj(nDoFs, nDoFs);
 
-      centroidalMomentumMatrix = new DenseMatrix64F(6, nDoFs);
+      centroidalMomentumMatrix = new DMatrixRMaj(6, nDoFs);
       setCentroidalMomentumFrame(centroidalMomentumFrame);
    }
 
@@ -288,7 +289,7 @@ public class CompositeRigidBodyMassMatrixCalculator
     *
     * @return the mass-matrix.
     */
-   public DenseMatrix64F getMassMatrix()
+   public DMatrixRMaj getMassMatrix()
    {
       updateMassMatrix();
       return massMatrix;
@@ -339,7 +340,7 @@ public class CompositeRigidBodyMassMatrixCalculator
     * @return the centroidal momentum matrix.
     * @see CompositeRigidBodyMassMatrixCalculator
     */
-   public DenseMatrix64F getCentroidalMomentumMatrix()
+   public DMatrixRMaj getCentroidalMomentumMatrix()
    {
       updateCentroidalMomentumMatrix();
       return centroidalMomentumMatrix;
@@ -363,7 +364,7 @@ public class CompositeRigidBodyMassMatrixCalculator
     * @return the bias spatial force.
     * @see CompositeRigidBodyMassMatrixCalculator
     */
-   public DenseMatrix64F getCentroidalConvectiveTermMatrix()
+   public DMatrixRMaj getCentroidalConvectiveTermMatrix()
    {
       updateCentroidalConvectiveTerm();
       return centroidalConvectiveTermMatrix;
@@ -557,7 +558,7 @@ public class CompositeRigidBodyMassMatrixCalculator
             children.get(childIndex).computeCentroidalConvectiveTerm();
       }
 
-      public void setSymmetricEntry(int row, int col, DenseMatrix64F symmetricMatrix, double entry)
+      public void setSymmetricEntry(int row, int col, DMatrix symmetricMatrix, double entry)
       {
          symmetricMatrix.set(row, col, entry);
          symmetricMatrix.set(col, row, entry);

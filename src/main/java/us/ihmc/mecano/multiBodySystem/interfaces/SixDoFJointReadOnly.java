@@ -1,6 +1,6 @@
 package us.ihmc.mecano.multiBodySystem.interfaces;
 
-import org.ejml.data.DenseMatrix64F;
+import org.ejml.data.DMatrix;
 
 /**
  * Read-only interface for 6 degree of freedom joint.
@@ -18,7 +18,7 @@ public interface SixDoFJointReadOnly extends FloatingJointReadOnly
 
    /** {@inheritDoc} */
    @Override
-   default int getJointConfiguration(int rowStart, DenseMatrix64F matrixToPack)
+   default int getJointConfiguration(int rowStart, DMatrix matrixToPack)
    {
       getJointPose().getOrientation().get(rowStart, matrixToPack);
       getJointPose().getPosition().get(rowStart + 4, matrixToPack);
@@ -27,7 +27,7 @@ public interface SixDoFJointReadOnly extends FloatingJointReadOnly
 
    /** {@inheritDoc} */
    @Override
-   default int getJointVelocity(int rowStart, DenseMatrix64F matrixToPack)
+   default int getJointVelocity(int rowStart, DMatrix matrixToPack)
    {
       getJointTwist().get(rowStart, matrixToPack);
       return rowStart + getDegreesOfFreedom();
@@ -35,7 +35,7 @@ public interface SixDoFJointReadOnly extends FloatingJointReadOnly
 
    /** {@inheritDoc} */
    @Override
-   default int getJointAcceleration(int rowStart, DenseMatrix64F matrixToPack)
+   default int getJointAcceleration(int rowStart, DMatrix matrixToPack)
    {
       getJointAcceleration().get(rowStart, matrixToPack);
       return rowStart + getDegreesOfFreedom();
@@ -43,7 +43,7 @@ public interface SixDoFJointReadOnly extends FloatingJointReadOnly
 
    /** {@inheritDoc} */
    @Override
-   default int getJointTau(int rowStart, DenseMatrix64F matrixToPack)
+   default int getJointTau(int rowStart, DMatrix matrixToPack)
    {
       getJointWrench().get(rowStart, matrixToPack);
       return rowStart + getDegreesOfFreedom();

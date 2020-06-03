@@ -5,7 +5,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 import java.util.List;
 import java.util.Random;
 
-import org.ejml.ops.MatrixFeatures;
+import org.ejml.dense.row.MatrixFeatures_DDRM;
 import org.junit.jupiter.api.Test;
 
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
@@ -38,7 +38,7 @@ public class CompositeRigidBodyMassMatrixCalculatorTest
          CentroidalMomentumRateCalculator centroidalMomentumRateCalculator = new CentroidalMomentumRateCalculator(input, matrixFrame);
          CompositeRigidBodyMassMatrixCalculator compositeRigidBodyMassMatrixCalculator = new CompositeRigidBodyMassMatrixCalculator(input, matrixFrame);
 
-         assertTrue(MatrixFeatures.isEquals(centroidalMomentumRateCalculator.getCentroidalMomentumMatrix(),
+         assertTrue(MatrixFeatures_DDRM.isEquals(centroidalMomentumRateCalculator.getCentroidalMomentumMatrix(),
                                             compositeRigidBodyMassMatrixCalculator.getCentroidalMomentumMatrix(),
                                             EPSILON));
          MecanoTestTools.assertSpatialForceEquals(centroidalMomentumRateCalculator.getBiasSpatialForce(),
@@ -50,7 +50,7 @@ public class CompositeRigidBodyMassMatrixCalculatorTest
 
          centroidalMomentumRateCalculator.reset();
          compositeRigidBodyMassMatrixCalculator.reset();
-         assertTrue(MatrixFeatures.isEquals(centroidalMomentumRateCalculator.getCentroidalMomentumMatrix(),
+         assertTrue(MatrixFeatures_DDRM.isEquals(centroidalMomentumRateCalculator.getCentroidalMomentumMatrix(),
                                             compositeRigidBodyMassMatrixCalculator.getCentroidalMomentumMatrix(),
                                             EPSILON));
          MecanoTestTools.assertSpatialForceEquals(centroidalMomentumRateCalculator.getBiasSpatialForce(),
@@ -71,7 +71,7 @@ public class CompositeRigidBodyMassMatrixCalculatorTest
          CompositeRigidBodyMassMatrixCalculator compositeRigidBodyMassMatrixCalculator = new CompositeRigidBodyMassMatrixCalculator(input);
          compositeRigidBodyMassMatrixCalculator.setCentroidalMomentumFrame(matrixFrame);
 
-         assertTrue(MatrixFeatures.isEquals(centroidalMomentumRateCalculator.getCentroidalMomentumMatrix(),
+         assertTrue(MatrixFeatures_DDRM.isEquals(centroidalMomentumRateCalculator.getCentroidalMomentumMatrix(),
                                             compositeRigidBodyMassMatrixCalculator.getCentroidalMomentumMatrix(),
                                             EPSILON));
          MecanoTestTools.assertSpatialForceEquals(centroidalMomentumRateCalculator.getBiasSpatialForce(),
