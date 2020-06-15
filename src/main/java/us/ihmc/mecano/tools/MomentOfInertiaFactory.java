@@ -1,5 +1,7 @@
 package us.ihmc.mecano.tools;
 
+import us.ihmc.euclid.axisAngle.AxisAngle;
+import us.ihmc.euclid.geometry.tools.EuclidGeometryTools;
 import us.ihmc.euclid.matrix.Matrix3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple3D.interfaces.Tuple3DReadOnly;
@@ -26,15 +28,14 @@ public class MomentOfInertiaFactory
       double IalongAxis = 0.5 * mass * radius * radius;
       double IcrossAxis = mass * (3.0 * radius * radius + height * height) / 12.0;
 
-      Vector3D principalInertia = new Vector3D(1.0, 1.0, 1.0);
-      principalInertia.sub(axisOfCylinder);
-      principalInertia.scale(IcrossAxis);
-      principalInertia.scaleAdd(IalongAxis, axisOfCylinder, principalInertia);
+      AxisAngle axisAngle = EuclidGeometryTools.axisAngleFromZUpToVector3D(axisOfCylinder);
+      Vector3D principalInertia = new Vector3D(IcrossAxis, IcrossAxis, IalongAxis);
+      axisAngle.transform(principalInertia);
 
       Matrix3D momentOfInertia = new Matrix3D();
-      momentOfInertia.setM00(principalInertia.getX());
-      momentOfInertia.setM11(principalInertia.getY());
-      momentOfInertia.setM22(principalInertia.getZ());
+      momentOfInertia.setM00(Math.abs(principalInertia.getX()));
+      momentOfInertia.setM11(Math.abs(principalInertia.getY()));
+      momentOfInertia.setM22(Math.abs(principalInertia.getZ()));
       return momentOfInertia;
 
    }

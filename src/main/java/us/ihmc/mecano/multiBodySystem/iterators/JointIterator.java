@@ -1,6 +1,7 @@
 package us.ihmc.mecano.multiBodySystem.iterators;
 
 import java.util.ArrayDeque;
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Deque;
 import java.util.Iterator;
@@ -9,6 +10,7 @@ import java.util.function.Predicate;
 
 import us.ihmc.mecano.multiBodySystem.interfaces.JointReadOnly;
 import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyReadOnly;
+import us.ihmc.mecano.tools.MultiBodySystemTools;
 
 /**
  * {@code JointIterator} is a generic iterator that can be used on any implementation of
@@ -26,6 +28,7 @@ public class JointIterator<J extends JointReadOnly> implements Iterator<J>
 {
    private final Deque<JointReadOnly> stack = new ArrayDeque<>();
    private final Predicate<JointReadOnly> selectionRule;
+   private final List<JointReadOnly> roots = new ArrayList<>();
 
    /**
     * Creates a new iterator for multiple subtrees.
@@ -46,7 +49,10 @@ public class JointIterator<J extends JointReadOnly> implements Iterator<J>
          this.selectionRule = joint -> filteringClass.isInstance(joint) && selectionRule.test((J) joint);
 
       if (root != null)
+      {
          stack.add(root);
+         roots.add(root);
+      }
    }
 
    /**
@@ -68,7 +74,10 @@ public class JointIterator<J extends JointReadOnly> implements Iterator<J>
          this.selectionRule = joint -> filteringClass.isInstance(joint) && selectionRule.test((J) joint);
 
       if (roots != null)
+      {
          stack.addAll(roots);
+         this.roots.addAll(roots);
+      }
    }
 
    private J next = null;
@@ -110,7 +119,7 @@ public class JointIterator<J extends JointReadOnly> implements Iterator<J>
       while (!stack.isEmpty())
       {
          JointReadOnly currentJoint = searchNextJoint();
-         if (currentJoint == null || selectionRule.test(currentJoint))
+         if (currentJoint != null && selectionRule.test(currentJoint))
             return (J) currentJoint;
       }
       return null;
@@ -118,12 +127,20 @@ public class JointIterator<J extends JointReadOnly> implements Iterator<J>
 
    private JointReadOnly searchNextJoint()
    {
-      if (stack.isEmpty())
-         return null;
-
       JointReadOnly currentJoint = stack.poll();
 
       RigidBodyReadOnly successor = currentJoint.getSuccessor();
+
+      if (currentJoint.isLoopClosure())
+      { // Determine if the primary branch of the loop is included in the iteration.
+         for (int rootIndex = 0; rootIndex < roots.size(); rootIndex++)
+         {
+            if (MultiBodySystemTools.isAncestor(successor, roots.get(rootIndex).getSuccessor()))
+            { // The primary branch is included in the iteration, no need to recurse further down.
+               return currentJoint;
+            }
+         }
+      }
 
       if (successor != null)
       {

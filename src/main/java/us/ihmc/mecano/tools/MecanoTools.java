@@ -347,12 +347,14 @@ public class MecanoTools
     * [w]<sub>&times;</sub> = |  z  0 -x |
     *    <sub> </sub>   \ -y  x  0 /
     * </pre>
+    * 
+    * The {@code centerOfMass} is assumed to be zero when {@code null} is passed.
     * </p>
     *
     * @param mass                       the mass of the corresponding rigid body.
     * @param centerOfMass               the coordinates of the center of mass expressed in the same
-    *                                   frame as the given {@code massMomentOfInertiaToTransform}. Not
-    *                                   modified.
+    *                                   frame as the given {@code massMomentOfInertiaToTransform}. Can
+    *                                   be {@code null}. Not modified.
     * @param negateTranslation          whether to negate the translation before transforming the
     *                                   moment of inertia.
     * @param translation                the translation to apply to the mass moment of inertia matrix.
@@ -362,10 +364,6 @@ public class MecanoTools
    public static void translateMomentOfInertia(double mass, Tuple3DReadOnly centerOfMass, boolean negateTranslation, Tuple3DReadOnly translation,
                                                Matrix3DBasics momentOfInertiaToTransform)
    {
-      double xc = centerOfMass.getX();
-      double yc = centerOfMass.getY();
-      double zc = centerOfMass.getZ();
-
       double xp = translation.getX();
       double yp = translation.getY();
       double zp = translation.getZ();
@@ -377,21 +375,41 @@ public class MecanoTools
          zp = -zp;
       }
 
-      double two_xc_xp = 2.0 * xc * xp;
-      double two_yc_yp = 2.0 * yc * yp;
-      double two_zc_zp = 2.0 * zc * zp;
-
       double xp_xp = xp * xp;
       double yp_yp = yp * yp;
       double zp_zp = zp * zp;
 
-      double txx = mass * (two_yc_yp + two_zc_zp + yp_yp + zp_zp);
-      double tyy = mass * (two_xc_xp + two_zc_zp + xp_xp + zp_zp);
-      double tzz = mass * (two_xc_xp + two_yc_yp + xp_xp + yp_yp);
+      double txx, tyy, tzz;
+      double txy, txz, tyz;
 
-      double txy = mass * (-xc * yp - yc * xp - xp * yp);
-      double txz = mass * (-xc * zp - zc * xp - xp * zp);
-      double tyz = mass * (-yc * zp - zc * yp - yp * zp);
+      if (centerOfMass != null)
+      {
+         double xc = centerOfMass.getX();
+         double yc = centerOfMass.getY();
+         double zc = centerOfMass.getZ();
+
+         double two_xc_xp = 2.0 * xc * xp;
+         double two_yc_yp = 2.0 * yc * yp;
+         double two_zc_zp = 2.0 * zc * zp;
+
+         txx = mass * (two_yc_yp + two_zc_zp + yp_yp + zp_zp);
+         tyy = mass * (two_xc_xp + two_zc_zp + xp_xp + zp_zp);
+         tzz = mass * (two_xc_xp + two_yc_yp + xp_xp + yp_yp);
+
+         txy = mass * (-xc * yp - yc * xp - xp * yp);
+         txz = mass * (-xc * zp - zc * xp - xp * zp);
+         tyz = mass * (-yc * zp - zc * yp - yp * zp);
+      }
+      else
+      {
+         txx = mass * (yp_yp + zp_zp);
+         tyy = mass * (xp_xp + zp_zp);
+         tzz = mass * (xp_xp + yp_yp);
+
+         txy = -mass * xp * yp;
+         txz = -mass * xp * zp;
+         tyz = -mass * yp * zp;
+      }
 
       double m00 = momentOfInertiaToTransform.getM00() + txx;
       double m01 = momentOfInertiaToTransform.getM01() + txy;

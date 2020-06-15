@@ -1,7 +1,6 @@
 package us.ihmc.mecano.multiBodySystem;
 
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 
 import us.ihmc.euclid.matrix.interfaces.Matrix3DReadOnly;
@@ -41,6 +40,12 @@ public class RigidBody implements RigidBodyBasics
     */
    private final JointBasics parentJoint;
    /**
+    * As for the {@link #parentJoint}, the parent loop closure joints are assumed to be directly
+    * connected to this rigid-body. Note that this list is most of the time empty as it is populated
+    * only for rigid-bodies located at a kinematic loop closure.
+    */
+   private final List<JointBasics> parentLoopClosureJoints = new ArrayList<>();
+   /**
     * The children joints are all the joints that are directly connected to a rigid-body and located
     * between the rigid-body and any end-effector of the robot.
     * <p>
@@ -48,7 +53,6 @@ public class RigidBody implements RigidBodyBasics
     * </p>
     */
    private final List<JointBasics> childrenJoints = new ArrayList<>();
-   private final List<JointBasics> childrenJointsReadOnly = Collections.unmodifiableList(childrenJoints);
    /**
     * The name of this rigid-body. It is important that this name is unique among all the rigid-bodies
     * of a robot.
@@ -201,6 +205,12 @@ public class RigidBody implements RigidBodyBasics
       return parentJoint;
    }
 
+   @Override
+   public List<JointBasics> getParentLoopClosureJoints()
+   {
+      return parentLoopClosureJoints;
+   }
+
    /** {@inheritDoc} */
    @Override
    public void addChildJoint(JointBasics joint)
@@ -212,7 +222,7 @@ public class RigidBody implements RigidBodyBasics
    @Override
    public List<JointBasics> getChildrenJoints()
    {
-      return childrenJointsReadOnly;
+      return childrenJoints;
    }
 
    /** {@inheritDoc} */

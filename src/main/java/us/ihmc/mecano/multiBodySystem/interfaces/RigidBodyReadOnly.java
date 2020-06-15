@@ -1,5 +1,6 @@
 package us.ihmc.mecano.multiBodySystem.interfaces;
 
+import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -50,7 +51,7 @@ public interface RigidBodyReadOnly
    /**
     * Gets the reference to the parent joint of this rigid-body.
     * <p>
-    * The parent joint is the joint directed connected to this rigid-body and located between this and
+    * The parent joint is the joint directly connected to this rigid-body and located between this and
     * the root body of the robot.
     * </p>
     *
@@ -59,7 +60,22 @@ public interface RigidBodyReadOnly
    JointReadOnly getParentJoint();
 
    /**
-    * Gets the view list of all the children joints that have been registered to this rigid-body.
+    * Gets the reference to the parent joints of this rigid-body that also close a kinematic loop.
+    * <p>
+    * As for the {@link #getParentJoint()}, the returned joints are assumed to be directly connected to
+    * this rigid-body. Note that this list is most of the time empty as it is populated only for
+    * rigid-bodies located at a kinematic loop closure.
+    * </p>
+    * 
+    * @return the list of parent joints that close a kinematic loop.
+    */
+   default List<? extends JointReadOnly> getParentLoopClosureJoints()
+   {
+      return Collections.emptyList();
+   }
+
+   /**
+    * Gets the list of all the children joints that have been registered to this rigid-body.
     * <p>
     * A child joint is a joint directly connected to this rigid-body and located between this and an
     * end-effector of the robot. This list is empty when this rigid-body is an end-effector.
