@@ -44,6 +44,9 @@ import us.ihmc.mecano.tools.MultiBodySystemTools;
  * Rigid Body Dynamics Algorithms (2008): <a href=
  * "https://books.google.com/books?id=GJRGBQAAQBAJ&lpg=PR5&ots=XoFXvnJZLH&dq=rigid%20body%20dynamics%20algorithms&lr&pg=PR1#v=onepage&q=rigid%20body%20dynamics%20algorithms&f=false">link</a>
  * </p>
+ * <p>
+ * Note on kinematic loops: this calculator does not support kinematic loops yet.
+ * </p>
  *
  * @author Sylvain Bertrand
  */
@@ -84,6 +87,7 @@ public class ForwardDynamicsCalculator
     *
     * @param rootBody the supporting body of the subtree to be evaluated by this calculator. Not
     *                 modified.
+    * @throws UnsupportedOperationException if the multi-body system contains kinematic loop(s).
     */
    public ForwardDynamicsCalculator(RigidBodyReadOnly rootBody)
    {
@@ -99,6 +103,7 @@ public class ForwardDynamicsCalculator
     * </p>
     *
     * @param input the definition of the system to be evaluated by this calculator.
+    * @throws UnsupportedOperationException if the {@code input} contains kinematic loop(s).
     */
    public ForwardDynamicsCalculator(MultiBodySystemReadOnly input)
    {
@@ -124,6 +129,7 @@ public class ForwardDynamicsCalculator
     *                                       {@code false}, the resulting joint accelerations may be
     *                                       less accurate and this calculator may gain slight
     *                                       performance improvement.
+    * @throws UnsupportedOperationException if the {@code input} contains kinematic loop(s).
     */
    public ForwardDynamicsCalculator(MultiBodySystemReadOnly input, boolean considerIgnoredSubtreesInertia)
    {
@@ -174,6 +180,9 @@ public class ForwardDynamicsCalculator
       {
          if (jointsToIgnore.contains(childJoint))
             continue;
+
+         if (childJoint.isLoopClosure())
+            throw new UnsupportedOperationException("This calculator does not support kinematic loops.");
 
          RigidBodyReadOnly childBody = childJoint.getSuccessor();
          if (childBody != null)

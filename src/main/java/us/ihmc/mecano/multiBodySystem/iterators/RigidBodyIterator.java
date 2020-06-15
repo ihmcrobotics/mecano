@@ -1,6 +1,7 @@
 package us.ihmc.mecano.multiBodySystem.iterators;
 
 import java.util.ArrayDeque;
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Deque;
 import java.util.Iterator;
@@ -9,6 +10,7 @@ import java.util.function.Predicate;
 
 import us.ihmc.mecano.multiBodySystem.interfaces.JointReadOnly;
 import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyReadOnly;
+import us.ihmc.mecano.tools.MultiBodySystemTools;
 
 /**
  * {@code RigidBodyIterator} is a generic iterator that can be used on any implementation of
@@ -26,6 +28,7 @@ public class RigidBodyIterator<B extends RigidBodyReadOnly> implements Iterator<
 {
    private final Deque<RigidBodyReadOnly> stack = new ArrayDeque<>();
    private final Predicate<RigidBodyReadOnly> selectionRule;
+   private final List<RigidBodyReadOnly> roots = new ArrayList<>();
 
    /**
     * Creates a new iterable for a single subtree.
@@ -46,7 +49,10 @@ public class RigidBodyIterator<B extends RigidBodyReadOnly> implements Iterator<
          this.selectionRule = body -> filteringClass.isInstance(body) && selectionRule.test((B) body);
 
       if (root != null)
+      {
          stack.add(root);
+         roots.add(root);
+      }
    }
 
    /**
@@ -68,7 +74,10 @@ public class RigidBodyIterator<B extends RigidBodyReadOnly> implements Iterator<
          this.selectionRule = body -> filteringClass.isInstance(body) && selectionRule.test((B) body);
 
       if (roots != null)
+      {
          stack.addAll(roots);
+         this.roots.addAll(roots);
+      }
    }
 
    private B next = null;
@@ -110,7 +119,7 @@ public class RigidBodyIterator<B extends RigidBodyReadOnly> implements Iterator<
       while (!stack.isEmpty())
       {
          RigidBodyReadOnly currentBody = searchNextRigidBody();
-         if (currentBody == null || selectionRule.test(currentBody))
+         if (currentBody != null && selectionRule.test(currentBody))
             return (B) currentBody;
       }
       return null;
@@ -118,9 +127,6 @@ public class RigidBodyIterator<B extends RigidBodyReadOnly> implements Iterator<
 
    private RigidBodyReadOnly searchNextRigidBody()
    {
-      if (stack.isEmpty())
-         return null;
-
       RigidBodyReadOnly currentBody = stack.poll();
 
       List<? extends JointReadOnly> childrenJoints = currentBody.getChildrenJoints();
@@ -130,7 +136,22 @@ public class RigidBodyIterator<B extends RigidBodyReadOnly> implements Iterator<
          for (JointReadOnly childJoint : childrenJoints)
          {
             RigidBodyReadOnly childBody = childJoint.getSuccessor();
-            stack.add(childBody);
+
+            boolean registerChildBody = true;
+
+            if (childJoint.isLoopClosure())
+            { // Determine if the primary branch of the loop is included in the iteration.
+               for (int rootIndex = 0; rootIndex < roots.size(); rootIndex++)
+               {
+                  if (MultiBodySystemTools.isAncestor(childBody, roots.get(rootIndex)))
+                  { // The primary branch is included in the iteration, no need to recurse further down.
+                     registerChildBody = false;
+                  }
+               }
+            }
+
+            if (registerChildBody)
+               stack.add(childBody);
          }
       }
 

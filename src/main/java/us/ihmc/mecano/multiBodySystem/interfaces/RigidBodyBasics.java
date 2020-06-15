@@ -1,5 +1,6 @@
 package us.ihmc.mecano.multiBodySystem.interfaces;
 
+import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -33,17 +34,27 @@ public interface RigidBodyBasics extends RigidBodyReadOnly
    @Override
    SpatialInertiaBasics getInertia();
 
-   /**
-    * Gets the reference to the parent joint of this rigid-body.
-    * <p>
-    * The parent joint is the joint directed connected to this rigid-body and located between this and
-    * the root body of the robot.
-    * </p>
-    *
-    * @return the reference to the parent joint or {@code null} if this rigid-body is a root body.
-    */
    @Override
    JointBasics getParentJoint();
+
+   /**
+    * Registers a new parent joint that closes a kinematic loop to this rigid-body.
+    * <p>
+    * This method should only be called when building the robot.
+    * </p>
+    * 
+    * @param parentLoopClosureJoint the new parent joint to register to this body.
+    */
+   default void addParentLoopClosureJoint(JointBasics parentLoopClosureJoint)
+   {
+      getParentLoopClosureJoints().add(parentLoopClosureJoint);
+   }
+
+   @Override
+   default List<JointBasics> getParentLoopClosureJoints()
+   {
+      return Collections.emptyList();
+   }
 
    /**
     * Registers a new child joint to this rigid-body.
@@ -57,10 +68,13 @@ public interface RigidBodyBasics extends RigidBodyReadOnly
     *
     * @param joint the new child joint to register to this rigid-body.
     */
-   void addChildJoint(JointBasics joint);
+   default void addChildJoint(JointBasics joint)
+   {
+      getChildrenJoints().add(joint);
+   }
 
    @Override
-   List<? extends JointBasics> getChildrenJoints();
+   List<JointBasics> getChildrenJoints();
 
    /**
     * Changes the position of this rigid-body's center of mass.

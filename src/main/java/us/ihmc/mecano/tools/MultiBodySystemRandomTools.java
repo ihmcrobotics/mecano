@@ -1123,6 +1123,35 @@ public class MultiBodySystemRandomTools
    }
 
    /**
+    * Generates a random kinematic chain and attached it to another multi-body system to form a
+    * kinematic loop.
+    * 
+    * @param random         the random generator to use.
+    * @param prefix         provides a common prefix used for all the joint and rigid-body names.
+    * @param start          the predecessor of the kinematic loop.
+    * @param end            the successor of the kinematic loop.
+    * @param numberOfJoints how many joints the kinematic chain should be composed of.
+    * @return the list of all the newly created joints.
+    * @throws IllegalArgumentException if {@code start} is not the ancestor of {@code end}.
+    */
+   public static List<RevoluteJoint> nextKinematicLoopRevoluteJoints(Random random, String prefix, RigidBodyBasics start, RigidBodyBasics end,
+                                                                     int numberOfJoints)
+   {
+      if (!MultiBodySystemTools.isAncestor(end, start))
+         throw new IllegalArgumentException("Improper rigid-bodies configuration: the end must be a descendant of start. Given bodies: [start: "
+               + start.getName() + ", end: " + end.getName() + "].");
+
+      List<RevoluteJoint> loopChain = nextRevoluteJointChain(random, prefix, start, numberOfJoints);
+      RevoluteJoint loopClosureJoint = loopChain.get(numberOfJoints - 1);
+      start.updateFramesRecursively();
+      RigidBodyTransform transformFromSuccessorParentJoint = end.getParentJoint().getFrameAfterJoint()
+                                                                .getTransformToDesiredFrame(loopClosureJoint.getFrameAfterJoint());
+
+      loopClosureJoint.setupLoopClosure(end, transformFromSuccessorParentJoint);
+      return loopChain;
+   }
+
+   /**
     * Generates a prismatic joint with random physical parameters and attaches it to the given
     * {@code predecessor}.
     *
