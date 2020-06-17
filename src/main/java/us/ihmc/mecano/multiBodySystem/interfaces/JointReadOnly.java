@@ -121,6 +121,25 @@ public interface JointReadOnly
    List<TwistReadOnly> getUnitTwists();
 
    /**
+    * Returns the {@code MovingReferenceFrame} which parent is {@link #getFrameAfterJoint()} and should
+    * match {@code getSuccessor().getParentJoint().getFrameAfterJoint()} when the kinematic loop is
+    * properly closed.
+    * 
+    * @return the reference frame used for algorithms to correct the loop closure.
+    */
+   MovingReferenceFrame getLoopClosureFrame();
+
+   /**
+    * Indicates whether this joint closes a kinematic loop in the multi-body system.
+    * 
+    * @return {@code true} if this joint closes a kinematic loop, {@code false} otherwise.
+    */
+   default boolean isLoopClosure()
+   {
+      return getLoopClosureFrame() != null;
+   }
+
+   /**
     * Packs the motion subspace of this joint into the given matrix.
     * <p>
     * The resulting matrix is a 6-by-N matrix, where N is equal to the number of DoFs this joint has,

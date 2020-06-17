@@ -15,6 +15,7 @@ import us.ihmc.mecano.spatial.interfaces.SpatialAccelerationReadOnly;
 import us.ihmc.mecano.spatial.interfaces.TwistReadOnly;
 import us.ihmc.mecano.spatial.interfaces.WrenchReadOnly;
 import us.ihmc.mecano.tools.MecanoFactories;
+import us.ihmc.mecano.tools.MecanoTools;
 
 /**
  * A {@code FixedJoint} has no degrees of freedom, it does not move.
@@ -53,6 +54,8 @@ public class FixedJoint implements FixedJointBasics
    private final SpatialAccelerationReadOnly jointAcceleration;
    /** The wrench of this joint, it is always set to zero. */
    private WrenchReadOnly jointWrench;
+
+   protected MovingReferenceFrame loopClosureFrame = null;
 
    /**
     * Creates a new fixed joint.
@@ -146,6 +149,14 @@ public class FixedJoint implements FixedJointBasics
       jointWrench = new Wrench(successorFrame, jointFrame);
    }
 
+   @Override
+   public void setupLoopClosure(RigidBodyBasics successor, RigidBodyTransformReadOnly transformToSuccessorParentJoint)
+   {
+      loopClosureFrame = MovingReferenceFrame.constructFrameFixedInParent(MecanoTools.capitalize(getName()) + "LoopClosureFrame",
+                                                                          getFrameAfterJoint(),
+                                                                          transformToSuccessorParentJoint);
+   }
+
    /** {@inheritDoc} */
    @Override
    public TwistReadOnly getJointTwist()
@@ -172,6 +183,12 @@ public class FixedJoint implements FixedJointBasics
    public List<TwistReadOnly> getUnitTwists()
    {
       return Collections.emptyList();
+   }
+
+   @Override
+   public MovingReferenceFrame getLoopClosureFrame()
+   {
+      return loopClosureFrame;
    }
 
    /**

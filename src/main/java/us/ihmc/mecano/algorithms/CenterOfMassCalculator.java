@@ -54,7 +54,8 @@ public class CenterOfMassCalculator implements ReferenceFrameHolder
    public CenterOfMassCalculator(MultiBodySystemReadOnly input, ReferenceFrame referenceFrame)
    {
       this.input = input;
-      rigidBodies = input.getJointsToConsider().stream().map(JointReadOnly::getSuccessor).toArray(RigidBodyReadOnly[]::new);
+      // Preventing repetitions dues to possible kinematic loop(s) by adding 'distinct()'
+      rigidBodies = input.getJointsToConsider().stream().map(JointReadOnly::getSuccessor).distinct().toArray(RigidBodyReadOnly[]::new);
       this.referenceFrame = referenceFrame;
    }
 

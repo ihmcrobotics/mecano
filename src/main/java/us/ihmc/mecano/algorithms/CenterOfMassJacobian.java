@@ -2,9 +2,7 @@ package us.ihmc.mecano.algorithms;
 
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.LinkedHashMap;
 import java.util.List;
-import java.util.Map;
 
 import org.ejml.data.DMatrix1Row;
 import org.ejml.data.DMatrixRMaj;
@@ -32,6 +30,11 @@ import us.ihmc.mecano.tools.MultiBodySystemTools;
 /**
  * Computes the center of mass Jacobian that maps from joint velocity space to center of mass
  * Cartesian velocity space.
+ * <p>
+ * Note on kinematic loops: the computed Jacobian matrix will be filled of zeros for the loop
+ * closure joints. By externally constraining the configuration and velocity of the joints composing
+ * a kinematic loop, the Jacobian will remain accurate.
+ * </p>
  *
  * @author Sylvain Bertrand
  */
@@ -62,8 +65,6 @@ public class CenterOfMassJacobian implements ReferenceFrameHolder
     * which can provide a slight performance improvement.
     */
    private final RecursionStep[] recursionSteps;
-   /** Map to quickly retrieve information for each rigid-body. */
-   private final Map<RigidBodyReadOnly, RecursionStep> rigidBodyToRecursionStepMap = new LinkedHashMap<>();
 
    /** The center of mass Jacobian. */
    private final DMatrixRMaj jacobianMatrix;
@@ -213,11 +214,10 @@ public class CenterOfMassJacobian implements ReferenceFrameHolder
       }
 
       initialRecursionStep = new RecursionStep(rootBody, null);
-      rigidBodyToRecursionStepMap.put(rootBody, initialRecursionStep);
-      buildMultiBodyTree(initialRecursionStep, input.getJointsToIgnore());
+      recursionSteps = buildMultiBodyTree(initialRecursionStep, input.getJointsToIgnore()).toArray(new RecursionStep[0]);
+
       if (considerIgnoredSubtreesInertia)
          initialRecursionStep.includeIgnoredSubtreeInertia();
-      recursionSteps = rigidBodyToRecursionStepMap.values().toArray(new RecursionStep[0]);
 
       jacobianColumn = new FrameVector3D(this.jacobianFrame);
 
@@ -226,23 +226,36 @@ public class CenterOfMassJacobian implements ReferenceFrameHolder
       jointVelocityMatrix = new DMatrixRMaj(nDegreesOfFreedom, 1);
    }
 
-   private void buildMultiBodyTree(RecursionStep parent, Collection<? extends JointReadOnly> jointsToIgnore)
+   private List<RecursionStep> buildMultiBodyTree(RecursionStep parent, Collection<? extends JointReadOnly> jointsToIgnore)
    {
+      List<RecursionStep> recursionSteps = new ArrayList<>();
+      recursionSteps.add(parent);
+
       for (JointReadOnly childJoint : parent.rigidBody.getChildrenJoints())
       {
          if (jointsToIgnore.contains(childJoint))
             continue;
+
+         if (childJoint.isLoopClosure())
+         {
+            /*
+             * We simply skip any loop closure joint which will leave their columns in the Jacobian matrix set
+             * to zero, which is what we want.
+             */
+            continue;
+         }
 
          RigidBodyReadOnly childBody = childJoint.getSuccessor();
          if (childBody != null)
          {
             int[] jointIndices = input.getJointMatrixIndexProvider().getJointDoFIndices(childJoint);
             RecursionStep child = new RecursionStep(childBody, jointIndices);
-            rigidBodyToRecursionStepMap.put(childBody, child);
             parent.children.add(child);
-            buildMultiBodyTree(child, jointsToIgnore);
+            recursionSteps.addAll(buildMultiBodyTree(child, jointsToIgnore));
          }
       }
+
+      return recursionSteps;
    }
 
    /**

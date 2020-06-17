@@ -658,12 +658,17 @@ public class MultiBodySystemTools
    /**
     * Collects in order the successor of each joint, i.e. {@link JointReadOnly#getSuccessor()}.
     * <p>
+    * Note on kinematic loops: if {@code joints} contains the two joints terminating a kinematic loop,
+    * then the common successor will occur twice in the result.
+    * </p>
+    * <p>
     * WARNING: This method generates garbage.
     * </p>
     *
     * @param joints the joints to collect the successors of.
     * @return the array containing in order the successor of each joint.
     */
+   // TODO Consider explicitly handling successor of kinematic loops
    public static RigidBodyReadOnly[] collectSuccessors(JointReadOnly... joints)
    {
       return Stream.of(joints).map(JointReadOnly::getSuccessor).toArray(RigidBodyReadOnly[]::new);
@@ -672,12 +677,17 @@ public class MultiBodySystemTools
    /**
     * Collects in order the successor of each joint, i.e. {@link JointReadOnly#getSuccessor()}.
     * <p>
+    * Note on kinematic loops: if {@code joints} contains the two joints terminating a kinematic loop,
+    * then the common successor will occur twice in the result.
+    * </p>
+    * <p>
     * WARNING: This method generates garbage.
     * </p>
     *
     * @param joints the joints to collect the successors of.
     * @return the array containing in order the successor of each joint.
     */
+   // TODO Consider explicitly handling successor of kinematic loops
    public static RigidBodyBasics[] collectSuccessors(JointBasics... joints)
    {
       return Stream.of(joints).map(JointBasics::getSuccessor).toArray(RigidBodyBasics[]::new);
@@ -687,12 +697,17 @@ public class MultiBodySystemTools
     * Collects any rigid-body that composes any of the subtrees originating at the given
     * {@code joints}.
     * <p>
+    * Note on kinematic loops: if {@code joints} contains the two joints terminating a kinematic loop,
+    * then the subtree of the common successor will occur twice in the result.
+    * </p>
+    * <p>
     * WARNING: This method generates garbage.
     * </p>
     *
     * @param joints the joints indicating the start of each subtree to collect.
     * @return the array containing all the rigid-bodies composing the subtrees.
     */
+   // TODO Consider explicitly handling successor of kinematic loops
    public static RigidBodyReadOnly[] collectSubtreeSuccessors(JointReadOnly... joints)
    {
       return Stream.of(joints).map(JointReadOnly::getSuccessor).flatMap(RigidBodyReadOnly::subtreeStream).distinct().toArray(RigidBodyReadOnly[]::new);
@@ -702,12 +717,17 @@ public class MultiBodySystemTools
     * Collects any rigid-body that composes any of the subtrees originating at the given
     * {@code joints}.
     * <p>
+    * Note on kinematic loops: if {@code joints} contains the two joints terminating a kinematic loop,
+    * then the subtree of the common successor will occur twice in the result.
+    * </p>
+    * <p>
     * WARNING: This method generates garbage.
     * </p>
     *
     * @param joints the joints indicating the start of each subtree to collect.
     * @return the array containing all the rigid-bodies composing the subtrees.
     */
+   // TODO Consider explicitly handling successor of kinematic loops
    public static RigidBodyBasics[] collectSubtreeSuccessors(JointBasics... joints)
    {
       return Stream.of(joints).map(JointBasics::getSuccessor).flatMap(RigidBodyBasics::subtreeStream).distinct().toArray(RigidBodyBasics[]::new);
@@ -716,6 +736,11 @@ public class MultiBodySystemTools
    /**
     * Collects and returns all the joints located between the given {@code rigidBody} and the root
     * body.
+    * <p>
+    * Note on kinematic loops: this method does not collect the joints on the secondary branch of a
+    * kinematic loop, i.e. the branch that starts off the primary branch and ends with the loop closure
+    * joint.
+    * </p>
     * <p>
     * WARNING: This method generates garbage.
     * </p>
@@ -732,6 +757,11 @@ public class MultiBodySystemTools
     * Collects and returns all the joints located between the given {@code rigidBody} and the root
     * body.
     * <p>
+    * Note on kinematic loops: this method does not collect the joints on the secondary branch of a
+    * kinematic loop, i.e. the branch that starts off the primary branch and ends with the loop closure
+    * joint.
+    * </p>
+    * <p>
     * WARNING: This method generates garbage.
     * </p>
     *
@@ -747,6 +777,11 @@ public class MultiBodySystemTools
     * Collects for each rigid-body all their support joints, i.e. the joints that are between the
     * rigid-body and the root body, and returns an array containing no duplicate elements.
     * <p>
+    * Note on kinematic loops: this method does not collect the joints on the secondary branch of a
+    * kinematic loop, i.e. the branch that starts off the primary branch and ends with the loop closure
+    * joint.
+    * </p>
+    * <p>
     * WARNING: This method generates garbage.
     * </p>
     *
@@ -761,6 +796,11 @@ public class MultiBodySystemTools
    /**
     * Collects for each rigid-body all their support joints, i.e. the joints that are between the
     * rigid-body and the root body, and returns an array containing no duplicate elements.
+    * <p>
+    * Note on kinematic loops: this method does not collect the joints on the secondary branch of a
+    * kinematic loop, i.e. the branch that starts off the primary branch and ends with the loop closure
+    * joint.
+    * </p>
     * <p>
     * WARNING: This method generates garbage.
     * </p>
@@ -827,6 +867,8 @@ public class MultiBodySystemTools
     *
     * @param rigidBody the rigid-body to collect the support and subtree joints of.
     * @return the array containing the support and subtree joints.
+    * @see #collectSupportJoints(RigidBodyReadOnly)
+    * @see #collectSubtreeJoints(RigidBodyReadOnly...)
     */
    public static JointReadOnly[] collectSupportAndSubtreeJoints(RigidBodyReadOnly rigidBody)
    {
@@ -844,6 +886,8 @@ public class MultiBodySystemTools
     *
     * @param rigidBody the rigid-body to collect the support and subtree joints of.
     * @return the array containing the support and subtree joints.
+    * @see #collectSupportJoints(RigidBodyBasics)
+    * @see #collectSubtreeJoints(RigidBodyBasics...)
     */
    public static JointBasics[] collectSupportAndSubtreeJoints(RigidBodyBasics rigidBody)
    {
@@ -863,6 +907,8 @@ public class MultiBodySystemTools
     *
     * @param rigidBodies the rigid-bodies to collect the support and subtree joints of.
     * @return the array containing the support and subtree joints.
+    * @see #collectSupportJoints(RigidBodyReadOnly)
+    * @see #collectSubtreeJoints(RigidBodyReadOnly...)
     */
    public static JointReadOnly[] collectSupportAndSubtreeJoints(RigidBodyReadOnly... rigidBodies)
    {
@@ -879,6 +925,8 @@ public class MultiBodySystemTools
     *
     * @param rigidBodies the rigid-bodies to collect the support and subtree joints of.
     * @return the array containing the support and subtree joints.
+    * @see #collectSupportJoints(RigidBodyBasics)
+    * @see #collectSubtreeJoints(RigidBodyBasics...)
     */
    public static JointBasics[] collectSupportAndSubtreeJoints(RigidBodyBasics... rigidBodies)
    {

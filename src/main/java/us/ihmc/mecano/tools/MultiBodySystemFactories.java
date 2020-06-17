@@ -1,7 +1,9 @@
 package us.ihmc.mecano.tools;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import us.ihmc.euclid.matrix.interfaces.Matrix3DReadOnly;
@@ -74,10 +76,17 @@ public class MultiBodySystemFactories
     * frame after the parent joint of {@code start}. As a result, the clone is an independent
     * multi-body system but its root is following the original multi-body system.
     * </p>
+    * <p>
+    * Note on kinematic loops: any loop on the path from {@code start} to {@code end} will not be
+    * properly cloned. More precisely, this method skip the secondary branch of a kinematic loop, i.e.
+    * the branch that starts off the primary branch and ends with the loop closure joint.
+    * </p>
     *
     * @param start the rigid-body from where the kinematic chain starts.
     * @param end   the rigid-body where the kinematic chain ends.
     * @return the clone kinematic chain.
+    * @throws UnsupportedOperationException if the kinematic chain contains one or more loop closure
+    *                                       joints.
     */
    public static OneDoFJointBasics[] cloneOneDoFJointKinematicChain(RigidBodyBasics start, RigidBodyBasics end)
    {
@@ -100,6 +109,8 @@ public class MultiBodySystemFactories
     *
     * @param originalJoints the kinematic chain to clone. Not modified.
     * @return the clone kinematic chain.
+    * @throws UnsupportedOperationException if {@code originalJoints} contains one or more loop closure
+    *                                       joints.
     */
    public static OneDoFJointBasics[] cloneOneDoFJointKinematicChain(OneDoFJointBasics[] originalJoints)
    {
@@ -123,6 +134,8 @@ public class MultiBodySystemFactories
     * @param originalJoints the kinematic chain to clone. Not modified.
     * @param clazz          class used to filter the cloned joints that are to be returned.
     * @return the clone kinematic chain.
+    * @throws UnsupportedOperationException if {@code originalJoints} contains one or more loop closure
+    *                                       joints.
     */
    public static <T extends JointReadOnly> T[] cloneKinematicChainAndFilter(T[] originalJoints, Class<T> clazz)
    {
@@ -147,6 +160,8 @@ public class MultiBodySystemFactories
     * @param clazz          class used to filter the cloned joints that are to be returned.
     * @param cloneSuffix    suffix to append to the cloned joints and rigid-bodies.
     * @return the clone kinematic chain.
+    * @throws UnsupportedOperationException if {@code originalJoints} contains one or more loop closure
+    *                                       joints.
     */
    public static <T extends JointReadOnly> T[] cloneKinematicChainAndFilter(T[] originalJoints, Class<T> clazz, String cloneSuffix)
    {
@@ -168,6 +183,8 @@ public class MultiBodySystemFactories
     *
     * @param originalJoints the kinematic chain to clone. Not modified.
     * @return the clone kinematic chain.
+    * @throws UnsupportedOperationException if {@code originalJoints} contains one or more loop closure
+    *                                       joints.
     */
    public static JointBasics[] cloneKinematicChain(JointReadOnly[] originalJoints)
    {
@@ -190,6 +207,8 @@ public class MultiBodySystemFactories
     * @param originalJoints the kinematic chain to clone. Not modified.
     * @param cloneSuffix    suffix to append to the cloned joints and rigid-bodies.
     * @return the clone kinematic chain.
+    * @throws UnsupportedOperationException if {@code originalJoints} contains one or more loop closure
+    *                                       joints.
     */
    public static JointBasics[] cloneKinematicChain(JointReadOnly[] originalJoints, String cloneSuffix)
    {
@@ -216,6 +235,8 @@ public class MultiBodySystemFactories
     *                       {@code null}, the frame is equal to frame after the parent joint of
     *                       {@code originalJoints[0]}.
     * @return the clone kinematic chain.
+    * @throws UnsupportedOperationException if {@code originalJoints} contains one or more loop closure
+    *                                       joints.
     */
    public static JointBasics[] cloneKinematicChain(JointReadOnly[] originalJoints, String cloneSuffix, ReferenceFrame chainRootFrame)
    {
@@ -239,6 +260,9 @@ public class MultiBodySystemFactories
       for (int jointIndex = 0; jointIndex < originalJoints.length; jointIndex++)
       {
          JointReadOnly originalJoint = originalJoints[jointIndex];
+
+         if (originalJoint.isLoopClosure())
+            throw new UnsupportedOperationException("Cloning loop closure joints is not supported.");
 
          RigidBodyReadOnly originalPredecessor = originalJoint.getPredecessor();
          // Retrieve the right predecessor for the joint to clone. The map has to contain the clone predecessor.
@@ -314,6 +338,11 @@ public class MultiBodySystemFactories
     * the parent joint of {@code originalSubtreeStartBody}. As a result, the clone is an independent
     * multi-body system but its root is following the original multi-body system.
     * </p>
+    * <p>
+    * WARNING for kinematic loops: this method does not cover the case where
+    * {@code originalSubtreeStartBody} is part of the secondary branch of a kinematic loop, i.e. the
+    * branch that originates from the primary branch and ends with a loop closure joint.
+    * </p>
     *
     * @param originalSubtreeStartBody the rigid-body holding the subtree to be cloned. Not modified.
     * @param cloneSuffix              suffix to append to the cloned joints and rigid-bodies.
@@ -334,6 +363,11 @@ public class MultiBodySystemFactories
     * The clone of the subtree has its own root body which reference frame is child of the frame after
     * the parent joint of {@code originalSubtreeStartBody}. As a result, the clone is an independent
     * multi-body system but its root is following the original multi-body system.
+    * </p>
+    * <p>
+    * WARNING for kinematic loops: this method does not cover the case where
+    * {@code originalSubtreeStartBody} is part of the secondary branch of a kinematic loop, i.e. the
+    * branch that originates from the primary branch and ends with a loop closure joint.
     * </p>
     *
     * @param originalSubtreeStartBody the rigid-body holding the subtree to be cloned. Not modified.
@@ -371,6 +405,9 @@ public class MultiBodySystemFactories
       Map<RigidBodyReadOnly, RigidBodyBasics> originalToCloneBodyMap = new HashMap<>();
       originalToCloneBodyMap.put(originalStart, cloneStart);
 
+      List<JointBasics> loopClosureCloneJoints = new ArrayList<>();
+      List<JointReadOnly> loopClosureOriginalJoints = new ArrayList<>();
+
       for (JointReadOnly originalJoint : originalStart.childrenSubtreeIterable())
       {
          RigidBodyReadOnly originalPredecessor = originalJoint.getPredecessor();
@@ -380,10 +417,29 @@ public class MultiBodySystemFactories
          // Clone the joint
          JointBasics cloneJoint = cloneJoint(originalJoint, cloneSuffix, clonePredecessor, originalStart.isRootBody(), jointBuilder);
 
+         if (originalJoint.isLoopClosure())
+         { // We rely on the iterator to stop at the loop closure joint.
+            loopClosureCloneJoints.add(cloneJoint);
+            loopClosureOriginalJoints.add(originalJoint);
+            // We will complete their setup at the end to ensure the successors are already created.
+            continue;
+         }
+
          // Clone the successor
          RigidBodyReadOnly originalSuccessor = originalJoint.getSuccessor();
          RigidBodyBasics cloneSuccessor = cloneRigidBody(originalSuccessor, null, cloneSuffix, cloneJoint, rigidBodyBuilder);
          originalToCloneBodyMap.put(originalSuccessor, cloneSuccessor);
+      }
+
+      for (int loopClosureIndex = 0; loopClosureIndex < loopClosureCloneJoints.size(); loopClosureIndex++)
+      {
+         JointBasics cloneJoint = loopClosureCloneJoints.get(loopClosureIndex);
+         JointReadOnly originalJoint = loopClosureOriginalJoints.get(loopClosureIndex);
+
+         RigidBodyBasics cloneSuccessor = originalToCloneBodyMap.get(originalJoint.getSuccessor());
+         RigidBodyTransform cloneTransform = new RigidBodyTransform(originalJoint.getLoopClosureFrame().getTransformToParent());
+         cloneTransform.invert();
+         cloneJoint.setupLoopClosure(cloneSuccessor, cloneTransform);
       }
    }
 

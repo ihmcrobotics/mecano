@@ -2,9 +2,7 @@ package us.ihmc.mecano.algorithms;
 
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.LinkedHashMap;
 import java.util.List;
-import java.util.Map;
 
 import org.ejml.data.DMatrix1Row;
 import org.ejml.data.DMatrixRMaj;
@@ -55,6 +53,11 @@ import us.ihmc.mecano.tools.MultiBodySystemTools;
  * velocity and acceleration vectors, <tt>A</tt> is the centroidal momentum matrix, and <tt>b</tt>
  * represents the convective term that this calculator also compute and that can be obtained via
  * {@link #getBiasSpatialForce()}.
+ * <p>
+ * Note on kinematic loops: the computed centroidal momentum matrix will be filled of zeros for the
+ * loop closure joints. By externally constraining the configuration, velocity, and acceleration of
+ * the joints composing a kinematic loop, the results from this calculator will remain accurate.
+ * </p>
  *
  * @author Sylvain Bertrand
  */
@@ -71,9 +74,6 @@ public class CentroidalMomentumRateCalculator implements ReferenceFrameHolder
     * provide a slight performance improvement.
     */
    private final RecursionStep[] recursionSteps;
-   /** Map to quickly retrieve information for each rigid-body. */
-   private final Map<RigidBodyReadOnly, RecursionStep> rigidBodyToRecursionStepMap = new LinkedHashMap<>();
-
    /** Intermediate variable to store the unit-twist of the parent joint. */
    private final Twist jointUnitTwist;
    /** Intermediate variable for garbage free operations. */
@@ -188,11 +188,10 @@ public class CentroidalMomentumRateCalculator implements ReferenceFrameHolder
 
       RigidBodyReadOnly rootBody = input.getRootBody();
       initialRecursionStep = new RecursionStep(rootBody, null, null);
-      rigidBodyToRecursionStepMap.put(rootBody, initialRecursionStep);
-      buildMultiBodyTree(initialRecursionStep, input.getJointsToIgnore());
+      recursionSteps = buildMultiBodyTree(initialRecursionStep, input.getJointsToIgnore()).toArray(new RecursionStep[0]);
+
       if (considerIgnoredSubtreesInertia)
          initialRecursionStep.includeIgnoredSubtreeInertia();
-      recursionSteps = rigidBodyToRecursionStepMap.values().toArray(new RecursionStep[0]);
 
       biasSpatialForce = new SpatialForce(matrixFrame);
 
@@ -213,22 +212,35 @@ public class CentroidalMomentumRateCalculator implements ReferenceFrameHolder
       centerOfMassAcceleration = new FrameVector3D(matrixFrame);
    }
 
-   private void buildMultiBodyTree(RecursionStep parent, Collection<? extends JointReadOnly> jointsToIgnore)
+   private List<RecursionStep> buildMultiBodyTree(RecursionStep parent, Collection<? extends JointReadOnly> jointsToIgnore)
    {
+      List<RecursionStep> recursionSteps = new ArrayList<>();
+      recursionSteps.add(parent);
+
       for (JointReadOnly childJoint : parent.rigidBody.getChildrenJoints())
       {
          if (jointsToIgnore.contains(childJoint))
             continue;
+
+         if (childJoint.isLoopClosure())
+         {
+            /*
+             * We simply skip any loop closure joint which will leave their columns in the matrix set to zero,
+             * which is what we want.
+             */
+            continue;
+         }
 
          RigidBodyReadOnly childBody = childJoint.getSuccessor();
          if (childBody != null)
          {
             int[] jointIndices = input.getJointMatrixIndexProvider().getJointDoFIndices(childJoint);
             RecursionStep child = new RecursionStep(childBody, parent, jointIndices);
-            rigidBodyToRecursionStepMap.put(childBody, child);
-            buildMultiBodyTree(child, jointsToIgnore);
+            recursionSteps.addAll(buildMultiBodyTree(child, jointsToIgnore));
          }
       }
+
+      return recursionSteps;
    }
 
    /**

@@ -6,7 +6,7 @@ plugins {
 
 ihmc {
    group = "us.ihmc"
-   version = "0.4.1"
+   version = "0.5.0"
    vcsUrl = "https://github.com/ihmcrobotics/mecano"
    openSource = true
 

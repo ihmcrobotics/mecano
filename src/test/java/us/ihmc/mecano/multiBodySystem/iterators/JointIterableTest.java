@@ -1,7 +1,10 @@
 package us.ihmc.mecano.multiBodySystem.iterators;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
+import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Random;
@@ -64,6 +67,42 @@ public class JointIterableTest
    }
 
    @Test
+   public void testChainWithKinematicLoop()
+   {
+      Random random = new Random(43954);
+
+      for (int i = 0; i < ITERATIONS; i++)
+      { // We only assert that the iterator returned each joint only once.
+         int numberOfJoints = random.nextInt(50) + 2;
+         List<JointBasics> joints = MultiBodySystemRandomTools.nextJointChain(random, numberOfJoints);
+         int loopStartIndex = random.nextInt(numberOfJoints);
+         int loopEndIndex = random.nextInt(numberOfJoints);
+
+         while (loopEndIndex == loopStartIndex)
+            loopEndIndex = random.nextInt(numberOfJoints);
+
+         if (loopStartIndex > loopEndIndex)
+         {
+            int temp = loopStartIndex;
+            loopStartIndex = loopEndIndex;
+            loopEndIndex = temp;
+         }
+
+         int kinematicLoopSize = random.nextInt(10) + 2;
+         RigidBodyBasics loopStart = joints.get(loopStartIndex).getSuccessor();
+         RigidBodyBasics loopEnd = joints.get(loopEndIndex).getSuccessor();
+         MultiBodySystemRandomTools.nextKinematicLoopRevoluteJoints(random, "loop", loopStart, loopEnd, kinematicLoopSize);
+
+         JointIterable<JointBasics> jointIterable = new JointIterable<>(JointBasics.class, null, joints.get(0));
+         List<JointBasics> iterableJoints = new ArrayList<>();
+         jointIterable.iterator().forEachRemaining(iterableJoints::add);
+
+         assertEquals(numberOfJoints + kinematicLoopSize, iterableJoints.size());
+         assertEquals(new HashSet<>(iterableJoints).size(), iterableJoints.size());
+      }
+   }
+
+   @Test
    public void testTreeDepth1() throws Exception
    {
       Random random = new Random(324534);
@@ -103,6 +142,7 @@ public class JointIterableTest
          RigidBody rootJointSuccessor = MultiBodySystemRandomTools.nextRigidBody(random, "rootJointSuccessor", rootJoint);
          int numberOfChildren = 10;
          int numberOfGrandChildrenPerChild = 10;
+
          for (int childIndex = 0; childIndex < numberOfChildren; childIndex++)
          {
             JointBasics childJoint = MultiBodySystemRandomTools.nextJoint(random, "jointDepth1", rootJointSuccessor);
@@ -114,10 +154,12 @@ public class JointIterableTest
                MultiBodySystemRandomTools.nextRigidBody(random, "bodyDepth2", grandChildJoint);
             }
          }
+
          JointIterable<JointReadOnly> jointIterable = new JointIterable<>(JointReadOnly.class, null, rootJoint);
          Iterator<JointReadOnly> iterator = jointIterable.iterator();
          assertTrue(iterator.hasNext());
          assertTrue(rootJoint == iterator.next());
+
          for (int childIndex = 0; childIndex < numberOfChildren; childIndex++)
          {
             assertTrue(iterator.hasNext());

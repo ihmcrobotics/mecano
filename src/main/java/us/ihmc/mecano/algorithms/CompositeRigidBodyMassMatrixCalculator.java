@@ -63,6 +63,11 @@ import us.ihmc.mecano.tools.MultiBodySystemTools;
  * where <tt>h</tt> is the system's momentum and <tt>A</tt> is the centroidal momentum matrix, the
  * term introduce <tt>b</tt> represents the convective term.
  * </p>
+ * <p>
+ * Note on kinematic loops: the computed mass matrix will be filled of zeros for the loop closure
+ * joints. By externally constraining the configuration and velocity of the joints composing a
+ * kinematic loop, the results from this calculator will remain accurate.
+ * </p>
  *
  * @author Twan Koolen
  * @author Sylvain Bertrand
@@ -196,10 +201,10 @@ public class CompositeRigidBodyMassMatrixCalculator
 
       RigidBodyReadOnly rootBody = input.getRootBody();
       rootCompositeInertia = new CompositeRigidBodyInertia(rootBody, null, null);
-      List<CompositeRigidBodyInertia> inertiaList = buildMultiBodyTree(rootCompositeInertia, input.getJointsToIgnore());
+      compositeInertias = buildMultiBodyTree(rootCompositeInertia, input.getJointsToIgnore()).toArray(new CompositeRigidBodyInertia[0]);
+
       if (considerIgnoredSubtreesInertia)
          rootCompositeInertia.includeIgnoredSubtreeInertia();
-      compositeInertias = inertiaList.toArray(new CompositeRigidBodyInertia[0]);
 
       int nDoFs = MultiBodySystemTools.computeDegreesOfFreedom(input.getJointsToConsider());
       massMatrix = new DMatrixRMaj(nDoFs, nDoFs);
@@ -216,6 +221,15 @@ public class CompositeRigidBodyMassMatrixCalculator
       {
          if (jointsToIgnore.contains(childJoint))
             continue;
+
+         if (childJoint.isLoopClosure())
+         {
+            /*
+             * We simply skip any loop closure joint which will leave their columns in the matrix set to zero,
+             * which is what we want.
+             */
+            continue;
+         }
 
          RigidBodyReadOnly childBody = childJoint.getSuccessor();
 
