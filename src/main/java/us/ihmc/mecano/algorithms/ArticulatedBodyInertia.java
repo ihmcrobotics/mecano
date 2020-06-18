@@ -1,6 +1,7 @@
 package us.ihmc.mecano.algorithms;
 
-import org.ejml.data.DenseMatrix64F;
+import org.ejml.data.DMatrix;
+import org.ejml.data.DMatrixRMaj;
 
 import us.ihmc.euclid.interfaces.GeometryObject;
 import us.ihmc.euclid.matrix.Matrix3D;
@@ -203,7 +204,7 @@ public class ArticulatedBodyInertia implements GeometryObject<ArticulatedBodyIne
     *
     * @param matrix the inertia matrix to add. Not modified.
     */
-   public void add(DenseMatrix64F matrix)
+   public void add(DMatrix matrix)
    {
       MecanoTools.addEquals(0, 0, matrix, angularInertia);
       MecanoTools.addEquals(3, 3, matrix, linearInertia);
@@ -231,7 +232,7 @@ public class ArticulatedBodyInertia implements GeometryObject<ArticulatedBodyIne
     *
     * @param matrix the inertia matrix to subtract. Not modified.
     */
-   public void sub(DenseMatrix64F matrix)
+   public void sub(DMatrix matrix)
    {
       MecanoTools.subEquals(0, 0, matrix, angularInertia);
       MecanoTools.subEquals(3, 3, matrix, linearInertia);
@@ -307,7 +308,7 @@ public class ArticulatedBodyInertia implements GeometryObject<ArticulatedBodyIne
     *
     * @param matrixToPack the matrix in which this inertia is stored. Modified.
     */
-   public void get(DenseMatrix64F matrixToPack)
+   public void get(DMatrix matrixToPack)
    {
       angularInertia.get(0, 0, matrixToPack);
       linearInertia.get(3, 3, matrixToPack);
@@ -446,8 +447,8 @@ public class ArticulatedBodyInertia implements GeometryObject<ArticulatedBodyIne
    @Override
    public String toString()
    {
-      DenseMatrix64F matrix = new DenseMatrix64F(6, 6);
+      DMatrixRMaj matrix = new DMatrixRMaj(6, 6);
       get(matrix);
-      return "Articulated-body inertia expressed in " + expressedInFrame + "\n" + MecanoIOTools.getDenseMatrix64FString(matrix);
+      return "Articulated-body inertia expressed in " + expressedInFrame + "\n" + MecanoIOTools.getDMatrixString(matrix);
    }
 }

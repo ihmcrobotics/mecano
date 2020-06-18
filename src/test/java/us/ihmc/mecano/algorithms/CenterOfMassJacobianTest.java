@@ -5,8 +5,8 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import java.util.List;
 import java.util.Random;
 
-import org.ejml.data.DenseMatrix64F;
-import org.ejml.ops.CommonOps;
+import org.ejml.data.DMatrixRMaj;
+import org.ejml.dense.row.CommonOps_DDRM;
 import org.junit.jupiter.api.Test;
 
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
@@ -150,10 +150,10 @@ public class CenterOfMassJacobianTest
          MultiBodySystemRandomTools.nextState(random, JointStateType.VELOCITY, joints);
          rootBody.updateFramesRecursively();
 
-         DenseMatrix64F jointVelocities = new DenseMatrix64F(MultiBodySystemTools.computeDegreesOfFreedom(joints), 1);
+         DMatrixRMaj jointVelocities = new DMatrixRMaj(MultiBodySystemTools.computeDegreesOfFreedom(joints), 1);
          MultiBodySystemTools.extractJointsState(joints, JointStateType.VELOCITY, jointVelocities);
-         DenseMatrix64F centerOfMassVelocityMatrix = new DenseMatrix64F(3, 1);
-         CommonOps.mult(centerOfMassJacobian.getJacobianMatrix(), jointVelocities, centerOfMassVelocityMatrix);
+         DMatrixRMaj centerOfMassVelocityMatrix = new DMatrixRMaj(3, 1);
+         CommonOps_DDRM.mult(centerOfMassJacobian.getJacobianMatrix(), jointVelocities, centerOfMassVelocityMatrix);
          Vector3D actualVelocity = new Vector3D();
          actualVelocity.set(centerOfMassVelocityMatrix);
 
@@ -182,10 +182,10 @@ public class CenterOfMassJacobianTest
          MultiBodySystemRandomTools.nextState(random, JointStateType.VELOCITY, joints);
          rootBody.updateFramesRecursively();
 
-         DenseMatrix64F jointVelocities = new DenseMatrix64F(MultiBodySystemTools.computeDegreesOfFreedom(joints), 1);
+         DMatrixRMaj jointVelocities = new DMatrixRMaj(MultiBodySystemTools.computeDegreesOfFreedom(joints), 1);
          MultiBodySystemTools.extractJointsState(joints, JointStateType.VELOCITY, jointVelocities);
-         DenseMatrix64F centerOfMassVelocityMatrix = new DenseMatrix64F(3, 1);
-         CommonOps.mult(centerOfMassJacobian.getJacobianMatrix(), jointVelocities, centerOfMassVelocityMatrix);
+         DMatrixRMaj centerOfMassVelocityMatrix = new DMatrixRMaj(3, 1);
+         CommonOps_DDRM.mult(centerOfMassJacobian.getJacobianMatrix(), jointVelocities, centerOfMassVelocityMatrix);
          Vector3D actualVelocity = new Vector3D();
          actualVelocity.set(centerOfMassVelocityMatrix);
 

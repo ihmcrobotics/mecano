@@ -6,11 +6,11 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 import java.util.Arrays;
 import java.util.Random;
 
-import org.ejml.data.DenseMatrix64F;
-import org.ejml.factory.DecompositionFactory;
-import org.ejml.interfaces.decomposition.EigenDecomposition;
-import org.ejml.ops.CommonOps;
-import org.ejml.ops.MatrixFeatures;
+import org.ejml.data.DMatrixRMaj;
+import org.ejml.dense.row.CommonOps_DDRM;
+import org.ejml.dense.row.MatrixFeatures_DDRM;
+import org.ejml.dense.row.factory.DecompositionFactory_DDRM;
+import org.ejml.interfaces.decomposition.EigenDecomposition_F64;
 import org.ejml.simple.SimpleMatrix;
 import org.junit.jupiter.api.Test;
 
@@ -261,13 +261,13 @@ public class SpatialInertiaTest
          RigidBodyTransform finalToInitial = finalFrame.getTransformToDesiredFrame(initialFrame);
          SimpleMatrix finalToInitialAdjoint = SimpleMatrix.wrap(adjoint(finalToInitial));
          SimpleMatrix finalToInitialAdjointTranspose = finalToInitialAdjoint.transpose();
-         DenseMatrix64F expected = finalToInitialAdjointTranspose.mult(inertiaInitial).mult(finalToInitialAdjoint).getMatrix();
+         DMatrixRMaj expected = finalToInitialAdjointTranspose.mult(inertiaInitial).mult(finalToInitialAdjoint).getMatrix();
 
          inertia.changeFrame(finalFrame);
-         DenseMatrix64F actual = new DenseMatrix64F(6, 6);
+         DMatrixRMaj actual = new DMatrixRMaj(6, 6);
          inertia.get(actual);
 
-         assertTrue(MatrixFeatures.isEquals(expected, actual, EPSILON));
+         assertTrue(MatrixFeatures_DDRM.isEquals(expected, actual, EPSILON));
       }
 
       for (int i = 0; i < ITERATIONS; i++)
@@ -308,20 +308,20 @@ public class SpatialInertiaTest
 
    private static void assertEigenValuesPositiveAndEqual(Matrix3D matrix1, Matrix3D matrix2, double epsilon)
    {
-      DenseMatrix64F denseMatrix1 = new DenseMatrix64F(3, 3);
+      DMatrixRMaj denseMatrix1 = new DMatrixRMaj(3, 3);
       matrix1.get(denseMatrix1);
 
-      DenseMatrix64F denseMatrix2 = new DenseMatrix64F(3, 3);
+      DMatrixRMaj denseMatrix2 = new DMatrixRMaj(3, 3);
       matrix2.get(denseMatrix2);
 
-      EigenDecomposition<DenseMatrix64F> eig1 = DecompositionFactory.eig(3, false);
+      EigenDecomposition_F64<DMatrixRMaj> eig1 = DecompositionFactory_DDRM.eig(3, false);
       eig1.decompose(denseMatrix1);
       double[] eigRealParts1 = new double[3];
       for (int i = 0; i < eig1.getNumberOfEigenvalues(); i++)
          eigRealParts1[i] = eig1.getEigenvalue(i).getReal();
       Arrays.sort(eigRealParts1);
 
-      EigenDecomposition<DenseMatrix64F> eig2 = DecompositionFactory.eig(3, false);
+      EigenDecomposition_F64<DMatrixRMaj> eig2 = DecompositionFactory_DDRM.eig(3, false);
       eig2.decompose(denseMatrix2);
       double[] eigRealParts2 = new double[3];
       for (int i = 0; i < eig2.getNumberOfEigenvalues(); i++)
@@ -347,16 +347,16 @@ public class SpatialInertiaTest
     */
    private static double computeKineticCoEnergy(Twist twist, SpatialInertia inertia)
    {
-      DenseMatrix64F twistMatrix = new DenseMatrix64F(6, 1);
-      DenseMatrix64F inertiaMatrix = new DenseMatrix64F(6, 6);
+      DMatrixRMaj twistMatrix = new DMatrixRMaj(6, 1);
+      DMatrixRMaj inertiaMatrix = new DMatrixRMaj(6, 6);
       twist.get(twistMatrix);
       inertia.get(inertiaMatrix);
 
-      DenseMatrix64F intermediate = new DenseMatrix64F(1, 6);
-      CommonOps.multTransA(twistMatrix, inertiaMatrix, intermediate);
+      DMatrixRMaj intermediate = new DMatrixRMaj(1, 6);
+      CommonOps_DDRM.multTransA(twistMatrix, inertiaMatrix, intermediate);
 
-      DenseMatrix64F result = new DenseMatrix64F(1, 1);
-      CommonOps.mult(intermediate, twistMatrix, result);
+      DMatrixRMaj result = new DMatrixRMaj(1, 1);
+      CommonOps_DDRM.mult(intermediate, twistMatrix, result);
 
       return 0.5 * result.get(0);
    }
@@ -365,40 +365,40 @@ public class SpatialInertiaTest
    {
       acceleration.getReferenceFrame().checkReferenceFrameMatch(inertia.getReferenceFrame());
 
-      DenseMatrix64F accelerationMatrix = new DenseMatrix64F(6, 1);
-      DenseMatrix64F inertiaMatrix = new DenseMatrix64F(6, 6);
+      DMatrixRMaj accelerationMatrix = new DMatrixRMaj(6, 1);
+      DMatrixRMaj inertiaMatrix = new DMatrixRMaj(6, 6);
 
       acceleration.get(accelerationMatrix);
       inertia.get(inertiaMatrix);
 
-      DenseMatrix64F wrenchMatrix = new DenseMatrix64F(6, 1);
-      CommonOps.mult(inertiaMatrix, accelerationMatrix, wrenchMatrix);
+      DMatrixRMaj wrenchMatrix = new DMatrixRMaj(6, 1);
+      CommonOps_DDRM.mult(inertiaMatrix, accelerationMatrix, wrenchMatrix);
       return new Wrench(acceleration.getBodyFrame(), acceleration.getReferenceFrame(), wrenchMatrix);
    }
 
-   private static DenseMatrix64F adjoint(RigidBodyTransform transform)
+   private static DMatrixRMaj adjoint(RigidBodyTransform transform)
    {
       Matrix3D translationTilde = new Matrix3D();
       translationTilde.setToTildeForm(transform.getTranslation());
-      DenseMatrix64F translationTildeDense = new DenseMatrix64F(3, 3);
+      DMatrixRMaj translationTildeDense = new DMatrixRMaj(3, 3);
       translationTilde.get(translationTildeDense);
 
-      DenseMatrix64F rotationDense = new DenseMatrix64F(3, 3);
+      DMatrixRMaj rotationDense = new DMatrixRMaj(3, 3);
       transform.getRotation().get(rotationDense);
 
-      DenseMatrix64F adjointMatrix = new DenseMatrix64F(6, 6);
+      DMatrixRMaj adjointMatrix = new DMatrixRMaj(6, 6);
 
       // upper left:
-      CommonOps.insert(rotationDense, adjointMatrix, 0, 0);
+      CommonOps_DDRM.insert(rotationDense, adjointMatrix, 0, 0);
 
       // lower left:
 
-      DenseMatrix64F lowerLeft = new DenseMatrix64F(translationTildeDense.getNumRows(), rotationDense.getNumCols());
-      CommonOps.mult(translationTildeDense, rotationDense, lowerLeft);
-      CommonOps.insert(lowerLeft, adjointMatrix, 3, 0);
+      DMatrixRMaj lowerLeft = new DMatrixRMaj(translationTildeDense.getNumRows(), rotationDense.getNumCols());
+      CommonOps_DDRM.mult(translationTildeDense, rotationDense, lowerLeft);
+      CommonOps_DDRM.insert(lowerLeft, adjointMatrix, 3, 0);
 
       // lower right:
-      CommonOps.insert(rotationDense, adjointMatrix, 3, 3);
+      CommonOps_DDRM.insert(rotationDense, adjointMatrix, 3, 3);
 
       return adjointMatrix;
    }

@@ -4,8 +4,9 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 
-import org.ejml.data.DenseMatrix64F;
-import org.ejml.ops.CommonOps;
+import org.ejml.data.DMatrix1Row;
+import org.ejml.data.DMatrixRMaj;
+import org.ejml.dense.row.CommonOps_DDRM;
 
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.FrameVector3D;
@@ -66,11 +67,11 @@ public class CenterOfMassJacobian implements ReferenceFrameHolder
    private final RecursionStep[] recursionSteps;
 
    /** The center of mass Jacobian. */
-   private final DenseMatrix64F jacobianMatrix;
+   private final DMatrixRMaj jacobianMatrix;
    /** Matrix containing the velocities of the joints to consider. */
-   private final DenseMatrix64F jointVelocityMatrix;
+   private final DMatrixRMaj jointVelocityMatrix;
    /** Intermediate variable for garbage free operations. */
-   private final DenseMatrix64F centerOfMassVelocityMatrix = new DenseMatrix64F(3, 1);
+   private final DMatrixRMaj centerOfMassVelocityMatrix = new DMatrixRMaj(3, 1);
 
    /** Intermediate variable to store one column of the Jacobian matrix. */
    private final FixedFrameVector3DBasics jacobianColumn;
@@ -221,8 +222,8 @@ public class CenterOfMassJacobian implements ReferenceFrameHolder
       jacobianColumn = new FrameVector3D(this.jacobianFrame);
 
       int nDegreesOfFreedom = MultiBodySystemTools.computeDegreesOfFreedom(input.getJointsToConsider());
-      jacobianMatrix = new DenseMatrix64F(3, nDegreesOfFreedom);
-      jointVelocityMatrix = new DenseMatrix64F(nDegreesOfFreedom, 1);
+      jacobianMatrix = new DMatrixRMaj(3, nDegreesOfFreedom);
+      jointVelocityMatrix = new DMatrixRMaj(nDegreesOfFreedom, 1);
    }
 
    private List<RecursionStep> buildMultiBodyTree(RecursionStep parent, Collection<? extends JointReadOnly> jointsToIgnore)
@@ -329,7 +330,7 @@ public class CenterOfMassJacobian implements ReferenceFrameHolder
 
       List<? extends JointReadOnly> joints = input.getJointMatrixIndexProvider().getIndexedJointsInOrder();
       MultiBodySystemTools.extractJointsState(joints, JointStateType.VELOCITY, jointVelocityMatrix);
-      CommonOps.mult(getJacobianMatrix(), jointVelocityMatrix, centerOfMassVelocityMatrix);
+      CommonOps_DDRM.mult(getJacobianMatrix(), jointVelocityMatrix, centerOfMassVelocityMatrix);
       centerOfMassVelocity.set(centerOfMassVelocityMatrix);
       isCenterOfMassVelocityUpToDate = true;
    }
@@ -389,9 +390,9 @@ public class CenterOfMassJacobian implements ReferenceFrameHolder
     * @param centerOfMassVelocityToPack the vector used to stored the computed center of mass velocity.
     *                                   Modified.
     */
-   public void getCenterOfMassVelocity(DenseMatrix64F jointVelocityMatrix, FrameVector3DBasics centerOfMassVelocityToPack)
+   public void getCenterOfMassVelocity(DMatrix1Row jointVelocityMatrix, FrameVector3DBasics centerOfMassVelocityToPack)
    {
-      CommonOps.mult(getJacobianMatrix(), jointVelocityMatrix, centerOfMassVelocityMatrix);
+      CommonOps_DDRM.mult(getJacobianMatrix(), jointVelocityMatrix, centerOfMassVelocityMatrix);
       centerOfMassVelocityToPack.setIncludingFrame(jacobianFrame, centerOfMassVelocityMatrix);
    }
 
@@ -407,7 +408,7 @@ public class CenterOfMassJacobian implements ReferenceFrameHolder
     *
     * @return the center of mass Jacobian.
     */
-   public DenseMatrix64F getJacobianMatrix()
+   public DMatrixRMaj getJacobianMatrix()
    {
       updateJacobian();
       return jacobianMatrix;
@@ -458,7 +459,7 @@ public class CenterOfMassJacobian implements ReferenceFrameHolder
       /**
        * Result of this recursion step: the matrix block of the Jacobian for the parent joint.
        */
-      private final DenseMatrix64F jacobianJointBlock;
+      private final DMatrixRMaj jacobianJointBlock;
       /**
        * The recursion steps holding onto the direct successor of this recursion step's rigid-body.
        */
@@ -481,7 +482,7 @@ public class CenterOfMassJacobian implements ReferenceFrameHolder
          else
          {
             bodyInertia = new SpatialInertia(rigidBody.getInertia());
-            jacobianJointBlock = new DenseMatrix64F(3, getJoint().getDegreesOfFreedom());
+            jacobianJointBlock = new DMatrixRMaj(3, getJoint().getDegreesOfFreedom());
          }
       }
 
@@ -601,12 +602,12 @@ public class CenterOfMassJacobian implements ReferenceFrameHolder
             jacobianColumn.get(0, i, jacobianJointBlock);
          }
 
-         CommonOps.scale(inverseOfTotalMass, jacobianJointBlock);
+         CommonOps_DDRM.scale(inverseOfTotalMass, jacobianJointBlock);
 
          for (int dofIndex = 0; dofIndex < getJoint().getDegreesOfFreedom(); dofIndex++)
          {
             int column = jointIndices[dofIndex];
-            CommonOps.extract(jacobianJointBlock, 0, 3, dofIndex, dofIndex + 1, jacobianMatrix, 0, column);
+            CommonOps_DDRM.extract(jacobianJointBlock, 0, 3, dofIndex, dofIndex + 1, jacobianMatrix, 0, column);
          }
       }
 

@@ -1,6 +1,6 @@
 package us.ihmc.mecano.spatial.interfaces;
 
-import org.ejml.data.DenseMatrix64F;
+import org.ejml.data.DMatrix;
 
 import us.ihmc.euclid.matrix.interfaces.Matrix3DReadOnly;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
@@ -334,7 +334,7 @@ public interface SpatialInertiaReadOnly extends ReferenceFrameHolder
     *
     * @param matrixToPack the matrix in which this spatial inertia is stored. Modified.
     */
-   default void get(DenseMatrix64F matrixToPack)
+   default void get(DMatrix matrixToPack)
    {
       get(0, 0, matrixToPack);
    }
@@ -355,7 +355,7 @@ public interface SpatialInertiaReadOnly extends ReferenceFrameHolder
     * @param startColumn  the first column index to start writing in the dense-matrix.
     * @param matrixToPack the matrix in which this spatial inertia is stored. Modified.
     */
-   default void get(int startRow, int startColumn, DenseMatrix64F matrixToPack)
+   default void get(int startRow, int startColumn, DMatrix matrixToPack)
    {
       // upper left block
       getMomentOfInertia().get(startRow, startColumn, matrixToPack);

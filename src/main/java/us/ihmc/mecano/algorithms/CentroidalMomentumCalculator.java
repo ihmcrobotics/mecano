@@ -4,8 +4,9 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 
-import org.ejml.data.DenseMatrix64F;
-import org.ejml.ops.CommonOps;
+import org.ejml.data.DMatrix1Row;
+import org.ejml.data.DMatrixRMaj;
+import org.ejml.dense.row.CommonOps_DDRM;
 
 import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
@@ -63,11 +64,11 @@ public class CentroidalMomentumCalculator implements ReferenceFrameHolder
    private final FixedFrameVector3DBasics centerOfMassVelocity;
 
    /** The centroidal momentum matrix. */
-   private final DenseMatrix64F centroidalMomentumMatrix;
+   private final DMatrixRMaj centroidalMomentumMatrix;
    /** Matrix containing the velocities of the joints to consider. */
-   private final DenseMatrix64F jointVelocityMatrix;
+   private final DMatrixRMaj jointVelocityMatrix;
    /** The total momentum of the system. */
-   private final DenseMatrix64F momentumMatrix = new DenseMatrix64F(6, 1);
+   private final DMatrixRMaj momentumMatrix = new DMatrixRMaj(6, 1);
 
    /** The total system mass. */
    private double totalMass = 0.0;
@@ -146,8 +147,8 @@ public class CentroidalMomentumCalculator implements ReferenceFrameHolder
       centerOfMassVelocity = new FrameVector3D(matrixFrame);
 
       int nDegreesOfFreedom = MultiBodySystemTools.computeDegreesOfFreedom(input.getJointsToConsider());
-      centroidalMomentumMatrix = new DenseMatrix64F(6, nDegreesOfFreedom);
-      jointVelocityMatrix = new DenseMatrix64F(nDegreesOfFreedom, 1);
+      centroidalMomentumMatrix = new DMatrixRMaj(6, nDegreesOfFreedom);
+      jointVelocityMatrix = new DMatrixRMaj(nDegreesOfFreedom, 1);
    }
 
    private List<IterativeStep> buildMultiBodyTree(IterativeStep parent, Collection<? extends JointReadOnly> jointsToIgnore)
@@ -226,7 +227,7 @@ public class CentroidalMomentumCalculator implements ReferenceFrameHolder
          iterativeStep.passTwo();
    }
 
-   private DenseMatrix64F getJointVelocityMatrix()
+   private DMatrixRMaj getJointVelocityMatrix()
    {
       if (!isJointVelocityMatrixUpToDate)
       {
@@ -295,9 +296,9 @@ public class CentroidalMomentumCalculator implements ReferenceFrameHolder
     * @param centerOfMassVelocityToPack the vector used to stored the computed center of mass velocity.
     *                                   Modified.
     */
-   public void getCenterOfMassVelocity(DenseMatrix64F jointVelocityMatrix, FrameVector3DBasics centerOfMassVelocityToPack)
+   public void getCenterOfMassVelocity(DMatrix1Row jointVelocityMatrix, FrameVector3DBasics centerOfMassVelocityToPack)
    {
-      CommonOps.mult(getCentroidalMomentumMatrix(), jointVelocityMatrix, momentumMatrix);
+      CommonOps_DDRM.mult(getCentroidalMomentumMatrix(), jointVelocityMatrix, momentumMatrix);
       centerOfMassVelocityToPack.setIncludingFrame(matrixFrame, 3, momentumMatrix);
       centerOfMassVelocityToPack.scale(1.0 / getTotalMass());
    }
@@ -311,7 +312,7 @@ public class CentroidalMomentumCalculator implements ReferenceFrameHolder
    {
       if (!isMomentumUpToDate)
       {
-         CommonOps.mult(getCentroidalMomentumMatrix(), getJointVelocityMatrix(), momentumMatrix);
+         CommonOps_DDRM.mult(getCentroidalMomentumMatrix(), getJointVelocityMatrix(), momentumMatrix);
          momentum.set(momentumMatrix);
          isMomentumUpToDate = true;
       }
@@ -328,9 +329,9 @@ public class CentroidalMomentumCalculator implements ReferenceFrameHolder
     * @param jointVelocityMatrix the matrix containing the joint velocities to use. Not modified.
     * @param momentumToPack      the vector used to stored the computed momentum. Modified.
     */
-   public void getMomentum(DenseMatrix64F jointVelocityMatrix, MomentumBasics momentumToPack)
+   public void getMomentum(DMatrix1Row jointVelocityMatrix, MomentumBasics momentumToPack)
    {
-      CommonOps.mult(getCentroidalMomentumMatrix(), jointVelocityMatrix, momentumMatrix);
+      CommonOps_DDRM.mult(getCentroidalMomentumMatrix(), jointVelocityMatrix, momentumMatrix);
       momentumToPack.setIncludingFrame(matrixFrame, momentumMatrix);
    }
 
@@ -345,7 +346,7 @@ public class CentroidalMomentumCalculator implements ReferenceFrameHolder
     *
     * @return the centroidal momentum matrix.
     */
-   public DenseMatrix64F getCentroidalMomentumMatrix()
+   public DMatrixRMaj getCentroidalMomentumMatrix()
    {
       updateCentroidalMomentum();
       return centroidalMomentumMatrix;
@@ -383,7 +384,7 @@ public class CentroidalMomentumCalculator implements ReferenceFrameHolder
        * Result of this recursion step: the matrix block of the centroidal momentum matrix for the parent
        * joint.
        */
-      private final DenseMatrix64F centroidalMomentumMatrixBlock;
+      private final DMatrixRMaj centroidalMomentumMatrixBlock;
       /**
        * Intermediate variable to prevent repetitive calculation of a transform between this rigid-body's
        * body-fixed frame and the matrix frame.
@@ -413,7 +414,7 @@ public class CentroidalMomentumCalculator implements ReferenceFrameHolder
          else
          {
             bodyInertia = new SpatialInertia(rigidBody.getInertia());
-            centroidalMomentumMatrixBlock = new DenseMatrix64F(6, getJoint().getDegreesOfFreedom());
+            centroidalMomentumMatrixBlock = new DMatrixRMaj(6, getJoint().getDegreesOfFreedom());
             matrixFrameToBodyFixedFrameTransform = new RigidBodyTransform();
          }
       }
@@ -475,7 +476,7 @@ public class CentroidalMomentumCalculator implements ReferenceFrameHolder
          for (int dofIndex = 0; dofIndex < getJoint().getDegreesOfFreedom(); dofIndex++)
          {
             int column = jointIndices[dofIndex];
-            CommonOps.extract(centroidalMomentumMatrixBlock, 0, 6, dofIndex, dofIndex + 1, centroidalMomentumMatrix, 0, column);
+            CommonOps_DDRM.extract(centroidalMomentumMatrixBlock, 0, 6, dofIndex, dofIndex + 1, centroidalMomentumMatrix, 0, column);
          }
       }
 

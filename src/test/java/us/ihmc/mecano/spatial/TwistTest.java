@@ -9,10 +9,10 @@ import static org.junit.jupiter.api.Assertions.fail;
 
 import java.util.Random;
 
-import org.ejml.data.DenseMatrix64F;
-import org.ejml.ops.CommonOps;
-import org.ejml.ops.EjmlUnitTests;
-import org.ejml.ops.RandomMatrices;
+import org.ejml.EjmlUnitTests;
+import org.ejml.data.DMatrixRMaj;
+import org.ejml.dense.row.CommonOps_DDRM;
+import org.ejml.dense.row.RandomMatrices_DDRM;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 
@@ -48,7 +48,7 @@ public class TwistTest extends SpatialMotionTest<Twist>
    }
 
    @Override
-   public Twist createSpatialMotionVector(ReferenceFrame bodyFrame, ReferenceFrame baseFrame, ReferenceFrame expressedInFrame, DenseMatrix64F matrix)
+   public Twist createSpatialMotionVector(ReferenceFrame bodyFrame, ReferenceFrame baseFrame, ReferenceFrame expressedInFrame, DMatrixRMaj matrix)
    {
       return new Twist(bodyFrame, baseFrame, expressedInFrame, matrix);
    }
@@ -118,7 +118,7 @@ public class TwistTest extends SpatialMotionTest<Twist>
       }
 
       Twist twist = new Twist(frameC, frameD, frameA, array);
-      DenseMatrix64F matrixBack = new DenseMatrix64F(SpatialVectorReadOnly.SIZE, 1);
+      DMatrixRMaj matrixBack = new DMatrixRMaj(SpatialVectorReadOnly.SIZE, 1);
       twist.get(matrixBack);
       double[] arrayBack = matrixBack.getData();
       assertArrayEquals(array, arrayBack);
@@ -141,14 +141,14 @@ public class TwistTest extends SpatialMotionTest<Twist>
    @Test
    public void testCopyConstructor()
    {
-      DenseMatrix64F inputMatrix = RandomMatrices.createRandom(SpatialVectorReadOnly.SIZE, 1, random);
+      DMatrixRMaj inputMatrix = RandomMatrices_DDRM.rectangle(SpatialVectorReadOnly.SIZE, 1, random);
       Twist twist = new Twist(frameC, frameD, frameA, inputMatrix);
       Twist twistCopy = new Twist(twist);
 
-      DenseMatrix64F twistMatrix = new DenseMatrix64F(SpatialVectorReadOnly.SIZE, 1);
+      DMatrixRMaj twistMatrix = new DMatrixRMaj(SpatialVectorReadOnly.SIZE, 1);
       twist.get(twistMatrix);
 
-      DenseMatrix64F twistCopyMatrix = new DenseMatrix64F(SpatialVectorReadOnly.SIZE, 1);
+      DMatrixRMaj twistCopyMatrix = new DMatrixRMaj(SpatialVectorReadOnly.SIZE, 1);
       twistCopy.get(twistCopyMatrix);
 
       // test that they're the same
@@ -158,7 +158,7 @@ public class TwistTest extends SpatialMotionTest<Twist>
       assertEquals(twist.getBaseFrame(), twistCopy.getBaseFrame());
 
       // test that we're actually copying, not just using references
-      inputMatrix = RandomMatrices.createRandom(SpatialVectorReadOnly.SIZE, 1, random);
+      inputMatrix = RandomMatrices_DDRM.rectangle(SpatialVectorReadOnly.SIZE, 1, random);
       twist.setIncludingFrame(frameD, frameA, frameC, inputMatrix);
       twist.get(twistMatrix);
       twistCopy.get(twistCopyMatrix);
@@ -350,17 +350,17 @@ public class TwistTest extends SpatialMotionTest<Twist>
          Twist twist1 = new Twist(frameB, frameA, frameA, angularVelocity1, linearVelocity1);
 
          // first transform using 2.8 (b)
-         DenseMatrix64F twist1TildeInA = toTildeForm(twist1);
+         DMatrixRMaj twist1TildeInA = toTildeForm(twist1);
          RigidBodyTransform transformFromAToC = frameA.getTransformToDesiredFrame(frameC);
-         DenseMatrix64F transformFromAToCMatrix = new DenseMatrix64F(4, 4);
+         DMatrixRMaj transformFromAToCMatrix = new DMatrixRMaj(4, 4);
          transformFromAToC.get(transformFromAToCMatrix);
-         DenseMatrix64F transformFromAToCMatrixInv = new DenseMatrix64F(transformFromAToCMatrix);
-         CommonOps.invert(transformFromAToCMatrixInv);
+         DMatrixRMaj transformFromAToCMatrixInv = new DMatrixRMaj(transformFromAToCMatrix);
+         CommonOps_DDRM.invert(transformFromAToCMatrixInv);
 
-         DenseMatrix64F twist1TildeInC = new DenseMatrix64F(transformFromAToCMatrix);
-         DenseMatrix64F temp = new DenseMatrix64F(transformFromAToCMatrix);
-         CommonOps.mult(twist1TildeInC, twist1TildeInA, temp);
-         CommonOps.mult(temp, transformFromAToCMatrixInv, twist1TildeInC);
+         DMatrixRMaj twist1TildeInC = new DMatrixRMaj(transformFromAToCMatrix);
+         DMatrixRMaj temp = new DMatrixRMaj(transformFromAToCMatrix);
+         CommonOps_DDRM.mult(twist1TildeInC, twist1TildeInA, temp);
+         CommonOps_DDRM.mult(temp, transformFromAToCMatrixInv, twist1TildeInC);
 
          Vector3D omega1InC = new Vector3D();
          Vector3D v1InC = new Vector3D();
@@ -388,10 +388,10 @@ public class TwistTest extends SpatialMotionTest<Twist>
       Twist twist2 = new Twist(twist1);
       twist1.changeFrame(twist1.getReferenceFrame());
 
-      DenseMatrix64F twist1Matrix = new DenseMatrix64F(SpatialVectorReadOnly.SIZE, 1);
+      DMatrixRMaj twist1Matrix = new DMatrixRMaj(SpatialVectorReadOnly.SIZE, 1);
       twist1.get(twist1Matrix);
 
-      DenseMatrix64F twist2Matrix = new DenseMatrix64F(SpatialVectorReadOnly.SIZE, 1);
+      DMatrixRMaj twist2Matrix = new DMatrixRMaj(SpatialVectorReadOnly.SIZE, 1);
       twist2.get(twist2Matrix);
 
       // test that they're the same
@@ -408,7 +408,7 @@ public class TwistTest extends SpatialMotionTest<Twist>
       Vector3D linearVelocity1 = new Vector3D(random.nextDouble(), random.nextDouble(), random.nextDouble());
       Twist twist1 = new Twist(frameB, frameA, frameA, angularVelocity1, linearVelocity1);
 
-      DenseMatrix64F twistMatrix = new DenseMatrix64F(6, 1);
+      DMatrixRMaj twistMatrix = new DMatrixRMaj(6, 1);
       twist1.get(twistMatrix);
 
       double epsilon = 1e-14;
@@ -496,12 +496,12 @@ public class TwistTest extends SpatialMotionTest<Twist>
    /**
     * Converts the twist to 'tilde' form, i.e.: [tilde(omega), v; 0, 0];
     */
-   private static DenseMatrix64F toTildeForm(Twist twist)
+   private static DMatrixRMaj toTildeForm(Twist twist)
    {
       Vector3DBasics angularVelocity = twist.getAngularPart();
       Vector3DBasics linearVelocity = twist.getLinearPart();
 
-      DenseMatrix64F ret = new DenseMatrix64F(4, 4);
+      DMatrixRMaj ret = new DMatrixRMaj(4, 4);
       MecanoTools.toTildeForm(angularVelocity, 0, 0, ret);
       ret.set(0, 3, linearVelocity.getX());
       ret.set(1, 3, linearVelocity.getY());
@@ -512,7 +512,7 @@ public class TwistTest extends SpatialMotionTest<Twist>
    /**
     * Converts a twist in tilde form back to twist coordinates (angular velocity and linear velocity)
     */
-   private static void fromTildeForm(DenseMatrix64F twistTilde, Vector3D angularVelocityToPack, Vector3D linearVelocityToPack)
+   private static void fromTildeForm(DMatrixRMaj twistTilde, Vector3D angularVelocityToPack, Vector3D linearVelocityToPack)
    {
       linearVelocityToPack.set(twistTilde.get(0, 3), twistTilde.get(1, 3), twistTilde.get(2, 3));
       angularVelocityToPack.set(twistTilde.get(2, 1), twistTilde.get(0, 2), twistTilde.get(1, 0));

@@ -6,8 +6,10 @@ import java.util.List;
 import java.util.Map;
 import java.util.function.Function;
 
-import org.ejml.data.DenseMatrix64F;
-import org.ejml.ops.CommonOps;
+import org.ejml.data.DMatrix;
+import org.ejml.data.DMatrix1Row;
+import org.ejml.data.DMatrixRMaj;
+import org.ejml.dense.row.CommonOps_DDRM;
 
 import us.ihmc.euclid.Axis3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
@@ -79,7 +81,7 @@ public class MultiBodyResponseCalculator
    /**
     * The output of this algorithm: the acceleration/velocity matrix for all the joints to consider.
     */
-   private final DenseMatrix64F jointMotionChangeMatrix;
+   private final DMatrixRMaj jointMotionChangeMatrix;
    /**
     * This algorithm relies on the pre-computed internal data from a forward dynamics algorithm.
     */
@@ -102,7 +104,7 @@ public class MultiBodyResponseCalculator
    }
 
    private ResponseType currentResponseType = null;
-   private final DenseMatrix64F singleElementMatrix = new DenseMatrix64F(1, 1);
+   private final DMatrixRMaj singleElementMatrix = new DMatrixRMaj(1, 1);
 
    /**
     * Creates a calculator for computing the response to external disturbances for a system defined by
@@ -138,7 +140,7 @@ public class MultiBodyResponseCalculator
       buildMultiBodyTree(initialRecursionStep);
 
       int nDoFs = MultiBodySystemTools.computeDegreesOfFreedom(input.getJointsToConsider());
-      jointMotionChangeMatrix = new DenseMatrix64F(nDoFs, 1);
+      jointMotionChangeMatrix = new DMatrixRMaj(nDoFs, 1);
 
       accelerationChangeProvider = RigidBodyAccelerationProvider.toRigidBodyAccelerationProvider(buildAccelerationSupplier(), input.getInertialFrame());
       twistChangeProvider = RigidBodyTwistProvider.toRigidBodyTwistProvider(buildTwistSupplier(), input.getInertialFrame());
@@ -283,7 +285,7 @@ public class MultiBodyResponseCalculator
     *         otherwise.
     */
    public boolean computeRigidBodyApparentSpatialInertiaInverse(RigidBodyReadOnly target, ReferenceFrame inertiaFrame,
-                                                                DenseMatrix64F apparentSpatialInertiaToPack)
+                                                                DMatrix1Row apparentSpatialInertiaToPack)
    {
       return computeRigidBodyApparentSpatialInertiaInverse(target, inertiaFrame, null, apparentSpatialInertiaToPack);
    }
@@ -344,7 +346,7 @@ public class MultiBodyResponseCalculator
     *         otherwise.
     */
    public boolean computeRigidBodyApparentSpatialInertiaInverse(RigidBodyReadOnly target, ReferenceFrame inertiaFrame, boolean[] selectedAxes,
-                                                                DenseMatrix64F apparentSpatialInertiaToPack)
+                                                                DMatrix1Row apparentSpatialInertiaToPack)
    {
       ResponseRecursionStep recursionStep = rigidBodyToRecursionStepMap.get(target);
 
@@ -443,7 +445,7 @@ public class MultiBodyResponseCalculator
     *         otherwise.
     */
    public boolean computeRigidBodyApparentLinearInertiaInverse(RigidBodyReadOnly target, ReferenceFrame inertiaFrame,
-                                                               DenseMatrix64F apparentLinearInertiaToPack)
+                                                               DMatrix1Row apparentLinearInertiaToPack)
    {
       ResponseRecursionStep recursionStep = rigidBodyToRecursionStepMap.get(target);
 
@@ -506,7 +508,7 @@ public class MultiBodyResponseCalculator
     * @param inertiaToPack the matrix in which to store the result. Modified.
     * @return {@code true} is the matrix was successfully computed, {@code false} otherwise.
     */
-   public boolean computeJointApparentInertiaInverse(JointReadOnly target, DenseMatrix64F inertiaToPack)
+   public boolean computeJointApparentInertiaInverse(JointReadOnly target, DMatrix1Row inertiaToPack)
    {
       ResponseRecursionStep recursionStep = rigidBodyToRecursionStepMap.get(target.getSuccessor());
 
@@ -522,7 +524,7 @@ public class MultiBodyResponseCalculator
          recursionStep.tauPlus.set(i, 0, 1.0);
          recursionStep.initializeDisturbance();
          recursionStep.updateRigidBodyMotionChange();
-         CommonOps.insert(recursionStep.qddPlus, inertiaToPack, 0, i);
+         CommonOps_DDRM.insert(recursionStep.qddPlus, inertiaToPack, 0, i);
          recursionStep.tauPlus.set(i, 0, 0.0);
          reset();
       }
@@ -712,7 +714,7 @@ public class MultiBodyResponseCalculator
     * @param wrench the wrench to be applied. Not modified.
     * @return {@code true} if the wrench was successfully applied, {@code false} otherwise.
     */
-   public boolean applyJointWrench(JointReadOnly target, DenseMatrix64F wrench)
+   public boolean applyJointWrench(JointReadOnly target, DMatrix wrench)
    {
       if (currentResponseType == ResponseType.TWIST)
          return false;
@@ -777,7 +779,7 @@ public class MultiBodyResponseCalculator
     * @param impulse the impulse to be applied. Not modified.
     * @return {@code true} if the impulse was successfully applied, {@code false} otherwise.
     */
-   public boolean applyJointImpulse(JointReadOnly target, DenseMatrix64F impulse)
+   public boolean applyJointImpulse(JointReadOnly target, DMatrix impulse)
    {
       if (currentResponseType == ResponseType.ACCELERATION)
          return false;
@@ -795,7 +797,7 @@ public class MultiBodyResponseCalculator
       return applyJointDisturbance(target, singleElementMatrix);
    }
 
-   private boolean applyJointDisturbance(JointReadOnly target, DenseMatrix64F disturbance)
+   private boolean applyJointDisturbance(JointReadOnly target, DMatrix disturbance)
    {
       ResponseRecursionStep recursionStep = rigidBodyToRecursionStepMap.get(target.getSuccessor());
 
@@ -817,7 +819,7 @@ public class MultiBodyResponseCalculator
     * @return the matrix with the resulting change in joint acceleration, or {@code null} if
     *         {@link #applyRigidBodyWrench(RigidBodyReadOnly, WrenchReadOnly)} was not called last.
     */
-   public DenseMatrix64F propagateWrench()
+   public DMatrixRMaj propagateWrench()
    {
       return currentResponseType == ResponseType.ACCELERATION ? propagateDisturbance() : null;
    }
@@ -830,12 +832,12 @@ public class MultiBodyResponseCalculator
     *         {@link #applyRigidBodyImpulse(RigidBodyReadOnly, SpatialImpulseReadOnly)} was not called
     *         last.
     */
-   public DenseMatrix64F propagateImpulse()
+   public DMatrixRMaj propagateImpulse()
    {
       return currentResponseType == ResponseType.TWIST ? propagateDisturbance() : null;
    }
 
-   private DenseMatrix64F propagateDisturbance()
+   private DMatrixRMaj propagateDisturbance()
    {
       if (!initialRecursionStep.isUpToDate)
          return null;
@@ -895,7 +897,7 @@ public class MultiBodyResponseCalculator
     * @param joint the joint to get the change in acceleration for.
     * @return the N-by-1 matrix containing the change in acceleration of the {@code joint}.
     */
-   public DenseMatrix64F getJointAccelerationChange(JointReadOnly joint)
+   public DMatrixRMaj getJointAccelerationChange(JointReadOnly joint)
    {
       return currentResponseType != ResponseType.ACCELERATION ? null : getJointMotionChange(joint);
    }
@@ -923,7 +925,7 @@ public class MultiBodyResponseCalculator
     * @param joint the joint to get the change in twist for.
     * @return the N-by-1 matrix containing the change in twist of the {@code joint}.
     */
-   public DenseMatrix64F getJointTwistChange(JointReadOnly joint)
+   public DMatrixRMaj getJointTwistChange(JointReadOnly joint)
    {
       return currentResponseType != ResponseType.TWIST ? null : getJointMotionChange(joint);
    }
@@ -943,7 +945,7 @@ public class MultiBodyResponseCalculator
       return recursionStep.qddPlus.get(0);
    }
 
-   private DenseMatrix64F getJointMotionChange(JointReadOnly joint)
+   private DMatrixRMaj getJointMotionChange(JointReadOnly joint)
    {
       ResponseRecursionStep recursionStep = rigidBodyToRecursionStepMap.get(joint.getSuccessor());
       if (recursionStep == null)
@@ -1007,7 +1009,7 @@ public class MultiBodyResponseCalculator
        * the number of DoFs that the joint has.
        * </p>
        */
-      final DenseMatrix64F tauPlus;
+      final DMatrixRMaj tauPlus;
       /**
        * This is the apparent force for this joint resulting from {@code testWrenchPlus}:
        *
@@ -1015,7 +1017,7 @@ public class MultiBodyResponseCalculator
        * p<sup>A+</sup> = p<sup>+</sup> + </sub> p<sup>a+</sup><sub>child</sub>
        * </pre>
        */
-      final DenseMatrix64F pAPlus;
+      final DMatrixRMaj pAPlus;
       /**
        * Intermediate result to save computation:
        *
@@ -1027,7 +1029,7 @@ public class MultiBodyResponseCalculator
        * DoFs for this joint, <tt>S</tt> is the joint motion subspace, and <tt>p<sup>A+</sup></tt> the
        * apparent force resulting from {@code testWrenchPlus}.
        */
-      final DenseMatrix64F uPlus;
+      final DMatrixRMaj uPlus;
       /**
        * The apparent bias forces/impulses of this joint for the parent resulting from the
        * {@code testWrenchPlus}:
@@ -1041,7 +1043,7 @@ public class MultiBodyResponseCalculator
        * the joint motion subspace, <tt>I<sup>A</sup></tt> this handle's articulated-body inertia,
        * <tt>&tau;</tt> this joint effort.
        */
-      final DenseMatrix64F paPlus;
+      final DMatrixRMaj paPlus;
       /**
        * The change in parent body motion.
        * <p>
@@ -1049,7 +1051,7 @@ public class MultiBodyResponseCalculator
        * way.
        * </p>
        */
-      final DenseMatrix64F aParentPlus;
+      final DMatrixRMaj aParentPlus;
       /**
        * <b>Output of this algorithm: the change in body motion:</b>
        *
@@ -1061,11 +1063,11 @@ public class MultiBodyResponseCalculator
        * way.
        * </p>
        */
-      final DenseMatrix64F aPlus;
+      final DMatrixRMaj aPlus;
       /**
        * Intermediate result for garbage-free operation.
        */
-      final DenseMatrix64F qddPlus_intermediate;
+      final DMatrixRMaj qddPlus_intermediate;
       /**
        * <b>Output of this algorithm: the change in joint motion:</b>
        *
@@ -1077,7 +1079,7 @@ public class MultiBodyResponseCalculator
        * way.
        * </p>
        */
-      final DenseMatrix64F qddPlus;
+      final DMatrixRMaj qddPlus;
       /**
        * The forward-dynamics recursion step for the rigid-body of this recursion step.
        */
@@ -1138,14 +1140,14 @@ public class MultiBodyResponseCalculator
             totalDisturbancePlusForParent = parent.isRoot() ? null : new SpatialForce();
             parentMotionChange = new SpatialAcceleration();
 
-            tauPlus = new DenseMatrix64F(nDoFs, 1);
-            pAPlus = new DenseMatrix64F(SpatialVectorReadOnly.SIZE, 1);
-            uPlus = new DenseMatrix64F(nDoFs, 1);
-            paPlus = new DenseMatrix64F(SpatialVectorReadOnly.SIZE, 1);
-            qddPlus_intermediate = new DenseMatrix64F(nDoFs, 1);
-            qddPlus = new DenseMatrix64F(nDoFs, 1);
-            aParentPlus = new DenseMatrix64F(SpatialVectorReadOnly.SIZE, 1);
-            aPlus = new DenseMatrix64F(SpatialVectorReadOnly.SIZE, 1);
+            tauPlus = new DMatrixRMaj(nDoFs, 1);
+            pAPlus = new DMatrixRMaj(SpatialVectorReadOnly.SIZE, 1);
+            uPlus = new DMatrixRMaj(nDoFs, 1);
+            paPlus = new DMatrixRMaj(SpatialVectorReadOnly.SIZE, 1);
+            qddPlus_intermediate = new DMatrixRMaj(nDoFs, 1);
+            qddPlus = new DMatrixRMaj(nDoFs, 1);
+            aParentPlus = new DMatrixRMaj(SpatialVectorReadOnly.SIZE, 1);
+            aPlus = new DMatrixRMaj(SpatialVectorReadOnly.SIZE, 1);
          }
       }
 
@@ -1204,7 +1206,7 @@ public class MultiBodyResponseCalculator
       {
          isUpToDate = false;
 
-         DenseMatrix64F S = articulatedBodyRecursionStep.S;
+         DMatrixRMaj S = articulatedBodyRecursionStep.S;
 
          totalDisturbancePlus.setToZero();
 
@@ -1222,14 +1224,14 @@ public class MultiBodyResponseCalculator
          totalDisturbancePlus.sub(testDisturbancePlus);
 
          totalDisturbancePlus.get(pAPlus);
-         CommonOps.multTransA(-1.0, S, pAPlus, uPlus);
-         CommonOps.addEquals(uPlus, tauPlus);
+         CommonOps_DDRM.multTransA(-1.0, S, pAPlus, uPlus);
+         CommonOps_DDRM.addEquals(uPlus, tauPlus);
 
          if (!parent.isRoot())
          {
-            DenseMatrix64F U_Dinv = articulatedBodyRecursionStep.U_Dinv;
-            CommonOps.mult(U_Dinv, uPlus, paPlus);
-            CommonOps.addEquals(paPlus, pAPlus);
+            DMatrixRMaj U_Dinv = articulatedBodyRecursionStep.U_Dinv;
+            CommonOps_DDRM.mult(U_Dinv, uPlus, paPlus);
+            CommonOps_DDRM.addEquals(paPlus, pAPlus);
             totalDisturbancePlusForParent.setIncludingFrame(totalDisturbancePlus.getReferenceFrame(), paPlus);
             totalDisturbancePlusForParent.applyTransform(articulatedBodyRecursionStep.transformToParentJointFrame);
             totalDisturbancePlusForParent.setReferenceFrame(parent.getFrameAfterJoint());
@@ -1273,9 +1275,9 @@ public class MultiBodyResponseCalculator
 
          if (!isRoot())
          {
-            DenseMatrix64F S = articulatedBodyRecursionStep.S;
-            DenseMatrix64F U = articulatedBodyRecursionStep.U;
-            DenseMatrix64F Dinv = articulatedBodyRecursionStep.Dinv;
+            DMatrixRMaj S = articulatedBodyRecursionStep.S;
+            DMatrixRMaj U = articulatedBodyRecursionStep.U;
+            DMatrixRMaj Dinv = articulatedBodyRecursionStep.Dinv;
 
             // Going top-down in the tree.
             parentMotionChange.setIncludingFrame(parent.rigidBodyMotionChange);
@@ -1286,19 +1288,19 @@ public class MultiBodyResponseCalculator
             if (isOnDisturbedBranch)
             {
                // Computing qdd = D^-1 * ( u - U^T * a_parent )
-               CommonOps.multTransA(-1.0, U, aParentPlus, qddPlus_intermediate);
-               CommonOps.addEquals(qddPlus_intermediate, uPlus);
-               CommonOps.mult(Dinv, qddPlus_intermediate, qddPlus);
+               CommonOps_DDRM.multTransA(-1.0, U, aParentPlus, qddPlus_intermediate);
+               CommonOps_DDRM.addEquals(qddPlus_intermediate, uPlus);
+               CommonOps_DDRM.mult(Dinv, qddPlus_intermediate, qddPlus);
             }
             else
             {
                // Computing qdd = -D^-1 * U^T * a_parent )
-               CommonOps.multTransA(-1.0, U, aParentPlus, qddPlus_intermediate);
-               CommonOps.mult(Dinv, qddPlus_intermediate, qddPlus);
+               CommonOps_DDRM.multTransA(-1.0, U, aParentPlus, qddPlus_intermediate);
+               CommonOps_DDRM.mult(Dinv, qddPlus_intermediate, qddPlus);
             }
 
-            CommonOps.mult(S, qddPlus, aPlus);
-            CommonOps.addEquals(aPlus, aParentPlus);
+            CommonOps_DDRM.mult(S, qddPlus, aPlus);
+            CommonOps_DDRM.addEquals(aPlus, aParentPlus);
             rigidBodyMotionChange.setIncludingFrame(getBodyFixedFrame(), input.getInertialFrame(), getFrameAfterJoint(), aPlus);
          }
 

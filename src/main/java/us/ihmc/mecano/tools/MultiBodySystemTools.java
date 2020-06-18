@@ -7,7 +7,7 @@ import java.util.List;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-import org.ejml.data.DenseMatrix64F;
+import org.ejml.data.DMatrix;
 
 import us.ihmc.mecano.frames.MovingReferenceFrame;
 import us.ihmc.mecano.multiBodySystem.interfaces.JointBasics;
@@ -1228,7 +1228,7 @@ public class MultiBodySystemTools
     * @param matrixToPack   the matrix in which the state of the joints is to be stored. Modified.
     * @return the number of rows used to store the information in the matrix.
     */
-   public static int extractJointsState(List<? extends JointReadOnly> joints, JointStateType stateSelection, DenseMatrix64F matrixToPack)
+   public static int extractJointsState(List<? extends JointReadOnly> joints, JointStateType stateSelection, DMatrix matrixToPack)
    {
       switch (stateSelection)
       {
@@ -1245,7 +1245,7 @@ public class MultiBodySystemTools
       }
    }
 
-   private static int extractJointsConfiguration(List<? extends JointReadOnly> joints, int startIndex, DenseMatrix64F matrixToPack)
+   private static int extractJointsConfiguration(List<? extends JointReadOnly> joints, int startIndex, DMatrix matrixToPack)
    {
       for (int jointIndex = 0; jointIndex < joints.size(); jointIndex++)
       {
@@ -1256,7 +1256,7 @@ public class MultiBodySystemTools
       return startIndex;
    }
 
-   private static int extractJointsVelocity(List<? extends JointReadOnly> joints, int startIndex, DenseMatrix64F matrixToPack)
+   private static int extractJointsVelocity(List<? extends JointReadOnly> joints, int startIndex, DMatrix matrixToPack)
    {
       for (int jointIndex = 0; jointIndex < joints.size(); jointIndex++)
       {
@@ -1267,7 +1267,7 @@ public class MultiBodySystemTools
       return startIndex;
    }
 
-   private static int extractJointsAcceleration(List<? extends JointReadOnly> joints, int startIndex, DenseMatrix64F matrixToPack)
+   private static int extractJointsAcceleration(List<? extends JointReadOnly> joints, int startIndex, DMatrix matrixToPack)
    {
       for (int jointIndex = 0; jointIndex < joints.size(); jointIndex++)
       {
@@ -1278,7 +1278,7 @@ public class MultiBodySystemTools
       return startIndex;
    }
 
-   private static int extractJointsTau(List<? extends JointReadOnly> joints, int startIndex, DenseMatrix64F matrixToPack)
+   private static int extractJointsTau(List<? extends JointReadOnly> joints, int startIndex, DMatrix matrixToPack)
    {
       for (int jointIndex = 0; jointIndex < joints.size(); jointIndex++)
       {
@@ -1299,7 +1299,7 @@ public class MultiBodySystemTools
     * @param matrixToPack   the matrix in which the state of the joints is to be stored. Modified.
     * @return the number of rows used to store the information in the matrix.
     */
-   public static int extractJointsState(JointReadOnly[] joints, JointStateType stateSelection, DenseMatrix64F matrixToPack)
+   public static int extractJointsState(JointReadOnly[] joints, JointStateType stateSelection, DMatrix matrixToPack)
    {
       switch (stateSelection)
       {
@@ -1316,7 +1316,7 @@ public class MultiBodySystemTools
       }
    }
 
-   private static int extractJointsConfiguration(JointReadOnly[] joints, int startIndex, DenseMatrix64F matrixToPack)
+   private static int extractJointsConfiguration(JointReadOnly[] joints, int startIndex, DMatrix matrixToPack)
    {
       for (int jointIndex = 0; jointIndex < joints.length; jointIndex++)
       {
@@ -1327,7 +1327,7 @@ public class MultiBodySystemTools
       return startIndex;
    }
 
-   private static int extractJointsVelocity(JointReadOnly[] joints, int startIndex, DenseMatrix64F matrixToPack)
+   private static int extractJointsVelocity(JointReadOnly[] joints, int startIndex, DMatrix matrixToPack)
    {
       for (int jointIndex = 0; jointIndex < joints.length; jointIndex++)
       {
@@ -1338,7 +1338,7 @@ public class MultiBodySystemTools
       return startIndex;
    }
 
-   private static int extractJointsAcceleration(JointReadOnly[] joints, int startIndex, DenseMatrix64F matrixToPack)
+   private static int extractJointsAcceleration(JointReadOnly[] joints, int startIndex, DMatrix matrixToPack)
    {
       for (int jointIndex = 0; jointIndex < joints.length; jointIndex++)
       {
@@ -1349,7 +1349,7 @@ public class MultiBodySystemTools
       return startIndex;
    }
 
-   private static int extractJointsTau(JointReadOnly[] joints, int startIndex, DenseMatrix64F matrixToPack)
+   private static int extractJointsTau(JointReadOnly[] joints, int startIndex, DMatrix matrixToPack)
    {
       for (int jointIndex = 0; jointIndex < joints.length; jointIndex++)
       {
@@ -1373,7 +1373,7 @@ public class MultiBodySystemTools
     *                       Modified.
     * @return the number of rows that were used from the matrix.
     */
-   public static int insertJointsState(List<? extends JointBasics> joints, JointStateType stateSelection, DenseMatrix64F matrix)
+   public static int insertJointsState(List<? extends JointBasics> joints, JointStateType stateSelection, DMatrix matrix)
    {
       switch (stateSelection)
       {
@@ -1390,7 +1390,7 @@ public class MultiBodySystemTools
       }
    }
 
-   private static int insertJointsConfiguration(List<? extends JointBasics> joints, int startIndex, DenseMatrix64F matrix)
+   private static int insertJointsConfiguration(List<? extends JointBasics> joints, int startIndex, DMatrix matrix)
    {
       for (int jointIndex = 0; jointIndex < joints.size(); jointIndex++)
       {
@@ -1401,7 +1401,7 @@ public class MultiBodySystemTools
       return startIndex;
    }
 
-   private static int insertJointsVelocity(List<? extends JointBasics> joints, int startIndex, DenseMatrix64F matrix)
+   private static int insertJointsVelocity(List<? extends JointBasics> joints, int startIndex, DMatrix matrix)
    {
       for (int jointIndex = 0; jointIndex < joints.size(); jointIndex++)
       {
@@ -1412,7 +1412,7 @@ public class MultiBodySystemTools
       return startIndex;
    }
 
-   private static int insertJointsAcceleration(List<? extends JointBasics> joints, int startIndex, DenseMatrix64F matrix)
+   private static int insertJointsAcceleration(List<? extends JointBasics> joints, int startIndex, DMatrix matrix)
    {
       for (int jointIndex = 0; jointIndex < joints.size(); jointIndex++)
       {
@@ -1423,7 +1423,7 @@ public class MultiBodySystemTools
       return startIndex;
    }
 
-   private static int insertJointsTau(List<? extends JointBasics> joints, int startIndex, DenseMatrix64F matrix)
+   private static int insertJointsTau(List<? extends JointBasics> joints, int startIndex, DMatrix matrix)
    {
       for (int jointIndex = 0; jointIndex < joints.size(); jointIndex++)
       {
@@ -1447,7 +1447,7 @@ public class MultiBodySystemTools
     *                       Modified.
     * @return the number of rows that were used from the matrix.
     */
-   public static int insertJointsState(JointBasics[] joints, JointStateType stateSelection, DenseMatrix64F matrix)
+   public static int insertJointsState(JointBasics[] joints, JointStateType stateSelection, DMatrix matrix)
    {
       switch (stateSelection)
       {
@@ -1464,7 +1464,7 @@ public class MultiBodySystemTools
       }
    }
 
-   private static int insertJointsConfiguration(JointBasics[] joints, int startIndex, DenseMatrix64F matrix)
+   private static int insertJointsConfiguration(JointBasics[] joints, int startIndex, DMatrix matrix)
    {
       for (int jointIndex = 0; jointIndex < joints.length; jointIndex++)
       {
@@ -1475,7 +1475,7 @@ public class MultiBodySystemTools
       return startIndex;
    }
 
-   private static int insertJointsVelocity(JointBasics[] joints, int startIndex, DenseMatrix64F matrix)
+   private static int insertJointsVelocity(JointBasics[] joints, int startIndex, DMatrix matrix)
    {
       for (int jointIndex = 0; jointIndex < joints.length; jointIndex++)
       {
@@ -1486,7 +1486,7 @@ public class MultiBodySystemTools
       return startIndex;
    }
 
-   private static int insertJointsAcceleration(JointBasics[] joints, int startIndex, DenseMatrix64F matrix)
+   private static int insertJointsAcceleration(JointBasics[] joints, int startIndex, DMatrix matrix)
    {
       for (int jointIndex = 0; jointIndex < joints.length; jointIndex++)
       {
@@ -1497,7 +1497,7 @@ public class MultiBodySystemTools
       return startIndex;
    }
 
-   private static int insertJointsTau(JointBasics[] joints, int startIndex, DenseMatrix64F matrix)
+   private static int insertJointsTau(JointBasics[] joints, int startIndex, DMatrix matrix)
    {
       for (int jointIndex = 0; jointIndex < joints.length; jointIndex++)
       {

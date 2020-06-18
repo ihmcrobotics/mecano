@@ -7,8 +7,9 @@ import java.util.List;
 import java.util.Map;
 import java.util.function.Function;
 
-import org.ejml.data.DenseMatrix64F;
-import org.ejml.ops.CommonOps;
+import org.ejml.data.DMatrix;
+import org.ejml.data.DMatrixRMaj;
+import org.ejml.dense.row.CommonOps_DDRM;
 
 import us.ihmc.euclid.referenceFrame.exceptions.ReferenceFrameMismatchException;
 import us.ihmc.euclid.referenceFrame.interfaces.FrameTuple3DReadOnly;
@@ -66,9 +67,9 @@ public class InverseDynamicsCalculator
    private final Map<JointReadOnly, RecursionStepBasics> jointToRecursionStepMap = new LinkedHashMap<>();
 
    /** The input of this algorithm: the acceleration matrix for all the joints to consider. */
-   private final DenseMatrix64F allJointAccelerationMatrix;
+   private final DMatrixRMaj allJointAccelerationMatrix;
    /** The output of this algorithm: the effort matrix for all the joints to consider. */
-   private final DenseMatrix64F allJointTauMatrix;
+   private final DMatrixRMaj allJointTauMatrix;
 
    /** Whether the effort resulting from the joint accelerations should be considered. */
    private boolean considerJointAccelerations = DEFAULT_CONSIDER_ACCELERATIONS;
@@ -245,8 +246,8 @@ public class InverseDynamicsCalculator
          initialRecursionStep.includeIgnoredSubtreeInertia();
 
       int nDoFs = MultiBodySystemTools.computeDegreesOfFreedom(input.getJointsToConsider());
-      allJointAccelerationMatrix = new DenseMatrix64F(nDoFs, 1);
-      allJointTauMatrix = new DenseMatrix64F(nDoFs, 1);
+      allJointAccelerationMatrix = new DMatrixRMaj(nDoFs, 1);
+      allJointTauMatrix = new DMatrixRMaj(nDoFs, 1);
 
       Function<RigidBodyReadOnly, SpatialAccelerationReadOnly> accelerationFunction = body ->
       {
@@ -434,7 +435,7 @@ public class InverseDynamicsCalculator
     * Computes the joint efforts needed to achieve the desired joint accelerations.
     * <p>
     * The desired joint accelerations are extracted from the joint state. To explicitly specify the
-    * joint accelerations to use, see {@link #compute(DenseMatrix64F)}.
+    * joint accelerations to use, see {@link #compute(DMatrix)}.
     * </p>
     */
    public void compute()
@@ -452,7 +453,7 @@ public class InverseDynamicsCalculator
     * @param jointAccelerationMatrix the matrix containing the joint accelerations to use. Not
     *                                modified.
     */
-   public void compute(DenseMatrix64F jointAccelerationMatrix)
+   public void compute(DMatrix jointAccelerationMatrix)
    {
       if (jointAccelerationMatrix != null)
       {
@@ -509,7 +510,7 @@ public class InverseDynamicsCalculator
     *
     * @return this calculator output: the joint efforts.
     */
-   public DenseMatrix64F getJointTauMatrix()
+   public DMatrixRMaj getJointTauMatrix()
    {
       return allJointTauMatrix;
    }
@@ -536,7 +537,7 @@ public class InverseDynamicsCalculator
     * @param joint the query. Not modify.
     * @return the tau matrix.
     */
-   public DenseMatrix64F getComputedJointTau(JointReadOnly joint)
+   public DMatrixRMaj getComputedJointTau(JointReadOnly joint)
    {
       RecursionStepBasics recursionStep = jointToRecursionStepMap.get(joint);
 
@@ -588,7 +589,7 @@ public class InverseDynamicsCalculator
    // TODO This is a poor method name, should probably be something like writeComputedJointEffort or writeComputedJointTau
    public boolean writeComputedJointWrench(JointBasics joint)
    {
-      DenseMatrix64F jointTau = getComputedJointTau(joint);
+      DMatrixRMaj jointTau = getComputedJointTau(joint);
 
       if (jointTau == null)
          return false;
@@ -640,7 +641,7 @@ public class InverseDynamicsCalculator
 
       RigidBodyReadOnly getRigidBody();
 
-      DenseMatrix64F getTau();
+      DMatrixRMaj getTau();
 
       default String getSimpleNameForParent()
       {
@@ -705,23 +706,23 @@ public class InverseDynamicsCalculator
        * <tt>S</tt> is the 6-by-N matrix representing the motion subspace of the parent joint, where N is
        * the number of DoFs of the joint.
        */
-      private final DenseMatrix64F S;
+      private final DMatrixRMaj S;
       /**
        * Joint acceleration.
        */
-      private final DenseMatrix64F qdd;
+      private final DMatrixRMaj qdd;
       /**
        * Rigid-body spatial acceleration.
        */
-      private final DenseMatrix64F a;
+      private final DMatrixRMaj a;
       /**
        * Computed joint effort.
        */
-      private final DenseMatrix64F tau;
+      private final DMatrixRMaj tau;
       /**
        * Computed joint wrench, before projection onto the joint motion subspace.
        */
-      private final DenseMatrix64F jointWrenchMatrix;
+      private final DMatrixRMaj jointWrenchMatrix;
       /**
        * Joint indices for storing {@code tau} in the main matrix {@code jointTauMatrix}.
        */
@@ -755,11 +756,11 @@ public class InverseDynamicsCalculator
             bodyInertia = new SpatialInertia(rigidBody.getInertia());
             jointWrench = new Wrench();
             externalWrench = new Wrench(getBodyFixedFrame(), getBodyFixedFrame());
-            S = new DenseMatrix64F(SpatialVectorReadOnly.SIZE, nDoFs);
-            qdd = new DenseMatrix64F(nDoFs, 1);
-            a = new DenseMatrix64F(SpatialVectorReadOnly.SIZE, 1);
-            tau = new DenseMatrix64F(nDoFs, 1);
-            jointWrenchMatrix = new DenseMatrix64F(SpatialVectorReadOnly.SIZE, 1);
+            S = new DMatrixRMaj(SpatialVectorReadOnly.SIZE, nDoFs);
+            qdd = new DMatrixRMaj(nDoFs, 1);
+            a = new DMatrixRMaj(SpatialVectorReadOnly.SIZE, 1);
+            tau = new DMatrixRMaj(nDoFs, 1);
+            jointWrenchMatrix = new DMatrixRMaj(SpatialVectorReadOnly.SIZE, 1);
             joint.getMotionSubspace(S);
          }
       }
@@ -808,8 +809,8 @@ public class InverseDynamicsCalculator
             if (considerJointAccelerations)
             {
                int nDoFs = joint.getDegreesOfFreedom();
-               CommonOps.extract(allJointAccelerationMatrix, jointIndices, nDoFs, qdd);
-               CommonOps.mult(S, qdd, a);
+               CommonOps_DDRM.extract(allJointAccelerationMatrix, jointIndices, nDoFs, qdd);
+               CommonOps_DDRM.mult(S, qdd, a);
                localJointAcceleration.setIncludingFrame(joint.getFrameAfterJoint(), joint.getFrameBeforeJoint(), joint.getFrameAfterJoint(), a);
                localJointAcceleration.changeFrame(getBodyFixedFrame());
                localJointAcceleration.setBodyFrame(getBodyFixedFrame());
@@ -848,7 +849,7 @@ public class InverseDynamicsCalculator
             addJointWrenchFromChild(children.get(childIndex));
 
          jointWrench.get(jointWrenchMatrix);
-         CommonOps.multTransA(S, jointWrenchMatrix, tau);
+         CommonOps_DDRM.multTransA(S, jointWrenchMatrix, tau);
 
          for (int dofIndex = 0; dofIndex < joint.getDegreesOfFreedom(); dofIndex++)
          {
@@ -904,7 +905,7 @@ public class InverseDynamicsCalculator
       }
 
       @Override
-      public DenseMatrix64F getTau()
+      public DMatrixRMaj getTau()
       {
          return tau;
       }
@@ -939,11 +940,11 @@ public class InverseDynamicsCalculator
        * <tt>S</tt> is the 6-by-N matrix representing the motion subspace of the parent joint, where N is
        * the number of DoFs of the joint.
        */
-      private final DenseMatrix64F S;
+      private final DMatrixRMaj S;
       /**
        * Computed joint effort.
        */
-      private final DenseMatrix64F tau;
+      private final DMatrixRMaj tau;
       /**
        * Joint indices for storing {@code tau} in the main matrix {@code jointTauMatrix}.
        */
@@ -971,8 +972,8 @@ public class InverseDynamicsCalculator
          int nDoFs = joint.getDegreesOfFreedom();
 
          jointWrench = new Wrench();
-         S = new DenseMatrix64F(SpatialVectorReadOnly.SIZE, nDoFs);
-         tau = new DenseMatrix64F(nDoFs, 1);
+         S = new DMatrixRMaj(SpatialVectorReadOnly.SIZE, nDoFs);
+         tau = new DMatrixRMaj(nDoFs, 1);
          joint.getMotionSubspace(S);
       }
 
@@ -1032,7 +1033,7 @@ public class InverseDynamicsCalculator
       }
 
       @Override
-      public DenseMatrix64F getTau()
+      public DMatrixRMaj getTau()
       {
          return tau;
       }

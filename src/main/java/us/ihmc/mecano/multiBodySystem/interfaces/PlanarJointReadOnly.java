@@ -1,6 +1,6 @@
 package us.ihmc.mecano.multiBodySystem.interfaces;
 
-import org.ejml.data.DenseMatrix64F;
+import org.ejml.data.DMatrix;
 
 /**
  * Read-only interface for planar joint.
@@ -18,7 +18,7 @@ public interface PlanarJointReadOnly extends FloatingJointReadOnly
 
    /** {@inheritDoc} */
    @Override
-   default int getJointAcceleration(int rowStart, DenseMatrix64F matrixToPack)
+   default int getJointAcceleration(int rowStart, DMatrix matrixToPack)
    {
       matrixToPack.set(rowStart + 0, 0, getJointAcceleration().getAngularPartY());
       matrixToPack.set(rowStart + 1, 0, getJointAcceleration().getLinearPartX());
@@ -28,7 +28,7 @@ public interface PlanarJointReadOnly extends FloatingJointReadOnly
 
    /** {@inheritDoc} */
    @Override
-   default int getJointTau(int rowStart, DenseMatrix64F matrixToPack)
+   default int getJointTau(int rowStart, DMatrix matrixToPack)
    {
       matrixToPack.set(rowStart + 0, 0, getJointWrench().getAngularPartY());
       matrixToPack.set(rowStart + 1, 0, getJointWrench().getLinearPartX());
@@ -38,7 +38,7 @@ public interface PlanarJointReadOnly extends FloatingJointReadOnly
 
    /** {@inheritDoc} */
    @Override
-   default int getJointConfiguration(int rowStart, DenseMatrix64F matrixToPack)
+   default int getJointConfiguration(int rowStart, DMatrix matrixToPack)
    {
       int index = rowStart;
       matrixToPack.set(index++, 0, getJointPose().getPitch());
@@ -49,7 +49,7 @@ public interface PlanarJointReadOnly extends FloatingJointReadOnly
 
    /** {@inheritDoc} */
    @Override
-   default int getJointVelocity(int rowStart, DenseMatrix64F matrixToPack)
+   default int getJointVelocity(int rowStart, DMatrix matrixToPack)
    {
       matrixToPack.set(rowStart + 0, 0, getJointTwist().getAngularPartY());
       matrixToPack.set(rowStart + 1, 0, getJointTwist().getLinearPartX());
