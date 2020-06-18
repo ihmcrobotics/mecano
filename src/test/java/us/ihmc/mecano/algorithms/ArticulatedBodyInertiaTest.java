@@ -4,8 +4,8 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.util.Random;
 
-import org.ejml.data.DenseMatrix64F;
-import org.ejml.ops.MatrixFeatures;
+import org.ejml.data.DMatrixRMaj;
+import org.ejml.dense.row.MatrixFeatures_DDRM;
 import org.junit.jupiter.api.Test;
 
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
@@ -41,13 +41,13 @@ public class ArticulatedBodyInertiaTest
          spatialInertia.applyTransform(transform);
          articulatedBodyInertia.applyTransform(transform);
 
-         DenseMatrix64F expected = new DenseMatrix64F(6, 6);
-         DenseMatrix64F actual = new DenseMatrix64F(6, 6);
+         DMatrixRMaj expected = new DMatrixRMaj(6, 6);
+         DMatrixRMaj actual = new DMatrixRMaj(6, 6);
 
          spatialInertia.get(expected);
          articulatedBodyInertia.get(actual);
 
-         boolean areEqual = MatrixFeatures.isEquals(expected, actual, EPSILON);
+         boolean areEqual = MatrixFeatures_DDRM.isEquals(expected, actual, EPSILON);
 
          if (!areEqual)
          {
@@ -80,13 +80,13 @@ public class ArticulatedBodyInertiaTest
          spatialInertia.applyInverseTransform(transform);
          articulatedBodyInertia.applyInverseTransform(transform);
 
-         DenseMatrix64F expected = new DenseMatrix64F(6, 6);
-         DenseMatrix64F actual = new DenseMatrix64F(6, 6);
+         DMatrixRMaj expected = new DMatrixRMaj(6, 6);
+         DMatrixRMaj actual = new DMatrixRMaj(6, 6);
 
          spatialInertia.get(expected);
          articulatedBodyInertia.get(actual);
 
-         boolean areEqual = MatrixFeatures.isEquals(expected, actual, EPSILON);
+         boolean areEqual = MatrixFeatures_DDRM.isEquals(expected, actual, EPSILON);
 
          if (!areEqual)
          {
@@ -104,8 +104,8 @@ public class ArticulatedBodyInertiaTest
          articulatedBodyInertia.getLinearInertia().set(MecanoRandomTools.nextSymmetricPositiveDefiniteMatrix3D(random));
          articulatedBodyInertia.getCrossInertia().set(EuclidCoreRandomTools.nextMatrix3D(random));
 
-         DenseMatrix64F expected = new DenseMatrix64F(6, 6);
-         DenseMatrix64F actual = new DenseMatrix64F(6, 6);
+         DMatrixRMaj expected = new DMatrixRMaj(6, 6);
+         DMatrixRMaj actual = new DMatrixRMaj(6, 6);
 
          articulatedBodyInertia.get(expected);
 
@@ -115,7 +115,7 @@ public class ArticulatedBodyInertiaTest
 
          articulatedBodyInertia.get(actual);
 
-         boolean areEqual = MatrixFeatures.isEquals(expected, actual, EPSILON);
+         boolean areEqual = MatrixFeatures_DDRM.isEquals(expected, actual, EPSILON);
 
          if (!areEqual)
          {

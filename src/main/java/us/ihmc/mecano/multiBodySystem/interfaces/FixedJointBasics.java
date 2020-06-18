@@ -1,6 +1,6 @@
 package us.ihmc.mecano.multiBodySystem.interfaces;
 
-import org.ejml.data.DenseMatrix64F;
+import org.ejml.data.DMatrix;
 
 import us.ihmc.euclid.orientation.interfaces.Orientation3DReadOnly;
 import us.ihmc.euclid.tuple3D.interfaces.Tuple3DReadOnly;
@@ -68,28 +68,28 @@ public interface FixedJointBasics extends JointBasics, FixedJointReadOnly
 
    /** {@inheritDoc} */
    @Override
-   default int setJointConfiguration(int rowStart, DenseMatrix64F jointConfiguration)
+   default int setJointConfiguration(int rowStart, DMatrix jointConfiguration)
    {
       return rowStart;
    }
 
    /** {@inheritDoc} */
    @Override
-   default int setJointVelocity(int rowStart, DenseMatrix64F jointVelocity)
+   default int setJointVelocity(int rowStart, DMatrix jointVelocity)
    {
       return rowStart;
    }
 
    /** {@inheritDoc} */
    @Override
-   default int setJointAcceleration(int rowStart, DenseMatrix64F jointAcceleration)
+   default int setJointAcceleration(int rowStart, DMatrix jointAcceleration)
    {
       return rowStart;
    }
 
    /** {@inheritDoc} */
    @Override
-   default int setJointTau(int rowStart, DenseMatrix64F jointTau)
+   default int setJointTau(int rowStart, DMatrix jointTau)
    {
       return rowStart;
    }

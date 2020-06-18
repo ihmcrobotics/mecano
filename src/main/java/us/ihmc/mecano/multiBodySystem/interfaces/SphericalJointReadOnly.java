@@ -1,6 +1,6 @@
 package us.ihmc.mecano.multiBodySystem.interfaces;
 
-import org.ejml.data.DenseMatrix64F;
+import org.ejml.data.DMatrix;
 
 import us.ihmc.euclid.referenceFrame.interfaces.FrameVector3DReadOnly;
 import us.ihmc.euclid.transform.RigidBodyTransform;
@@ -54,7 +54,7 @@ public interface SphericalJointReadOnly extends JointReadOnly
 
    /** {@inheritDoc} */
    @Override
-   default int getJointConfiguration(int rowStart, DenseMatrix64F matrix)
+   default int getJointConfiguration(int rowStart, DMatrix matrix)
    {
       getJointOrientation().get(rowStart, matrix);
       return rowStart + getConfigurationMatrixSize();
@@ -62,7 +62,7 @@ public interface SphericalJointReadOnly extends JointReadOnly
 
    /** {@inheritDoc} */
    @Override
-   default int getJointVelocity(int rowStart, DenseMatrix64F matrixToPack)
+   default int getJointVelocity(int rowStart, DMatrix matrixToPack)
    {
       getJointTwist().getAngularPart().get(rowStart, matrixToPack);
       return rowStart + getDegreesOfFreedom();
@@ -70,7 +70,7 @@ public interface SphericalJointReadOnly extends JointReadOnly
 
    /** {@inheritDoc} */
    @Override
-   default int getJointAcceleration(int rowStart, DenseMatrix64F matrixToPack)
+   default int getJointAcceleration(int rowStart, DMatrix matrixToPack)
    {
       getJointAcceleration().getAngularPart().get(rowStart, matrixToPack);
       return rowStart + getDegreesOfFreedom();
@@ -78,7 +78,7 @@ public interface SphericalJointReadOnly extends JointReadOnly
 
    /** {@inheritDoc} */
    @Override
-   default int getJointTau(int rowStart, DenseMatrix64F matrixToPack)
+   default int getJointTau(int rowStart, DMatrix matrixToPack)
    {
       getJointWrench().getAngularPart().get(rowStart, matrixToPack);
       return rowStart + getDegreesOfFreedom();

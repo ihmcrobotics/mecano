@@ -1,6 +1,6 @@
 package us.ihmc.mecano.spatial.interfaces;
 
-import org.ejml.data.DenseMatrix64F;
+import org.ejml.data.DMatrix;
 
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.referenceFrame.interfaces.FrameVector3DReadOnly;
@@ -233,7 +233,7 @@ public interface SpatialVectorReadOnly extends ReferenceFrameHolder
     *
     * @param matrixToPack the column vector in which this vector is stored. Modified.
     */
-   default void get(DenseMatrix64F matrixToPack)
+   default void get(DMatrix matrixToPack)
    {
       get(0, 0, matrixToPack);
    }
@@ -248,7 +248,7 @@ public interface SpatialVectorReadOnly extends ReferenceFrameHolder
     * @param startRow     the first row index to start writing in the dense-matrix.
     * @param matrixToPack the column vector in which this vector is stored. Modified.
     */
-   default void get(int startRow, DenseMatrix64F matrixToPack)
+   default void get(int startRow, DMatrix matrixToPack)
    {
       get(startRow, 0, matrixToPack);
    }
@@ -265,7 +265,7 @@ public interface SpatialVectorReadOnly extends ReferenceFrameHolder
     * @param column       the column index to write in the dense-matrix.
     * @param matrixToPack the column vector in which this vector is stored. Modified.
     */
-   default void get(int startRow, int column, DenseMatrix64F matrixToPack)
+   default void get(int startRow, int column, DMatrix matrixToPack)
    {
       getAngularPart().get(startRow, column, matrixToPack);
       getLinearPart().get(startRow + 3, column, matrixToPack);

@@ -1,6 +1,6 @@
 package us.ihmc.mecano.multiBodySystem.interfaces;
 
-import org.ejml.data.DenseMatrix64F;
+import org.ejml.data.DMatrix;
 
 import us.ihmc.euclid.referenceFrame.interfaces.FrameVector3DReadOnly;
 import us.ihmc.mecano.multiBodySystem.PrismaticJoint;
@@ -281,15 +281,15 @@ public interface OneDoFJointReadOnly extends JointReadOnly
 
    /** {@inheritDoc} */
    @Override
-   default int getJointConfiguration(int rowStart, DenseMatrix64F matrixToPack)
+   default int getJointConfiguration(int rowStart, DMatrix matrixToPack)
    {
-      matrixToPack.set(rowStart, getQ());
+      matrixToPack.set(rowStart, 0, getQ());
       return rowStart + getConfigurationMatrixSize();
    }
 
    /** {@inheritDoc} */
    @Override
-   default int getJointVelocity(int rowStart, DenseMatrix64F matrixToPack)
+   default int getJointVelocity(int rowStart, DMatrix matrixToPack)
    {
       matrixToPack.set(rowStart, 0, getQd());
       return rowStart + getDegreesOfFreedom();
@@ -297,7 +297,7 @@ public interface OneDoFJointReadOnly extends JointReadOnly
 
    /** {@inheritDoc} */
    @Override
-   default int getJointAcceleration(int rowStart, DenseMatrix64F matrixToPack)
+   default int getJointAcceleration(int rowStart, DMatrix matrixToPack)
    {
       matrixToPack.set(rowStart, 0, getQdd());
       return rowStart + getDegreesOfFreedom();
@@ -305,7 +305,7 @@ public interface OneDoFJointReadOnly extends JointReadOnly
 
    /** {@inheritDoc} */
    @Override
-   default int getJointTau(int rowStart, DenseMatrix64F matrixToPack)
+   default int getJointTau(int rowStart, DMatrix matrixToPack)
    {
       matrixToPack.set(rowStart, 0, getTau());
       return rowStart + getDegreesOfFreedom();

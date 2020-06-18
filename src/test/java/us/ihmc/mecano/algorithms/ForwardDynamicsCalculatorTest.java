@@ -11,9 +11,9 @@ import java.util.Map;
 import java.util.Random;
 import java.util.stream.Collectors;
 
-import org.ejml.data.DenseMatrix64F;
-import org.ejml.ops.CommonOps;
-import org.ejml.ops.MatrixFeatures;
+import org.ejml.data.DMatrixRMaj;
+import org.ejml.dense.row.CommonOps_DDRM;
+import org.ejml.dense.row.MatrixFeatures_DDRM;
 import org.junit.jupiter.api.Test;
 
 import us.ihmc.euclid.tools.EuclidCoreIOTools;
@@ -305,7 +305,7 @@ public class ForwardDynamicsCalculatorTest
 
       int numberOfDoFs = joints.stream().mapToInt(JointReadOnly::getDegreesOfFreedom).sum();
 
-      DenseMatrix64F qdd_expected = new DenseMatrix64F(numberOfDoFs, 1);
+      DMatrixRMaj qdd_expected = new DMatrixRMaj(numberOfDoFs, 1);
       int index = 0;
       for (JointBasics joint : joints)
       {
@@ -324,7 +324,7 @@ public class ForwardDynamicsCalculatorTest
       forwardDynamicsCalculator.compute();
       joints.forEach(forwardDynamicsCalculator::writeComputedJointAcceleration);
 
-      DenseMatrix64F qdd_actual = new DenseMatrix64F(numberOfDoFs, 1);
+      DMatrixRMaj qdd_actual = new DMatrixRMaj(numberOfDoFs, 1);
       index = 0;
       for (JointBasics joint : joints)
       {
@@ -332,12 +332,12 @@ public class ForwardDynamicsCalculatorTest
          index += joint.getDegreesOfFreedom();
       }
 
-      boolean areEqual = MatrixFeatures.isEquals(qdd_expected, qdd_actual, epsilon);
+      boolean areEqual = MatrixFeatures_DDRM.isEquals(qdd_expected, qdd_actual, epsilon);
       if (!areEqual)
       {
          System.out.println("iteration: " + iteration);
          double maxError = 0.0;
-         DenseMatrix64F output = new DenseMatrix64F(numberOfDoFs, 3);
+         DMatrixRMaj output = new DMatrixRMaj(numberOfDoFs, 3);
          for (int row = 0; row < numberOfDoFs; row++)
          {
             output.set(row, 0, qdd_expected.get(row, 0));
@@ -405,7 +405,7 @@ public class ForwardDynamicsCalculatorTest
 
       int numberOfDoFs = MultiBodySystemTools.computeDegreesOfFreedom(input.getJointsToConsider());
 
-      DenseMatrix64F qdd_expected = new DenseMatrix64F(numberOfDoFs, 1);
+      DMatrixRMaj qdd_expected = new DMatrixRMaj(numberOfDoFs, 1);
       int index = 0;
 
       for (JointBasics joint : input.getJointsToConsider())
@@ -425,8 +425,8 @@ public class ForwardDynamicsCalculatorTest
 
       inverseDynamicsCalculator.writeComputedJointWrenches(joints);
 
-      DenseMatrix64F massMatrix = massMatrixCalculator.getMassMatrix();
-      DenseMatrix64F biasMatrix = new DenseMatrix64F(numberOfDoFs, 1);
+      DMatrixRMaj massMatrix = massMatrixCalculator.getMassMatrix();
+      DMatrixRMaj biasMatrix = new DMatrixRMaj(numberOfDoFs, 1);
 
       index = 0;
       for (JointReadOnly joint : input.getJointsToConsider())
@@ -435,10 +435,10 @@ public class ForwardDynamicsCalculatorTest
          index += joint.getDegreesOfFreedom();
       }
 
-      DenseMatrix64F tauMatrix = new DenseMatrix64F(numberOfDoFs, 1);
+      DMatrixRMaj tauMatrix = new DMatrixRMaj(numberOfDoFs, 1);
 
-      CommonOps.mult(massMatrix, qdd_expected, tauMatrix);
-      CommonOps.addEquals(tauMatrix, biasMatrix);
+      CommonOps_DDRM.mult(massMatrix, qdd_expected, tauMatrix);
+      CommonOps_DDRM.addEquals(tauMatrix, biasMatrix);
 
       index = 0;
       for (JointBasics joint : input.getJointsToConsider())
@@ -452,14 +452,14 @@ public class ForwardDynamicsCalculatorTest
 
       forwardDynamicsCalculator.compute();
 
-      DenseMatrix64F qdd_actual = forwardDynamicsCalculator.getJointAccelerationMatrix();
+      DMatrixRMaj qdd_actual = forwardDynamicsCalculator.getJointAccelerationMatrix();
 
-      boolean areEqual = MatrixFeatures.isEquals(qdd_expected, qdd_actual, epsilon);
+      boolean areEqual = MatrixFeatures_DDRM.isEquals(qdd_expected, qdd_actual, epsilon);
       if (!areEqual)
       {
          System.out.println("iteration: " + iteration);
          double maxError = 0.0;
-         DenseMatrix64F output = new DenseMatrix64F(numberOfDoFs, 3);
+         DMatrixRMaj output = new DMatrixRMaj(numberOfDoFs, 3);
          for (int row = 0; row < numberOfDoFs; row++)
          {
             output.set(row, 0, qdd_expected.get(row, 0));

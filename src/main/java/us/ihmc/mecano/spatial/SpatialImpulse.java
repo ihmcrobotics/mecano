@@ -1,6 +1,6 @@
 package us.ihmc.mecano.spatial;
 
-import org.ejml.data.DenseMatrix64F;
+import org.ejml.data.DMatrix;
 
 import us.ihmc.euclid.interfaces.GeometryObject;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
@@ -109,7 +109,7 @@ public class SpatialImpulse implements SpatialImpulseBasics, GeometryObject<Spat
     * @param matrix           the column vector containing the values for this vector's components. Not
     *                         modified.
     */
-   public SpatialImpulse(ReferenceFrame bodyFrame, ReferenceFrame expressedInFrame, DenseMatrix64F matrix)
+   public SpatialImpulse(ReferenceFrame bodyFrame, ReferenceFrame expressedInFrame, DMatrix matrix)
    {
       setIncludingFrame(bodyFrame, expressedInFrame, matrix);
    }

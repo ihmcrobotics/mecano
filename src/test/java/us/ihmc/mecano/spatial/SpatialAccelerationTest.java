@@ -4,7 +4,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 
 import java.util.Random;
 
-import org.ejml.data.DenseMatrix64F;
+import org.ejml.data.DMatrixRMaj;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 
@@ -37,7 +37,7 @@ public class SpatialAccelerationTest extends SpatialMotionTest<SpatialAccelerati
 
    @Override
    public SpatialAcceleration createSpatialMotionVector(ReferenceFrame bodyFrame, ReferenceFrame baseFrame, ReferenceFrame expressedInFrame,
-                                                        DenseMatrix64F matrix)
+                                                        DMatrixRMaj matrix)
    {
       return new SpatialAcceleration(bodyFrame, baseFrame, expressedInFrame, matrix);
    }

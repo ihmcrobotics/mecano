@@ -1,6 +1,6 @@
 package us.ihmc.mecano.multiBodySystem.interfaces;
 
-import org.ejml.data.DenseMatrix64F;
+import org.ejml.data.DMatrix;
 
 import us.ihmc.euclid.orientation.interfaces.Orientation3DReadOnly;
 import us.ihmc.euclid.referenceFrame.interfaces.FixedFrameVector3DBasics;
@@ -153,7 +153,7 @@ public interface SphericalJointBasics extends SphericalJointReadOnly, JointBasic
 
    /** {@inheritDoc} */
    @Override
-   default int setJointConfiguration(int rowStart, DenseMatrix64F matrix)
+   default int setJointConfiguration(int rowStart, DMatrix matrix)
    {
       getJointOrientation().set(rowStart, matrix);
       return rowStart + getConfigurationMatrixSize();
@@ -161,7 +161,7 @@ public interface SphericalJointBasics extends SphericalJointReadOnly, JointBasic
 
    /** {@inheritDoc} */
    @Override
-   default int setJointVelocity(int rowStart, DenseMatrix64F matrix)
+   default int setJointVelocity(int rowStart, DMatrix matrix)
    {
       getJointAngularVelocity().set(rowStart, matrix);
       return rowStart + getDegreesOfFreedom();
@@ -169,7 +169,7 @@ public interface SphericalJointBasics extends SphericalJointReadOnly, JointBasic
 
    /** {@inheritDoc} */
    @Override
-   default int setJointAcceleration(int rowStart, DenseMatrix64F matrix)
+   default int setJointAcceleration(int rowStart, DMatrix matrix)
    {
       getJointAngularAcceleration().set(rowStart, matrix);
       return rowStart + getDegreesOfFreedom();
@@ -177,7 +177,7 @@ public interface SphericalJointBasics extends SphericalJointReadOnly, JointBasic
 
    /** {@inheritDoc} */
    @Override
-   default int setJointTau(int rowStart, DenseMatrix64F matrix)
+   default int setJointTau(int rowStart, DMatrix matrix)
    {
       getJointTorque().set(rowStart, matrix);
       return rowStart + getDegreesOfFreedom();

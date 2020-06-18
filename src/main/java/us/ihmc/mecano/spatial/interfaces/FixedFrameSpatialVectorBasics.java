@@ -1,6 +1,6 @@
 package us.ihmc.mecano.spatial.interfaces;
 
-import org.ejml.data.DenseMatrix64F;
+import org.ejml.data.DMatrix;
 
 import us.ihmc.euclid.interfaces.Clearable;
 import us.ihmc.euclid.interfaces.Transformable;
@@ -262,7 +262,7 @@ public interface FixedFrameSpatialVectorBasics extends SpatialVectorReadOnly, Cl
     * @param matrix the column vector containing the new values for this vector's components. Not
     *               modified.
     */
-   default void set(DenseMatrix64F matrix)
+   default void set(DMatrix matrix)
    {
       set(0, matrix);
    }
@@ -279,7 +279,7 @@ public interface FixedFrameSpatialVectorBasics extends SpatialVectorReadOnly, Cl
     * @param matrix   the column vector containing the new values for this vector's components. Not
     *                 modified.
     */
-   default void set(int startRow, DenseMatrix64F matrix)
+   default void set(int startRow, DMatrix matrix)
    {
       set(startRow, 0, matrix);
    }
@@ -297,7 +297,7 @@ public interface FixedFrameSpatialVectorBasics extends SpatialVectorReadOnly, Cl
     * @param matrix   the column vector containing the new values for this vector's components. Not
     *                 modified.
     */
-   default void set(int startRow, int column, DenseMatrix64F matrix)
+   default void set(int startRow, int column, DMatrix matrix)
    {
       EuclidCoreTools.checkMatrixMinimumSize(startRow + 6, column + 1, matrix);
       getAngularPart().set(matrix.unsafe_get(startRow++, column), matrix.unsafe_get(startRow++, column), matrix.unsafe_get(startRow++, column));
@@ -461,7 +461,7 @@ public interface FixedFrameSpatialVectorBasics extends SpatialVectorReadOnly, Cl
     * @param matrix the column vector containing the values to add to this vector's components. Not
     *               modified.
     */
-   default void add(DenseMatrix64F matrix)
+   default void add(DMatrix matrix)
    {
       add(0, matrix);
    }
@@ -477,7 +477,7 @@ public interface FixedFrameSpatialVectorBasics extends SpatialVectorReadOnly, Cl
     * @param matrix   the column vector containing the values to add to this vector's components. Not
     *                 modified.
     */
-   default void add(int startRow, DenseMatrix64F matrix)
+   default void add(int startRow, DMatrix matrix)
    {
       add(startRow, 0, matrix);
    }
@@ -495,7 +495,7 @@ public interface FixedFrameSpatialVectorBasics extends SpatialVectorReadOnly, Cl
     * @param matrix   the column vector containing the values to add to this vector's components. Not
     *                 modified.
     */
-   default void add(int startRow, int column, DenseMatrix64F matrix)
+   default void add(int startRow, int column, DMatrix matrix)
    {
       EuclidCoreTools.checkMatrixMinimumSize(startRow + 6, column + 1, matrix);
       getAngularPart().add(matrix.unsafe_get(startRow++, column), matrix.unsafe_get(startRow++, column), matrix.unsafe_get(startRow++, column));
@@ -563,7 +563,7 @@ public interface FixedFrameSpatialVectorBasics extends SpatialVectorReadOnly, Cl
     * @param matrix the column vector containing the values to subtract from this vector's components.
     *               Not modified.
     */
-   default void sub(DenseMatrix64F matrix)
+   default void sub(DMatrix matrix)
    {
       sub(0, matrix);
    }
@@ -580,7 +580,7 @@ public interface FixedFrameSpatialVectorBasics extends SpatialVectorReadOnly, Cl
     * @param matrix   the column vector containing the values to subtract from this vector's
     *                 components. Not modified.
     */
-   default void sub(int startRow, DenseMatrix64F matrix)
+   default void sub(int startRow, DMatrix matrix)
    {
       sub(startRow, 0, matrix);
    }
@@ -598,7 +598,7 @@ public interface FixedFrameSpatialVectorBasics extends SpatialVectorReadOnly, Cl
     * @param matrix   the column vector containing the values to subtract from this vector's
     *                 components. Not modified.
     */
-   default void sub(int startRow, int column, DenseMatrix64F matrix)
+   default void sub(int startRow, int column, DMatrix matrix)
    {
       EuclidCoreTools.checkMatrixMinimumSize(startRow + 6, column + 1, matrix);
       getAngularPart().sub(matrix.unsafe_get(startRow++, column), matrix.unsafe_get(startRow++, column), matrix.unsafe_get(startRow++, column));

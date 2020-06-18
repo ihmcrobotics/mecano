@@ -3,8 +3,8 @@ package us.ihmc.mecano.algorithms;
 import java.util.List;
 import java.util.Random;
 
-import org.ejml.data.DenseMatrix64F;
-import org.ejml.ops.CommonOps;
+import org.ejml.data.DMatrixRMaj;
+import org.ejml.dense.row.CommonOps_DDRM;
 import org.junit.jupiter.api.Test;
 
 import us.ihmc.euclid.referenceFrame.FrameVector3D;
@@ -73,7 +73,7 @@ public class CentroidalMomentumRateCalculatorTest
          SpatialForce expectedMomentumRate = computeMomentumRate(rootBody, spatialAccelerationCalculator, centroidalMomentumRateCalculator.getReferenceFrame());
          MecanoTestTools.assertSpatialVectorEquals(expectedMomentumRate, actualMomentumRate, EPSILON);
 
-         DenseMatrix64F jointAccelerationMatrix = new DenseMatrix64F(numberOfJoints, 1);
+         DMatrixRMaj jointAccelerationMatrix = new DMatrixRMaj(numberOfJoints, 1);
          MultiBodySystemTools.extractJointsState(joints, JointStateType.ACCELERATION, jointAccelerationMatrix);
          actualMomentumRate = new SpatialForce();
          centroidalMomentumRateCalculator.getMomentumRate(jointAccelerationMatrix, actualMomentumRate);
@@ -121,7 +121,7 @@ public class CentroidalMomentumRateCalculatorTest
          SpatialForce expectedMomentumRate = computeMomentumRate(rootBody, spatialAccelerationCalculator, centroidalMomentumRateCalculator.getReferenceFrame());
          MecanoTestTools.assertSpatialVectorEquals(expectedMomentumRate, actualMomentumRate, EPSILON);
 
-         DenseMatrix64F jointAccelerationMatrix = new DenseMatrix64F(numberOfJoints, 1);
+         DMatrixRMaj jointAccelerationMatrix = new DMatrixRMaj(numberOfJoints, 1);
          MultiBodySystemTools.extractJointsState(joints, JointStateType.ACCELERATION, jointAccelerationMatrix);
          actualMomentumRate = new SpatialForce();
          centroidalMomentumRateCalculator.getMomentumRate(jointAccelerationMatrix, actualMomentumRate);
@@ -169,7 +169,7 @@ public class CentroidalMomentumRateCalculatorTest
          SpatialForce expectedMomentumRate = computeMomentumRate(rootBody, spatialAccelerationCalculator, centroidalMomentumRateCalculator.getReferenceFrame());
          MecanoTestTools.assertSpatialVectorEquals(expectedMomentumRate, actualMomentumRate, EPSILON);
 
-         DenseMatrix64F jointAccelerationMatrix = new DenseMatrix64F(centroidalMomentumCalculator.getCentroidalMomentumMatrix().getNumCols(), 1);
+         DMatrixRMaj jointAccelerationMatrix = new DMatrixRMaj(centroidalMomentumCalculator.getCentroidalMomentumMatrix().getNumCols(), 1);
          MultiBodySystemTools.extractJointsState(joints, JointStateType.ACCELERATION, jointAccelerationMatrix);
          actualMomentumRate = new SpatialForce();
          centroidalMomentumRateCalculator.getMomentumRate(jointAccelerationMatrix, actualMomentumRate);
@@ -237,11 +237,11 @@ public class CentroidalMomentumRateCalculatorTest
 
    public static Momentum extractMomentum(List<? extends JointReadOnly> joints, CentroidalMomentumRateCalculator centroidalMomentumRateCalculator)
    {
-      DenseMatrix64F jointVelocities = new DenseMatrix64F(MultiBodySystemTools.computeDegreesOfFreedom(joints), 1);
+      DMatrixRMaj jointVelocities = new DMatrixRMaj(MultiBodySystemTools.computeDegreesOfFreedom(joints), 1);
       MultiBodySystemTools.extractJointsState(joints, JointStateType.VELOCITY, jointVelocities);
 
-      DenseMatrix64F momentumMatrix = new DenseMatrix64F(6, 1);
-      CommonOps.mult(centroidalMomentumRateCalculator.getCentroidalMomentumMatrix(), jointVelocities, momentumMatrix);
+      DMatrixRMaj momentumMatrix = new DMatrixRMaj(6, 1);
+      CommonOps_DDRM.mult(centroidalMomentumRateCalculator.getCentroidalMomentumMatrix(), jointVelocities, momentumMatrix);
 
       return new Momentum(centroidalMomentumRateCalculator.getReferenceFrame(), momentumMatrix);
    }

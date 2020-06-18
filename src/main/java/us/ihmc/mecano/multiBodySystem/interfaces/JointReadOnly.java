@@ -4,7 +4,8 @@ import java.util.List;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-import org.ejml.data.DenseMatrix64F;
+import org.ejml.data.DMatrix;
+import org.ejml.data.DMatrix1Row;
 
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.transform.RigidBodyTransform;
@@ -149,7 +150,7 @@ public interface JointReadOnly
     * @param matrixToPack the matrix used to store the motion subspace. It is reshaped to the proper
     *                     size. Modified.
     */
-   default void getMotionSubspace(DenseMatrix64F matrixToPack)
+   default void getMotionSubspace(DMatrix1Row matrixToPack)
    {
       matrixToPack.reshape(SpatialVectorReadOnly.SIZE, getDegreesOfFreedom());
 
@@ -287,8 +288,7 @@ public interface JointReadOnly
    WrenchReadOnly getJointWrench();
 
    /**
-    * Packs this joint's configuration into a column vector {@code DenseMatrix64F}. Here are a few
-    * examples:
+    * Packs this joint's configuration into a column vector {@code DMatrix}. Here are a few examples:
     * <ul>
     * <li>For a {@code RevoluteJoint}, the actual joint angle is stored at the
     * {@code rowStart}<sup>th</sup> row.
@@ -301,11 +301,10 @@ public interface JointReadOnly
     *                     Modified.
     * @return {@code rowStart + this.getConfigurationMatrixSize()}.
     */
-   int getJointConfiguration(int rowStart, DenseMatrix64F matrixToPack);
+   int getJointConfiguration(int rowStart, DMatrix matrixToPack);
 
    /**
-    * Packs this joint actual velocity into a column vector {@code DenseMatrix64F}. Here are a few
-    * examples:
+    * Packs this joint actual velocity into a column vector {@code DMatrix}. Here are a few examples:
     * <ul>
     * <li>For a {@code OneDoFJoint}, the scalar velocity {@code qd} is stored at the
     * {@code rowStart}<sup>th</sup> row.
@@ -319,10 +318,10 @@ public interface JointReadOnly
     * @param matrixToPack the column vector in which the velocity of this joint is stored. Modified.
     * @return {@code rowStart + this.getDegreesOfFreedom()}.
     */
-   int getJointVelocity(int rowStart, DenseMatrix64F matrixToPack);
+   int getJointVelocity(int rowStart, DMatrix matrixToPack);
 
    /**
-    * Packs this joint desired acceleration into a column vector {@code DenseMatrix64F}. Here are a few
+    * Packs this joint desired acceleration into a column vector {@code DMatrix}. Here are a few
     * examples:
     * <ul>
     * <li>For a {@code OneDoFJoint}, the scalar acceleration {@code qddDesired} is stored at the
@@ -337,10 +336,10 @@ public interface JointReadOnly
     *                     Modified.
     * @return {@code rowStart + this.getDegreesOfFreedom()}.
     */
-   int getJointAcceleration(int rowStart, DenseMatrix64F matrixToPack);
+   int getJointAcceleration(int rowStart, DMatrix matrixToPack);
 
    /**
-    * Packs this joint desired force/torque into a column vector {@code DenseMatrix64F}. Here are a few
+    * Packs this joint desired force/torque into a column vector {@code DMatrix}. Here are a few
     * examples:
     * <ul>
     * <li>For a {@code RevoluteJoint}, the desired joint torque is stored at the 1<sup>st</sup> row.
@@ -356,7 +355,7 @@ public interface JointReadOnly
     *                     Modified.
     * @return {@code rowStart + this.getDegreesOfFreedom()}.
     */
-   int getJointTau(int rowStart, DenseMatrix64F matrixToPack);
+   int getJointTau(int rowStart, DMatrix matrixToPack);
 
    /**
     * Packs the offset from the frame before this joint to the frame after this parent joint.

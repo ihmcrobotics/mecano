@@ -10,7 +10,7 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Random;
 
-import org.ejml.data.DenseMatrix64F;
+import org.ejml.data.DMatrixRMaj;
 import org.junit.jupiter.api.Test;
 
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
@@ -67,11 +67,11 @@ public class GeometricJacobianCalculatorTest
       jacobianCalculator.setKinematicChain(base, endEffector);
 
       { // Just checking the matrix sizing is correct
-         DenseMatrix64F jacobianMatrix = new DenseMatrix64F(jacobianCalculator.getJacobianMatrix());
+         DMatrixRMaj jacobianMatrix = new DMatrixRMaj(jacobianCalculator.getJacobianMatrix());
          assertEquals(6, jacobianMatrix.getNumRows());
          assertEquals(numberOfJoints, jacobianMatrix.getNumCols());
 
-         DenseMatrix64F convectiveTerm = new DenseMatrix64F(jacobianCalculator.getConvectiveTermMatrix());
+         DMatrixRMaj convectiveTerm = new DMatrixRMaj(jacobianCalculator.getConvectiveTermMatrix());
          assertEquals(6, convectiveTerm.getNumRows());
          assertEquals(1, convectiveTerm.getNumCols());
       }
@@ -86,11 +86,11 @@ public class GeometricJacobianCalculatorTest
       assertTrue(endEffector == jacobianCalculator.getEndEffector());
 
       { // Just checking the matrix sizing is correct
-         DenseMatrix64F jacobianMatrix = new DenseMatrix64F(jacobianCalculator.getJacobianMatrix());
+         DMatrixRMaj jacobianMatrix = new DMatrixRMaj(jacobianCalculator.getJacobianMatrix());
          assertEquals(6, jacobianMatrix.getNumRows());
          assertEquals(numberOfJoints, jacobianMatrix.getNumCols());
 
-         DenseMatrix64F convectiveTerm = new DenseMatrix64F(jacobianCalculator.getConvectiveTermMatrix());
+         DMatrixRMaj convectiveTerm = new DMatrixRMaj(jacobianCalculator.getConvectiveTermMatrix());
          assertEquals(6, convectiveTerm.getNumRows());
          assertEquals(1, convectiveTerm.getNumCols());
       }
@@ -555,7 +555,7 @@ public class GeometricJacobianCalculatorTest
       Twist expectedTwist = new Twist();
       Twist actualTwist = new Twist();
 
-      DenseMatrix64F jointVelocitiesMatrix = new DenseMatrix64F(jacobianCalculator.getNumberOfDegreesOfFreedom(), 1);
+      DMatrixRMaj jointVelocitiesMatrix = new DMatrixRMaj(jacobianCalculator.getNumberOfDegreesOfFreedom(), 1);
       MultiBodySystemTools.extractJointsState(jacobianCalculator.getJointsFromBaseToEndEffector(), JointStateType.VELOCITY, jointVelocitiesMatrix);
 
       endEffector.getBodyFixedFrame().getTwistRelativeToOther(base.getBodyFixedFrame(), expectedTwist);
@@ -575,7 +575,7 @@ public class GeometricJacobianCalculatorTest
 
       SpatialAcceleration actualAcceleration = new SpatialAcceleration();
 
-      DenseMatrix64F jointDesiredAccelerationsMatrix = new DenseMatrix64F(jacobianCalculator.getNumberOfDegreesOfFreedom(), 1);
+      DMatrixRMaj jointDesiredAccelerationsMatrix = new DMatrixRMaj(jacobianCalculator.getNumberOfDegreesOfFreedom(), 1);
       MultiBodySystemTools.extractJointsState(jacobianCalculator.getJointsFromBaseToEndEffector(),
                                               JointStateType.ACCELERATION,
                                               jointDesiredAccelerationsMatrix);

@@ -4,9 +4,9 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 
 import java.util.Random;
 
-import org.ejml.data.DenseMatrix64F;
-import org.ejml.ops.EjmlUnitTests;
-import org.ejml.ops.RandomMatrices;
+import org.ejml.EjmlUnitTests;
+import org.ejml.data.DMatrixRMaj;
+import org.ejml.dense.row.RandomMatrices_DDRM;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -31,7 +31,7 @@ public abstract class SpatialMotionTest<T extends SpatialMotionBasics>
    public abstract T createSpatialMotionVector(ReferenceFrame bodyFrame, ReferenceFrame baseFrame, ReferenceFrame expressedInFrame,
                                                Vector3DReadOnly angularPart, Vector3DReadOnly linearPart);
 
-   public abstract T createSpatialMotionVector(ReferenceFrame bodyFrame, ReferenceFrame baseFrame, ReferenceFrame expressedInFrame, DenseMatrix64F matrix);
+   public abstract T createSpatialMotionVector(ReferenceFrame bodyFrame, ReferenceFrame baseFrame, ReferenceFrame expressedInFrame, DMatrixRMaj matrix);
 
    @BeforeEach
    public void setUp() throws Exception
@@ -109,9 +109,9 @@ public abstract class SpatialMotionTest<T extends SpatialMotionBasics>
    @Test
    public void testConstructUsingMatrix()
    {
-      DenseMatrix64F matrix = RandomMatrices.createRandom(SpatialVectorReadOnly.SIZE, 1, random);
+      DMatrixRMaj matrix = RandomMatrices_DDRM.rectangle(SpatialVectorReadOnly.SIZE, 1, random);
       T spatialMotionVector = createSpatialMotionVector(frameC, frameD, frameA, matrix);
-      DenseMatrix64F matrixBack = new DenseMatrix64F(SpatialVectorReadOnly.SIZE, 1);
+      DMatrixRMaj matrixBack = new DMatrixRMaj(SpatialVectorReadOnly.SIZE, 1);
       spatialMotionVector.get(matrixBack);
       EjmlUnitTests.assertEquals(matrix, matrixBack, 0.0);
    }
@@ -121,7 +121,7 @@ public abstract class SpatialMotionTest<T extends SpatialMotionBasics>
    {
       Assertions.assertThrows(RuntimeException.class, () ->
       {
-         DenseMatrix64F matrix = new DenseMatrix64F(SpatialVectorReadOnly.SIZE - 1, 1);
+         DMatrixRMaj matrix = new DMatrixRMaj(SpatialVectorReadOnly.SIZE - 1, 1);
          createSpatialMotionVector(frameC, frameD, frameA, matrix);
       });
    }
