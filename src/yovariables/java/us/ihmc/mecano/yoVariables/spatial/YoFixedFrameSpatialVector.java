@@ -4,7 +4,7 @@ import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.mecano.spatial.interfaces.FixedFrameSpatialVectorBasics;
 import us.ihmc.mecano.spatial.interfaces.SpatialVectorReadOnly;
 import us.ihmc.mecano.tools.MecanoIOTools;
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoFrameVector3D;
 import us.ihmc.yoVariables.variable.YoVariable;
 
@@ -43,7 +43,7 @@ public class YoFixedFrameSpatialVector implements FixedFrameSpatialVectorBasics
     * @param expressedInFrame in which reference frame the spatial vector is expressed.
     * @param registry         the registry to register child variables to.
     */
-   public YoFixedFrameSpatialVector(String namePrefix, ReferenceFrame expressedInFrame, YoVariableRegistry registry)
+   public YoFixedFrameSpatialVector(String namePrefix, ReferenceFrame expressedInFrame, YoRegistry registry)
    {
       this(namePrefix, "", expressedInFrame, registry);
    }
@@ -59,7 +59,7 @@ public class YoFixedFrameSpatialVector implements FixedFrameSpatialVectorBasics
     * @param expressedInFrame in which reference frame the spatial vector is expressed.
     * @param registry         the registry to register child variables to.
     */
-   public YoFixedFrameSpatialVector(String namePrefix, String nameSuffix, ReferenceFrame expressedInFrame, YoVariableRegistry registry)
+   public YoFixedFrameSpatialVector(String namePrefix, String nameSuffix, ReferenceFrame expressedInFrame, YoRegistry registry)
    {
       this(new YoFrameVector3D(namePrefix + "Angular", nameSuffix, expressedInFrame, registry),
            new YoFrameVector3D(namePrefix + "Linear", nameSuffix, expressedInFrame, registry));

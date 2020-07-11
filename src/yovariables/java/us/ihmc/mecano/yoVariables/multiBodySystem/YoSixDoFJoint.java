@@ -12,7 +12,7 @@ import us.ihmc.mecano.tools.MecanoTools;
 import us.ihmc.mecano.yoVariables.spatial.YoFixedFrameSpatialAcceleration;
 import us.ihmc.mecano.yoVariables.spatial.YoFixedFrameTwist;
 import us.ihmc.mecano.yoVariables.spatial.YoFixedFrameWrench;
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoFramePose3D;
 
 /**
@@ -24,7 +24,7 @@ import us.ihmc.yoVariables.variable.YoFramePose3D;
 public class YoSixDoFJoint extends Joint implements SixDoFJointBasics
 {
    /** Registry in which the {@code YoVariable}s created for this joint are attached to. */
-   private final YoVariableRegistry registry;
+   private final YoRegistry registry;
 
    /** The 3D pose of this joint. */
    private final YoFramePose3D jointPose;
@@ -51,7 +51,7 @@ public class YoSixDoFJoint extends Joint implements SixDoFJointBasics
     * @param predecessor the rigid-body connected to and preceding this joint.
     * @param registry    the registry to register child variables to.
     */
-   public YoSixDoFJoint(String name, RigidBodyBasics predecessor, YoVariableRegistry registry)
+   public YoSixDoFJoint(String name, RigidBodyBasics predecessor, YoRegistry registry)
    {
       this(name, predecessor, null, registry);
    }
@@ -64,7 +64,7 @@ public class YoSixDoFJoint extends Joint implements SixDoFJointBasics
     * @param transformToParent the transform to the frame after the parent joint. Not modified.
     * @param registry          the registry to register child variables to.
     */
-   public YoSixDoFJoint(String name, RigidBodyBasics predecessor, RigidBodyTransform transformToParent, YoVariableRegistry registry)
+   public YoSixDoFJoint(String name, RigidBodyBasics predecessor, RigidBodyTransform transformToParent, YoRegistry registry)
    {
       super(name, predecessor, transformToParent);
       this.registry = registry;

@@ -4,7 +4,7 @@ import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.interfaces.Vector3DReadOnly;
 import us.ihmc.mecano.multiBodySystem.OneDoFJoint;
 import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
 
 /**
@@ -34,7 +34,7 @@ public abstract class YoOneDoFJoint extends OneDoFJoint
     * @param registry             the registry to register child variables to.
     */
    public YoOneDoFJoint(String name, RigidBodyBasics predecessor, Vector3DReadOnly jointAxisAngularPart, Vector3DReadOnly jointAxisLinearPart,
-                        RigidBodyTransform transformToParent, YoVariableRegistry registry)
+                        RigidBodyTransform transformToParent, YoRegistry registry)
    {
       super(name, predecessor, jointAxisAngularPart, jointAxisLinearPart, transformToParent);
 
