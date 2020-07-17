@@ -18,9 +18,9 @@ import us.ihmc.mecano.spatial.interfaces.TwistReadOnly;
 import us.ihmc.mecano.spatial.interfaces.WrenchReadOnly;
 import us.ihmc.mecano.tools.MecanoFactories;
 import us.ihmc.mecano.tools.MecanoTools;
+import us.ihmc.yoVariables.euclid.referenceFrame.YoFrameQuaternion;
+import us.ihmc.yoVariables.euclid.referenceFrame.YoFrameVector3D;
 import us.ihmc.yoVariables.registry.YoRegistry;
-import us.ihmc.yoVariables.variable.YoFrameQuaternion;
-import us.ihmc.yoVariables.variable.YoFrameVector3D;
 
 /**
  * A {@code YoSphericalJoint} has 3 degrees of freedom of rotation and has its state backed by
