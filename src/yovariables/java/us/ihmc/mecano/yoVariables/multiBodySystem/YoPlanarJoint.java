@@ -14,7 +14,7 @@ import us.ihmc.mecano.spatial.interfaces.FixedFrameWrenchBasics;
 import us.ihmc.mecano.spatial.interfaces.TwistReadOnly;
 import us.ihmc.mecano.tools.MecanoTools;
 import us.ihmc.mecano.yoVariables.tools.YoMecanoFactories;
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
 
 /**
@@ -26,7 +26,7 @@ import us.ihmc.yoVariables.variable.YoDouble;
 public class YoPlanarJoint extends Joint implements PlanarJointBasics
 {
    /** Registry in which the {@code YoVariable}s created for this joint are attached to. */
-   private final YoVariableRegistry registry;
+   private final YoRegistry registry;
    /** The 3D pose of this joint restricted in the XZ-plane. */
    private final Pose3DBasics jointPose;
    /** The twist of this joint restricted in the XZ-plane. */
@@ -51,7 +51,7 @@ public class YoPlanarJoint extends Joint implements PlanarJointBasics
     * @param predecessor the rigid-body connected to and preceding this joint.
     * @param registry    the registry to register child variables to.
     */
-   public YoPlanarJoint(String name, RigidBodyBasics predecessor, YoVariableRegistry registry)
+   public YoPlanarJoint(String name, RigidBodyBasics predecessor, YoRegistry registry)
    {
       this(name, predecessor, null, registry);
    }
@@ -64,7 +64,7 @@ public class YoPlanarJoint extends Joint implements PlanarJointBasics
     * @param transformToParent the transform to the frame after the parent joint. Not modified.
     * @param registry          the registry to register child variables to.
     */
-   public YoPlanarJoint(String name, RigidBodyBasics predecessor, RigidBodyTransform transformToParent, YoVariableRegistry registry)
+   public YoPlanarJoint(String name, RigidBodyBasics predecessor, RigidBodyTransform transformToParent, YoRegistry registry)
    {
       super(name, predecessor, transformToParent);
       this.registry = registry;

@@ -9,8 +9,8 @@ import us.ihmc.mecano.spatial.SpatialForce;
 import us.ihmc.mecano.spatial.interfaces.FixedFrameWrenchBasics;
 import us.ihmc.mecano.spatial.interfaces.WrenchReadOnly;
 import us.ihmc.mecano.tools.MecanoIOTools;
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
-import us.ihmc.yoVariables.variable.YoFrameVector3D;
+import us.ihmc.yoVariables.euclid.referenceFrame.YoFrameVector3D;
+import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoVariable;
 
 /**
@@ -65,7 +65,7 @@ public class YoFixedFrameWrench implements FixedFrameWrenchBasics, GeometryObjec
     * @param expressedInFrame the frame in which this wrench is expressed.
     * @param registry         the registry to register child variables to.
     */
-   public YoFixedFrameWrench(String namePrefix, ReferenceFrame bodyFrame, ReferenceFrame expressedInFrame, YoVariableRegistry registry)
+   public YoFixedFrameWrench(String namePrefix, ReferenceFrame bodyFrame, ReferenceFrame expressedInFrame, YoRegistry registry)
    {
       this(bodyFrame, new YoFixedFrameSpatialVector(namePrefix, expressedInFrame, registry));
    }
@@ -82,7 +82,7 @@ public class YoFixedFrameWrench implements FixedFrameWrenchBasics, GeometryObjec
     * @param expressedInFrame the frame in which this wrench is expressed.
     * @param registry         the registry to register child variables to.
     */
-   public YoFixedFrameWrench(String namePrefix, String nameSuffix, ReferenceFrame bodyFrame, ReferenceFrame expressedInFrame, YoVariableRegistry registry)
+   public YoFixedFrameWrench(String namePrefix, String nameSuffix, ReferenceFrame bodyFrame, ReferenceFrame expressedInFrame, YoRegistry registry)
    {
       this(bodyFrame, new YoFixedFrameSpatialVector(namePrefix, nameSuffix, expressedInFrame, registry));
    }

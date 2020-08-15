@@ -13,7 +13,7 @@ import us.ihmc.mecano.yoVariables.multiBodySystem.YoPrismaticJoint;
 import us.ihmc.mecano.yoVariables.multiBodySystem.YoRevoluteJoint;
 import us.ihmc.mecano.yoVariables.multiBodySystem.YoSixDoFJoint;
 import us.ihmc.mecano.yoVariables.multiBodySystem.YoSphericalJoint;
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.registry.YoRegistry;
 
 /**
  * This class gathers factories useful for creating multi-body system backed by {@code YoVariable}s.
@@ -35,7 +35,7 @@ public class YoMultiBodySystemFactories
     * @param registry the registry to register child variables to.
     * @return the new joint builder.
     */
-   public static JointBuilder newYoJointBuilder(YoVariableRegistry registry)
+   public static JointBuilder newYoJointBuilder(YoRegistry registry)
    {
       return new JointBuilder()
       {
