@@ -12,7 +12,7 @@ import us.ihmc.mecano.multiBodySystem.interfaces.RevoluteJointBasics;
 import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
 import us.ihmc.mecano.tools.MecanoFactories;
 import us.ihmc.mecano.tools.MecanoFactories.RevoluteJointTransformUpdater;
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.registry.YoRegistry;
 
 /**
  * A {@code YoRevoluteJoint} is a joint has 1 degree of freedom of rotation and has its state backed
@@ -40,7 +40,7 @@ public class YoRevoluteJoint extends YoOneDoFJoint implements RevoluteJointBasic
     * @param jointAxis   the axis around which this joint can rotate. Not modified.
     * @param registry    the registry to register child variables to.
     */
-   public YoRevoluteJoint(String name, RigidBodyBasics predecessor, Vector3DReadOnly jointAxis, YoVariableRegistry registry)
+   public YoRevoluteJoint(String name, RigidBodyBasics predecessor, Vector3DReadOnly jointAxis, YoRegistry registry)
    {
       this(name, predecessor, (RigidBodyTransform) null, jointAxis, registry);
    }
@@ -56,7 +56,7 @@ public class YoRevoluteJoint extends YoOneDoFJoint implements RevoluteJointBasic
     * @param jointAxis   the axis around which this joint can rotate. Not modified.
     * @param registry    the registry to register child variables to.
     */
-   public YoRevoluteJoint(String name, RigidBodyBasics predecessor, Tuple3DReadOnly jointOffset, Vector3DReadOnly jointAxis, YoVariableRegistry registry)
+   public YoRevoluteJoint(String name, RigidBodyBasics predecessor, Tuple3DReadOnly jointOffset, Vector3DReadOnly jointAxis, YoRegistry registry)
    {
       this(name, predecessor, new RigidBodyTransform(new Quaternion(), jointOffset), jointAxis, registry);
    }
@@ -71,7 +71,7 @@ public class YoRevoluteJoint extends YoOneDoFJoint implements RevoluteJointBasic
     * @param registry          the registry to register child variables to.
     */
    public YoRevoluteJoint(String name, RigidBodyBasics predecessor, RigidBodyTransform transformToParent, Vector3DReadOnly jointAxis,
-                          YoVariableRegistry registry)
+                          YoRegistry registry)
    {
       super(name, predecessor, jointAxis, new Vector3D(), transformToParent, registry);
       this.jointAxis = new FrameVector3D(beforeJointFrame, jointAxis);

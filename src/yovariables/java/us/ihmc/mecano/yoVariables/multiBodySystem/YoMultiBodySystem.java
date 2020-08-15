@@ -16,7 +16,7 @@ import us.ihmc.mecano.tools.MultiBodySystemFactories;
 import us.ihmc.mecano.tools.MultiBodySystemFactories.JointBuilder;
 import us.ihmc.mecano.tools.MultiBodySystemFactories.RigidBodyBuilder;
 import us.ihmc.mecano.yoVariables.tools.YoMultiBodySystemFactories;
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.registry.YoRegistry;
 
 /**
  * A {@code YoMultiBodySystem} can be created from any {@code MultiBodySystemReadOnly}.
@@ -44,7 +44,7 @@ public class YoMultiBodySystem implements MultiBodySystemBasics
     * @param stationaryFrame the root frame to which yo-multi-body system is attached.
     * @param registry        the registry to register child variables to.
     */
-   public YoMultiBodySystem(MultiBodySystemReadOnly input, ReferenceFrame stationaryFrame, YoVariableRegistry registry)
+   public YoMultiBodySystem(MultiBodySystemReadOnly input, ReferenceFrame stationaryFrame, YoRegistry registry)
    {
       this(input, stationaryFrame, registry, MultiBodySystemFactories.DEFAULT_RIGID_BODY_BUILDER, YoMultiBodySystemFactories.newYoJointBuilder(registry));
    }
@@ -59,9 +59,9 @@ public class YoMultiBodySystem implements MultiBodySystemBasics
     * @param rigidBodyBuilder use a custom rigid-body builder. Can be {@code null}, the default builder
     *                         is {@link MultiBodySystemFactories#DEFAULT_RIGID_BODY_BUILDER}.
     * @param yoJointBuilder   use a custom yo-joint builder, the default used is
-    *                         {@link YoMultiBodySystemFactories#newYoJointBuilder(YoVariableRegistry)}.
+    *                         {@link YoMultiBodySystemFactories#newYoJointBuilder(YoRegistry)}.
     */
-   public YoMultiBodySystem(MultiBodySystemReadOnly input, ReferenceFrame stationaryFrame, YoVariableRegistry registry, RigidBodyBuilder rigidBodyBuilder,
+   public YoMultiBodySystem(MultiBodySystemReadOnly input, ReferenceFrame stationaryFrame, YoRegistry registry, RigidBodyBuilder rigidBodyBuilder,
                             JointBuilder yoJointBuilder)
    {
       yoRootBody = MultiBodySystemFactories.cloneMultiBodySystem(input.getRootBody(), stationaryFrame, "", rigidBodyBuilder, yoJointBuilder);

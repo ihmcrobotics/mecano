@@ -451,6 +451,24 @@ public interface FixedFrameSpatialVectorBasics extends SpatialVectorReadOnly, Cl
    }
 
    /**
+    * Sets this vector to the sum of the two given vectors.
+    * <p>
+    * {@code this = vector1 + vector2}
+    * </p>
+    * 
+    * @param vector1 the first vector to sum. Not modified.
+    * @param vector2 the second vector to sum. Not modified.
+    * @throws ReferenceFrameMismatchException if any of the arguments is not expressed in the same
+    *                                         reference frame as {@code this}.
+    */
+   default void add(SpatialVectorReadOnly vector1, SpatialVectorReadOnly vector2)
+   {
+      checkReferenceFrameMatch(vector1, vector2);
+      getAngularPart().add((Tuple3DReadOnly) vector1.getAngularPart(), (Tuple3DReadOnly) vector2.getAngularPart());
+      getLinearPart().add((Tuple3DReadOnly) vector1.getLinearPart(), (Tuple3DReadOnly) vector2.getLinearPart());
+   }
+
+   /**
     * Adds to this vector's components the given column vector starting to read from its first row
     * index.
     * <p>
@@ -553,6 +571,24 @@ public interface FixedFrameSpatialVectorBasics extends SpatialVectorReadOnly, Cl
    }
 
    /**
+    * Sets this vector to the difference of the two given vectors.
+    * <p>
+    * {@code this = vector1 - vector2}
+    * </p>
+    * 
+    * @param vector1 the first vector. Not modified.
+    * @param vector2 the second vector to subtract to {@code vector2}. Not modified.
+    * @throws ReferenceFrameMismatchException if any of the arguments is not expressed in the same
+    *                                         reference frame as {@code this}.
+    */
+   default void sub(SpatialVectorReadOnly vector1, SpatialVectorReadOnly vector2)
+   {
+      checkReferenceFrameMatch(vector1, vector2);
+      getAngularPart().sub((Tuple3DReadOnly) vector1.getAngularPart(), (Tuple3DReadOnly) vector2.getAngularPart());
+      getLinearPart().sub((Tuple3DReadOnly) vector1.getLinearPart(), (Tuple3DReadOnly) vector2.getLinearPart());
+   }
+
+   /**
     * Subtracts from this vector's components the given column vector starting to read from its first
     * row index.
     * <p>
@@ -637,6 +673,47 @@ public interface FixedFrameSpatialVectorBasics extends SpatialVectorReadOnly, Cl
    {
       getAngularPart().sub(angular);
       getLinearPart().sub(linear);
+   }
+
+   /**
+    * Performs a linear interpolation from this vector to {@code other} given the percentage
+    * {@code alpha}.
+    * <p>
+    * this = (1.0 - alpha) * this + alpha * other
+    * </p>
+    *
+    * @param other the other vector used for the interpolation. Not modified.
+    * @param alpha the percentage used for the interpolation. A value of 0 will result in not modifying
+    *              this vector, while a value of 1 is equivalent to setting this vector to
+    *              {@code other}.
+    * @throws ReferenceFrameMismatchException if {@code other} is not expressed in the same reference
+    *                                         frame as {@code this}.
+    */
+   default void interpolate(SpatialVectorReadOnly other, double alpha)
+   {
+      interpolate(this, other, alpha);
+   }
+
+   /**
+    * Performs a linear interpolation from {@code vector1} to {@code vector2} given the percentage
+    * {@code alpha}.
+    * <p>
+    * this = (1.0 - alpha) * vector1 + alpha * vector2
+    * </p>
+    *
+    * @param vector1 the first vector used in the interpolation. Not modified.
+    * @param vector2 the second vector used in the interpolation. Not modified.
+    * @param alpha   the percentage to use for the interpolation. A value of 0 will result in setting
+    *                this vector to {@code vector1}, while a value of 1 is equivalent to setting this
+    *                vector to {@code vector2}.
+    * @throws ReferenceFrameMismatchException if any of the arguments are not expressed in the same
+    *                                         reference frame as {@code this}.
+    */
+   default void interpolate(SpatialVectorReadOnly vector1, SpatialVectorReadOnly vector2, double alpha)
+   {
+      checkReferenceFrameMatch(vector1, vector2);
+      getAngularPart().interpolate((Tuple3DReadOnly) vector1.getAngularPart(), (Tuple3DReadOnly) vector2.getAngularPart(), alpha);
+      getLinearPart().interpolate((Tuple3DReadOnly) vector1.getLinearPart(), (Tuple3DReadOnly) vector2.getLinearPart(), alpha);
    }
 
    /**

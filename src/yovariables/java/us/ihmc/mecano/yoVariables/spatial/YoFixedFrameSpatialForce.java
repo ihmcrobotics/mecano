@@ -11,8 +11,8 @@ import us.ihmc.mecano.spatial.interfaces.FixedFrameSpatialForceBasics;
 import us.ihmc.mecano.spatial.interfaces.SpatialForceReadOnly;
 import us.ihmc.mecano.spatial.interfaces.SpatialVectorReadOnly;
 import us.ihmc.mecano.tools.MecanoIOTools;
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
-import us.ihmc.yoVariables.variable.YoFrameVector3D;
+import us.ihmc.yoVariables.euclid.referenceFrame.YoFrameVector3D;
+import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoVariable;
 
 /**
@@ -56,7 +56,7 @@ public class YoFixedFrameSpatialForce implements FixedFrameSpatialForceBasics, G
     * @param expressedInFrame in which reference frame the spatial force is expressed.
     * @param registry         the registry to register child variables to.
     */
-   public YoFixedFrameSpatialForce(String namePrefix, ReferenceFrame expressedInFrame, YoVariableRegistry registry)
+   public YoFixedFrameSpatialForce(String namePrefix, ReferenceFrame expressedInFrame, YoRegistry registry)
    {
       this(new YoFixedFrameSpatialVector(namePrefix, expressedInFrame, registry));
    }
@@ -72,7 +72,7 @@ public class YoFixedFrameSpatialForce implements FixedFrameSpatialForceBasics, G
     * @param expressedInFrame in which reference frame the spatial force is expressed.
     * @param registry         the registry to register child variables to.
     */
-   public YoFixedFrameSpatialForce(String namePrefix, String nameSuffix, ReferenceFrame expressedInFrame, YoVariableRegistry registry)
+   public YoFixedFrameSpatialForce(String namePrefix, String nameSuffix, ReferenceFrame expressedInFrame, YoRegistry registry)
    {
       this(new YoFixedFrameSpatialVector(namePrefix, nameSuffix, expressedInFrame, registry));
    }

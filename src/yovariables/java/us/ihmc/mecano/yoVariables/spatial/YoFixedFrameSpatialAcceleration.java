@@ -11,8 +11,8 @@ import us.ihmc.mecano.spatial.interfaces.FixedFrameSpatialAccelerationBasics;
 import us.ihmc.mecano.spatial.interfaces.SpatialAccelerationReadOnly;
 import us.ihmc.mecano.spatial.interfaces.SpatialVectorReadOnly;
 import us.ihmc.mecano.tools.MecanoIOTools;
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
-import us.ihmc.yoVariables.variable.YoFrameVector3D;
+import us.ihmc.yoVariables.euclid.referenceFrame.YoFrameVector3D;
+import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoVariable;
 
 /**
@@ -84,7 +84,7 @@ public class YoFixedFrameSpatialAcceleration implements FixedFrameSpatialAcceler
     * @param registry         the registry to register child variables to.
     */
    public YoFixedFrameSpatialAcceleration(String namePrefix, ReferenceFrame bodyFrame, ReferenceFrame baseFrame, ReferenceFrame expressedInFrame,
-                                          YoVariableRegistry registry)
+                                          YoRegistry registry)
    {
       this(bodyFrame, baseFrame, new YoFixedFrameSpatialVector(namePrefix, expressedInFrame, registry));
    }
@@ -104,7 +104,7 @@ public class YoFixedFrameSpatialAcceleration implements FixedFrameSpatialAcceler
     * @param registry         the registry to register child variables to.
     */
    public YoFixedFrameSpatialAcceleration(String namePrefix, String nameSuffix, ReferenceFrame bodyFrame, ReferenceFrame baseFrame,
-                                          ReferenceFrame expressedInFrame, YoVariableRegistry registry)
+                                          ReferenceFrame expressedInFrame, YoRegistry registry)
    {
       this(bodyFrame, baseFrame, new YoFixedFrameSpatialVector(namePrefix, nameSuffix, expressedInFrame, registry));
    }

@@ -9,7 +9,7 @@ import us.ihmc.euclid.tuple3D.interfaces.Vector3DReadOnly;
 import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.mecano.multiBodySystem.interfaces.PrismaticJointBasics;
 import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.registry.YoRegistry;
 
 /**
  * A {@code YoPrismaticJoint} is a joint has 1 degree of freedom of translation and has its state
@@ -33,7 +33,7 @@ public class YoPrismaticJoint extends YoOneDoFJoint implements PrismaticJointBas
     * @param jointAxis   the axis along which this joint can translate. Not modified.
     * @param registry    the registry to register child variables to.
     */
-   public YoPrismaticJoint(String name, RigidBodyBasics predecessor, Tuple3DReadOnly jointOffset, Vector3DReadOnly jointAxis, YoVariableRegistry registry)
+   public YoPrismaticJoint(String name, RigidBodyBasics predecessor, Tuple3DReadOnly jointOffset, Vector3DReadOnly jointAxis, YoRegistry registry)
    {
       this(name, predecessor, new RigidBodyTransform(new Quaternion(), jointOffset), jointAxis, registry);
    }
@@ -48,7 +48,7 @@ public class YoPrismaticJoint extends YoOneDoFJoint implements PrismaticJointBas
     * @param registry          the registry to register child variables to.
     */
    public YoPrismaticJoint(String name, RigidBodyBasics predecessor, RigidBodyTransform transformToParent, Vector3DReadOnly jointAxis,
-                           YoVariableRegistry registry)
+                           YoRegistry registry)
    {
       super(name, predecessor, new Vector3D(), jointAxis, transformToParent, registry);
       this.jointAxis = new FrameVector3D(beforeJointFrame, jointAxis);

@@ -18,9 +18,9 @@ import us.ihmc.mecano.spatial.interfaces.TwistReadOnly;
 import us.ihmc.mecano.spatial.interfaces.WrenchReadOnly;
 import us.ihmc.mecano.tools.MecanoFactories;
 import us.ihmc.mecano.tools.MecanoTools;
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
-import us.ihmc.yoVariables.variable.YoFrameQuaternion;
-import us.ihmc.yoVariables.variable.YoFrameVector3D;
+import us.ihmc.yoVariables.euclid.referenceFrame.YoFrameQuaternion;
+import us.ihmc.yoVariables.euclid.referenceFrame.YoFrameVector3D;
+import us.ihmc.yoVariables.registry.YoRegistry;
 
 /**
  * A {@code YoSphericalJoint} has 3 degrees of freedom of rotation and has its state backed by
@@ -69,7 +69,7 @@ public class YoSphericalJoint extends Joint implements SphericalJointBasics
     *                    Not modified.
     * @param registry    the registry to register child variables to.
     */
-   public YoSphericalJoint(String name, RigidBodyBasics predecessor, Tuple3DReadOnly jointOffset, YoVariableRegistry registry)
+   public YoSphericalJoint(String name, RigidBodyBasics predecessor, Tuple3DReadOnly jointOffset, YoRegistry registry)
    {
       this(name, predecessor, new RigidBodyTransform(new Quaternion(), jointOffset), registry);
    }
@@ -82,7 +82,7 @@ public class YoSphericalJoint extends Joint implements SphericalJointBasics
     * @param transformToParent the transform to the frame after the parent joint. Not modified.
     * @param registry          the registry to register child variables to.
     */
-   public YoSphericalJoint(String name, RigidBodyBasics predecessor, RigidBodyTransform transformToParent, YoVariableRegistry registry)
+   public YoSphericalJoint(String name, RigidBodyBasics predecessor, RigidBodyTransform transformToParent, YoRegistry registry)
    {
       super(name, predecessor, transformToParent);
       jointOrientation = new YoFrameQuaternion(name, beforeJointFrame, registry);
