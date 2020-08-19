@@ -6,7 +6,7 @@ plugins {
 
 ihmc {
    group = "us.ihmc"
-   version = "0.7.0"
+   version = "0.7.1"
    vcsUrl = "https://github.com/ihmcrobotics/mecano"
    openSource = true
 
@@ -38,5 +38,5 @@ graphvizDependencies {
 yovariablesDependencies {
    api(ihmc.sourceSetProject("main"))
 
-   api("us.ihmc:ihmc-yovariables:0.9.0")
+   api("us.ihmc:ihmc-yovariables:0.9.1")
 }
