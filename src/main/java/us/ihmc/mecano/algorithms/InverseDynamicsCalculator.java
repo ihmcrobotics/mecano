@@ -265,7 +265,7 @@ public class InverseDynamicsCalculator
       List<JointReadOnly> childrenJoints = new ArrayList<>(parent.rigidBody.getChildrenJoints());
 
       if (childrenJoints.size() > 1)
-      {
+      { // Reorganize the joints in the children to ensure that loop closures are treated last.
          List<JointReadOnly> loopClosureAncestors = new ArrayList<>();
 
          for (int i = 0; i < childrenJoints.size();)
