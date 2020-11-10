@@ -1,12 +1,15 @@
 package us.ihmc.mecano.multiBodySystem.interfaces;
 
 import org.ejml.data.DMatrix;
+import org.ejml.data.DMatrix1Row;
+import org.ejml.dense.row.CommonOps_DDRM;
 
 import us.ihmc.euclid.referenceFrame.interfaces.FrameVector3DReadOnly;
 import us.ihmc.mecano.multiBodySystem.PrismaticJoint;
 import us.ihmc.mecano.multiBodySystem.RevoluteJoint;
 import us.ihmc.mecano.spatial.interfaces.SpatialAccelerationBasics;
 import us.ihmc.mecano.spatial.interfaces.SpatialAccelerationReadOnly;
+import us.ihmc.mecano.spatial.interfaces.SpatialVectorReadOnly;
 import us.ihmc.mecano.spatial.interfaces.TwistBasics;
 import us.ihmc.mecano.spatial.interfaces.TwistReadOnly;
 
@@ -132,6 +135,18 @@ public interface OneDoFJointReadOnly extends JointReadOnly
     * @return the upper force/torque limit for this joint.
     */
    double getEffortLimitUpper();
+
+   /** {@inheritDoc} */
+   @Override
+   default boolean getMotionSubspaceDot(DMatrix1Row matrixToPack)
+   {
+      if (!isMotionSubspaceVariable())
+         return false;
+
+      getJointBiasAcceleration().get(matrixToPack);
+      CommonOps_DDRM.scale(1.0 / getQd(), matrixToPack);
+      return true;
+   }
 
    /**
     * Gets the read-only reference to this joint unitary twist.
@@ -269,6 +284,12 @@ public interface OneDoFJointReadOnly extends JointReadOnly
    {
       accelerationToPack.setIncludingFrame(getUnitSuccessorAcceleration());
       accelerationToPack.scale(getQdd());
+      if (isMotionSubspaceVariable())
+      {
+         SpatialAccelerationReadOnly successorBiasAcceleration = getSuccessorBiasAcceleration();
+         accelerationToPack.checkReferenceFrameMatch(successorBiasAcceleration);
+         accelerationToPack.add((SpatialVectorReadOnly) successorBiasAcceleration);
+      }
    }
 
    /** {@inheritDoc} */
@@ -277,6 +298,12 @@ public interface OneDoFJointReadOnly extends JointReadOnly
    {
       accelerationToPack.setIncludingFrame(getUnitPredecessorAcceleration());
       accelerationToPack.scale(getQdd());
+      if (isMotionSubspaceVariable())
+      {
+         SpatialAccelerationReadOnly predecessorBiasAcceleration = getPredecessorBiasAcceleration();
+         accelerationToPack.checkReferenceFrameMatch(predecessorBiasAcceleration);
+         accelerationToPack.add((SpatialVectorReadOnly) predecessorBiasAcceleration);
+      }
    }
 
    /** {@inheritDoc} */
