@@ -177,7 +177,24 @@ public class ForwardDynamicsCalculator
 
    private void buildMultiBodyTree(ArticulatedBodyRecursionStep parent, Collection<? extends JointReadOnly> jointsToIgnore)
    {
-      for (JointReadOnly childJoint : parent.rigidBody.getChildrenJoints())
+      List<JointReadOnly> childrenJoints = new ArrayList<>(parent.rigidBody.getChildrenJoints());
+
+      if (childrenJoints.size() > 1)
+      { // Reorganize the joints in the children to ensure that loop closures are treated last.
+         List<JointReadOnly> loopClosureAncestors = new ArrayList<>();
+
+         for (int i = 0; i < childrenJoints.size();)
+         {
+            if (MultiBodySystemTools.doesSubtreeContainLoopClosure(childrenJoints.get(i).getSuccessor()))
+               loopClosureAncestors.add(childrenJoints.remove(i));
+            else
+               i++;
+         }
+
+         childrenJoints.addAll(loopClosureAncestors);
+      }
+
+      for (JointReadOnly childJoint : childrenJoints)
       {
          if (jointsToIgnore.contains(childJoint))
             continue;
