@@ -778,7 +778,8 @@ public class InverseDynamicsCalculator
             a = new DMatrixRMaj(SpatialVectorReadOnly.SIZE, 1);
             tau = new DMatrixRMaj(nDoFs, 1);
             jointWrenchMatrix = new DMatrixRMaj(SpatialVectorReadOnly.SIZE, 1);
-            joint.getMotionSubspace(S);
+            if (!joint.isMotionSubspaceVariable())
+               joint.getMotionSubspace(S);
          }
       }
 
@@ -807,6 +808,9 @@ public class InverseDynamicsCalculator
       {
          if (!isRoot())
          {
+            if (joint.isMotionSubspaceVariable())
+               joint.getMotionSubspace(S);
+
             rigidBodyAcceleration.setIncludingFrame(parent.rigidBodyAcceleration);
 
             TwistReadOnly bodyTwistToUse;
@@ -826,9 +830,16 @@ public class InverseDynamicsCalculator
             if (considerJointAccelerations)
             {
                int nDoFs = joint.getDegreesOfFreedom();
+
                CommonOps_DDRM.extract(allJointAccelerationMatrix, jointIndices, nDoFs, qdd);
                CommonOps_DDRM.mult(S, qdd, a);
                localJointAcceleration.setIncludingFrame(joint.getFrameAfterJoint(), joint.getFrameBeforeJoint(), joint.getFrameAfterJoint(), a);
+               if (joint.isMotionSubspaceVariable())
+               {
+                  SpatialAccelerationReadOnly jointBiasAcceleration = joint.getJointBiasAcceleration();
+                  localJointAcceleration.checkReferenceFrameMatch(jointBiasAcceleration);
+                  localJointAcceleration.add((SpatialVectorReadOnly) jointBiasAcceleration);
+               }
                localJointAcceleration.changeFrame(getBodyFixedFrame());
                localJointAcceleration.setBodyFrame(getBodyFixedFrame());
                localJointAcceleration.setBaseFrame(parent.getBodyFixedFrame());
