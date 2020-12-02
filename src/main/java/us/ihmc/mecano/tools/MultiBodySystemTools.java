@@ -1124,6 +1124,23 @@ public class MultiBodySystemTools
       return true;
    }
 
+   public static boolean doesSubtreeContainLoopClosure(RigidBodyReadOnly start)
+   {
+      for (int i = 0; i < start.getChildrenJoints().size(); i++)
+      {
+         if (start.getChildrenJoints().get(i).isLoopClosure())
+            return true;
+      }
+
+      for (int i = 0; i < start.getChildrenJoints().size(); i++)
+      {
+         if (doesSubtreeContainLoopClosure(start.getChildrenJoints().get(i).getSuccessor()))
+            return true;
+      }
+
+      return false;
+   }
+
    /**
     * Iterates through the given array and compute how many do implement the given {@code clazz}.
     *

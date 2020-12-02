@@ -9,6 +9,7 @@ import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.transform.interfaces.RigidBodyTransformReadOnly;
 import us.ihmc.mecano.exceptions.ScrewTheoryException;
 import us.ihmc.mecano.spatial.Twist;
+import us.ihmc.mecano.spatial.interfaces.TwistBasics;
 import us.ihmc.mecano.spatial.interfaces.TwistReadOnly;
 
 /**
@@ -343,7 +344,7 @@ public abstract class MovingReferenceFrame extends ReferenceFrame
     *
     * @param twistToPack the twist in which the absolute velocity of this frame is stored. Modified.
     */
-   public void getTwistOfFrame(Twist twistToPack)
+   public void getTwistOfFrame(TwistBasics twistToPack)
    {
       twistToPack.setIncludingFrame(getTwistOfFrame());
    }
@@ -362,7 +363,7 @@ public abstract class MovingReferenceFrame extends ReferenceFrame
     * @param base                the frame with respect to which the twist is to be computed.
     * @param relativeTwistToPack the twist of {@code this} with respect to {@code base}. Modified.
     */
-   public void getTwistRelativeToOther(ReferenceFrame base, Twist relativeTwistToPack)
+   public void getTwistRelativeToOther(ReferenceFrame base, TwistBasics relativeTwistToPack)
    {
       verifySameRoots(base);
 
