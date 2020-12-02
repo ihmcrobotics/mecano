@@ -18,9 +18,9 @@ mainDependencies {
    api("org.ejml:ejml-core:0.39")
    api("org.ejml:ejml-ddense:0.39")
 
-   api("us.ihmc:euclid:0.15.1")
-   api("us.ihmc:euclid-frame:0.15.1")
-   api("us.ihmc:euclid-geometry:0.15.1")
+   api("us.ihmc:euclid:0.15.2")
+   api("us.ihmc:euclid-frame:0.15.2")
+   api("us.ihmc:euclid-geometry:0.15.2")
 }
 
 testDependencies {
