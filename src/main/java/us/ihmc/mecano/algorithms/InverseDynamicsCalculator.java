@@ -965,11 +965,6 @@ public class InverseDynamicsCalculator
        */
       private final Wrench jointWrench;
       /**
-       * <tt>S</tt> is the 6-by-N matrix representing the motion subspace of the parent joint, where N is
-       * the number of DoFs of the joint.
-       */
-      private final DMatrixRMaj S;
-      /**
        * Computed joint effort.
        */
       private final DMatrixRMaj tau;
@@ -1000,9 +995,7 @@ public class InverseDynamicsCalculator
          int nDoFs = joint.getDegreesOfFreedom();
 
          jointWrench = new Wrench();
-         S = new DMatrixRMaj(SpatialVectorReadOnly.SIZE, nDoFs);
          tau = new DMatrixRMaj(nDoFs, 1);
-         joint.getMotionSubspace(S);
       }
 
       @Override
