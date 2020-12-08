@@ -970,6 +970,7 @@ public class MultiBodySystemTools
     * WARNING: This method generates garbage.
     * </p>
     *
+    * @param <T>    the joint type to be filtered.
     * @param source the original collection of joints to filter. Not modified.
     * @param clazz  the class that the filtered joints have to implement.
     * @return the filtered joints.
@@ -988,6 +989,7 @@ public class MultiBodySystemTools
     * The filtered joints are added to the end of {@code destination} using {@link List#add(Object)}.
     * </p>
     *
+    * @param <T>         the joint type to be filtered.
     * @param source      the original collection of joints to filter. Not modified.
     * @param destination the collection where to store the filtered joints. Modified.
     * @param clazz       the class that the filtered joints have to implement.
@@ -1019,6 +1021,7 @@ public class MultiBodySystemTools
     * WARNING: This method generates garbage.
     * </p>
     *
+    * @param <T>    the joint type to be filtered.
     * @param source the original array of joints to filter. Not modified.
     * @param clazz  the class that the filtered joints have to implement.
     * @return the array containing the filtered joints.
@@ -1039,6 +1042,7 @@ public class MultiBodySystemTools
     * overwriting any element previously stored in the array.
     * </p>
     *
+    * @param <T>         the joint type to be filtered.
     * @param source      the original array of joints to filter. Not modified.
     * @param destination the array where to store the filtered joints. Modified.
     * @param clazz       the class that the filtered joints have to implement.
@@ -1124,6 +1128,15 @@ public class MultiBodySystemTools
       return true;
    }
 
+   /**
+    * Tests whether the subtree starting at the given rigid-body contains at least one loop closure or
+    * not.
+    * 
+    * @param start the rigid-body from which the subtree to test starts.
+    * @return {@code true} if the subtree contains one or more loop closure, {@code false} if there is
+    *         no loop closure.
+    * @see JointReadOnly#isLoopClosure()
+    */
    public static boolean doesSubtreeContainLoopClosure(RigidBodyReadOnly start)
    {
       for (int i = 0; i < start.getChildrenJoints().size(); i++)
@@ -1144,6 +1157,7 @@ public class MultiBodySystemTools
    /**
     * Iterates through the given array and compute how many do implement the given {@code clazz}.
     *
+    * @param <T>    the joint type to be filtered.
     * @param clazz  the query for the joint type.
     * @param joints the array containing the joints to be tested.
     * @return the number of joints in the array that implement the given class.

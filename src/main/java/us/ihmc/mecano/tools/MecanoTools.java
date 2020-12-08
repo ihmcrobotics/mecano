@@ -754,6 +754,7 @@ public class MecanoTools
    /**
     * Attempts to cast the given joint to the type {@code T}.
     *
+    * @param <T>           the desired joint type.
     * @param jointToCast   the joint to be casted to the type {@code T}. Not modified.
     * @param classToCastTo the class the joint is susceptible to be an instance of.
     * @return the joint casted to the type {@code T}.

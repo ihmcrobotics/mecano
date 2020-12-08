@@ -131,6 +131,7 @@ public class MultiBodySystemFactories
     * independent multi-body system but its root is following the original multi-body system.
     * </p>
     *
+    * @param <T> the joint type to be cloned.
     * @param originalJoints the kinematic chain to clone. Not modified.
     * @param clazz          class used to filter the cloned joints that are to be returned.
     * @return the clone kinematic chain.
@@ -156,6 +157,7 @@ public class MultiBodySystemFactories
     * independent multi-body system but its root is following the original multi-body system.
     * </p>
     *
+    * @param <T> the joint type to be cloned.
     * @param originalJoints the kinematic chain to clone. Not modified.
     * @param clazz          class used to filter the cloned joints that are to be returned.
     * @param cloneSuffix    suffix to append to the cloned joints and rigid-bodies.
