@@ -778,7 +778,8 @@ public class InverseDynamicsCalculator
             a = new DMatrixRMaj(SpatialVectorReadOnly.SIZE, 1);
             tau = new DMatrixRMaj(nDoFs, 1);
             jointWrenchMatrix = new DMatrixRMaj(SpatialVectorReadOnly.SIZE, 1);
-            joint.getMotionSubspace(S);
+            if (!joint.isMotionSubspaceVariable())
+               joint.getMotionSubspace(S);
          }
       }
 
@@ -807,6 +808,9 @@ public class InverseDynamicsCalculator
       {
          if (!isRoot())
          {
+            if (joint.isMotionSubspaceVariable())
+               joint.getMotionSubspace(S);
+
             rigidBodyAcceleration.setIncludingFrame(parent.rigidBodyAcceleration);
 
             TwistReadOnly bodyTwistToUse;
@@ -826,9 +830,16 @@ public class InverseDynamicsCalculator
             if (considerJointAccelerations)
             {
                int nDoFs = joint.getDegreesOfFreedom();
+
                CommonOps_DDRM.extract(allJointAccelerationMatrix, jointIndices, nDoFs, qdd);
                CommonOps_DDRM.mult(S, qdd, a);
                localJointAcceleration.setIncludingFrame(joint.getFrameAfterJoint(), joint.getFrameBeforeJoint(), joint.getFrameAfterJoint(), a);
+               if (joint.isMotionSubspaceVariable())
+               {
+                  SpatialAccelerationReadOnly jointBiasAcceleration = joint.getJointBiasAcceleration();
+                  localJointAcceleration.checkReferenceFrameMatch(jointBiasAcceleration);
+                  localJointAcceleration.add((SpatialVectorReadOnly) jointBiasAcceleration);
+               }
                localJointAcceleration.changeFrame(getBodyFixedFrame());
                localJointAcceleration.setBodyFrame(getBodyFixedFrame());
                localJointAcceleration.setBaseFrame(parent.getBodyFixedFrame());
@@ -954,11 +965,6 @@ public class InverseDynamicsCalculator
        */
       private final Wrench jointWrench;
       /**
-       * <tt>S</tt> is the 6-by-N matrix representing the motion subspace of the parent joint, where N is
-       * the number of DoFs of the joint.
-       */
-      private final DMatrixRMaj S;
-      /**
        * Computed joint effort.
        */
       private final DMatrixRMaj tau;
@@ -989,9 +995,7 @@ public class InverseDynamicsCalculator
          int nDoFs = joint.getDegreesOfFreedom();
 
          jointWrench = new Wrench();
-         S = new DMatrixRMaj(SpatialVectorReadOnly.SIZE, nDoFs);
          tau = new DMatrixRMaj(nDoFs, 1);
-         joint.getMotionSubspace(S);
       }
 
       @Override

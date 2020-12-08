@@ -336,7 +336,7 @@ public class ForwardDynamicsCalculator
     * Computes the joint accelerations resulting from the joint efforts.
     * <p>
     * The desired joint efforts are extracted from the joint state. To explicitly specify the joint
-    * efforts to use, see {@link #compute(DenseMatrix64F)}.
+    * efforts to use, see {@link #compute(DMatrix)}.
     * </p>
     */
    public void compute()
@@ -808,7 +808,8 @@ public class ForwardDynamicsCalculator
             a = new DMatrixRMaj(SpatialVectorReadOnly.SIZE, 1);
             inverseSolver = nDoFs == 6 ? LinearSolverFactory_DDRM.symmPosDef(6) : null;
             transformToParentJointFrame = new RigidBodyTransform();
-            getJoint().getMotionSubspace(S);
+            if (!getJoint().isMotionSubspaceVariable())
+               getJoint().getMotionSubspace(S);
          }
       }
 
@@ -857,6 +858,8 @@ public class ForwardDynamicsCalculator
 
             biasAcceleration.setToZero(frameAfterJoint, input.getInertialFrame(), frameBeforeJoint);
             biasAcceleration.changeFrame(frameAfterJoint, getJoint().getJointTwist(), frameAfterJoint.getTwistOfFrame());
+            if (getJoint().isMotionSubspaceVariable())
+               biasAcceleration.add((SpatialVectorReadOnly) getJoint().getJointBiasAcceleration());
             biasAcceleration.get(c);
          }
 
@@ -901,6 +904,8 @@ public class ForwardDynamicsCalculator
          }
 
          // Computing intermediate variables used in later calculation
+         if (getJoint().isMotionSubspaceVariable())
+            getJoint().getMotionSubspace(S);
          articulatedInertia.get(IA);
          CommonOps_DDRM.mult(IA, S, U);
          CommonOps_DDRM.multTransA(S, U, D);

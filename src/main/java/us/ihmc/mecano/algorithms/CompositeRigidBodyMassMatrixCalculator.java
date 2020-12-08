@@ -468,10 +468,15 @@ public class CompositeRigidBodyMassMatrixCalculator
             compositeInertia = new SpatialInertia();
             unitMomenta = IntStream.range(0, nDoFs).mapToObj(i -> new Momentum()).toArray(Momentum[]::new);
             unitTwists = new Twist[nDoFs];
+
             for (int i = 0; i < nDoFs; i++)
             {
-               unitTwists[i] = new Twist(getJoint().getUnitTwists().get(i));
-               unitTwists[i].changeFrame(getFrameAfterJoint());
+               unitTwists[i] = new Twist();
+               if (!getJoint().isMotionSubspaceVariable())
+               {
+                  unitTwists[i].setIncludingFrame(getJoint().getUnitTwists().get(i));
+                  unitTwists[i].changeFrame(getFrameAfterJoint());
+               }
             }
             coriolisBodyAcceleration = new SpatialAcceleration();
          }
@@ -515,6 +520,15 @@ public class CompositeRigidBodyMassMatrixCalculator
             childInertia.setIncludingFrame(children.get(i).compositeInertia);
             childInertia.changeFrame(getFrameAfterJoint());
             compositeInertia.add(childInertia);
+         }
+
+         if (getJoint().isMotionSubspaceVariable())
+         {
+            for (int i = 0; i < getNumberOfDoFs(); i++)
+            {
+               unitTwists[i].setIncludingFrame(getJoint().getUnitTwists().get(i));
+               unitTwists[i].changeFrame(getFrameAfterJoint());
+            }
          }
 
          for (int i = 0; i < getNumberOfDoFs(); i++)
