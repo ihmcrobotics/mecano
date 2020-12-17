@@ -29,9 +29,7 @@ import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointReadOnly;
 import us.ihmc.mecano.multiBodySystem.interfaces.PlanarJointBasics;
 import us.ihmc.mecano.multiBodySystem.interfaces.PlanarJointReadOnly;
 import us.ihmc.mecano.multiBodySystem.interfaces.PrismaticJointBasics;
-import us.ihmc.mecano.multiBodySystem.interfaces.PrismaticJointReadOnly;
 import us.ihmc.mecano.multiBodySystem.interfaces.RevoluteJointBasics;
-import us.ihmc.mecano.multiBodySystem.interfaces.RevoluteJointReadOnly;
 import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
 import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyReadOnly;
 import us.ihmc.mecano.multiBodySystem.interfaces.SixDoFJointBasics;
@@ -131,7 +129,7 @@ public class MultiBodySystemFactories
     * independent multi-body system but its root is following the original multi-body system.
     * </p>
     *
-    * @param <T> the joint type to be cloned.
+    * @param <T>            the joint type to be cloned.
     * @param originalJoints the kinematic chain to clone. Not modified.
     * @param clazz          class used to filter the cloned joints that are to be returned.
     * @return the clone kinematic chain.
@@ -157,7 +155,7 @@ public class MultiBodySystemFactories
     * independent multi-body system but its root is following the original multi-body system.
     * </p>
     *
-    * @param <T> the joint type to be cloned.
+    * @param <T>            the joint type to be cloned.
     * @param originalJoints the kinematic chain to clone. Not modified.
     * @param clazz          class used to filter the cloned joints that are to be returned.
     * @param cloneSuffix    suffix to append to the cloned joints and rigid-bodies.
@@ -242,6 +240,39 @@ public class MultiBodySystemFactories
     */
    public static JointBasics[] cloneKinematicChain(JointReadOnly[] originalJoints, String cloneSuffix, ReferenceFrame chainRootFrame)
    {
+      return cloneKinematicChain(originalJoints, cloneSuffix, chainRootFrame, DEFAULT_RIGID_BODY_BUILDER, DEFAULT_JOINT_BUILDER);
+   }
+
+   /**
+    * Performs a deep copy of the given {@code originalJoints}.
+    * <p>
+    * The {@code originalJoints} must represent a continuous kinematic chain. The joints must be stored
+    * in order starting from the joint that is the closest to the root, to end with the joint the
+    * closest to an end-effector.
+    * </p>
+    * <p>
+    * The clone of the kinematic chain has its own root body which reference frame is child of the
+    * frame after the parent joint of {@code originalJoints[0]} or {@code chainRootFrame} if provided.
+    * When {@code chainRootFrame} is not provided, i.e. equal to {@code null}, the clone is an
+    * independent multi-body system but its root is following the original multi-body system.
+    * </p>
+    *
+    * @param originalJoints   the kinematic chain to clone. Not modified.
+    * @param cloneSuffix      suffix to append to the cloned joints and rigid-bodies.
+    * @param chainRootFrame   the parent frame of the rigid-body of the clone kinematic chain. When
+    *                         {@code null}, the frame is equal to frame after the parent joint of
+    *                         {@code originalJoints[0]}.
+    * @param rigidBodyBuilder the builder to use for creating rigid-bodies. If {@code null},
+    *                         {@link #DEFAULT_RIGID_BODY_BUILDER} is used.
+    * @param jointBuilder     the builder to use for creating joints. If {@code null},
+    *                         {@link #DEFAULT_JOINT_BUILDER} is used.
+    * @return the clone kinematic chain.
+    * @throws UnsupportedOperationException if {@code originalJoints} contains one or more loop closure
+    *                                       joints.
+    */
+   public static JointBasics[] cloneKinematicChain(JointReadOnly[] originalJoints, String cloneSuffix, ReferenceFrame chainRootFrame,
+                                                   RigidBodyBuilder rigidBodyBuilder, JointBuilder jointBuilder)
+   {
       if (!MultiBodySystemTools.areJointsInContinuousOrder(originalJoints))
          throw new IllegalArgumentException("The given joints do not represent a continuous kinematic chain or are out of order: "
                + Arrays.toString(originalJoints));
@@ -251,7 +282,7 @@ public class MultiBodySystemFactories
       RigidBodyReadOnly originalAncestor = originalJoints[0].getPredecessor();
       RigidBodyBasics cloneAncestor;
       if (originalAncestor.isRootBody())
-         cloneAncestor = cloneRigidBody(originalAncestor, chainRootFrame, cloneSuffix, null, null);
+         cloneAncestor = rigidBodyBuilder.cloneRigidBody(originalAncestor, chainRootFrame, cloneSuffix, null);
       else if (chainRootFrame != null)
          cloneAncestor = new RigidBody(originalAncestor.getName() + cloneSuffix, chainRootFrame);
       else
@@ -271,11 +302,11 @@ public class MultiBodySystemFactories
          RigidBodyBasics clonePredecessor = originalToCloneBodyMap.get(originalPredecessor);
 
          // Clone the joint
-         JointBasics cloneJoint = cloneJoint(originalJoint, cloneSuffix, clonePredecessor, false, null);
+         JointBasics cloneJoint = jointBuilder.cloneJoint(originalJoint, cloneSuffix, clonePredecessor);
 
          // Clone the successor
          RigidBodyReadOnly originalSuccessor = originalJoint.getSuccessor();
-         RigidBodyBasics cloneSuccessor = cloneRigidBody(originalSuccessor, null, cloneSuffix, cloneJoint, null);
+         RigidBodyBasics cloneSuccessor = rigidBodyBuilder.cloneRigidBody(originalSuccessor, null, cloneSuffix, cloneJoint);
          originalToCloneBodyMap.put(originalSuccessor, cloneSuccessor);
 
          cloneJoints[jointIndex] = cloneJoint;
@@ -327,8 +358,10 @@ public class MultiBodySystemFactories
    {
       if (!originalRootBody.isRootBody())
          throw new IllegalArgumentException("The given rigid-body is not the root-body of its multi-body system: " + originalRootBody.getName());
+      if (rigidBodyBuilder == null)
+         rigidBodyBuilder = DEFAULT_RIGID_BODY_BUILDER;
 
-      RigidBodyBasics cloneSubtreeStartBody = cloneRigidBody(originalRootBody, cloneStationaryFrame, cloneSuffix, null, rigidBodyBuilder);
+      RigidBodyBasics cloneSubtreeStartBody = rigidBodyBuilder.cloneRigidBody(originalRootBody, cloneStationaryFrame, cloneSuffix, null);
       cloneSubtree(originalRootBody, cloneSubtreeStartBody, cloneSuffix, rigidBodyBuilder, jointBuilder);
       return cloneSubtreeStartBody;
    }
@@ -404,6 +437,11 @@ public class MultiBodySystemFactories
    private static void cloneSubtree(RigidBodyReadOnly originalStart, RigidBodyBasics cloneStart, String cloneSuffix, RigidBodyBuilder rigidBodyBuilder,
                                     JointBuilder jointBuilder)
    {
+      if (rigidBodyBuilder == null)
+         rigidBodyBuilder = DEFAULT_RIGID_BODY_BUILDER;
+      if (jointBuilder == null)
+         jointBuilder = DEFAULT_JOINT_BUILDER;
+
       Map<RigidBodyReadOnly, RigidBodyBasics> originalToCloneBodyMap = new HashMap<>();
       originalToCloneBodyMap.put(originalStart, cloneStart);
 
@@ -417,7 +455,7 @@ public class MultiBodySystemFactories
          RigidBodyBasics clonePredecessor = originalToCloneBodyMap.get(originalPredecessor);
 
          // Clone the joint
-         JointBasics cloneJoint = cloneJoint(originalJoint, cloneSuffix, clonePredecessor, originalStart.isRootBody(), jointBuilder);
+         JointBasics cloneJoint = jointBuilder.cloneJoint(originalJoint, cloneSuffix, clonePredecessor);
 
          if (originalJoint.isLoopClosure())
          { // We rely on the iterator to stop at the loop closure joint.
@@ -429,7 +467,7 @@ public class MultiBodySystemFactories
 
          // Clone the successor
          RigidBodyReadOnly originalSuccessor = originalJoint.getSuccessor();
-         RigidBodyBasics cloneSuccessor = cloneRigidBody(originalSuccessor, null, cloneSuffix, cloneJoint, rigidBodyBuilder);
+         RigidBodyBasics cloneSuccessor = rigidBodyBuilder.cloneRigidBody(originalSuccessor, null, cloneSuffix, cloneJoint);
          originalToCloneBodyMap.put(originalSuccessor, cloneSuccessor);
       }
 
@@ -445,122 +483,6 @@ public class MultiBodySystemFactories
       }
    }
 
-   private static JointBasics cloneJoint(JointReadOnly original, String cloneSuffix, RigidBodyBasics clonePredecessor, boolean testIfPredecessorIsRoot,
-                                         JointBuilder jointBuilder)
-   {
-      if (jointBuilder == null)
-         jointBuilder = DEFAULT_JOINT_BUILDER;
-
-      if (original instanceof OneDoFJointReadOnly)
-         return cloneOneDoFJoint((OneDoFJointReadOnly) original, cloneSuffix, clonePredecessor, jointBuilder);
-      else if (original instanceof SixDoFJointReadOnly)
-         return cloneSixDoFJoint((SixDoFJointReadOnly) original, cloneSuffix, clonePredecessor, jointBuilder);
-      else if (original instanceof PlanarJointReadOnly)
-         return clonePlanarJoint((PlanarJointReadOnly) original, cloneSuffix, clonePredecessor, jointBuilder);
-      else if (original instanceof SphericalJointReadOnly)
-         return cloneSphericalJoint((SphericalJointReadOnly) original, cloneSuffix, clonePredecessor, jointBuilder);
-      else if (original instanceof FixedJointReadOnly)
-         return cloneFixedJoint((FixedJointReadOnly) original, cloneSuffix, clonePredecessor, jointBuilder);
-      else
-         throw new UnsupportedOperationException("Unhandled joint type: " + original.getClass().getName());
-   }
-
-   private static SixDoFJointBasics cloneSixDoFJoint(SixDoFJointReadOnly original, String cloneSuffix, RigidBodyBasics clonePredecessor,
-                                                     JointBuilder jointBuilder)
-   {
-      String jointNameOriginal = original.getName();
-      RigidBodyTransform jointTransform = getCloneJointTransformToParent(original);
-      return jointBuilder.buildSixDoFJoint(jointNameOriginal + cloneSuffix, clonePredecessor, jointTransform);
-   }
-
-   private static PlanarJoint clonePlanarJoint(PlanarJointReadOnly original, String cloneSuffix, RigidBodyBasics clonePredecessor, JointBuilder jointBuilder)
-   {
-      String jointNameOriginal = original.getName();
-      RigidBodyTransform jointTransform = getCloneJointTransformToParent(original);
-      return new PlanarJoint(jointNameOriginal + cloneSuffix, clonePredecessor, jointTransform);
-   }
-
-   private static OneDoFJointBasics cloneOneDoFJoint(OneDoFJointReadOnly original, String cloneSuffix, RigidBodyBasics clonePredecessor,
-                                                     JointBuilder jointBuilder)
-   {
-      String jointNameOriginal = original.getName();
-      RigidBodyTransform jointTransform = getCloneJointTransformToParent(original);
-
-      OneDoFJointBasics clone;
-
-      if (original instanceof RevoluteJointReadOnly)
-         clone = jointBuilder.buildRevoluteJoint(jointNameOriginal + cloneSuffix, clonePredecessor, jointTransform, original.getJointAxis());
-      else if (original instanceof PrismaticJointReadOnly)
-         clone = jointBuilder.buildPrismaticJoint(jointNameOriginal + cloneSuffix, clonePredecessor, jointTransform, original.getJointAxis());
-      else
-         throw new RuntimeException("Unhandled type of " + OneDoFJoint.class.getSimpleName() + ": " + original.getClass().getSimpleName());
-
-      clone.setJointLimits(original.getJointLimitLower(), original.getJointLimitUpper());
-      clone.setVelocityLimits(original.getVelocityLimitLower(), original.getVelocityLimitUpper());
-      clone.setEffortLimits(original.getEffortLimitLower(), original.getEffortLimitUpper());
-
-      return clone;
-   }
-
-   private static SphericalJointBasics cloneSphericalJoint(SphericalJointReadOnly original, String cloneSuffix, RigidBodyBasics clonePredecessor,
-                                                           JointBuilder jointBuilder)
-   {
-      String jointNameOriginal = original.getName();
-      RigidBodyTransform jointTransform = getCloneJointTransformToParent(original);
-      return jointBuilder.buildSphericalJoint(jointNameOriginal + cloneSuffix, clonePredecessor, jointTransform);
-   }
-
-   private static FixedJointBasics cloneFixedJoint(FixedJointReadOnly original, String cloneSuffix, RigidBodyBasics clonePredecessor, JointBuilder jointBuilder)
-   {
-      String jointNameOriginal = original.getName();
-      RigidBodyTransform jointTransform = getCloneJointTransformToParent(original);
-      return jointBuilder.buildFixedJoint(jointNameOriginal + cloneSuffix, clonePredecessor, jointTransform);
-   }
-
-   private static RigidBodyTransform getCloneJointTransformToParent(JointReadOnly original)
-   {
-      if (original.getFrameBeforeJoint() == original.getPredecessor().getBodyFixedFrame())
-         return null;
-      else
-         return original.getFrameBeforeJoint().getTransformToParent();
-   }
-
-   private static RigidBodyBasics cloneRigidBody(RigidBodyReadOnly original, ReferenceFrame cloneStationaryFrame, String cloneSuffix,
-                                                 JointBasics parentJointOfClone, RigidBodyBuilder rigidBodyBuilder)
-   {
-      if (original.isRootBody() && parentJointOfClone != null)
-         throw new IllegalArgumentException("Inconsistent set of arguments. If the original body is the root body, the parent joint should be null.");
-
-      if (rigidBodyBuilder == null)
-         rigidBodyBuilder = DEFAULT_RIGID_BODY_BUILDER;
-
-      String nameOriginal = original.getName();
-
-      if (parentJointOfClone == null)
-      {
-         /*
-          * Regardless of whether the original body is the root body or not, we create the clone as the root
-          * body of its own multi-body system. This allows to keep the clone subtree detached from the
-          * original one but still ensure that the clone follows in space the pose of the original body.
-          */
-         MovingReferenceFrame originalBodyFixedFrame = original.getBodyFixedFrame();
-         if (cloneStationaryFrame == null)
-            cloneStationaryFrame = originalBodyFixedFrame;
-         return rigidBodyBuilder.buildRoot(nameOriginal + cloneSuffix, originalBodyFixedFrame.getTransformToParent(), cloneStationaryFrame);
-      }
-      else
-      {
-         SpatialInertiaReadOnly originalInertia = original.getInertia();
-
-         double mass = originalInertia.getMass();
-         Matrix3DReadOnly momentOfInertia = originalInertia.getMomentOfInertia();
-         RigidBodyTransform inertiaPose = new RigidBodyTransform(original.getBodyFixedFrame().getTransformToParent());
-         RigidBodyBasics clone = rigidBodyBuilder.build(nameOriginal + cloneSuffix, parentJointOfClone, momentOfInertia, mass, inertiaPose);
-         clone.getInertia().getCenterOfMassOffset().set((Tuple3DReadOnly) originalInertia.getCenterOfMassOffset());
-         return clone;
-      }
-   }
-
    /**
     * Interface for creating custom joints.
     * <p>
@@ -573,6 +495,29 @@ public class MultiBodySystemFactories
     */
    public static interface JointBuilder
    {
+      default JointBasics buildJoint(Class<? extends JointReadOnly> jointType, String name, RigidBodyBasics predecessor, RigidBodyTransform transformToParent)
+      {
+         if (SixDoFJointReadOnly.class.isAssignableFrom(jointType))
+            return buildSixDoFJoint(name, predecessor, transformToParent);
+         if (PlanarJointReadOnly.class.isAssignableFrom(jointType))
+            return buildPlanarJoint(name, predecessor, transformToParent);
+         if (SphericalJointReadOnly.class.isAssignableFrom(jointType))
+            return buildSphericalJoint(name, predecessor, transformToParent);
+         if (FixedJointReadOnly.class.isAssignableFrom(jointType))
+            return buildFixedJoint(name, predecessor, transformToParent);
+         return null;
+      }
+
+      default OneDoFJointBasics buildOneDoFJoint(Class<? extends OneDoFJointReadOnly> jointType, String name, RigidBodyBasics predecessor,
+                                                 RigidBodyTransform transformToParent, Vector3DReadOnly jointAxis)
+      {
+         if (RevoluteJointBasics.class.isAssignableFrom(jointType))
+            return buildRevoluteJoint(name, predecessor, transformToParent, jointAxis);
+         if (PrismaticJointBasics.class.isAssignableFrom(jointType))
+            return buildPrismaticJoint(name, predecessor, transformToParent, jointAxis);
+         return null;
+      }
+
       /**
        * Builds a new implementation of {@code SixDoFJointBasics}.
        *
@@ -653,6 +598,51 @@ public class MultiBodySystemFactories
       {
          return new FixedJoint(name, predecessor, transformToParent);
       }
+
+      default JointBasics cloneJoint(JointReadOnly original, String cloneSuffix, RigidBodyBasics clonePredecessor)
+      {
+         if (original instanceof OneDoFJointReadOnly)
+         {
+            return cloneOneDoFJoint((OneDoFJointReadOnly) original, cloneSuffix, clonePredecessor);
+         }
+         else
+         {
+            String jointNameOriginal = original.getName();
+            RigidBodyTransform jointTransform = cloneJointTransformToParent(original);
+            JointBasics clone = buildJoint(original.getClass(), jointNameOriginal + cloneSuffix, clonePredecessor, jointTransform);
+            if (clone == null)
+               throw new UnsupportedOperationException("Unhandled joint type: " + original.getClass().getName());
+            return clone;
+         }
+      }
+
+      default OneDoFJointBasics cloneOneDoFJoint(OneDoFJointReadOnly original, String cloneSuffix, RigidBodyBasics clonePredecessor)
+      {
+         String jointNameOriginal = original.getName();
+         RigidBodyTransform jointTransform = cloneJointTransformToParent(original);
+
+         OneDoFJointBasics clone = buildOneDoFJoint(original.getClass(),
+                                                    jointNameOriginal + cloneSuffix,
+                                                    clonePredecessor,
+                                                    jointTransform,
+                                                    original.getJointAxis());
+         if (clone == null)
+            throw new RuntimeException("Unhandled type of " + OneDoFJoint.class.getSimpleName() + ": " + original.getClass().getSimpleName());
+
+         clone.setJointLimits(original.getJointLimitLower(), original.getJointLimitUpper());
+         clone.setVelocityLimits(original.getVelocityLimitLower(), original.getVelocityLimitUpper());
+         clone.setEffortLimits(original.getEffortLimitLower(), original.getEffortLimitUpper());
+
+         return clone;
+      }
+
+      default RigidBodyTransform cloneJointTransformToParent(JointReadOnly original)
+      {
+         if (original.getFrameBeforeJoint() == original.getPredecessor().getBodyFixedFrame())
+            return null;
+         else
+            return original.getFrameBeforeJoint().getTransformToParent();
+      }
    }
 
    /**
@@ -701,6 +691,39 @@ public class MultiBodySystemFactories
       default RigidBodyBasics build(String bodyName, JointBasics parentJoint, Matrix3DReadOnly momentOfInertia, double mass, RigidBodyTransform inertiaPose)
       {
          return new RigidBody(bodyName, parentJoint, momentOfInertia, mass, inertiaPose);
+      }
+
+      default RigidBodyBasics cloneRigidBody(RigidBodyReadOnly original, ReferenceFrame cloneStationaryFrame, String cloneSuffix,
+                                             JointBasics parentJointOfClone)
+      {
+         if (original.isRootBody() && parentJointOfClone != null)
+            throw new IllegalArgumentException("Inconsistent set of arguments. If the original body is the root body, the parent joint should be null.");
+
+         String nameOriginal = original.getName();
+
+         if (parentJointOfClone == null)
+         {
+            /*
+             * Regardless of whether the original body is the root body or not, we create the clone as the root
+             * body of its own multi-body system. This allows to keep the clone subtree detached from the
+             * original one but still ensure that the clone follows in space the pose of the original body.
+             */
+            MovingReferenceFrame originalBodyFixedFrame = original.getBodyFixedFrame();
+            if (cloneStationaryFrame == null)
+               cloneStationaryFrame = originalBodyFixedFrame;
+            return buildRoot(nameOriginal + cloneSuffix, originalBodyFixedFrame.getTransformToParent(), cloneStationaryFrame);
+         }
+         else
+         {
+            SpatialInertiaReadOnly originalInertia = original.getInertia();
+
+            double mass = originalInertia.getMass();
+            Matrix3DReadOnly momentOfInertia = originalInertia.getMomentOfInertia();
+            RigidBodyTransform inertiaPose = new RigidBodyTransform(original.getBodyFixedFrame().getTransformToParent());
+            RigidBodyBasics clone = build(nameOriginal + cloneSuffix, parentJointOfClone, momentOfInertia, mass, inertiaPose);
+            clone.getInertia().getCenterOfMassOffset().set((Tuple3DReadOnly) originalInertia.getCenterOfMassOffset());
+            return clone;
+         }
       }
    }
 }
