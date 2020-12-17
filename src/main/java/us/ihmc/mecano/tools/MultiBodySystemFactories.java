@@ -495,6 +495,15 @@ public class MultiBodySystemFactories
     */
    public static interface JointBuilder
    {
+      /**
+       * Creates a new joint.
+       * 
+       * @param jointType         the type of the joint to be build.
+       * @param name              the joint name.
+       * @param predecessor       the predecessor of the joint.
+       * @param transformToParent the transform to the frame after the parent joint.
+       * @return the new joint.
+       */
       default JointBasics buildJoint(Class<? extends JointReadOnly> jointType, String name, RigidBodyBasics predecessor, RigidBodyTransform transformToParent)
       {
          if (SixDoFJointReadOnly.class.isAssignableFrom(jointType))
@@ -508,6 +517,16 @@ public class MultiBodySystemFactories
          return null;
       }
 
+      /**
+       * Creates a new 1-DoF joint.
+       * 
+       * @param jointType         the type of the joint to be build.
+       * @param name              the joint name.
+       * @param predecessor       the predecessor of the joint.
+       * @param transformToParent the transform to the frame after the parent joint.
+       * @param jointAxis         the joint axis.
+       * @return the new 1-DoF.
+       */
       default OneDoFJointBasics buildOneDoFJoint(Class<? extends OneDoFJointReadOnly> jointType, String name, RigidBodyBasics predecessor,
                                                  RigidBodyTransform transformToParent, Vector3DReadOnly jointAxis)
       {
@@ -599,6 +618,15 @@ public class MultiBodySystemFactories
          return new FixedJoint(name, predecessor, transformToParent);
       }
 
+      /**
+       * Clone the given joint {@code original} and attach the clone to {@code clonePredecessor}.
+       * 
+       * @param original         the original joint to be cloned.
+       * @param cloneSuffix      the suffix for name of the clone, i.e. the name of the clone is
+       *                         {@code original.getName() + cloneSuffix}.
+       * @param clonePredecessor the predecessor of the clone.
+       * @return the clone joint.
+       */
       default JointBasics cloneJoint(JointReadOnly original, String cloneSuffix, RigidBodyBasics clonePredecessor)
       {
          if (original instanceof OneDoFJointReadOnly)
@@ -616,6 +644,15 @@ public class MultiBodySystemFactories
          }
       }
 
+      /**
+       * Clone the given 1-DoF joint {@code original} and attach the clone to {@code clonePredecessor}.
+       * 
+       * @param original         the original 1-DoF joint to be cloned.
+       * @param cloneSuffix      the suffix for name of the clone, i.e. the name of the clone is
+       *                         {@code original.getName() + cloneSuffix}.
+       * @param clonePredecessor the predecessor of the clone.
+       * @return the clone 1-DoF joint.
+       */
       default OneDoFJointBasics cloneOneDoFJoint(OneDoFJointReadOnly original, String cloneSuffix, RigidBodyBasics clonePredecessor)
       {
          String jointNameOriginal = original.getName();
@@ -636,6 +673,12 @@ public class MultiBodySystemFactories
          return clone;
       }
 
+      /**
+       * Clone the transform from the given {@code original} to its parent joint.
+       * 
+       * @param original the joint to clone the transform from.
+       * @return the transform from the given {@code original} to its parent joint.
+       */
       default RigidBodyTransform cloneJointTransformToParent(JointReadOnly original)
       {
          if (original.getFrameBeforeJoint() == original.getPredecessor().getBodyFixedFrame())
@@ -693,6 +736,17 @@ public class MultiBodySystemFactories
          return new RigidBody(bodyName, parentJoint, momentOfInertia, mass, inertiaPose);
       }
 
+      /**
+       * Clone the given rigid-body {@code original} and attach the clone to {@code clonePredecessor}.
+       * 
+       * @param original             the original rigid-body to be cloned.
+       * @param cloneStationaryFrame if {@code original} is a root body, it is used to attach the clone.
+       *                             Can be {@code null} if {@code original} is not a root body.
+       * @param cloneSuffix          the suffix for name of the clone, i.e. the name of the clone is
+       *                             {@code original.getName() + cloneSuffix}.
+       * @param parentJointOfClone   the parent of joint of the clone.
+       * @return the clone rigid-body.
+       */
       default RigidBodyBasics cloneRigidBody(RigidBodyReadOnly original, ReferenceFrame cloneStationaryFrame, String cloneSuffix,
                                              JointBasics parentJointOfClone)
       {
