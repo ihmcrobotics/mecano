@@ -10,7 +10,9 @@ import org.ejml.data.DMatrix1Row;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.mecano.frames.MovingReferenceFrame;
+import us.ihmc.mecano.multiBodySystem.PrismaticJoint;
 import us.ihmc.mecano.multiBodySystem.RevoluteJoint;
+import us.ihmc.mecano.multiBodySystem.SphericalJoint;
 import us.ihmc.mecano.multiBodySystem.iterators.JointIterable;
 import us.ihmc.mecano.multiBodySystem.iterators.SubtreeStreams;
 import us.ihmc.mecano.spatial.interfaces.SpatialAccelerationBasics;
@@ -140,6 +142,27 @@ public interface JointReadOnly
    }
 
    /**
+    * Indicates whether the motion subspace of this joint is constant with respect to the joint's
+    * configuration.
+    * <p>
+    * Simple joints such as {@link RevoluteJoint}s and {@link SphericalJoint}s have an invariant motion
+    * subspace. Only complex joints may have a motion subspace that is a function of their
+    * configuration, such joint are not implemented in this library.
+    * </p>
+    * <p>
+    * If this returns {@code false}, then the derivative of this joint's motion subspace is always
+    * zero.
+    * </p>
+    * 
+    * @return {@code true} to indicate that the motion subspace for this joint depends on its current
+    *         configuration, {@code false} (default) otherwise.
+    */
+   default boolean isMotionSubspaceVariable()
+   {
+      return false;
+   }
+
+   /**
     * Packs the motion subspace of this joint into the given matrix.
     * <p>
     * The resulting matrix is a 6-by-N matrix, where N is equal to the number of DoFs this joint has,
@@ -156,6 +179,29 @@ public interface JointReadOnly
 
       for (int dofIndex = 0; dofIndex < getDegreesOfFreedom(); dofIndex++)
          getUnitTwists().get(dofIndex).get(0, dofIndex, matrixToPack);
+   }
+
+   /**
+    * Packs the first derivative of the motion subspace of this joint into the given matrix.
+    * <p>
+    * Note that for most joints, the motion subspace is constant with respect to the joint
+    * configuration and thus its derivative is always zero.
+    * </p>
+    * <p>
+    * Note that the bias acceleration can be used as a way to compute <tt>dS/dt * qDot</tt>, where
+    * <tt>dS/dt</tt> is the motion subspace derivative and <tt>qDot</tt> the joint velocity, and is
+    * usually cheaper computation-wise.
+    * </p>
+    * 
+    * @param matrixToPack the matrix used to store the first derivative of the motion subspace. It is
+    *                     reshaped to the proper size. Modified.
+    * @return {@code true} if the motion subspace derivative was computed and packed into the given
+    *         matrix. This method returns {@code false} (default) if the given matrix was left
+    *         unchanged, this is usually because the motion subspace is invariant.
+    */
+   default boolean getMotionSubspaceDot(DMatrix1Row matrixToPack)
+   {
+      return false;
    }
 
    /**
@@ -223,6 +269,29 @@ public interface JointReadOnly
    SpatialAccelerationReadOnly getJointAcceleration();
 
    /**
+    * Gets the read-only reference to this joint's bias acceleration, i.e. acceleration solely due to
+    * velocities.
+    * <p>
+    * Note that only complex joints have a bias acceleration, common joints such as
+    * {@link RevoluteJoint}s or {@link PrismaticJoint}s will return {@code null}.
+    * </p>
+    * <p>
+    * The reference frames of the joint bias spatial acceleration are as follows:
+    * <ul>
+    * <li>{@code bodyFrame} is {@code afterJointFrame}.
+    * <li>{@code baseFrame} is {@code beforeJointFrame}.
+    * <li>{@code expressedInFrame} is {@code afterJointFrame}.
+    * </ul>
+    * </p>
+    * 
+    * @return the bias acceleration of this joint, or {@code null} if it is zero.
+    */
+   default SpatialAccelerationReadOnly getJointBiasAcceleration()
+   {
+      return null;
+   }
+
+   /**
     * Packs the spatial acceleration (the 3D angular and linear accelerations) of this joint's
     * {@code successor} with respect to this joint's {@code predecessor}. The reference frames of the
     * resulting spatial acceleration are as follows:
@@ -245,6 +314,37 @@ public interface JointReadOnly
       successorAccelerationToPack.setBaseFrame(predecessorFrame);
       successorAccelerationToPack.setBodyFrame(successorFrame);
       successorAccelerationToPack.changeFrame(successorFrame);
+
+      if (isMotionSubspaceVariable())
+      {
+         SpatialAccelerationReadOnly successorBiasAcceleration = getSuccessorBiasAcceleration();
+         successorAccelerationToPack.checkReferenceFrameMatch(successorBiasAcceleration);
+         successorAccelerationToPack.add((SpatialVectorReadOnly) successorBiasAcceleration);
+      }
+   }
+
+   /**
+    * Gets the read-only reference to the bias acceleration, i.e. acceleration solely due to
+    * velocities, of this joint's {@code successor} with respect to this joint's {@code predecessor}.
+    * <p>
+    * Note that only complex joints have a bias acceleration, common joints such as
+    * {@link RevoluteJoint}s or {@link PrismaticJoint}s will return {@code null}.
+    * </p>
+    * <p>
+    * The reference frames of the joint bias spatial acceleration are as follows:
+    * <ul>
+    * <li>{@code bodyFrame} is {@code successorFrame = successor.getBodyFixedFrame()}.
+    * <li>{@code baseFrame} is {@code predecessorFrame = predecessor.getBodyFixedFrame()}.
+    * <li>{@code expressedInFrame} is {@code successorFrame}.
+    * </ul>
+    * </p>
+    * 
+    * @return the the bias acceleration of this joint's {@code successor}, or {@code null} if it is
+    *         zero.
+    */
+   default SpatialAccelerationReadOnly getSuccessorBiasAcceleration()
+   {
+      return null;
    }
 
    /**
@@ -273,6 +373,37 @@ public interface JointReadOnly
       predecessorAccelerationToPack.setBodyFrame(successorFrame);
       predecessorAccelerationToPack.invert();
       predecessorAccelerationToPack.changeFrame(predecessorFrame);
+
+      if (isMotionSubspaceVariable())
+      {
+         SpatialAccelerationReadOnly predecessorBiasAcceleration = getPredecessorBiasAcceleration();
+         predecessorAccelerationToPack.checkReferenceFrameMatch(predecessorBiasAcceleration);
+         predecessorAccelerationToPack.add((SpatialVectorReadOnly) predecessorBiasAcceleration);
+      }
+   }
+
+   /**
+    * Gets the read-only reference to the bias acceleration, i.e. acceleration solely due to
+    * velocities, of this joint's {@code predecessor} with respect to this joint's {@code successor}.
+    * <p>
+    * Note that only complex joints have a bias acceleration, common joints such as
+    * {@link RevoluteJoint}s or {@link PrismaticJoint}s will return {@code null}.
+    * </p>
+    * <p>
+    * The reference frames of the joint bias spatial acceleration are as follows:
+    * <ul>
+    * <li>{@code bodyFrame} is {@code predecessorFrame = predecessor.getBodyFixedFrame()}.
+    * <li>{@code baseFrame} is {@code successorFrame = successor.getBodyFixedFrame()}.
+    * <li>{@code expressedInFrame} is {@code predecessorFrame}.
+    * </ul>
+    * </p>
+    * 
+    * @return the the bias acceleration of this joint's {@code predecessor}, or {@code null} if it is
+    *         zero.
+    */
+   default SpatialAccelerationReadOnly getPredecessorBiasAcceleration()
+   {
+      return null;
    }
 
    /**
