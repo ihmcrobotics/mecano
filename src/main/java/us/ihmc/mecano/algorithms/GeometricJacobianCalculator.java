@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 
+import org.ejml.data.DMatrix;
 import org.ejml.data.DMatrix1Row;
 import org.ejml.data.DMatrixRMaj;
 import org.ejml.dense.row.CommonOps_DDRM;
@@ -14,12 +15,15 @@ import us.ihmc.mecano.frames.MovingReferenceFrame;
 import us.ihmc.mecano.multiBodySystem.interfaces.JointReadOnly;
 import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyReadOnly;
 import us.ihmc.mecano.spatial.SpatialAcceleration;
+import us.ihmc.mecano.spatial.SpatialVector;
 import us.ihmc.mecano.spatial.Twist;
 import us.ihmc.mecano.spatial.interfaces.SpatialAccelerationBasics;
 import us.ihmc.mecano.spatial.interfaces.SpatialAccelerationReadOnly;
+import us.ihmc.mecano.spatial.interfaces.SpatialVectorBasics;
 import us.ihmc.mecano.spatial.interfaces.SpatialVectorReadOnly;
 import us.ihmc.mecano.spatial.interfaces.TwistBasics;
 import us.ihmc.mecano.spatial.interfaces.WrenchReadOnly;
+import us.ihmc.mecano.tools.JointStateType;
 import us.ihmc.mecano.tools.MultiBodySystemTools;
 
 /**
@@ -67,6 +71,7 @@ public class GeometricJacobianCalculator
    private int numberOfDegreesOfFreedom;
    /** The geometric Jacobian matrix. */
    private final DMatrixRMaj jacobianMatrix = new DMatrixRMaj(6, 12);
+   private final DMatrixRMaj jacobianRateMatrix = new DMatrixRMaj(6, 12);
    /**
     * The convective term required when mapping the joint acceleration space to the end-effector
     * spatial acceleration space.
@@ -91,6 +96,7 @@ public class GeometricJacobianCalculator
    private final Twist relativeJointTwist = new Twist();
 
    private boolean isJacobianUpToDate = false;
+   private boolean isJacobianRateUpToDate = false;
    private boolean isConvectiveTermUpToDate = false;
 
    /**
@@ -127,6 +133,7 @@ public class GeometricJacobianCalculator
    public void reset()
    {
       isJacobianUpToDate = false;
+      isJacobianRateUpToDate = false;
       isConvectiveTermUpToDate = false;
    }
 
@@ -149,8 +156,7 @@ public class GeometricJacobianCalculator
    {
       this.base = base;
       this.endEffector = endEffector;
-      if (jacobianFrame == null)
-         jacobianFrame = endEffector.getBodyFixedFrame();
+      jacobianFrame = endEffector.getBodyFixedFrame();
       reset();
 
       numberOfDegreesOfFreedom = MultiBodySystemTools.computeDegreesOfFreedom(base, endEffector);
@@ -213,8 +219,7 @@ public class GeometricJacobianCalculator
          numberOfDegreesOfFreedom = MultiBodySystemTools.computeDegreesOfFreedom(joints);
       }
 
-      if (jacobianFrame == null)
-         jacobianFrame = endEffector.getBodyFixedFrame();
+      jacobianFrame = endEffector.getBodyFixedFrame();
       reset();
 
       jointsFromBaseToEndEffector.clear();
@@ -278,6 +283,107 @@ public class GeometricJacobianCalculator
             isGoingUpstream = joint.getPredecessor() != commonAncestor;
       }
       isJacobianUpToDate = true;
+   }
+
+   private final DMatrixRMaj jointVelocities = new DMatrixRMaj(12, 1);
+
+   /**
+    * Computes the time-derivative of the Jacobian matrix JDot<sub>6xN</sub>, where N is the number of
+    * degrees of freedom between the {@code base} and {@code endEffector}.
+    * <p>
+    * <b>WARNING: The {@code jacobianFrame} is assumed to be rigidly attached to the end-effector.</b>
+    * </p>
+    * <p>
+    * The base, end-effector, and jacobian frame, have all to be properly set before calling this
+    * method.
+    * </p>
+    *
+    * @throws RuntimeException if either the base or the end-effector has not been provided beforehand.
+    */
+   private void updateJacobianRateMatrix()
+   {
+      if (isJacobianRateUpToDate)
+         return;
+
+      updateJacobianMatrix();
+
+      jointVelocities.reshape(numberOfDegreesOfFreedom, 1);
+      MultiBodySystemTools.extractJointsState(jointsFromBaseToEndEffector, JointStateType.VELOCITY, jointVelocities);
+
+      jacobianRateMatrix.reshape(SpatialVectorReadOnly.SIZE, numberOfDegreesOfFreedom);
+
+      JointReadOnly joint = jointsFromBaseToEndEffector.get(jointsFromBaseToEndEffector.size() - 1);
+      int startCol = numberOfDegreesOfFreedom - joint.getDegreesOfFreedom();
+      int endCol = numberOfDegreesOfFreedom;
+
+      fillColumns(startCol, endCol, 0.0, jacobianRateMatrix);
+      twistToEndEffector.setToZero();
+
+      for (int jointIdx = jointsFromBaseToEndEffector.size() - 2; jointIdx >= 0; jointIdx--)
+      {
+         addJointTwist(startCol, endCol, jointVelocities, jacobianMatrix, twistToEndEffector);
+
+         joint = jointsFromBaseToEndEffector.get(jointIdx);
+         endCol = startCol;
+         startCol -= joint.getDegreesOfFreedom();
+         computeJacobianRateMatrixBlock(startCol, endCol, twistToEndEffector);
+      }
+
+      isJacobianRateUpToDate = true;
+   }
+
+   private final SpatialVector twistToEndEffector = new SpatialVector();
+   private final SpatialVector jacobianColumn = new SpatialVector();
+   private final SpatialVector jacobianRateColumn = new SpatialVector();
+
+   private void computeJacobianRateMatrixBlock(int startIndex, int endIndex, SpatialVectorReadOnly twistToEndEffector)
+   {
+      for (int i = startIndex; i < endIndex; i++)
+      {
+         jacobianColumn.set(0, i, jacobianMatrix);
+
+         // w_<z.a.> = w_J x w_others
+         jacobianRateColumn.getAngularPart().cross(jacobianColumn.getAngularPart(), twistToEndEffector.getAngularPart());
+
+         // a_<z.a.> = v_J x w_others + w_J x v_others
+         jacobianRateColumn.getLinearPart().cross(jacobianColumn.getLinearPart(), twistToEndEffector.getAngularPart());
+         jacobianRateColumn.addCrossToLinearPart(jacobianColumn.getAngularPart(), twistToEndEffector.getLinearPart());
+
+         jacobianRateColumn.get(0, i, jacobianRateMatrix);
+      }
+   }
+
+   private static void fillColumns(int startColumn, int endColumn, double value, DMatrix matrix)
+   {
+      if (startColumn == endColumn)
+         return;
+
+      if (startColumn < 0 || startColumn >= matrix.getNumCols() || endColumn < 0 || endColumn > matrix.getNumCols() || endColumn < startColumn)
+         throw new IllegalArgumentException("Illegal arguments: startColumn = " + startColumn + " , endColumn = " + endColumn + ".");
+
+      for (int col = startColumn; col < endColumn; col++)
+      {
+         for (int row = 0; row < matrix.getNumRows(); row++)
+         {
+            matrix.unsafe_set(row, col, value);
+         }
+      }
+   }
+
+   private static void addJointTwist(int startIndex, int endIndex, DMatrixRMaj jointVelocities, DMatrixRMaj jacobianMatrix, SpatialVectorBasics vectorToModify)
+   {
+      for (int col = startIndex; col < endIndex; col++)
+      {
+         double qDot = jointVelocities.get(col);
+         double wx = qDot * jacobianMatrix.get(0, col);
+         double wy = qDot * jacobianMatrix.get(1, col);
+         double wz = qDot * jacobianMatrix.get(2, col);
+         double vx = qDot * jacobianMatrix.get(3, col);
+         double vy = qDot * jacobianMatrix.get(4, col);
+         double vz = qDot * jacobianMatrix.get(5, col);
+         vectorToModify.getAngularPart().add(wx, wy, wz);
+         vectorToModify.getLinearPart().add(vx, vy, vz);
+      }
    }
 
    /**
@@ -522,6 +628,12 @@ public class GeometricJacobianCalculator
    {
       updateJacobianMatrix();
       return jacobianMatrix;
+   }
+
+   public DMatrixRMaj getJacobianRateMatrix()
+   {
+      updateJacobianRateMatrix();
+      return jacobianRateMatrix;
    }
 
    /**

@@ -11,6 +11,7 @@ import java.util.List;
 import java.util.Random;
 
 import org.ejml.data.DMatrixRMaj;
+import org.ejml.dense.row.CommonOps_DDRM;
 import org.junit.jupiter.api.Test;
 
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
@@ -18,8 +19,10 @@ import us.ihmc.euclid.referenceFrame.tools.ReferenceFrameTools;
 import us.ihmc.euclid.tools.EuclidCoreRandomTools;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.mecano.multiBodySystem.Joint;
+import us.ihmc.mecano.multiBodySystem.OneDoFJoint;
 import us.ihmc.mecano.multiBodySystem.PrismaticJoint;
 import us.ihmc.mecano.multiBodySystem.interfaces.JointBasics;
+import us.ihmc.mecano.multiBodySystem.interfaces.JointReadOnly;
 import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
 import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyReadOnly;
 import us.ihmc.mecano.spatial.SpatialAcceleration;
@@ -28,6 +31,7 @@ import us.ihmc.mecano.spatial.interfaces.SpatialAccelerationReadOnly;
 import us.ihmc.mecano.tools.JointStateType;
 import us.ihmc.mecano.tools.MecanoTestTools;
 import us.ihmc.mecano.tools.MultiBodySystemRandomTools;
+import us.ihmc.mecano.tools.MultiBodySystemStateIntegrator;
 import us.ihmc.mecano.tools.MultiBodySystemTools;
 
 public class GeometricJacobianCalculatorTest
@@ -234,6 +238,7 @@ public class GeometricJacobianCalculatorTest
          SpatialAccelerationReadOnly expectedConvectiveTerm = spatialAccelerationCalculator.getRelativeAcceleration(randomBase, randomEndEffector);
 
          MecanoTestTools.assertSpatialAccelerationEquals(expectedConvectiveTerm, actualConvectiveTerm, 1.0e-11);
+         assertJacobianRateConsistency(jacobianCalculator, 1.0e-11);
       }
 
       for (int i = 0; i < ITERATIONS; i++)
@@ -269,6 +274,7 @@ public class GeometricJacobianCalculatorTest
          expectedConvectiveTerm.changeFrame(fixedInEndEffector);
 
          MecanoTestTools.assertSpatialAccelerationEquals(expectedConvectiveTerm, actualConvectiveTerm, 1.0e-11);
+         assertJacobianRateConsistency(jacobianCalculator, 1.0e-11);
       }
    }
 
@@ -548,6 +554,99 @@ public class GeometricJacobianCalculatorTest
       }
    }
 
+   @Test
+   public void testJacobianRateMatrix()
+   {
+      Random random = new Random(4324342L);
+      GeometricJacobianCalculator jacobianCalculator = new GeometricJacobianCalculator();
+
+      for (int i = 0; i < ITERATIONS; i++)
+      { // Test with 1-DoF joints only
+         int numberOfJoints = random.nextInt(100) + 2;
+
+         List<OneDoFJoint> joints = MultiBodySystemRandomTools.nextOneDoFJointChain(random, numberOfJoints);
+         RigidBodyBasics rootBody = MultiBodySystemTools.getRootBody(joints.get(0).getSuccessor());
+         RigidBodyBasics endEffector = joints.get(numberOfJoints - 1).getSuccessor();
+
+         MultiBodySystemRandomTools.nextState(random, JointStateType.CONFIGURATION, joints);
+         MultiBodySystemRandomTools.nextState(random, JointStateType.VELOCITY, joints);
+
+         jacobianCalculator.setKinematicChain(rootBody, endEffector);
+
+         DMatrixRMaj expectedJacobianRateMatrix = computeJacobianRateFD(jacobianCalculator, 1.0e-6);
+         DMatrixRMaj actualJacobianRateMatrix = jacobianCalculator.getJacobianRateMatrix();
+
+         MecanoTestTools.assertDMatrixEquals("Iteration: " + i, expectedJacobianRateMatrix, actualJacobianRateMatrix, 1.0e-7);
+
+         DMatrixRMaj jointVelocities = new DMatrixRMaj(numberOfJoints, 1);
+
+         DMatrixRMaj actualConvectiveTerm = new DMatrixRMaj(6, 1);
+         MultiBodySystemTools.extractJointsState(joints, JointStateType.VELOCITY, jointVelocities);
+         CommonOps_DDRM.mult(actualJacobianRateMatrix, jointVelocities, actualConvectiveTerm);
+         DMatrixRMaj expectedConvectiveTerm = jacobianCalculator.getConvectiveTermMatrix();
+
+         MecanoTestTools.assertDMatrixEquals("Iteration: " + i, expectedConvectiveTerm, actualConvectiveTerm, 1.0e-11);
+      }
+
+      for (int i = 0; i < ITERATIONS; i++)
+      { // Test with any joint
+         int numberOfJoints = random.nextInt(10) + 2;
+
+         List<JointBasics> joints = MultiBodySystemRandomTools.nextJointChain(random, numberOfJoints);
+         RigidBodyBasics rootBody = MultiBodySystemTools.getRootBody(joints.get(0).getSuccessor());
+         RigidBodyBasics endEffector = joints.get(numberOfJoints - 1).getSuccessor();
+
+         MultiBodySystemRandomTools.nextState(random, JointStateType.CONFIGURATION, joints);
+         MultiBodySystemRandomTools.nextState(random, JointStateType.VELOCITY, joints);
+
+         jacobianCalculator.setKinematicChain(rootBody, endEffector);
+
+         DMatrixRMaj expectedJacobianRateMatrix = computeJacobianRateFD(jacobianCalculator, 1.0e-6);
+         DMatrixRMaj actualJacobianRateMatrix = jacobianCalculator.getJacobianRateMatrix();
+
+         MecanoTestTools.assertDMatrixEquals("Iteration: " + i, expectedJacobianRateMatrix, actualJacobianRateMatrix, 1.0e-5);
+
+         DMatrixRMaj jointVelocities = new DMatrixRMaj(jacobianCalculator.getNumberOfDegreesOfFreedom(), 1);
+
+         DMatrixRMaj actualConvectiveTerm = new DMatrixRMaj(6, 1);
+         MultiBodySystemTools.extractJointsState(joints, JointStateType.VELOCITY, jointVelocities);
+         CommonOps_DDRM.mult(actualJacobianRateMatrix, jointVelocities, actualConvectiveTerm);
+         DMatrixRMaj expectedConvectiveTerm = jacobianCalculator.getConvectiveTermMatrix();
+
+         MecanoTestTools.assertDMatrixEquals("Iteration: " + i, expectedConvectiveTerm, actualConvectiveTerm, 1.0e-11);
+      }
+   }
+
+   @SuppressWarnings("unchecked")
+   private static DMatrixRMaj computeJacobianRateFD(GeometricJacobianCalculator calculator, double dt)
+   {
+      int size = calculator.getJointsFromBaseToEndEffector().stream().mapToInt(JointReadOnly::getConfigurationMatrixSize).sum();
+      DMatrixRMaj q = new DMatrixRMaj(size, 1);
+      MultiBodySystemTools.extractJointsState(calculator.getJointsFromBaseToEndEffector(), JointStateType.CONFIGURATION, q);
+
+      new MultiBodySystemStateIntegrator(-0.5 * dt).integrateFromVelocity((List<? extends JointBasics>) calculator.getJointsFromBaseToEndEffector());
+
+      ((RigidBodyBasics) calculator.getBase()).updateFramesRecursively();
+      calculator.reset();
+      DMatrixRMaj jacobianCurrent = new DMatrixRMaj(calculator.getJacobianMatrix());
+
+      new MultiBodySystemStateIntegrator(dt).integrateFromVelocity((List<? extends JointBasics>) calculator.getJointsFromBaseToEndEffector());
+
+      ((RigidBodyBasics) calculator.getBase()).updateFramesRecursively();
+      calculator.reset();
+      DMatrixRMaj jacobianNext = new DMatrixRMaj(calculator.getJacobianMatrix());
+
+      DMatrixRMaj jacobianRate = new DMatrixRMaj(6, calculator.getNumberOfDegreesOfFreedom());
+      CommonOps_DDRM.subtract(jacobianNext, jacobianCurrent, jacobianRate);
+      CommonOps_DDRM.scale(1.0 / dt, jacobianRate);
+
+      MultiBodySystemTools.insertJointsState((List<? extends JointBasics>) calculator.getJointsFromBaseToEndEffector(), JointStateType.CONFIGURATION, q);
+      ((RigidBodyBasics) calculator.getBase()).updateFramesRecursively();
+      calculator.reset();
+
+      return jacobianRate;
+   }
+
    public static void compareJacobianTwistAgainstTwistCalculator(RigidBodyReadOnly base, RigidBodyReadOnly endEffector,
                                                                  GeometricJacobianCalculator jacobianCalculator, double epsilon)
          throws AssertionError
@@ -584,5 +683,15 @@ public class GeometricJacobianCalculatorTest
       jacobianCalculator.getEndEffectorAcceleration(jointDesiredAccelerationsMatrix, actualAcceleration);
 
       MecanoTestTools.assertSpatialAccelerationEquals(expectedAcceleration, actualAcceleration, epsilon);
+   }
+
+   public static void assertJacobianRateConsistency(GeometricJacobianCalculator jacobianCalculator, double epsilon)
+   {
+      DMatrixRMaj jointVelocities = new DMatrixRMaj(jacobianCalculator.getNumberOfDegreesOfFreedom(), 1);
+      MultiBodySystemTools.extractJointsState(jacobianCalculator.getJointsFromBaseToEndEffector(), JointStateType.VELOCITY, jointVelocities);
+      DMatrixRMaj actualConvectiveTerm = new DMatrixRMaj(6, 1);
+      CommonOps_DDRM.mult(jacobianCalculator.getJacobianRateMatrix(), jointVelocities, actualConvectiveTerm);
+
+      MecanoTestTools.assertDMatrixEquals(actualConvectiveTerm, jacobianCalculator.getConvectiveTermMatrix(), epsilon);
    }
 }
