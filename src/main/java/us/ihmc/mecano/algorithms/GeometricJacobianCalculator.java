@@ -11,7 +11,6 @@ import org.ejml.dense.row.CommonOps_DDRM;
 
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.referenceFrame.exceptions.ReferenceFrameMismatchException;
-import us.ihmc.mecano.frames.MovingReferenceFrame;
 import us.ihmc.mecano.multiBodySystem.interfaces.JointReadOnly;
 import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyReadOnly;
 import us.ihmc.mecano.spatial.SpatialAcceleration;
@@ -71,6 +70,7 @@ public class GeometricJacobianCalculator
    private int numberOfDegreesOfFreedom;
    /** The geometric Jacobian matrix. */
    private final DMatrixRMaj jacobianMatrix = new DMatrixRMaj(6, 12);
+   /** The time-derivative of the geometric Jacobian matrix. */
    private final DMatrixRMaj jacobianRateMatrix = new DMatrixRMaj(6, 12);
    /**
     * The convective term required when mapping the joint acceleration space to the end-effector
@@ -84,20 +84,14 @@ public class GeometricJacobianCalculator
    private final DMatrixRMaj spatialVector = new DMatrixRMaj(6, 1);
    /** The total bias acceleration resulting Coriolis and centrifugal accelerations. */
    private final SpatialAcceleration endEffectorCoriolisAcceleration = new SpatialAcceleration();
-   /**
-    * Intermediate variable store the twist of a rigid-body in the kinematic chain with respect to the
-    * base. Used for computing the Coriolis and centrifugal accelerations.
-    */
-   private final Twist bodyTwistRelativeToBase = new Twist();
-   /**
-    * Intermediate variable store the successor with respect to the predecessor of a joint in the
-    * kinematic chain. Used for computing the Coriolis and centrifugal accelerations.
-    */
-   private final Twist relativeJointTwist = new Twist();
+
+   /** Intermediate variable used when computing the Jacobian rate. */
+   private final SpatialVector twistToEndEffector = new SpatialVector();
+   /** Intermediate variable used when computing the Jacobian rate. */
+   private final SpatialVector jacobianRateColumn = new SpatialVector();
 
    private boolean isJacobianUpToDate = false;
    private boolean isJacobianRateUpToDate = false;
-   private boolean isConvectiveTermUpToDate = false;
 
    /**
     * Creates an empty calculator.
@@ -134,7 +128,6 @@ public class GeometricJacobianCalculator
    {
       isJacobianUpToDate = false;
       isJacobianRateUpToDate = false;
-      isConvectiveTermUpToDate = false;
    }
 
    /**
@@ -288,10 +281,30 @@ public class GeometricJacobianCalculator
    private final DMatrixRMaj jointVelocities = new DMatrixRMaj(12, 1);
 
    /**
-    * Computes the time-derivative of the Jacobian matrix JDot<sub>6xN</sub>, where N is the number of
-    * degrees of freedom between the {@code base} and {@code endEffector}.
+    * Computes the time-derivative of the Jacobian matrix JDot<sub>6xN</sub> and the convective term
+    * C<sub>6x1</sub> = JDot<sub>6xN</sub> * qDot<sub>Nx1</sub>, where N is the number of degrees of
+    * freedom between the {@code base} and {@code endEffector}.
     * <p>
     * <b>WARNING: The {@code jacobianFrame} is assumed to be rigidly attached to the end-effector.</b>
+    * </p>
+    * <p>
+    * The convective term represents the Coriolis acceleration of the {@code endEffector} relative to
+    * the {@code base} expressed at the {@code jacobianFrame}. The Coriolis acceleration is an
+    * acceleration that results from the combination of the angular and linear velocities happening on
+    * the end-effector.
+    * </p>
+    * <p>
+    * As shown in <a href="https://en.wikipedia.org/wiki/Coriolis_force">Wikipedia</a>, the Coriolis
+    * acceleration also depends on the velocity of the frame it is expressed in. This method assumes
+    * that the {@code jacobianFrame} is attached to the end-effector. If this is not the case, the
+    * computed acceleration will be biased.
+    * </p>
+    * <p>
+    * Using the convective term, the spatial acceleration xDDot<sub>6x1</sub> of the
+    * {@code endEffector} relative to the {@code base} expressed in the {@code jacbianFrame} can be
+    * computed as follows:<br>
+    * xDDot<sub>6x1</sub> = J<sub>6xN</sub> * qDDot<sub>Nx1</sub> + C<sub>6x1</sub><br>
+    * where qDDot<sub>Nx1</sub> is the vector of joint accelerations.
     * </p>
     * <p>
     * The base, end-effector, and jacobian frame, have all to be properly set before calling this
@@ -329,30 +342,48 @@ public class GeometricJacobianCalculator
          computeJacobianRateMatrixBlock(startCol, endCol, twistToEndEffector);
       }
 
+      CommonOps_DDRM.mult(jacobianRateMatrix, jointVelocities, convectiveTerm);
+      endEffectorCoriolisAcceleration.setIncludingFrame(getEndEffectorFrame(), getBaseFrame(), getJacobianFrame(), convectiveTerm);
+
       isJacobianRateUpToDate = true;
    }
 
-   private final SpatialVector twistToEndEffector = new SpatialVector();
-   private final SpatialVector jacobianColumn = new SpatialVector();
-   private final SpatialVector jacobianRateColumn = new SpatialVector();
-
+   /**
+    * Computes the columns of the Jacobian rate matrix in [{@code startIndex}, {@code endIndex}[.
+    * 
+    * @param startIndex         the first column index (inclusive) of the Jacobian rate matrix to
+    *                           compute.
+    * @param endIndex           the last column index (exclusive) of the Jacobian rate matrix to
+    *                           compute.
+    * @param twistToEndEffector the twist of the end-effector with respect to the joint that maps to
+    *                           the columns [{@code startIndex}, {@code endIndex}[ of the Jacobian. Not
+    *                           modified.
+    */
    private void computeJacobianRateMatrixBlock(int startIndex, int endIndex, SpatialVectorReadOnly twistToEndEffector)
    {
       for (int i = startIndex; i < endIndex; i++)
       {
-         jacobianColumn.set(0, i, jacobianMatrix);
-
-         // w_<z.a.> = w_J x w_others
-         jacobianRateColumn.getAngularPart().cross(jacobianColumn.getAngularPart(), twistToEndEffector.getAngularPart());
+         jacobianRateColumn.set(0, i, jacobianMatrix);
 
          // a_<z.a.> = v_J x w_others + w_J x v_others
-         jacobianRateColumn.getLinearPart().cross(jacobianColumn.getLinearPart(), twistToEndEffector.getAngularPart());
-         jacobianRateColumn.addCrossToLinearPart(jacobianColumn.getAngularPart(), twistToEndEffector.getLinearPart());
+         jacobianRateColumn.getLinearPart().cross(jacobianRateColumn.getLinearPart(), twistToEndEffector.getAngularPart());
+         jacobianRateColumn.addCrossToLinearPart(jacobianRateColumn.getAngularPart(), twistToEndEffector.getLinearPart());
+
+         // w_<z.a.> = w_J x w_others
+         jacobianRateColumn.getAngularPart().cross(jacobianRateColumn.getAngularPart(), twistToEndEffector.getAngularPart());
 
          jacobianRateColumn.get(0, i, jacobianRateMatrix);
       }
    }
 
+   /**
+    * Fills the columns of the given matrix to contain {@code value}.
+    * 
+    * @param startColumn the first column index (inclusive).
+    * @param endColumn   the last column index (exclusive).
+    * @param value       the value used to fill the columns.
+    * @param matrix      the matrix to fill columns of. Modified.
+    */
    private static void fillColumns(int startColumn, int endColumn, double value, DMatrix matrix)
    {
       if (startColumn == endColumn)
@@ -370,6 +401,16 @@ public class GeometricJacobianCalculator
       }
    }
 
+   /**
+    * &forall;i &in; [<tt>startIndex</tt>,<tt>endIndex</tt>[ : <tt>vectorToModify += jointVelocities(i)
+    * * jacobianMatrix_column(i)
+    * 
+    * @param startIndex      the first column index (inclusive) in the Jacobian matrix.
+    * @param endIndex        the last column index (exclusive) in the Jacobian matrix.
+    * @param jointVelocities the column vector containing the joint velocities. Not modified.
+    * @param jacobianMatrix  the Jacobian matrix used to retrieve the joint twists. Not modified.
+    * @param vectorToModify  the vector to which the joint twist is added to. Modified.
+    */
    private static void addJointTwist(int startIndex, int endIndex, DMatrixRMaj jointVelocities, DMatrixRMaj jacobianMatrix, SpatialVectorBasics vectorToModify)
    {
       for (int col = startIndex; col < endIndex; col++)
@@ -384,96 +425,6 @@ public class GeometricJacobianCalculator
          vectorToModify.getAngularPart().add(wx, wy, wz);
          vectorToModify.getLinearPart().add(vx, vy, vz);
       }
-   }
-
-   /**
-    * Computes the convective term C<sub>6x1</sub> = JDot<sub>6xN</sub> * qDot<sub>Nx1</sub>.<br>
-    * where N is the number of degrees of freedom between the {@code base} and {@code endEffector},
-    * JDot<sub>6xN</sub> is the time-derivative of the Jacobian matrix, and qDot<sub>Nx1</sub> the
-    * vector of joint velocities.
-    * <p>
-    * <b>WARNING: The {@code jacobianFrame} is assumed to be rigidly attached to the end-effector.</b>
-    * </p>
-    * <p>
-    * The convective term represents the Coriolis acceleration of the {@code endEffector} relative to
-    * the {@code base} expressed at the {@code jacobianFrame}. The Coriolis acceleration is an
-    * acceleration that results from the combination of the angular and linear velocities happening on
-    * the end-effector.
-    * </p>
-    * <p>
-    * As shown in <a href="https://en.wikipedia.org/wiki/Coriolis_force">Wikipedia</a>, the Coriolis
-    * acceleration also depends on the velocity of the frame it is expressed in. This method assumes
-    * that the {@code jacobianFrame} is attached to the end-effector. If this is not the case, the
-    * computed acceleration will be biased.
-    * </p>
-    * <p>
-    * Using the convective term, the spatial acceleration xDDot<sub>6x1</sub> of the
-    * {@code endEffector} relative to the {@code base} expressed in the {@code jacbianFrame} can be
-    * computed as follows:<br>
-    * xDDot<sub>6x1</sub> = J<sub>6xN</sub> * qDDot<sub>Nx1</sub> + C<sub>6x1</sub><br>
-    * where qDDot<sub>Nx1</sub> is the vector of joint accelerations.
-    * </p>
-    * <p>
-    * The base, end-effector, and jacobian frame, have all to be properly set before calling this
-    * method.
-    * </p>
-    *
-    * @throws RuntimeException if either the base or the end-effector has not been provided beforehand.
-    */
-   private void updateConvectiveTerm()
-   {
-      if (isConvectiveTermUpToDate)
-         return;
-
-      if (base == null || endEffector == null)
-         throw new RuntimeException("The base and end-effector have to be set first.");
-
-      MovingReferenceFrame baseFrame = base.getBodyFixedFrame();
-      endEffectorCoriolisAcceleration.setToZero(baseFrame, baseFrame, baseFrame);
-      boolean isGoingUpstream = commonAncestor != base;
-
-      for (int i = isGoingUpstream ? 0 : 1; i < bodyPathFromBaseToEndEffector.size(); i++)
-      {
-         RigidBodyReadOnly currentBody = bodyPathFromBaseToEndEffector.get(i);
-         if (currentBody == commonAncestor)
-            continue; // The chain is going from leaf to root.
-         JointReadOnly parentJoint = currentBody.getParentJoint();
-         MovingReferenceFrame currentBodyFrame = currentBody.getBodyFixedFrame();
-         RigidBodyReadOnly predecessor = parentJoint.getPredecessor();
-         MovingReferenceFrame predecessorBodyFrame = predecessor.getBodyFixedFrame();
-
-         if (isGoingUpstream)
-         {
-            parentJoint.getSuccessorTwist(relativeJointTwist);
-            currentBodyFrame.getTwistRelativeToOther(baseFrame, bodyTwistRelativeToBase);
-            relativeJointTwist.invert();
-
-            // By changing the zero-acceleration from body to body until the end-effector, we collect Coriolis and centrifugal accelerations.
-            endEffectorCoriolisAcceleration.changeFrame(predecessorBodyFrame, relativeJointTwist, bodyTwistRelativeToBase);
-            endEffectorCoriolisAcceleration.setBodyFrame(predecessorBodyFrame);
-         }
-         else
-         {
-            parentJoint.getPredecessorTwist(relativeJointTwist);
-            predecessorBodyFrame.getTwistRelativeToOther(baseFrame, bodyTwistRelativeToBase);
-
-            // By changing the zero-acceleration from body to body until the end-effector, we collect Coriolis and centrifugal accelerations.
-            endEffectorCoriolisAcceleration.changeFrame(currentBodyFrame, relativeJointTwist, bodyTwistRelativeToBase);
-            endEffectorCoriolisAcceleration.setBodyFrame(currentBodyFrame);
-         }
-
-         if (isGoingUpstream)
-            isGoingUpstream = predecessor != commonAncestor;
-
-      }
-
-      // The following line is where the jacobianFrame is assumed to be rigidly attached to the end-effector.
-      endEffectorCoriolisAcceleration.changeFrame(jacobianFrame);
-
-      convectiveTerm.reshape(6, 1);
-      endEffectorCoriolisAcceleration.get(convectiveTerm);
-
-      isConvectiveTermUpToDate = true;
    }
 
    /**
@@ -630,6 +581,15 @@ public class GeometricJacobianCalculator
       return jacobianMatrix;
    }
 
+   /**
+    * Gets the current value of the time-derivative of the Jacobian matrix.
+    * <p>
+    * <b>WARNING: The {@code jacobianFrame} is assumed to be rigidly attached to the end-effector.</b>
+    * </p>
+    * 
+    * @return the current value of the time-derivative of the Jacobian matrix.
+    * @throws RuntimeException if either the base or the end-effector has not been provided beforehand.
+    */
    public DMatrixRMaj getJacobianRateMatrix()
    {
       updateJacobianRateMatrix();
@@ -641,13 +601,16 @@ public class GeometricJacobianCalculator
     * <p>
     * As for the Jacobian matrix, the convective term is computed in {@link #jacobianFrame}.
     * </p>
+    * <p>
+    * <b>WARNING: The {@code jacobianFrame} is assumed to be rigidly attached to the end-effector.</b>
+    * </p>
     *
     * @return the current value of the convective term.
     * @throws RuntimeException if either the base or the end-effector has not been provided beforehand.
     */
    public DMatrixRMaj getConvectiveTermMatrix()
    {
-      updateConvectiveTerm();
+      updateJacobianRateMatrix();
       return convectiveTerm;
    }
 
@@ -656,13 +619,16 @@ public class GeometricJacobianCalculator
     * <p>
     * As for the Jacobian matrix, the convective term is computed in {@link #jacobianFrame}.
     * </p>
+    * <p>
+    * <b>WARNING: The {@code jacobianFrame} is assumed to be rigidly attached to the end-effector.</b>
+    * </p>
     *
     * @return the current value of the convective term.
     * @throws RuntimeException if either the base or the end-effector has not been provided beforehand.
     */
    public SpatialAccelerationReadOnly getConvectiveTerm()
    {
-      updateConvectiveTerm();
+      updateJacobianRateMatrix();
       return endEffectorCoriolisAcceleration;
    }
 
@@ -703,5 +669,4 @@ public class GeometricJacobianCalculator
    {
       return "Jacobian, end effector = " + getEndEffector() + ", base = " + getBase() + ", expressed in " + getJacobianFrame();
    }
-
 }
