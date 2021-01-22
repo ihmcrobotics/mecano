@@ -320,6 +320,31 @@ public interface SpatialInertiaReadOnly extends ReferenceFrameHolder
       return MecanoTools.computeKineticCoEnergy(getMomentOfInertia(), getMass(), getCenterOfMassOffset(), twist.getAngularPart(), twist.getLinearPart());
    }
 
+   default void transform(SpatialVectorReadOnly vectorOriginal, FixedFrameSpatialVectorBasics vectorTransformed)
+   {
+      if (vectorOriginal == vectorTransformed)
+         throw new UnsupportedOperationException("In-place transformation is not supported.");
+
+      checkReferenceFrameMatch(vectorOriginal, vectorTransformed);
+
+      if (isCenterOfMassOffsetZero())
+      {
+         getMomentOfInertia().transform(vectorOriginal.getAngularPart(), vectorTransformed.getAngularPart());
+         vectorTransformed.getLinearPart().setAndScale(getMass(), vectorOriginal.getLinearPart());
+      }
+      else
+      {
+         vectorTransformed.getAngularPart().cross(getCenterOfMassOffset(), vectorOriginal.getLinearPart());
+         vectorTransformed.getAngularPart().scale(getMass());
+         getMomentOfInertia().addTransform(vectorOriginal.getAngularPart(), vectorTransformed.getAngularPart());
+
+         vectorTransformed.getLinearPart().cross(vectorOriginal.getAngularPart(), getCenterOfMassOffset());
+         vectorTransformed.getLinearPart().add(vectorOriginal.getLinearPart());
+         vectorTransformed.getLinearPart().scale(getMass());
+      }
+
+   }
+
    /**
     * Packs this spatial inertia matrix into the given {@code DenseMatrix64F} as follows:
     *

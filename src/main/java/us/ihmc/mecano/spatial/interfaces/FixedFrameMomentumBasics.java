@@ -50,25 +50,6 @@ public interface FixedFrameMomentumBasics extends MomentumReadOnly, FixedFrameSp
     */
    default void compute(SpatialInertiaReadOnly spatialInertia, TwistReadOnly twist)
    {
-      spatialInertia.checkReferenceFrameMatch(twist.getReferenceFrame());
-      twist.checkExpressedInFrameMatch(getReferenceFrame());
-
-      spatialInertia.getMomentOfInertia().transform(twist.getAngularPart(), getAngularPart());
-      getLinearPart().set(twist.getLinearPart());
-
-      if (!spatialInertia.isCenterOfMassOffsetZero())
-      {
-         double x = getAngularPartX();
-         double y = getAngularPartY();
-         double z = getAngularPartZ();
-
-         getAngularPart().cross(spatialInertia.getCenterOfMassOffset(), twist.getLinearPart());
-         getAngularPart().scale(spatialInertia.getMass());
-         getAngularPart().add(x, y, z);
-
-         addCrossToLinearPart(twist.getAngularPart(), spatialInertia.getCenterOfMassOffset());
-      }
-
-      getLinearPart().scale(spatialInertia.getMass());
+      spatialInertia.transform(twist, this);
    }
 }
