@@ -320,6 +320,12 @@ public interface SpatialInertiaReadOnly extends ReferenceFrameHolder
       return MecanoTools.computeKineticCoEnergy(getMomentOfInertia(), getMass(), getCenterOfMassOffset(), twist.getAngularPart(), twist.getLinearPart());
    }
 
+   /**
+    * Transforms the given spatial vector {@code vectorOriginal} and stores 
+    * 
+    * @param vectorOriginal
+    * @param vectorTransformed
+    */
    default void transform(SpatialVectorReadOnly vectorOriginal, FixedFrameSpatialVectorBasics vectorTransformed)
    {
       if (vectorOriginal == vectorTransformed)

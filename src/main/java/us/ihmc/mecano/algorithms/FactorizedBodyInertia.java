@@ -21,7 +21,32 @@ import us.ihmc.mecano.spatial.interfaces.TwistReadOnly;
 import us.ihmc.mecano.tools.MecanoIOTools;
 import us.ihmc.mecano.tools.MecanoTools;
 
-public class FactorizedBodyInertia implements GeometryObject<FactorizedBodyInertia>, ReferenceFrameHolder, FrameChangeable
+/**
+ * Factorized body inertia is a 6-by-6 matrix that is used to represent:
+ *
+ * <pre>
+ *     / &omega;&times; v&times; \
+ * B = |       | I
+ *     \ 0  &omega;&times; /
+ * </pre>
+ *
+ * where <tt>&omega;</tt> and <tt>v</tt> are the angular and linear velocities of a rigid-body,
+ * <tt>I</tt> is the spatial inertia of the same rigid-body, and <tt>(.)&times;</tt> is the mapping
+ * from vector to 3-by-3 matrix as follows:
+ *
+ * <pre>
+ * / x \    /  0 -z  y \
+ * | y |&times; = |  z  0 -x |
+ * \ z /    \ -y  x  0 /
+ * </pre>
+ * <p>
+ * This class is used as part of {@link CompositeRigidBodyMassMatrixCalculator} for calculating the
+ * Coriolis and centrifugal matrix.
+ * </p>
+ *
+ * @author Sylvain Bertrand
+ */
+class FactorizedBodyInertia implements GeometryObject<FactorizedBodyInertia>, ReferenceFrameHolder, FrameChangeable
 {
    private ReferenceFrame referenceFrame = null;
    private final Matrix3D angularInertia = new Matrix3D();

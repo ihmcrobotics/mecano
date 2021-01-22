@@ -99,6 +99,7 @@ public class CompositeRigidBodyMassMatrixCalculatorTest
          MultiBodySystemBasics input = MultiBodySystemBasics.toMultiBodySystemBasics(joints);
          input.getRootBody().updateFramesRecursively();
          CompositeRigidBodyMassMatrixCalculator massMatrixCalculator = new CompositeRigidBodyMassMatrixCalculator(input);
+         massMatrixCalculator.setEnableCoriolisMatrixCalculation(true);
          DMatrixRMaj jointVelocities = new DMatrixRMaj(MultiBodySystemTools.computeDegreesOfFreedom(joints), 1);
          MultiBodySystemTools.extractJointsState(joints, JointStateType.VELOCITY, jointVelocities);
 
@@ -123,6 +124,7 @@ public class CompositeRigidBodyMassMatrixCalculatorTest
          MultiBodySystemBasics input = MultiBodySystemBasics.toMultiBodySystemBasics(joints);
          input.getRootBody().updateFramesRecursively();
          CompositeRigidBodyMassMatrixCalculator massMatrixCalculator = new CompositeRigidBodyMassMatrixCalculator(input);
+         massMatrixCalculator.setEnableCoriolisMatrixCalculation(true);
          DMatrixRMaj jointVelocities = new DMatrixRMaj(MultiBodySystemTools.computeDegreesOfFreedom(joints), 1);
          MultiBodySystemTools.extractJointsState(joints, JointStateType.VELOCITY, jointVelocities);
          

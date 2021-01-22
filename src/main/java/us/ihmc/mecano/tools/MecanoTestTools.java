@@ -495,11 +495,36 @@ public class MecanoTestTools
       }
    }
 
+   /**
+    * Asserts on a per component basis that the two matrices are equal to an {@code epsilon}.
+    * <p>
+    * Note: the two arguments are considered to be equal if they are both equal to {@code null}.
+    * </p>
+    *
+    * @param expected the expected matrix. Not modified.
+    * @param actual   the actual matrix. Not modified.
+    * @param epsilon  the tolerance to use.
+    * @throws AssertionError if the two matrices are not equal. If only one of the arguments is equal
+    *                        to {@code null}.
+    */
    public static void assertDMatrixEquals(DMatrix expected, DMatrix actual, double epsilon)
    {
       assertDMatrixEquals(null, expected, actual, epsilon);
    }
 
+   /**
+    * Asserts on a per component basis that the two matrices are equal to an {@code epsilon}.
+    * <p>
+    * Note: the two arguments are considered to be equal if they are both equal to {@code null}.
+    * </p>
+    *
+    * @param messagePrefix prefix to add to the automated message.
+    * @param expected      the expected matrix. Not modified.
+    * @param actual        the actual matrix. Not modified.
+    * @param epsilon       the tolerance to use.
+    * @throws AssertionError if the two matrices are not equal. If only one of the arguments is equal
+    *                        to {@code null}.
+    */
    public static void assertDMatrixEquals(String messagePrefix, DMatrix expected, DMatrix actual, double epsilon)
    {
       if (expected == null && actual == null)

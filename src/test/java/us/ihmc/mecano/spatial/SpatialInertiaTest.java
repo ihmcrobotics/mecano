@@ -306,6 +306,33 @@ public class SpatialInertiaTest
       }
    }
 
+   @Test
+   public void testTransform()
+   {
+      Random random = new Random(6457645);
+
+      for (int i = 0; i < ITERATIONS; i++)
+      { // Test against EJML
+         ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
+         SpatialInertia spatialInertia = MecanoRandomTools.nextSpatialInertia(random, worldFrame, worldFrame);
+         SpatialVector vectorOriginal = MecanoRandomTools.nextSpatialVector(random, worldFrame);
+         SpatialVector expectedVectorTransformed = new SpatialVector();
+         SpatialVector actualVectorTransformed = new SpatialVector();
+
+         DMatrixRMaj spatialInertia_ejml = new DMatrixRMaj(6, 6);
+         DMatrixRMaj vectorOriginal_ejml = new DMatrixRMaj(6, 1);
+         DMatrixRMaj expectedVectorTransformed_ejml = new DMatrixRMaj(6, 1);
+         spatialInertia.get(spatialInertia_ejml);
+         vectorOriginal.get(vectorOriginal_ejml);
+         CommonOps_DDRM.mult(spatialInertia_ejml, vectorOriginal_ejml, expectedVectorTransformed_ejml);
+         expectedVectorTransformed.set(expectedVectorTransformed_ejml);
+
+         spatialInertia.transform(vectorOriginal, actualVectorTransformed);
+
+         MecanoTestTools.assertSpatialVectorEquals(expectedVectorTransformed, actualVectorTransformed, EPSILON);
+      }
+   }
+
    private static void assertEigenValuesPositiveAndEqual(Matrix3D matrix1, Matrix3D matrix2, double epsilon)
    {
       DMatrixRMaj denseMatrix1 = new DMatrixRMaj(3, 3);
