@@ -573,7 +573,7 @@ public class GeometricJacobianCalculatorTest
 
          jacobianCalculator.setKinematicChain(rootBody, endEffector);
 
-         DMatrixRMaj expectedJacobianRateMatrix = computeJacobianRateFD(jacobianCalculator, 1.0e-6);
+         DMatrixRMaj expectedJacobianRateMatrix = computeJacobianRateFD(joints, jacobianCalculator, 1.0e-6);
          DMatrixRMaj actualJacobianRateMatrix = jacobianCalculator.getJacobianRateMatrix();
 
          MecanoTestTools.assertDMatrixEquals("Iteration: " + i, expectedJacobianRateMatrix, actualJacobianRateMatrix, 1.0e-7);
@@ -601,7 +601,7 @@ public class GeometricJacobianCalculatorTest
 
          jacobianCalculator.setKinematicChain(rootBody, endEffector);
 
-         DMatrixRMaj expectedJacobianRateMatrix = computeJacobianRateFD(jacobianCalculator, 1.0e-6);
+         DMatrixRMaj expectedJacobianRateMatrix = computeJacobianRateFD(joints, jacobianCalculator, 1.0e-6);
          DMatrixRMaj actualJacobianRateMatrix = jacobianCalculator.getJacobianRateMatrix();
 
          MecanoTestTools.assertDMatrixEquals("Iteration: " + i, expectedJacobianRateMatrix, actualJacobianRateMatrix, 1.0e-5);
@@ -617,20 +617,19 @@ public class GeometricJacobianCalculatorTest
       }
    }
 
-   @SuppressWarnings("unchecked")
-   private static DMatrixRMaj computeJacobianRateFD(GeometricJacobianCalculator calculator, double dt)
+   private static DMatrixRMaj computeJacobianRateFD(List<? extends JointBasics> joints, GeometricJacobianCalculator calculator, double dt)
    {
-      int size = calculator.getJointsFromBaseToEndEffector().stream().mapToInt(JointReadOnly::getConfigurationMatrixSize).sum();
+      int size = joints.stream().mapToInt(JointReadOnly::getConfigurationMatrixSize).sum();
       DMatrixRMaj q = new DMatrixRMaj(size, 1);
-      MultiBodySystemTools.extractJointsState(calculator.getJointsFromBaseToEndEffector(), JointStateType.CONFIGURATION, q);
+      MultiBodySystemTools.extractJointsState(joints, JointStateType.CONFIGURATION, q);
 
-      new MultiBodySystemStateIntegrator(-0.5 * dt).integrateFromVelocity((List<? extends JointBasics>) calculator.getJointsFromBaseToEndEffector());
+      new MultiBodySystemStateIntegrator(-0.5 * dt).integrateFromVelocity(joints);
 
       ((RigidBodyBasics) calculator.getBase()).updateFramesRecursively();
       calculator.reset();
       DMatrixRMaj jacobianCurrent = new DMatrixRMaj(calculator.getJacobianMatrix());
 
-      new MultiBodySystemStateIntegrator(dt).integrateFromVelocity((List<? extends JointBasics>) calculator.getJointsFromBaseToEndEffector());
+      new MultiBodySystemStateIntegrator(dt).integrateFromVelocity(joints);
 
       ((RigidBodyBasics) calculator.getBase()).updateFramesRecursively();
       calculator.reset();
@@ -640,7 +639,7 @@ public class GeometricJacobianCalculatorTest
       CommonOps_DDRM.subtract(jacobianNext, jacobianCurrent, jacobianRate);
       CommonOps_DDRM.scale(1.0 / dt, jacobianRate);
 
-      MultiBodySystemTools.insertJointsState((List<? extends JointBasics>) calculator.getJointsFromBaseToEndEffector(), JointStateType.CONFIGURATION, q);
+      MultiBodySystemTools.insertJointsState(joints, JointStateType.CONFIGURATION, q);
       ((RigidBodyBasics) calculator.getBase()).updateFramesRecursively();
       calculator.reset();
 
