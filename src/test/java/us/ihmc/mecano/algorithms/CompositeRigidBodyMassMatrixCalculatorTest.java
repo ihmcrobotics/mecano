@@ -8,6 +8,7 @@ import java.util.Random;
 import org.ejml.data.DMatrixRMaj;
 import org.ejml.dense.row.CommonOps_DDRM;
 import org.ejml.dense.row.MatrixFeatures_DDRM;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
@@ -138,5 +139,61 @@ public class CompositeRigidBodyMassMatrixCalculatorTest
          
          MecanoTestTools.assertDMatrixEquals("Iteration " + i, expectedJointTaus, actualJointTaus, 1.0e-11);
       }
+   }
+
+   @Test
+   @Disabled
+   public void testBenchmarkCoriolisMatrix()
+   {
+      Random random = new Random(547467);
+
+      for (int i = 0; i < 5000; i++)
+      { // warmup
+         int numberOfJoints = random.nextInt(100) + 1;
+         List<JointBasics> joints = MultiBodySystemRandomTools.nextJointTree(random, numberOfJoints);
+         MultiBodySystemRandomTools.nextState(random, JointStateType.CONFIGURATION, joints);
+         MultiBodySystemRandomTools.nextState(random, JointStateType.VELOCITY, joints);
+
+         MultiBodySystemBasics input = MultiBodySystemBasics.toMultiBodySystemBasics(joints);
+         input.getRootBody().updateFramesRecursively();
+         CompositeRigidBodyMassMatrixCalculator massMatrixCalculator = new CompositeRigidBodyMassMatrixCalculator(input);
+         massMatrixCalculator.setEnableCoriolisMatrixCalculation(true);
+         massMatrixCalculator.getCoriolisMatrix();
+      }
+
+      long totalTimeNoCoriolis = 0l;
+      long totalTimeCoriolis = 0l;
+      int benchmarkIterations = 50000;
+
+      for (int i = 0; i < benchmarkIterations; i++)
+      { // actual benchmark
+         int numberOfJoints = random.nextInt(100) + 1;
+         List<JointBasics> joints = MultiBodySystemRandomTools.nextJointTree(random, numberOfJoints);
+         MultiBodySystemRandomTools.nextState(random, JointStateType.CONFIGURATION, joints);
+         MultiBodySystemRandomTools.nextState(random, JointStateType.VELOCITY, joints);
+         
+         MultiBodySystemBasics input = MultiBodySystemBasics.toMultiBodySystemBasics(joints);
+         input.getRootBody().updateFramesRecursively();
+
+         { // No Coriolis
+            CompositeRigidBodyMassMatrixCalculator massMatrixCalculator = new CompositeRigidBodyMassMatrixCalculator(input);
+            long start = System.nanoTime();
+            massMatrixCalculator.getMassMatrix();
+            totalTimeNoCoriolis += System.nanoTime() - start;
+         }
+
+         input.getRootBody().updateFramesRecursively();
+         
+         { // Coriolis
+            CompositeRigidBodyMassMatrixCalculator massMatrixCalculator = new CompositeRigidBodyMassMatrixCalculator(input);
+            massMatrixCalculator.setEnableCoriolisMatrixCalculation(true);
+            long start = System.nanoTime();
+            massMatrixCalculator.getCoriolisMatrix();
+            totalTimeCoriolis += System.nanoTime() - start;
+         }
+      }
+
+      System.out.println("Time w/o  Coriolis: avg: " + (totalTimeNoCoriolis / 1e3 / benchmarkIterations) + "microsec.");
+      System.out.println("Time with Coriolis: avg: " + (totalTimeCoriolis / 1e3 / benchmarkIterations) + "microsec.");
    }
 }
