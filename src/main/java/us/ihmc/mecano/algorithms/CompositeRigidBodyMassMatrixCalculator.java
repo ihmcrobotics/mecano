@@ -8,6 +8,7 @@ import org.ejml.data.DMatrix;
 import org.ejml.data.DMatrixRMaj;
 
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
+import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.mecano.frames.MovingReferenceFrame;
 import us.ihmc.mecano.multiBodySystem.interfaces.JointReadOnly;
 import us.ihmc.mecano.multiBodySystem.interfaces.MultiBodySystemReadOnly;
@@ -507,6 +508,11 @@ public class CompositeRigidBodyMassMatrixCalculator
 
       /** The Coriolis and centrifugal accelerations for this rigid-body. */
       private final SpatialAcceleration coriolisBodyAcceleration;
+      /**
+       * Transform from {@code this.getFrameAfterJoint()} to {@code parent.getFrameAfterJoint()} used to
+       * reduce computation load.
+       */
+      private final RigidBodyTransform transformToParent = new RigidBodyTransform();
 
       public CompositeRigidBodyInertia(RigidBodyReadOnly rigidBody, CompositeRigidBodyInertia parent, int[] jointIndices)
       {
@@ -591,6 +597,9 @@ public class CompositeRigidBodyMassMatrixCalculator
       {
          if (!isRoot())
          {
+            if (!parent.isRoot())
+               getFrameAfterJoint().getTransformToDesiredFrame(transformToParent, parent.getFrameAfterJoint());
+
             if (getJoint().isMotionSubspaceVariable())
             {
                for (int i = 0; i < getNumberOfDoFs(); i++)
@@ -639,8 +648,11 @@ public class CompositeRigidBodyMassMatrixCalculator
 
          for (int i = 0; i < children.size(); i++)
          {
-            childInertia.setIncludingFrame(children.get(i).compositeInertia);
-            childInertia.changeFrame(getFrameAfterJoint());
+            CompositeRigidBodyInertia child = children.get(i);
+            childInertia.setIncludingFrame(child.compositeInertia);
+            // Optimization for "childInertia.changeFrame(getFrameAfterJoint());"
+            childInertia.applyTransform(child.transformToParent);
+            childInertia.setReferenceFrame(getFrameAfterJoint());
             compositeInertia.add(childInertia);
          }
 
@@ -658,8 +670,11 @@ public class CompositeRigidBodyMassMatrixCalculator
 
             for (int i = 0; i < children.size(); i++)
             {
-               childFactorizedInertia.setIncludingFrame(children.get(i).compositeFactorizedInertia);
-               childFactorizedInertia.changeFrame(getFrameAfterJoint());
+               CompositeRigidBodyInertia child = children.get(i);
+               childFactorizedInertia.setIncludingFrame(child.compositeFactorizedInertia);
+               // Optimization for "childFactorizedInertia.changeFrame(getFrameAfterJoint());"
+               childFactorizedInertia.applyTransform(child.transformToParent);
+               childFactorizedInertia.setReferenceFrame(getFrameAfterJoint());
                compositeFactorizedInertia.add(childFactorizedInertia);
             }
 
@@ -711,6 +726,7 @@ public class CompositeRigidBodyMassMatrixCalculator
          if (enableCoriolisMatrixCalculation)
          {
             CompositeRigidBodyInertia ancestor = parent;
+            CompositeRigidBodyInertia previous = this;
 
             while (!ancestor.isRoot())
             {
@@ -721,9 +737,13 @@ public class CompositeRigidBodyMassMatrixCalculator
                   Momentum F2j = F2[j];
                   Momentum F3j = F3[j];
 
-                  F1j.changeFrame(ancestor.getFrameAfterJoint());
-                  F2j.changeFrame(ancestor.getFrameAfterJoint());
-                  F3j.changeFrame(ancestor.getFrameAfterJoint());
+                  // Optimization for "F*j.changeFrame(ancestor.getFrameAfterJoint())"
+                  F1j.applyTransform(previous.transformToParent);
+                  F2j.applyTransform(previous.transformToParent);
+                  F3j.applyTransform(previous.transformToParent);
+                  F1j.setReferenceFrame(ancestor.getFrameAfterJoint());
+                  F2j.setReferenceFrame(ancestor.getFrameAfterJoint());
+                  F3j.setReferenceFrame(ancestor.getFrameAfterJoint());
 
                   for (int i = 0; i < ancestor.getNumberOfDoFs(); i++)
                   {
@@ -739,21 +759,25 @@ public class CompositeRigidBodyMassMatrixCalculator
                   }
                }
 
+               previous = ancestor;
                ancestor = ancestor.parent;
             }
          }
          else
          {
             CompositeRigidBodyInertia ancestor = parent;
+            CompositeRigidBodyInertia previous = this;
 
-            while (ancestor.getJoint() != null)
+            while (!ancestor.isRoot())
             {
                for (int j = 0; j < getNumberOfDoFs(); j++)
                {
                   int index_j = jointIndices[j];
                   Momentum F2j = F2[j];
 
-                  F2j.changeFrame(ancestor.getFrameAfterJoint());
+                  // Optimization for "F2j.changeFrame(ancestor.getFrameAfterJoint())"
+                  F2j.applyTransform(previous.transformToParent);
+                  F2j.setReferenceFrame(previous.parent.getFrameAfterJoint());
 
                   for (int i = 0; i < ancestor.getNumberOfDoFs(); i++)
                   {
@@ -764,6 +788,7 @@ public class CompositeRigidBodyMassMatrixCalculator
                   }
                }
 
+               previous = ancestor;
                ancestor = ancestor.parent;
             }
          }
@@ -828,6 +853,12 @@ public class CompositeRigidBodyMassMatrixCalculator
       public JointReadOnly getJoint()
       {
          return rigidBody.getParentJoint();
+      }
+
+      @Override
+      public String toString()
+      {
+         return rigidBody.toString();
       }
    }
 }
