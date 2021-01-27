@@ -9,6 +9,12 @@ import static us.ihmc.mecano.tools.MecanoIOTools.getSpatialVectorString;
 import static us.ihmc.mecano.tools.MecanoIOTools.getTwistString;
 import static us.ihmc.mecano.tools.MecanoIOTools.getWrenchString;
 
+import org.ejml.data.DMatrix;
+import org.ejml.data.DMatrixD1;
+import org.ejml.data.DMatrixRMaj;
+import org.ejml.dense.row.MatrixFeatures_DDRM;
+import org.ejml.ops.MatrixFeatures_D;
+
 import us.ihmc.mecano.spatial.SpatialVector;
 import us.ihmc.mecano.spatial.interfaces.MomentumReadOnly;
 import us.ihmc.mecano.spatial.interfaces.SpatialAccelerationReadOnly;
@@ -486,6 +492,67 @@ public class MecanoTestTools
       if (!expected.epsilonEquals(actual, epsilon))
       {
          throwNotEqualAssertionError(messagePrefix, expected, actual, format);
+      }
+   }
+
+   /**
+    * Asserts on a per component basis that the two matrices are equal to an {@code epsilon}.
+    * <p>
+    * Note: the two arguments are considered to be equal if they are both equal to {@code null}.
+    * </p>
+    *
+    * @param expected the expected matrix. Not modified.
+    * @param actual   the actual matrix. Not modified.
+    * @param epsilon  the tolerance to use.
+    * @throws AssertionError if the two matrices are not equal. If only one of the arguments is equal
+    *                        to {@code null}.
+    */
+   public static void assertDMatrixEquals(DMatrix expected, DMatrix actual, double epsilon)
+   {
+      assertDMatrixEquals(null, expected, actual, epsilon);
+   }
+
+   /**
+    * Asserts on a per component basis that the two matrices are equal to an {@code epsilon}.
+    * <p>
+    * Note: the two arguments are considered to be equal if they are both equal to {@code null}.
+    * </p>
+    *
+    * @param messagePrefix prefix to add to the automated message.
+    * @param expected      the expected matrix. Not modified.
+    * @param actual        the actual matrix. Not modified.
+    * @param epsilon       the tolerance to use.
+    * @throws AssertionError if the two matrices are not equal. If only one of the arguments is equal
+    *                        to {@code null}.
+    */
+   public static void assertDMatrixEquals(String messagePrefix, DMatrix expected, DMatrix actual, double epsilon)
+   {
+      if (expected == null && actual == null)
+         return;
+
+      if (!(expected != null && actual != null))
+         throwNotEqualAssertionError(messagePrefix, expected == null ? "null" : expected.toString(), actual == null ? "null" : actual.toString());
+
+      boolean equal;
+      if (expected instanceof DMatrixD1 && actual instanceof DMatrixD1)
+         equal = MatrixFeatures_DDRM.isEquals((DMatrixD1) expected, (DMatrixD1) actual, epsilon);
+      else
+         equal = MatrixFeatures_D.isIdentical(expected, actual, epsilon);
+
+      if (!equal)
+      {
+         double max = 0.0;
+         DMatrixRMaj difference = new DMatrixRMaj(expected.getNumRows(), expected.getNumCols());
+         for (int row = 0; row < expected.getNumRows(); row++)
+         {
+            for (int col = 0; col < expected.getNumCols(); col++)
+            {
+               double diff = expected.unsafe_get(row, col) - actual.unsafe_get(row, col);
+               difference.unsafe_set(row, col, diff);
+               max = Math.max(max, Math.abs(diff));
+            }
+         }
+         throwNotEqualAssertionError(messagePrefix, expected.toString(), actual.toString(), difference.toString() + "\nMax difference of: " + max);
       }
    }
 

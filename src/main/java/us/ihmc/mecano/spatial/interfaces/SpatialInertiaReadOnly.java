@@ -321,6 +321,42 @@ public interface SpatialInertiaReadOnly extends ReferenceFrameHolder
    }
 
    /**
+    * Transforms the given spatial vector {@code vectorOriginal} and stores the result in
+    * {@code vectorTransformed}.
+    * 
+    * @param vectorOriginal    the vector to be transformed. Not modified.
+    * @param vectorTransformed the vector used to store the result. Modified.
+    * @throws ReferenceFrameMismatchException if any of the arguments are not expressed in the same
+    *                                         reference frame as {@code this}.
+    * @throws UnsupportedOperationException   if the two arguments are the same instance. This method
+    *                                         does not support in-place operation.
+    */
+   default void transform(SpatialVectorReadOnly vectorOriginal, FixedFrameSpatialVectorBasics vectorTransformed)
+   {
+      if (vectorOriginal == vectorTransformed)
+         throw new UnsupportedOperationException("In-place transformation is not supported.");
+
+      checkReferenceFrameMatch(vectorOriginal, vectorTransformed);
+
+      if (isCenterOfMassOffsetZero())
+      {
+         getMomentOfInertia().transform(vectorOriginal.getAngularPart(), vectorTransformed.getAngularPart());
+         vectorTransformed.getLinearPart().setAndScale(getMass(), vectorOriginal.getLinearPart());
+      }
+      else
+      {
+         vectorTransformed.getAngularPart().cross(getCenterOfMassOffset(), vectorOriginal.getLinearPart());
+         vectorTransformed.getAngularPart().scale(getMass());
+         getMomentOfInertia().addTransform(vectorOriginal.getAngularPart(), vectorTransformed.getAngularPart());
+
+         vectorTransformed.getLinearPart().cross(vectorOriginal.getAngularPart(), getCenterOfMassOffset());
+         vectorTransformed.getLinearPart().add(vectorOriginal.getLinearPart());
+         vectorTransformed.getLinearPart().scale(getMass());
+      }
+
+   }
+
+   /**
     * Packs this spatial inertia matrix into the given {@code DenseMatrix64F} as follows:
     *
     * <pre>
