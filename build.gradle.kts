@@ -6,7 +6,7 @@ plugins {
 
 ihmc {
    group = "us.ihmc"
-   version = "0.7.4"
+   version = "0.8.0"
    vcsUrl = "https://github.com/ihmcrobotics/mecano"
    openSource = true
 
@@ -18,9 +18,9 @@ mainDependencies {
    api("org.ejml:ejml-core:0.39")
    api("org.ejml:ejml-ddense:0.39")
 
-   api("us.ihmc:euclid:0.16.0")
-   api("us.ihmc:euclid-frame:0.16.0")
-   api("us.ihmc:euclid-geometry:0.16.0")
+   api("us.ihmc:euclid:0.16.2")
+   api("us.ihmc:euclid-frame:0.16.2")
+   api("us.ihmc:euclid-geometry:0.16.2")
 }
 
 testDependencies {
