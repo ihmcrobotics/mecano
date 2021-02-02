@@ -101,35 +101,35 @@ public class FixedJoint implements FixedJointBasics
 
    /** {@inheritDoc} */
    @Override
-   public final MovingReferenceFrame getFrameBeforeJoint()
+   public MovingReferenceFrame getFrameBeforeJoint()
    {
       return jointFrame;
    }
 
    /** {@inheritDoc} */
    @Override
-   public final MovingReferenceFrame getFrameAfterJoint()
+   public MovingReferenceFrame getFrameAfterJoint()
    {
       return jointFrame;
    }
 
    /** {@inheritDoc} */
    @Override
-   public final RigidBodyBasics getPredecessor()
+   public RigidBodyBasics getPredecessor()
    {
       return predecessor;
    }
 
    /** {@inheritDoc} */
    @Override
-   public final RigidBodyBasics getSuccessor()
+   public RigidBodyBasics getSuccessor()
    {
       return successor;
    }
 
    /** {@inheritDoc} */
    @Override
-   public final String getName()
+   public String getName()
    {
       return name;
    }
