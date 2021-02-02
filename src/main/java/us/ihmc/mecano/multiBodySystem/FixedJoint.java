@@ -4,6 +4,7 @@ import java.util.Collections;
 import java.util.List;
 
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
+import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.transform.interfaces.RigidBodyTransformReadOnly;
 import us.ihmc.mecano.frames.MovingReferenceFrame;
 import us.ihmc.mecano.multiBodySystem.interfaces.FixedJointBasics;
@@ -150,11 +151,15 @@ public class FixedJoint implements FixedJointBasics
    }
 
    @Override
-   public void setupLoopClosure(RigidBodyBasics successor, RigidBodyTransformReadOnly transformToSuccessorParentJoint)
+   public void setupLoopClosure(RigidBodyBasics successor, RigidBodyTransformReadOnly transformFromSuccessorParentJoint)
    {
+      RigidBodyTransform transformToSuccessorParentJoint = new RigidBodyTransform(transformFromSuccessorParentJoint);
+      transformToSuccessorParentJoint.invert();
       loopClosureFrame = MovingReferenceFrame.constructFrameFixedInParent(MecanoTools.capitalize(getName()) + "LoopClosureFrame",
                                                                           getFrameAfterJoint(),
                                                                           transformToSuccessorParentJoint);
+      setSuccessor(successor);
+      successor.addParentLoopClosureJoint(this);
    }
 
    /** {@inheritDoc} */
