@@ -3,7 +3,7 @@ package us.ihmc.mecano.yoVariables.multiBodySystem;
 import java.util.List;
 
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
-import us.ihmc.euclid.transform.RigidBodyTransform;
+import us.ihmc.euclid.transform.interfaces.RigidBodyTransformReadOnly;
 import us.ihmc.mecano.multiBodySystem.Joint;
 import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
 import us.ihmc.mecano.multiBodySystem.interfaces.SixDoFJointBasics;
@@ -64,7 +64,7 @@ public class YoSixDoFJoint extends Joint implements SixDoFJointBasics
     * @param transformToParent the transform to the frame after the parent joint. Not modified.
     * @param registry          the registry to register child variables to.
     */
-   public YoSixDoFJoint(String name, RigidBodyBasics predecessor, RigidBodyTransform transformToParent, YoRegistry registry)
+   public YoSixDoFJoint(String name, RigidBodyBasics predecessor, RigidBodyTransformReadOnly transformToParent, YoRegistry registry)
    {
       super(name, predecessor, transformToParent);
       this.registry = registry;

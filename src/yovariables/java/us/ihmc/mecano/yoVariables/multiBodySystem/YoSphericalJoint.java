@@ -7,6 +7,7 @@ import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.referenceFrame.interfaces.FixedFrameVector3DBasics;
 import us.ihmc.euclid.tools.EuclidCoreIOTools;
 import us.ihmc.euclid.transform.RigidBodyTransform;
+import us.ihmc.euclid.transform.interfaces.RigidBodyTransformReadOnly;
 import us.ihmc.euclid.tuple3D.interfaces.Tuple3DReadOnly;
 import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.euclid.tuple4D.interfaces.QuaternionBasics;
@@ -82,7 +83,7 @@ public class YoSphericalJoint extends Joint implements SphericalJointBasics
     * @param transformToParent the transform to the frame after the parent joint. Not modified.
     * @param registry          the registry to register child variables to.
     */
-   public YoSphericalJoint(String name, RigidBodyBasics predecessor, RigidBodyTransform transformToParent, YoRegistry registry)
+   public YoSphericalJoint(String name, RigidBodyBasics predecessor, RigidBodyTransformReadOnly transformToParent, YoRegistry registry)
    {
       super(name, predecessor, transformToParent);
       jointOrientation = new YoFrameQuaternion(name, beforeJointFrame, registry);

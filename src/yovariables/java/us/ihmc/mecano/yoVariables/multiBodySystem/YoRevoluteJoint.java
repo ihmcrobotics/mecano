@@ -4,6 +4,7 @@ import us.ihmc.euclid.orientation.interfaces.Orientation3DReadOnly;
 import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.referenceFrame.interfaces.FrameVector3DBasics;
 import us.ihmc.euclid.transform.RigidBodyTransform;
+import us.ihmc.euclid.transform.interfaces.RigidBodyTransformReadOnly;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple3D.interfaces.Tuple3DReadOnly;
 import us.ihmc.euclid.tuple3D.interfaces.Vector3DReadOnly;
@@ -70,7 +71,7 @@ public class YoRevoluteJoint extends YoOneDoFJoint implements RevoluteJointBasic
     * @param jointAxis         the axis around which this joint can rotate. Not modified.
     * @param registry          the registry to register child variables to.
     */
-   public YoRevoluteJoint(String name, RigidBodyBasics predecessor, RigidBodyTransform transformToParent, Vector3DReadOnly jointAxis,
+   public YoRevoluteJoint(String name, RigidBodyBasics predecessor, RigidBodyTransformReadOnly transformToParent, Vector3DReadOnly jointAxis,
                           YoRegistry registry)
    {
       super(name, predecessor, jointAxis, new Vector3D(), transformToParent, registry);
