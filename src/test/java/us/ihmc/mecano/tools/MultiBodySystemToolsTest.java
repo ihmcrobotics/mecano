@@ -4,6 +4,7 @@ import static org.junit.jupiter.api.Assertions.assertArrayEquals;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
@@ -13,6 +14,7 @@ import java.util.List;
 import java.util.Random;
 import java.util.Set;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import org.junit.jupiter.api.Test;
 
@@ -553,6 +555,124 @@ public class MultiBodySystemToolsTest
             actualDoFs = MultiBodySystemTools.computeDistance(secondBody, firstBody);
             assertEquals(expectedDoFs, actualDoFs);
          }
+      }
+   }
+
+   @Test
+   public void testFindJoint() throws Exception
+   {
+      Random random = new Random(1646541);
+
+      for (int i = 0; i < ITERATIONS; i++)
+      {
+         int numberOfJoints = random.nextInt(100) + 1;
+         List<JointBasics> joints = MultiBodySystemRandomTools.nextJointTree(random, numberOfJoints);
+         RigidBodyBasics rootBody = MultiBodySystemTools.getRootBody(joints.get(0).getPredecessor());
+
+         int expectedJointIndex = random.nextInt(numberOfJoints);
+         JointBasics expectedJoint = joints.get(expectedJointIndex);
+         String expectedJointName = expectedJoint.getName();
+
+         List<RigidBodyBasics> supportBodies = Stream.of(MultiBodySystemTools.collectSupportJoints(expectedJoint.getSuccessor()))
+                                                     .map(JointBasics::getPredecessor).collect(Collectors.toList());
+         List<RigidBodyBasics> nonSupportBodies = rootBody.subtreeStream().filter(body -> !supportBodies.contains(body)).collect(Collectors.toList());
+
+         // JointBasics
+         assertTrue(expectedJoint == MultiBodySystemTools.findJoint(rootBody, expectedJointName));
+         assertTrue(expectedJoint == MultiBodySystemTools.findJoint(supportBodies.get(random.nextInt(supportBodies.size())), expectedJointName));
+         assertNull(MultiBodySystemTools.findJoint(rootBody, expectedJointName.toLowerCase()));
+         assertNull(MultiBodySystemTools.findJoint(rootBody, expectedJointName.toUpperCase()));
+         assertNull(MultiBodySystemTools.findJoint(nonSupportBodies.get(random.nextInt(nonSupportBodies.size())), expectedJointName));
+
+         assertTrue(expectedJoint == MultiBodySystemTools.findJoint(rootBody, expectedJointName, false));
+         assertTrue(expectedJoint == MultiBodySystemTools.findJoint(supportBodies.get(random.nextInt(supportBodies.size())), expectedJointName, false));
+         assertNull(MultiBodySystemTools.findJoint(rootBody, expectedJointName.toLowerCase(), false));
+         assertNull(MultiBodySystemTools.findJoint(rootBody, expectedJointName.toUpperCase(), false));
+         assertNull(MultiBodySystemTools.findJoint(nonSupportBodies.get(random.nextInt(nonSupportBodies.size())), expectedJointName, false));
+
+         assertTrue(expectedJoint == MultiBodySystemTools.findJoint(rootBody, expectedJointName.toLowerCase(), true));
+         assertTrue(expectedJoint == MultiBodySystemTools.findJoint(rootBody, expectedJointName.toUpperCase(), true));
+
+         // JointReadOnly
+         assertTrue(expectedJoint == MultiBodySystemTools.findJoint((RigidBodyReadOnly) rootBody, expectedJointName));
+         assertTrue(expectedJoint == MultiBodySystemTools.findJoint((RigidBodyReadOnly) supportBodies.get(random.nextInt(supportBodies.size())),
+                                                                    expectedJointName));
+         assertNull(MultiBodySystemTools.findJoint((RigidBodyReadOnly) rootBody, expectedJointName.toLowerCase()));
+         assertNull(MultiBodySystemTools.findJoint((RigidBodyReadOnly) rootBody, expectedJointName.toUpperCase()));
+         assertNull(MultiBodySystemTools.findJoint((RigidBodyReadOnly) nonSupportBodies.get(random.nextInt(nonSupportBodies.size())), expectedJointName));
+
+         assertTrue(expectedJoint == MultiBodySystemTools.findJoint((RigidBodyReadOnly) rootBody, expectedJointName, false));
+         assertTrue(expectedJoint == MultiBodySystemTools.findJoint((RigidBodyReadOnly) supportBodies.get(random.nextInt(supportBodies.size())),
+                                                                    expectedJointName,
+                                                                    false));
+         assertNull(MultiBodySystemTools.findJoint((RigidBodyReadOnly) rootBody, expectedJointName.toLowerCase(), false));
+         assertNull(MultiBodySystemTools.findJoint((RigidBodyReadOnly) rootBody, expectedJointName.toUpperCase(), false));
+         assertNull(MultiBodySystemTools.findJoint((RigidBodyReadOnly) nonSupportBodies.get(random.nextInt(nonSupportBodies.size())),
+                                                   expectedJointName,
+                                                   false));
+
+         assertTrue(expectedJoint == MultiBodySystemTools.findJoint((RigidBodyReadOnly) rootBody, expectedJointName.toLowerCase(), true));
+         assertTrue(expectedJoint == MultiBodySystemTools.findJoint((RigidBodyReadOnly) rootBody, expectedJointName.toUpperCase(), true));
+      }
+   }
+
+   @Test
+   public void testFindRigidBody() throws Exception
+   {
+      Random random = new Random(1646541);
+
+      for (int i = 0; i < ITERATIONS; i++)
+      {
+         int numberOfJoints = random.nextInt(100) + 1;
+         List<JointBasics> joints = MultiBodySystemRandomTools.nextJointTree(random, numberOfJoints);
+         RigidBodyBasics rootBody = MultiBodySystemTools.getRootBody(joints.get(0).getPredecessor());
+         List<? extends RigidBodyBasics> bodies = rootBody.subtreeList();
+
+         int expectedBodyIndex = random.nextInt(numberOfJoints);
+         RigidBodyBasics expectedBody = bodies.get(expectedBodyIndex);
+         String expectedBodyName = expectedBody.getName();
+
+         List<RigidBodyBasics> supportBodies = Stream.of(MultiBodySystemTools.collectSupportJoints(expectedBody)).map(JointBasics::getPredecessor)
+                                                     .collect(Collectors.toList());
+         supportBodies.add(expectedBody);
+         List<RigidBodyBasics> nonSupportBodies = rootBody.subtreeStream().filter(body -> !supportBodies.contains(body)).collect(Collectors.toList());
+
+         // RigidBodyBasics
+         assertTrue(expectedBody == MultiBodySystemTools.findRigidBody(rootBody, expectedBodyName));
+         assertTrue(expectedBody == MultiBodySystemTools.findRigidBody(supportBodies.get(random.nextInt(supportBodies.size())), expectedBodyName));
+         assertNull(MultiBodySystemTools.findRigidBody(rootBody, expectedBodyName.toLowerCase()));
+         assertNull(MultiBodySystemTools.findRigidBody(rootBody, expectedBodyName.toUpperCase()));
+         assertNull(MultiBodySystemTools.findRigidBody(nonSupportBodies.get(random.nextInt(nonSupportBodies.size())), expectedBodyName));
+
+         assertTrue(expectedBody == MultiBodySystemTools.findRigidBody(rootBody, expectedBodyName, false));
+         assertTrue(expectedBody == MultiBodySystemTools.findRigidBody(supportBodies.get(random.nextInt(supportBodies.size())), expectedBodyName, false));
+         assertNull(MultiBodySystemTools.findRigidBody(rootBody, expectedBodyName.toLowerCase(), false));
+         assertNull(MultiBodySystemTools.findRigidBody(rootBody, expectedBodyName.toUpperCase(), false));
+         assertNull(MultiBodySystemTools.findRigidBody(nonSupportBodies.get(random.nextInt(nonSupportBodies.size())), expectedBodyName, false));
+
+         assertTrue(expectedBody == MultiBodySystemTools.findRigidBody(rootBody, expectedBodyName.toLowerCase(), true));
+         assertTrue(expectedBody == MultiBodySystemTools.findRigidBody(rootBody, expectedBodyName.toUpperCase(), true));
+
+         // RigidBodyReadOnly
+         assertTrue(expectedBody == MultiBodySystemTools.findRigidBody((RigidBodyReadOnly) rootBody, expectedBodyName));
+         assertTrue(expectedBody == MultiBodySystemTools.findRigidBody((RigidBodyReadOnly) supportBodies.get(random.nextInt(supportBodies.size())),
+                                                                       expectedBodyName));
+         assertNull(MultiBodySystemTools.findRigidBody((RigidBodyReadOnly) rootBody, expectedBodyName.toLowerCase()));
+         assertNull(MultiBodySystemTools.findRigidBody((RigidBodyReadOnly) rootBody, expectedBodyName.toUpperCase()));
+         assertNull(MultiBodySystemTools.findRigidBody((RigidBodyReadOnly) nonSupportBodies.get(random.nextInt(nonSupportBodies.size())), expectedBodyName));
+
+         assertTrue(expectedBody == MultiBodySystemTools.findRigidBody((RigidBodyReadOnly) rootBody, expectedBodyName, false));
+         assertTrue(expectedBody == MultiBodySystemTools.findRigidBody((RigidBodyReadOnly) supportBodies.get(random.nextInt(supportBodies.size())),
+                                                                       expectedBodyName,
+                                                                       false));
+         assertNull(MultiBodySystemTools.findRigidBody((RigidBodyReadOnly) rootBody, expectedBodyName.toLowerCase(), false));
+         assertNull(MultiBodySystemTools.findRigidBody((RigidBodyReadOnly) rootBody, expectedBodyName.toUpperCase(), false));
+         assertNull(MultiBodySystemTools.findRigidBody((RigidBodyReadOnly) nonSupportBodies.get(random.nextInt(nonSupportBodies.size())),
+                                                       expectedBodyName,
+                                                       false));
+
+         assertTrue(expectedBody == MultiBodySystemTools.findRigidBody((RigidBodyReadOnly) rootBody, expectedBodyName.toLowerCase(), true));
+         assertTrue(expectedBody == MultiBodySystemTools.findRigidBody((RigidBodyReadOnly) rootBody, expectedBodyName.toUpperCase(), true));
       }
    }
 }
