@@ -48,6 +48,12 @@ public abstract class YoOneDoFJoint extends OneDoFJoint
       velocityLimitUpper = new YoDouble("qd_max_" + getName(), registry);
       effortLimitLower = new YoDouble("tau_min_" + getName(), registry);
       effortLimitUpper = new YoDouble("tau_max_" + getName(), registry);
+      jointLimitLower.set(Double.NEGATIVE_INFINITY);
+      jointLimitUpper.set(Double.POSITIVE_INFINITY);
+      velocityLimitLower.set(Double.NEGATIVE_INFINITY);
+      velocityLimitUpper.set(Double.POSITIVE_INFINITY);
+      effortLimitLower.set(Double.NEGATIVE_INFINITY);
+      effortLimitUpper.set(Double.POSITIVE_INFINITY);
    }
 
    /** {@inheritDoc} */
