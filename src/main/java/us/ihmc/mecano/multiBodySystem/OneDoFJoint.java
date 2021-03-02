@@ -175,7 +175,7 @@ public abstract class OneDoFJoint extends Joint implements OneDoFJointBasics
 
    /** {@inheritDoc} */
    @Override
-   public final void setSuccessor(RigidBodyBasics successor)
+   public void setSuccessor(RigidBodyBasics successor)
    {
       this.successor = successor;
 

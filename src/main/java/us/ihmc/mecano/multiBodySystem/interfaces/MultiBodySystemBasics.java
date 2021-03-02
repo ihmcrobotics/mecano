@@ -9,6 +9,7 @@ import java.util.stream.Collectors;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.mecano.multiBodySystem.iterators.SubtreeStreams;
 import us.ihmc.mecano.tools.MultiBodySystemFactories;
+import us.ihmc.mecano.tools.MultiBodySystemTools;
 
 /**
  * Provides a unique interface to configure multi-body algorithms.
@@ -49,6 +50,20 @@ public interface MultiBodySystemBasics extends MultiBodySystemReadOnly
    default List<? extends JointBasics> getJointsToIgnore()
    {
       return getAllJoints().stream().filter(joint -> !getJointsToConsider().contains(joint)).collect(Collectors.toList());
+   }
+
+   /** {@inheritDoc} */
+   @Override
+   default JointBasics findJoint(String jointName)
+   {
+      return MultiBodySystemTools.findJoint(getRootBody(), jointName);
+   }
+
+   /** {@inheritDoc} */
+   @Override
+   default RigidBodyBasics findRigidBody(String rigidBodyName)
+   {
+      return MultiBodySystemTools.findRigidBody(getRootBody(), rigidBodyName);
    }
 
    /**

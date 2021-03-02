@@ -94,6 +94,32 @@ public interface MultiBodySystemReadOnly
    }
 
    /**
+    * Finds and returns the first joint contained in this multi-body system which name matches the
+    * given name.
+    * 
+    * @param jointName the name of the joint to be found.
+    * @return the joint matching the given name, or {@code null} if no joint with such name could be
+    *         found.
+    */
+   default JointReadOnly findJoint(String jointName)
+   {
+      return MultiBodySystemTools.findJoint(getRootBody(), jointName);
+   }
+
+   /**
+    * Finds and returns the first rigid-body contained in this multi-body system which name matches the
+    * given name.
+    * 
+    * @param rigidBodyName the name of the rigid-body to be found.
+    * @return the rigid-body matching the given name, or {@code null} if no rigid-body with such name
+    *         could be found.
+    */
+   default RigidBodyReadOnly findRigidBody(String rigidBodyName)
+   {
+      return MultiBodySystemTools.findRigidBody(getRootBody(), rigidBodyName);
+   }
+
+   /**
     * Creates a new input from the given {@code rootBody}. The resulting input will consider all the
     * joints composing the subtree starting off the given body.
     *

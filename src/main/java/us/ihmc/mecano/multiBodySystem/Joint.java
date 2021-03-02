@@ -116,28 +116,28 @@ public abstract class Joint implements JointBasics
 
    /** {@inheritDoc} */
    @Override
-   public final MovingReferenceFrame getFrameBeforeJoint()
+   public MovingReferenceFrame getFrameBeforeJoint()
    {
       return beforeJointFrame;
    }
 
    /** {@inheritDoc} */
    @Override
-   public final MovingReferenceFrame getFrameAfterJoint()
+   public MovingReferenceFrame getFrameAfterJoint()
    {
       return afterJointFrame;
    }
 
    /** {@inheritDoc} */
    @Override
-   public final RigidBodyBasics getPredecessor()
+   public RigidBodyBasics getPredecessor()
    {
       return predecessor;
    }
 
    /** {@inheritDoc} */
    @Override
-   public final RigidBodyBasics getSuccessor()
+   public RigidBodyBasics getSuccessor()
    {
       return successor;
    }
@@ -150,7 +150,7 @@ public abstract class Joint implements JointBasics
 
    /** {@inheritDoc} */
    @Override
-   public final String getName()
+   public String getName()
    {
       return name;
    }

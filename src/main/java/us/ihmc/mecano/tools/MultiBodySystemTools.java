@@ -1065,6 +1065,179 @@ public class MultiBodySystemTools
    }
 
    /**
+    * Finds and returns the first joint contained in the subtree starting at the given rigid-body which
+    * name matches the given name.
+    * 
+    * @param start     where to start the search, if unsure, the root body should be given. Not
+    *                  modified.
+    * @param jointName the name of the joint to be found.
+    * @return the joint matching the given name, or {@code null} if no joint with such name could be
+    *         found.
+    */
+   public static JointReadOnly findJoint(RigidBodyReadOnly start, String jointName)
+   {
+      return findJoint(start, jointName, false);
+   }
+
+   /**
+    * Finds and returns the first joint contained in the subtree starting at the given rigid-body which
+    * name matches the given name.
+    * 
+    * @param start      where to start the search, if unsure, the root body should be given. Not
+    *                   modified.
+    * @param jointName  the name of the joint to be found.
+    * @param ignoreCase whether to ignore the case when comparing the name, see
+    *                   {@link String#equalsIgnoreCase(String)}.
+    * @return the joint matching the given name, or {@code null} if no joint with such name could be
+    *         found.
+    */
+   public static JointReadOnly findJoint(RigidBodyReadOnly start, String jointName, boolean ignoreCase)
+   {
+      List<? extends JointReadOnly> childrenJoints = start.getChildrenJoints();
+
+      for (int i = 0; i < childrenJoints.size(); i++)
+      {
+         JointReadOnly childJoint = childrenJoints.get(i);
+
+         if (ignoreCase)
+         {
+            if (childJoint.getName().equalsIgnoreCase(jointName))
+               return childJoint;
+         }
+         else
+         {
+            if (childJoint.getName().equals(jointName))
+               return childJoint;
+         }
+      }
+
+      for (int i = 0; i < childrenJoints.size(); i++)
+      {
+         JointReadOnly result = findJoint(childrenJoints.get(i).getSuccessor(), jointName, ignoreCase);
+         if (result != null)
+            return result;
+      }
+
+      return null;
+   }
+
+   /**
+    * Finds and returns the first joint contained in the subtree starting at the given rigid-body which
+    * name matches the given name.
+    * 
+    * @param start     where to start the search, if unsure, the root body should be given. Not
+    *                  modified.
+    * @param jointName the name of the joint to be found.
+    * @return the joint matching the given name, or {@code null} if no joint with such name could be
+    *         found.
+    */
+   public static JointBasics findJoint(RigidBodyBasics start, String jointName)
+   {
+      return findJoint(start, jointName, false);
+   }
+
+   /**
+    * Finds and returns the first joint contained in the subtree starting at the given rigid-body which
+    * name matches the given name.
+    * 
+    * @param start      where to start the search, if unsure, the root body should be given. Not
+    *                   modified.
+    * @param jointName  the name of the joint to be found.
+    * @param ignoreCase whether to ignore the case when comparing the name, see
+    *                   {@link String#equalsIgnoreCase(String)}.
+    * @return the joint matching the given name, or {@code null} if no joint with such name could be
+    *         found.
+    */
+   public static JointBasics findJoint(RigidBodyBasics start, String jointName, boolean ignoreCase)
+   {
+      return (JointBasics) findJoint((RigidBodyReadOnly) start, jointName, ignoreCase);
+   }
+
+   /**
+    * Finds and returns the first rigid-body contained in the subtree (including {@code start})
+    * starting at the given rigid-body which name matches the given name.
+    * 
+    * @param start         where to start the search, if unsure, the root body should be given. Not
+    *                      modified.
+    * @param rigidBodyName the name of the rigid-body to be found.
+    * @return the rigid-body matching the given name, or {@code null} if no rigid-body with such name
+    *         could be found.
+    */
+   public static RigidBodyReadOnly findRigidBody(RigidBodyReadOnly start, String rigidBodyName)
+   {
+      return findRigidBody(start, rigidBodyName, false);
+   }
+
+   /**
+    * Finds and returns the first rigid-body contained in the subtree (including {@code start})
+    * starting at the given rigid-body which name matches the given name.
+    * 
+    * @param start         where to start the search, if unsure, the root body should be given. Not
+    *                      modified.
+    * @param rigidBodyName the name of the rigid-body to be found.
+    * @param ignoreCase    whether to ignore the case when comparing the name, see
+    *                      {@link String#equalsIgnoreCase(String)}.
+    * @return the rigid-body matching the given name, or {@code null} if no rigid-body with such name
+    *         could be found.
+    */
+   public static RigidBodyReadOnly findRigidBody(RigidBodyReadOnly start, String rigidBodyName, boolean ignoreCase)
+   {
+      if (ignoreCase)
+      {
+         if (start.getName().equalsIgnoreCase(rigidBodyName))
+            return start;
+      }
+      else
+      {
+         if (start.getName().equals(rigidBodyName))
+            return start;
+      }
+
+      List<? extends JointReadOnly> childrenJoints = start.getChildrenJoints();
+
+      for (int i = 0; i < childrenJoints.size(); i++)
+      {
+         RigidBodyReadOnly result = findRigidBody(childrenJoints.get(i).getSuccessor(), rigidBodyName, ignoreCase);
+         if (result != null)
+            return result;
+      }
+
+      return null;
+   }
+
+   /**
+    * Finds and returns the first rigid-body contained in the subtree (including {@code start})
+    * starting at the given rigid-body which name matches the given name.
+    * 
+    * @param start         where to start the search, if unsure, the root body should be given. Not
+    *                      modified.
+    * @param rigidBodyName the name of the rigid-body to be found.
+    * @return the rigid-body matching the given name, or {@code null} if no rigid-body with such name
+    *         could be found.
+    */
+   public static RigidBodyBasics findRigidBody(RigidBodyBasics start, String rigidBodyName)
+   {
+      return findRigidBody(start, rigidBodyName, false);
+   }
+
+   /**
+    * Finds and returns the first rigid-body contained in the subtree (including {@code start})
+    * starting at the given rigid-body which name matches the given name.
+    * 
+    * @param start         where to start the search, if unsure, the root body should be given. Not
+    *                      modified.
+    * @param rigidBodyName the name of the rigid-body to be found.
+    * @param ignoreCase    whether to ignore the case when comparing the name, see
+    *                      {@link String#equalsIgnoreCase(String)}.
+    * @return the rigid-body matching the given name, or {@code null} if no rigid-body with such name
+    *         could be found.
+    */
+   public static RigidBodyBasics findRigidBody(RigidBodyBasics start, String rigidBodyName, boolean ignoreCase)
+   {
+      return (RigidBodyBasics) findRigidBody((RigidBodyReadOnly) start, rigidBodyName, ignoreCase);
+   }
+
+   /**
     * Tests that the given {@code joints} are stored in order from root to leaf and represent a
     * continuous kinematic chain.
     * <p>
