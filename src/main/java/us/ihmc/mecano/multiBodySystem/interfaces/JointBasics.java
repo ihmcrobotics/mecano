@@ -144,8 +144,8 @@ public interface JointBasics extends JointReadOnly
    void setJointWrench(JointReadOnly other);
 
    /**
-    * Sets the joint current configuration from the given column vector {@code DMatrix}. Here
-    * are a few examples:
+    * Sets the joint current configuration from the given column vector {@code DMatrix}. Here are a few
+    * examples:
     * <ul>
     * <li>For a {@code RevoluteJoint}, the {@code rowStart}<sup>th</sup> row of the given column vector
     * is used to set the current joint angle {@code q}.
@@ -744,6 +744,20 @@ public interface JointBasics extends JointReadOnly
 
    /**
     * Updates {@code afterJointFrame} of this joint to take into consideration the new joint
+    * configuration and velocity.
+    * <p>
+    * This method only updates the frame for this joint, use {@link #updateFramesRecursively()} to
+    * update all reference frames in the subtree starting at this joint.
+    * </p>
+    */
+   default void updateFrame()
+   {
+      getFrameBeforeJoint().update();
+      getFrameAfterJoint().update();
+   }
+
+   /**
+    * Updates {@code afterJointFrame} of this joint to take into consideration the new joint
     * configuration. Then calls {@link RigidBody#updateFramesRecursively()} which in its turn updates
     * its {@code bodyFixedFrame} and then {@link #updateFramesRecursively()} for all of its
     * {@link JointBasics} child.
@@ -758,8 +772,7 @@ public interface JointBasics extends JointReadOnly
     */
    default void updateFramesRecursively()
    {
-      getFrameBeforeJoint().update();
-      getFrameAfterJoint().update();
+      updateFrame();
 
       if (getSuccessor() != null)
       {
