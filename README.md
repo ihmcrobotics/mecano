@@ -1,5 +1,5 @@
 # ![Mecano](logo/Mecano.png)
-[ ![mecano](https://api.bintray.com/packages/ihmcrobotics/maven-release/mecano/images/download.svg) ](https://bintray.com/ihmcrobotics/maven-release/mecano/_latestVersion)
+[ ![mecano](https://maven-badges.herokuapp.com/maven-central/us.ihmc/mecano/badge.svg?style=plastic)](https://maven-badges.herokuapp.com/maven-central/us.ihmc/mecano)
 [ ![buildstatus](https://bamboo.ihmc.us/plugins/servlet/wittified/build-status/LIBS-MECANO)](https://bamboo.ihmc.us/plugins/servlet/wittified/build-status/LIBS-MECANO)
 
 ## Minutiae
@@ -59,11 +59,7 @@ At a minimum, you will need to have the following repository declared in your bu
 
 ```gradle
 repositories {
-   maven {
-      url  "https://dl.bintray.com/ihmcrobotics/maven-release" // IHMC Code releases
-   }
-
-   /* You will also need to add either jcenter() or mavenCentral() or both, depending on your preference */
+   mavenCentral()
 }
 ```
 
@@ -74,4 +70,4 @@ dependencies {
    compile group: "us.ihmc", name: "mecano", version: "x.x"
 }
 ```
-[ ![mecano](https://api.bintray.com/packages/ihmcrobotics/maven-release/mecano/images/download.svg) ](https://bintray.com/ihmcrobotics/maven-release/mecano/_latestVersion)
+[ ![mecano](https://maven-badges.herokuapp.com/maven-central/us.ihmc/mecano/badge.svg?style=plastic)](https://maven-badges.herokuapp.com/maven-central/us.ihmc/mecano)
