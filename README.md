@@ -51,9 +51,8 @@ This library includes the following:
 	- Response to external disturbance (wrench or impulse): MultiBodyResponseCalculator.
 
 ## Using Mecano from .jar releases with Maven/Gradle
-The releases .jars for Mecano are hosted on Bintray.
-You can browse the IHMC release packages at https://bintray.com/ihmcrobotics/maven-release.
-Instructions for adding the Maven repository and identifying the artifacts can also be found on Bintray for each package.
+The releases .jars for Mecano are hosted on Maven repository.
+You can browse the IHMC release packages at https://mvnrepository.com/artifact/us.ihmc.
 
 At a minimum, you will need to have the following repository declared in your build script to use the Mecano .jars:
 
