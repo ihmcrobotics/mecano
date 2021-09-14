@@ -210,7 +210,9 @@ public abstract class MovingReferenceFrame extends ReferenceFrame
 
    private static MovingReferenceFrame findClosestAncestorMovingFrame(ReferenceFrame frame)
    {
-      if (frame instanceof MovingReferenceFrame)
+      if (frame == null)
+         return null;
+      else if (frame instanceof MovingReferenceFrame)
          return (MovingReferenceFrame) frame;
       else
          return findClosestAncestorMovingFrame(frame.getParent());
@@ -292,9 +294,14 @@ public abstract class MovingReferenceFrame extends ReferenceFrame
          twistOfFrame.changeFrame(this);
 
          if (isFixedInParent())
+         {
             twistOfFrame.setBodyFrame(this);
+         }
          else
+         {
+            twistOfFrame.setBodyFrame(getParent()); // This is necessary when the parent frame is a FixedReferenceFrame.
             twistOfFrame.add(twistRelativeToParent);
+         }
       }
 
       isTwistOfFrameUpToDate = true;
