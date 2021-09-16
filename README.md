@@ -1,5 +1,5 @@
 # ![Mecano](logo/Mecano.png)
-[ ![mecano](https://api.bintray.com/packages/ihmcrobotics/maven-release/mecano/images/download.svg) ](https://bintray.com/ihmcrobotics/maven-release/mecano/_latestVersion)
+[ ![mecano](https://maven-badges.herokuapp.com/maven-central/us.ihmc/mecano/badge.svg?style=plastic)](https://maven-badges.herokuapp.com/maven-central/us.ihmc/mecano)
 [ ![buildstatus](https://bamboo.ihmc.us/plugins/servlet/wittified/build-status/LIBS-MECANO)](https://bamboo.ihmc.us/plugins/servlet/wittified/build-status/LIBS-MECANO)
 
 ## Minutiae
@@ -51,19 +51,14 @@ This library includes the following:
 	- Response to external disturbance (wrench or impulse): MultiBodyResponseCalculator.
 
 ## Using Mecano from .jar releases with Maven/Gradle
-The releases .jars for Mecano are hosted on Bintray.
-You can browse the IHMC release packages at https://bintray.com/ihmcrobotics/maven-release.
-Instructions for adding the Maven repository and identifying the artifacts can also be found on Bintray for each package.
+The releases .jars for Mecano are hosted on Maven repository.
+You can browse the IHMC release packages at https://mvnrepository.com/artifact/us.ihmc.
 
 At a minimum, you will need to have the following repository declared in your build script to use the Mecano .jars:
 
 ```gradle
 repositories {
-   maven {
-      url  "https://dl.bintray.com/ihmcrobotics/maven-release" // IHMC Code releases
-   }
-
-   /* You will also need to add either jcenter() or mavenCentral() or both, depending on your preference */
+   mavenCentral()
 }
 ```
 
@@ -74,4 +69,4 @@ dependencies {
    compile group: "us.ihmc", name: "mecano", version: "x.x"
 }
 ```
-[ ![mecano](https://api.bintray.com/packages/ihmcrobotics/maven-release/mecano/images/download.svg) ](https://bintray.com/ihmcrobotics/maven-release/mecano/_latestVersion)
+[ ![mecano](https://maven-badges.herokuapp.com/maven-central/us.ihmc/mecano/badge.svg?style=plastic)](https://maven-badges.herokuapp.com/maven-central/us.ihmc/mecano)

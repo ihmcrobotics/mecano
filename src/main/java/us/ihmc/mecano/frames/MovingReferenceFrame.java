@@ -44,13 +44,12 @@ public abstract class MovingReferenceFrame extends ReferenceFrame
     * It is {@code null} when this frame's parent is a stationary {@code ReferenceFrame}.
     * </p>
     */
-   private final MovingReferenceFrame parentMovingFrame;
-   private final List<MovingReferenceFrame> childrenMovingFrames = new ArrayList<>();
-
+   private final MovingReferenceFrame closestAncestorMovingFrame;
    /**
-    * Whether the twist of this frame relative to its parent is equal to zero.
+    * List containing the descendants from this frame that this frame has to notify when their twist is
+    * out-of-date.
     */
-   private final boolean isFixedInParent;
+   private final List<MovingReferenceFrame> descendantsMovingFrames = new ArrayList<>();
 
    /**
     * Constructs a {@code MovingReferenceFrame} that has a 'zero-velocity' with respect to its parent.
@@ -71,22 +70,7 @@ public abstract class MovingReferenceFrame extends ReferenceFrame
     */
    public static MovingReferenceFrame constructFrameFixedInParent(String frameName, ReferenceFrame parentFrame, RigidBodyTransformReadOnly transformToParent)
    {
-      boolean isZUpFrame = parentFrame.isZupFrame() && transformToParent.isRotation2D();
-      boolean isFixedInParent = true;
-      MovingReferenceFrame newFrame = new MovingReferenceFrame(frameName, parentFrame, transformToParent, isZUpFrame, isFixedInParent)
-      {
-         @Override
-         protected void updateTransformToParent(RigidBodyTransform transformToParent)
-         {
-         }
-
-         @Override
-         protected void updateTwistRelativeToParent(Twist twistRelativeToParentToPack)
-         {
-         }
-      };
-
-      return newFrame;
+      return new FixedMovingReferenceFrame(frameName, parentFrame, transformToParent);
    }
 
    /**
@@ -203,30 +187,48 @@ public abstract class MovingReferenceFrame extends ReferenceFrame
       this(frameName, parentFrame, transformToParent, isZUpFrame, false);
    }
 
-   private MovingReferenceFrame(String frameName, ReferenceFrame parentFrame, RigidBodyTransformReadOnly transformToParent, boolean isZUpFrame,
-                                boolean isFixedInParent)
+   protected MovingReferenceFrame(String frameName,
+                                  ReferenceFrame parentFrame,
+                                  RigidBodyTransformReadOnly transformToParent,
+                                  boolean isZUpFrame,
+                                  boolean isFixedInParent)
    {
-      super(frameName, parentFrame, transformToParent, parentFrame.isAStationaryFrame() && isFixedInParent, isZUpFrame);
+      super(frameName, parentFrame, transformToParent, parentFrame.isAStationaryFrame() && isFixedInParent, isZUpFrame, isFixedInParent);
 
-      this.isFixedInParent = isFixedInParent;
+      closestAncestorMovingFrame = findClosestAncestorMovingFrame(parentFrame);
+      if (closestAncestorMovingFrame != null)
+         closestAncestorMovingFrame.descendantsMovingFrames.add(this);
 
-      if (parentFrame instanceof MovingReferenceFrame)
-      {
-         parentMovingFrame = (MovingReferenceFrame) parentFrame;
-         parentMovingFrame.childrenMovingFrames.add(this);
-      }
-      else
-      {
-         parentMovingFrame = null;
-
-         if (!parentFrame.isAStationaryFrame())
-            throw unhandledReferenceFrameTypeException(parentFrame);
-      }
+      if (!isAncestorValid(parentFrame))
+         throw unhandledReferenceFrameTypeException(parentFrame);
 
       if (isFixedInParent)
          twistRelativeToParent = null;
       else
          twistRelativeToParent = new Twist(this, parentFrame, this);
+   }
+
+   private static MovingReferenceFrame findClosestAncestorMovingFrame(ReferenceFrame frame)
+   {
+      if (frame == null)
+         return null;
+      else if (frame instanceof MovingReferenceFrame)
+         return (MovingReferenceFrame) frame;
+      else
+         return findClosestAncestorMovingFrame(frame.getParent());
+   }
+
+   private static boolean isAncestorValid(ReferenceFrame frame)
+   {
+      if (frame instanceof MovingReferenceFrame)
+         return true;
+      if (frame.isAStationaryFrame())
+         return true;
+      if (frame.isRootFrame())
+         return true;
+      if (frame.isFixedInParent())
+         return isAncestorValid(frame.getParent());
+      return false;
    }
 
    /**
@@ -247,7 +249,7 @@ public abstract class MovingReferenceFrame extends ReferenceFrame
    {
       super.update();
 
-      if (!isFixedInParent)
+      if (!isFixedInParent())
       {
          updateTwistRelativeToParent(twistRelativeToParent);
          twistRelativeToParent.checkReferenceFrameMatch(this, getParent(), this);
@@ -279,33 +281,38 @@ public abstract class MovingReferenceFrame extends ReferenceFrame
       if (isTwistOfFrameUpToDateRecursive())
          return;
 
-      if (parentMovingFrame == null)
+      if (closestAncestorMovingFrame == null)
       {
-         if (isFixedInParent)
+         if (isFixedInParent())
             twistOfFrame.setToZero(this, getParent(), this);
          else
             twistOfFrame.setIncludingFrame(twistRelativeToParent);
       }
       else
       {
-         twistOfFrame.setIncludingFrame(parentMovingFrame.getTwistOfFrame());
+         twistOfFrame.setIncludingFrame(closestAncestorMovingFrame.getTwistOfFrame());
          twistOfFrame.changeFrame(this);
 
-         if (isFixedInParent)
+         if (isFixedInParent())
+         {
             twistOfFrame.setBodyFrame(this);
+         }
          else
+         {
+            twistOfFrame.setBodyFrame(getParent()); // This is necessary when the parent frame is a FixedReferenceFrame.
             twistOfFrame.add(twistRelativeToParent);
+         }
       }
 
       isTwistOfFrameUpToDate = true;
 
-      for (int i = 0; i < childrenMovingFrames.size(); i++)
-         childrenMovingFrames.get(i).isTwistOfFrameUpToDate = false;
+      for (int i = 0; i < descendantsMovingFrames.size(); i++)
+         descendantsMovingFrames.get(i).isTwistOfFrameUpToDate = false;
    }
 
    private boolean isTwistOfFrameUpToDateRecursive()
    {
-      return isTwistOfFrameUpToDate && (parentMovingFrame == null || parentMovingFrame.isTwistOfFrameUpToDateRecursive());
+      return isTwistOfFrameUpToDate && (closestAncestorMovingFrame == null || closestAncestorMovingFrame.isTwistOfFrameUpToDateRecursive());
    }
 
    /**
@@ -396,7 +403,7 @@ public abstract class MovingReferenceFrame extends ReferenceFrame
     */
    public MovingReferenceFrame getMovingParent()
    {
-      return parentMovingFrame;
+      return closestAncestorMovingFrame;
    }
 
    private static ScrewTheoryException unhandledReferenceFrameTypeException(ReferenceFrame referenceFrame)
