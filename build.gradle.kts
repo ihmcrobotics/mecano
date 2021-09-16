@@ -18,9 +18,9 @@ mainDependencies {
    api("org.ejml:ejml-core:0.39")
    api("org.ejml:ejml-ddense:0.39")
 
-   api("us.ihmc:euclid:0.16.2")
-   api("us.ihmc:euclid-frame:0.16.2")
-   api("us.ihmc:euclid-geometry:0.16.2")
+   api("us.ihmc:euclid:0.17.0")
+   api("us.ihmc:euclid-frame:0.17.0")
+   api("us.ihmc:euclid-geometry:0.17.0")
 }
 
 testDependencies {
@@ -38,5 +38,5 @@ graphvizDependencies {
 yovariablesDependencies {
    api(ihmc.sourceSetProject("main"))
 
-   api("us.ihmc:ihmc-yovariables:0.9.9")
+   api("us.ihmc:ihmc-yovariables:0.9.11")
 }

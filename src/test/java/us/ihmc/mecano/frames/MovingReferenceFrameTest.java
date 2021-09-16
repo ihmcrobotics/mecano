@@ -1,14 +1,18 @@
 package us.ihmc.mecano.frames;
 
+import static org.junit.jupiter.api.Assertions.assertTrue;
+
 import java.util.Random;
 
 import org.junit.jupiter.api.Test;
 
+import us.ihmc.euclid.referenceFrame.FixedReferenceFrame;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.referenceFrame.tools.ReferenceFrameTools;
 import us.ihmc.euclid.tools.EuclidCoreRandomTools;
 import us.ihmc.euclid.tools.EuclidCoreTestTools;
 import us.ihmc.euclid.transform.RigidBodyTransform;
+import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.mecano.spatial.Twist;
 import us.ihmc.mecano.tools.MecanoRandomTools;
 import us.ihmc.mecano.tools.MecanoTestTools;
@@ -29,7 +33,9 @@ public class MovingReferenceFrameTest
       return nextRandomlyChangingFrameTree(frameNamePrefix, random, worldFrame, numberOfReferenceFrames);
    }
 
-   private static RandomlyChangingFrame[] nextRandomlyChangingFrameTree(String frameNamePrefix, Random random, ReferenceFrame rootFrame,
+   private static RandomlyChangingFrame[] nextRandomlyChangingFrameTree(String frameNamePrefix,
+                                                                        Random random,
+                                                                        ReferenceFrame rootFrame,
                                                                         int numberOfReferenceFrames)
    {
       RandomlyChangingFrame[] referenceFrames = new RandomlyChangingFrame[numberOfReferenceFrames];
@@ -109,6 +115,78 @@ public class MovingReferenceFrameTest
 
       MecanoTestTools.assertTwistEquals(actualTwistFrameOne, expectedTwistFrameOne, EPSILON);
       MecanoTestTools.assertTwistEquals(actualTwistFrameTwo, expectedTwistFrameTwo, EPSILON);
+   }
+
+   @Test
+   public void testIndirectMovingFrameAncestor()
+   {
+      Random random = new Random(234243);
+
+      MovingReferenceFrame parentMovingFrame = nextRandomlyChangingFrameTree(random, 1)[0];
+
+      int numberOfIntermediateFrames = random.nextInt(10) + 1;
+      ReferenceFrame[] chainA = new ReferenceFrame[numberOfIntermediateFrames];
+      MovingReferenceFrame[] chainB = new MovingReferenceFrame[numberOfIntermediateFrames];
+
+      ReferenceFrame parentChainA = parentMovingFrame;
+      MovingReferenceFrame parentChainB = parentMovingFrame;
+
+      for (int frameIndex = 0; frameIndex < numberOfIntermediateFrames; frameIndex++)
+      {
+         RigidBodyTransform transformToParent = EuclidCoreRandomTools.nextRigidBodyTransform(random);
+         chainA[frameIndex] = new FixedReferenceFrame("chainA_" + frameIndex, parentChainA, transformToParent);
+         parentChainA = chainA[frameIndex];
+
+         chainB[frameIndex] = new FixedMovingReferenceFrame("chainB_" + frameIndex, parentChainB, transformToParent);
+         parentChainB = chainB[frameIndex];
+      }
+
+      parentMovingFrame.update();
+
+      RigidBodyTransform transform = EuclidCoreRandomTools.nextRigidBodyTransform(random);
+      Vector3D angular = EuclidCoreRandomTools.nextVector3D(random);
+      Vector3D linear = EuclidCoreRandomTools.nextVector3D(random);
+
+      MovingReferenceFrame testFrameA = new MovingReferenceFrame("testFrameA", parentChainA)
+      {
+         @Override
+         protected void updateTransformToParent(RigidBodyTransform transformToParent)
+         {
+            transformToParent.set(transform);
+         }
+
+         @Override
+         protected void updateTwistRelativeToParent(Twist twistRelativeToParentToPack)
+         {
+            twistRelativeToParentToPack.set(angular, linear);
+         }
+      };
+
+      MovingReferenceFrame testFrameB = new MovingReferenceFrame("testFrameB", parentChainB)
+      {
+         @Override
+         protected void updateTransformToParent(RigidBodyTransform transformToParent)
+         {
+            transformToParent.set(transform);
+         }
+
+         @Override
+         protected void updateTwistRelativeToParent(Twist twistRelativeToParentToPack)
+         {
+            twistRelativeToParentToPack.set(angular, linear);
+         }
+      };
+
+      EuclidCoreTestTools.assertRigidBodyTransformEquals(testFrameA.getTransformToRoot(), testFrameB.getTransformToRoot(), EPSILON);
+      EuclidCoreTestTools.assertTuple3DEquals(testFrameA.getTwistOfFrame().getAngularPart(), testFrameB.getTwistOfFrame().getAngularPart(), EPSILON);
+      EuclidCoreTestTools.assertTuple3DEquals(testFrameA.getTwistOfFrame().getLinearPart(), testFrameB.getTwistOfFrame().getLinearPart(), EPSILON);
+      assertTrue(testFrameA.getTwistOfFrame().getBaseFrame() == testFrameB.getTwistOfFrame().getBaseFrame());
+
+      assertTrue(testFrameA.getTwistOfFrame().getBodyFrame() == testFrameA);
+      assertTrue(testFrameB.getTwistOfFrame().getBodyFrame() == testFrameB);
+
+      assertTrue(testFrameA.getTwistOfFrame().getReferenceFrame() == testFrameA);
+      assertTrue(testFrameB.getTwistOfFrame().getReferenceFrame() == testFrameB);
    }
 
    @Test
