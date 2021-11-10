@@ -1182,6 +1182,9 @@ public class MultiBodySystemTools
     */
    public static RigidBodyReadOnly findRigidBody(RigidBodyReadOnly start, String rigidBodyName, boolean ignoreCase)
    {
+      if (start == null)
+         return null;
+
       if (ignoreCase)
       {
          if (start.getName().equalsIgnoreCase(rigidBodyName))
