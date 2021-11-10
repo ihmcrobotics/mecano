@@ -200,7 +200,10 @@ public class ForwardDynamicsCalculator
             continue;
 
          if (childJoint.isLoopClosure())
-            throw new UnsupportedOperationException("This calculator does not support kinematic loops.");
+         {
+            System.out.println(getClass().getSimpleName() + ": This calculator does not support kinematic loops. Ignoring joint: " + childJoint.getName());
+            continue;
+         }
 
          RigidBodyReadOnly childBody = childJoint.getSuccessor();
          if (childBody != null)
