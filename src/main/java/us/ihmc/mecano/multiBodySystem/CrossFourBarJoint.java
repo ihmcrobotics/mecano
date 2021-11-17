@@ -2,14 +2,12 @@ package us.ihmc.mecano.multiBodySystem;
 
 import java.util.Collections;
 import java.util.List;
-import java.util.function.DoubleSupplier;
 
 import org.ejml.data.DMatrixRMaj;
 
 import us.ihmc.euclid.orientation.interfaces.Orientation3DReadOnly;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.referenceFrame.interfaces.FrameVector3DReadOnly;
-import us.ihmc.euclid.referenceFrame.tools.EuclidFrameFactories;
 import us.ihmc.euclid.tools.EuclidCoreIOTools;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.transform.interfaces.RigidBodyTransformReadOnly;
@@ -129,20 +127,7 @@ public class CrossFourBarJoint implements OneDoFJointBasics
 
       unitTwists = Collections.singletonList(unitJointTwist);
       jointTwist = MecanoFactories.newTwistReadOnly(this::getQd, unitJointTwist);
-      jointAcceleration = setupJointAcceleration();
-   }
-
-   private SpatialAccelerationReadOnly setupJointAcceleration()
-   {
-      DoubleSupplier wx = () -> getQdd() * unitJointAcceleration.getAngularPartX() + jointBiasAcceleration.getAngularPartX();
-      DoubleSupplier wy = () -> getQdd() * unitJointAcceleration.getAngularPartY() + jointBiasAcceleration.getAngularPartY();
-      DoubleSupplier wz = () -> getQdd() * unitJointAcceleration.getAngularPartZ() + jointBiasAcceleration.getAngularPartZ();
-      DoubleSupplier vx = () -> getQdd() * unitJointAcceleration.getLinearPartX() + jointBiasAcceleration.getLinearPartX();
-      DoubleSupplier vy = () -> getQdd() * unitJointAcceleration.getLinearPartY() + jointBiasAcceleration.getLinearPartY();
-      DoubleSupplier vz = () -> getQdd() * unitJointAcceleration.getLinearPartZ() + jointBiasAcceleration.getLinearPartZ();
-      FrameVector3DReadOnly angularPart = EuclidFrameFactories.newLinkedFrameVector3DReadOnly(this::getFrameAfterJoint, wx, wy, wz);
-      FrameVector3DReadOnly linearPart = EuclidFrameFactories.newLinkedFrameVector3DReadOnly(this::getFrameAfterJoint, vx, vy, vz);
-      return MecanoFactories.newSpatialAccelerationVectorReadOnly(afterJointFrame, beforeJointFrame, angularPart, linearPart);
+      jointAcceleration = MecanoFactories.newSpatialAccelerationVectorReadOnly(this::getQdd, unitJointAcceleration, jointBiasAcceleration);
    }
 
    @Override

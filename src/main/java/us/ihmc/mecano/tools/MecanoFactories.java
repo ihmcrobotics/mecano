@@ -689,7 +689,9 @@ public class MecanoFactories
     * @param linearPart  the vector holding the linear part the twist should be linked to.
     * @return the new twist linked to the two vectors.
     */
-   public static TwistReadOnly newTwistReadOnly(ReferenceFrame bodyFrame, ReferenceFrame baseFrame, FrameVector3DReadOnly angularPart,
+   public static TwistReadOnly newTwistReadOnly(ReferenceFrame bodyFrame,
+                                                ReferenceFrame baseFrame,
+                                                FrameVector3DReadOnly angularPart,
                                                 FrameVector3DReadOnly linearPart)
    {
       angularPart.checkReferenceFrameMatch(linearPart);
@@ -886,6 +888,86 @@ public class MecanoFactories
    }
 
    /**
+    * Creates a new acceleration that is linked to the given accelerations as follows:
+    *
+    * <pre>
+    * newAcceleration = scale * referenceAcceleration + biasAcceleration
+    * </pre>
+    *
+    * where the scale is obtained from the given {@code scaleSupplier}.
+    *
+    * @param scaleSupplier         the supplier to get the scale.
+    * @param referenceAcceleration the reference acceleration. Not modified.
+    * @param biasAcceleration      the bias acceleration. Not modified.
+    * @return the new acceleration linked to the accelerations.
+    */
+   public static SpatialAccelerationReadOnly newSpatialAccelerationVectorReadOnly(DoubleSupplier scaleSupplier,
+                                                                                  SpatialAccelerationReadOnly referenceAcceleration,
+                                                                                  SpatialAccelerationReadOnly biasAcceleration)
+   {
+      referenceAcceleration.checkReferenceFrameMatch(biasAcceleration);
+      DoubleSupplier wx = () -> scaleSupplier.getAsDouble() * referenceAcceleration.getAngularPartX() + biasAcceleration.getAngularPartX();
+      DoubleSupplier wy = () -> scaleSupplier.getAsDouble() * referenceAcceleration.getAngularPartY() + biasAcceleration.getAngularPartY();
+      DoubleSupplier wz = () -> scaleSupplier.getAsDouble() * referenceAcceleration.getAngularPartZ() + biasAcceleration.getAngularPartZ();
+      DoubleSupplier vx = () -> scaleSupplier.getAsDouble() * referenceAcceleration.getLinearPartX() + biasAcceleration.getLinearPartX();
+      DoubleSupplier vy = () -> scaleSupplier.getAsDouble() * referenceAcceleration.getLinearPartY() + biasAcceleration.getLinearPartY();
+      DoubleSupplier vz = () -> scaleSupplier.getAsDouble() * referenceAcceleration.getLinearPartZ() + biasAcceleration.getLinearPartZ();
+
+      return new SpatialAccelerationReadOnly()
+      {
+         private final FrameVector3DReadOnly angularPart = EuclidFrameFactories.newLinkedFrameVector3DReadOnly(referenceAcceleration, wx, wy, wz);
+         private final FrameVector3DReadOnly linearPart = EuclidFrameFactories.newLinkedFrameVector3DReadOnly(referenceAcceleration, vx, vy, vz);
+
+         @Override
+         public ReferenceFrame getBodyFrame()
+         {
+            return referenceAcceleration.getBodyFrame();
+         }
+
+         @Override
+         public ReferenceFrame getBaseFrame()
+         {
+            return referenceAcceleration.getBaseFrame();
+         }
+
+         @Override
+         public ReferenceFrame getReferenceFrame()
+         {
+            return referenceAcceleration.getReferenceFrame();
+         }
+
+         @Override
+         public FrameVector3DReadOnly getAngularPart()
+         {
+            return angularPart;
+         }
+
+         @Override
+         public FrameVector3DReadOnly getLinearPart()
+         {
+            return linearPart;
+         }
+
+         @Override
+         public boolean equals(Object object)
+         {
+            if (object == this)
+               return true;
+            else if (object instanceof SpatialAccelerationReadOnly)
+               return equals((SpatialAccelerationReadOnly) object);
+            else
+               return false;
+         }
+
+         @Override
+         public String toString()
+         {
+            return MecanoIOTools.getSpatialAccelerationString(this);
+         }
+      };
+   }
+
+   /**
     * Creates a new acceleration that is linked to the given {@code angularPart} and
     * {@code linearPart}.
     *
@@ -895,8 +977,10 @@ public class MecanoFactories
     * @param linearPart  the vector holding the linear part the acceleration should be linked to.
     * @return the new acceleration linked to the two vectors.
     */
-   public static SpatialAccelerationReadOnly newSpatialAccelerationVectorReadOnly(ReferenceFrame bodyFrame, ReferenceFrame baseFrame,
-                                                                                  FrameVector3DReadOnly angularPart, FrameVector3DReadOnly linearPart)
+   public static SpatialAccelerationReadOnly newSpatialAccelerationVectorReadOnly(ReferenceFrame bodyFrame,
+                                                                                  ReferenceFrame baseFrame,
+                                                                                  FrameVector3DReadOnly angularPart,
+                                                                                  FrameVector3DReadOnly linearPart)
    {
       angularPart.checkReferenceFrameMatch(linearPart);
 
@@ -963,7 +1047,8 @@ public class MecanoFactories
     * @param expressedInFrame the acceleration
     * @return the new acceleration.
     */
-   public static FixedFrameSpatialAccelerationBasics newPlanarFixedFrameSpatialAccelerationVectorBasics(ReferenceFrame bodyFrame, ReferenceFrame baseFrame,
+   public static FixedFrameSpatialAccelerationBasics newPlanarFixedFrameSpatialAccelerationVectorBasics(ReferenceFrame bodyFrame,
+                                                                                                        ReferenceFrame baseFrame,
                                                                                                         ReferenceFrame expressedInFrame)
    {
       return new FixedFrameSpatialAccelerationBasics()
