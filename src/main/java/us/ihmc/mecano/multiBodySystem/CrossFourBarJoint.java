@@ -7,20 +7,17 @@ import org.ejml.data.DMatrixRMaj;
 
 import us.ihmc.euclid.orientation.interfaces.Orientation3DReadOnly;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
-import us.ihmc.euclid.referenceFrame.interfaces.FrameVector3DReadOnly;
 import us.ihmc.euclid.tools.EuclidCoreIOTools;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.transform.interfaces.RigidBodyTransformReadOnly;
 import us.ihmc.euclid.tuple3D.Vector3D;
-import us.ihmc.euclid.tuple3D.interfaces.Tuple3DReadOnly;
-import us.ihmc.euclid.tuple3D.interfaces.Vector3DReadOnly;
 import us.ihmc.mecano.fourBar.CrossFourBarJointIKBinarySolver;
 import us.ihmc.mecano.fourBar.CrossFourBarJointIKSolver;
 import us.ihmc.mecano.fourBar.FourBar;
 import us.ihmc.mecano.fourBar.FourBarKinematicLoopFunction;
 import us.ihmc.mecano.fourBar.FourBarKinematicLoopFunctionTools;
 import us.ihmc.mecano.frames.MovingReferenceFrame;
-import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointBasics;
+import us.ihmc.mecano.multiBodySystem.interfaces.CrossFourBarJointBasics;
 import us.ihmc.mecano.multiBodySystem.interfaces.RevoluteJointBasics;
 import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
 import us.ihmc.mecano.spatial.SpatialAcceleration;
@@ -36,7 +33,7 @@ import us.ihmc.mecano.tools.MultiBodySystemFactories;
 import us.ihmc.mecano.tools.MultiBodySystemFactories.JointBuilder;
 import us.ihmc.mecano.tools.MultiBodySystemFactories.RigidBodyBuilder;
 
-public class CrossFourBarJoint implements OneDoFJointBasics
+public class CrossFourBarJoint implements CrossFourBarJointBasics
 {
    private final String name;
    private final String nameId;
@@ -260,29 +257,46 @@ public class CrossFourBarJoint implements OneDoFJointBasics
       return fourBarFunction;
    }
 
+   @Override
    public RevoluteJointBasics getMasterJoint()
    {
       return fourBarFunction.getMasterJoint();
    }
 
+   @Override
    public RevoluteJointBasics getJointA()
    {
       return fourBarFunction.getJointA();
    }
 
+   @Override
    public RevoluteJointBasics getJointB()
    {
       return fourBarFunction.getJointB();
    }
 
+   @Override
    public RevoluteJointBasics getJointC()
    {
       return fourBarFunction.getJointC();
    }
 
+   @Override
    public RevoluteJointBasics getJointD()
    {
       return fourBarFunction.getJointD();
+   }
+
+   @Override
+   public DMatrixRMaj getLoopJacobian()
+   {
+      return fourBarFunction.getLoopJacobian();
+   }
+
+   @Override
+   public DMatrixRMaj getLoopConvectiveTerm()
+   {
+      return fourBarFunction.getLoopConvectiveTerm();
    }
 
    public CrossFourBarJointIKSolver getIKSolver()
@@ -315,12 +329,6 @@ public class CrossFourBarJoint implements OneDoFJointBasics
    }
 
    @Override
-   public boolean isMotionSubspaceVariable()
-   {
-      return true;
-   }
-
-   @Override
    public MovingReferenceFrame getLoopClosureFrame()
    {
       return null;
@@ -345,30 +353,6 @@ public class CrossFourBarJoint implements OneDoFJointBasics
    }
 
    @Override
-   public FrameVector3DReadOnly getJointAxis()
-   {
-      return getMasterJoint().getJointAxis();
-   }
-
-   @Override
-   public double getQ()
-   {
-      return getJointA().getQ() + getJointD().getQ();
-   }
-
-   @Override
-   public double getQd()
-   {
-      return getJointA().getQd() + getJointD().getQd();
-   }
-
-   @Override
-   public double getQdd()
-   {
-      return getJointA().getQdd() + getJointD().getQdd();
-   }
-
-   @Override
    public double getTau()
    {
       // TODO This method ignores potentially non-zero torques set in the other joints.
@@ -378,42 +362,6 @@ public class CrossFourBarJoint implements OneDoFJointBasics
          return getMasterJoint().getTau() / (loopJacobian.get(0) + loopJacobian.get(3));
       else
          return getMasterJoint().getTau() / (loopJacobian.get(1) + loopJacobian.get(2));
-   }
-
-   @Override
-   public double getJointLimitLower()
-   {
-      return getJointA().getJointLimitLower() + getJointD().getJointLimitLower();
-   }
-
-   @Override
-   public double getJointLimitUpper()
-   {
-      return getJointA().getJointLimitUpper() + getJointD().getJointLimitUpper();
-   }
-
-   @Override
-   public double getVelocityLimitLower()
-   {
-      return getJointA().getVelocityLimitLower() + getJointD().getVelocityLimitLower();
-   }
-
-   @Override
-   public double getVelocityLimitUpper()
-   {
-      return getJointA().getVelocityLimitUpper() + getJointD().getVelocityLimitUpper();
-   }
-
-   @Override
-   public double getEffortLimitLower()
-   {
-      return getMasterJoint().getEffortLimitLower();
-   }
-
-   @Override
-   public double getEffortLimitUpper()
-   {
-      return getMasterJoint().getEffortLimitUpper();
    }
 
    @Override
@@ -518,64 +466,12 @@ public class CrossFourBarJoint implements OneDoFJointBasics
    }
 
    @Override
-   public void setJointPosition(Tuple3DReadOnly jointPosition)
-   {
-      // This joint type behaves more like a revolute joint.
-   }
-
-   @Override
-   public void setJointAngularVelocity(Vector3DReadOnly jointAngularVelocity)
-   {
-      setQd(jointAngularVelocity.dot(getJointAxis()));
-   }
-
-   @Override
-   public void setJointLinearVelocity(Vector3DReadOnly jointLinearVelocity)
-   {
-      // This joint type behaves more like a revolute joint.
-   }
-
-   @Override
-   public void setJointAngularAcceleration(Vector3DReadOnly jointAngularAcceleration)
-   {
-      setQdd(jointAngularAcceleration.dot(getJointAxis()));
-   }
-
-   @Override
-   public void setJointLinearAcceleration(Vector3DReadOnly jointLinearAcceleration)
-   {
-      // This joint type behaves more like a revolute joint.
-   }
-
-   @Override
-   public void setJointTorque(Vector3DReadOnly jointTorque)
-   {
-      setTau(jointTorque.dot(getJointAxis()));
-   }
-
-   @Override
-   public void setJointForce(Vector3DReadOnly jointForce)
-   {
-      // This joint type behaves more like a revolute joint.
-   }
-
-   @Override
-   public void setQ(double q)
-   {
-      getMasterJoint().setQ(computeMasterJointQ(q));
-   }
-
    public double computeMasterJointQ(double q)
    {
       return ikSolver.solve(q, fourBarFunction.getMasterVertex());
    }
 
    @Override
-   public void setQd(double qd)
-   {
-      getMasterJoint().setQd(computeMasterJointQd(qd));
-   }
-
    public double computeMasterJointQd(double qd)
    {
       fourBarFunction.updateState(false, false);
@@ -585,11 +481,6 @@ public class CrossFourBarJoint implements OneDoFJointBasics
    }
 
    @Override
-   public void setQdd(double qdd)
-   {
-      getMasterJoint().setQdd(computeMasterJointQdd(qdd));
-   }
-
    public double computeMasterJointQdd(double qdd)
    {
       fourBarFunction.updateState(false, false);
@@ -602,15 +493,6 @@ public class CrossFourBarJoint implements OneDoFJointBasics
    }
 
    @Override
-   public void setTau(double tau)
-   {
-      getJointA().setJointTauToZero();
-      getJointB().setJointTauToZero();
-      getJointC().setJointTauToZero();
-      getJointD().setJointTauToZero();
-      getMasterJoint().setTau(computeMasterJointTau(tau));
-   }
-
    public double computeMasterJointTau(double tau)
    {
       DMatrixRMaj loopJacobian = fourBarFunction.getLoopJacobian();
@@ -618,42 +500,6 @@ public class CrossFourBarJoint implements OneDoFJointBasics
          return ((loopJacobian.get(0) + loopJacobian.get(3)) * tau);
       else
          return ((loopJacobian.get(1) + loopJacobian.get(2)) * tau);
-   }
-
-   @Override
-   public void setJointLimitLower(double jointLimitLower)
-   {
-      throw new UnsupportedOperationException();
-   }
-
-   @Override
-   public void setJointLimitUpper(double jointLimitUpper)
-   {
-      throw new UnsupportedOperationException();
-   }
-
-   @Override
-   public void setVelocityLimitLower(double velocityLimitLower)
-   {
-      throw new UnsupportedOperationException();
-   }
-
-   @Override
-   public void setVelocityLimitUpper(double velocityLimitUpper)
-   {
-      throw new UnsupportedOperationException();
-   }
-
-   @Override
-   public void setEffortLimitLower(double effortLimitLower)
-   {
-      getMasterJoint().setEffortLimitLower(effortLimitLower);
-   }
-
-   @Override
-   public void setEffortLimitUpper(double effortLimitUpper)
-   {
-      getMasterJoint().setEffortLimitUpper(effortLimitUpper);
    }
 
    /**
