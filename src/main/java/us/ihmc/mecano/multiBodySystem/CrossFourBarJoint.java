@@ -3,10 +3,12 @@ package us.ihmc.mecano.multiBodySystem;
 import java.util.Collections;
 import java.util.List;
 
+import org.ejml.data.DMatrix;
 import org.ejml.data.DMatrixRMaj;
 
 import us.ihmc.euclid.orientation.interfaces.Orientation3DReadOnly;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
+import us.ihmc.euclid.referenceFrame.interfaces.FixedFrameVector3DBasics;
 import us.ihmc.euclid.tools.EuclidCoreIOTools;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.transform.interfaces.RigidBodyTransformReadOnly;
@@ -18,14 +20,16 @@ import us.ihmc.mecano.fourBar.FourBarKinematicLoopFunction;
 import us.ihmc.mecano.fourBar.FourBarKinematicLoopFunctionTools;
 import us.ihmc.mecano.frames.MovingReferenceFrame;
 import us.ihmc.mecano.multiBodySystem.interfaces.CrossFourBarJointBasics;
+import us.ihmc.mecano.multiBodySystem.interfaces.CrossFourBarJointReadOnly;
 import us.ihmc.mecano.multiBodySystem.interfaces.RevoluteJointBasics;
+import us.ihmc.mecano.multiBodySystem.interfaces.RevoluteJointReadOnly;
 import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
 import us.ihmc.mecano.spatial.SpatialAcceleration;
 import us.ihmc.mecano.spatial.Twist;
 import us.ihmc.mecano.spatial.Wrench;
 import us.ihmc.mecano.spatial.interfaces.SpatialAccelerationBasics;
 import us.ihmc.mecano.spatial.interfaces.SpatialAccelerationReadOnly;
-import us.ihmc.mecano.spatial.interfaces.SpatialVectorReadOnly;
+import us.ihmc.mecano.spatial.interfaces.TwistBasics;
 import us.ihmc.mecano.spatial.interfaces.TwistReadOnly;
 import us.ihmc.mecano.spatial.interfaces.WrenchReadOnly;
 import us.ihmc.mecano.tools.MecanoFactories;
@@ -165,66 +169,17 @@ public class CrossFourBarJoint implements CrossFourBarJointBasics
       updateMotionSubspace();
    }
 
-   private final Twist tempTwist = new Twist();
-   private final SpatialAcceleration tempAcceleration = new SpatialAcceleration();
    private final Twist deltaTwist = new Twist();
    private final Twist bodyTwist = new Twist();
 
    @Override
    public void updateMotionSubspace()
    {
-      DMatrixRMaj loopJacobian = fourBarFunction.getLoopJacobian();
-      DMatrixRMaj loopConvectiveTerm = fourBarFunction.getLoopConvectiveTerm();
-      RevoluteJointBasics joint1, joint2;
-      double J_1, J_2, c_1, c_2;
-      if (beforeJointFrame == getJointA().getFrameBeforeJoint())
-      {
-         joint1 = getJointA();
-         joint2 = getJointD();
-         J_1 = loopJacobian.get(0);
-         J_2 = loopJacobian.get(3);
-         c_1 = loopConvectiveTerm.get(0);
-         c_2 = loopConvectiveTerm.get(3);
-      }
-      else
-      {
-         joint1 = getJointB();
-         joint2 = getJointC();
-         J_1 = loopJacobian.get(1);
-         J_2 = loopJacobian.get(2);
-         c_1 = loopConvectiveTerm.get(1);
-         c_2 = loopConvectiveTerm.get(2);
-      }
-
-      unitJointTwist.setIncludingFrame(joint1.getUnitJointTwist());
-      unitJointTwist.scale(J_1);
-      unitJointTwist.setBodyFrame(joint2.getFrameBeforeJoint());
-      unitJointTwist.changeFrame(joint2.getFrameAfterJoint());
-      tempTwist.setIncludingFrame(joint2.getUnitJointTwist());
-      tempTwist.scale(J_2);
-      unitJointTwist.add(tempTwist);
-      unitJointTwist.scale(1.0 / (J_1 + J_2));
+      updateUnitJointTwist(this, unitJointTwist);
       // Since we're ignoring the bias terms, the unit-accelerations are the same as the unit-twists.
       unitJointAcceleration.setIncludingFrame(unitJointTwist);
 
-      /*
-       * This next block is for computing the bias acceleration. I ended up using tests to figure out
-       * exactly what it should, but I feel that it can be simplified.
-       */
-      joint2.getFrameAfterJoint().getTwistRelativeToOther(joint1.getFrameAfterJoint(), deltaTwist);
-      joint2.getFrameBeforeJoint().getTwistRelativeToOther(joint1.getFrameBeforeJoint(), bodyTwist);
-      deltaTwist.changeFrame(joint2.getFrameAfterJoint());
-      bodyTwist.changeFrame(joint2.getFrameAfterJoint());
-      jointBiasAcceleration.setIncludingFrame(joint1.getUnitJointAcceleration());
-      jointBiasAcceleration.scale(c_1);
-      jointBiasAcceleration.setBodyFrame(joint2.getFrameBeforeJoint());
-      jointBiasAcceleration.changeFrame(joint2.getFrameAfterJoint(), deltaTwist, bodyTwist);
-      tempAcceleration.setIncludingFrame(joint2.getUnitJointAcceleration());
-      tempAcceleration.scale(c_2);
-      jointBiasAcceleration.add(tempAcceleration);
-      tempAcceleration.setIncludingFrame(unitJointAcceleration);
-      tempAcceleration.scale(-(c_1 + c_2));
-      jointBiasAcceleration.add((SpatialVectorReadOnly) tempAcceleration);
+      updateBiasAcceleration(this, deltaTwist, bodyTwist, jointBiasAcceleration);
 
       if (getSuccessor() != null)
       {
@@ -250,6 +205,115 @@ public class CrossFourBarJoint implements CrossFourBarJointBasics
          unitJointWrench.changeFrame(afterJointFrame);
          unitJointWrench.setBodyFrame(getSuccessor().getBodyFixedFrame());
       }
+   }
+
+   /**
+    * Computes the unit-twist for the given cross four bar joint and stores the result in the given
+    * twist.
+    * <p>
+    * This method relies on {@link CrossFourBarJointReadOnly#getLoopJacobian()} to be up-to-date.
+    * </p>
+    * 
+    * @param joint                the joint to update the unit-twist of. Not modified.
+    * @param unitJointTwistToPack the twist in which the result is stored. Modified.
+    */
+   public static void updateUnitJointTwist(CrossFourBarJointReadOnly joint, TwistBasics unitJointTwistToPack)
+   {
+      DMatrix loopJacobian = joint.getLoopJacobian();
+
+      RevoluteJointReadOnly joint1, joint2;
+      double J_1, J_2;
+
+      if (joint.getFrameBeforeJoint() == joint.getJointA().getFrameBeforeJoint())
+      {
+         joint1 = joint.getJointA();
+         joint2 = joint.getJointD();
+         J_1 = loopJacobian.get(0, 0);
+         J_2 = loopJacobian.get(3, 0);
+      }
+      else
+      {
+         joint1 = joint.getJointB();
+         joint2 = joint.getJointC();
+         J_1 = loopJacobian.get(1, 0);
+         J_2 = loopJacobian.get(2, 0);
+      }
+
+      TwistReadOnly j1UnitTwist = joint1.getUnitJointTwist();
+      TwistReadOnly j2UnitTwist = joint2.getUnitJointTwist();
+
+      unitJointTwistToPack.setIncludingFrame(j1UnitTwist);
+      unitJointTwistToPack.scale(J_1);
+      unitJointTwistToPack.setBodyFrame(joint2.getFrameBeforeJoint());
+      unitJointTwistToPack.changeFrame(joint2.getFrameAfterJoint());
+      unitJointTwistToPack.getAngularPart().scaleAdd(J_2, j2UnitTwist.getAngularPart(), unitJointTwistToPack.getAngularPart());
+      unitJointTwistToPack.getLinearPart().scaleAdd(J_2, j2UnitTwist.getLinearPart(), unitJointTwistToPack.getLinearPart());
+      unitJointTwistToPack.scale(1.0 / (J_1 + J_2));
+      unitJointTwistToPack.setBodyFrame(joint.getFrameAfterJoint());
+   }
+
+   /**
+    * Computes the bias acceleration for the given cross four bar joint and stores the result in the
+    * given spatial acceleration.
+    * <p>
+    * This method relies on {@link CrossFourBarJointReadOnly#getLoopConvectiveTerm()} and
+    * {@link CrossFourBarJointReadOnly#getUnitJointAcceleration()} to be up-to-date.
+    * 
+    * @param joint                 the joint to compute the bias acceleration of. Not Modified.
+    * @param deltaTwist            twist used to stores intermediate result. Modified.
+    * @param bodyTwist             twist used to stores intermediate result. Modified.
+    * @param jointBiasAcceleration the spatial acceleration in which the result is stored. Modified.
+    */
+   public static void updateBiasAcceleration(CrossFourBarJointReadOnly joint,
+                                             TwistBasics deltaTwist,
+                                             TwistBasics bodyTwist,
+                                             SpatialAccelerationBasics jointBiasAcceleration)
+   {
+      DMatrix loopConvectiveTerm = joint.getLoopConvectiveTerm();
+      RevoluteJointReadOnly joint1, joint2;
+      double c_1, c_2;
+
+      if (joint.getFrameBeforeJoint() == joint.getJointA().getFrameBeforeJoint())
+      {
+         joint1 = joint.getJointA();
+         joint2 = joint.getJointD();
+         c_1 = loopConvectiveTerm.get(0, 0);
+         c_2 = loopConvectiveTerm.get(3, 0);
+      }
+      else
+      {
+         joint1 = joint.getJointB();
+         joint2 = joint.getJointC();
+         c_1 = loopConvectiveTerm.get(1, 0);
+         c_2 = loopConvectiveTerm.get(2, 0);
+      }
+
+      SpatialAccelerationReadOnly jUnitAccel = joint.getUnitJointAcceleration();
+      SpatialAccelerationReadOnly j1UnitAccel = joint1.getUnitJointAcceleration();
+      SpatialAccelerationReadOnly j2UnitAccel = joint2.getUnitJointAcceleration();
+
+      /*
+       * This next block is for computing the bias acceleration. I ended up using tests to figure out
+       * exactly what it should, but I feel that it can be simplified.
+       */
+      joint2.getFrameAfterJoint().getTwistRelativeToOther(joint1.getFrameAfterJoint(), deltaTwist);
+      joint2.getFrameBeforeJoint().getTwistRelativeToOther(joint1.getFrameBeforeJoint(), bodyTwist);
+      deltaTwist.changeFrame(joint2.getFrameAfterJoint());
+      bodyTwist.changeFrame(joint2.getFrameAfterJoint());
+      jointBiasAcceleration.setIncludingFrame(j1UnitAccel);
+      jointBiasAcceleration.scale(c_1);
+      jointBiasAcceleration.setBodyFrame(joint2.getFrameBeforeJoint());
+      jointBiasAcceleration.changeFrame(joint2.getFrameAfterJoint(), deltaTwist, bodyTwist);
+
+      FixedFrameVector3DBasics jointBiasAngularAcceleration = jointBiasAcceleration.getAngularPart();
+      FixedFrameVector3DBasics jointBiasLinearAcceleration = jointBiasAcceleration.getLinearPart();
+      jointBiasAngularAcceleration.scaleAdd(c_2, j2UnitAccel.getAngularPart(), jointBiasAngularAcceleration);
+      jointBiasLinearAcceleration.scaleAdd(c_2, j2UnitAccel.getLinearPart(), jointBiasLinearAcceleration);
+
+      jointBiasAngularAcceleration.scaleAdd(-(c_1 + c_2), jUnitAccel.getAngularPart(), jointBiasAngularAcceleration);
+      jointBiasLinearAcceleration.scaleAdd(-(c_1 + c_2), jUnitAccel.getLinearPart(), jointBiasLinearAcceleration);
+
+      jointBiasAcceleration.setBodyFrame(joint.getFrameAfterJoint());
    }
 
    public FourBarKinematicLoopFunction getFourBarFunction()
