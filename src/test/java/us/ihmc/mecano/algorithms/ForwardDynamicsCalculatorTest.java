@@ -18,6 +18,7 @@ import org.junit.jupiter.api.Test;
 
 import us.ihmc.euclid.tools.EuclidCoreIOTools;
 import us.ihmc.euclid.tools.EuclidCoreRandomTools;
+import us.ihmc.log.LogTools;
 import us.ihmc.mecano.algorithms.interfaces.RigidBodyAccelerationProvider;
 import us.ihmc.mecano.multiBodySystem.Joint;
 import us.ihmc.mecano.multiBodySystem.OneDoFJoint;
@@ -457,7 +458,7 @@ public class ForwardDynamicsCalculatorTest
       boolean areEqual = MatrixFeatures_DDRM.isEquals(qdd_expected, qdd_actual, epsilon);
       if (!areEqual)
       {
-         System.out.println("iteration: " + iteration);
+         LogTools.info("iteration: " + iteration);
          double maxError = 0.0;
          DMatrixRMaj output = new DMatrixRMaj(numberOfDoFs, 3);
          for (int row = 0; row < numberOfDoFs; row++)
@@ -469,7 +470,7 @@ public class ForwardDynamicsCalculatorTest
             maxError = Math.max(maxError, Math.abs(error));
          }
          output.print(EuclidCoreIOTools.getStringFormat(9, 6));
-         System.out.println("Max error: " + maxError);
+         LogTools.info("Max error: " + maxError);
       }
       assertTrue(areEqual);
    }

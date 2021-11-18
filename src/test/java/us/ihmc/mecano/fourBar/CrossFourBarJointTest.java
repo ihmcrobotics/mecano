@@ -32,6 +32,7 @@ import us.ihmc.euclid.tuple2D.interfaces.Point2DReadOnly;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple3D.interfaces.Vector3DReadOnly;
 import us.ihmc.euclid.tuple4D.Quaternion;
+import us.ihmc.log.LogTools;
 import us.ihmc.mecano.algorithms.GeometricJacobianCalculator;
 import us.ihmc.mecano.algorithms.SpatialAccelerationCalculator;
 import us.ihmc.mecano.multiBodySystem.CrossFourBarJoint;
@@ -695,7 +696,7 @@ public class CrossFourBarJointTest
             assertEqualsVarEpsilon(expected_qddD, actual_qddD, LARGE_EPSILON);
          }
 
-         System.out.println("Average time: " + (totalTime / 1.0e6 / ITERATIONS) + "millisec");
+         LogTools.info("Average time: " + (totalTime / 1.0e6 / ITERATIONS) + "millisec");
       }
    }
 

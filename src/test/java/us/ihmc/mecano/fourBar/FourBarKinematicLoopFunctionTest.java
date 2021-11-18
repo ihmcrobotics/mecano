@@ -26,6 +26,7 @@ import us.ihmc.euclid.tuple2D.Vector2D;
 import us.ihmc.euclid.tuple3D.UnitVector3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple4D.Quaternion;
+import us.ihmc.log.LogTools;
 import us.ihmc.mecano.fourBar.CrossFourBarTest.Viewer;
 import us.ihmc.mecano.fourBar.FourBarKinematicLoopFunctionTools.FourBarToJointConverter;
 import us.ihmc.mecano.multiBodySystem.RevoluteJoint;
@@ -102,8 +103,8 @@ public class FourBarKinematicLoopFunctionTest
          }
          catch (Throwable e)
          { // Show the error message in the console as well.
-            System.out.println("Master joint: " + names[masterJointIndex]);
-            System.err.println("\n\n" + e.getMessage() + "\n\n");
+            LogTools.info("Master joint: " + names[masterJointIndex]);
+            LogTools.error("\n\n" + e.getMessage() + "\n\n");
             Viewer viewer = CrossFourBarTest.startupViewer();
             List<FramePoint2D> allVertices = new ArrayList<FramePoint2D>();
             allVertices.addAll(verticesZeroConfig.vertexList());
@@ -187,10 +188,10 @@ public class FourBarKinematicLoopFunctionTest
          }
          catch (Throwable e)
          { // Show the error message in the console as well.
-            System.out.println("\n-------------------\nMaster joint: " + names[masterJointIndex]);
-            System.err.println("\n----------------------------------");
-            System.err.println(e.getMessage());
-            System.err.println("-------------------------------------\n");
+            LogTools.info("\n-------------------\nMaster joint: " + names[masterJointIndex]);
+            LogTools.error("\n----------------------------------");
+            LogTools.error(e.getMessage());
+            LogTools.error("-------------------------------------\n");
             Viewer viewer = CrossFourBarTest.startupViewer();
             List<FramePoint2D> allVertices = new ArrayList<FramePoint2D>();
             allVertices.addAll(verticesZeroConfig.vertexList());

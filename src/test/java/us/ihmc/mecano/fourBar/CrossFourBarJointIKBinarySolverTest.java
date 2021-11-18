@@ -11,6 +11,7 @@ import org.junit.jupiter.api.Test;
 import us.ihmc.euclid.geometry.tools.EuclidGeometryRandomTools;
 import us.ihmc.euclid.tools.EuclidCoreRandomTools;
 import us.ihmc.euclid.tuple2D.Point2D;
+import us.ihmc.log.LogTools;
 
 public class CrossFourBarJointIKBinarySolverTest
 {
@@ -68,8 +69,8 @@ public class CrossFourBarJointIKBinarySolverTest
          naiveMethodTotalTimeNano += end - start;
       }
 
-      System.out.println(getClass().getSimpleName() + " Default method average solve time: " + (defaultMethodTotalTimeNano / ITERATIONS / 1.0e6) + "millisec");
-      System.out.println(getClass().getSimpleName() + " Naive method average solve time: " + (naiveMethodTotalTimeNano / ITERATIONS / 1.0e6) + "millisec");
+      LogTools.info("Default method average solve time: " + (defaultMethodTotalTimeNano / ITERATIONS / 1.0e6) + "millisec");
+      LogTools.info("Naive method average solve time: " + (naiveMethodTotalTimeNano / ITERATIONS / 1.0e6) + "millisec");
    }
 
 }

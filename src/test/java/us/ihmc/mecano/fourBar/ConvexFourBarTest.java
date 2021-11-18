@@ -19,6 +19,7 @@ import us.ihmc.euclid.tools.EuclidCoreTools;
 import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.euclid.tuple2D.Vector2D;
 import us.ihmc.euclid.tuple2D.interfaces.Point2DReadOnly;
+import us.ihmc.log.LogTools;
 
 /**
  * Tests for {@link FourBar} using exclusively convex configurations.
@@ -121,7 +122,7 @@ public class ConvexFourBarTest
          double[] vals = new double[] {a, b, c, d, A, B, C, D};
          for (int i = 0; i < vals.length; i++)
          {
-            System.out.println(names[i] + " = " + vals[i]);
+            LogTools.info(names[i] + " = " + vals[i]);
          }
       }
       FourBar fourBar = new FourBar();
@@ -493,7 +494,7 @@ public class ConvexFourBarTest
          total += System.nanoTime() - start;
       }
 
-      System.out.println("Average time in millisec: " + total / 1.0e3 / iter);
+      LogTools.info("Average time in millisec: " + total / 1.0e3 / iter);
    }
 
    @Test
@@ -706,7 +707,7 @@ public class ConvexFourBarTest
       }
       catch (Throwable e)
       {
-         System.err.println(e.getClass().getSimpleName() + ": " + e.getMessage());
+         LogTools.error(e.getClass().getSimpleName() + ": " + e.getMessage());
 
          CrossFourBarTest.Viewer viewer = CrossFourBarTest.startupViewer();
          viewer.updateFOV(A, B, C, D);
