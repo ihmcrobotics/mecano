@@ -24,6 +24,8 @@ public interface CrossFourBarJointReadOnly extends OneDoFJointReadOnly
 
    double computeMasterJointTau(double tau);
 
+   int getMasterJointIndex();
+
    DMatrix getLoopJacobian();
 
    DMatrix getLoopConvectiveTerm();
