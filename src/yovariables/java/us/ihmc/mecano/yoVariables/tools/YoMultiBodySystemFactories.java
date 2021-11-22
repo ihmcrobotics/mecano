@@ -3,11 +3,13 @@ package us.ihmc.mecano.yoVariables.tools;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.interfaces.Vector3DReadOnly;
+import us.ihmc.mecano.multiBodySystem.interfaces.CrossFourBarJointReadOnly;
 import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
 import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyReadOnly;
 import us.ihmc.mecano.tools.MultiBodySystemFactories;
 import us.ihmc.mecano.tools.MultiBodySystemFactories.JointBuilder;
 import us.ihmc.mecano.tools.MultiBodySystemFactories.RigidBodyBuilder;
+import us.ihmc.mecano.yoVariables.multiBodySystem.YoCrossFourBarJoint;
 import us.ihmc.mecano.yoVariables.multiBodySystem.YoPlanarJoint;
 import us.ihmc.mecano.yoVariables.multiBodySystem.YoPrismaticJoint;
 import us.ihmc.mecano.yoVariables.multiBodySystem.YoRevoluteJoint;
@@ -67,6 +69,15 @@ public class YoMultiBodySystemFactories
          public YoPrismaticJoint buildPrismaticJoint(String name, RigidBodyBasics predecessor, RigidBodyTransform transformToParent, Vector3DReadOnly jointAxis)
          {
             return new YoPrismaticJoint(name, predecessor, transformToParent, jointAxis, registry);
+         }
+
+         @Override
+         public YoCrossFourBarJoint cloneCrossFourBarJoint(CrossFourBarJointReadOnly original, String cloneSuffix, RigidBodyBasics clonePredecessor)
+         {
+            return new YoCrossFourBarJoint(original.getName() + cloneSuffix,
+                                           cloneCrossFourBarLoopJoints(original, cloneSuffix, clonePredecessor),
+                                           original.getMasterJointIndex(),
+                                           registry);
          }
       };
    }

@@ -707,6 +707,22 @@ public class MultiBodySystemFactories
        */
       default CrossFourBarJointBasics cloneCrossFourBarJoint(CrossFourBarJointReadOnly original, String cloneSuffix, RigidBodyBasics clonePredecessor)
       {
+         return new CrossFourBarJoint(original.getName() + cloneSuffix,
+                                      cloneCrossFourBarLoopJoints(original, cloneSuffix, clonePredecessor),
+                                      original.getMasterJointIndex());
+      }
+
+      /**
+       * Extracts and clones the internal joints composing the given cross four bar joint.
+       * 
+       * @param original         the original cross four bar joint which internal revolute joints are to
+       *                         be cloned.
+       * @param cloneSuffix      the suffix for name of the clones.
+       * @param clonePredecessor the predecessor of the clone.
+       * @return the clone cross four bar internal joints.
+       */
+      default RevoluteJointBasics[] cloneCrossFourBarLoopJoints(CrossFourBarJointReadOnly original, String cloneSuffix, RigidBodyBasics clonePredecessor)
+      {
          RevoluteJointBasics cloneJointA, cloneJointB, cloneJointC, cloneJointD;
          RigidBodyBasics cloneBodyAD, cloneBodyBC, cloneSuccessor;
 
@@ -764,9 +780,7 @@ public class MultiBodySystemFactories
             }
          }
 
-         return new CrossFourBarJoint(original.getName() + cloneSuffix,
-                                      new RevoluteJointBasics[] {cloneJointA, cloneJointB, cloneJointC, cloneJointD},
-                                      original.getMasterJointIndex());
+         return new RevoluteJointBasics[] {cloneJointA, cloneJointB, cloneJointC, cloneJointD};
       }
 
       /**
