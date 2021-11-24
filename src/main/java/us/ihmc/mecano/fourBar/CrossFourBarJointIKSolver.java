@@ -2,6 +2,12 @@ package us.ihmc.mecano.fourBar;
 
 import us.ihmc.mecano.fourBar.FourBarKinematicLoopFunctionTools.FourBarToJointConverter;
 
+/**
+ * Interface for a solver that computes one of the four bar interior angle given the overall cross
+ * four bar angle.
+ * 
+ * @author Sylvain Bertrand
+ */
 public interface CrossFourBarJointIKSolver
 {
    /**
@@ -25,8 +31,9 @@ public interface CrossFourBarJointIKSolver
     * </p>
     * <p>
     * Given the configuration depicted below, let's define the point O being the intersection of the
-    * edges AB and CD support lines. The angle &theta; is defined as the angle BOD. Given &theta;, this
-    * method is expected to solve for the angle DAB and to return the value.
+    * edges AB and CD support lines. The angle &theta; is defined as the angle BOD. Given &theta; this
+    * method is solver for one of the four interior angles of the cross four bar, e.g. angle DAB, and
+    * returns the computed value.
     * 
     * <pre>
     * +A------B+
@@ -44,9 +51,8 @@ public interface CrossFourBarJointIKSolver
     *                         flipped edge (CD in the example). In the given example it is the angle
     *                         BOD. It is expected to be positive if clockwise, and negative if
     *                         counter-clockwise.
-    * @param vertexToSolveFor the vertex which angle is to be solved for. In the given example, it is
-    *                         the vertex A.
-    * @return the value of the angle DAB.
+    * @param vertexToSolveFor the vertex which interior angle is to be solved for.
+    * @return the value of the interior angle.
     */
    double solve(double theta, FourBarVertex vertexToSolveFor);
 }

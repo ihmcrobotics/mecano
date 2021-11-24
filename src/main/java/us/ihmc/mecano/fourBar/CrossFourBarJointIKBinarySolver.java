@@ -21,22 +21,41 @@ public class CrossFourBarJointIKBinarySolver implements CrossFourBarJointIKSolve
    private boolean limitsInverted = false;
    private FourBarToJointConverter[] converters = null;
 
+   /**
+    * Creates a new solver.
+    * 
+    * @param tolerance used as terminal condition for the binary search.
+    */
    public CrossFourBarJointIKBinarySolver(double tolerance)
    {
       this(tolerance, 100);
    }
 
+   /**
+    * Creates a new solver.
+    * 
+    * @param tolerance     used as terminal condition for the binary search.
+    * @param maxIterations upper limit on the number of iterations for the binary search.
+    */
    public CrossFourBarJointIKBinarySolver(double tolerance, int maxIterations)
    {
       this.tolerance = tolerance;
       this.maxIterations = maxIterations;
    }
 
+   /**
+    * This class implements two solvers, a simple naive solver that is meant for education, and a
+    * (default) solver that is less understandable but more efficient computation-wise.
+    * 
+    * @param useNaiveMethod {@code true} to use the naive solver (not recommended), {@code false}
+    *                       (default) to use the more efficient solver.
+    */
    public void setUseNaiveMethod(boolean useNaiveMethod)
    {
       this.useNaiveMethod = useNaiveMethod;
    }
 
+   /** {@inheritDoc} */
    @Override
    public void setConverters(FourBarToJointConverter[] converters)
    {
@@ -49,6 +68,7 @@ public class CrossFourBarJointIKBinarySolver implements CrossFourBarJointIKSolve
    private FourBarVertex lastVertexToSolveFor = null;
    private double lastSolution = Double.NaN;
 
+   /** {@inheritDoc} */
    @Override
    public double solve(double theta, FourBarVertex vertexToSolveFor)
    {
