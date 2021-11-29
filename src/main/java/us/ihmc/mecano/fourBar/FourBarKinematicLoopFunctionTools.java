@@ -19,6 +19,11 @@ import us.ihmc.mecano.multiBodySystem.interfaces.RevoluteJointReadOnly;
 import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyReadOnly;
 import us.ihmc.mecano.tools.MultiBodySystemTools;
 
+/**
+ * This class declares static tools for handling four bar linkages.
+ * 
+ * @see FourBarKinematicLoopFunction
+ */
 public class FourBarKinematicLoopFunctionTools
 {
    private static final String A_NAME = "A";
@@ -466,16 +471,29 @@ public class FourBarKinematicLoopFunctionTools
       return ancestor;
    }
 
+   /**
+    * Helper class that is used to convert back and forth between joint angle and the corresponding
+    * four bar vertex angle.
+    */
    static class FourBarToJointConverter
    {
+      /** The corresponding four bar angle. */
       private FourBarAngle fourBarAngle;
+      /**
+       * Whether the joint and vertex angle are similar, i.e. {@code 1}, or opposite, i.e. {@code -1}.
+       */
       private double sign;
+      /** The angle of the four bar's vertex when the joint is at zero. */
       private double interiorAngleAtZero;
 
-      public FourBarToJointConverter()
-      {
-      }
-
+      /**
+       * Initializes this converter.
+       * 
+       * @param fourBarAngle        the corresponding four bar angle.
+       * @param sign                whether the joint and vertex angle are similar, i.e. {@code 1}, or
+       *                            opposite, i.e. {@code -1}.
+       * @param interiorAngleAtZero the angle of the four bar's vertex when the joint is at zero.
+       */
       public void set(FourBarAngle fourBarAngle, double sign, double interiorAngleAtZero)
       {
          this.fourBarAngle = fourBarAngle;
@@ -483,36 +501,78 @@ public class FourBarKinematicLoopFunctionTools
          this.interiorAngleAtZero = interiorAngleAtZero;
       }
 
+      /**
+       * Computes the joint angle corresponding to the given four bar vertex angle.
+       * 
+       * @param interiorAngle the four bar vertex angle.
+       * @return the joint angle value.
+       */
       public double toJointAngle(double interiorAngle)
       {
          return sign * (interiorAngle - interiorAngleAtZero);
       }
 
+      /**
+       * Computes the joint velocity/acceleration corresponding to the given four bar vertex
+       * velocity/acceleration.
+       * 
+       * @param interiorAngularDerivative the four bar vertex velocity/acceleration.
+       * @return the joint velocity/acceleration value.
+       */
       public double toJointDerivative(double interiorAngularDerivative)
       {
          return sign * interiorAngularDerivative;
       }
 
+      /**
+       * Computes the four bar vertex angle corresponding to the given joint angle.
+       * 
+       * @param jointAngle the joint angle.
+       * @return the four bar vertex angle value.
+       */
       public double toFourBarInteriorAngle(double jointAngle)
       {
          return sign * jointAngle + interiorAngleAtZero;
       }
 
+      /**
+       * Computes the four bar vertex velocity/acceleration corresponding to the given joint
+       * velocity/acceleration.
+       * 
+       * @param jointDerivative the joint velocity/acceleration.
+       * @return the four bar vertex velocity/acceleration value.
+       */
       public double toFourBarInteriorAngularDerivative(double jointDerivative)
       {
          return sign * jointDerivative;
       }
 
+      /**
+       * The four bar angle this converter is associated to.
+       * 
+       * @return the angle of the four bar this converter is associated to.
+       */
       public FourBarAngle getFourBarAngle()
       {
          return fourBarAngle;
       }
 
+      /**
+       * The sign relation between the joint and the four bar vertex.
+       * 
+       * @return the sign relation between the joint and the four bar vertex, i.e. either {@code 1} or
+       *         {@code -1}.
+       */
       public double getSign()
       {
          return sign;
       }
 
+      /**
+       * The angle value of the four bar vertex when the joint angle is zero.
+       * 
+       * @return the angle value of the four bar vertex when the joint angle is zero.
+       */
       public double getInteriorAngleAtZero()
       {
          return interiorAngleAtZero;

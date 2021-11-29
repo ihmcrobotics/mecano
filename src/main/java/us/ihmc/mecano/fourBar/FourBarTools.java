@@ -4,13 +4,31 @@ import us.ihmc.euclid.geometry.Bound;
 import us.ihmc.euclid.geometry.tools.EuclidGeometryTools;
 import us.ihmc.euclid.tools.EuclidCoreTools;
 
+/**
+ * This class declares static tools for four bar geometry.
+ * 
+ * @see FourBar
+ */
 public class FourBarTools
 {
+   /**
+    * Tests whether the given four bar is a cross four bar, meaning two of its edges cross.
+    * 
+    * @param fourBar the query. Not modified.
+    * @return {@code true} if it is a cross four bar, {@code false} otherwise.
+    */
    public static boolean isCrossFourBar(FourBar fourBar)
    {
       return fourBar.getEdgeAB().isCrossing() && fourBar.getEdgeCD().isCrossing() || fourBar.getEdgeDA().isCrossing() && fourBar.getEdgeBC().isCrossing();
    }
 
+   /**
+    * Tests whether the four bar associated to the given vertex is a cross four bar, meaning two of its
+    * edges cross.
+    * 
+    * @param fourBarVertex this method tests the four bar to which this vertex belongs. Not modified.
+    * @return {@code true} if it is a cross four bar, {@code false} otherwise.
+    */
    public static boolean isCrossFourBar(FourBarVertex fourBarVertex)
    {
       FourBarVertex A = fourBarVertex;
@@ -22,6 +40,12 @@ public class FourBarTools
       return ABEdge.isCrossing() && CDEdge.isCrossing() || DAEdge.isCrossing() && BCEdge.isCrossing();
    }
 
+   /**
+    * Sets the vertex angle to its minimum angle and updates the four bar configuration to which it
+    * belongs.
+    * 
+    * @param vertex the vertex to set to its minimum angle. Modified.
+    */
    public static void setToMinAngle(FourBarVertex vertex)
    {
       vertex.setToMin();
@@ -45,6 +69,12 @@ public class FourBarTools
          previousVertex.setToMin();
    }
 
+   /**
+    * Sets the vertex angle to its maximum angle and updates the four bar configuration to which it
+    * belongs.
+    * 
+    * @param vertex the vertex to set to its maximum angle. Modified.
+    */
    public static void setToMaxAngle(FourBarVertex vertex)
    {
       vertex.setToMax();
@@ -68,16 +98,46 @@ public class FourBarTools
          previousVertex.setToMax();
    }
 
+   /**
+    * Sets the vertex to the given {@code angle} and update the four bar configuration to which the
+    * vertex belongs.
+    * 
+    * @param vertex the vertex which angle is to be updated. Modified.
+    * @param angle  the vertex's angle.
+    * @return if the configuration is within the four bar range, this method returns {@code null},
+    *         otherwise returns the bound to which the configuration has been clamped.
+    */
    public static Bound update(FourBarVertex vertex, double angle)
    {
       return update(vertex, angle, Double.NaN, Double.NaN);
    }
 
+   /**
+    * Sets the vertex to the given {@code angle} and velocity {@code angleDot} and update the four bar
+    * configuration to which the vertex belongs.
+    * 
+    * @param vertex   the vertex which angle and velocity are to be updated. Modified.
+    * @param angle    the vertex's angle.
+    * @param angleDot the vertex's velocity.
+    * @return if the configuration is within the four bar range, this method returns {@code null},
+    *         otherwise returns the bound to which the configuration has been clamped.
+    */
    public static Bound update(FourBarVertex vertex, double angle, double angleDot)
    {
       return update(vertex, angle, angleDot, Double.NaN);
    }
 
+   /**
+    * Sets the vertex to the given {@code angle}, velocity {@code angleDot}, and acceleration
+    * {@code angleDDot} and update the four bar configuration to which the vertex belongs.
+    * 
+    * @param vertex    the vertex which angle and velocity are to be updated. Modified.
+    * @param angle     the vertex's angle.
+    * @param angleDot  the vertex's velocity.
+    * @param angleDDot the vertex's acceleration.
+    * @return if the configuration is within the four bar range, this method returns {@code null},
+    *         otherwise returns the bound to which the configuration has been clamped.
+    */
    public static Bound update(FourBarVertex vertex, double angle, double angleDot, double angleDDot)
    {
       Bound limit = null;
@@ -265,6 +325,13 @@ public class FourBarTools
       return limit;
    }
 
+   /**
+    * Computes the minimum and maximum angle of the given {@code vertex} such that the range
+    * corresponds to the four bar range before its configuration flips, e.g. 2 edges change from
+    * crossing to non-crossing.
+    * 
+    * @param vertex the vertex to compute the limits of. Modified.
+    */
    public static void updateLimits(FourBarVertex vertex)
    {
       FourBarVertex A = vertex;

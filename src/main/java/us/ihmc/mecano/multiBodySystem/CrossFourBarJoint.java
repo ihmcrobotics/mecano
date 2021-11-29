@@ -15,9 +15,7 @@ import us.ihmc.euclid.transform.interfaces.RigidBodyTransformReadOnly;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.mecano.fourBar.CrossFourBarJointIKBinarySolver;
 import us.ihmc.mecano.fourBar.CrossFourBarJointIKSolver;
-import us.ihmc.mecano.fourBar.FourBar;
 import us.ihmc.mecano.fourBar.FourBarKinematicLoopFunction;
-import us.ihmc.mecano.fourBar.FourBarKinematicLoopFunctionTools;
 import us.ihmc.mecano.frames.MovingReferenceFrame;
 import us.ihmc.mecano.multiBodySystem.interfaces.CrossFourBarJointBasics;
 import us.ihmc.mecano.multiBodySystem.interfaces.CrossFourBarJointReadOnly;
@@ -118,8 +116,8 @@ public class CrossFourBarJoint implements CrossFourBarJointBasics
     * @throws IllegalArgumentException if the given joints do not represent a cross four bar joints.
     * @throws IllegalArgumentException if a subtree is already attached to the last two joints closing
     *                                  the four bar.
-    * @see FourBarKinematicLoopFunctionTools#configureFourBarKinematics(RevoluteJointBasics[],
-    *      FourBarToJointConverter[], FourBar, int, double)
+    * @see FourBarKinematicLoopFunction#FourBarKinematicLoopFunction(String, RevoluteJointBasics[],
+    *      int)
     */
    public CrossFourBarJoint(String name, RevoluteJointBasics[] fourBarJoints, int masterJointIndex)
    {
@@ -343,6 +341,12 @@ public class CrossFourBarJoint implements CrossFourBarJointBasics
       jointBiasAcceleration.setBodyFrame(joint.getFrameAfterJoint());
    }
 
+   /**
+    * Gets the reference to the calculator this joint uses to compute the internal Jacobian and
+    * convective term.
+    * 
+    * @return the reference to the calculator.
+    */
    public FourBarKinematicLoopFunction getFourBarFunction()
    {
       return fourBarFunction;
@@ -404,6 +408,12 @@ public class CrossFourBarJoint implements CrossFourBarJointBasics
       return fourBarFunction.getLoopConvectiveTerm();
    }
 
+   /**
+    * Gets the reference to the solver this joint uses to compute the master joint angle given this
+    * joint angle.
+    * 
+    * @return the reference to the solver.
+    */
    public CrossFourBarJointIKSolver getIKSolver()
    {
       return ikSolver;

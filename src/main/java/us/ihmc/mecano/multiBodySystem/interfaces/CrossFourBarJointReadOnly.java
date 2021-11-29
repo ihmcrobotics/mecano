@@ -186,8 +186,8 @@ public interface CrossFourBarJointReadOnly extends OneDoFJointReadOnly
     * qDDot = G * yDDot + g
     * </pre>
     * <p>
-    * The {@code G} matrix is a 4-by-1 matrix which row indexing follows the ordering of the joints
-    * according to {@link #getLoopJoints()}, {@code g} is the convective term vector see
+    * The {@code G} matrix is a 4-by-1 matrix which row indexing follows the alphabetical ordering of
+    * the joints, i.e. A, B, C, and D, {@code g} is the convective term vector see
     * {@link #getLoopConvectiveTerm()}, {@code qDot} and {@code qDDot} are the 4 element vectors of the
     * 4 loop joint velocities and accelerations, and {@code yDot} and {@code yDDot} are the master
     * joint velocity and acceleration.
@@ -206,8 +206,8 @@ public interface CrossFourBarJointReadOnly extends OneDoFJointReadOnly
     * qDDot = G * yDDot + g
     * </pre>
     * <p>
-    * The {@code g} is a 4 element vector which indexing follows the ordering of the joints according
-    * to {@link #getLoopJoints()}, {@code G} the loop Jacobian, see {@link #getLoopJacobian()},
+    * The {@code g} is a 4 element vector which indexing follows the alphabetical ordering of the
+    * joints, i.e. A, B, C, and D, {@code G} the loop Jacobian, see {@link #getLoopJacobian()},
     * {@code qDDot} is the 4 element vector of the 4 loop joint accelerations, and {@code yDDot} is the
     * master joint acceleration.
     * </p>

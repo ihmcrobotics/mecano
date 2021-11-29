@@ -193,8 +193,9 @@ public class FourBar
     * @param isBConvex whether the four bar linkage is convex at the vertex B.
     * @param isCConvex whether the four bar linkage is convex at the vertex C.
     * @param isDConvex whether the four bar linkage is convex at the vertex D.
-    * @throws if the number of convex vertices is equal to either 1 or 3 which represents the
-    *            configurations that this calculator does not support yet.
+    * @throws UnsupportedOperationException if the number of convex vertices is equal to either 1 or 3
+    *                                       which represents the configurations that this calculator
+    *                                       does not support yet.
     */
    public void setup(double AB, double BC, double CD, double DA, boolean isAConvex, boolean isBConvex, boolean isCConvex, boolean isDConvex)
    {

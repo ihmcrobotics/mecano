@@ -36,5 +36,9 @@ public enum FourBarAngle
    /** Inner angle at vertex D. */
    CDA;
 
+   /**
+    * Static final field holding the return from {@link #values()}. This field should be used in place
+    * of calling values() for garbage-free operations.
+    */
    public static final FourBarAngle[] values = values();
 }

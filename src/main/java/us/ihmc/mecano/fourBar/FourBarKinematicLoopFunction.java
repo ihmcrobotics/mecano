@@ -144,6 +144,8 @@ public class FourBarKinematicLoopFunction implements KinematicLoopFunction
     * @param updateVelocity     whether the joint velocities should be computed and updated.
     * @param updateAcceleration whether the joint accelerations should be computed and updated,
     *                           requires {@code updateVelocity = true}.
+    * @return if the configuration is within the four bar range, this method returns {@code null},
+    *         otherwise returns the bound to which the configuration has been clamped.
     */
    public Bound updateState(boolean updateVelocity, boolean updateAcceleration)
    {
@@ -317,6 +319,11 @@ public class FourBarKinematicLoopFunction implements KinematicLoopFunction
       }
    }
 
+   /**
+    * Gets the name of the four bar this function is for.
+    * 
+    * @return the name of the four bar.
+    */
    public String getName()
    {
       return name;
@@ -422,11 +429,21 @@ public class FourBarKinematicLoopFunction implements KinematicLoopFunction
       return jointD;
    }
 
+   /**
+    * The index of the master joint in the list {@link #getLoopJoints()}.
+    * 
+    * @return the index of the master joint.
+    */
    public int getMasterJointIndex()
    {
       return masterJointIndex;
    }
 
+   /**
+    * The vertex of {@link #getFourBar()} that corresponds to the master joint.
+    * 
+    * @return the master vertex.
+    */
    public FourBarVertex getMasterVertex()
    {
       return masterVertex;
