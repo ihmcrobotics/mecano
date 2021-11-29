@@ -35,6 +35,33 @@ import us.ihmc.mecano.spatial.interfaces.WrenchReadOnly;
 import us.ihmc.mecano.tools.MecanoFactories;
 import us.ihmc.mecano.tools.MultiBodySystemFactories;
 
+/**
+ * Implementation of a cross four bar joint.
+ * <p>
+ * A cross four bar joint is a joint that has 1 degree of freedom of rotation and which has a
+ * variable center of rotation which changes with its configuration. Example of a cross four bar
+ * joint:
+ * 
+ * <pre>
+ *    root
+ *      |
+ *      |
+ * A O-----O B
+ *    \   /
+ *     \ /
+ *      X
+ *     / \
+ *    /   \
+ * C O-----O D
+ *      |
+ * end-effector
+ * </pre>
+ * 
+ * where A, B, C, and D are all revolute joint around the same axis. It is assumed that only one
+ * joint in this sub-system composed of {A, B, C, and D} is a torque source, this is the master
+ * joint.
+ * </p>
+ */
 public class CrossFourBarJoint implements CrossFourBarJointBasics
 {
    private final String name;
@@ -151,6 +178,7 @@ public class CrossFourBarJoint implements CrossFourBarJointBasics
       ikSolver.setConverters(fourBarFunction.getConverters());
    }
 
+   /** {@inheritDoc} */
    @Override
    public void updateFrame()
    {
@@ -170,6 +198,7 @@ public class CrossFourBarJoint implements CrossFourBarJointBasics
    private final Twist deltaTwist = new Twist();
    private final Twist bodyTwist = new Twist();
 
+   /** {@inheritDoc} */
    @Override
    public void updateMotionSubspace()
    {
@@ -319,48 +348,56 @@ public class CrossFourBarJoint implements CrossFourBarJointBasics
       return fourBarFunction;
    }
 
+   /** {@inheritDoc} */
    @Override
    public RevoluteJointBasics getMasterJoint()
    {
       return fourBarFunction.getMasterJoint();
    }
 
+   /** {@inheritDoc} */
    @Override
    public RevoluteJointBasics getJointA()
    {
       return fourBarFunction.getJointA();
    }
 
+   /** {@inheritDoc} */
    @Override
    public RevoluteJointBasics getJointB()
    {
       return fourBarFunction.getJointB();
    }
 
+   /** {@inheritDoc} */
    @Override
    public RevoluteJointBasics getJointC()
    {
       return fourBarFunction.getJointC();
    }
 
+   /** {@inheritDoc} */
    @Override
    public RevoluteJointBasics getJointD()
    {
       return fourBarFunction.getJointD();
    }
 
+   /** {@inheritDoc} */
    @Override
    public int getMasterJointIndex()
    {
       return fourBarFunction.getMasterJointIndex();
    }
 
+   /** {@inheritDoc} */
    @Override
    public DMatrixRMaj getLoopJacobian()
    {
       return fourBarFunction.getLoopJacobian();
    }
 
+   /** {@inheritDoc} */
    @Override
    public DMatrixRMaj getLoopConvectiveTerm()
    {
@@ -372,54 +409,65 @@ public class CrossFourBarJoint implements CrossFourBarJointBasics
       return ikSolver;
    }
 
+   /** {@inheritDoc} */
    @Override
    public MovingReferenceFrame getFrameBeforeJoint()
    {
       return beforeJointFrame;
    }
 
+   /** {@inheritDoc} */
    @Override
    public MovingReferenceFrame getFrameAfterJoint()
    {
       return afterJointFrame;
    }
 
+   /** {@inheritDoc} */
    @Override
    public RigidBodyBasics getPredecessor()
    {
       return predecessor;
    }
 
+   /** {@inheritDoc} */
    @Override
    public RigidBodyBasics getSuccessor()
    {
       return successor;
    }
 
+   /** {@inheritDoc} */
    @Override
    public MovingReferenceFrame getLoopClosureFrame()
    {
       return null;
    }
 
+   /** {@inheritDoc} */
    @Override
    public String getName()
    {
       return name;
    }
 
+   /** {@inheritDoc} */
    @Override
    public String getNameId()
    {
       return nameId;
    }
 
+   /**
+    * This feature is not supported.
+    */
    @Override
    public void setupLoopClosure(RigidBodyBasics successor, RigidBodyTransformReadOnly transformFromSuccessorParentJoint)
    {
       throw new UnsupportedOperationException("Loop closure using a four bar joint has not been implemented.");
    }
 
+   /** {@inheritDoc} */
    @Override
    public double getTau()
    {
@@ -432,78 +480,93 @@ public class CrossFourBarJoint implements CrossFourBarJointBasics
          return getMasterJoint().getTau() / (loopJacobian.get(1) + loopJacobian.get(2));
    }
 
+   /** {@inheritDoc} */
    @Override
    public TwistReadOnly getUnitJointTwist()
    {
       return unitJointTwist;
    }
 
+   /** {@inheritDoc} */
    @Override
    public TwistReadOnly getUnitSuccessorTwist()
    {
       return unitSuccessorTwist;
    }
 
+   /** {@inheritDoc} */
    @Override
    public TwistReadOnly getUnitPredecessorTwist()
    {
       return unitPredecessorTwist;
    }
 
+   /** {@inheritDoc} */
    @Override
    public SpatialAccelerationReadOnly getUnitJointAcceleration()
    {
       return unitJointAcceleration;
    }
 
+   /** {@inheritDoc} */
    @Override
    public SpatialAccelerationReadOnly getUnitSuccessorAcceleration()
    {
       return unitSuccessorAcceleration;
    }
 
+   /** {@inheritDoc} */
    @Override
    public SpatialAccelerationReadOnly getUnitPredecessorAcceleration()
    {
       return unitPredecessorAcceleration;
    }
 
+   /** {@inheritDoc} */
    @Override
    public void getJointConfiguration(RigidBodyTransform jointConfigurationToPack)
    {
       afterJointFrame.getTransformToDesiredFrame(jointConfigurationToPack, beforeJointFrame);
    }
 
+   /** {@inheritDoc} */
    @Override
    public TwistReadOnly getJointTwist()
    {
       return jointTwist;
    }
 
+   /** {@inheritDoc} */
    @Override
    public List<TwistReadOnly> getUnitTwists()
    {
       return unitTwists;
    }
 
+   /** {@inheritDoc} */
    @Override
    public SpatialAccelerationReadOnly getJointAcceleration()
    {
       return jointAcceleration;
    }
 
+   /** {@inheritDoc} */
    @Override
    public SpatialAccelerationReadOnly getJointBiasAcceleration()
    {
       return jointBiasAcceleration;
    }
 
+   /** {@inheritDoc} */
    @Override
    public SpatialAccelerationReadOnly getSuccessorBiasAcceleration()
    {
       return successorBiasAcceleration;
    }
 
+   /**
+    * This feature is not implemented.
+    */
    @Override
    public void getPredecessorAcceleration(SpatialAccelerationBasics accelerationToPack)
    {
@@ -512,6 +575,9 @@ public class CrossFourBarJoint implements CrossFourBarJointBasics
       throw new UnsupportedOperationException("Implement me!");
    }
 
+   /**
+    * This feature is not implemented.
+    */
    @Override
    public SpatialAccelerationReadOnly getPredecessorBiasAcceleration()
    {
@@ -520,12 +586,14 @@ public class CrossFourBarJoint implements CrossFourBarJointBasics
       throw new UnsupportedOperationException("Implement me!");
    }
 
+   /** {@inheritDoc} */
    @Override
    public WrenchReadOnly getJointWrench()
    {
       return jointWrench;
    }
 
+   /** {@inheritDoc} */
    @Override
    public void setJointOrientation(Orientation3DReadOnly jointOrientation)
    {
@@ -533,12 +601,14 @@ public class CrossFourBarJoint implements CrossFourBarJointBasics
       setQ(rotationVector.dot(getJointAxis()));
    }
 
+   /** {@inheritDoc} */
    @Override
    public double computeMasterJointQ(double q)
    {
       return ikSolver.solve(q, fourBarFunction.getMasterVertex());
    }
 
+   /** {@inheritDoc} */
    @Override
    public double computeMasterJointQd(double qd)
    {
@@ -548,6 +618,7 @@ public class CrossFourBarJoint implements CrossFourBarJointBasics
       return qd / (loopJacobian.get(0) + loopJacobian.get(3));
    }
 
+   /** {@inheritDoc} */
    @Override
    public double computeMasterJointQdd(double qdd)
    {
@@ -560,6 +631,7 @@ public class CrossFourBarJoint implements CrossFourBarJointBasics
       return qdd_master;
    }
 
+   /** {@inheritDoc} */
    @Override
    public double computeMasterJointTau(double tau)
    {
@@ -594,6 +666,15 @@ public class CrossFourBarJoint implements CrossFourBarJointBasics
       return nameId.hashCode();
    }
 
+   /**
+    * Clones the given joint and attached the clone to a stationary frame.
+    * 
+    * @param original        the original cross four bar joint to be cloned.
+    * @param stationaryFrame the frame to which the clone should be attached to.
+    * @param cloneSuffix     the suffix for name of the clone, i.e. the name of the clone is
+    *                        {@code original.getName() + cloneSuffix}.
+    * @return the clone cross four bar joint.
+    */
    public static CrossFourBarJoint cloneCrossFourBarJoint(CrossFourBarJoint original, ReferenceFrame stationaryFrame, String cloneSuffix)
    {
       RigidBodyBasics originalPredecessor = original.getPredecessor();
@@ -601,6 +682,16 @@ public class CrossFourBarJoint implements CrossFourBarJointBasics
       return cloneCrossFourBarJoint(original, clonePredecessor, cloneSuffix);
    }
 
+   /**
+    * Clones the given cross four bar joint {@code original} and attach the clone to
+    * {@code clonePredecessor}.
+    * 
+    * @param original         the original cross four bar joint to be cloned.
+    * @param cloneSuffix      the suffix for name of the clone, i.e. the name of the clone is
+    *                         {@code original.getName() + cloneSuffix}.
+    * @param clonePredecessor the predecessor of the clone.
+    * @return the clone cross four bar joint.
+    */
    public static CrossFourBarJoint cloneCrossFourBarJoint(CrossFourBarJoint original, RigidBodyBasics clonePredecessor, String cloneSuffix)
    {
       return (CrossFourBarJoint) MultiBodySystemFactories.DEFAULT_JOINT_BUILDER.cloneCrossFourBarJoint(original, cloneSuffix, clonePredecessor);

@@ -177,70 +177,117 @@ public interface CrossFourBarJointReadOnly extends OneDoFJointReadOnly
     */
    int getMasterJointIndex();
 
+   /**
+    * Gets the Jacobian {@code G} which maps from the master joint velocity/acceleration to all loop
+    * joint velocities/accelerations:
+    * 
+    * <pre>
+    * qDot  = G * yDot
+    * qDDot = G * yDDot + g
+    * </pre>
+    * <p>
+    * The {@code G} matrix is a 4-by-1 matrix which row indexing follows the ordering of the joints
+    * according to {@link #getLoopJoints()}, {@code g} is the convective term vector see
+    * {@link #getLoopConvectiveTerm()}, {@code qDot} and {@code qDDot} are the 4 element vectors of the
+    * 4 loop joint velocities and accelerations, and {@code yDot} and {@code yDDot} are the master
+    * joint velocity and acceleration.
+    * </p>
+    * 
+    * @return the Jacobian of the four bar internal joints.
+    * @see KinematicLoopFunction#getLoopJacobian()
+    */
    DMatrix getLoopJacobian();
 
+   /**
+    * Gets the convective term {@code g} used in the mapping from the master joint acceleration to all
+    * loop joint accelerations:
+    * 
+    * <pre>
+    * qDDot = G * yDDot + g
+    * </pre>
+    * <p>
+    * The {@code g} is a 4 element vector which indexing follows the ordering of the joints according
+    * to {@link #getLoopJoints()}, {@code G} the loop Jacobian, see {@link #getLoopJacobian()},
+    * {@code qDDot} is the 4 element vector of the 4 loop joint accelerations, and {@code yDDot} is the
+    * master joint acceleration.
+    * </p>
+    * 
+    * @return the convective term of the four bar internal joints.
+    * @see KinematicLoopFunction#getLoopConvectiveTerm()
+    */
    DMatrix getLoopConvectiveTerm();
 
+   /** {@inheritDoc} */
    @Override
    default boolean isMotionSubspaceVariable()
    {
       return true;
    }
 
+   /** {@inheritDoc} */
    @Override
    default FrameVector3DReadOnly getJointAxis()
    {
       return getMasterJoint().getJointAxis();
    }
 
+   /** {@inheritDoc} */
    @Override
    default double getQ()
    {
       return getJointA().getQ() + getJointD().getQ();
    }
 
+   /** {@inheritDoc} */
    @Override
    default double getQd()
    {
       return getJointA().getQd() + getJointD().getQd();
    }
 
+   /** {@inheritDoc} */
    @Override
    default double getQdd()
    {
       return getJointA().getQdd() + getJointD().getQdd();
    }
 
+   /** {@inheritDoc} */
    @Override
    default double getJointLimitLower()
    {
       return getJointA().getJointLimitLower() + getJointD().getJointLimitLower();
    }
 
+   /** {@inheritDoc} */
    @Override
    default double getJointLimitUpper()
    {
       return getJointA().getJointLimitUpper() + getJointD().getJointLimitUpper();
    }
 
+   /** {@inheritDoc} */
    @Override
    default double getVelocityLimitLower()
    {
       return getJointA().getVelocityLimitLower() + getJointD().getVelocityLimitLower();
    }
 
+   /** {@inheritDoc} */
    @Override
    default double getVelocityLimitUpper()
    {
       return getJointA().getVelocityLimitUpper() + getJointD().getVelocityLimitUpper();
    }
 
+   /** {@inheritDoc} */
    @Override
    default double getEffortLimitLower()
    {
       return getMasterJoint().getEffortLimitLower();
    }
 
+   /** {@inheritDoc} */
    @Override
    default double getEffortLimitUpper()
    {
