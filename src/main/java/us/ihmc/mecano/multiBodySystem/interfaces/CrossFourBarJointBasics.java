@@ -26,7 +26,7 @@ import us.ihmc.euclid.tuple3D.interfaces.Vector3DReadOnly;
  * </pre>
  * 
  * where A, B, C, and D are all revolute joint around the same axis. It is assumed that only one
- * joint in this sub-system composed of {A, B, C, and D} is a torque source, this is the master
+ * joint in this sub-system composed of {A, B, C, and D} is a torque source, this is the actuated
  * joint.
  * </p>
  */
@@ -34,7 +34,7 @@ public interface CrossFourBarJointBasics extends CrossFourBarJointReadOnly, OneD
 {
    /** {@inheritDoc} */
    @Override
-   RevoluteJointBasics getMasterJoint();
+   RevoluteJointBasics getActuatedJoint();
 
    /** {@inheritDoc} */
    @Override
@@ -64,21 +64,21 @@ public interface CrossFourBarJointBasics extends CrossFourBarJointReadOnly, OneD
    @Override
    default void setQ(double q)
    {
-      getMasterJoint().setQ(computeMasterJointQ(q));
+      getActuatedJoint().setQ(computeActuatedJointQ(q));
    }
 
    /** {@inheritDoc} */
    @Override
    default void setQd(double qd)
    {
-      getMasterJoint().setQd(computeMasterJointQd(qd));
+      getActuatedJoint().setQd(computeActuatedJointQd(qd));
    }
 
    /** {@inheritDoc} */
    @Override
    default void setQdd(double qdd)
    {
-      getMasterJoint().setQdd(computeMasterJointQdd(qdd));
+      getActuatedJoint().setQdd(computeActuatedJointQdd(qdd));
    }
 
    /** {@inheritDoc} */
@@ -89,7 +89,7 @@ public interface CrossFourBarJointBasics extends CrossFourBarJointReadOnly, OneD
       getJointB().setJointTauToZero();
       getJointC().setJointTauToZero();
       getJointD().setJointTauToZero();
-      getMasterJoint().setTau(computeMasterJointTau(tau));
+      getActuatedJoint().setTau(computeActuatedJointTau(tau));
    }
 
    /**

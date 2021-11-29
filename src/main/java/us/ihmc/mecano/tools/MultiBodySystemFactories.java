@@ -709,7 +709,7 @@ public class MultiBodySystemFactories
       {
          return new CrossFourBarJoint(original.getName() + cloneSuffix,
                                       cloneCrossFourBarLoopJoints(original, cloneSuffix, clonePredecessor),
-                                      original.getMasterJointIndex());
+                                      original.getActuatedJointIndex());
       }
 
       /**

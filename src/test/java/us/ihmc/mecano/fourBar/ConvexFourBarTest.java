@@ -378,7 +378,7 @@ public class ConvexFourBarTest
    }
 
    @Test
-   public void testMasterAngleComputations()
+   public void testActuatedAngleComputations()
    {
       Random rand = new Random(1986L);
       for (int i = 0; i < 10000; i++)

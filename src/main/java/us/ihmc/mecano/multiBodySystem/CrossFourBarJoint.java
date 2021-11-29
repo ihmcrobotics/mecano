@@ -56,7 +56,7 @@ import us.ihmc.mecano.tools.MultiBodySystemFactories;
  * </pre>
  * 
  * where A, B, C, and D are all revolute joint around the same axis. It is assumed that only one
- * joint in this sub-system composed of {A, B, C, and D} is a torque source, this is the master
+ * joint in this sub-system composed of {A, B, C, and D} is a torque source, this is the actuated
  * joint.
  * </p>
  */
@@ -112,16 +112,16 @@ public class CrossFourBarJoint implements CrossFourBarJointBasics
     *
     * @param name             the name of this joint.
     * @param fourBarJoints    the 4 revolute joints composing the four bar.
-    * @param masterJointIndex the index in {@code fourBarJoints} of the joints that is actuated.
+    * @param actuatedJointIndex the index in {@code fourBarJoints} of the joints that is actuated.
     * @throws IllegalArgumentException if the given joints do not represent a cross four bar joints.
     * @throws IllegalArgumentException if a subtree is already attached to the last two joints closing
     *                                  the four bar.
     * @see FourBarKinematicLoopFunction#FourBarKinematicLoopFunction(String, RevoluteJointBasics[],
     *      int)
     */
-   public CrossFourBarJoint(String name, RevoluteJointBasics[] fourBarJoints, int masterJointIndex)
+   public CrossFourBarJoint(String name, RevoluteJointBasics[] fourBarJoints, int actuatedJointIndex)
    {
-      fourBarFunction = new FourBarKinematicLoopFunction(name, fourBarJoints, masterJointIndex);
+      fourBarFunction = new FourBarKinematicLoopFunction(name, fourBarJoints, actuatedJointIndex);
       if (!fourBarFunction.isCrossed())
          throw new IllegalArgumentException("The given joint configuration does not represent a cross four bar.");
       setIKSolver(new CrossFourBarJointIKBinarySolver(1.0e-5));
@@ -226,7 +226,7 @@ public class CrossFourBarJoint implements CrossFourBarJointBasics
          successorBiasAcceleration.setBodyFrame(getSuccessor().getBodyFixedFrame());
          successorBiasAcceleration.changeFrame(getSuccessor().getBodyFixedFrame());
 
-         unitJointWrench.setIncludingFrame(fourBarFunction.getMasterJoint().getUnitJointTwist());
+         unitJointWrench.setIncludingFrame(fourBarFunction.getActuatedJoint().getUnitJointTwist());
          unitJointWrench.changeFrame(afterJointFrame);
          unitJointWrench.setBodyFrame(getSuccessor().getBodyFixedFrame());
       }
@@ -354,9 +354,9 @@ public class CrossFourBarJoint implements CrossFourBarJointBasics
 
    /** {@inheritDoc} */
    @Override
-   public RevoluteJointBasics getMasterJoint()
+   public RevoluteJointBasics getActuatedJoint()
    {
-      return fourBarFunction.getMasterJoint();
+      return fourBarFunction.getActuatedJoint();
    }
 
    /** {@inheritDoc} */
@@ -389,9 +389,9 @@ public class CrossFourBarJoint implements CrossFourBarJointBasics
 
    /** {@inheritDoc} */
    @Override
-   public int getMasterJointIndex()
+   public int getActuatedJointIndex()
    {
-      return fourBarFunction.getMasterJointIndex();
+      return fourBarFunction.getActuatedJointIndex();
    }
 
    /** {@inheritDoc} */
@@ -409,7 +409,7 @@ public class CrossFourBarJoint implements CrossFourBarJointBasics
    }
 
    /**
-    * Gets the reference to the solver this joint uses to compute the master joint angle given this
+    * Gets the reference to the solver this joint uses to compute the actuated joint angle given this
     * joint angle.
     * 
     * @return the reference to the solver.
@@ -484,10 +484,10 @@ public class CrossFourBarJoint implements CrossFourBarJointBasics
       // TODO This method ignores potentially non-zero torques set in the other joints.
       DMatrixRMaj loopJacobian = fourBarFunction.getLoopJacobian();
       fourBarFunction.updateEffort();
-      if (getMasterJoint() == getJointA() || getMasterJoint() == getJointD())
-         return getMasterJoint().getTau() / (loopJacobian.get(0) + loopJacobian.get(3));
+      if (getActuatedJoint() == getJointA() || getActuatedJoint() == getJointD())
+         return getActuatedJoint().getTau() / (loopJacobian.get(0) + loopJacobian.get(3));
       else
-         return getMasterJoint().getTau() / (loopJacobian.get(1) + loopJacobian.get(2));
+         return getActuatedJoint().getTau() / (loopJacobian.get(1) + loopJacobian.get(2));
    }
 
    /** {@inheritDoc} */
@@ -613,14 +613,14 @@ public class CrossFourBarJoint implements CrossFourBarJointBasics
 
    /** {@inheritDoc} */
    @Override
-   public double computeMasterJointQ(double q)
+   public double computeActuatedJointQ(double q)
    {
-      return ikSolver.solve(q, fourBarFunction.getMasterVertex());
+      return ikSolver.solve(q, fourBarFunction.getActuatedVertex());
    }
 
    /** {@inheritDoc} */
    @Override
-   public double computeMasterJointQd(double qd)
+   public double computeActuatedJointQd(double qd)
    {
       fourBarFunction.updateState(false, false);
       // qd = (J_A + J_D) qd_M = (J_B + J_C) qd_M
@@ -630,23 +630,23 @@ public class CrossFourBarJoint implements CrossFourBarJointBasics
 
    /** {@inheritDoc} */
    @Override
-   public double computeMasterJointQdd(double qdd)
+   public double computeActuatedJointQdd(double qdd)
    {
       fourBarFunction.updateState(false, false);
       // qdd = (J_A + J_D) qdd_M + c_A + c_D = (J_B + J_C) qdd_M + c_B + c_C
       DMatrixRMaj loopJacobian = fourBarFunction.getLoopJacobian();
       DMatrixRMaj loopConvectiveTerm = fourBarFunction.getLoopConvectiveTerm();
       qdd = qdd - loopConvectiveTerm.get(0) - loopConvectiveTerm.get(3);
-      double qdd_master = qdd / (loopJacobian.get(0) + loopJacobian.get(3));
-      return qdd_master;
+      double qdd_actuated = qdd / (loopJacobian.get(0) + loopJacobian.get(3));
+      return qdd_actuated;
    }
 
    /** {@inheritDoc} */
    @Override
-   public double computeMasterJointTau(double tau)
+   public double computeActuatedJointTau(double tau)
    {
       DMatrixRMaj loopJacobian = fourBarFunction.getLoopJacobian();
-      if (getMasterJoint() == getJointA() || getMasterJoint() == getJointD())
+      if (getActuatedJoint() == getJointA() || getActuatedJoint() == getJointD())
          return ((loopJacobian.get(0) + loopJacobian.get(3)) * tau);
       else
          return ((loopJacobian.get(1) + loopJacobian.get(2)) * tau);

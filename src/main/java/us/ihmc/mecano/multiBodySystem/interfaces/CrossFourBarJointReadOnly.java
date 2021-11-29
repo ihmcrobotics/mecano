@@ -27,19 +27,19 @@ import us.ihmc.euclid.referenceFrame.interfaces.FrameVector3DReadOnly;
  * </pre>
  * 
  * where A, B, C, and D are all revolute joint around the same axis. It is assumed that only one
- * joint in this sub-system composed of {A, B, C, and D} is a torque source, this is the master
+ * joint in this sub-system composed of {A, B, C, and D} is a torque source, this is the actuated
  * joint.
  * </p>
  */
 public interface CrossFourBarJointReadOnly extends OneDoFJointReadOnly
 {
    /**
-    * Returns the reference to the master joint of this cross four bar. It is assumed to be the sole
+    * Returns the reference to the actuated joint of this cross four bar. It is assumed to be the sole
     * torque source and is used to define the state of the this cross four bar joint.
     * 
-    * @return the reference to the master joint.
+    * @return the reference to the actuated joint.
     */
-   RevoluteJointReadOnly getMasterJoint();
+   RevoluteJointReadOnly getActuatedJoint();
 
    /**
     * Returns one of the two joints starting the linkage:
@@ -130,55 +130,55 @@ public interface CrossFourBarJointReadOnly extends OneDoFJointReadOnly
    RevoluteJointReadOnly getJointD();
 
    /**
-    * Given the cross four bar joint angle {@code q}, computes the corresponding angle for the master
+    * Given the cross four bar joint angle {@code q}, computes the corresponding angle for the actuated
     * joint.
     * 
-    * @param q the cross four bar joint angle to compute the master joint angle for.
-    * @return the corresponding master joint angle.
+    * @param q the cross four bar joint angle to compute the actuated joint angle for.
+    * @return the corresponding actuated joint angle.
     */
-   double computeMasterJointQ(double q);
+   double computeActuatedJointQ(double q);
 
    /**
     * Given the cross four bar joint velocity {@code qd}, computes the corresponding velocity for the
-    * master joint.
+    * actuated joint.
     * 
-    * @param qd the cross four bar joint velocity to compute the master joint velocity for.
-    * @return the corresponding master joint velocity.
+    * @param qd the cross four bar joint velocity to compute the actuated joint velocity for.
+    * @return the corresponding actuated joint velocity.
     */
-   double computeMasterJointQd(double qd);
+   double computeActuatedJointQd(double qd);
 
    /**
     * Given the cross four bar joint acceleration {@code qdd}, computes the corresponding acceleration
-    * for the master joint.
+    * for the actuated joint.
     * 
-    * @param qdd the cross four bar joint acceleration to compute the master joint acceleration for.
-    * @return the corresponding master joint acceleration.
+    * @param qdd the cross four bar joint acceleration to compute the actuated joint acceleration for.
+    * @return the corresponding actuated joint acceleration.
     */
-   double computeMasterJointQdd(double qdd);
+   double computeActuatedJointQdd(double qdd);
 
    /**
     * Given the cross four bar joint torque {@code tau}, computes the corresponding torque for the
-    * master joint.
+    * actuated joint.
     * 
-    * @param tau the cross four bar joint torque to compute the master joint torque for.
-    * @return the corresponding master joint torque.
+    * @param tau the cross four bar joint torque to compute the actuated joint torque for.
+    * @return the corresponding actuated joint torque.
     */
-   double computeMasterJointTau(double tau);
+   double computeActuatedJointTau(double tau);
 
    /**
-    * Gets the index in [0, 3] corresponding to the master joint.
+    * Gets the index in [0, 3] corresponding to the actuated joint.
     * <p>
     * The index can be used with the matrices {@link #getLoopJacobian()} and
     * {@link CrossFourBarJointReadOnly#getLoopConvectiveTerm()} to retrieve the row that correspond to
     * the mast joint.
     * </p>
     * 
-    * @return the index in [0, 3] corresponding to the master joint.
+    * @return the index in [0, 3] corresponding to the actuated joint.
     */
-   int getMasterJointIndex();
+   int getActuatedJointIndex();
 
    /**
-    * Gets the Jacobian {@code G} which maps from the master joint velocity/acceleration to all loop
+    * Gets the Jacobian {@code G} which maps from the actuated joint velocity/acceleration to all loop
     * joint velocities/accelerations:
     * 
     * <pre>
@@ -189,7 +189,7 @@ public interface CrossFourBarJointReadOnly extends OneDoFJointReadOnly
     * The {@code G} matrix is a 4-by-1 matrix which row indexing follows the alphabetical ordering of
     * the joints, i.e. A, B, C, and D, {@code g} is the convective term vector see
     * {@link #getLoopConvectiveTerm()}, {@code qDot} and {@code qDDot} are the 4 element vectors of the
-    * 4 loop joint velocities and accelerations, and {@code yDot} and {@code yDDot} are the master
+    * 4 loop joint velocities and accelerations, and {@code yDot} and {@code yDDot} are the actuated
     * joint velocity and acceleration.
     * </p>
     * 
@@ -199,8 +199,8 @@ public interface CrossFourBarJointReadOnly extends OneDoFJointReadOnly
    DMatrix getLoopJacobian();
 
    /**
-    * Gets the convective term {@code g} used in the mapping from the master joint acceleration to all
-    * loop joint accelerations:
+    * Gets the convective term {@code g} used in the mapping from the actuated joint acceleration to
+    * all loop joint accelerations:
     * 
     * <pre>
     * qDDot = G * yDDot + g
@@ -209,7 +209,7 @@ public interface CrossFourBarJointReadOnly extends OneDoFJointReadOnly
     * The {@code g} is a 4 element vector which indexing follows the alphabetical ordering of the
     * joints, i.e. A, B, C, and D, {@code G} the loop Jacobian, see {@link #getLoopJacobian()},
     * {@code qDDot} is the 4 element vector of the 4 loop joint accelerations, and {@code yDDot} is the
-    * master joint acceleration.
+    * actuated joint acceleration.
     * </p>
     * 
     * @return the convective term of the four bar internal joints.
@@ -228,7 +228,7 @@ public interface CrossFourBarJointReadOnly extends OneDoFJointReadOnly
    @Override
    default FrameVector3DReadOnly getJointAxis()
    {
-      return getMasterJoint().getJointAxis();
+      return getActuatedJoint().getJointAxis();
    }
 
    /** {@inheritDoc} */
@@ -284,13 +284,13 @@ public interface CrossFourBarJointReadOnly extends OneDoFJointReadOnly
    @Override
    default double getEffortLimitLower()
    {
-      return getMasterJoint().getEffortLimitLower();
+      return getActuatedJoint().getEffortLimitLower();
    }
 
    /** {@inheritDoc} */
    @Override
    default double getEffortLimitUpper()
    {
-      return getMasterJoint().getEffortLimitUpper();
+      return getActuatedJoint().getEffortLimitUpper();
    }
 }

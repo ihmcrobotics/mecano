@@ -84,34 +84,34 @@ public class FourBarKinematicLoopFunctionTools
     * <ul>
     * <li>performs sanity checks on the kinematics to ensure it represents a four bar linkage.
     * <li>initializes the converters and the four bar calculator.
-    * <li>updates the master joint index so points to the same joint in the array.
+    * <li>updates the actuated joint index so points to the same joint in the array.
     * <li>evaluates and updates if needed the limits of each joint.
     * </ul>
     * </p>
     * 
-    * @param joints           the array of joints to use in the four bar linkage, expected to be 4
-    *                         joints. Modified.
-    * @param converters       use for converting back and forth between joint angle and interior angle
-    *                         of the four bar geometry. Modified.
-    * @param fourBar          the calculator for evaluating the configuration of the four bar geometry.
-    *                         Modified.
-    * @param masterJointIndex the index of the joint that is used to control the four bar linkage.
-    * @param epsilon          tolerance used during sanity checks.
-    * @return the update index to point to the master joint in the update array.
+    * @param joints             the array of joints to use in the four bar linkage, expected to be 4
+    *                           joints. Modified.
+    * @param converters         use for converting back and forth between joint angle and interior
+    *                           angle of the four bar geometry. Modified.
+    * @param fourBar            the calculator for evaluating the configuration of the four bar
+    *                           geometry. Modified.
+    * @param actuatedJointIndex the index of the joint that is used to control the four bar linkage.
+    * @param epsilon            tolerance used during sanity checks.
+    * @return the update index to point to the actuated joint in the update array.
     * @throws IllegalArgumentException if the given joints cannot be used to represent a four bar
     *                                  linkage.
     */
    public static int configureFourBarKinematics(RevoluteJointBasics[] joints,
                                                 FourBarToJointConverter[] converters,
                                                 FourBar fourBar,
-                                                int masterJointIndex,
+                                                int actuatedJointIndex,
                                                 double epsilon)
    {
       if (joints.length != 4)
          throw new IllegalArgumentException("Expected 4 joints");
 
       RevoluteJointReadOnly loopClosureJoint = null;
-      RevoluteJointReadOnly masterJoint = joints[masterJointIndex];
+      RevoluteJointReadOnly actuatedJoint = joints[actuatedJointIndex];
       RigidBodyReadOnly ancestor = findCommonClosestAncestor(joints[0], joints[1], joints[2], joints[3]);
 
       for (int i = 0; i < 4; i++)
@@ -131,9 +131,9 @@ public class FourBarKinematicLoopFunctionTools
          throw new IllegalArgumentException("The four bar is not properly closed at zero-configuration, error:\n" + error);
 
       ReferenceFrame fourBarLocalFrame = constructReferenceFrameFromPointAndAxis("LocalFrame",
-                                                                                 new FramePoint3D(masterJoint.getFrameBeforeJoint()),
+                                                                                 new FramePoint3D(actuatedJoint.getFrameBeforeJoint()),
                                                                                  Axis3D.Z,
-                                                                                 masterJoint.getJointAxis());
+                                                                                 actuatedJoint.getJointAxis());
 
       FramePoint3D tempFramePoint3D = new FramePoint3D();
       FrameVector3D[] axes = {new FrameVector3D(), new FrameVector3D(), new FrameVector3D(), new FrameVector3D()};
@@ -272,11 +272,11 @@ public class FourBarKinematicLoopFunctionTools
 
       for (int i = 0; i < 4; i++)
       {
-         if (joints[i] == masterJoint)
+         if (joints[i] == actuatedJoint)
             return i;
       }
 
-      throw new IllegalStateException("Something went wrong: Could not retrieve the master joint.");
+      throw new IllegalStateException("Something went wrong: Could not retrieve the actuated joint.");
    }
 
    /**

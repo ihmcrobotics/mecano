@@ -76,7 +76,7 @@ public class YoMultiBodySystemFactories
          {
             return new YoCrossFourBarJoint(original.getName() + cloneSuffix,
                                            cloneCrossFourBarLoopJoints(original, cloneSuffix, clonePredecessor),
-                                           original.getMasterJointIndex(),
+                                           original.getActuatedJointIndex(),
                                            registry);
          }
       };

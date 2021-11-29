@@ -12,9 +12,9 @@ public class YoCrossFourBarJoint extends CrossFourBarJoint
    private final YoDouble velocityLimitLower, velocityLimitUpper;
    private final YoDouble effortLimitLower, effortLimitUpper;
 
-   public YoCrossFourBarJoint(String name, RevoluteJointBasics[] fourBarJoints, int masterJointIndex, YoRegistry registry)
+   public YoCrossFourBarJoint(String name, RevoluteJointBasics[] fourBarJoints, int actuatedJointIndex, YoRegistry registry)
    {
-      super(name, fourBarJoints, masterJointIndex);
+      super(name, fourBarJoints, actuatedJointIndex);
 
       q = new YoDouble("q_" + getName(), registry);
       qd = new YoDouble("qd_" + getName(), registry);

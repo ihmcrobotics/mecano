@@ -130,10 +130,10 @@ public class CrossFourBarJointTest
          for (int i = 0; i < ITERATIONS; i++)
          { // Test configuration
             double alpha = i / (ITERATIONS - 1.0);
-            double expected_qMaster = EuclidCoreTools.interpolate(function.getMasterJoint().getJointLimitLower(),
-                                                                  function.getMasterJoint().getJointLimitUpper(),
-                                                                  alpha);
-            function.getMasterJoint().setQ(expected_qMaster);
+            double expected_qActuated = EuclidCoreTools.interpolate(function.getActuatedJoint().getJointLimitLower(),
+                                                                    function.getActuatedJoint().getJointLimitUpper(),
+                                                                    alpha);
+            function.getActuatedJoint().setQ(expected_qActuated);
             function.updateState(false, false);
             double expected_qA = function.getJointA().getQ();
             double expected_qB = function.getJointB().getQ();
@@ -241,11 +241,11 @@ public class CrossFourBarJointTest
 
          for (int i = 0; i < ITERATIONS; i++)
          {
-            double qMaster = EuclidCoreRandomTools.nextDouble(random,
-                                                              function.getMasterJoint().getJointLimitLower(),
-                                                              function.getMasterJoint().getJointLimitUpper());
-            fourBarJoint.getMasterJoint().setQ(qMaster);
-            function.getMasterJoint().setQ(qMaster);
+            double qActuated = EuclidCoreRandomTools.nextDouble(random,
+                                                                function.getActuatedJoint().getJointLimitLower(),
+                                                                function.getActuatedJoint().getJointLimitUpper());
+            fourBarJoint.getActuatedJoint().setQ(qActuated);
+            function.getActuatedJoint().setQ(qActuated);
             fourBarJoint.updateFramesRecursively();
             function.updateState(false, false);
             function.getJointA().getPredecessor().updateFramesRecursively();
@@ -286,12 +286,12 @@ public class CrossFourBarJointTest
 
          for (int i = 0; i < ITERATIONS; i++)
          {
-            double qMaster = EuclidCoreRandomTools.nextDouble(random,
-                                                              function.getMasterJoint().getJointLimitLower(),
-                                                              function.getMasterJoint().getJointLimitUpper());
-            double expected_qdMaster = EuclidCoreRandomTools.nextDouble(random, 10.0);
-            function.getMasterJoint().setQ(qMaster);
-            function.getMasterJoint().setQd(expected_qdMaster);
+            double qActuated = EuclidCoreRandomTools.nextDouble(random,
+                                                                function.getActuatedJoint().getJointLimitLower(),
+                                                                function.getActuatedJoint().getJointLimitUpper());
+            double expected_qdActuated = EuclidCoreRandomTools.nextDouble(random, 10.0);
+            function.getActuatedJoint().setQ(qActuated);
+            function.getActuatedJoint().setQd(expected_qdActuated);
             function.updateState(true, false);
 
             double expected_qdA = function.getJointA().getQd();
@@ -386,14 +386,14 @@ public class CrossFourBarJointTest
 
          for (int i = 0; i < ITERATIONS; i++)
          {
-            double qMaster = EuclidCoreRandomTools.nextDouble(random,
-                                                              fourBarJoint.getMasterJoint().getJointLimitLower(),
-                                                              fourBarJoint.getMasterJoint().getJointLimitUpper());
-            double qdMaster = EuclidCoreRandomTools.nextDouble(random, 10.0);
-            fourBarJoint.getMasterJoint().setQ(qMaster);
-            fourBarJoint.getMasterJoint().setQd(qdMaster);
-            function.getMasterJoint().setQ(qMaster);
-            function.getMasterJoint().setQd(qdMaster);
+            double qActuated = EuclidCoreRandomTools.nextDouble(random,
+                                                                fourBarJoint.getActuatedJoint().getJointLimitLower(),
+                                                                fourBarJoint.getActuatedJoint().getJointLimitUpper());
+            double qdActuated = EuclidCoreRandomTools.nextDouble(random, 10.0);
+            fourBarJoint.getActuatedJoint().setQ(qActuated);
+            fourBarJoint.getActuatedJoint().setQd(qdActuated);
+            function.getActuatedJoint().setQ(qActuated);
+            function.getActuatedJoint().setQd(qdActuated);
 
             fourBarJoint.updateFramesRecursively();
             function.updateState(true, false);
@@ -452,14 +452,14 @@ public class CrossFourBarJointTest
 
          for (int i = 0; i < ITERATIONS; i++)
          {
-            double qMaster = EuclidCoreRandomTools.nextDouble(random,
-                                                              fourBarJoint.getMasterJoint().getJointLimitLower(),
-                                                              fourBarJoint.getMasterJoint().getJointLimitUpper());
-            double qdMaster = EuclidCoreRandomTools.nextDouble(random, 10.0);
-            fourBarJoint.getMasterJoint().setQ(qMaster);
-            fourBarJoint.getMasterJoint().setQd(qdMaster);
-            function.getMasterJoint().setQ(qMaster);
-            function.getMasterJoint().setQd(qdMaster);
+            double qActuated = EuclidCoreRandomTools.nextDouble(random,
+                                                                fourBarJoint.getActuatedJoint().getJointLimitLower(),
+                                                                fourBarJoint.getActuatedJoint().getJointLimitUpper());
+            double qdActuated = EuclidCoreRandomTools.nextDouble(random, 10.0);
+            fourBarJoint.getActuatedJoint().setQ(qActuated);
+            fourBarJoint.getActuatedJoint().setQd(qdActuated);
+            function.getActuatedJoint().setQ(qActuated);
+            function.getActuatedJoint().setQd(qdActuated);
 
             fourBarJoint.updateFramesRecursively();
             function.updateState(true, false);
@@ -490,14 +490,14 @@ public class CrossFourBarJointTest
 
          for (int i = 0; i < ITERATIONS; i++)
          {
-            double qMaster = EuclidCoreRandomTools.nextDouble(random,
-                                                              fourBarJoint.getMasterJoint().getJointLimitLower(),
-                                                              fourBarJoint.getMasterJoint().getJointLimitUpper());
-            double qdMaster = EuclidCoreRandomTools.nextDouble(random, 10.0);
-            fourBarJoint.getMasterJoint().setQ(qMaster);
-            fourBarJoint.getMasterJoint().setQd(qdMaster);
-            function.getMasterJoint().setQ(qMaster);
-            function.getMasterJoint().setQd(qdMaster);
+            double qActuated = EuclidCoreRandomTools.nextDouble(random,
+                                                                fourBarJoint.getActuatedJoint().getJointLimitLower(),
+                                                                fourBarJoint.getActuatedJoint().getJointLimitUpper());
+            double qdActuated = EuclidCoreRandomTools.nextDouble(random, 10.0);
+            fourBarJoint.getActuatedJoint().setQ(qActuated);
+            fourBarJoint.getActuatedJoint().setQd(qdActuated);
+            function.getActuatedJoint().setQ(qActuated);
+            function.getActuatedJoint().setQd(qdActuated);
 
             fourBarJoint.updateFramesRecursively();
             function.updateState(true, false);
@@ -528,14 +528,14 @@ public class CrossFourBarJointTest
 
          for (int i = 0; i < ITERATIONS; i++)
          {
-            double qMaster = EuclidCoreRandomTools.nextDouble(random,
-                                                              fourBarJoint.getMasterJoint().getJointLimitLower(),
-                                                              fourBarJoint.getMasterJoint().getJointLimitUpper());
-            double qdMaster = EuclidCoreRandomTools.nextDouble(random, 10.0);
-            fourBarJoint.getMasterJoint().setQ(qMaster);
-            fourBarJoint.getMasterJoint().setQd(qdMaster);
-            function.getMasterJoint().setQ(qMaster);
-            function.getMasterJoint().setQd(qdMaster);
+            double qActuated = EuclidCoreRandomTools.nextDouble(random,
+                                                                fourBarJoint.getActuatedJoint().getJointLimitLower(),
+                                                                fourBarJoint.getActuatedJoint().getJointLimitUpper());
+            double qdActuated = EuclidCoreRandomTools.nextDouble(random, 10.0);
+            fourBarJoint.getActuatedJoint().setQ(qActuated);
+            fourBarJoint.getActuatedJoint().setQd(qdActuated);
+            function.getActuatedJoint().setQ(qActuated);
+            function.getActuatedJoint().setQd(qdActuated);
 
             fourBarJoint.updateFramesRecursively();
             function.updateState(true, false);
@@ -576,14 +576,14 @@ public class CrossFourBarJointTest
 
          for (int i = 0; i < ITERATIONS; i++)
          {
-            double qMaster = EuclidCoreRandomTools.nextDouble(random,
-                                                              fourBarJoint.getMasterJoint().getJointLimitLower(),
-                                                              fourBarJoint.getMasterJoint().getJointLimitUpper());
-            double qdMaster = EuclidCoreRandomTools.nextDouble(random, 10.0);
-            fourBarJoint.getMasterJoint().setQ(qMaster);
-            fourBarJoint.getMasterJoint().setQd(qdMaster);
-            function.getMasterJoint().setQ(qMaster);
-            function.getMasterJoint().setQd(qdMaster);
+            double qActuated = EuclidCoreRandomTools.nextDouble(random,
+                                                                fourBarJoint.getActuatedJoint().getJointLimitLower(),
+                                                                fourBarJoint.getActuatedJoint().getJointLimitUpper());
+            double qdActuated = EuclidCoreRandomTools.nextDouble(random, 10.0);
+            fourBarJoint.getActuatedJoint().setQ(qActuated);
+            fourBarJoint.getActuatedJoint().setQd(qdActuated);
+            function.getActuatedJoint().setQ(qActuated);
+            function.getActuatedJoint().setQd(qdActuated);
 
             fourBarJoint.updateFramesRecursively();
             function.updateState(true, false);
@@ -613,14 +613,14 @@ public class CrossFourBarJointTest
 
          for (int i = 0; i < ITERATIONS; i++)
          {
-            double qMaster = EuclidCoreRandomTools.nextDouble(random,
-                                                              fourBarJoint.getMasterJoint().getJointLimitLower(),
-                                                              fourBarJoint.getMasterJoint().getJointLimitUpper());
-            double qdMaster = EuclidCoreRandomTools.nextDouble(random, 10.0);
-            fourBarJoint.getMasterJoint().setQ(qMaster);
-            fourBarJoint.getMasterJoint().setQd(qdMaster);
-            function.getMasterJoint().setQ(qMaster);
-            function.getMasterJoint().setQd(qdMaster);
+            double qActuated = EuclidCoreRandomTools.nextDouble(random,
+                                                                fourBarJoint.getActuatedJoint().getJointLimitLower(),
+                                                                fourBarJoint.getActuatedJoint().getJointLimitUpper());
+            double qdActuated = EuclidCoreRandomTools.nextDouble(random, 10.0);
+            fourBarJoint.getActuatedJoint().setQ(qActuated);
+            fourBarJoint.getActuatedJoint().setQd(qdActuated);
+            function.getActuatedJoint().setQ(qActuated);
+            function.getActuatedJoint().setQd(qdActuated);
 
             fourBarJoint.updateFramesRecursively();
             function.updateState(true, false);
@@ -652,17 +652,17 @@ public class CrossFourBarJointTest
 
          for (int i = 0; i < ITERATIONS; i++)
          {
-            double qMasterMin = function.getMasterJoint().getJointLimitLower();
-            double qMasterMax = function.getMasterJoint().getJointLimitUpper();
-            double qMasterMid = 0.5 * (qMasterMin + qMasterMax);
-            double qMasterRange = 0.75 * (qMasterMax - qMasterMin); // Reduce the range little to avoid singularities causing large acceleration values.
+            double qActuatedMin = function.getActuatedJoint().getJointLimitLower();
+            double qActuatedMax = function.getActuatedJoint().getJointLimitUpper();
+            double qActuatedMid = 0.5 * (qActuatedMin + qActuatedMax);
+            double qActuatedRange = 0.75 * (qActuatedMax - qActuatedMin); // Reduce the range little to avoid singularities causing large acceleration values.
 
-            double qMaster = qMasterMid + 0.5 * EuclidCoreRandomTools.nextDouble(random, qMasterRange);
-            double qdMaster = EuclidCoreRandomTools.nextDouble(random, 10.0);
-            double expected_qddMaster = EuclidCoreRandomTools.nextDouble(random, 10.0);
-            function.getMasterJoint().setQ(qMaster);
-            function.getMasterJoint().setQd(qdMaster);
-            function.getMasterJoint().setQdd(expected_qddMaster);
+            double qActuated = qActuatedMid + 0.5 * EuclidCoreRandomTools.nextDouble(random, qActuatedRange);
+            double qdActuated = EuclidCoreRandomTools.nextDouble(random, 10.0);
+            double expected_qddActuated = EuclidCoreRandomTools.nextDouble(random, 10.0);
+            function.getActuatedJoint().setQ(qActuated);
+            function.getActuatedJoint().setQd(qdActuated);
+            function.getActuatedJoint().setQdd(expected_qddActuated);
             function.updateState(true, true);
 
             double expected_qddA = function.getJointA().getQdd();
@@ -768,17 +768,17 @@ public class CrossFourBarJointTest
 
          for (int i = 0; i < ITERATIONS; i++)
          {
-            double qMaster = EuclidCoreRandomTools.nextDouble(random,
-                                                              fourBarJoint.getMasterJoint().getJointLimitLower(),
-                                                              fourBarJoint.getMasterJoint().getJointLimitUpper());
-            double qdMaster = EuclidCoreRandomTools.nextDouble(random, 10.0);
-            double qddMaster = EuclidCoreRandomTools.nextDouble(random, 10.0);
-            fourBarJoint.getMasterJoint().setQ(qMaster);
-            fourBarJoint.getMasterJoint().setQd(qdMaster);
-            fourBarJoint.getMasterJoint().setQdd(qddMaster);
-            function.getMasterJoint().setQ(qMaster);
-            function.getMasterJoint().setQd(qdMaster);
-            function.getMasterJoint().setQdd(qddMaster);
+            double qActuated = EuclidCoreRandomTools.nextDouble(random,
+                                                                fourBarJoint.getActuatedJoint().getJointLimitLower(),
+                                                                fourBarJoint.getActuatedJoint().getJointLimitUpper());
+            double qdActuated = EuclidCoreRandomTools.nextDouble(random, 10.0);
+            double qddActuated = EuclidCoreRandomTools.nextDouble(random, 10.0);
+            fourBarJoint.getActuatedJoint().setQ(qActuated);
+            fourBarJoint.getActuatedJoint().setQd(qdActuated);
+            fourBarJoint.getActuatedJoint().setQdd(qddActuated);
+            function.getActuatedJoint().setQ(qActuated);
+            function.getActuatedJoint().setQd(qdActuated);
+            function.getActuatedJoint().setQdd(qddActuated);
 
             fourBarJoint.updateFramesRecursively();
             function.updateState(true, true);
@@ -838,17 +838,17 @@ public class CrossFourBarJointTest
 
          for (int i = 0; i < ITERATIONS; i++)
          {
-            double qMaster = EuclidCoreRandomTools.nextDouble(random,
-                                                              fourBarJoint.getMasterJoint().getJointLimitLower(),
-                                                              fourBarJoint.getMasterJoint().getJointLimitUpper());
-            double qdMaster = EuclidCoreRandomTools.nextDouble(random, 10.0);
-            double qddMaster = EuclidCoreRandomTools.nextDouble(random, 10.0);
-            fourBarJoint.getMasterJoint().setQ(qMaster);
-            fourBarJoint.getMasterJoint().setQd(qdMaster);
-            fourBarJoint.getMasterJoint().setQdd(qddMaster);
-            function.getMasterJoint().setQ(qMaster);
-            function.getMasterJoint().setQd(qdMaster);
-            function.getMasterJoint().setQdd(qddMaster);
+            double qActuated = EuclidCoreRandomTools.nextDouble(random,
+                                                                fourBarJoint.getActuatedJoint().getJointLimitLower(),
+                                                                fourBarJoint.getActuatedJoint().getJointLimitUpper());
+            double qdActuated = EuclidCoreRandomTools.nextDouble(random, 10.0);
+            double qddActuated = EuclidCoreRandomTools.nextDouble(random, 10.0);
+            fourBarJoint.getActuatedJoint().setQ(qActuated);
+            fourBarJoint.getActuatedJoint().setQd(qdActuated);
+            fourBarJoint.getActuatedJoint().setQdd(qddActuated);
+            function.getActuatedJoint().setQ(qActuated);
+            function.getActuatedJoint().setQd(qdActuated);
+            function.getActuatedJoint().setQdd(qddActuated);
 
             fourBarJoint.updateFramesRecursively();
             function.updateState(true, true);
@@ -906,9 +906,9 @@ public class CrossFourBarJointTest
 
             assertEquals(qdd, fourBarJoint.getQdd(), SMALL_EPSILON);
 
-            function.getMasterJoint().setQ(fourBarJoint.getMasterJoint().getQ());
-            function.getMasterJoint().setQd(fourBarJoint.getMasterJoint().getQd());
-            function.getMasterJoint().setQdd(fourBarJoint.getMasterJoint().getQdd());
+            function.getActuatedJoint().setQ(fourBarJoint.getActuatedJoint().getQ());
+            function.getActuatedJoint().setQd(fourBarJoint.getActuatedJoint().getQd());
+            function.getActuatedJoint().setQdd(fourBarJoint.getActuatedJoint().getQdd());
 
             function.updateState(true, true);
             function.getJointA().getPredecessor().updateFramesRecursively();
@@ -964,9 +964,9 @@ public class CrossFourBarJointTest
             fourBarJoint.setQdd(qdd);
             fourBarJoint.updateFramesRecursively();
 
-            function.getMasterJoint().setQ(fourBarJoint.getMasterJoint().getQ());
-            function.getMasterJoint().setQd(fourBarJoint.getMasterJoint().getQd());
-            function.getMasterJoint().setQdd(fourBarJoint.getMasterJoint().getQdd());
+            function.getActuatedJoint().setQ(fourBarJoint.getActuatedJoint().getQ());
+            function.getActuatedJoint().setQd(fourBarJoint.getActuatedJoint().getQd());
+            function.getActuatedJoint().setQdd(fourBarJoint.getActuatedJoint().getQdd());
 
             function.updateState(true, true);
             function.getJointA().getPredecessor().updateFramesRecursively();
@@ -1021,14 +1021,14 @@ public class CrossFourBarJointTest
 
          for (int i = 0; i < ITERATIONS; i++)
          {
-            double qMaster = EuclidCoreRandomTools.nextDouble(random,
-                                                              fourBarJoint.getMasterJoint().getJointLimitLower(),
-                                                              fourBarJoint.getMasterJoint().getJointLimitUpper());
-            double qdMaster = EuclidCoreRandomTools.nextDouble(random, 10.0);
-            double qddMaster = EuclidCoreRandomTools.nextDouble(random, 10.0);
-            fourBarJoint.getMasterJoint().setQ(qMaster);
-            fourBarJoint.getMasterJoint().setQd(0.0); // Cancel out the bias accelerations
-            fourBarJoint.getMasterJoint().setQdd(qddMaster);
+            double qActuated = EuclidCoreRandomTools.nextDouble(random,
+                                                                fourBarJoint.getActuatedJoint().getJointLimitLower(),
+                                                                fourBarJoint.getActuatedJoint().getJointLimitUpper());
+            double qdActuated = EuclidCoreRandomTools.nextDouble(random, 10.0);
+            double qddActuated = EuclidCoreRandomTools.nextDouble(random, 10.0);
+            fourBarJoint.getActuatedJoint().setQ(qActuated);
+            fourBarJoint.getActuatedJoint().setQd(0.0); // Cancel out the bias accelerations
+            fourBarJoint.getActuatedJoint().setQdd(qddActuated);
             fourBarJoint.updateFramesRecursively();
 
             SpatialAccelerationCalculator spatialAccelerationCalculator = new SpatialAccelerationCalculator(fourBarJoint.getJointA().getPredecessor(),
@@ -1044,7 +1044,7 @@ public class CrossFourBarJointTest
 
             MecanoTestTools.assertSpatialAccelerationEquals("Iteration " + i, expectedAcceleration, fourBarJoint.getUnitJointAcceleration(), SMALL_EPSILON);
 
-            fourBarJoint.getMasterJoint().setQd(qdMaster); // Introduce bias acceleration, unit-acceleration shouldn't change.
+            fourBarJoint.getActuatedJoint().setQd(qdActuated); // Introduce bias acceleration, unit-acceleration shouldn't change.
             fourBarJoint.updateFramesRecursively();
             MecanoTestTools.assertSpatialAccelerationEquals("Iteration " + i, expectedAcceleration, fourBarJoint.getUnitJointAcceleration(), SMALL_EPSILON);
          }
@@ -1062,14 +1062,14 @@ public class CrossFourBarJointTest
 
          for (int i = 0; i < ITERATIONS; i++)
          {
-            double qMaster = EuclidCoreRandomTools.nextDouble(random,
-                                                              fourBarJoint.getMasterJoint().getJointLimitLower(),
-                                                              fourBarJoint.getMasterJoint().getJointLimitUpper());
-            double qdMaster = EuclidCoreRandomTools.nextDouble(random, 10.0);
-            double qddMaster = EuclidCoreRandomTools.nextDouble(random, 10.0);
-            fourBarJoint.getMasterJoint().setQ(qMaster);
-            fourBarJoint.getMasterJoint().setQd(0.0); // Cancel out the bias accelerations
-            fourBarJoint.getMasterJoint().setQdd(qddMaster);
+            double qActuated = EuclidCoreRandomTools.nextDouble(random,
+                                                                fourBarJoint.getActuatedJoint().getJointLimitLower(),
+                                                                fourBarJoint.getActuatedJoint().getJointLimitUpper());
+            double qdActuated = EuclidCoreRandomTools.nextDouble(random, 10.0);
+            double qddActuated = EuclidCoreRandomTools.nextDouble(random, 10.0);
+            fourBarJoint.getActuatedJoint().setQ(qActuated);
+            fourBarJoint.getActuatedJoint().setQd(0.0); // Cancel out the bias accelerations
+            fourBarJoint.getActuatedJoint().setQdd(qddActuated);
             fourBarJoint.updateFramesRecursively();
 
             SpatialAccelerationCalculator spatialAccelerationCalculator = new SpatialAccelerationCalculator(fourBarJoint.getJointA().getPredecessor(),
@@ -1084,7 +1084,7 @@ public class CrossFourBarJointTest
 
             MecanoTestTools.assertSpatialAccelerationEquals("Iteration " + i, expectedAcceleration, fourBarJoint.getUnitSuccessorAcceleration(), SMALL_EPSILON);
 
-            fourBarJoint.getMasterJoint().setQd(qdMaster); // Introduce bias acceleration, unit-acceleration shouldn't change.
+            fourBarJoint.getActuatedJoint().setQd(qdActuated); // Introduce bias acceleration, unit-acceleration shouldn't change.
             fourBarJoint.updateFramesRecursively();
             MecanoTestTools.assertSpatialAccelerationEquals("Iteration " + i, expectedAcceleration, fourBarJoint.getUnitSuccessorAcceleration(), SMALL_EPSILON);
          }
@@ -1102,14 +1102,14 @@ public class CrossFourBarJointTest
 
          for (int i = 0; i < ITERATIONS; i++)
          {
-            double qMaster = EuclidCoreRandomTools.nextDouble(random,
-                                                              fourBarJoint.getMasterJoint().getJointLimitLower(),
-                                                              fourBarJoint.getMasterJoint().getJointLimitUpper());
-            double qdMaster = EuclidCoreRandomTools.nextDouble(random, 10.0);
-            double qddMaster = EuclidCoreRandomTools.nextDouble(random, 10.0);
-            fourBarJoint.getMasterJoint().setQ(qMaster);
-            fourBarJoint.getMasterJoint().setQd(0.0); // Cancel out the bias accelerations
-            fourBarJoint.getMasterJoint().setQdd(qddMaster);
+            double qActuated = EuclidCoreRandomTools.nextDouble(random,
+                                                                fourBarJoint.getActuatedJoint().getJointLimitLower(),
+                                                                fourBarJoint.getActuatedJoint().getJointLimitUpper());
+            double qdActuated = EuclidCoreRandomTools.nextDouble(random, 10.0);
+            double qddActuated = EuclidCoreRandomTools.nextDouble(random, 10.0);
+            fourBarJoint.getActuatedJoint().setQ(qActuated);
+            fourBarJoint.getActuatedJoint().setQd(0.0); // Cancel out the bias accelerations
+            fourBarJoint.getActuatedJoint().setQdd(qddActuated);
             fourBarJoint.updateFramesRecursively();
 
             SpatialAccelerationCalculator spatialAccelerationCalculator = new SpatialAccelerationCalculator(fourBarJoint.getJointA().getPredecessor(),
@@ -1126,7 +1126,7 @@ public class CrossFourBarJointTest
                                                             fourBarJoint.getUnitPredecessorAcceleration(),
                                                             SMALL_EPSILON);
 
-            fourBarJoint.getMasterJoint().setQd(qdMaster); // Introduce bias acceleration, unit-acceleration shouldn't change.
+            fourBarJoint.getActuatedJoint().setQd(qdActuated); // Introduce bias acceleration, unit-acceleration shouldn't change.
             fourBarJoint.updateFramesRecursively();
             MecanoTestTools.assertSpatialAccelerationEquals("Iteration " + i,
                                                             expectedAcceleration,
@@ -1325,14 +1325,14 @@ public class CrossFourBarJointTest
       }
    }
 
-   static RevoluteJoint[] nextCrossFourBar(Random random, String prefix, Vector3DReadOnly axis, int masterJointIndex, boolean flipAxesRandomly)
+   static RevoluteJoint[] nextCrossFourBar(Random random, String prefix, Vector3DReadOnly axis, int actuatedJointIndex, boolean flipAxesRandomly)
    {
       return nextCrossFourBar(random,
                               prefix,
                               new RigidBody(prefix + "Root", worldFrame),
                               joint -> MultiBodySystemRandomTools.nextRigidBody(random, prefix + "BodyCD", joint),
                               axis,
-                              masterJointIndex,
+                              actuatedJointIndex,
                               flipAxesRandomly);
    }
 
@@ -1341,7 +1341,7 @@ public class CrossFourBarJointTest
                                                    RigidBodyBasics predecessor,
                                                    Function<RevoluteJointBasics, RigidBodyBasics> successorFactory,
                                                    Vector3DReadOnly axis,
-                                                   int masterJointIndex,
+                                                   int actuatedJointIndex,
                                                    boolean flipAxesRandomly)
    {
       List<Point2D> vertices = EuclidGeometryRandomTools.nextCircleBasedConvexPolygon2D(random, 10.0, 5.0, 4);
@@ -1382,14 +1382,14 @@ public class CrossFourBarJointTest
       jointDPosition.changeFrame(worldFrame);
 
       if (flipAxesRandomly)
-      { // Flip any but master joint such that the clockwise order is respected.
-         if (masterJointIndex != 0 && random.nextBoolean())
+      { // Flip any but actuated joint such that the clockwise order is respected.
+         if (actuatedJointIndex != 0 && random.nextBoolean())
             axisA.negate();
-         if (masterJointIndex != 1 && random.nextBoolean())
+         if (actuatedJointIndex != 1 && random.nextBoolean())
             axisB.negate();
-         if (masterJointIndex != 2 && random.nextBoolean())
+         if (actuatedJointIndex != 2 && random.nextBoolean())
             axisC.negate();
-         if (masterJointIndex != 3 && random.nextBoolean())
+         if (actuatedJointIndex != 3 && random.nextBoolean())
             axisD.negate();
       }
 
@@ -1416,22 +1416,22 @@ public class CrossFourBarJointTest
       return generators;
    }
 
-   private static CrossFourBarJoint createKnownCrossFourBarJoint1(String name, int masterJointIndex, double solverTolerance)
+   private static CrossFourBarJoint createKnownCrossFourBarJoint1(String name, int actuatedJointIndex, double solverTolerance)
    {
       Point2D A = new Point2D(0.002, -0.189);
       Point2D B = new Point2D(-0.019, -0.144);
       Point2D C = new Point2D(0.023, -0.245);
       Point2D D = new Point2D(-0.015, -0.278);
-      return createCrossFourBarJoint(name, A, B, C, D, masterJointIndex, solverTolerance);
+      return createCrossFourBarJoint(name, A, B, C, D, actuatedJointIndex, solverTolerance);
    }
 
-   private static CrossFourBarJoint createKnownCrossFourBarJoint2(String name, int masterJointIndex, double solverTolerance)
+   private static CrossFourBarJoint createKnownCrossFourBarJoint2(String name, int actuatedJointIndex, double solverTolerance)
    {
       Point2D A = new Point2D(0.227, 0.1);
       Point2D B = new Point2D(0.227, -0.1);
       Point2D C = new Point2D(0.427, 0.1);
       Point2D D = new Point2D(0.427, -0.1);
-      return createCrossFourBarJoint(name, A, B, C, D, masterJointIndex, solverTolerance);
+      return createCrossFourBarJoint(name, A, B, C, D, actuatedJointIndex, solverTolerance);
    }
 
    private static CrossFourBarJoint createCrossFourBarJoint(String name,
@@ -1439,11 +1439,11 @@ public class CrossFourBarJointTest
                                                             Point2D B,
                                                             Point2D C,
                                                             Point2D D,
-                                                            int masterJointIndex,
+                                                            int actuatedJointIndex,
                                                             double solverTolerance)
    {
       RevoluteJoint[] fourBarJoints = createCrossFourBarJoints(A, B, C, D);
-      CrossFourBarJoint joint = new CrossFourBarJoint(name, fourBarJoints, masterJointIndex);
+      CrossFourBarJoint joint = new CrossFourBarJoint(name, fourBarJoints, actuatedJointIndex);
 
       FramePoint3D offset = new FramePoint3D();
       if (fourBarJoints[3] != joint.getJointD())
