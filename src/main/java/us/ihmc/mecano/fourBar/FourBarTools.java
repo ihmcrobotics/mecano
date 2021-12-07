@@ -11,6 +11,8 @@ import us.ihmc.euclid.tools.EuclidCoreTools;
  */
 public class FourBarTools
 {
+   private static final double EPSILON = 1.0e-15;
+
    /**
     * Tests whether the given four bar is a cross four bar, meaning two of its edges cross.
     * 
@@ -175,13 +177,13 @@ public class FourBarTools
       double sinBCDSquare = Double.NaN;
       double sinBCD = Double.NaN;
 
-      if (angle <= A.getMinAngle())
+      if (angle <= A.getMinAngle() + EPSILON)
       {
          angle = A.getMinAngle();
          setToMinAngle(A);
          limit = Bound.MIN;
       }
-      else if (angle >= A.getMaxAngle())
+      else if (angle >= A.getMaxAngle() - EPSILON)
       {
          angle = A.getMaxAngle();
          setToMaxAngle(A);
@@ -241,86 +243,121 @@ public class FourBarTools
       if (Double.isNaN(angleDot))
          return limit;
 
-      if (limit != null)
-      {
-         cosABC = EuclidCoreTools.cos(B.getAngle());
-         cosDAB = EuclidCoreTools.cos(A.getAngle());
-         cosBCD = Math.cos(C.getAngle());
-         sinBCDSquare = 1.0 - cosBCD * cosBCD;
-         sinBCD = Math.sqrt(sinBCDSquare);
-         cosABD = cosineAngleWithCosineLaw(AB, BD, DA);
-         cosDBC = cosineAngleWithCosineLaw(BC, BD, CD);
-         sinABDSquare = 1 - cosABD * cosABD;
-         sinABD = Math.sqrt(sinABDSquare);
-         sinDBCSquare = 1 - cosDBC * cosDBC;
-         sinDBC = Math.sqrt(sinDBCSquare);
-
-         AC = Math.sqrt(AB * AB + BC * BC - 2.0 * AB * BC * cosABC);
-         BD = Math.sqrt(AB * AB + DA * DA - 2.0 * AB * DA * cosDAB);
-         ACDiag.setLength(AC);
-         BDDiag.setLength(BD);
-      }
-
       double sinDAB = Math.sin(A.getAngle());
-
-      A.setAngleDot(angleDot);
-      double BDDt = DA * AB * sinDAB * angleDot / BD;
-      BDDiag.setLengthDot(BDDt);
-      double cosBCDDot = cosineAngleDotWithCosineLaw(BC, CD, 0.0, BD, BDDt);
-      C.setAngleDot(-cosBCDDot / sinBCD);
-
-      if (!C.isConvex())
-         C.setAngleDot(-C.getAngleDot());
-
-      double cosABDDot = cosineAngleDotWithCosineLaw(AB, BD, BDDt, DA, 0.0);
-      double angleDtABD = -cosABDDot / sinABD;
-      double cosDBCDot = cosineAngleDotWithCosineLaw(BC, BD, BDDt, CD, 0.0);
-      double angleDtDBC = -cosDBCDot / sinDBC;
-
-      if (ABEdge.isCrossing())
-         angleDtABD = -angleDtABD;
-      if (BCEdge.isCrossing())
-         angleDtDBC = -angleDtDBC;
-
-      B.setAngleDot(angleDtABD + angleDtDBC);
-      if (!B.isConvex())
-         B.setAngleDot(-B.getAngleDot());
-
-      D.setAngleDot(-A.getAngleDot() - B.getAngleDot() - C.getAngleDot());
-
       double sinABC = Math.sin(B.getAngle());
-      double ACDt = AB * BC * sinABC * B.getAngleDot() / AC;
-      ACDiag.setLengthDot(ACDt);
+      double cosBCDDot;
+      double cosABDDot;
+      double cosDBCDot;
+      double BDDt;
+      double ACDt;
+
+      if (EuclidCoreTools.isZero(angleDot, EPSILON))
+      {
+         A.setAngleDot(0.0);
+         B.setAngleDot(0.0);
+         C.setAngleDot(0.0);
+         D.setAngleDot(0.0);
+         BDDiag.setLengthDot(0.0);
+         ACDiag.setLengthDot(0.0);
+
+         cosBCDDot = 0.0;
+         cosABDDot = 0.0;
+         cosDBCDot = 0.0;
+         BDDt = 0.0;
+         ACDt = 0.0;
+      }
+      else
+      {
+         if (limit != null)
+         {
+            cosABC = EuclidCoreTools.cos(B.getAngle());
+            cosDAB = EuclidCoreTools.cos(A.getAngle());
+            BD = Math.sqrt(AB * AB + DA * DA - 2.0 * AB * DA * cosDAB);
+            AC = Math.sqrt(AB * AB + BC * BC - 2.0 * AB * BC * cosABC);
+            cosBCD = Math.cos(C.getAngle());
+            sinBCDSquare = 1.0 - cosBCD * cosBCD;
+            sinBCD = Math.sqrt(sinBCDSquare);
+            cosABD = cosineAngleWithCosineLaw(AB, BD, DA);
+            cosDBC = cosineAngleWithCosineLaw(BC, BD, CD);
+            sinABDSquare = 1 - cosABD * cosABD;
+            sinABD = Math.sqrt(sinABDSquare);
+            sinDBCSquare = 1 - cosDBC * cosDBC;
+            sinDBC = Math.sqrt(sinDBCSquare);
+
+            ACDiag.setLength(AC);
+            BDDiag.setLength(BD);
+         }
+
+         A.setAngleDot(angleDot);
+         BDDt = DA * AB * sinDAB * angleDot / BD;
+         BDDiag.setLengthDot(BDDt);
+         cosBCDDot = cosineAngleDotWithCosineLaw(BC, CD, 0.0, BD, BDDt);
+         C.setAngleDot(-cosBCDDot / sinBCD);
+
+         if (!C.isConvex())
+            C.setAngleDot(-C.getAngleDot());
+
+         cosABDDot = cosineAngleDotWithCosineLaw(AB, BD, BDDt, DA, 0.0);
+         double angleDtABD = -cosABDDot / sinABD;
+         cosDBCDot = cosineAngleDotWithCosineLaw(BC, BD, BDDt, CD, 0.0);
+         double angleDtDBC = -cosDBCDot / sinDBC;
+
+         if (ABEdge.isCrossing())
+            angleDtABD = -angleDtABD;
+         if (BCEdge.isCrossing())
+            angleDtDBC = -angleDtDBC;
+
+         B.setAngleDot(angleDtABD + angleDtDBC);
+         if (!B.isConvex())
+            B.setAngleDot(-B.getAngleDot());
+
+         D.setAngleDot(-A.getAngleDot() - B.getAngleDot() - C.getAngleDot());
+
+         ACDt = AB * BC * sinABC * B.getAngleDot() / AC;
+         ACDiag.setLengthDot(ACDt);
+      }
 
       // -------------------- Compute angle second derivative ----------------------- //
       if (Double.isNaN(angleDDot))
          return limit;
 
-      A.setAngleDDot(angleDDot);
-      double BDDt2 = DA * AB / BD * (cosDAB * angleDot * angleDot + sinDAB * (angleDDot - BDDt * angleDot / BD));
-      BDDiag.setLengthDDot(BDDt2);
+      if (EuclidCoreTools.isZero(angleDDot, EPSILON) && EuclidCoreTools.isZero(angleDot, EPSILON))
+      {
+         A.setAngleDDot(0.0);
+         B.setAngleDDot(0.0);
+         C.setAngleDDot(0.0);
+         D.setAngleDDot(0.0);
+         BDDiag.setLengthDDot(0.0);
+         ACDiag.setLengthDDot(0.0);
+      }
+      else
+      {
+         A.setAngleDDot(angleDDot);
+         double BDDt2 = DA * AB / BD * (cosDAB * angleDot * angleDot + sinDAB * (angleDDot - BDDt * angleDot / BD));
+         BDDiag.setLengthDDot(BDDt2);
 
-      double cosBCDDt2 = cosineAngleDDotWithCosineLaw(BC, CD, 0.0, 0.0, BD, BDDt, BDDt2);
-      C.setAngleDDot(-(cosBCDDt2 * sinBCDSquare + cosBCDDot * cosBCDDot * cosBCD) / (sinBCDSquare * sinBCD));
-      if (!C.isConvex())
-         C.setAngleDDot(-C.getAngleDDot());
+         double cosBCDDt2 = cosineAngleDDotWithCosineLaw(BC, CD, 0.0, 0.0, BD, BDDt, BDDt2);
+         C.setAngleDDot(-(cosBCDDt2 * sinBCDSquare + cosBCDDot * cosBCDDot * cosBCD) / (sinBCDSquare * sinBCD));
+         if (!C.isConvex())
+            C.setAngleDDot(-C.getAngleDDot());
 
-      double cosABDDt2 = cosineAngleDDotWithCosineLaw(AB, BD, BDDt, BDDt2, DA, 0.0, 0.0);
-      double angleDt2ABD = -(cosABDDt2 * sinABDSquare + cosABDDot * cosABDDot * cosABD) / (sinABDSquare * sinABD);
-      double cosDBCDt2 = cosineAngleDDotWithCosineLaw(BC, BD, BDDt, BDDt2, CD, 0.0, 0.0);
-      double angleDt2DBC = -(cosDBCDt2 * sinDBCSquare + cosDBCDot * cosDBCDot * cosDBC) / (sinDBCSquare * sinDBC);
-      if (ABEdge.isCrossing())
-         angleDt2ABD = -angleDt2ABD;
-      if (BCEdge.isCrossing())
-         angleDt2DBC = -angleDt2DBC;
+         double cosABDDt2 = cosineAngleDDotWithCosineLaw(AB, BD, BDDt, BDDt2, DA, 0.0, 0.0);
+         double angleDt2ABD = -(cosABDDt2 * sinABDSquare + cosABDDot * cosABDDot * cosABD) / (sinABDSquare * sinABD);
+         double cosDBCDt2 = cosineAngleDDotWithCosineLaw(BC, BD, BDDt, BDDt2, CD, 0.0, 0.0);
+         double angleDt2DBC = -(cosDBCDt2 * sinDBCSquare + cosDBCDot * cosDBCDot * cosDBC) / (sinDBCSquare * sinDBC);
+         if (ABEdge.isCrossing())
+            angleDt2ABD = -angleDt2ABD;
+         if (BCEdge.isCrossing())
+            angleDt2DBC = -angleDt2DBC;
 
-      B.setAngleDDot(angleDt2ABD + angleDt2DBC);
-      if (!B.isConvex())
-         B.setAngleDDot(-B.getAngleDDot());
-      D.setAngleDDot(-A.getAngleDDot() - B.getAngleDDot() - C.getAngleDDot());
+         B.setAngleDDot(angleDt2ABD + angleDt2DBC);
+         if (!B.isConvex())
+            B.setAngleDDot(-B.getAngleDDot());
+         D.setAngleDDot(-A.getAngleDDot() - B.getAngleDDot() - C.getAngleDDot());
 
-      double ACDt2 = AB * BC / AC * (cosABC * B.getAngleDot() * B.getAngleDot() + sinABC * (B.getAngleDDot() - ACDt * B.getAngleDot() / AC));
-      ACDiag.setLengthDDot(ACDt2);
+         double ACDt2 = AB * BC / AC * (cosABC * B.getAngleDot() * B.getAngleDot() + sinABC * (B.getAngleDDot() - ACDt * B.getAngleDot() / AC));
+         ACDiag.setLengthDDot(ACDt2);
+      }
 
       return limit;
    }
