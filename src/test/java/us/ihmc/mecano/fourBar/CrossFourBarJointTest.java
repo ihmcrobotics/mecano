@@ -18,6 +18,7 @@ import org.opentest4j.AssertionFailedError;
 
 import us.ihmc.euclid.Axis3D;
 import us.ihmc.euclid.geometry.tools.EuclidGeometryRandomTools;
+import us.ihmc.euclid.matrix.Matrix3D;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
@@ -469,6 +470,10 @@ public class CrossFourBarJointTest
             function.getJointD().getSuccessor().getBodyFixedFrame().getTwistRelativeToOther(function.getJointA().getPredecessor().getBodyFixedFrame(),
                                                                                             expectedTwist);
 
+            expectedTwist.setBaseFrame(fourBarJoint.getPredecessor().getBodyFixedFrame());
+            expectedTwist.setBodyFrame(fourBarJoint.getSuccessor().getBodyFixedFrame());
+            expectedTwist.setReferenceFrame(fourBarJoint.getSuccessor().getBodyFixedFrame());
+
             Twist actualTwist = new Twist();
             fourBarJoint.getSuccessorTwist(actualTwist);
 
@@ -506,6 +511,9 @@ public class CrossFourBarJointTest
             Twist expectedTwist = new Twist();
             function.getJointA().getPredecessor().getBodyFixedFrame().getTwistRelativeToOther(function.getJointD().getSuccessor().getBodyFixedFrame(),
                                                                                               expectedTwist);
+            expectedTwist.setBaseFrame(fourBarJoint.getSuccessor().getBodyFixedFrame());
+            expectedTwist.setBodyFrame(fourBarJoint.getPredecessor().getBodyFixedFrame());
+            expectedTwist.setReferenceFrame(fourBarJoint.getPredecessor().getBodyFixedFrame());
 
             Twist actualTwist = new Twist();
             fourBarJoint.getPredecessorTwist(actualTwist);
@@ -593,6 +601,9 @@ public class CrossFourBarJointTest
             function.getJointD().getSuccessor().getBodyFixedFrame().getTwistRelativeToOther(function.getJointA().getPredecessor().getBodyFixedFrame(),
                                                                                             expectedTwist);
             expectedTwist.scale(1.0 / (function.getJointA().getQd() + function.getJointD().getQd()));
+            expectedTwist.setBaseFrame(fourBarJoint.getPredecessor().getBodyFixedFrame());
+            expectedTwist.setBodyFrame(fourBarJoint.getSuccessor().getBodyFixedFrame());
+            expectedTwist.setReferenceFrame(fourBarJoint.getSuccessor().getBodyFixedFrame());
 
             TwistReadOnly actualTwist = fourBarJoint.getUnitSuccessorTwist();
 
@@ -630,6 +641,9 @@ public class CrossFourBarJointTest
             function.getJointA().getPredecessor().getBodyFixedFrame().getTwistRelativeToOther(function.getJointD().getSuccessor().getBodyFixedFrame(),
                                                                                               expectedTwist);
             expectedTwist.scale(1.0 / (function.getJointA().getQd() + function.getJointD().getQd()));
+            expectedTwist.setBaseFrame(fourBarJoint.getSuccessor().getBodyFixedFrame());
+            expectedTwist.setBodyFrame(fourBarJoint.getPredecessor().getBodyFixedFrame());
+            expectedTwist.setReferenceFrame(fourBarJoint.getPredecessor().getBodyFixedFrame());
 
             TwistReadOnly actualTwist = fourBarJoint.getUnitPredecessorTwist();
 
@@ -872,6 +886,9 @@ public class CrossFourBarJointTest
                                                                                                                                              .getPredecessor(),
                                                                                                                                      function.getJointD()
                                                                                                                                              .getSuccessor()));
+            expectedAcceleration.setBodyFrame(fourBarJoint.getSuccessor().getBodyFixedFrame());
+            expectedAcceleration.setBaseFrame(fourBarJoint.getPredecessor().getBodyFixedFrame());
+            expectedAcceleration.setReferenceFrame(fourBarJoint.getSuccessor().getBodyFixedFrame());
             SpatialAcceleration actualAcceleration = new SpatialAcceleration();
             fourBarJoint.getSuccessorAcceleration(actualAcceleration);
 
@@ -1078,6 +1095,7 @@ public class CrossFourBarJointTest
                                                                                                                                                  .getPredecessor(),
                                                                                                                                      fourBarJoint.getJointD()
                                                                                                                                                  .getSuccessor()));
+            expectedAcceleration.setBaseFrame(fourBarJoint.getPredecessor().getBodyFixedFrame());
             expectedAcceleration.setBodyFrame(fourBarJoint.getSuccessor().getBodyFixedFrame());
             expectedAcceleration.changeFrame(fourBarJoint.getSuccessor().getBodyFixedFrame());
             expectedAcceleration.scale(1.0 / fourBarJoint.getQdd());
@@ -1119,6 +1137,8 @@ public class CrossFourBarJointTest
                                                                                                                                      fourBarJoint.getJointA()
                                                                                                                                                  .getPredecessor()));
             expectedAcceleration.setBaseFrame(fourBarJoint.getSuccessor().getBodyFixedFrame());
+            expectedAcceleration.setBodyFrame(fourBarJoint.getPredecessor().getBodyFixedFrame());
+            expectedAcceleration.setReferenceFrame(fourBarJoint.getPredecessor().getBodyFixedFrame());
             expectedAcceleration.scale(1.0 / fourBarJoint.getQdd());
 
             MecanoTestTools.assertSpatialAccelerationEquals("Iteration " + i,
@@ -1435,25 +1455,45 @@ public class CrossFourBarJointTest
    }
 
    private static CrossFourBarJoint createCrossFourBarJoint(String name,
-                                                            Point2D A,
-                                                            Point2D B,
-                                                            Point2D C,
-                                                            Point2D D,
+                                                            Point2DReadOnly A,
+                                                            Point2DReadOnly B,
+                                                            Point2DReadOnly C,
+                                                            Point2DReadOnly D,
                                                             int actuatedJointIndex,
                                                             double solverTolerance)
    {
-      RevoluteJoint[] fourBarJoints = createCrossFourBarJoints(A, B, C, D);
-      CrossFourBarJoint joint = new CrossFourBarJoint(name, fourBarJoints, actuatedJointIndex);
-
-      FramePoint3D offset = new FramePoint3D();
-      if (fourBarJoints[3] != joint.getJointD())
-      {
-         joint.updateFramesRecursively();
-         offset.setToZero(joint.getJointC().getFrameAfterJoint());
-         offset.changeFrame(joint.getFrameAfterJoint());
-      }
-      new RigidBody("bodyCD", joint, 0, 0, 0, 0, offset);
+      RigidBody rootBody = new RigidBody("root", worldFrame);
+      RigidBodyTransform transformAToPredecessor = new RigidBodyTransform(new Quaternion(), new Vector3D(A));
+      RigidBodyTransform transformBToPredecessor = new RigidBodyTransform(new Quaternion(), new Vector3D(B));
+      Vector2D AD = new Vector2D();
+      AD.sub(D, A);
+      Vector2D BC = new Vector2D();
+      BC.sub(C, B);
+      RigidBodyTransform transformCToB = new RigidBodyTransform(new Quaternion(), new Vector3D(BC));
+      RigidBodyTransform transformDToA = new RigidBodyTransform(new Quaternion(), new Vector3D(AD));
+      CrossFourBarJoint joint = new CrossFourBarJoint(name,
+                                                      rootBody,
+                                                      "jointA",
+                                                      "jointB",
+                                                      "jointC",
+                                                      "jointD",
+                                                      "bodyDA",
+                                                      "bodyBC",
+                                                      transformAToPredecessor,
+                                                      transformBToPredecessor,
+                                                      transformCToB,
+                                                      transformDToA,
+                                                      null,
+                                                      null,
+                                                      0,
+                                                      0,
+                                                      null,
+                                                      null,
+                                                      actuatedJointIndex,
+                                                      3,
+                                                      Axis3D.Z);
       joint.setIKSolver(new CrossFourBarJointIKBinarySolver(solverTolerance));
+      new RigidBody("bodyCD", joint, new Matrix3D(), 0.0, new RigidBodyTransform());
       return joint;
    }
 
