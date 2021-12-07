@@ -58,13 +58,13 @@ public class CrossFourBarJointIKBinarySolverTest
 
          start = System.nanoTime();
          double actualAngle = defaultSolver.solve(theta, sourceVertex);
-         assertEquals(expectedAngle, actualAngle, EPSILON);
+         assertEquals(expectedAngle, actualAngle, EPSILON, "Iteration: " + i);
          end = System.nanoTime();
          defaultMethodTotalTimeNano += end - start;
 
          start = System.nanoTime();
          actualAngle = naiveSolver.solve(theta, sourceVertex);
-         assertEquals(expectedAngle, actualAngle, EPSILON);
+         assertEquals(expectedAngle, actualAngle, EPSILON, "Iteration: " + i);
          end = System.nanoTime();
          naiveMethodTotalTimeNano += end - start;
       }
