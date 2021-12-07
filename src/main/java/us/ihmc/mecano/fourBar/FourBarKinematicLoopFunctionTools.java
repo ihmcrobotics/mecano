@@ -240,6 +240,9 @@ public class FourBarKinematicLoopFunctionTools
 
       fourBar.setup(originA, originB, originC, originD);
 
+      // Restrict the fourBar limits to avoid singularities
+      FourBarTools.updateFourBarLimits(fourBar.getVertexA(), 1.0e-3);
+
       for (FourBarAngle fourBarAngle : FourBarAngle.values)
       {
          int index = fourBarAngle.ordinal();

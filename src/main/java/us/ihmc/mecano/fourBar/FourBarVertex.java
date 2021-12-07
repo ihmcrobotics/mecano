@@ -74,7 +74,7 @@ public class FourBarVertex
     */
    protected void updateLimits()
    {
-      FourBarTools.updateLimits(this);
+      FourBarTools.updateVertexLimits(this);
    }
 
    /**

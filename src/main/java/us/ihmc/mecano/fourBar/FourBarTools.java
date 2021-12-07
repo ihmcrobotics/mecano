@@ -332,7 +332,7 @@ public class FourBarTools
     * 
     * @param vertex the vertex to compute the limits of. Modified.
     */
-   public static void updateLimits(FourBarVertex vertex)
+   public static void updateVertexLimits(FourBarVertex vertex)
    {
       FourBarVertex A = vertex;
       FourBarEdge ABEdge = A.getNextEdge();
@@ -451,6 +451,48 @@ public class FourBarTools
          A.setMinAngle(-upperBound);
          A.setMaxAngle(-lowerBound);
       }
+   }
+
+   public static void updateFourBarLimits(FourBarVertex A, double restriction)
+   {
+      if (restriction == 0.0)
+         return;
+
+      FourBarVertex B = A.getNextVertex();
+      FourBarVertex C = B.getNextVertex();
+      FourBarVertex D = C.getNextVertex();
+
+      // Compute the vertex angles at the new limit
+      update(A, A.getMinAngle() + restriction);
+      A.setMinAngle(A.getAngle());
+      if (A.isConvex() == B.isConvex())
+         B.setMaxAngle(B.getAngle());
+      else
+         B.setMinAngle(B.getAngle());
+      if (A.isConvex() == C.isConvex())
+         C.setMinAngle(C.getAngle());
+      else
+         C.setMaxAngle(C.getAngle());
+      if (A.isConvex() == D.isConvex())
+         D.setMaxAngle(D.getAngle());
+      else
+         D.setMinAngle(D.getAngle());
+
+      // Compute the vertex angles at the new limit
+      update(A, A.getMaxAngle() - restriction);
+      A.setMaxAngle(A.getAngle());
+      if (A.isConvex() == B.isConvex())
+         B.setMinAngle(B.getAngle());
+      else
+         B.setMaxAngle(B.getAngle());
+      if (A.isConvex() == C.isConvex())
+         C.setMaxAngle(C.getAngle());
+      else
+         C.setMinAngle(C.getAngle());
+      if (A.isConvex() == D.isConvex())
+         D.setMinAngle(D.getAngle());
+      else
+         D.setMaxAngle(D.getAngle());
    }
 
    /**
