@@ -4,6 +4,7 @@ import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.interfaces.Vector3DReadOnly;
 import us.ihmc.mecano.multiBodySystem.interfaces.CrossFourBarJointReadOnly;
+import us.ihmc.mecano.multiBodySystem.interfaces.RevoluteJointReadOnly;
 import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
 import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyReadOnly;
 import us.ihmc.mecano.tools.MultiBodySystemFactories;
@@ -74,9 +75,43 @@ public class YoMultiBodySystemFactories
          @Override
          public YoCrossFourBarJoint cloneCrossFourBarJoint(CrossFourBarJointReadOnly original, String cloneSuffix, RigidBodyBasics clonePredecessor)
          {
+            RevoluteJointReadOnly originalJointA = original.getJointA();
+            RevoluteJointReadOnly originalJointB = original.getJointB();
+            RevoluteJointReadOnly originalJointC = original.getJointC();
+            RevoluteJointReadOnly originalJointD = original.getJointD();
+            RigidBodyReadOnly originalBodyDA = originalJointA.getSuccessor();
+            RigidBodyReadOnly originalBodyBC = originalJointB.getSuccessor();
+            int loopClosureIndex;
+            if (originalJointA.isLoopClosure())
+               loopClosureIndex = 0;
+            else if (originalJointB.isLoopClosure())
+               loopClosureIndex = 1;
+            else if (originalJointC.isLoopClosure())
+               loopClosureIndex = 2;
+            else
+               loopClosureIndex = 3;
+
             return new YoCrossFourBarJoint(original.getName() + cloneSuffix,
-                                           cloneCrossFourBarLoopJoints(original, cloneSuffix, clonePredecessor),
+                                           clonePredecessor,
+                                           originalJointA.getName() + cloneSuffix,
+                                           originalJointB.getName() + cloneSuffix,
+                                           originalJointC.getName() + cloneSuffix,
+                                           originalJointD.getName() + cloneSuffix,
+                                           originalBodyDA.getName() + cloneSuffix,
+                                           originalBodyBC.getName() + cloneSuffix,
+                                           originalJointA.getFrameBeforeJoint().getTransformToParent(),
+                                           originalJointB.getFrameBeforeJoint().getTransformToParent(),
+                                           originalJointC.getFrameBeforeJoint().getTransformToParent(),
+                                           originalJointD.getFrameBeforeJoint().getTransformToParent(),
+                                           originalBodyDA.getInertia().getMomentOfInertia(),
+                                           originalBodyBC.getInertia().getMomentOfInertia(),
+                                           originalBodyDA.getInertia().getMass(),
+                                           originalBodyBC.getInertia().getMass(),
+                                           originalBodyDA.getBodyFixedFrame().getTransformToParent(),
+                                           originalBodyBC.getBodyFixedFrame().getTransformToParent(),
                                            original.getActuatedJointIndex(),
+                                           loopClosureIndex,
+                                           original.getJointAxis(),
                                            registry);
          }
       };
