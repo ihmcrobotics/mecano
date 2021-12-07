@@ -1,11 +1,14 @@
 package us.ihmc.mecano.multiBodySystem;
 
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 
 import org.ejml.data.DMatrix;
 import org.ejml.data.DMatrixRMaj;
 
+import us.ihmc.euclid.matrix.Matrix3D;
+import us.ihmc.euclid.matrix.interfaces.Matrix3DReadOnly;
 import us.ihmc.euclid.orientation.interfaces.Orientation3DReadOnly;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.referenceFrame.interfaces.FixedFrameVector3DBasics;
@@ -13,15 +16,18 @@ import us.ihmc.euclid.tools.EuclidCoreIOTools;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.transform.interfaces.RigidBodyTransformReadOnly;
 import us.ihmc.euclid.tuple3D.Vector3D;
+import us.ihmc.euclid.tuple3D.interfaces.Vector3DReadOnly;
 import us.ihmc.mecano.fourBar.CrossFourBarJointIKBinarySolver;
 import us.ihmc.mecano.fourBar.CrossFourBarJointIKSolver;
 import us.ihmc.mecano.fourBar.FourBarKinematicLoopFunction;
 import us.ihmc.mecano.frames.MovingReferenceFrame;
 import us.ihmc.mecano.multiBodySystem.interfaces.CrossFourBarJointBasics;
 import us.ihmc.mecano.multiBodySystem.interfaces.CrossFourBarJointReadOnly;
+import us.ihmc.mecano.multiBodySystem.interfaces.JointReadOnly;
 import us.ihmc.mecano.multiBodySystem.interfaces.RevoluteJointBasics;
 import us.ihmc.mecano.multiBodySystem.interfaces.RevoluteJointReadOnly;
 import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
+import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyReadOnly;
 import us.ihmc.mecano.spatial.SpatialAcceleration;
 import us.ihmc.mecano.spatial.Twist;
 import us.ihmc.mecano.spatial.Wrench;
@@ -92,6 +98,196 @@ public class CrossFourBarJoint implements CrossFourBarJointBasics
    private final Vector3D rotationVector = new Vector3D();
 
    /**
+    * The minimum value {@link #q} can have:
+    *
+    * <pre>
+    * this.q &in; [this.jointLimitLower; this.jointLimitUpper]
+    * </pre>
+    *
+    * It is initialized to -&infin;.
+    */
+   private double jointLimitLower = Double.NEGATIVE_INFINITY;
+   /**
+    * The maximum value {@link #q} can have:
+    *
+    * <pre>
+    * this.q &in; [this.jointLimitLower; this.jointLimitUpper]
+    * </pre>
+    *
+    * It is initialized to +&infin;.
+    */
+   private double jointLimitUpper = Double.POSITIVE_INFINITY;
+   /**
+    * The minimum value {@link #qd} can have:
+    *
+    * <pre>
+    * this.qd &in; [this.velocityLimitLower; this.velocityLimitUpper]
+    * </pre>
+    *
+    * It is initialized to -&infin;.
+    */
+   private double velocityLimitLower = Double.NEGATIVE_INFINITY;
+   /**
+    * The maximum value {@link #qd} can have:
+    *
+    * <pre>
+    * this.qd &in; [this.velocityLimitLower; this.velocityLimitUpper]
+    * </pre>
+    *
+    * It is initialized to +&infin;.
+    */
+   private double velocityLimitUpper = Double.POSITIVE_INFINITY;
+   /**
+    * The minimum value {@link #tau} can have:
+    *
+    * <pre>
+    * this.tau &in; [this.effortLimitLower; this.effortLimitUpper]
+    * </pre>
+    *
+    * It is initialized to -&infin;.
+    */
+   private double effortLimitLower = Double.NEGATIVE_INFINITY;
+   /**
+    * The maximum value {@link #tau} can have:
+    *
+    * <pre>
+    * this.tau &in; [this.effortLimitLower; this.effortLimitUpper]
+    * </pre>
+    *
+    * It is initialized to +&infin;.
+    */
+   private double effortLimitUpper = Double.POSITIVE_INFINITY;
+
+   /**
+    * <pre>
+    *    root
+    *      |
+    *      |
+    * A O-----O B
+    *    \   /
+    *     \ /
+    *      X
+    *     / \
+    *    /   \
+    * C O-----O D
+    *      |
+    * end-effector
+    * </pre>
+    */
+   public CrossFourBarJoint(String name,
+                            RigidBodyBasics predecessor,
+                            String jointNameA,
+                            String jointNameB,
+                            String jointNameC,
+                            String jointNameD,
+                            String bodyNameDA,
+                            String bodyNameBC,
+                            RigidBodyTransformReadOnly transformAToPredecessor,
+                            RigidBodyTransformReadOnly transformBToPredecessor,
+                            RigidBodyTransformReadOnly transformCToB,
+                            RigidBodyTransformReadOnly transformDToA,
+                            Matrix3DReadOnly bodyInertiaDA,
+                            Matrix3DReadOnly bodyInertiaBC,
+                            double bodyMassDA,
+                            double bodyMassBC,
+                            RigidBodyTransformReadOnly bodyInertiaPoseDA,
+                            RigidBodyTransformReadOnly bodyInertiaPoseBC,
+                            int actuatedJointIndex,
+                            int loopClosureJointIndex,
+                            Vector3DReadOnly jointAxis)
+   {
+      if (actuatedJointIndex == loopClosureJointIndex)
+         throw new IllegalArgumentException("The actuated joint cannot be the loop closure.");
+      if (loopClosureJointIndex < 2)
+         throw new UnsupportedOperationException("Only the joint C and D support the loop closure.");
+
+      JointReadOnly.checkJointNameSanity(name);
+
+      jointNameA = getInternalName(name, jointNameA, "A");
+      jointNameB = getInternalName(name, jointNameB, "B");
+      jointNameC = getInternalName(name, jointNameC, "C");
+      jointNameD = getInternalName(name, jointNameD, "D");
+
+      bodyNameBC = getInternalName(name, bodyNameBC, "BC");
+      bodyNameDA = getInternalName(name, bodyNameDA, "DA");
+
+      if (bodyInertiaBC == null)
+         bodyInertiaBC = new Matrix3D();
+      if (bodyInertiaDA == null)
+         bodyInertiaDA = new Matrix3D();
+      if (bodyInertiaPoseBC == null)
+         bodyInertiaPoseBC = new RigidBodyTransform();
+      if (bodyInertiaPoseDA == null)
+         bodyInertiaPoseDA = new RigidBodyTransform();
+
+      MovingReferenceFrame parentFrame;
+      if (predecessor.isRootBody())
+         parentFrame = predecessor.getBodyFixedFrame();
+      else
+         parentFrame = predecessor.getParentJoint().getFrameAfterJoint();
+
+      RigidBody base = new RigidBody(name + "InternalBase", parentFrame);
+      RevoluteJoint jointA = new RevoluteJoint(jointNameA, base, transformAToPredecessor, jointAxis);
+      RevoluteJoint jointB = new RevoluteJoint(jointNameB, base, transformBToPredecessor, jointAxis);
+      RigidBody bodyBC = new RigidBody(bodyNameBC, jointB, bodyInertiaBC, bodyMassBC, bodyInertiaPoseBC);
+      RigidBody bodyDA = new RigidBody(bodyNameDA, jointA, bodyInertiaDA, bodyMassDA, bodyInertiaPoseDA);
+      RevoluteJoint jointC = new RevoluteJoint(jointNameC, bodyBC, transformCToB, jointAxis);
+      RevoluteJoint jointD = new RevoluteJoint(jointNameD, bodyDA, transformDToA, jointAxis);
+
+      RigidBodyTransform transformDToC = new RigidBodyTransform();
+      transformDToC.multiply(transformCToB);
+      transformDToC.multiply(transformBToPredecessor);
+      transformDToC.multiplyInvertOther(transformAToPredecessor);
+      transformDToC.multiplyInvertOther(transformDToA);
+
+      if (loopClosureJointIndex == 2)
+      { // The loop closure happens at joint C
+         RigidBody end = new RigidBody(name + "InternalEnd", jointD, new Matrix3D(), 0.0, new RigidBodyTransform());
+         jointC.setupLoopClosure(end, transformDToC);
+      }
+      else
+      { // The loop closure happens at joint D
+         RigidBody end = new RigidBody(name + "InternalEnd", jointC, new Matrix3D(), 0.0, new RigidBodyTransform());
+         RigidBodyTransform transformCToD = new RigidBodyTransform();
+         transformCToD.setAndInvert(transformDToC);
+         jointD.setupLoopClosure(end, transformCToD);
+      }
+
+      fourBarFunction = new FourBarKinematicLoopFunction(name, Arrays.asList(jointA, jointB, jointC, jointD), actuatedJointIndex);
+      if (!fourBarFunction.isCrossed())
+         throw new IllegalArgumentException("The given joint configuration does not represent a cross four bar.");
+      setIKSolver(new CrossFourBarJointIKBinarySolver(1.0e-12));
+
+      this.name = name;
+      this.predecessor = predecessor;
+      predecessor.addChildJoint(this);
+      nameId = JointReadOnly.computeNameId(this);
+
+      if (getJointB().isLoopClosure() || getJointC().isLoopClosure())
+      {
+         beforeJointFrame = getJointA().getFrameBeforeJoint();
+         afterJointFrame = getJointD().getFrameAfterJoint();
+      }
+      else
+      {
+         beforeJointFrame = getJointB().getFrameBeforeJoint();
+         afterJointFrame = getJointC().getFrameAfterJoint();
+      }
+
+      unitTwists = Collections.singletonList(unitJointTwist);
+      jointTwist = MecanoFactories.newTwistReadOnly(this::getQd, unitJointTwist);
+      jointAcceleration = MecanoFactories.newSpatialAccelerationVectorReadOnly(this::getQdd, unitJointAcceleration, jointBiasAcceleration);
+   }
+
+   private static String getInternalName(String jointName, String internalName, String defaultNameSuffix)
+   {
+      if (internalName == null)
+         return jointName + "_" + defaultNameSuffix;
+      else
+         return internalName;
+   }
+
+   /**
     * Creates a new cross four bar joint that is to wrap the 4 given revolute joints into a single
     * 1-DoF joint.
     * <p>
@@ -110,8 +306,8 @@ public class CrossFourBarJoint implements CrossFourBarJointBasics
     * </ol>
     * </p>
     *
-    * @param name             the name of this joint.
-    * @param fourBarJoints    the 4 revolute joints composing the four bar.
+    * @param name               the name of this joint.
+    * @param fourBarJoints      the 4 revolute joints composing the four bar.
     * @param actuatedJointIndex the index in {@code fourBarJoints} of the joints that is actuated.
     * @throws IllegalArgumentException if the given joints do not represent a cross four bar joints.
     * @throws IllegalArgumentException if a subtree is already attached to the last two joints closing
@@ -157,9 +353,6 @@ public class CrossFourBarJoint implements CrossFourBarJointBasics
    @Override
    public void setSuccessor(RigidBodyBasics successor)
    {
-      if (this.successor != null)
-         throw new IllegalStateException("The successor of this joint has already been set.");
-
       this.successor = successor;
       jointWrench = MecanoFactories.newWrenchReadOnly(this::getTau, unitJointWrench);
    }
@@ -652,6 +845,90 @@ public class CrossFourBarJoint implements CrossFourBarJointBasics
          return ((loopJacobian.get(1) + loopJacobian.get(2)) * tau);
    }
 
+   /** {@inheritDoc} */
+   @Override
+   public void setJointLimitLower(double jointLimitLower)
+   {
+      this.jointLimitLower = jointLimitLower;
+   }
+
+   /** {@inheritDoc} */
+   @Override
+   public void setJointLimitUpper(double jointLimitUpper)
+   {
+      this.jointLimitUpper = jointLimitUpper;
+   }
+
+   /** {@inheritDoc} */
+   @Override
+   public void setVelocityLimitLower(double velocityLimitLower)
+   {
+      this.velocityLimitLower = velocityLimitLower;
+   }
+
+   /** {@inheritDoc} */
+   @Override
+   public void setVelocityLimitUpper(double velocityLimitUpper)
+   {
+      this.velocityLimitUpper = velocityLimitUpper;
+   }
+
+   /** {@inheritDoc} */
+   @Override
+   public void setEffortLimitLower(double effortLimitLower)
+   {
+      this.effortLimitLower = effortLimitLower;
+   }
+
+   /** {@inheritDoc} */
+   @Override
+   public void setEffortLimitUpper(double effortLimitUpper)
+   {
+      this.effortLimitUpper = effortLimitUpper;
+   }
+
+   /** {@inheritDoc} */
+   @Override
+   public double getJointLimitLower()
+   {
+      return Math.max(CrossFourBarJointBasics.super.getJointLimitLower(), jointLimitLower);
+   }
+
+   /** {@inheritDoc} */
+   @Override
+   public double getJointLimitUpper()
+   {
+      return Math.min(CrossFourBarJointBasics.super.getJointLimitUpper(), jointLimitUpper);
+   }
+
+   /** {@inheritDoc} */
+   @Override
+   public double getVelocityLimitLower()
+   {
+      return Math.max(CrossFourBarJointBasics.super.getVelocityLimitLower(), velocityLimitLower);
+   }
+
+   /** {@inheritDoc} */
+   @Override
+   public double getVelocityLimitUpper()
+   {
+      return Math.min(CrossFourBarJointBasics.super.getVelocityLimitUpper(), velocityLimitUpper);
+   }
+
+   /** {@inheritDoc} */
+   @Override
+   public double getEffortLimitLower()
+   {
+      return Math.max(CrossFourBarJointBasics.super.getEffortLimitLower(), effortLimitLower);
+   }
+
+   /** {@inheritDoc} */
+   @Override
+   public double getEffortLimitUpper()
+   {
+      return Math.min(CrossFourBarJointBasics.super.getEffortLimitUpper(), effortLimitUpper);
+   }
+
    /**
     * Returns the implementation name of this joint and the joint name.
     */
@@ -685,9 +962,9 @@ public class CrossFourBarJoint implements CrossFourBarJointBasics
     *                        {@code original.getName() + cloneSuffix}.
     * @return the clone cross four bar joint.
     */
-   public static CrossFourBarJoint cloneCrossFourBarJoint(CrossFourBarJoint original, ReferenceFrame stationaryFrame, String cloneSuffix)
+   public static CrossFourBarJoint cloneCrossFourBarJoint(CrossFourBarJointReadOnly original, ReferenceFrame stationaryFrame, String cloneSuffix)
    {
-      RigidBodyBasics originalPredecessor = original.getPredecessor();
+      RigidBodyReadOnly originalPredecessor = original.getPredecessor();
       RigidBodyBasics clonePredecessor = new RigidBody(originalPredecessor.getName() + cloneSuffix, stationaryFrame);
       return cloneCrossFourBarJoint(original, clonePredecessor, cloneSuffix);
    }
@@ -702,7 +979,7 @@ public class CrossFourBarJoint implements CrossFourBarJointBasics
     * @param clonePredecessor the predecessor of the clone.
     * @return the clone cross four bar joint.
     */
-   public static CrossFourBarJoint cloneCrossFourBarJoint(CrossFourBarJoint original, RigidBodyBasics clonePredecessor, String cloneSuffix)
+   public static CrossFourBarJoint cloneCrossFourBarJoint(CrossFourBarJointReadOnly original, RigidBodyBasics clonePredecessor, String cloneSuffix)
    {
       return (CrossFourBarJoint) MultiBodySystemFactories.DEFAULT_JOINT_BUILDER.cloneCrossFourBarJoint(original, cloneSuffix, clonePredecessor);
    }
