@@ -256,7 +256,7 @@ public class CrossFourBarJoint implements CrossFourBarJointBasics
       fourBarFunction = new FourBarKinematicLoopFunction(name, Arrays.asList(jointA, jointB, jointC, jointD), actuatedJointIndex);
       if (!fourBarFunction.isCrossed())
          throw new IllegalArgumentException("The given joint configuration does not represent a cross four bar.");
-      setIKSolver(new CrossFourBarJointIKBinarySolver(1.0e-12));
+      setIKSolver(new CrossFourBarJointIKBinarySolver(1.0e-5));
 
       this.name = name;
       this.predecessor = predecessor;
