@@ -478,7 +478,7 @@ public class FourBarKinematicLoopFunctionTools
     * Helper class that is used to convert back and forth between joint angle and the corresponding
     * four bar vertex angle.
     */
-   static class FourBarToJointConverter
+   public static class FourBarToJointConverter
    {
       /** The corresponding four bar angle. */
       private FourBarAngle fourBarAngle;
