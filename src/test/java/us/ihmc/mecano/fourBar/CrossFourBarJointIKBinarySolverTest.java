@@ -23,9 +23,9 @@ public class CrossFourBarJointIKBinarySolverTest
    {
       Random random = new Random(4534);
       FourBar fourBar = new FourBar();
-      CrossFourBarJointIKBinarySolver defaultSolver = new CrossFourBarJointIKBinarySolver(EPSILON);
+      CrossFourBarJointIKBinarySolver defaultSolver = new CrossFourBarJointIKBinarySolver(100.0 * EPSILON);
       defaultSolver.setUseNaiveMethod(false);
-      CrossFourBarJointIKBinarySolver naiveSolver = new CrossFourBarJointIKBinarySolver(EPSILON);
+      CrossFourBarJointIKBinarySolver naiveSolver = new CrossFourBarJointIKBinarySolver(100.0 * EPSILON);
       naiveSolver.setUseNaiveMethod(true);
 
       long defaultMethodTotalTimeNano = 0L;
