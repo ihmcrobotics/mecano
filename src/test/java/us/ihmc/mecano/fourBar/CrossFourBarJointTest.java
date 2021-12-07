@@ -1496,43 +1496,4 @@ public class CrossFourBarJointTest
       new RigidBody("bodyCD", joint, new Matrix3D(), 0.0, new RigidBodyTransform());
       return joint;
    }
-
-   private static RevoluteJoint[] createCrossFourBarJoints(Point2DReadOnly A, Point2DReadOnly B, Point2DReadOnly C, Point2DReadOnly D)
-   {
-      Vector2D AB = new Vector2D();
-      Vector2D AC = new Vector2D();
-      Vector2D AD = new Vector2D();
-      AB.sub(B, A);
-      AC.sub(C, A);
-      AD.sub(D, A);
-
-      FramePoint3D jointAPosition = new FramePoint3D(worldFrame, A);
-      ReferenceFrame fourBarLocalFrame = FourBarKinematicLoopFunctionTools.constructReferenceFrameFromPointAndAxis("LocalFrame",
-                                                                                                                   jointAPosition,
-                                                                                                                   Axis3D.Z,
-                                                                                                                   new FrameVector3D(worldFrame, Axis3D.Y));
-
-      FramePoint3D jointBPosition = new FramePoint3D(fourBarLocalFrame, AB);
-      jointBPosition.changeFrame(worldFrame);
-      FramePoint3D jointCPosition = new FramePoint3D(fourBarLocalFrame, AC);
-      jointCPosition.changeFrame(worldFrame);
-      FramePoint3D jointDPosition = new FramePoint3D(fourBarLocalFrame, AD);
-      jointDPosition.changeFrame(worldFrame);
-
-      RigidBody rootBody = new RigidBody("root", worldFrame);
-      RevoluteJoint jointA = new RevoluteJoint("jointA", rootBody, jointAPosition, Axis3D.Y);
-      RevoluteJoint jointB = new RevoluteJoint("jointB", rootBody, jointBPosition, Axis3D.Y);
-      RigidBody bodyDA = new RigidBody("bodyDA", jointA, 0, 0, 0, 0, new Vector3D());
-      RigidBody bodyBC = new RigidBody("bodyBC", jointB, 0, 0, 0, 0, new Vector3D());
-      jointCPosition.changeFrame(jointB.getFrameAfterJoint());
-      RevoluteJoint jointC = new RevoluteJoint("jointC", bodyBC, jointCPosition, Axis3D.Y);
-      jointDPosition.changeFrame(jointA.getFrameAfterJoint());
-      RevoluteJoint jointD = new RevoluteJoint("jointD", bodyDA, jointDPosition, Axis3D.Y);
-
-      RigidBody bodyCD = new RigidBody("bodyCD", jointD, 0, 0, 0, 0, new Vector3D());
-      jointCPosition.changeFrame(jointD.getFrameAfterJoint());
-      jointC.setupLoopClosure(bodyCD, new RigidBodyTransform(new Quaternion(), jointCPosition));
-
-      return new RevoluteJoint[] {jointA, jointB, jointC, jointD};
-   }
 }
