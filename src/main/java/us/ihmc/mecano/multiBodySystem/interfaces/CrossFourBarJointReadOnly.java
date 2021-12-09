@@ -129,6 +129,16 @@ public interface CrossFourBarJointReadOnly extends OneDoFJointReadOnly
     */
    RevoluteJointReadOnly getJointD();
 
+   default RigidBodyReadOnly getBodyDA()
+   {
+      return getJointA().getSuccessor();
+   }
+
+   default RigidBodyReadOnly getBodyBC()
+   {
+      return getJointB().getSuccessor();
+   }
+
    /**
     * Given the cross four bar joint angle {@code q}, computes the corresponding angle for the actuated
     * joint.

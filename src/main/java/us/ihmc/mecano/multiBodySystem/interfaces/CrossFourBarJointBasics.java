@@ -54,6 +54,20 @@ public interface CrossFourBarJointBasics extends CrossFourBarJointReadOnly, OneD
 
    /** {@inheritDoc} */
    @Override
+   default RigidBodyBasics getBodyDA()
+   {
+      return getJointA().getSuccessor();
+   }
+
+   /** {@inheritDoc} */
+   @Override
+   default RigidBodyBasics getBodyBC()
+   {
+      return getJointB().getSuccessor();
+   }
+
+   /** {@inheritDoc} */
+   @Override
    void updateFrame();
 
    /** {@inheritDoc} */
