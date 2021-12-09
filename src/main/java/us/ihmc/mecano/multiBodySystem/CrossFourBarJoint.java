@@ -38,6 +38,7 @@ import us.ihmc.mecano.spatial.interfaces.TwistReadOnly;
 import us.ihmc.mecano.spatial.interfaces.WrenchReadOnly;
 import us.ihmc.mecano.tools.MecanoFactories;
 import us.ihmc.mecano.tools.MultiBodySystemFactories;
+import us.ihmc.mecano.tools.MultiBodySystemFactories.RigidBodyBuilder;
 
 /**
  * Implementation of a cross four bar joint.
@@ -196,6 +197,53 @@ public class CrossFourBarJoint implements CrossFourBarJointBasics
                             int loopClosureJointIndex,
                             Vector3DReadOnly jointAxis)
    {
+      this(name,
+           predecessor,
+           jointNameA,
+           jointNameB,
+           jointNameC,
+           jointNameD,
+           bodyNameDA,
+           bodyNameBC,
+           transformAToPredecessor,
+           transformBToPredecessor,
+           transformCToB,
+           transformDToA,
+           bodyInertiaDA,
+           bodyInertiaBC,
+           bodyMassDA,
+           bodyMassBC,
+           bodyInertiaPoseDA,
+           bodyInertiaPoseBC,
+           MultiBodySystemFactories.DEFAULT_RIGID_BODY_BUILDER,
+           actuatedJointIndex,
+           loopClosureJointIndex,
+           jointAxis);
+   }
+
+   public CrossFourBarJoint(String name,
+                            RigidBodyBasics predecessor,
+                            String jointNameA,
+                            String jointNameB,
+                            String jointNameC,
+                            String jointNameD,
+                            String bodyNameDA,
+                            String bodyNameBC,
+                            RigidBodyTransformReadOnly transformAToPredecessor,
+                            RigidBodyTransformReadOnly transformBToPredecessor,
+                            RigidBodyTransformReadOnly transformCToB,
+                            RigidBodyTransformReadOnly transformDToA,
+                            Matrix3DReadOnly bodyInertiaDA,
+                            Matrix3DReadOnly bodyInertiaBC,
+                            double bodyMassDA,
+                            double bodyMassBC,
+                            RigidBodyTransformReadOnly bodyInertiaPoseDA,
+                            RigidBodyTransformReadOnly bodyInertiaPoseBC,
+                            RigidBodyBuilder rigidBodyBuilder,
+                            int actuatedJointIndex,
+                            int loopClosureJointIndex,
+                            Vector3DReadOnly jointAxis)
+   {
       if (actuatedJointIndex == loopClosureJointIndex)
          throw new IllegalArgumentException("The actuated joint cannot be the loop closure.");
       if (loopClosureJointIndex < 2)
@@ -220,6 +268,9 @@ public class CrossFourBarJoint implements CrossFourBarJointBasics
       if (bodyInertiaPoseDA == null)
          bodyInertiaPoseDA = new RigidBodyTransform();
 
+      if (bodyNameDA.equals("LEFT_KNEE_Y_DA"))
+         System.out.println();
+
       MovingReferenceFrame parentFrame;
       if (predecessor.isRootBody())
          parentFrame = predecessor.getBodyFixedFrame();
@@ -229,8 +280,8 @@ public class CrossFourBarJoint implements CrossFourBarJointBasics
       RigidBody base = new RigidBody(name + "InternalBase", parentFrame);
       RevoluteJoint jointA = new RevoluteJoint(jointNameA, base, transformAToPredecessor, jointAxis);
       RevoluteJoint jointB = new RevoluteJoint(jointNameB, base, transformBToPredecessor, jointAxis);
-      RigidBody bodyBC = new RigidBody(bodyNameBC, jointB, bodyInertiaBC, bodyMassBC, bodyInertiaPoseBC);
-      RigidBody bodyDA = new RigidBody(bodyNameDA, jointA, bodyInertiaDA, bodyMassDA, bodyInertiaPoseDA);
+      RigidBodyBasics bodyBC = rigidBodyBuilder.build(bodyNameBC, jointB, bodyInertiaBC, bodyMassBC, bodyInertiaPoseBC);
+      RigidBodyBasics bodyDA = rigidBodyBuilder.build(bodyNameDA, jointA, bodyInertiaDA, bodyMassDA, bodyInertiaPoseDA);
       RevoluteJoint jointC = new RevoluteJoint(jointNameC, bodyBC, transformCToB, jointAxis);
       RevoluteJoint jointD = new RevoluteJoint(jointNameD, bodyDA, transformDToA, jointAxis);
 

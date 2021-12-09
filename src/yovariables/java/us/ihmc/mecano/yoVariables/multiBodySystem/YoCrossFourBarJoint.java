@@ -6,6 +6,8 @@ import us.ihmc.euclid.transform.interfaces.RigidBodyTransformReadOnly;
 import us.ihmc.euclid.tuple3D.interfaces.Vector3DReadOnly;
 import us.ihmc.mecano.multiBodySystem.CrossFourBarJoint;
 import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
+import us.ihmc.mecano.tools.MultiBodySystemFactories;
+import us.ihmc.mecano.tools.MultiBodySystemFactories.RigidBodyBuilder;
 import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
 
@@ -39,6 +41,55 @@ public class YoCrossFourBarJoint extends CrossFourBarJoint
                               Vector3DReadOnly jointAxis,
                               YoRegistry registry)
    {
+      this(name,
+           predecessor,
+           jointNameA,
+           jointNameB,
+           jointNameC,
+           jointNameD,
+           bodyNameDA,
+           bodyNameBC,
+           transformAToPredecessor,
+           transformBToPredecessor,
+           transformCToB,
+           transformDToA,
+           bodyInertiaDA,
+           bodyInertiaBC,
+           bodyMassDA,
+           bodyMassBC,
+           bodyInertiaPoseDA,
+           bodyInertiaPoseBC,
+           MultiBodySystemFactories.DEFAULT_RIGID_BODY_BUILDER,
+           actuatedJointIndex,
+           loopClosureJointIndex,
+           jointAxis,
+           registry);
+   }
+
+   public YoCrossFourBarJoint(String name,
+                              RigidBodyBasics predecessor,
+                              String jointNameA,
+                              String jointNameB,
+                              String jointNameC,
+                              String jointNameD,
+                              String bodyNameDA,
+                              String bodyNameBC,
+                              RigidBodyTransformReadOnly transformAToPredecessor,
+                              RigidBodyTransformReadOnly transformBToPredecessor,
+                              RigidBodyTransformReadOnly transformCToB,
+                              RigidBodyTransformReadOnly transformDToA,
+                              Matrix3DReadOnly bodyInertiaDA,
+                              Matrix3DReadOnly bodyInertiaBC,
+                              double bodyMassDA,
+                              double bodyMassBC,
+                              RigidBodyTransformReadOnly bodyInertiaPoseDA,
+                              RigidBodyTransformReadOnly bodyInertiaPoseBC,
+                              RigidBodyBuilder rigidBodyBuilder,
+                              int actuatedJointIndex,
+                              int loopClosureJointIndex,
+                              Vector3DReadOnly jointAxis,
+                              YoRegistry registry)
+   {
       super(name,
             predecessor,
             jointNameA,
@@ -57,6 +108,7 @@ public class YoCrossFourBarJoint extends CrossFourBarJoint
             bodyMassBC,
             bodyInertiaPoseDA,
             bodyInertiaPoseBC,
+            rigidBodyBuilder,
             actuatedJointIndex,
             loopClosureJointIndex,
             jointAxis);
