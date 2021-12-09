@@ -1,7 +1,7 @@
 package us.ihmc.mecano.yoVariables.tools;
 
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
-import us.ihmc.euclid.transform.RigidBodyTransform;
+import us.ihmc.euclid.transform.interfaces.RigidBodyTransformReadOnly;
 import us.ihmc.euclid.tuple3D.interfaces.Vector3DReadOnly;
 import us.ihmc.mecano.multiBodySystem.interfaces.CrossFourBarJointReadOnly;
 import us.ihmc.mecano.multiBodySystem.interfaces.RevoluteJointReadOnly;
@@ -43,31 +43,31 @@ public class YoMultiBodySystemFactories
       return new JointBuilder()
       {
          @Override
-         public YoSixDoFJoint buildSixDoFJoint(String name, RigidBodyBasics predecessor, RigidBodyTransform transformToParent)
+         public YoSixDoFJoint buildSixDoFJoint(String name, RigidBodyBasics predecessor, RigidBodyTransformReadOnly transformToParent)
          {
             return new YoSixDoFJoint(name, predecessor, transformToParent, registry);
          }
 
          @Override
-         public YoPlanarJoint buildPlanarJoint(String name, RigidBodyBasics predecessor, RigidBodyTransform transformToParent)
+         public YoPlanarJoint buildPlanarJoint(String name, RigidBodyBasics predecessor, RigidBodyTransformReadOnly transformToParent)
          {
             return new YoPlanarJoint(name, predecessor, transformToParent, registry);
          }
 
          @Override
-         public YoSphericalJoint buildSphericalJoint(String name, RigidBodyBasics predecessor, RigidBodyTransform transformToParent)
+         public YoSphericalJoint buildSphericalJoint(String name, RigidBodyBasics predecessor, RigidBodyTransformReadOnly transformToParent)
          {
             return new YoSphericalJoint(name, predecessor, transformToParent, registry);
          }
 
          @Override
-         public YoRevoluteJoint buildRevoluteJoint(String name, RigidBodyBasics predecessor, RigidBodyTransform transformToParent, Vector3DReadOnly jointAxis)
+         public YoRevoluteJoint buildRevoluteJoint(String name, RigidBodyBasics predecessor, RigidBodyTransformReadOnly transformToParent, Vector3DReadOnly jointAxis)
          {
             return new YoRevoluteJoint(name, predecessor, transformToParent, jointAxis, registry);
          }
 
          @Override
-         public YoPrismaticJoint buildPrismaticJoint(String name, RigidBodyBasics predecessor, RigidBodyTransform transformToParent, Vector3DReadOnly jointAxis)
+         public YoPrismaticJoint buildPrismaticJoint(String name, RigidBodyBasics predecessor, RigidBodyTransformReadOnly transformToParent, Vector3DReadOnly jointAxis)
          {
             return new YoPrismaticJoint(name, predecessor, transformToParent, jointAxis, registry);
          }

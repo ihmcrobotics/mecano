@@ -9,6 +9,7 @@ import java.util.Map;
 import us.ihmc.euclid.matrix.interfaces.Matrix3DReadOnly;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.transform.RigidBodyTransform;
+import us.ihmc.euclid.transform.interfaces.RigidBodyTransformReadOnly;
 import us.ihmc.euclid.tuple3D.interfaces.Tuple3DReadOnly;
 import us.ihmc.euclid.tuple3D.interfaces.Vector3DReadOnly;
 import us.ihmc.mecano.frames.MovingReferenceFrame;
@@ -519,7 +520,10 @@ public class MultiBodySystemFactories
        * @param transformToParent the transform to the frame after the parent joint.
        * @return the new joint.
        */
-      default JointBasics buildJoint(Class<? extends JointReadOnly> jointType, String name, RigidBodyBasics predecessor, RigidBodyTransform transformToParent)
+      default JointBasics buildJoint(Class<? extends JointReadOnly> jointType,
+                                     String name,
+                                     RigidBodyBasics predecessor,
+                                     RigidBodyTransformReadOnly transformToParent)
       {
          if (SixDoFJointReadOnly.class.isAssignableFrom(jointType))
             return buildSixDoFJoint(name, predecessor, transformToParent);
@@ -545,7 +549,7 @@ public class MultiBodySystemFactories
       default OneDoFJointBasics buildOneDoFJoint(Class<? extends OneDoFJointReadOnly> jointType,
                                                  String name,
                                                  RigidBodyBasics predecessor,
-                                                 RigidBodyTransform transformToParent,
+                                                 RigidBodyTransformReadOnly transformToParent,
                                                  Vector3DReadOnly jointAxis)
       {
          if (RevoluteJointBasics.class.isAssignableFrom(jointType))
@@ -563,7 +567,7 @@ public class MultiBodySystemFactories
        * @param transformToParent the transform to the frame after the parent joint.
        * @return the new 6-DoF joint.
        */
-      default SixDoFJointBasics buildSixDoFJoint(String name, RigidBodyBasics predecessor, RigidBodyTransform transformToParent)
+      default SixDoFJointBasics buildSixDoFJoint(String name, RigidBodyBasics predecessor, RigidBodyTransformReadOnly transformToParent)
       {
          return new SixDoFJoint(name, predecessor, transformToParent);
       }
@@ -576,7 +580,7 @@ public class MultiBodySystemFactories
        * @param transformToParent the transform to the frame after the parent joint.
        * @return the new planar joint.
        */
-      default PlanarJointBasics buildPlanarJoint(String name, RigidBodyBasics predecessor, RigidBodyTransform transformToParent)
+      default PlanarJointBasics buildPlanarJoint(String name, RigidBodyBasics predecessor, RigidBodyTransformReadOnly transformToParent)
       {
          return new PlanarJoint(name, predecessor, transformToParent);
       }
@@ -589,7 +593,7 @@ public class MultiBodySystemFactories
        * @param transformToParent the transform to the frame after the parent joint.
        * @return the new spherical joint.
        */
-      default SphericalJointBasics buildSphericalJoint(String name, RigidBodyBasics predecessor, RigidBodyTransform transformToParent)
+      default SphericalJointBasics buildSphericalJoint(String name, RigidBodyBasics predecessor, RigidBodyTransformReadOnly transformToParent)
       {
          return new SphericalJoint(name, predecessor, transformToParent);
       }
@@ -603,7 +607,10 @@ public class MultiBodySystemFactories
        * @param jointAxis         the joint axis.
        * @return the new revolute joint.
        */
-      default RevoluteJointBasics buildRevoluteJoint(String name, RigidBodyBasics predecessor, RigidBodyTransform transformToParent, Vector3DReadOnly jointAxis)
+      default RevoluteJointBasics buildRevoluteJoint(String name,
+                                                     RigidBodyBasics predecessor,
+                                                     RigidBodyTransformReadOnly transformToParent,
+                                                     Vector3DReadOnly jointAxis)
       {
          return new RevoluteJoint(name, predecessor, transformToParent, jointAxis);
       }
@@ -619,7 +626,7 @@ public class MultiBodySystemFactories
        */
       default PrismaticJointBasics buildPrismaticJoint(String name,
                                                        RigidBodyBasics predecessor,
-                                                       RigidBodyTransform transformToParent,
+                                                       RigidBodyTransformReadOnly transformToParent,
                                                        Vector3DReadOnly jointAxis)
       {
          return new PrismaticJoint(name, predecessor, transformToParent, jointAxis);
@@ -633,7 +640,7 @@ public class MultiBodySystemFactories
        * @param transformToParent the transform to the frame after the parent joint.
        * @return the new fixed joint.
        */
-      default FixedJointBasics buildFixedJoint(String name, RigidBodyBasics predecessor, RigidBodyTransform transformToParent)
+      default FixedJointBasics buildFixedJoint(String name, RigidBodyBasics predecessor, RigidBodyTransformReadOnly transformToParent)
       {
          return new FixedJoint(name, predecessor, transformToParent);
       }
@@ -785,7 +792,7 @@ public class MultiBodySystemFactories
        *                              frame.
        * @return the new root body.
        */
-      default RigidBodyBasics buildRoot(String bodyName, RigidBodyTransform transformToParent, ReferenceFrame parentStationaryFrame)
+      default RigidBodyBasics buildRoot(String bodyName, RigidBodyTransformReadOnly transformToParent, ReferenceFrame parentStationaryFrame)
       {
          return new RigidBody(bodyName, transformToParent, parentStationaryFrame);
       }
@@ -805,7 +812,11 @@ public class MultiBodySystemFactories
        *                        mass position expressed in parentJoint.getFrameAfterJointFrame().
        * @return the new rigid-body.
        */
-      default RigidBodyBasics build(String bodyName, JointBasics parentJoint, Matrix3DReadOnly momentOfInertia, double mass, RigidBodyTransform inertiaPose)
+      default RigidBodyBasics build(String bodyName,
+                                    JointBasics parentJoint,
+                                    Matrix3DReadOnly momentOfInertia,
+                                    double mass,
+                                    RigidBodyTransformReadOnly inertiaPose)
       {
          return new RigidBody(bodyName, parentJoint, momentOfInertia, mass, inertiaPose);
       }
