@@ -388,9 +388,6 @@ public class CrossFourBarJoint implements CrossFourBarJointBasics
       if (bodyInertiaPoseDA == null)
          bodyInertiaPoseDA = new RigidBodyTransform();
 
-      if (bodyNameDA.equals("LEFT_KNEE_Y_DA"))
-         System.out.println();
-
       MovingReferenceFrame parentFrame;
       if (predecessor.isRootBody())
          parentFrame = predecessor.getBodyFixedFrame();
