@@ -51,6 +51,31 @@ public interface JointReadOnly
    static final String NAME_ID_SEPARATOR = ":";
 
    /**
+    * Checks the given name for illegal characters such as {@link JointReadOnly#NAME_ID_SEPARATOR}.
+    * 
+    * @param name the query.
+    */
+   static void checkJointNameSanity(String name)
+   {
+      if (name.contains(NAME_ID_SEPARATOR))
+         throw new IllegalArgumentException("A joint name can not contain '" + NAME_ID_SEPARATOR + "'. Tried to construct a joint with name " + name + ".");
+   }
+
+   /**
+    * Computes a unique name identifier for the given joint.
+    *
+    * @param joint the joint to compute the unique name for. Not modified.
+    * @return the unique name id.
+    */
+   static String computeNameId(JointReadOnly joint)
+   {
+      if (joint.getPredecessor().isRootBody())
+         return joint.getName();
+      else
+         return joint.getPredecessor().getParentJoint().getNameId() + NAME_ID_SEPARATOR + joint.getName();
+   }
+
+   /**
     * Returns the {@code RigidBody} that precedes this joint. In other words, the {@code RigidBody}
     * directly connected to this joint that sits between this joint and the root or that is the root of
     * this kinematics chain.

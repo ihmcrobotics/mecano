@@ -13,6 +13,7 @@ import org.junit.jupiter.api.Test;
 
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.referenceFrame.tools.EuclidFrameRandomTools;
+import us.ihmc.log.LogTools;
 import us.ihmc.mecano.multiBodySystem.interfaces.JointBasics;
 import us.ihmc.mecano.multiBodySystem.interfaces.MultiBodySystemBasics;
 import us.ihmc.mecano.multiBodySystem.interfaces.MultiBodySystemReadOnly;
@@ -193,7 +194,7 @@ public class CompositeRigidBodyMassMatrixCalculatorTest
          }
       }
 
-      System.out.println("Time w/o  Coriolis: avg: " + (totalTimeNoCoriolis / 1e3 / benchmarkIterations) + "microsec.");
-      System.out.println("Time with Coriolis: avg: " + (totalTimeCoriolis / 1e3 / benchmarkIterations) + "microsec.");
+      LogTools.info("Time w/o  Coriolis: avg: " + (totalTimeNoCoriolis / 1e3 / benchmarkIterations) + "microsec.");
+      LogTools.info("Time with Coriolis: avg: " + (totalTimeCoriolis / 1e3 / benchmarkIterations) + "microsec.");
    }
 }

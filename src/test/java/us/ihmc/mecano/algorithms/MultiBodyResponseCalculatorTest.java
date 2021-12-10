@@ -23,6 +23,7 @@ import us.ihmc.euclid.referenceFrame.tools.EuclidFrameRandomTools;
 import us.ihmc.euclid.referenceFrame.tools.EuclidFrameTestTools;
 import us.ihmc.euclid.tools.EuclidCoreIOTools;
 import us.ihmc.euclid.tools.EuclidCoreRandomTools;
+import us.ihmc.log.LogTools;
 import us.ihmc.mecano.algorithms.TablePrinter.Alignment;
 import us.ihmc.mecano.algorithms.interfaces.RigidBodyAccelerationProvider;
 import us.ihmc.mecano.algorithms.interfaces.RigidBodyTwistProvider;
@@ -972,7 +973,7 @@ public class MultiBodyResponseCalculatorTest
       boolean areEqual = MatrixFeatures_DDRM.isEquals(qdd_expected, qdd_actual, epsilon);
       if (!areEqual)
       {
-         System.out.println("iteration: " + iteration);
+         LogTools.info("iteration: " + iteration);
          double maxError = 0.0;
          DMatrixRMaj output = new DMatrixRMaj(qdd_expected.getNumRows(), 5);
 
@@ -1004,8 +1005,8 @@ public class MultiBodyResponseCalculatorTest
                row++;
             }
          }
-         System.out.println(tablePrinter.toString());
-         System.out.println("Max error: " + maxError);
+         LogTools.info(tablePrinter.toString());
+         LogTools.info("Max error: " + maxError);
       }
       assertTrue(areEqual);
    }
