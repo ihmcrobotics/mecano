@@ -129,11 +129,51 @@ public interface CrossFourBarJointReadOnly extends OneDoFJointReadOnly
     */
    RevoluteJointReadOnly getJointD();
 
+   /**
+    * Returns the rigid body that represents one of the two cross bars:
+    * 
+    * <pre>
+    *    root
+    *      |
+    *      |
+    * A O-----O B
+    *    \   /
+    *     \ /
+    *      X
+    *     / \
+    *    /   \
+    * C O-----O D
+    *      |
+    * end-effector
+    * </pre>
+    * 
+    * @return the reference to the rigid-body DA, i.e. successor of joint A and predecessor of joint D.
+    */
    default RigidBodyReadOnly getBodyDA()
    {
       return getJointA().getSuccessor();
    }
 
+   /**
+    * Returns the rigid body that represents one of the two cross bars:
+    * 
+    * <pre>
+    *    root
+    *      |
+    *      |
+    * A O-----O B
+    *    \   /
+    *     \ /
+    *      X
+    *     / \
+    *    /   \
+    * C O-----O D
+    *      |
+    * end-effector
+    * </pre>
+    * 
+    * @return the reference to the rigid-body BC, i.e. successor of joint B and predecessor of joint C.
+    */
    default RigidBodyReadOnly getBodyBC()
    {
       return getJointB().getSuccessor();

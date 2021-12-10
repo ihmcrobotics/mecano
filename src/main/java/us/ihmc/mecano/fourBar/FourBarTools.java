@@ -490,11 +490,22 @@ public class FourBarTools
       }
    }
 
-   public static void updateFourBarLimits(FourBarVertex A, double restriction)
+   /**
+    * Re-compute the limits at each vertex of the four bar the given {@code vertex} belongs and
+    * restricts the upper and lower limits by the given amount {@code restriction}.
+    * 
+    * @param vertex      the vertex for which the restriction is to be applied and then propagated to
+    *                    the other vertices of the four bar. Modified.
+    * @param restriction the value to reduce the upper and lower limits by.
+    */
+   public static void updateFourBarLimits(FourBarVertex vertex, double restriction)
    {
+      if (restriction < 0.0)
+         throw new IllegalArgumentException("The restriction cannot be negative: " + restriction);
       if (restriction == 0.0)
          return;
 
+      FourBarVertex A = vertex;
       FourBarVertex B = A.getNextVertex();
       FourBarVertex C = B.getNextVertex();
       FourBarVertex D = C.getNextVertex();
