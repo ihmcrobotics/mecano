@@ -9,9 +9,11 @@ import java.util.Map;
 import us.ihmc.euclid.matrix.interfaces.Matrix3DReadOnly;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.transform.RigidBodyTransform;
+import us.ihmc.euclid.transform.interfaces.RigidBodyTransformReadOnly;
 import us.ihmc.euclid.tuple3D.interfaces.Tuple3DReadOnly;
 import us.ihmc.euclid.tuple3D.interfaces.Vector3DReadOnly;
 import us.ihmc.mecano.frames.MovingReferenceFrame;
+import us.ihmc.mecano.multiBodySystem.CrossFourBarJoint;
 import us.ihmc.mecano.multiBodySystem.FixedJoint;
 import us.ihmc.mecano.multiBodySystem.OneDoFJoint;
 import us.ihmc.mecano.multiBodySystem.PlanarJoint;
@@ -20,6 +22,8 @@ import us.ihmc.mecano.multiBodySystem.RevoluteJoint;
 import us.ihmc.mecano.multiBodySystem.RigidBody;
 import us.ihmc.mecano.multiBodySystem.SixDoFJoint;
 import us.ihmc.mecano.multiBodySystem.SphericalJoint;
+import us.ihmc.mecano.multiBodySystem.interfaces.CrossFourBarJointBasics;
+import us.ihmc.mecano.multiBodySystem.interfaces.CrossFourBarJointReadOnly;
 import us.ihmc.mecano.multiBodySystem.interfaces.FixedJointBasics;
 import us.ihmc.mecano.multiBodySystem.interfaces.FixedJointReadOnly;
 import us.ihmc.mecano.multiBodySystem.interfaces.JointBasics;
@@ -30,6 +34,7 @@ import us.ihmc.mecano.multiBodySystem.interfaces.PlanarJointBasics;
 import us.ihmc.mecano.multiBodySystem.interfaces.PlanarJointReadOnly;
 import us.ihmc.mecano.multiBodySystem.interfaces.PrismaticJointBasics;
 import us.ihmc.mecano.multiBodySystem.interfaces.RevoluteJointBasics;
+import us.ihmc.mecano.multiBodySystem.interfaces.RevoluteJointReadOnly;
 import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
 import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyReadOnly;
 import us.ihmc.mecano.multiBodySystem.interfaces.SixDoFJointBasics;
@@ -270,8 +275,11 @@ public class MultiBodySystemFactories
     * @throws UnsupportedOperationException if {@code originalJoints} contains one or more loop closure
     *                                       joints.
     */
-   public static JointBasics[] cloneKinematicChain(JointReadOnly[] originalJoints, String cloneSuffix, ReferenceFrame chainRootFrame,
-                                                   RigidBodyBuilder rigidBodyBuilder, JointBuilder jointBuilder)
+   public static JointBasics[] cloneKinematicChain(JointReadOnly[] originalJoints,
+                                                   String cloneSuffix,
+                                                   ReferenceFrame chainRootFrame,
+                                                   RigidBodyBuilder rigidBodyBuilder,
+                                                   JointBuilder jointBuilder)
    {
       if (!MultiBodySystemTools.areJointsInContinuousOrder(originalJoints))
          throw new IllegalArgumentException("The given joints do not represent a continuous kinematic chain or are out of order: "
@@ -353,8 +361,11 @@ public class MultiBodySystemFactories
     * @throws IllegalArgumentException if the given {@code originalRootBody} is not the root body of
     *                                  its system.
     */
-   public static RigidBodyBasics cloneMultiBodySystem(RigidBodyReadOnly originalRootBody, ReferenceFrame cloneStationaryFrame, String cloneSuffix,
-                                                      RigidBodyBuilder rigidBodyBuilder, JointBuilder jointBuilder)
+   public static RigidBodyBasics cloneMultiBodySystem(RigidBodyReadOnly originalRootBody,
+                                                      ReferenceFrame cloneStationaryFrame,
+                                                      String cloneSuffix,
+                                                      RigidBodyBuilder rigidBodyBuilder,
+                                                      JointBuilder jointBuilder)
    {
       if (!originalRootBody.isRootBody())
          throw new IllegalArgumentException("The given rigid-body is not the root-body of its multi-body system: " + originalRootBody.getName());
@@ -417,7 +428,9 @@ public class MultiBodySystemFactories
     *                                  {@link #cloneMultiBodySystem(RigidBodyReadOnly, ReferenceFrame, String, RigidBodyBuilder, JointBuilder)}
     *                                  should be used.
     */
-   public static RigidBodyBasics cloneSubtree(RigidBodyReadOnly originalSubtreeStartBody, String cloneSuffix, RigidBodyBuilder rigidBodyBuilder,
+   public static RigidBodyBasics cloneSubtree(RigidBodyReadOnly originalSubtreeStartBody,
+                                              String cloneSuffix,
+                                              RigidBodyBuilder rigidBodyBuilder,
                                               JointBuilder jointBuilder)
    {
       if (originalSubtreeStartBody.isRootBody())
@@ -434,7 +447,10 @@ public class MultiBodySystemFactories
       return cloneSubtreeStartBody;
    }
 
-   private static void cloneSubtree(RigidBodyReadOnly originalStart, RigidBodyBasics cloneStart, String cloneSuffix, RigidBodyBuilder rigidBodyBuilder,
+   private static void cloneSubtree(RigidBodyReadOnly originalStart,
+                                    RigidBodyBasics cloneStart,
+                                    String cloneSuffix,
+                                    RigidBodyBuilder rigidBodyBuilder,
                                     JointBuilder jointBuilder)
    {
       if (rigidBodyBuilder == null)
@@ -504,7 +520,10 @@ public class MultiBodySystemFactories
        * @param transformToParent the transform to the frame after the parent joint.
        * @return the new joint.
        */
-      default JointBasics buildJoint(Class<? extends JointReadOnly> jointType, String name, RigidBodyBasics predecessor, RigidBodyTransform transformToParent)
+      default JointBasics buildJoint(Class<? extends JointReadOnly> jointType,
+                                     String name,
+                                     RigidBodyBasics predecessor,
+                                     RigidBodyTransformReadOnly transformToParent)
       {
          if (SixDoFJointReadOnly.class.isAssignableFrom(jointType))
             return buildSixDoFJoint(name, predecessor, transformToParent);
@@ -527,8 +546,11 @@ public class MultiBodySystemFactories
        * @param jointAxis         the joint axis.
        * @return the new 1-DoF.
        */
-      default OneDoFJointBasics buildOneDoFJoint(Class<? extends OneDoFJointReadOnly> jointType, String name, RigidBodyBasics predecessor,
-                                                 RigidBodyTransform transformToParent, Vector3DReadOnly jointAxis)
+      default OneDoFJointBasics buildOneDoFJoint(Class<? extends OneDoFJointReadOnly> jointType,
+                                                 String name,
+                                                 RigidBodyBasics predecessor,
+                                                 RigidBodyTransformReadOnly transformToParent,
+                                                 Vector3DReadOnly jointAxis)
       {
          if (RevoluteJointBasics.class.isAssignableFrom(jointType))
             return buildRevoluteJoint(name, predecessor, transformToParent, jointAxis);
@@ -545,7 +567,7 @@ public class MultiBodySystemFactories
        * @param transformToParent the transform to the frame after the parent joint.
        * @return the new 6-DoF joint.
        */
-      default SixDoFJointBasics buildSixDoFJoint(String name, RigidBodyBasics predecessor, RigidBodyTransform transformToParent)
+      default SixDoFJointBasics buildSixDoFJoint(String name, RigidBodyBasics predecessor, RigidBodyTransformReadOnly transformToParent)
       {
          return new SixDoFJoint(name, predecessor, transformToParent);
       }
@@ -558,7 +580,7 @@ public class MultiBodySystemFactories
        * @param transformToParent the transform to the frame after the parent joint.
        * @return the new planar joint.
        */
-      default PlanarJointBasics buildPlanarJoint(String name, RigidBodyBasics predecessor, RigidBodyTransform transformToParent)
+      default PlanarJointBasics buildPlanarJoint(String name, RigidBodyBasics predecessor, RigidBodyTransformReadOnly transformToParent)
       {
          return new PlanarJoint(name, predecessor, transformToParent);
       }
@@ -571,7 +593,7 @@ public class MultiBodySystemFactories
        * @param transformToParent the transform to the frame after the parent joint.
        * @return the new spherical joint.
        */
-      default SphericalJointBasics buildSphericalJoint(String name, RigidBodyBasics predecessor, RigidBodyTransform transformToParent)
+      default SphericalJointBasics buildSphericalJoint(String name, RigidBodyBasics predecessor, RigidBodyTransformReadOnly transformToParent)
       {
          return new SphericalJoint(name, predecessor, transformToParent);
       }
@@ -585,7 +607,10 @@ public class MultiBodySystemFactories
        * @param jointAxis         the joint axis.
        * @return the new revolute joint.
        */
-      default RevoluteJointBasics buildRevoluteJoint(String name, RigidBodyBasics predecessor, RigidBodyTransform transformToParent, Vector3DReadOnly jointAxis)
+      default RevoluteJointBasics buildRevoluteJoint(String name,
+                                                     RigidBodyBasics predecessor,
+                                                     RigidBodyTransformReadOnly transformToParent,
+                                                     Vector3DReadOnly jointAxis)
       {
          return new RevoluteJoint(name, predecessor, transformToParent, jointAxis);
       }
@@ -599,7 +624,9 @@ public class MultiBodySystemFactories
        * @param jointAxis         the joint axis.
        * @return the new prismatic joint.
        */
-      default PrismaticJointBasics buildPrismaticJoint(String name, RigidBodyBasics predecessor, RigidBodyTransform transformToParent,
+      default PrismaticJointBasics buildPrismaticJoint(String name,
+                                                       RigidBodyBasics predecessor,
+                                                       RigidBodyTransformReadOnly transformToParent,
                                                        Vector3DReadOnly jointAxis)
       {
          return new PrismaticJoint(name, predecessor, transformToParent, jointAxis);
@@ -613,7 +640,7 @@ public class MultiBodySystemFactories
        * @param transformToParent the transform to the frame after the parent joint.
        * @return the new fixed joint.
        */
-      default FixedJointBasics buildFixedJoint(String name, RigidBodyBasics predecessor, RigidBodyTransform transformToParent)
+      default FixedJointBasics buildFixedJoint(String name, RigidBodyBasics predecessor, RigidBodyTransformReadOnly transformToParent)
       {
          return new FixedJoint(name, predecessor, transformToParent);
       }
@@ -655,6 +682,9 @@ public class MultiBodySystemFactories
        */
       default OneDoFJointBasics cloneOneDoFJoint(OneDoFJointReadOnly original, String cloneSuffix, RigidBodyBasics clonePredecessor)
       {
+         if (original instanceof CrossFourBarJointReadOnly)
+            return cloneCrossFourBarJoint((CrossFourBarJointReadOnly) original, cloneSuffix, clonePredecessor);
+
          String jointNameOriginal = original.getName();
          RigidBodyTransform jointTransform = cloneJointTransformToParent(original);
 
@@ -671,6 +701,57 @@ public class MultiBodySystemFactories
          clone.setEffortLimits(original.getEffortLimitLower(), original.getEffortLimitUpper());
 
          return clone;
+      }
+
+      /**
+       * Clones the given cross four bar joint {@code original} and attach the clone to
+       * {@code clonePredecessor}.
+       * 
+       * @param original         the original cross four bar joint to be cloned.
+       * @param cloneSuffix      the suffix for name of the clone, i.e. the name of the clone is
+       *                         {@code original.getName() + cloneSuffix}.
+       * @param clonePredecessor the predecessor of the clone.
+       * @return the clone cross four bar joint.
+       */
+      default CrossFourBarJointBasics cloneCrossFourBarJoint(CrossFourBarJointReadOnly original, String cloneSuffix, RigidBodyBasics clonePredecessor)
+      {
+         RevoluteJointReadOnly originalJointA = original.getJointA();
+         RevoluteJointReadOnly originalJointB = original.getJointB();
+         RevoluteJointReadOnly originalJointC = original.getJointC();
+         RevoluteJointReadOnly originalJointD = original.getJointD();
+         RigidBodyReadOnly originalBodyDA = originalJointA.getSuccessor();
+         RigidBodyReadOnly originalBodyBC = originalJointB.getSuccessor();
+         int loopClosureIndex;
+         if (originalJointA.isLoopClosure())
+            loopClosureIndex = 0;
+         else if (originalJointB.isLoopClosure())
+            loopClosureIndex = 1;
+         else if (originalJointC.isLoopClosure())
+            loopClosureIndex = 2;
+         else
+            loopClosureIndex = 3;
+
+         return new CrossFourBarJoint(original.getName() + cloneSuffix,
+                                      clonePredecessor,
+                                      originalJointA.getName() + cloneSuffix,
+                                      originalJointB.getName() + cloneSuffix,
+                                      originalJointC.getName() + cloneSuffix,
+                                      originalJointD.getName() + cloneSuffix,
+                                      originalBodyDA.getName() + cloneSuffix,
+                                      originalBodyBC.getName() + cloneSuffix,
+                                      originalJointA.getFrameBeforeJoint().getTransformToParent(),
+                                      originalJointB.getFrameBeforeJoint().getTransformToParent(),
+                                      originalJointD.getFrameBeforeJoint().getTransformToParent(),
+                                      originalJointC.getFrameBeforeJoint().getTransformToParent(),
+                                      originalBodyDA.getInertia().getMomentOfInertia(),
+                                      originalBodyBC.getInertia().getMomentOfInertia(),
+                                      originalBodyDA.getInertia().getMass(),
+                                      originalBodyBC.getInertia().getMass(),
+                                      originalBodyDA.getBodyFixedFrame().getTransformToParent(),
+                                      originalBodyBC.getBodyFixedFrame().getTransformToParent(),
+                                      original.getActuatedJointIndex(),
+                                      loopClosureIndex,
+                                      original.getJointAxis());
       }
 
       /**
@@ -711,7 +792,7 @@ public class MultiBodySystemFactories
        *                              frame.
        * @return the new root body.
        */
-      default RigidBodyBasics buildRoot(String bodyName, RigidBodyTransform transformToParent, ReferenceFrame parentStationaryFrame)
+      default RigidBodyBasics buildRoot(String bodyName, RigidBodyTransformReadOnly transformToParent, ReferenceFrame parentStationaryFrame)
       {
          return new RigidBody(bodyName, transformToParent, parentStationaryFrame);
       }
@@ -731,7 +812,11 @@ public class MultiBodySystemFactories
        *                        mass position expressed in parentJoint.getFrameAfterJointFrame().
        * @return the new rigid-body.
        */
-      default RigidBodyBasics build(String bodyName, JointBasics parentJoint, Matrix3DReadOnly momentOfInertia, double mass, RigidBodyTransform inertiaPose)
+      default RigidBodyBasics build(String bodyName,
+                                    JointBasics parentJoint,
+                                    Matrix3DReadOnly momentOfInertia,
+                                    double mass,
+                                    RigidBodyTransformReadOnly inertiaPose)
       {
          return new RigidBody(bodyName, parentJoint, momentOfInertia, mass, inertiaPose);
       }
@@ -747,7 +832,9 @@ public class MultiBodySystemFactories
        * @param parentJointOfClone   the parent of joint of the clone.
        * @return the clone rigid-body.
        */
-      default RigidBodyBasics cloneRigidBody(RigidBodyReadOnly original, ReferenceFrame cloneStationaryFrame, String cloneSuffix,
+      default RigidBodyBasics cloneRigidBody(RigidBodyReadOnly original,
+                                             ReferenceFrame cloneStationaryFrame,
+                                             String cloneSuffix,
                                              JointBasics parentJointOfClone)
       {
          if (original.isRootBody() && parentJointOfClone != null)

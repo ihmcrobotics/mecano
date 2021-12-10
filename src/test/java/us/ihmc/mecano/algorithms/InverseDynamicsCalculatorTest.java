@@ -8,6 +8,7 @@ import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
+import us.ihmc.log.LogTools;
 import us.ihmc.mecano.multiBodySystem.Joint;
 import us.ihmc.mecano.multiBodySystem.OneDoFJoint;
 import us.ihmc.mecano.multiBodySystem.RigidBody;
@@ -50,7 +51,7 @@ public class InverseDynamicsCalculatorTest
          totalTime += System.nanoTime() - startTime;
       }
 
-      System.out.println("1-DoF chain: Took on average per iteration: " + totalTime / 1e9 / ITERATIONS + " seconds");
+      LogTools.info("1-DoF chain: Took on average per iteration: " + totalTime / 1e9 / ITERATIONS + " seconds");
    }
 
    @Test
@@ -86,7 +87,7 @@ public class InverseDynamicsCalculatorTest
          totalTime += System.nanoTime() - startTime;
       }
 
-      System.out.println("Floating 1-DoF chain: Took on average per iteration: " + totalTime / 1e9 / ITERATIONS + " seconds");
+      LogTools.info("Floating 1-DoF chain: Took on average per iteration: " + totalTime / 1e9 / ITERATIONS + " seconds");
    }
 
    @Test
@@ -118,7 +119,7 @@ public class InverseDynamicsCalculatorTest
          totalTime += System.nanoTime() - startTime;
       }
 
-      System.out.println("1-DoF tree: Took on average per iteration: " + totalTime / 1e9 / ITERATIONS + " seconds");
+      LogTools.info("1-DoF tree: Took on average per iteration: " + totalTime / 1e9 / ITERATIONS + " seconds");
    }
 
    @Test
@@ -154,6 +155,6 @@ public class InverseDynamicsCalculatorTest
          totalTime += System.nanoTime() - startTime;
       }
 
-      System.out.println("Floating 1-DoF tree: Took on average per iteration: " + totalTime / 1e9 / ITERATIONS + " seconds");
+      LogTools.info("Floating 1-DoF tree: Took on average per iteration: " + totalTime / 1e9 / ITERATIONS + " seconds");
    }
 }

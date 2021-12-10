@@ -4,6 +4,7 @@ import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.transform.interfaces.RigidBodyTransformReadOnly;
 import us.ihmc.mecano.frames.MovingReferenceFrame;
 import us.ihmc.mecano.multiBodySystem.interfaces.JointBasics;
+import us.ihmc.mecano.multiBodySystem.interfaces.JointReadOnly;
 import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
 import us.ihmc.mecano.tools.MecanoFactories;
 import us.ihmc.mecano.tools.MecanoTools;
@@ -87,19 +88,14 @@ public abstract class Joint implements JointBasics
     */
    public Joint(String name, RigidBodyBasics predecessor, RigidBodyTransformReadOnly transformToParent)
    {
-      if (name.contains(NAME_ID_SEPARATOR))
-         throw new IllegalArgumentException("A joint name can not contain '" + NAME_ID_SEPARATOR + "'. Tried to construct a jonit with name " + name + ".");
+      JointReadOnly.checkJointNameSanity(name);
 
       this.name = name;
       this.predecessor = predecessor;
       beforeJointFrame = MecanoFactories.newFrameBeforeJoint(this, transformToParent);
       afterJointFrame = MecanoFactories.newFrameAfterJoint(this);
-
-      if (predecessor.isRootBody())
-         nameId = name;
-      else
-         nameId = predecessor.getParentJoint().getNameId() + NAME_ID_SEPARATOR + name;
       predecessor.addChildJoint(this);
+      nameId = JointReadOnly.computeNameId(this);
    }
 
    @Override

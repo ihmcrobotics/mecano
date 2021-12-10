@@ -1,13 +1,16 @@
 package us.ihmc.mecano.yoVariables.tools;
 
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
-import us.ihmc.euclid.transform.RigidBodyTransform;
+import us.ihmc.euclid.transform.interfaces.RigidBodyTransformReadOnly;
 import us.ihmc.euclid.tuple3D.interfaces.Vector3DReadOnly;
+import us.ihmc.mecano.multiBodySystem.interfaces.CrossFourBarJointReadOnly;
+import us.ihmc.mecano.multiBodySystem.interfaces.RevoluteJointReadOnly;
 import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
 import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyReadOnly;
 import us.ihmc.mecano.tools.MultiBodySystemFactories;
 import us.ihmc.mecano.tools.MultiBodySystemFactories.JointBuilder;
 import us.ihmc.mecano.tools.MultiBodySystemFactories.RigidBodyBuilder;
+import us.ihmc.mecano.yoVariables.multiBodySystem.YoCrossFourBarJoint;
 import us.ihmc.mecano.yoVariables.multiBodySystem.YoPlanarJoint;
 import us.ihmc.mecano.yoVariables.multiBodySystem.YoPrismaticJoint;
 import us.ihmc.mecano.yoVariables.multiBodySystem.YoRevoluteJoint;
@@ -40,33 +43,76 @@ public class YoMultiBodySystemFactories
       return new JointBuilder()
       {
          @Override
-         public YoSixDoFJoint buildSixDoFJoint(String name, RigidBodyBasics predecessor, RigidBodyTransform transformToParent)
+         public YoSixDoFJoint buildSixDoFJoint(String name, RigidBodyBasics predecessor, RigidBodyTransformReadOnly transformToParent)
          {
             return new YoSixDoFJoint(name, predecessor, transformToParent, registry);
          }
 
          @Override
-         public YoPlanarJoint buildPlanarJoint(String name, RigidBodyBasics predecessor, RigidBodyTransform transformToParent)
+         public YoPlanarJoint buildPlanarJoint(String name, RigidBodyBasics predecessor, RigidBodyTransformReadOnly transformToParent)
          {
             return new YoPlanarJoint(name, predecessor, transformToParent, registry);
          }
 
          @Override
-         public YoSphericalJoint buildSphericalJoint(String name, RigidBodyBasics predecessor, RigidBodyTransform transformToParent)
+         public YoSphericalJoint buildSphericalJoint(String name, RigidBodyBasics predecessor, RigidBodyTransformReadOnly transformToParent)
          {
             return new YoSphericalJoint(name, predecessor, transformToParent, registry);
          }
 
          @Override
-         public YoRevoluteJoint buildRevoluteJoint(String name, RigidBodyBasics predecessor, RigidBodyTransform transformToParent, Vector3DReadOnly jointAxis)
+         public YoRevoluteJoint buildRevoluteJoint(String name, RigidBodyBasics predecessor, RigidBodyTransformReadOnly transformToParent, Vector3DReadOnly jointAxis)
          {
             return new YoRevoluteJoint(name, predecessor, transformToParent, jointAxis, registry);
          }
 
          @Override
-         public YoPrismaticJoint buildPrismaticJoint(String name, RigidBodyBasics predecessor, RigidBodyTransform transformToParent, Vector3DReadOnly jointAxis)
+         public YoPrismaticJoint buildPrismaticJoint(String name, RigidBodyBasics predecessor, RigidBodyTransformReadOnly transformToParent, Vector3DReadOnly jointAxis)
          {
             return new YoPrismaticJoint(name, predecessor, transformToParent, jointAxis, registry);
+         }
+
+         @Override
+         public YoCrossFourBarJoint cloneCrossFourBarJoint(CrossFourBarJointReadOnly original, String cloneSuffix, RigidBodyBasics clonePredecessor)
+         {
+            RevoluteJointReadOnly originalJointA = original.getJointA();
+            RevoluteJointReadOnly originalJointB = original.getJointB();
+            RevoluteJointReadOnly originalJointC = original.getJointC();
+            RevoluteJointReadOnly originalJointD = original.getJointD();
+            RigidBodyReadOnly originalBodyDA = originalJointA.getSuccessor();
+            RigidBodyReadOnly originalBodyBC = originalJointB.getSuccessor();
+            int loopClosureIndex;
+            if (originalJointA.isLoopClosure())
+               loopClosureIndex = 0;
+            else if (originalJointB.isLoopClosure())
+               loopClosureIndex = 1;
+            else if (originalJointC.isLoopClosure())
+               loopClosureIndex = 2;
+            else
+               loopClosureIndex = 3;
+
+            return new YoCrossFourBarJoint(original.getName() + cloneSuffix,
+                                           clonePredecessor,
+                                           originalJointA.getName() + cloneSuffix,
+                                           originalJointB.getName() + cloneSuffix,
+                                           originalJointC.getName() + cloneSuffix,
+                                           originalJointD.getName() + cloneSuffix,
+                                           originalBodyDA.getName() + cloneSuffix,
+                                           originalBodyBC.getName() + cloneSuffix,
+                                           originalJointA.getFrameBeforeJoint().getTransformToParent(),
+                                           originalJointB.getFrameBeforeJoint().getTransformToParent(),
+                                           originalJointD.getFrameBeforeJoint().getTransformToParent(),
+                                           originalJointC.getFrameBeforeJoint().getTransformToParent(),
+                                           originalBodyDA.getInertia().getMomentOfInertia(),
+                                           originalBodyBC.getInertia().getMomentOfInertia(),
+                                           originalBodyDA.getInertia().getMass(),
+                                           originalBodyBC.getInertia().getMass(),
+                                           originalBodyDA.getBodyFixedFrame().getTransformToParent(),
+                                           originalBodyBC.getBodyFixedFrame().getTransformToParent(),
+                                           original.getActuatedJointIndex(),
+                                           loopClosureIndex,
+                                           original.getJointAxis(),
+                                           registry);
          }
       };
    }
