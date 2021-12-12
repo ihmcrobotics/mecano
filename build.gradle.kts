@@ -28,7 +28,7 @@ testDependencies {
    api("org.ejml:ejml-ddense:0.39")
    api("org.ejml:ejml-simple:0.39")
 
-   api("us.ihmc:log-tools:0.6.1")
+   api("us.ihmc:log-tools:0.6.2")
 }
 
 graphvizDependencies {
