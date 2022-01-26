@@ -41,6 +41,8 @@ public class YoPlanarJoint extends Joint implements PlanarJointBasics
     */
    private final List<TwistReadOnly> unitTwists;
 
+   private final String varName;
+
    /**
     * Creates a new planar joint.
     * <p>
@@ -69,22 +71,24 @@ public class YoPlanarJoint extends Joint implements PlanarJointBasics
       super(name, predecessor, transformToParent);
       this.registry = registry;
 
-      YoDouble x = new YoDouble(name + "X", registry);
-      YoDouble z = new YoDouble(name + "Z", registry);
-      YoDouble pitch = new YoDouble(name + "Pitch", registry);
+      varName = !name.isEmpty() ? "_" + name + "_" : "_";
+
+      YoDouble x = new YoDouble("q" + varName + "x", registry);
+      YoDouble z = new YoDouble("q" + varName + "z", registry);
+      YoDouble pitch = new YoDouble("q" + varName + "pitch", registry);
       jointPose = YoMecanoFactories.newPlanarYoPose3DBasics(pitch, x, z);
-      YoDouble angularVelocityY = new YoDouble(name + "AngularVelocityY", registry);
-      YoDouble linearVelocityX = new YoDouble(name + "LinearVelocityX", registry);
-      YoDouble linearVelocityZ = new YoDouble(name + "LinearVelocityZ", registry);
+      YoDouble angularVelocityY = new YoDouble("qd" + varName + "wy", registry);
+      YoDouble linearVelocityX = new YoDouble("qd" + varName + "x", registry);
+      YoDouble linearVelocityZ = new YoDouble("qd" + varName + "z", registry);
       jointTwist = YoMecanoFactories.newPlanarYoFixedFrameTwistBasics(angularVelocityY,
                                                                       linearVelocityX,
                                                                       linearVelocityZ,
                                                                       afterJointFrame,
                                                                       beforeJointFrame,
                                                                       afterJointFrame);
-      YoDouble angularAccelerationY = new YoDouble(name + "AngularAccelerationY", registry);
-      YoDouble linearAccelerationX = new YoDouble(name + "LinearAccelerationX", registry);
-      YoDouble linearAccelerationZ = new YoDouble(name + "LinearAccelerationZ", registry);
+      YoDouble angularAccelerationY = new YoDouble("qdd" + varName + "wy", registry);
+      YoDouble linearAccelerationX = new YoDouble("qdd" + varName + "x", registry);
+      YoDouble linearAccelerationZ = new YoDouble("qdd" + varName + "z", registry);
       jointAcceleration = YoMecanoFactories.newPlanarYoFixedFrameSpatialAccelerationVectorBasics(angularAccelerationY,
                                                                                                  linearAccelerationX,
                                                                                                  linearAccelerationZ,
@@ -100,9 +104,9 @@ public class YoPlanarJoint extends Joint implements PlanarJointBasics
    {
       this.successor = successor;
       ReferenceFrame successorFrame = successor.getBodyFixedFrame();
-      YoDouble torqueY = new YoDouble(name + "TorqueY", registry);
-      YoDouble forceX = new YoDouble(name + "ForceX", registry);
-      YoDouble forceZ = new YoDouble(name + "ForceZ", registry);
+      YoDouble torqueY = new YoDouble("tau" + varName + "wy", registry);
+      YoDouble forceX = new YoDouble("tau" + varName + "x", registry);
+      YoDouble forceZ = new YoDouble("tau" + varName + "z", registry);
       jointWrench = YoMecanoFactories.newPlanarYoFixedFrameWrenchBasics(torqueY, forceX, forceZ, successorFrame, afterJointFrame);
    }
 

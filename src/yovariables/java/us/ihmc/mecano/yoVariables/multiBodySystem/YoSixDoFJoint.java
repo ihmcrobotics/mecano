@@ -12,7 +12,10 @@ import us.ihmc.mecano.tools.MecanoTools;
 import us.ihmc.mecano.yoVariables.spatial.YoFixedFrameSpatialAcceleration;
 import us.ihmc.mecano.yoVariables.spatial.YoFixedFrameTwist;
 import us.ihmc.mecano.yoVariables.spatial.YoFixedFrameWrench;
+import us.ihmc.yoVariables.euclid.referenceFrame.YoFramePoint3D;
 import us.ihmc.yoVariables.euclid.referenceFrame.YoFramePose3D;
+import us.ihmc.yoVariables.euclid.referenceFrame.YoFrameQuaternion;
+import us.ihmc.yoVariables.euclid.referenceFrame.YoFrameVector3D;
 import us.ihmc.yoVariables.registry.YoRegistry;
 
 /**
@@ -39,6 +42,8 @@ public class YoSixDoFJoint extends Joint implements SixDoFJointBasics
     * framework, the unit-twists are calculated once at construction and remain constant.
     */
    private final List<TwistReadOnly> unitTwists;
+
+   private final String varName;
 
    /**
     * Creates a new 6-DoF joint which state is backed by {@code YoVariable}s.
@@ -68,9 +73,19 @@ public class YoSixDoFJoint extends Joint implements SixDoFJointBasics
    {
       super(name, predecessor, transformToParent);
       this.registry = registry;
-      jointPose = new YoFramePose3D(name, beforeJointFrame, registry);
-      jointTwist = new YoFixedFrameTwist(name + "Twist", afterJointFrame, beforeJointFrame, afterJointFrame, registry);
-      jointAcceleration = new YoFixedFrameSpatialAcceleration(name + "Acceleration", afterJointFrame, beforeJointFrame, afterJointFrame, registry);
+
+      varName = !name.isEmpty() ? "_" + name + "_" : "_";
+
+      jointPose = new YoFramePose3D(new YoFramePoint3D("q" + varName, beforeJointFrame, registry),
+                                    new YoFrameQuaternion("q" + varName, beforeJointFrame, registry));
+      jointTwist = new YoFixedFrameTwist(afterJointFrame,
+                                         beforeJointFrame,
+                                         new YoFrameVector3D("qd" + varName + "w", afterJointFrame, registry),
+                                         new YoFrameVector3D("qd" + varName, afterJointFrame, registry));
+      jointAcceleration = new YoFixedFrameSpatialAcceleration(afterJointFrame,
+                                                              beforeJointFrame,
+                                                              new YoFrameVector3D("qdd" + varName + "w", afterJointFrame, registry),
+                                                              new YoFrameVector3D("qdd" + varName, afterJointFrame, registry));
       unitTwists = MecanoTools.computeSixDoFJointMotionSubspace(beforeJointFrame, afterJointFrame);
    }
 
@@ -81,7 +96,9 @@ public class YoSixDoFJoint extends Joint implements SixDoFJointBasics
       this.successor = successor;
       ReferenceFrame successorFrame = successor.getBodyFixedFrame();
       if (jointWrench == null)
-         jointWrench = new YoFixedFrameWrench(name + "Wrench", successorFrame, afterJointFrame, registry);
+         jointWrench = new YoFixedFrameWrench(successorFrame,
+                                              new YoFrameVector3D("tau" + varName + "w", afterJointFrame, registry),
+                                              new YoFrameVector3D("tau" + varName, afterJointFrame, registry));
       else
          jointWrench.checkBodyFrameMatch(successorFrame);
    }
