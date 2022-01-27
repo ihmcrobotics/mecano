@@ -86,16 +86,21 @@ public class YoSphericalJoint extends Joint implements SphericalJointBasics
    public YoSphericalJoint(String name, RigidBodyBasics predecessor, RigidBodyTransformReadOnly transformToParent, YoRegistry registry)
    {
       super(name, predecessor, transformToParent);
-      jointOrientation = new YoFrameQuaternion(name, beforeJointFrame, registry);
-      jointAngularVelocity = new YoFrameVector3D(name + "AngularVelocity", afterJointFrame, registry);
-      jointAngularAcceleration = new YoFrameVector3D(name + "AngularAcceleration", afterJointFrame, registry);
+
+      String varName;
+
+      varName = !name.isEmpty() ? "_" + name + "_" : "_";
+
+      jointOrientation = new YoFrameQuaternion("q" + varName, beforeJointFrame, registry);
+      jointAngularVelocity = new YoFrameVector3D("qd" + varName + "w", afterJointFrame, registry);
+      jointAngularAcceleration = new YoFrameVector3D("qdd" + varName + "w", afterJointFrame, registry);
       jointTwist = MecanoFactories.newTwistReadOnly(afterJointFrame, beforeJointFrame, jointAngularVelocity, new FrameVector3D(afterJointFrame));
       jointAcceleration = MecanoFactories.newSpatialAccelerationVectorReadOnly(afterJointFrame,
                                                                                beforeJointFrame,
                                                                                jointAngularAcceleration,
                                                                                new FrameVector3D(afterJointFrame));
       unitTwists = MecanoTools.computeSphericalJointMotionSubspace(beforeJointFrame, afterJointFrame);
-      jointTorque = new YoFrameVector3D(name + "Torque", afterJointFrame, registry);
+      jointTorque = new YoFrameVector3D("tau" + varName + "w", afterJointFrame, registry);
    }
 
    /** {@inheritDoc} */
