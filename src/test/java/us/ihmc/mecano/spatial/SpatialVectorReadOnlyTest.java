@@ -4,8 +4,10 @@ import java.util.Random;
 import static org.junit.jupiter.api.Assertions.*;
 import org.ejml.data.DMatrix;
 import org.ejml.data.DMatrixRMaj;
+import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
+import us.ihmc.euclid.referenceFrame.exceptions.ReferenceFrameMismatchException;
 import us.ihmc.euclid.referenceFrame.tools.EuclidFrameRandomTools;
 import us.ihmc.euclid.referenceFrame.tools.ReferenceFrameTools;
 import us.ihmc.euclid.tools.EuclidCoreRandomTools;
@@ -37,22 +39,21 @@ public abstract class SpatialVectorReadOnlyTest<T extends SpatialVectorReadOnly>
       {
          T randomSpatialVector = newRandomSpatialVector(random);
          
-         assertTrue(randomSpatialVector.getElement(0) == randomSpatialVector.getAngularPartX());
-         assertTrue(randomSpatialVector.getElement(1) == randomSpatialVector.getAngularPartY());
-         assertTrue(randomSpatialVector.getElement(2) == randomSpatialVector.getAngularPartZ());
-         assertTrue(randomSpatialVector.getElement(3) == randomSpatialVector.getLinearPartX());
-         assertTrue(randomSpatialVector.getElement(4) == randomSpatialVector.getLinearPartY());
-         assertTrue(randomSpatialVector.getElement(5) == randomSpatialVector.getLinearPartZ());
+         assertEquals(randomSpatialVector.getElement(0), randomSpatialVector.getAngularPartX());
+         assertEquals(randomSpatialVector.getElement(1), randomSpatialVector.getAngularPartY());
+         assertEquals(randomSpatialVector.getElement(2), randomSpatialVector.getAngularPartZ());
+         assertEquals(randomSpatialVector.getElement(3), randomSpatialVector.getLinearPartX());
+         assertEquals(randomSpatialVector.getElement(4), randomSpatialVector.getLinearPartY());
+         assertEquals(randomSpatialVector.getElement(5), randomSpatialVector.getLinearPartZ());
          
-         //Test setElement with an index greater than 5 fails
-         try
-         {
-            randomSpatialVector.getElement(i+6);
-            fail("Should have thrown a RuntimeException");
-         }
-         catch (RuntimeException e)
-         {
-            //good 
+         { // Check IndexOutOfBoundsException for getElement
+            int randomIndex = random.nextInt();
+            
+            if (randomIndex < 0 || randomIndex >= 6)
+               //Test setElement with an index greater than 5 fails
+               assertThrows(IndexOutOfBoundsException.class, () -> randomSpatialVector.getElement(randomIndex));
+            else
+               assertDoesNotThrow(() -> randomSpatialVector.getElement(randomIndex));
          }
       }
    }
@@ -69,12 +70,12 @@ public abstract class SpatialVectorReadOnlyTest<T extends SpatialVectorReadOnly>
          
          randomSpatialVector.get(vectorArray);
          
-         assertTrue(vectorArray[0] == randomSpatialVector.getAngularPartX());
-         assertTrue(vectorArray[1] == randomSpatialVector.getAngularPartY());
-         assertTrue(vectorArray[2] == randomSpatialVector.getAngularPartZ());
-         assertTrue(vectorArray[3] == randomSpatialVector.getLinearPartX());
-         assertTrue(vectorArray[4] == randomSpatialVector.getLinearPartY());
-         assertTrue(vectorArray[5] == randomSpatialVector.getLinearPartZ());
+         assertEquals(vectorArray[0], randomSpatialVector.getAngularPartX());
+         assertEquals(vectorArray[1], randomSpatialVector.getAngularPartY());
+         assertEquals(vectorArray[2], randomSpatialVector.getAngularPartZ());
+         assertEquals(vectorArray[3], randomSpatialVector.getLinearPartX());
+         assertEquals(vectorArray[4], randomSpatialVector.getLinearPartY());
+         assertEquals(vectorArray[5], randomSpatialVector.getLinearPartZ());
       }
       
       for (int i = 0; i < ITERATIONS; i++)
@@ -86,12 +87,12 @@ public abstract class SpatialVectorReadOnlyTest<T extends SpatialVectorReadOnly>
          
          randomSpatialVector.get(startingArrayIndex, vectorArray);
          
-         assertTrue(vectorArray[startingArrayIndex] == randomSpatialVector.getAngularPartX());
-         assertTrue(vectorArray[startingArrayIndex + 1] == randomSpatialVector.getAngularPartY());
-         assertTrue(vectorArray[startingArrayIndex + 2] == randomSpatialVector.getAngularPartZ());
-         assertTrue(vectorArray[startingArrayIndex + 3] == randomSpatialVector.getLinearPartX());
-         assertTrue(vectorArray[startingArrayIndex + 4] == randomSpatialVector.getLinearPartY());
-         assertTrue(vectorArray[startingArrayIndex + 5] == randomSpatialVector.getLinearPartZ());
+         assertEquals(vectorArray[startingArrayIndex], randomSpatialVector.getAngularPartX());
+         assertEquals(vectorArray[startingArrayIndex + 1], randomSpatialVector.getAngularPartY());
+         assertEquals(vectorArray[startingArrayIndex + 2], randomSpatialVector.getAngularPartZ());
+         assertEquals(vectorArray[startingArrayIndex + 3], randomSpatialVector.getLinearPartX());
+         assertEquals(vectorArray[startingArrayIndex + 4], randomSpatialVector.getLinearPartY());
+         assertEquals(vectorArray[startingArrayIndex + 5], randomSpatialVector.getLinearPartZ());
       }
       
 
@@ -134,12 +135,12 @@ public abstract class SpatialVectorReadOnlyTest<T extends SpatialVectorReadOnly>
          
          randomSpatialVector.get(vectorMatrix);
          
-         assertTrue(vectorMatrix.get(0,0) == randomSpatialVector.getAngularPartX());
-         assertTrue(vectorMatrix.get(1,0) == randomSpatialVector.getAngularPartY());
-         assertTrue(vectorMatrix.get(2,0) == randomSpatialVector.getAngularPartZ());
-         assertTrue(vectorMatrix.get(3,0) == randomSpatialVector.getLinearPartX());
-         assertTrue(vectorMatrix.get(4,0) == randomSpatialVector.getLinearPartY());
-         assertTrue(vectorMatrix.get(5,0) == randomSpatialVector.getLinearPartZ());
+         assertEquals(vectorMatrix.get(0,0), randomSpatialVector.getAngularPartX());
+         assertEquals(vectorMatrix.get(1,0), randomSpatialVector.getAngularPartY());
+         assertEquals(vectorMatrix.get(2,0), randomSpatialVector.getAngularPartZ());
+         assertEquals(vectorMatrix.get(3,0), randomSpatialVector.getLinearPartX());
+         assertEquals(vectorMatrix.get(4,0), randomSpatialVector.getLinearPartY());
+         assertEquals(vectorMatrix.get(5,0), randomSpatialVector.getLinearPartZ());
       }
       
       for (int i = 0; i < ITERATIONS; i++)
@@ -151,12 +152,12 @@ public abstract class SpatialVectorReadOnlyTest<T extends SpatialVectorReadOnly>
          
          randomSpatialVector.get(startingArrayIndex, vectorMatrix);
          
-         assertTrue(vectorMatrix.get(startingArrayIndex,0) == randomSpatialVector.getAngularPartX());
-         assertTrue(vectorMatrix.get(startingArrayIndex + 1,0) == randomSpatialVector.getAngularPartY());
-         assertTrue(vectorMatrix.get(startingArrayIndex + 2,0) == randomSpatialVector.getAngularPartZ());
-         assertTrue(vectorMatrix.get(startingArrayIndex + 3,0) == randomSpatialVector.getLinearPartX());
-         assertTrue(vectorMatrix.get(startingArrayIndex + 4,0) == randomSpatialVector.getLinearPartY());
-         assertTrue(vectorMatrix.get(startingArrayIndex + 5,0) == randomSpatialVector.getLinearPartZ());
+         assertEquals(vectorMatrix.get(startingArrayIndex,0), randomSpatialVector.getAngularPartX());
+         assertEquals(vectorMatrix.get(startingArrayIndex + 1,0), randomSpatialVector.getAngularPartY());
+         assertEquals(vectorMatrix.get(startingArrayIndex + 2,0), randomSpatialVector.getAngularPartZ());
+         assertEquals(vectorMatrix.get(startingArrayIndex + 3,0), randomSpatialVector.getLinearPartX());
+         assertEquals(vectorMatrix.get(startingArrayIndex + 4,0), randomSpatialVector.getLinearPartY());
+         assertEquals(vectorMatrix.get(startingArrayIndex + 5,0), randomSpatialVector.getLinearPartZ());
       }
       
       for (int i = 0; i < ITERATIONS; i++)
@@ -169,12 +170,12 @@ public abstract class SpatialVectorReadOnlyTest<T extends SpatialVectorReadOnly>
          
          randomSpatialVector.get(startingArrayRow, startingArrayColumn, vectorMatrix);
          
-         assertTrue(vectorMatrix.get(startingArrayRow,startingArrayColumn) == randomSpatialVector.getAngularPartX());
-         assertTrue(vectorMatrix.get(startingArrayRow + 1,startingArrayColumn) == randomSpatialVector.getAngularPartY());
-         assertTrue(vectorMatrix.get(startingArrayRow + 2,startingArrayColumn) == randomSpatialVector.getAngularPartZ());
-         assertTrue(vectorMatrix.get(startingArrayRow + 3,startingArrayColumn) == randomSpatialVector.getLinearPartX());
-         assertTrue(vectorMatrix.get(startingArrayRow + 4,startingArrayColumn) == randomSpatialVector.getLinearPartY());
-         assertTrue(vectorMatrix.get(startingArrayRow + 5,startingArrayColumn) == randomSpatialVector.getLinearPartZ());
+         assertEquals(vectorMatrix.get(startingArrayRow,startingArrayColumn), randomSpatialVector.getAngularPartX());
+         assertEquals(vectorMatrix.get(startingArrayRow + 1,startingArrayColumn), randomSpatialVector.getAngularPartY());
+         assertEquals(vectorMatrix.get(startingArrayRow + 2,startingArrayColumn), randomSpatialVector.getAngularPartZ());
+         assertEquals(vectorMatrix.get(startingArrayRow + 3,startingArrayColumn), randomSpatialVector.getLinearPartX());
+         assertEquals(vectorMatrix.get(startingArrayRow + 4,startingArrayColumn), randomSpatialVector.getLinearPartY());
+         assertEquals(vectorMatrix.get(startingArrayRow + 5,startingArrayColumn), randomSpatialVector.getLinearPartZ());
       }
 
    }
@@ -195,18 +196,13 @@ public abstract class SpatialVectorReadOnlyTest<T extends SpatialVectorReadOnly>
          assertEquals(testDot, randomSpatialVector.getAngularPartX() * randomSpatialVectorSameReferenceFrame.getAngularPartX() + randomSpatialVector.getAngularPartY() * randomSpatialVectorSameReferenceFrame.getAngularPartY() + randomSpatialVector.getAngularPartZ() * randomSpatialVectorSameReferenceFrame.getAngularPartZ()
                              + randomSpatialVector.getLinearPartX() * randomSpatialVectorSameReferenceFrame.getLinearPartX() + randomSpatialVector.getLinearPartY() * randomSpatialVectorSameReferenceFrame.getLinearPartY() + randomSpatialVector.getLinearPartZ() * randomSpatialVectorSameReferenceFrame.getLinearPartZ(), getEpsilon());
          
-         //Test setElement with an index greater than 5 fails
-         try
+         Assertions.assertThrows(ReferenceFrameMismatchException.class, () ->
          {
             T randomSpatialVectorDifferentReferenceFrame = newRandomSpatialVector(random);
 
-            testDot = randomSpatialVector.dot(randomSpatialVectorDifferentReferenceFrame);
-            fail("Should have thrown a RuntimeException");
-         }
-         catch (RuntimeException e)
-         {
-            //good 
-         }
+            @SuppressWarnings("unused")
+            double testDotDiffFrames = randomSpatialVector.dot(randomSpatialVectorDifferentReferenceFrame);
+         });
       }
    }
    

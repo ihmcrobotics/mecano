@@ -2,10 +2,12 @@ package us.ihmc.mecano.spatial;
 
 import static org.junit.jupiter.api.Assertions.*;
 import org.ejml.data.DMatrixRMaj;
+import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import java.util.Random;
 import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
+import us.ihmc.euclid.referenceFrame.exceptions.ReferenceFrameMismatchException;
 import us.ihmc.euclid.referenceFrame.tools.EuclidFrameRandomTools;
 import us.ihmc.euclid.referenceFrame.tools.ReferenceFrameTools;
 import us.ihmc.euclid.tools.EuclidCoreRandomTools;
@@ -15,6 +17,7 @@ import us.ihmc.euclid.tuple3D.interfaces.Vector3DReadOnly;
 import us.ihmc.mecano.spatial.interfaces.FixedFrameSpatialVectorBasics;
 import us.ihmc.mecano.spatial.interfaces.SpatialVectorBasics;
 import us.ihmc.mecano.spatial.interfaces.SpatialVectorReadOnly;
+import us.ihmc.mecano.tools.MecanoTestTools;
 
 public abstract class SpatialVectorBasicsTest<T extends SpatialVectorBasics> extends FixedFrameSpatialVectorBasicsTest<FixedFrameSpatialVectorBasics>
 {
@@ -45,10 +48,9 @@ public abstract class SpatialVectorBasicsTest<T extends SpatialVectorBasics> ext
 
          expectedSpatialVector.setIncludingFrame(originalSpatialVector);
          expectedSpatialVector.changeFrame(actualSpatialVector.getReferenceFrame());
-         
          actualSpatialVector.setMatchingFrame(originalSpatialVector);
          
-         assertTrue(actualSpatialVector.equals(expectedSpatialVector));
+         MecanoTestTools.assertSpatialVectorEquals(actualSpatialVector, expectedSpatialVector, getEpsilon());
       }
       
       //Test setMatchingFrame from an angular / linear part where the parts have the same Reference Frame
@@ -63,25 +65,18 @@ public abstract class SpatialVectorBasicsTest<T extends SpatialVectorBasics> ext
 
          expectedSpatialVector.setIncludingFrame(originalSpatialVector);
          expectedSpatialVector.changeFrame(actualSpatialVector.getReferenceFrame());
-         
          actualSpatialVector.setMatchingFrame(randomAngularPart, randomLinearPart);
          
-         assertTrue(actualSpatialVector.equals(expectedSpatialVector));
+         MecanoTestTools.assertSpatialVectorEquals(actualSpatialVector, expectedSpatialVector, getEpsilon());
          
-         //Test setMatchingFrame when AngularPart/LinearPart have different Reference Frames fails 
-         try
+         Assertions.assertThrows(ReferenceFrameMismatchException.class, () ->
          {
             randomLinearPart.setReferenceFrame(ReferenceFrameTools.getWorldFrame());
             
             originalSpatialVector.setMatchingFrame(randomAngularPart, randomLinearPart);
-            fail("Should have thrown a RuntimeException");
-         }
-         catch (RuntimeException e)
-         {
-            //good 
-         }
+         });
+
       }
-    
    }
    
    @Test
@@ -97,9 +92,9 @@ public abstract class SpatialVectorBasicsTest<T extends SpatialVectorBasics> ext
          T originalSpatialVector = newRandomSpatialVector(random);
          T expectedSpatialVector = newRandomSpatialVector(random);
 
-         assertFalse(originalSpatialVector.equals(expectedSpatialVector));
+         assertNotEquals(originalSpatialVector, expectedSpatialVector);
          originalSpatialVector.setIncludingFrame(expectedSpatialVector);
-         assertTrue(originalSpatialVector.equals(expectedSpatialVector));
+         MecanoTestTools.assertSpatialVectorEquals(originalSpatialVector, expectedSpatialVector, getEpsilon());
       }
       
       //Test setIncludingFrame - given an angular part and linear part, updates the frame of this vector
@@ -112,27 +107,22 @@ public abstract class SpatialVectorBasicsTest<T extends SpatialVectorBasics> ext
          FrameVector3D randomLinearPart = EuclidFrameRandomTools.nextFrameVector3D(random, randomFrame);
 
          //Setting AngularPart/LinearPart where the Reference Frames are the same
-         assertFalse(originalSpatialVector.getAngularPart().equals(randomAngularPart));
-         assertFalse(originalSpatialVector.getLinearPart().equals(randomLinearPart));
+         assertNotEquals(originalSpatialVector.getAngularPart(), randomAngularPart);
+         assertNotEquals(originalSpatialVector.getLinearPart(), randomLinearPart);
+         
          originalSpatialVector.setIncludingFrame(randomAngularPart,randomLinearPart);
-         assertTrue(originalSpatialVector.getAngularPart().equals(randomAngularPart));
-         assertTrue(originalSpatialVector.getLinearPart().equals(randomLinearPart));
-         assertTrue(originalSpatialVector.getReferenceFrame().equals(randomFrame));
+         
+         assertEquals(originalSpatialVector.getAngularPart(), randomAngularPart);
+         assertEquals(originalSpatialVector.getLinearPart(), randomLinearPart);
+         assertEquals(originalSpatialVector.getReferenceFrame(), randomFrame);
          
          //Test setting AngularPart/LinearPart where the Reference Frames are not the same fails 
-         try
+         Assertions.assertThrows(ReferenceFrameMismatchException.class, () ->
          {
             randomLinearPart.setReferenceFrame(ReferenceFrameTools.getWorldFrame());
             
             originalSpatialVector.setIncludingFrame(randomAngularPart, randomLinearPart);
-            assertTrue(originalSpatialVector.getReferenceFrame().equals(randomLinearPart.getReferenceFrame()));
-            fail("Should have thrown a RuntimeException");
-         }
-         catch (RuntimeException e)
-         {
-            //good 
-         }
-  
+         });
       }
       
       //Test setIncludingFrame - sets a spatial vector equal to a ReferenceFrame, and two Vector3Ds 
@@ -144,15 +134,17 @@ public abstract class SpatialVectorBasicsTest<T extends SpatialVectorBasics> ext
          Vector3D randomAngularPart = EuclidCoreRandomTools.nextVector3D(random);
          Vector3D randomLinearPart = EuclidCoreRandomTools.nextVector3D(random);
 
-         assertFalse(randomSpatialVector.getReferenceFrame().equals(randomFrame));
-         assertFalse(randomSpatialVector.getAngularPart().equals(randomAngularPart));
-         assertFalse(randomSpatialVector.getLinearPart().equals(randomLinearPart));
+         assertNotEquals(randomSpatialVector.getReferenceFrame(), randomFrame);
+         assertNotEquals(randomSpatialVector.getAngularPart(), randomAngularPart);
+         assertNotEquals(randomSpatialVector.getAngularPart(), randomLinearPart);
+
          randomSpatialVector.setIncludingFrame(randomFrame, randomAngularPart, randomLinearPart);
-         assertTrue(randomSpatialVector.getReferenceFrame().equals(randomFrame));
-         assertTrue(randomSpatialVector.getAngularPart().getReferenceFrame().equals(randomFrame));
-         assertTrue(randomSpatialVector.getLinearPart().getReferenceFrame().equals(randomFrame));
-         assertTrue(randomSpatialVector.getAngularPart().equals(randomAngularPart));
-         assertTrue(randomSpatialVector.getLinearPart().equals(randomLinearPart));
+         
+         assertEquals(randomSpatialVector.getReferenceFrame(), randomFrame);
+         assertEquals(randomSpatialVector.getAngularPart().getReferenceFrame(), randomFrame);
+         assertEquals(randomSpatialVector.getLinearPart().getReferenceFrame(), randomFrame);
+         EuclidCoreTestTools.assertTuple3DEquals(randomSpatialVector.getAngularPart(), randomAngularPart, getEpsilon());
+         EuclidCoreTestTools.assertTuple3DEquals(randomSpatialVector.getLinearPart(), randomLinearPart, getEpsilon());
       }
       
       //Test setIncludingFrame - sets a spatial vector equal to a ReferenceFrame, sets the angular/linear parts from an array. 
@@ -169,13 +161,14 @@ public abstract class SpatialVectorBasicsTest<T extends SpatialVectorBasics> ext
          assertFalse(randomSpatialVector.getReferenceFrame().equals(randomFrame));
 
          randomSpatialVector.setIncludingFrame(randomFrame, randomVectorArray);
-         assertTrue(randomSpatialVector.getReferenceFrame().equals(randomFrame));
-         assertTrue(randomVectorArray[0] == randomSpatialVector.getAngularPartX());
-         assertTrue(randomVectorArray[1] == randomSpatialVector.getAngularPartY());
-         assertTrue(randomVectorArray[2] == randomSpatialVector.getAngularPartZ());
-         assertTrue(randomVectorArray[3] == randomSpatialVector.getLinearPartX());
-         assertTrue(randomVectorArray[4] == randomSpatialVector.getLinearPartY());
-         assertTrue(randomVectorArray[5] == randomSpatialVector.getLinearPartZ());
+
+         assertEquals(randomSpatialVector.getReferenceFrame(), randomFrame);
+         assertEquals(randomVectorArray[0], randomSpatialVector.getAngularPartX());
+         assertEquals(randomVectorArray[1], randomSpatialVector.getAngularPartY());
+         assertEquals(randomVectorArray[2], randomSpatialVector.getAngularPartZ());
+         assertEquals(randomVectorArray[3], randomSpatialVector.getLinearPartX());
+         assertEquals(randomVectorArray[4], randomSpatialVector.getLinearPartY());
+         assertEquals(randomVectorArray[5], randomSpatialVector.getLinearPartZ());
       }
       
       //Test setIncludingFrame - sets a spatial vector equal to a ReferenceFrame, sets the angular/linear parts from an array with a starting point in the array. 
@@ -194,13 +187,14 @@ public abstract class SpatialVectorBasicsTest<T extends SpatialVectorBasics> ext
          int startingArrayIndex = i % 18;
          
          randomSpatialVector.setIncludingFrame(randomFrame, startingArrayIndex, randomVectorArray);
-         assertTrue(randomSpatialVector.getReferenceFrame().equals(randomFrame));
-         assertTrue(randomVectorArray[startingArrayIndex] == randomSpatialVector.getAngularPartX());
-         assertTrue(randomVectorArray[startingArrayIndex+1] == randomSpatialVector.getAngularPartY());
-         assertTrue(randomVectorArray[startingArrayIndex+2] == randomSpatialVector.getAngularPartZ());
-         assertTrue(randomVectorArray[startingArrayIndex+3] == randomSpatialVector.getLinearPartX());
-         assertTrue(randomVectorArray[startingArrayIndex+4] == randomSpatialVector.getLinearPartY());
-         assertTrue(randomVectorArray[startingArrayIndex+5] == randomSpatialVector.getLinearPartZ());
+         
+         assertEquals(randomSpatialVector.getReferenceFrame(), randomFrame);
+         assertEquals(randomVectorArray[startingArrayIndex], randomSpatialVector.getAngularPartX());
+         assertEquals(randomVectorArray[startingArrayIndex+1], randomSpatialVector.getAngularPartY());
+         assertEquals(randomVectorArray[startingArrayIndex+2], randomSpatialVector.getAngularPartZ());
+         assertEquals(randomVectorArray[startingArrayIndex+3], randomSpatialVector.getLinearPartX());
+         assertEquals(randomVectorArray[startingArrayIndex+4], randomSpatialVector.getLinearPartY());
+         assertEquals(randomVectorArray[startingArrayIndex+5], randomSpatialVector.getLinearPartZ());
       }
       
       //Test setIncludingFrame - sets a spatial vector equal to a ReferenceFrame, sets the angular/linear parts from an float array. 
@@ -214,16 +208,17 @@ public abstract class SpatialVectorBasicsTest<T extends SpatialVectorBasics> ext
          for (int index = 0; index < 6; index++)
             randomVectorArray[index] = random.nextFloat();
 
-         assertFalse(randomSpatialVector.getReferenceFrame().equals(randomFrame));
+         assertNotEquals(randomSpatialVector.getReferenceFrame(), randomFrame);
 
          randomSpatialVector.setIncludingFrame(randomFrame, randomVectorArray);
-         assertTrue(randomSpatialVector.getReferenceFrame().equals(randomFrame));
-         assertTrue(randomVectorArray[0] == randomSpatialVector.getAngularPartX());
-         assertTrue(randomVectorArray[1] == randomSpatialVector.getAngularPartY());
-         assertTrue(randomVectorArray[2] == randomSpatialVector.getAngularPartZ());
-         assertTrue(randomVectorArray[3] == randomSpatialVector.getLinearPartX());
-         assertTrue(randomVectorArray[4] == randomSpatialVector.getLinearPartY());
-         assertTrue(randomVectorArray[5] == randomSpatialVector.getLinearPartZ());
+         
+         assertEquals(randomSpatialVector.getReferenceFrame(), randomFrame);
+         assertEquals(randomVectorArray[0], randomSpatialVector.getAngularPartX());
+         assertEquals(randomVectorArray[1], randomSpatialVector.getAngularPartY());
+         assertEquals(randomVectorArray[2], randomSpatialVector.getAngularPartZ());
+         assertEquals(randomVectorArray[3], randomSpatialVector.getLinearPartX());
+         assertEquals(randomVectorArray[4], randomSpatialVector.getLinearPartY());
+         assertEquals(randomVectorArray[5], randomSpatialVector.getLinearPartZ());
       }   
       
       //Test setIncludingFrame - sets a spatial vector equal to a ReferenceFrame, sets the angular/linear parts from a float array with a starting point in the array. 
@@ -237,18 +232,19 @@ public abstract class SpatialVectorBasicsTest<T extends SpatialVectorBasics> ext
          for (int index = 0; index < 24; index++)
             randomVectorArray[index] = random.nextFloat();
          
-         assertFalse(randomSpatialVector.getReferenceFrame().equals(randomFrame));
+         assertNotEquals(randomSpatialVector.getReferenceFrame(), randomFrame);
 
          int startingArrayIndex = i % 18;
          
          randomSpatialVector.setIncludingFrame(randomFrame, startingArrayIndex, randomVectorArray);
-         assertTrue(randomSpatialVector.getReferenceFrame().equals(randomFrame));
-         assertTrue(randomVectorArray[startingArrayIndex] == randomSpatialVector.getAngularPartX());
-         assertTrue(randomVectorArray[startingArrayIndex+1] == randomSpatialVector.getAngularPartY());
-         assertTrue(randomVectorArray[startingArrayIndex+2] == randomSpatialVector.getAngularPartZ());
-         assertTrue(randomVectorArray[startingArrayIndex+3] == randomSpatialVector.getLinearPartX());
-         assertTrue(randomVectorArray[startingArrayIndex+4] == randomSpatialVector.getLinearPartY());
-         assertTrue(randomVectorArray[startingArrayIndex+5] == randomSpatialVector.getLinearPartZ());
+         
+         assertEquals(randomSpatialVector.getReferenceFrame(), randomFrame);
+         assertEquals(randomVectorArray[startingArrayIndex], randomSpatialVector.getAngularPartX());
+         assertEquals(randomVectorArray[startingArrayIndex+1], randomSpatialVector.getAngularPartY());
+         assertEquals(randomVectorArray[startingArrayIndex+2], randomSpatialVector.getAngularPartZ());
+         assertEquals(randomVectorArray[startingArrayIndex+3], randomSpatialVector.getLinearPartX());
+         assertEquals(randomVectorArray[startingArrayIndex+4], randomSpatialVector.getLinearPartY());
+         assertEquals(randomVectorArray[startingArrayIndex+5], randomSpatialVector.getLinearPartZ());
       }
       
       //Test setIncludingFrame - sets a spatial vector equal to a ReferenceFrame, sets the angular/linear parts from a column DMatrix. 
@@ -264,16 +260,18 @@ public abstract class SpatialVectorBasicsTest<T extends SpatialVectorBasics> ext
             randomMatrix.set(row, 0, random.nextDouble());
          }
 
-         assertFalse(randomSpatialVector.getReferenceFrame().equals(randomFrame));
+         assertNotEquals(randomSpatialVector.getReferenceFrame(), randomFrame);
 
          randomSpatialVector.setIncludingFrame(randomFrame, randomMatrix);
-         assertTrue(randomSpatialVector.getReferenceFrame().equals(randomFrame));
-         assertTrue(randomMatrix.get(0,0) == randomSpatialVector.getAngularPartX());
-         assertTrue(randomMatrix.get(1,0) == randomSpatialVector.getAngularPartY());
-         assertTrue(randomMatrix.get(2,0) == randomSpatialVector.getAngularPartZ());
-         assertTrue(randomMatrix.get(3,0) == randomSpatialVector.getLinearPartX());
-         assertTrue(randomMatrix.get(4,0) == randomSpatialVector.getLinearPartY());
-         assertTrue(randomMatrix.get(5,0) == randomSpatialVector.getLinearPartZ());
+         
+         assertEquals(randomSpatialVector.getReferenceFrame(), randomFrame);
+         assertEquals(randomMatrix.get(0,0), randomSpatialVector.getAngularPartX());
+         assertEquals(randomMatrix.get(0,0), randomSpatialVector.getAngularPartX());
+         assertEquals(randomMatrix.get(1,0), randomSpatialVector.getAngularPartY());
+         assertEquals(randomMatrix.get(2,0), randomSpatialVector.getAngularPartZ());
+         assertEquals(randomMatrix.get(3,0), randomSpatialVector.getLinearPartX());
+         assertEquals(randomMatrix.get(4,0), randomSpatialVector.getLinearPartY());
+         assertEquals(randomMatrix.get(5,0), randomSpatialVector.getLinearPartZ());
       }  
       
       //Test setIncludingFrame - sets a spatial vector equal to a ReferenceFrame, sets the angular/linear parts from a column DMatrix starting
@@ -289,18 +287,19 @@ public abstract class SpatialVectorBasicsTest<T extends SpatialVectorBasics> ext
             randomMatrix.set(row, 0, random.nextDouble());
          }
 
-         assertFalse(randomSpatialVector.getReferenceFrame().equals(randomFrame));
+         assertNotEquals(randomSpatialVector.getReferenceFrame(), randomFrame);
 
          int startingMatrixRow = i % 18;
 
          randomSpatialVector.setIncludingFrame(randomFrame, startingMatrixRow, randomMatrix);
-         assertTrue(randomSpatialVector.getReferenceFrame().equals(randomFrame));
-         assertTrue(randomMatrix.get(startingMatrixRow,0) == randomSpatialVector.getAngularPartX());
-         assertTrue(randomMatrix.get(startingMatrixRow+1,0) == randomSpatialVector.getAngularPartY());
-         assertTrue(randomMatrix.get(startingMatrixRow+2,0) == randomSpatialVector.getAngularPartZ());
-         assertTrue(randomMatrix.get(startingMatrixRow+3,0) == randomSpatialVector.getLinearPartX());
-         assertTrue(randomMatrix.get(startingMatrixRow+4,0) == randomSpatialVector.getLinearPartY());
-         assertTrue(randomMatrix.get(startingMatrixRow+5,0) == randomSpatialVector.getLinearPartZ());
+         
+         assertEquals(randomSpatialVector.getReferenceFrame(), randomFrame);
+         assertEquals(randomMatrix.get(startingMatrixRow,0), randomSpatialVector.getAngularPartX());
+         assertEquals(randomMatrix.get(startingMatrixRow+1,0), randomSpatialVector.getAngularPartY());
+         assertEquals(randomMatrix.get(startingMatrixRow+2,0), randomSpatialVector.getAngularPartZ());
+         assertEquals(randomMatrix.get(startingMatrixRow+3,0), randomSpatialVector.getLinearPartX());
+         assertEquals(randomMatrix.get(startingMatrixRow+4,0), randomSpatialVector.getLinearPartY());
+         assertEquals(randomMatrix.get(startingMatrixRow+5,0), randomSpatialVector.getLinearPartZ());
       }  
 
       //Test setIncludingFrame - sets a spatial vector equal to a ReferenceFrame, sets the angular/linear parts from a 
@@ -319,20 +318,20 @@ public abstract class SpatialVectorBasicsTest<T extends SpatialVectorBasics> ext
             }
          }
 
-         assertFalse(randomSpatialVector.getReferenceFrame().equals(randomFrame));
+         assertNotEquals(randomSpatialVector.getReferenceFrame(), randomFrame);
 
          int startingMatrixRow = i % 18;
          int startingMatrixColumn = i % 18;
          
          randomSpatialVector.setIncludingFrame(randomFrame, startingMatrixRow, startingMatrixColumn, randomMatrix);
          
-         assertTrue(randomSpatialVector.getReferenceFrame().equals(randomFrame));
-         assertTrue(randomMatrix.get(startingMatrixRow,startingMatrixColumn) == randomSpatialVector.getAngularPartX());
-         assertTrue(randomMatrix.get(startingMatrixRow+1,startingMatrixColumn) == randomSpatialVector.getAngularPartY());
-         assertTrue(randomMatrix.get(startingMatrixRow+2,startingMatrixColumn) == randomSpatialVector.getAngularPartZ());
-         assertTrue(randomMatrix.get(startingMatrixRow+3,startingMatrixColumn) == randomSpatialVector.getLinearPartX());
-         assertTrue(randomMatrix.get(startingMatrixRow+4,startingMatrixColumn) == randomSpatialVector.getLinearPartY());
-         assertTrue(randomMatrix.get(startingMatrixRow+5,startingMatrixColumn) == randomSpatialVector.getLinearPartZ());
+         assertEquals(randomSpatialVector.getReferenceFrame(), randomFrame);
+         assertEquals(randomMatrix.get(startingMatrixRow,startingMatrixColumn), randomSpatialVector.getAngularPartX());
+         assertEquals(randomMatrix.get(startingMatrixRow+1,startingMatrixColumn), randomSpatialVector.getAngularPartY());
+         assertEquals(randomMatrix.get(startingMatrixRow+2,startingMatrixColumn), randomSpatialVector.getAngularPartZ());
+         assertEquals(randomMatrix.get(startingMatrixRow+3,startingMatrixColumn), randomSpatialVector.getLinearPartX());
+         assertEquals(randomMatrix.get(startingMatrixRow+4,startingMatrixColumn), randomSpatialVector.getLinearPartY());
+         assertEquals(randomMatrix.get(startingMatrixRow+5,startingMatrixColumn), randomSpatialVector.getLinearPartZ());
       }   
       
    }
@@ -347,11 +346,13 @@ public abstract class SpatialVectorBasicsTest<T extends SpatialVectorBasics> ext
          T spatialVector = newRandomSpatialVector(random);
          ReferenceFrame randomFrame = EuclidFrameRandomTools.nextReferenceFrame(random);
          
-         assertFalse(spatialVector.getReferenceFrame().equals(randomFrame));
+         assertNotEquals(spatialVector.getReferenceFrame(), randomFrame);
+         
          spatialVector.setReferenceFrame(randomFrame);
-         assertTrue(spatialVector.getReferenceFrame().equals(randomFrame));
-         assertTrue(spatialVector.getAngularPart().getReferenceFrame().equals(randomFrame));
-         assertTrue(spatialVector.getLinearPart().getReferenceFrame().equals(randomFrame));
+         
+         assertEquals(spatialVector.getReferenceFrame(), randomFrame);
+         assertEquals(spatialVector.getAngularPart().getReferenceFrame(), randomFrame);
+         assertEquals(spatialVector.getLinearPart().getReferenceFrame(), randomFrame);
       }
    }
    
@@ -365,18 +366,19 @@ public abstract class SpatialVectorBasicsTest<T extends SpatialVectorBasics> ext
          T randomSpatialVector = newRandomSpatialVector(random);
          ReferenceFrame randomFrame = EuclidFrameRandomTools.nextReferenceFrame(random);
          
-         assertFalse(randomSpatialVector.getReferenceFrame().equals(randomFrame));
+         assertNotEquals(randomSpatialVector.getReferenceFrame(), randomFrame);
          
          randomSpatialVector.setToZero(randomFrame);
-         assertTrue(randomSpatialVector.getReferenceFrame().equals(randomFrame));
-         assertTrue(randomSpatialVector.getAngularPart().getReferenceFrame().equals(randomFrame));
-         assertTrue(randomSpatialVector.getLinearPart().getReferenceFrame().equals(randomFrame));
-         assertTrue(randomSpatialVector.getAngularPartX() == 0); 
-         assertTrue(randomSpatialVector.getAngularPartY() == 0);
-         assertTrue(randomSpatialVector.getAngularPartZ() == 0);
-         assertTrue(randomSpatialVector.getLinearPartX() == 0);
-         assertTrue(randomSpatialVector.getLinearPartY() == 0);
-         assertTrue(randomSpatialVector.getLinearPartZ() == 0);
+         
+         assertEquals(randomSpatialVector.getReferenceFrame(), randomFrame);
+         assertEquals(randomSpatialVector.getAngularPart().getReferenceFrame(), randomFrame);
+         assertEquals(randomSpatialVector.getLinearPart().getReferenceFrame(), randomFrame);
+         assertEquals(randomSpatialVector.getAngularPartX(), 0); 
+         assertEquals(randomSpatialVector.getAngularPartY(), 0);
+         assertEquals(randomSpatialVector.getAngularPartZ(), 0);
+         assertEquals(randomSpatialVector.getLinearPartX(), 0);
+         assertEquals(randomSpatialVector.getLinearPartY(), 0);
+         assertEquals(randomSpatialVector.getLinearPartZ(), 0);
       }      
    }
    
@@ -391,13 +393,13 @@ public abstract class SpatialVectorBasicsTest<T extends SpatialVectorBasics> ext
          T randomSpatialVector = newRandomSpatialVector(random);
          ReferenceFrame randomFrame = EuclidFrameRandomTools.nextReferenceFrame(random);
          
-         assertFalse(randomSpatialVector.getReferenceFrame().equals(randomFrame));
+         assertNotEquals(randomSpatialVector.getReferenceFrame(), randomFrame);
 
          randomSpatialVector.setToNaN(randomFrame);
          
-         assertTrue(randomSpatialVector.getReferenceFrame().equals(randomFrame));
-         assertTrue(randomSpatialVector.getAngularPart().getReferenceFrame().equals(randomFrame));
-         assertTrue(randomSpatialVector.getLinearPart().getReferenceFrame().equals(randomFrame));
+         assertEquals(randomSpatialVector.getReferenceFrame(), randomFrame);
+         assertEquals(randomSpatialVector.getAngularPart().getReferenceFrame(), randomFrame);
+         assertEquals(randomSpatialVector.getLinearPart().getReferenceFrame(), randomFrame);
          EuclidCoreTestTools.assertTuple3DContainsOnlyNaN(randomSpatialVector.getAngularPart());
          EuclidCoreTestTools.assertTuple3DContainsOnlyNaN(randomSpatialVector.getLinearPart());
       }         

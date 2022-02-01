@@ -2,9 +2,12 @@ package us.ihmc.mecano.spatial;
 
 import java.util.Random;
 import static org.junit.jupiter.api.Assertions.*;
+
+import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
+import us.ihmc.euclid.referenceFrame.exceptions.ReferenceFrameMismatchException;
 import us.ihmc.euclid.referenceFrame.tools.EuclidFrameRandomTools;
 import us.ihmc.euclid.referenceFrame.tools.ReferenceFrameTools;
 import us.ihmc.euclid.tools.EuclidCoreRandomTools;
@@ -64,15 +67,15 @@ public class SpatialVectorTest extends SpatialVectorBasicsTest<SpatialVector>
        */
       SpatialVector spatialVector = new SpatialVector();
 
-      assertTrue(spatialVector.getReferenceFrame() == ReferenceFrameTools.getWorldFrame());
-      assertTrue(spatialVector.getAngularPart().getReferenceFrame() == ReferenceFrameTools.getWorldFrame());
-      assertTrue(spatialVector.getLinearPart().getReferenceFrame() == ReferenceFrameTools.getWorldFrame());
-      assertTrue(spatialVector.getAngularPartX() == 0); 
-      assertTrue(spatialVector.getAngularPartY() == 0);
-      assertTrue(spatialVector.getAngularPartZ() == 0);
-      assertTrue(spatialVector.getLinearPartX() == 0);
-      assertTrue(spatialVector.getLinearPartY() == 0);
-      assertTrue(spatialVector.getLinearPartZ() == 0);
+      assertEquals(spatialVector.getReferenceFrame(), ReferenceFrameTools.getWorldFrame());
+      assertEquals(spatialVector.getAngularPart().getReferenceFrame(), ReferenceFrameTools.getWorldFrame());
+      assertEquals(spatialVector.getLinearPart().getReferenceFrame(), ReferenceFrameTools.getWorldFrame());
+      assertEquals(spatialVector.getAngularPartX(), 0); 
+      assertEquals(spatialVector.getAngularPartY(), 0);
+      assertEquals(spatialVector.getAngularPartZ(), 0);
+      assertEquals(spatialVector.getLinearPartX(), 0);
+      assertEquals(spatialVector.getLinearPartY(), 0);
+      assertEquals(spatialVector.getLinearPartZ(), 0);
       
       /*
        * Test constructor - public SpatialVector(ReferenceFrame expressedInFrame) 
@@ -85,15 +88,15 @@ public class SpatialVectorTest extends SpatialVectorBasicsTest<SpatialVector>
          ReferenceFrame randomFrame = EuclidFrameRandomTools.nextReferenceFrame(random);
          SpatialVector spatialVectorByReferenceFrame = new SpatialVector(randomFrame);
          
-         assertTrue(spatialVectorByReferenceFrame.getReferenceFrame().equals(randomFrame));
-         assertTrue(spatialVectorByReferenceFrame.getAngularPart().getReferenceFrame().equals(randomFrame));
-         assertTrue(spatialVectorByReferenceFrame.getLinearPart().getReferenceFrame().equals(randomFrame));
-         assertTrue(spatialVectorByReferenceFrame.getAngularPartX() == 0); 
-         assertTrue(spatialVectorByReferenceFrame.getAngularPartY() == 0);
-         assertTrue(spatialVectorByReferenceFrame.getAngularPartZ() == 0);
-         assertTrue(spatialVectorByReferenceFrame.getLinearPartX() == 0);
-         assertTrue(spatialVectorByReferenceFrame.getLinearPartY() == 0);
-         assertTrue(spatialVectorByReferenceFrame.getLinearPartZ() == 0);
+         assertEquals(spatialVectorByReferenceFrame.getReferenceFrame(), randomFrame);
+         assertEquals(spatialVectorByReferenceFrame.getAngularPart().getReferenceFrame(), randomFrame);
+         assertEquals(spatialVectorByReferenceFrame.getLinearPart().getReferenceFrame(), randomFrame);
+         assertEquals(spatialVectorByReferenceFrame.getAngularPartX(), 0); 
+         assertEquals(spatialVectorByReferenceFrame.getAngularPartY(), 0);
+         assertEquals(spatialVectorByReferenceFrame.getAngularPartZ(), 0);
+         assertEquals(spatialVectorByReferenceFrame.getLinearPartX(), 0);
+         assertEquals(spatialVectorByReferenceFrame.getLinearPartY(), 0);
+         assertEquals(spatialVectorByReferenceFrame.getLinearPartZ(), 0);
       }
       
       /*
@@ -113,9 +116,9 @@ public class SpatialVectorTest extends SpatialVectorBasicsTest<SpatialVector>
          
          SpatialVector spatialVectorByReferenceFrameAngularPartLinearPart = new SpatialVector(randomFrame, randomAngularPart, randomLinearPart);
          
-         assertTrue(spatialVectorByReferenceFrameAngularPartLinearPart.getReferenceFrame().equals(randomFrame));
-         assertTrue(spatialVectorByReferenceFrameAngularPartLinearPart.getAngularPart().getReferenceFrame().equals(randomFrame));
-         assertTrue(spatialVectorByReferenceFrameAngularPartLinearPart.getLinearPart().getReferenceFrame().equals(randomFrame));
+         assertEquals(spatialVectorByReferenceFrameAngularPartLinearPart.getReferenceFrame(), randomFrame);
+         assertEquals(spatialVectorByReferenceFrameAngularPartLinearPart.getAngularPart().getReferenceFrame(), randomFrame);
+         assertEquals(spatialVectorByReferenceFrameAngularPartLinearPart.getLinearPart().getReferenceFrame(), randomFrame);
          EuclidCoreTestTools.assertTuple3DEquals(spatialVectorByReferenceFrameAngularPartLinearPart.getAngularPart(), randomAngularPart, getEpsilon());
          EuclidCoreTestTools.assertTuple3DEquals(spatialVectorByReferenceFrameAngularPartLinearPart.getLinearPart(), randomLinearPart, getEpsilon());
       }
@@ -138,26 +141,20 @@ public class SpatialVectorTest extends SpatialVectorBasicsTest<SpatialVector>
          
          SpatialVector spatialVectorByAngularPartLinearPart = new SpatialVector(randomAngularPart, randomLinearPart);
          
-         assertTrue(spatialVectorByAngularPartLinearPart.getReferenceFrame().equals(randomFrame));
-         assertTrue(spatialVectorByAngularPartLinearPart.getAngularPart().getReferenceFrame().equals(randomFrame));
-         assertTrue(spatialVectorByAngularPartLinearPart.getLinearPart().getReferenceFrame().equals(randomFrame));
+         assertEquals(spatialVectorByAngularPartLinearPart.getReferenceFrame(), randomFrame);
+         assertEquals(spatialVectorByAngularPartLinearPart.getAngularPart().getReferenceFrame(), randomFrame);
+         assertEquals(spatialVectorByAngularPartLinearPart.getLinearPart().getReferenceFrame(), randomFrame);        
          EuclidCoreTestTools.assertTuple3DEquals(spatialVectorByAngularPartLinearPart.getAngularPart(), randomAngularPart, getEpsilon());
          EuclidCoreTestTools.assertTuple3DEquals(spatialVectorByAngularPartLinearPart.getLinearPart(), randomLinearPart, getEpsilon());
          
-         //Test creating a spatial vector with an angular part that has a different Reference Frame from the linear part throws an exception
-         try
+         ReferenceFrame randomDifferentFrame = EuclidFrameRandomTools.nextReferenceFrame(random);
+         randomLinearPart.setReferenceFrame(randomDifferentFrame);
+            
+         Assertions.assertThrows(ReferenceFrameMismatchException.class, () ->
          {
-            //set linear part reference frame different from the angular part's reference frame
-            ReferenceFrame randomDifferentFrame = EuclidFrameRandomTools.nextReferenceFrame(random);
-            randomLinearPart.setReferenceFrame(randomDifferentFrame);
+            @SuppressWarnings("unused")
             SpatialVector spatialVectorByAngularPartLinearPartDifferent = new SpatialVector(randomAngularPart, randomLinearPart);
-            assertTrue(spatialVectorByAngularPartLinearPartDifferent.getReferenceFrame().equals(randomLinearPart.getReferenceFrame()));
-            fail("Should have thrown a RuntimeException");
-         }
-         catch (RuntimeException e)
-         {
-            //good 
-         }
+         });
       }
       
       /*
@@ -176,7 +173,7 @@ public class SpatialVectorTest extends SpatialVectorBasicsTest<SpatialVector>
          SpatialVector spatialVectorByCopy = new SpatialVector(spatialVectorByReferenceFrameAngularPartLinearPart);
          
          assertFalse(spatialVectorByCopy == spatialVectorByReferenceFrameAngularPartLinearPart);
-         MecanoTestTools.assertSpatialVectorEquals(spatialVectorByReferenceFrameAngularPartLinearPart,spatialVectorByCopy, getEpsilon());
+         MecanoTestTools.assertSpatialVectorEquals(spatialVectorByReferenceFrameAngularPartLinearPart, spatialVectorByCopy, getEpsilon());
       }      
    } 
    
@@ -188,9 +185,9 @@ public class SpatialVectorTest extends SpatialVectorBasicsTest<SpatialVector>
       ReferenceFrame randomFrame = EuclidFrameRandomTools.nextReferenceFrame(random);
       SpatialVector spatialVector = new SpatialVector();
       
-      assertTrue(spatialVector.getReferenceFrame() == ReferenceFrameTools.getWorldFrame());
+      assertEquals(spatialVector.getReferenceFrame(), ReferenceFrameTools.getWorldFrame());
       spatialVector.setReferenceFrame(randomFrame);
-      assertTrue(spatialVector.getReferenceFrame() == randomFrame);
+      assertEquals(spatialVector.getReferenceFrame(), randomFrame);
    }
    
    @Test
@@ -200,6 +197,7 @@ public class SpatialVectorTest extends SpatialVectorBasicsTest<SpatialVector>
       
       for (int i = 0; i < ITERATIONS; i++)
       {
+         //Test equals() method
          SpatialVector originalSpatialVector = new SpatialVector(EuclidFrameRandomTools.nextReferenceFrame(random), EuclidCoreRandomTools.nextVector3D(random), EuclidCoreRandomTools.nextVector3D(random));
          SpatialVector copySpatialVector = originalSpatialVector;
          
@@ -228,7 +226,7 @@ public class SpatialVectorTest extends SpatialVectorBasicsTest<SpatialVector>
          Vector3D randomLinearPart = EuclidCoreRandomTools.nextVector3D(random);
          
          SpatialVector spatialVectorByReferenceFrameAngularPartLinearPart = new SpatialVector(randomFrame, randomAngularPart, randomLinearPart);
-         assertTrue(spatialVectorByReferenceFrameAngularPartLinearPart.toString().equals(MecanoIOTools.getSpatialVectorString(spatialVectorByReferenceFrameAngularPartLinearPart)));
+         assertEquals(spatialVectorByReferenceFrameAngularPartLinearPart.toString(), MecanoIOTools.getSpatialVectorString(spatialVectorByReferenceFrameAngularPartLinearPart));
       } 
       
    }
