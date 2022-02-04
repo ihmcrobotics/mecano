@@ -151,9 +151,9 @@ public interface SpatialImpulseReadOnly extends SpatialForceReadOnly
    default boolean geometricallyEquals(SpatialImpulseReadOnly other, double epsilon)
    {
       checkReferenceFrameMatch(other);
-      if (!getAngularPart().geometricallyEquals(getAngularPart(), epsilon))
+      if (!getAngularPart().geometricallyEquals(other.getAngularPart(), epsilon))
          return false;
-      if (!getLinearPart().geometricallyEquals(getLinearPart(), epsilon))
+      if (!getLinearPart().geometricallyEquals(other.getLinearPart(), epsilon))
          return false;
       return true;
    }
