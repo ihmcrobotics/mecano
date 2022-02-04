@@ -23,7 +23,6 @@ public class SpatialVectorTest extends SpatialVectorBasicsTest<SpatialVector>
    @Override
    public SpatialVector newEmptySpatialVector()
    {
-      // Return new empty Triangle3D()
       return new SpatialVector();
    }
 
@@ -218,17 +217,18 @@ public class SpatialVectorTest extends SpatialVectorBasicsTest<SpatialVector>
    public void testToString()
    {
       Random random = new Random(130375);
-      
+
       for (int i = 0; i < ITERATIONS; i++)
       {
          ReferenceFrame randomFrame = EuclidFrameRandomTools.nextReferenceFrame(random);
          Vector3D randomAngularPart = EuclidCoreRandomTools.nextVector3D(random);
          Vector3D randomLinearPart = EuclidCoreRandomTools.nextVector3D(random);
-         
+
          SpatialVector spatialVectorByReferenceFrameAngularPartLinearPart = new SpatialVector(randomFrame, randomAngularPart, randomLinearPart);
-         assertEquals(spatialVectorByReferenceFrameAngularPartLinearPart.toString(), MecanoIOTools.getSpatialVectorString(spatialVectorByReferenceFrameAngularPartLinearPart));
-      } 
-      
+         assertEquals(spatialVectorByReferenceFrameAngularPartLinearPart.toString(),
+                      MecanoIOTools.getSpatialVectorString(spatialVectorByReferenceFrameAngularPartLinearPart));
+      }
+
    }
 }
 
