@@ -7,6 +7,7 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.function.Function;
+import java.util.function.Predicate;
 
 import org.ejml.data.DMatrix;
 import org.ejml.data.DMatrixRMaj;
@@ -60,10 +61,22 @@ public class ForwardDynamicsCalculator
    private final ArticulatedBodyRecursionStep initialRecursionStep;
    /** Map to quickly retrieve information for each rigid-body. */
    private final Map<RigidBodyReadOnly, ArticulatedBodyRecursionStep> rigidBodyToRecursionStepMap = new LinkedHashMap<>();
+   /** For iterating over each rigid-body quickly. */
+   private final ArticulatedBodyRecursionStep[] articulatedBodyRecursionSteps;
 
-   /** The input of this algorithm: the effort matrix for all the joints to consider. */
+   /**
+    * The input of this algorithm: the effort matrix for all the joints to consider.
+    * <p>
+    * Also serves as the output for locked joint.
+    * </p>
+    */
    private final DMatrixRMaj jointTauMatrix;
-   /** The output of this algorithm: the acceleration matrix for all the joints to consider. */
+   /**
+    * The output of this algorithm: the acceleration matrix for all the joints to consider.
+    * <p>
+    * Also serves as the input for locked joint.
+    * </p>
+    */
    private final DMatrixRMaj jointAccelerationMatrix;
 
    /**
@@ -142,6 +155,7 @@ public class ForwardDynamicsCalculator
       buildMultiBodyTree(initialRecursionStep, input.getJointsToIgnore());
       if (considerIgnoredSubtreesInertia)
          initialRecursionStep.includeIgnoredSubtreeInertia();
+      articulatedBodyRecursionSteps = rigidBodyToRecursionStepMap.values().toArray(new ArticulatedBodyRecursionStep[rigidBodyToRecursionStepMap.size()]);
 
       int nDoFs = MultiBodySystemTools.computeDegreesOfFreedom(input.getJointsToConsider());
       jointTauMatrix = new DMatrixRMaj(nDoFs, 1);
@@ -306,7 +320,11 @@ public class ForwardDynamicsCalculator
     */
    public void setExternalWrenchesToZero()
    {
-      initialRecursionStep.setExternalWrenchToZeroRecursive();
+      for (ArticulatedBodyRecursionStep recursionStep : articulatedBodyRecursionSteps)
+      {
+         if (recursionStep.externalWrench != null)
+            recursionStep.externalWrench.setToZero();
+      }
    }
 
    /**
@@ -333,6 +351,53 @@ public class ForwardDynamicsCalculator
    public void setExternalWrench(RigidBodyReadOnly rigidBody, WrenchReadOnly externalWrench)
    {
       rigidBodyToRecursionStepMap.get(rigidBody).externalWrench.setMatchingFrame(externalWrench);
+   }
+
+   /**
+    * Sets whether the given joint should be locked or not.
+    * <p>
+    * By default, all joints are unlocked. Locking a joint can be used to pin the joint to a certain
+    * configuration when simulating.
+    * </p>
+    * <p>
+    * When a joint is locked, its motion (twist and acceleration) are constant and cannot be changed by
+    * this calculator. The desired joint effort is then ignored and the resulting effort is computed.
+    * </p>
+    * 
+    * @param joint the joint to lock or unlock. Not modified.
+    * @param lock  {@code true} for locking the joint, {@code false} otherwise. Default value is
+    *              {@code false}.
+    */
+   public void setLockJoint(JointReadOnly joint, boolean lock)
+   {
+      rigidBodyToRecursionStepMap.get(joint.getSuccessor()).isJointLocked = lock;
+   }
+
+   /**
+    * Convenience method for setting the lock flag of all the joints this calculator handles.
+    * 
+    * @param isJointLockedFunction the function used to determine if a joint should be locked
+    *                              (predicate should return {@code true}) or unlocked (predicate should
+    *                              return {@code false}).
+    */
+   public void setLockJoints(Predicate<JointReadOnly> isJointLockedFunction)
+   {
+      for (ArticulatedBodyRecursionStep recursionStep : articulatedBodyRecursionSteps)
+      {
+         if (recursionStep.getJoint() != null)
+            recursionStep.isJointLocked = isJointLockedFunction.test(recursionStep.getJoint());
+      }
+   }
+
+   /**
+    * Resets all joint to their default state: unlocked.
+    */
+   public void unlockAllJoints()
+   {
+      for (ArticulatedBodyRecursionStep recursionStep : articulatedBodyRecursionSteps)
+      {
+         recursionStep.isJointLocked = false;
+      }
    }
 
    /**
@@ -368,9 +433,11 @@ public class ForwardDynamicsCalculator
          MultiBodySystemTools.extractJointsState(indexedJointsInOrder, JointStateType.EFFORT, this.jointTauMatrix);
       }
 
-      initialRecursionStep.passOne();
+      boolean atLeastOneLockedJoint = initialRecursionStep.passOne();
       initialRecursionStep.passTwo();
       initialRecursionStep.passThree();
+      if (atLeastOneLockedJoint)
+         initialRecursionStep.passFour();
    }
 
    /**
@@ -394,6 +461,20 @@ public class ForwardDynamicsCalculator
    }
 
    /**
+    * Gets the joint efforts used as input of this calculator.
+    * <p>
+    * Note that for locked joint, the joint effort is actually computed and the effort matrix is
+    * updated accordingly.
+    * </p>
+    * 
+    * @return the joint efforts.
+    */
+   public DMatrixRMaj getJointTauMatrix()
+   {
+      return jointTauMatrix;
+   }
+
+   /**
     * Gets the computed N-by-1 acceleration vector for the given {@code joint}, where N is the number
     * of degrees of freedom the joint has.
     *
@@ -401,6 +482,28 @@ public class ForwardDynamicsCalculator
     * @return the computed joint acceleration matrix.
     */
    public DMatrixRMaj getComputedJointAcceleration(JointReadOnly joint)
+   {
+      ArticulatedBodyRecursionStep recursionStep = rigidBodyToRecursionStepMap.get(joint.getSuccessor());
+
+      if (recursionStep == null)
+         return null;
+      else
+         return recursionStep.qdd;
+   }
+
+   /**
+    * Gets the N-by-1 force vector for the given {@code joint}, where N is the number of degrees of
+    * freedom the joint has.
+    * <p>
+    * The joint efforts are provided in {@link #compute(DMatrix)} or extracted from the joint state and
+    * are the input of this algorithm. Howver, for locked joints, this calculator instead preserve the
+    * joint acceleration and calculate the joint effort.
+    * </p>
+    *
+    * @param joint the joint to get the effort of. Not modified.
+    * @return the joint effort matrix.
+    */
+   public DMatrixRMaj getJointTau(JointReadOnly joint)
    {
       ArticulatedBodyRecursionStep recursionStep = rigidBodyToRecursionStepMap.get(joint.getSuccessor());
 
@@ -490,6 +593,9 @@ public class ForwardDynamicsCalculator
    {
       return considerVelocities ? accelerationProvider : zeroVelocityAccelerationProvider;
    }
+
+   /** Intermediate result used for garbage free operations. */
+   private final SpatialForce jointForceFromChild = new SpatialForce();
 
    /**
     * Represents a single recursion step for any of the three passes of the articulated-body algorithm
@@ -736,6 +842,19 @@ public class ForwardDynamicsCalculator
        * Joint indices for storing {@code qdd} in the main matrix {@code jointAccelerationMatrix}.
        */
       final int[] jointIndices;
+      /**
+       * User parameter for locking a joint.
+       * <p>
+       * When a joint is locked, its motion (twist and acceleration) are constant and cannot be changed by
+       * this calculator.
+       * </p>
+       */
+      boolean isJointLocked = false;
+      /**
+       * Calculated joint wrench, before projection onto the joint motion subspace.
+       */
+      private final Wrench jointWrench;
+      private final DMatrixRMaj jointWrenchMatrix;
 
       private ArticulatedBodyRecursionStep(RigidBodyReadOnly rigidBody, ArticulatedBodyRecursionStep parent, int[] jointIndices)
       {
@@ -777,6 +896,8 @@ public class ForwardDynamicsCalculator
             a = null;
             inverseSolver = null;
             transformToParentJointFrame = null;
+            jointWrench = null;
+            jointWrenchMatrix = null;
          }
          else
          {
@@ -813,6 +934,8 @@ public class ForwardDynamicsCalculator
             transformToParentJointFrame = new RigidBodyTransform();
             if (!getJoint().isMotionSubspaceVariable())
                getJoint().getMotionSubspace(S);
+            jointWrench = new Wrench();
+            jointWrenchMatrix = new DMatrixRMaj(SpatialVectorReadOnly.SIZE, 1);
          }
       }
 
@@ -838,8 +961,10 @@ public class ForwardDynamicsCalculator
       /**
        * The first pass consists in calculating the bias wrench resulting from external and Coriolis
        * forces, and the bias acceleration resulting from the Coriolis acceleration.
+       * 
+       * @return {@code true} if there is at least one joint that is locked.
        */
-      public void passOne()
+      public boolean passOne()
       {
          if (isRoot())
          {
@@ -866,8 +991,11 @@ public class ForwardDynamicsCalculator
             biasAcceleration.get(c);
          }
 
+         boolean atLeastOneLockedJoint = isJointLocked;
+
          for (int childIndex = 0; childIndex < children.size(); childIndex++)
-            children.get(childIndex).passOne();
+            atLeastOneLockedJoint |= children.get(childIndex).passOne();
+         return atLeastOneLockedJoint;
       }
 
       /**
@@ -906,57 +1034,84 @@ public class ForwardDynamicsCalculator
             articulatedBiasWrench.add(child.articulatedBiasWrenchForParent);
          }
 
-         // Computing intermediate variables used in later calculation
+         int nDoFs = getJoint().getDegreesOfFreedom();
+
          if (getJoint().isMotionSubspaceVariable())
             getJoint().getMotionSubspace(S);
-         articulatedInertia.get(IA);
-         CommonOps_DDRM.mult(IA, S, U);
-         CommonOps_DDRM.multTransA(S, U, D);
 
-         int nDoFs = getJoint().getDegreesOfFreedom();
-         if (nDoFs == 1)
+         // Computing intermediate variables used in later calculation
+         if (!isJointLocked)
          {
-            Dinv.set(0, 1.0 / D.get(0));
-         }
-         else if (nDoFs == 0)
-         {
-            Dinv.reshape(0, 0);
-         }
-         else if (nDoFs <= 5)
-         {
-            UnrolledInverseFromMinor_DDRM.inv(D, Dinv);
+            articulatedInertia.get(IA);
+            // U_[6xN] = IA_[6x6] * S_[6xN]
+            CommonOps_DDRM.mult(IA, S, U);
+            // D_[NxN] = (S_[6xN])^T * U_[6xN]
+            CommonOps_DDRM.multTransA(S, U, D);
+
+            if (nDoFs == 1)
+            {
+               Dinv.set(0, 1.0 / D.get(0));
+            }
+            else if (nDoFs == 0)
+            {
+               Dinv.reshape(0, 0);
+            }
+            else if (nDoFs <= 5)
+            {
+               UnrolledInverseFromMinor_DDRM.inv(D, Dinv);
+            }
+            else
+            {
+               inverseSolver.setA(D);
+               inverseSolver.invert(Dinv);
+            }
+
+            // Computing u_i = tau_i - S_i^T * p_i^A
+            for (int dofIndex = 0; dofIndex < nDoFs; dofIndex++)
+            {
+               tau.set(dofIndex, 0, jointTauMatrix.get(jointIndices[dofIndex], 0));
+            }
+
+            articulatedBiasWrench.get(pA);
+            // u_[Nx1] = -(S_[6xN])^T * pA_[6x1]
+            CommonOps_DDRM.multTransA(-1.0, S, pA, u);
+            // u_[Nx1] = u_[Nx1] + tau_[Nx1]
+            CommonOps_DDRM.addEquals(u, tau);
+
+            if (!parent.isRoot())
+            {
+               // U_Dinv_[6xN] = U_[6xN] * Dinv_[NxN]
+               CommonOps_DDRM.mult(U, Dinv, U_Dinv);
+               // U_Dinv_UT[6x6] = U_Dinv_[6xN] * (U_[6xN])^T
+               CommonOps_DDRM.multTransB(U_Dinv, U, U_Dinv_UT);
+
+               // Computing I_i^a = I_i^A - U_i * D_i^-1 * U_i^T
+               articulatedInertiaForParent.setIncludingFrame(articulatedInertia);
+               articulatedInertiaForParent.sub(U_Dinv_UT);
+               articulatedInertiaForParent.get(Ia);
+
+               // Computing p_i^a = p_i^A + I_i^a * c_i + U_i * D_i^-1 * u_i
+               articulatedBiasWrench.get(pa);
+               // pa_[6x1] += Ia_[6x6] * c_[6x1]
+               CommonOps_DDRM.multAdd(Ia, c, pa);
+               // pa_[6x1] += U_Dinv_[6xN] * u_[Nx1]
+               CommonOps_DDRM.multAdd(U_Dinv, u, pa);
+               articulatedBiasWrenchForParent.setIncludingFrame(frameAfterJoint, pa);
+            }
          }
          else
          {
-            inverseSolver.setA(D);
-            inverseSolver.invert(Dinv);
-         }
+            if (!parent.isRoot())
+            {
+               // Computing I_i^a = I_i^A - U_i * D_i^-1 * U_i^T
+               articulatedInertiaForParent.setIncludingFrame(articulatedInertia);
+               articulatedInertiaForParent.get(Ia);
 
-         // Computing u_i = tau_i - S_i^T * p_i^A
-         for (int dofIndex = 0; dofIndex < nDoFs; dofIndex++)
-         {
-            tau.set(dofIndex, 0, jointTauMatrix.get(jointIndices[dofIndex], 0));
-         }
-
-         articulatedBiasWrench.get(pA);
-         CommonOps_DDRM.multTransA(-1.0, S, pA, u);
-         CommonOps_DDRM.addEquals(u, tau);
-
-         if (!parent.isRoot())
-         {
-            CommonOps_DDRM.mult(U, Dinv, U_Dinv);
-            CommonOps_DDRM.multTransB(U_Dinv, U, U_Dinv_UT);
-
-            // Computing I_i^a = I_i^A - U_i * D_i^-1 * U_i^T
-            articulatedInertiaForParent.setIncludingFrame(articulatedInertia);
-            articulatedInertiaForParent.sub(U_Dinv_UT);
-            articulatedInertiaForParent.get(Ia);
-
-            // Computing p_i^a = p_i^A + I_i^a * c_i + U_i * D_i^-1 * u_i
-            articulatedBiasWrench.get(pa);
-            CommonOps_DDRM.multAdd(Ia, c, pa);
-            CommonOps_DDRM.multAdd(U_Dinv, u, pa);
-            articulatedBiasWrenchForParent.setIncludingFrame(frameAfterJoint, pa);
+               // Computing p_i^a = p_i^A + I_i^a * c_i + U_i * D_i^-1 * u_i
+               articulatedBiasWrench.get(pa);
+               CommonOps_DDRM.multAdd(Ia, c, pa);
+               articulatedBiasWrenchForParent.setIncludingFrame(frameAfterJoint, pa);
+            }
          }
       }
 
@@ -980,13 +1135,22 @@ public class ForwardDynamicsCalculator
             rigidBodyAcceleration.add((SpatialVectorReadOnly) biasAcceleration);
             rigidBodyAcceleration.get(aPrime);
 
-            // Computing qdd_i = D_i^-1 * ( u_i - U_i^T * a'_i )
-            CommonOps_DDRM.multTransA(-1.0, U, aPrime, qdd_intermediate);
-            CommonOps_DDRM.addEquals(qdd_intermediate, u);
-            CommonOps_DDRM.mult(Dinv, qdd_intermediate, qdd);
+            if (!isJointLocked)
+            {
+               // Computing qdd_i = D_i^-1 * ( u_i - U_i^T * a'_i )
+               CommonOps_DDRM.multTransA(-1.0, U, aPrime, qdd_intermediate);
+               CommonOps_DDRM.addEquals(qdd_intermediate, u);
+               CommonOps_DDRM.mult(Dinv, qdd_intermediate, qdd);
 
-            // Computing a_i = a'_i + S_i * qdd_i
-            CommonOps_DDRM.mult(S, qdd, a);
+               // Computing a_i = a'_i + S_i * qdd_i
+               CommonOps_DDRM.mult(S, qdd, a);
+            }
+            else
+            {
+               // Just update the acceleration from the joint state.
+               getJoint().getJointAcceleration(0, qdd);
+               getJoint().getJointAcceleration().get(a);
+            }
 
             rigidBodyZeroVelocityAcceleration.add(a);
 
@@ -1003,13 +1167,44 @@ public class ForwardDynamicsCalculator
             children.get(childIndex).passThree();
       }
 
-      public void setExternalWrenchToZeroRecursive()
+      /**
+       * Only needed when there is one or more locked joint. This will compute their joint wrench.
+       */
+      public void passFour()
       {
-         if (externalWrench != null)
-            externalWrench.setToZero();
+         for (int childIndex = 0; childIndex < children.size(); childIndex++)
+            children.get(childIndex).passFour();
 
-         for (int i = 0; i < children.size(); i++)
-            children.get(i).setExternalWrenchToZeroRecursive();
+         if (isRoot())
+            return;
+
+         MovingReferenceFrame frameAfterJoint = getFrameAfterJoint();
+
+         rigidBodyAcceleration.changeFrame(getBodyFixedFrame());
+         bodyInertia.computeDynamicWrench(rigidBodyAcceleration, getBodyTwist(), jointWrench);
+         jointWrench.sub(externalWrench);
+         jointWrench.changeFrame(frameAfterJoint);
+
+         for (int childIndex = 0; childIndex < children.size(); childIndex++)
+            addJointWrenchFromChild(children.get(childIndex));
+
+         if (isJointLocked)
+         {
+            jointWrench.get(jointWrenchMatrix);
+            CommonOps_DDRM.multTransA(S, jointWrenchMatrix, tau);
+
+            for (int dofIndex = 0; dofIndex < getJoint().getDegreesOfFreedom(); dofIndex++)
+            {
+               jointTauMatrix.set(jointIndices[dofIndex], 0, tau.get(dofIndex, 0));
+            }
+         }
+      }
+
+      private void addJointWrenchFromChild(ArticulatedBodyRecursionStep child)
+      {
+         jointForceFromChild.setIncludingFrame(child.jointWrench);
+         jointForceFromChild.changeFrame(getFrameAfterJoint());
+         jointWrench.add(jointForceFromChild);
       }
 
       public boolean isRoot()

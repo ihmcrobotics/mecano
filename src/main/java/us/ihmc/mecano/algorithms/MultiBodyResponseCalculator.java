@@ -284,8 +284,7 @@ public class MultiBodyResponseCalculator
     * @return {@code true} is the apparent inertia matrix was successfully computed, {@code false}
     *         otherwise.
     */
-   public boolean computeRigidBodyApparentSpatialInertiaInverse(RigidBodyReadOnly target, ReferenceFrame inertiaFrame,
-                                                                DMatrix1Row apparentSpatialInertiaToPack)
+   public boolean computeRigidBodyApparentSpatialInertiaInverse(RigidBodyReadOnly target, ReferenceFrame inertiaFrame, DMatrix1Row apparentSpatialInertiaToPack)
    {
       return computeRigidBodyApparentSpatialInertiaInverse(target, inertiaFrame, null, apparentSpatialInertiaToPack);
    }
@@ -345,7 +344,9 @@ public class MultiBodyResponseCalculator
     * @return {@code true} is the apparent inertia matrix was successfully computed, {@code false}
     *         otherwise.
     */
-   public boolean computeRigidBodyApparentSpatialInertiaInverse(RigidBodyReadOnly target, ReferenceFrame inertiaFrame, boolean[] selectedAxes,
+   public boolean computeRigidBodyApparentSpatialInertiaInverse(RigidBodyReadOnly target,
+                                                                ReferenceFrame inertiaFrame,
+                                                                boolean[] selectedAxes,
                                                                 DMatrix1Row apparentSpatialInertiaToPack)
    {
       ResponseRecursionStep recursionStep = rigidBodyToRecursionStepMap.get(target);
@@ -444,8 +445,7 @@ public class MultiBodyResponseCalculator
     * @return {@code true} is the apparent inertia matrix was successfully computed, {@code false}
     *         otherwise.
     */
-   public boolean computeRigidBodyApparentLinearInertiaInverse(RigidBodyReadOnly target, ReferenceFrame inertiaFrame,
-                                                               DMatrix1Row apparentLinearInertiaToPack)
+   public boolean computeRigidBodyApparentLinearInertiaInverse(RigidBodyReadOnly target, ReferenceFrame inertiaFrame, DMatrix1Row apparentLinearInertiaToPack)
    {
       ResponseRecursionStep recursionStep = rigidBodyToRecursionStepMap.get(target);
 
@@ -1206,8 +1206,6 @@ public class MultiBodyResponseCalculator
       {
          isUpToDate = false;
 
-         DMatrixRMaj S = articulatedBodyRecursionStep.S;
-
          totalDisturbancePlus.setToZero();
 
          for (int i = 0; i < children.size(); i++)
@@ -1222,19 +1220,33 @@ public class MultiBodyResponseCalculator
 
          testDisturbancePlus.changeFrame(getFrameAfterJoint());
          totalDisturbancePlus.sub(testDisturbancePlus);
-
          totalDisturbancePlus.get(pAPlus);
-         CommonOps_DDRM.multTransA(-1.0, S, pAPlus, uPlus);
-         CommonOps_DDRM.addEquals(uPlus, tauPlus);
 
-         if (!parent.isRoot())
+         if (!articulatedBodyRecursionStep.isJointLocked)
          {
-            DMatrixRMaj U_Dinv = articulatedBodyRecursionStep.U_Dinv;
-            CommonOps_DDRM.mult(U_Dinv, uPlus, paPlus);
-            CommonOps_DDRM.addEquals(paPlus, pAPlus);
-            totalDisturbancePlusForParent.setIncludingFrame(totalDisturbancePlus.getReferenceFrame(), paPlus);
-            totalDisturbancePlusForParent.applyTransform(articulatedBodyRecursionStep.transformToParentJointFrame);
-            totalDisturbancePlusForParent.setReferenceFrame(parent.getFrameAfterJoint());
+            DMatrixRMaj S = articulatedBodyRecursionStep.S;
+
+            CommonOps_DDRM.multTransA(-1.0, S, pAPlus, uPlus);
+            CommonOps_DDRM.addEquals(uPlus, tauPlus);
+
+            if (!parent.isRoot())
+            {
+               DMatrixRMaj U_Dinv = articulatedBodyRecursionStep.U_Dinv;
+               CommonOps_DDRM.mult(U_Dinv, uPlus, paPlus);
+               CommonOps_DDRM.addEquals(paPlus, pAPlus);
+               totalDisturbancePlusForParent.setIncludingFrame(totalDisturbancePlus.getReferenceFrame(), paPlus);
+               totalDisturbancePlusForParent.applyTransform(articulatedBodyRecursionStep.transformToParentJointFrame);
+               totalDisturbancePlusForParent.setReferenceFrame(parent.getFrameAfterJoint());
+            }
+         }
+         else
+         {
+            if (!parent.isRoot())
+            {
+               totalDisturbancePlusForParent.setIncludingFrame(totalDisturbancePlus.getReferenceFrame(), pAPlus);
+               totalDisturbancePlusForParent.applyTransform(articulatedBodyRecursionStep.transformToParentJointFrame);
+               totalDisturbancePlusForParent.setReferenceFrame(parent.getFrameAfterJoint());
+            }
          }
       }
 
@@ -1249,9 +1261,19 @@ public class MultiBodyResponseCalculator
          {
             int[] jointIndices = articulatedBodyRecursionStep.jointIndices;
 
-            for (int dofIndex = 0; dofIndex < getJoint().getDegreesOfFreedom(); dofIndex++)
+            if (!articulatedBodyRecursionStep.isJointLocked)
             {
-               jointMotionChangeMatrix.set(jointIndices[dofIndex], 0, qddPlus.get(dofIndex, 0));
+               for (int dofIndex = 0; dofIndex < getJoint().getDegreesOfFreedom(); dofIndex++)
+               {
+                  jointMotionChangeMatrix.set(jointIndices[dofIndex], 0, qddPlus.get(dofIndex, 0));
+               }
+            }
+            else
+            {
+               for (int dofIndex = 0; dofIndex < getJoint().getDegreesOfFreedom(); dofIndex++)
+               {
+                  jointMotionChangeMatrix.set(jointIndices[dofIndex], 0, 0.0);
+               }
             }
          }
 
@@ -1275,33 +1297,40 @@ public class MultiBodyResponseCalculator
 
          if (!isRoot())
          {
-            DMatrixRMaj S = articulatedBodyRecursionStep.S;
-            DMatrixRMaj U = articulatedBodyRecursionStep.U;
-            DMatrixRMaj Dinv = articulatedBodyRecursionStep.Dinv;
-
             // Going top-down in the tree.
             parentMotionChange.setIncludingFrame(parent.rigidBodyMotionChange);
             parentMotionChange.applyInverseTransform(articulatedBodyRecursionStep.transformToParentJointFrame);
             parentMotionChange.setReferenceFrame(getFrameAfterJoint());
             parentMotionChange.get(aParentPlus);
 
-            if (isOnDisturbedBranch)
+            if (!articulatedBodyRecursionStep.isJointLocked)
             {
-               // Computing qdd = D^-1 * ( u - U^T * a_parent )
-               CommonOps_DDRM.multTransA(-1.0, U, aParentPlus, qddPlus_intermediate);
-               CommonOps_DDRM.addEquals(qddPlus_intermediate, uPlus);
-               CommonOps_DDRM.mult(Dinv, qddPlus_intermediate, qddPlus);
+               DMatrixRMaj S = articulatedBodyRecursionStep.S;
+               DMatrixRMaj U = articulatedBodyRecursionStep.U;
+               DMatrixRMaj Dinv = articulatedBodyRecursionStep.Dinv;
+
+               if (isOnDisturbedBranch)
+               {
+                  // Computing qdd = D^-1 * ( u - U^T * a_parent )
+                  CommonOps_DDRM.multTransA(-1.0, U, aParentPlus, qddPlus_intermediate);
+                  CommonOps_DDRM.addEquals(qddPlus_intermediate, uPlus);
+                  CommonOps_DDRM.mult(Dinv, qddPlus_intermediate, qddPlus);
+               }
+               else
+               {
+                  // Computing qdd = -D^-1 * U^T * a_parent )
+                  CommonOps_DDRM.multTransA(-1.0, U, aParentPlus, qddPlus_intermediate);
+                  CommonOps_DDRM.mult(Dinv, qddPlus_intermediate, qddPlus);
+               }
+
+               CommonOps_DDRM.mult(S, qddPlus, aPlus);
+               CommonOps_DDRM.addEquals(aPlus, aParentPlus);
+               rigidBodyMotionChange.setIncludingFrame(getBodyFixedFrame(), input.getInertialFrame(), getFrameAfterJoint(), aPlus);
             }
             else
             {
-               // Computing qdd = -D^-1 * U^T * a_parent )
-               CommonOps_DDRM.multTransA(-1.0, U, aParentPlus, qddPlus_intermediate);
-               CommonOps_DDRM.mult(Dinv, qddPlus_intermediate, qddPlus);
+               rigidBodyMotionChange.setIncludingFrame(getBodyFixedFrame(), input.getInertialFrame(), getFrameAfterJoint(), aParentPlus);
             }
-
-            CommonOps_DDRM.mult(S, qddPlus, aPlus);
-            CommonOps_DDRM.addEquals(aPlus, aParentPlus);
-            rigidBodyMotionChange.setIncludingFrame(getBodyFixedFrame(), input.getInertialFrame(), getFrameAfterJoint(), aPlus);
          }
 
          isUpToDate = true;
