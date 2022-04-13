@@ -8,16 +8,17 @@ import us.ihmc.mecano.multiBodySystem.CrossFourBarJoint;
 import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
 import us.ihmc.mecano.tools.MultiBodySystemFactories;
 import us.ihmc.mecano.tools.MultiBodySystemFactories.RigidBodyBuilder;
+import us.ihmc.mecano.yoVariables.multiBodySystem.interfaces.YoOneDoFJointBasics;
 import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
 
 /**
  * Implementation of a {@code CrossFourBarJoint} with internal state variables backed with
  * {@code YoVariable}s.
- * 
+ *
  * @see CrossFourBarJoint
  */
-public class YoCrossFourBarJoint extends CrossFourBarJoint
+public class YoCrossFourBarJoint extends CrossFourBarJoint implements YoOneDoFJointBasics
 {
    private final YoDouble q, qd, qdd, tau;
    private final YoDouble jointLimitLower, jointLimitUpper;
@@ -26,7 +27,7 @@ public class YoCrossFourBarJoint extends CrossFourBarJoint
 
    /**
     * Creates a new cross four bar joint with the following structure:
-    * 
+    *
     * <pre>
     *    root
     *      |
@@ -51,7 +52,7 @@ public class YoCrossFourBarJoint extends CrossFourBarJoint
     * Note that the mass properties of the two cross bars, i.e. rigid bodies DA and BC, are not used in
     * the rigid-body algorithms such as inverse and forward dynamics calculators.
     * </p>
-    * 
+    *
     * @param name                    the name of this joint.
     * @param predecessor             the rigid-body connected to and preceding this joint.
     * @param jointNameA              the name of the joint A, see diagram above. Can be {@code null}.
@@ -115,34 +116,14 @@ public class YoCrossFourBarJoint extends CrossFourBarJoint
                               Vector3DReadOnly jointAxis,
                               YoRegistry registry)
    {
-      this(name,
-           predecessor,
-           jointNameA,
-           jointNameB,
-           jointNameC,
-           jointNameD,
-           bodyNameDA,
-           bodyNameBC,
-           transformAToPredecessor,
-           transformBToPredecessor,
-           transformDToA,
-           transformCToB,
-           bodyInertiaDA,
-           bodyInertiaBC,
-           bodyMassDA,
-           bodyMassBC,
-           bodyInertiaPoseDA,
-           bodyInertiaPoseBC,
-           MultiBodySystemFactories.DEFAULT_RIGID_BODY_BUILDER,
-           actuatedJointIndex,
-           loopClosureJointIndex,
-           jointAxis,
-           registry);
+      this(name, predecessor, jointNameA, jointNameB, jointNameC, jointNameD, bodyNameDA, bodyNameBC, transformAToPredecessor, transformBToPredecessor,
+           transformDToA, transformCToB, bodyInertiaDA, bodyInertiaBC, bodyMassDA, bodyMassBC, bodyInertiaPoseDA, bodyInertiaPoseBC,
+           MultiBodySystemFactories.DEFAULT_RIGID_BODY_BUILDER, actuatedJointIndex, loopClosureJointIndex, jointAxis, registry);
    }
 
    /**
     * Creates a new cross four bar joint with the following structure:
-    * 
+    *
     * <pre>
     *    root
     *      |
@@ -167,7 +148,7 @@ public class YoCrossFourBarJoint extends CrossFourBarJoint
     * Note that the mass properties of the two cross bars, i.e. rigid bodies DA and BC, are not used in
     * the rigid-body algorithms such as inverse and forward dynamics calculators.
     * </p>
-    * 
+    *
     * @param name                    the name of this joint.
     * @param predecessor             the rigid-body connected to and preceding this joint.
     * @param jointNameA              the name of the joint A, see diagram above. Can be {@code null}.
@@ -234,28 +215,9 @@ public class YoCrossFourBarJoint extends CrossFourBarJoint
                               Vector3DReadOnly jointAxis,
                               YoRegistry registry)
    {
-      super(name,
-            predecessor,
-            jointNameA,
-            jointNameB,
-            jointNameC,
-            jointNameD,
-            bodyNameDA,
-            bodyNameBC,
-            transformAToPredecessor,
-            transformBToPredecessor,
-            transformDToA,
-            transformCToB,
-            bodyInertiaDA,
-            bodyInertiaBC,
-            bodyMassDA,
-            bodyMassBC,
-            bodyInertiaPoseDA,
-            bodyInertiaPoseBC,
-            rigidBodyBuilder,
-            actuatedJointIndex,
-            loopClosureJointIndex,
-            jointAxis);
+      super(name, predecessor, jointNameA, jointNameB, jointNameC, jointNameD, bodyNameDA, bodyNameBC, transformAToPredecessor, transformBToPredecessor,
+            transformDToA, transformCToB, bodyInertiaDA, bodyInertiaBC, bodyMassDA, bodyMassBC, bodyInertiaPoseDA, bodyInertiaPoseBC, rigidBodyBuilder,
+            actuatedJointIndex, loopClosureJointIndex, jointAxis);
 
       q = new YoDouble("q_" + getName(), registry);
       qd = new YoDouble("qd_" + getName(), registry);
@@ -460,5 +422,115 @@ public class YoCrossFourBarJoint extends CrossFourBarJoint
    {
       effortLimitUpper.set(super.getEffortLimitUpper(), false);
       return effortLimitUpper.getValue();
+   }
+
+   /**
+    * Gets the yoVariable used to store this joint position.
+    *
+    * @return the position's yoVariable.
+    */
+   @Override
+   public YoDouble getYoQ()
+   {
+      return q;
+   }
+
+   /**
+    * Gets the yoVariable used to store this joint velocity.
+    *
+    * @return the velocity's yoVariable.
+    */
+   @Override
+   public YoDouble getYoQd()
+   {
+      return qd;
+   }
+
+   /**
+    * Gets the yoVariable used to store this joint acceleration.
+    *
+    * @return the acceleration's yoVariable.
+    */
+   @Override
+   public YoDouble getYoQdd()
+   {
+      return qdd;
+   }
+
+   /**
+    * Gets the yoVariable used to store this joint force/torque.
+    *
+    * @return the torque's yoVariable.
+    */
+   @Override
+   public YoDouble getYoTau()
+   {
+      return tau;
+   }
+
+   /**
+    * Gets the yoVariable used to store this joint lower limit.
+    *
+    * @return the lower limit's yoVariable.
+    */
+   @Override
+   public YoDouble getYoJointLimitLower()
+   {
+      return jointLimitLower;
+   }
+
+   /**
+    * Gets the yoVariable used to store this joint upper limit.
+    *
+    * @return the upper limit's yoVariable.
+    */
+   @Override
+   public YoDouble getYoJointLimitUpper()
+   {
+      return jointLimitUpper;
+   }
+
+   /**
+    * Gets the yoVariable used to store this joint's velocity lower limit.
+    *
+    * @return the velocity lower limit's yoVariable.
+    */
+   @Override
+   public YoDouble getYoVelocityLimitLower()
+   {
+      return velocityLimitLower;
+   }
+
+   /**
+    * Gets the yoVariable used to store this joint's velocity upper limit.
+    *
+    * @return the velocity upper limit's yoVariable.
+    */
+   @Override
+   public YoDouble getYoVelocityLimitUpper()
+   {
+      return velocityLimitUpper;
+   }
+
+   /**
+    * Gets the yoVariable used to store this joint's force/torque lower limit.
+    *
+    * @return the torque lower limit's yoVariable.
+    */
+   @Override
+   public YoDouble getYoEffortLimitLower()
+   {
+      return effortLimitLower;
+   }
+
+   /**
+    * Gets the yoVariable used to store this joint's force/torque upper limit.
+    *
+    * @return the torque upper limit's yoVariable.
+    */
+   @Override
+   public YoDouble getYoEffortLimitUpper()
+   {
+      return effortLimitUpper;
    }
 }

@@ -27,10 +27,12 @@ import us.ihmc.euclid.tuple4D.interfaces.QuaternionBasics;
 import us.ihmc.euclid.tuple4D.interfaces.Tuple4DReadOnly;
 import us.ihmc.mecano.frames.MovingReferenceFrame;
 import us.ihmc.mecano.multiBodySystem.interfaces.JointReadOnly;
+import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointReadOnly;
 import us.ihmc.mecano.multiBodySystem.interfaces.RevoluteJointReadOnly;
 import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyReadOnly;
 import us.ihmc.mecano.spatial.SpatialAcceleration;
 import us.ihmc.mecano.spatial.Twist;
+import us.ihmc.mecano.spatial.Wrench;
 import us.ihmc.mecano.spatial.interfaces.FixedFrameSpatialAccelerationBasics;
 import us.ihmc.mecano.spatial.interfaces.FixedFrameTwistBasics;
 import us.ihmc.mecano.spatial.interfaces.FixedFrameWrenchBasics;
@@ -120,6 +122,103 @@ public class MecanoFactories
             twistRelativeToParentToPack.setIncludingFrame(joint.getJointTwist());
          }
       };
+   }
+
+   /**
+    * Factory for creating a new unit-length successor twist for the given 1-DoF joint. This assumes
+    * that the joint's unit-twist is invariant.
+    * 
+    * @param joint the joint to create the new twist for.
+    * @return the unit-length successor twist.
+    */
+   public static TwistReadOnly newOneDoFJointUnitSuccessorTwist(OneDoFJointReadOnly joint)
+   {
+      ReferenceFrame predecessorFrame = joint.getPredecessor().getBodyFixedFrame();
+      ReferenceFrame successorFrame = joint.getSuccessor().getBodyFixedFrame();
+
+      Twist unitSuccessorTwist = new Twist(joint.getUnitJointTwist());
+      unitSuccessorTwist.setBaseFrame(predecessorFrame);
+      unitSuccessorTwist.setBodyFrame(successorFrame);
+      unitSuccessorTwist.changeFrame(successorFrame);
+      return unitSuccessorTwist;
+   }
+
+   /**
+    * Factory for creating a new unit-length predecessor twist for the given 1-DoF joint. This assumes
+    * that the joint's unit-twist is invariant.
+    * 
+    * @param joint the joint to create the new twist for.
+    * @return the unit-length predecessor twist.
+    */
+   public static TwistReadOnly newOneDoFJointUnitPredecessorTwist(OneDoFJointReadOnly joint)
+   {
+      ReferenceFrame predecessorFrame = joint.getPredecessor().getBodyFixedFrame();
+      ReferenceFrame successorFrame = joint.getSuccessor().getBodyFixedFrame();
+
+      Twist unitPredecessorTwist = new Twist(joint.getUnitJointTwist());
+      unitPredecessorTwist.invert();
+      unitPredecessorTwist.setBaseFrame(successorFrame);
+      unitPredecessorTwist.setBodyFrame(predecessorFrame);
+      unitPredecessorTwist.changeFrame(predecessorFrame);
+      return unitPredecessorTwist;
+   }
+
+   /**
+    * Factory for creating a new unit-length successor spatial acceleration for the given 1-DoF joint.
+    * This assumes that the joint's unit-acceleration is invariant.
+    * 
+    * @param joint the joint to create the new spatial acceleration for.
+    * @return the unit-length successor spatial acceleration.
+    */
+   public static SpatialAccelerationReadOnly newOneDoFJointUnitSuccessorAcceleration(OneDoFJointReadOnly joint)
+   {
+      ReferenceFrame predecessorFrame = joint.getPredecessor().getBodyFixedFrame();
+      ReferenceFrame successorFrame = joint.getSuccessor().getBodyFixedFrame();
+
+      SpatialAcceleration unitSuccessorSpatialAcceleration = new SpatialAcceleration(joint.getUnitJointAcceleration());
+      unitSuccessorSpatialAcceleration.setBaseFrame(predecessorFrame);
+      unitSuccessorSpatialAcceleration.setBodyFrame(successorFrame);
+      unitSuccessorSpatialAcceleration.changeFrame(successorFrame);
+      return unitSuccessorSpatialAcceleration;
+   }
+
+   /**
+    * Factory for creating a new unit-length predecessor spatial acceleration for the given 1-DoF
+    * joint. This assumes that the joint's unit-acceleration is invariant.
+    * 
+    * @param joint the joint to create the new spatial acceleration for.
+    * @return the unit-length predecessor spatial acceleration.
+    */
+   public static SpatialAccelerationReadOnly newOneDoFJointUnitPredecessorAcceleration(OneDoFJointReadOnly joint)
+   {
+      ReferenceFrame predecessorFrame = joint.getPredecessor().getBodyFixedFrame();
+      ReferenceFrame successorFrame = joint.getSuccessor().getBodyFixedFrame();
+
+      SpatialAcceleration unitPredecessorSpatialAcceleration = new SpatialAcceleration(joint.getUnitJointAcceleration());
+      unitPredecessorSpatialAcceleration.invert();
+      unitPredecessorSpatialAcceleration.setBaseFrame(successorFrame);
+      unitPredecessorSpatialAcceleration.setBodyFrame(predecessorFrame);
+      unitPredecessorSpatialAcceleration.changeFrame(predecessorFrame); // actually, there is relative motion, but not in the directions that matter
+      return unitPredecessorSpatialAcceleration;
+   }
+
+   /**
+    * Factory for creating a new unit-length wrench for the given 1-DoF joint. This assumes that the
+    * joint's motion subspace is invariant.
+    * 
+    * @param joint the joint to create the new wrench for.
+    * @return the unit-length wrench.
+    */
+   public static WrenchReadOnly newOneDoFJointUnitJointWrench(OneDoFJointReadOnly joint)
+   {
+      MovingReferenceFrame frameAfterJoint = joint.getFrameAfterJoint();
+      ReferenceFrame successorFrame = joint.getSuccessor().getBodyFixedFrame();
+
+      Wrench unitJointWrench = new Wrench();
+      unitJointWrench.setIncludingFrame(joint.getUnitJointTwist());
+      unitJointWrench.setBodyFrame(successorFrame);
+      unitJointWrench.changeFrame(frameAfterJoint);
+      return unitJointWrench;
    }
 
    /**
