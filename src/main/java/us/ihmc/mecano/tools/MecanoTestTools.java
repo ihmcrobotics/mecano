@@ -534,6 +534,7 @@ public class MecanoTestTools
          throwNotEqualAssertionError(messagePrefix, expected == null ? "null" : expected.toString(), actual == null ? "null" : actual.toString());
 
       boolean equal;
+
       if (expected instanceof DMatrixD1 && actual instanceof DMatrixD1)
          equal = MatrixFeatures_DDRM.isEquals((DMatrixD1) expected, (DMatrixD1) actual, epsilon);
       else
@@ -541,18 +542,25 @@ public class MecanoTestTools
 
       if (!equal)
       {
-         double max = 0.0;
-         DMatrixRMaj difference = new DMatrixRMaj(expected.getNumRows(), expected.getNumCols());
-         for (int row = 0; row < expected.getNumRows(); row++)
+         if (expected.getNumRows() != actual.getNumRows() || expected.getNumCols() != actual.getNumCols())
          {
-            for (int col = 0; col < expected.getNumCols(); col++)
-            {
-               double diff = expected.unsafe_get(row, col) - actual.unsafe_get(row, col);
-               difference.unsafe_set(row, col, diff);
-               max = Math.max(max, Math.abs(diff));
-            }
+            throwNotEqualAssertionError(messagePrefix, expected.toString(), actual.toString());
          }
-         throwNotEqualAssertionError(messagePrefix, expected.toString(), actual.toString(), difference.toString() + "\nMax difference of: " + max);
+         else
+         {
+            double max = 0.0;
+            DMatrixRMaj difference = new DMatrixRMaj(expected.getNumRows(), expected.getNumCols());
+            for (int row = 0; row < expected.getNumRows(); row++)
+            {
+               for (int col = 0; col < expected.getNumCols(); col++)
+               {
+                  double diff = expected.unsafe_get(row, col) - actual.unsafe_get(row, col);
+                  difference.unsafe_set(row, col, diff);
+                  max = Math.max(max, Math.abs(diff));
+               }
+            }
+            throwNotEqualAssertionError(messagePrefix, expected.toString(), actual.toString(), difference.toString() + "\nMax difference of: " + max);
+         }
       }
    }
 

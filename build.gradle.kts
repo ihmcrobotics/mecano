@@ -6,7 +6,7 @@ plugins {
 
 ihmc {
    group = "us.ihmc"
-   version = "0.9.1"
+   version = "0.10.0"
    vcsUrl = "https://github.com/ihmcrobotics/mecano"
    openSource = true
 
@@ -18,9 +18,9 @@ mainDependencies {
    api("org.ejml:ejml-core:0.39")
    api("org.ejml:ejml-ddense:0.39")
 
-   api("us.ihmc:euclid:0.17.0")
-   api("us.ihmc:euclid-frame:0.17.0")
-   api("us.ihmc:euclid-geometry:0.17.0")
+   api("us.ihmc:euclid:0.17.2")
+   api("us.ihmc:euclid-frame:0.17.2")
+   api("us.ihmc:euclid-geometry:0.17.2")
 }
 
 testDependencies {
@@ -40,5 +40,5 @@ graphvizDependencies {
 yovariablesDependencies {
    api(ihmc.sourceSetProject("main"))
 
-   api("us.ihmc:ihmc-yovariables:0.9.11")
+   api("us.ihmc:ihmc-yovariables:0.9.12")
 }

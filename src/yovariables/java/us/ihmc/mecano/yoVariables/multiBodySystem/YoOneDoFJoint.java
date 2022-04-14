@@ -1,9 +1,20 @@
 package us.ihmc.mecano.yoVariables.multiBodySystem;
 
+import java.util.Collections;
+import java.util.List;
+
+import us.ihmc.euclid.tools.EuclidCoreIOTools;
 import us.ihmc.euclid.transform.interfaces.RigidBodyTransformReadOnly;
 import us.ihmc.euclid.tuple3D.interfaces.Vector3DReadOnly;
-import us.ihmc.mecano.multiBodySystem.OneDoFJoint;
+import us.ihmc.mecano.multiBodySystem.Joint;
 import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
+import us.ihmc.mecano.spatial.SpatialAcceleration;
+import us.ihmc.mecano.spatial.Twist;
+import us.ihmc.mecano.spatial.interfaces.SpatialAccelerationReadOnly;
+import us.ihmc.mecano.spatial.interfaces.TwistReadOnly;
+import us.ihmc.mecano.spatial.interfaces.WrenchReadOnly;
+import us.ihmc.mecano.tools.MecanoFactories;
+import us.ihmc.mecano.yoVariables.multiBodySystem.interfaces.YoOneDoFJointBasics;
 import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
 
@@ -13,12 +24,23 @@ import us.ihmc.yoVariables.variable.YoDouble;
  * @author Twan Koolen
  * @author Sylvain Bertrand
  */
-public abstract class YoOneDoFJoint extends OneDoFJoint
+public abstract class YoOneDoFJoint extends Joint implements YoOneDoFJointBasics
 {
    private final YoDouble q, qd, qdd, tau;
    private final YoDouble jointLimitLower, jointLimitUpper;
    private final YoDouble velocityLimitLower, velocityLimitUpper;
    private final YoDouble effortLimitLower, effortLimitUpper;
+
+   // See OneDoFJoint for additional documentation
+   private final TwistReadOnly jointTwist;
+   private final TwistReadOnly unitJointTwist;
+   private final List<TwistReadOnly> unitTwists;
+   private TwistReadOnly unitSuccessorTwist, unitPredecessorTwist;
+   private final SpatialAccelerationReadOnly jointAcceleration;
+   private final SpatialAccelerationReadOnly unitJointAcceleration;
+   private SpatialAccelerationReadOnly unitSuccessorAcceleration, unitPredecessorAcceleration;
+   private WrenchReadOnly jointWrench;
+   private WrenchReadOnly unitJointWrench;
 
    /**
     * Creates the abstract layer for a new 1-DoF joint backed by {@code YoVariable}s.
@@ -33,10 +55,14 @@ public abstract class YoOneDoFJoint extends OneDoFJoint
     *                             parent joint. Not modified.
     * @param registry             the registry to register child variables to.
     */
-   public YoOneDoFJoint(String name, RigidBodyBasics predecessor, Vector3DReadOnly jointAxisAngularPart, Vector3DReadOnly jointAxisLinearPart,
-                        RigidBodyTransformReadOnly transformToParent, YoRegistry registry)
+   public YoOneDoFJoint(String name,
+                        RigidBodyBasics predecessor,
+                        Vector3DReadOnly jointAxisAngularPart,
+                        Vector3DReadOnly jointAxisLinearPart,
+                        RigidBodyTransformReadOnly transformToParent,
+                        YoRegistry registry)
    {
-      super(name, predecessor, jointAxisAngularPart, jointAxisLinearPart, transformToParent);
+      super(name, predecessor, transformToParent);
 
       q = new YoDouble("q_" + getName(), registry);
       qd = new YoDouble("qd_" + getName(), registry);
@@ -54,127 +80,214 @@ public abstract class YoOneDoFJoint extends OneDoFJoint
       velocityLimitUpper.set(Double.POSITIVE_INFINITY);
       effortLimitLower.set(Double.NEGATIVE_INFINITY);
       effortLimitUpper.set(Double.POSITIVE_INFINITY);
+
+      unitJointTwist = new Twist(afterJointFrame, beforeJointFrame, afterJointFrame, jointAxisAngularPart, jointAxisLinearPart);
+      unitTwists = Collections.singletonList(unitJointTwist);
+      jointTwist = MecanoFactories.newTwistReadOnly(this::getQd, unitJointTwist);
+      unitJointAcceleration = new SpatialAcceleration(unitJointTwist);
+      jointAcceleration = MecanoFactories.newSpatialAccelerationVectorReadOnly(this::getQdd, unitJointAcceleration);
    }
 
    /** {@inheritDoc} */
    @Override
-   public void setQ(double q)
+   public void setSuccessor(RigidBodyBasics successor)
    {
-      this.q.set(q);
+      this.successor = successor;
+      unitSuccessorTwist = MecanoFactories.newOneDoFJointUnitSuccessorTwist(this);
+      unitPredecessorTwist = MecanoFactories.newOneDoFJointUnitPredecessorTwist(this);
+      unitSuccessorAcceleration = MecanoFactories.newOneDoFJointUnitSuccessorAcceleration(this);
+      unitPredecessorAcceleration = MecanoFactories.newOneDoFJointUnitPredecessorAcceleration(this);
+      unitJointWrench = MecanoFactories.newOneDoFJointUnitJointWrench(this);
+      jointWrench = MecanoFactories.newWrenchReadOnly(this::getTau, unitJointWrench);
    }
 
    /** {@inheritDoc} */
    @Override
-   public void setQd(double qd)
+   public TwistReadOnly getJointTwist()
    {
-      this.qd.set(qd);
+      return jointTwist;
    }
 
    /** {@inheritDoc} */
    @Override
-   public void setQdd(double qdd)
+   public TwistReadOnly getUnitJointTwist()
    {
-      this.qdd.set(qdd);
+      return unitJointTwist;
    }
 
    /** {@inheritDoc} */
    @Override
-   public void setTau(double tau)
+   public List<TwistReadOnly> getUnitTwists()
    {
-      this.tau.set(tau);
+      return unitTwists;
    }
 
    /** {@inheritDoc} */
    @Override
-   public void setJointLimits(double jointLimitLower, double jointLimitUpper)
+   public TwistReadOnly getUnitSuccessorTwist()
    {
-      this.jointLimitLower.set(jointLimitLower);
-      this.jointLimitUpper.set(jointLimitUpper);
+      return unitSuccessorTwist;
    }
 
    /** {@inheritDoc} */
    @Override
-   public void setVelocityLimits(double velocityLimitLower, double velocityLimitUpper)
+   public TwistReadOnly getUnitPredecessorTwist()
    {
-      this.velocityLimitLower.set(velocityLimitLower);
-      this.velocityLimitUpper.set(velocityLimitUpper);
+      return unitPredecessorTwist;
    }
 
    /** {@inheritDoc} */
    @Override
-   public void setEffortLimits(double effortLimitLower, double effortLimitUpper)
+   public SpatialAccelerationReadOnly getJointAcceleration()
    {
-      this.effortLimitLower.set(effortLimitLower);
-      this.effortLimitUpper.set(effortLimitUpper);
+      return jointAcceleration;
    }
 
    /** {@inheritDoc} */
    @Override
-   public double getQ()
+   public SpatialAccelerationReadOnly getUnitJointAcceleration()
    {
-      return q.getValue();
+      return unitJointAcceleration;
    }
 
    /** {@inheritDoc} */
    @Override
-   public double getQd()
+   public SpatialAccelerationReadOnly getUnitSuccessorAcceleration()
    {
-      return qd.getValue();
+      return unitSuccessorAcceleration;
    }
 
    /** {@inheritDoc} */
    @Override
-   public double getQdd()
+   public SpatialAccelerationReadOnly getUnitPredecessorAcceleration()
    {
-      return qdd.getValue();
+      return unitPredecessorAcceleration;
    }
 
    /** {@inheritDoc} */
    @Override
-   public double getTau()
+   public WrenchReadOnly getJointWrench()
    {
-      return tau.getValue();
+      return jointWrench;
    }
 
-   /** {@inheritDoc} */
+   /**
+    * Gets the yoVariable used to store this joint position.
+    *
+    * @return the position's yoVariable.
+    */
    @Override
-   public double getJointLimitLower()
+   public YoDouble getYoQ()
    {
-      return jointLimitLower.getValue();
+      return q;
    }
 
-   /** {@inheritDoc} */
+   /**
+    * Gets the yoVariable used to store this joint velocity.
+    *
+    * @return the velocity's yoVariable.
+    */
    @Override
-   public double getJointLimitUpper()
+   public YoDouble getYoQd()
    {
-      return jointLimitUpper.getValue();
+      return qd;
    }
 
-   /** {@inheritDoc} */
+   /**
+    * Gets the yoVariable used to store this joint acceleration.
+    *
+    * @return the acceleration's yoVariable.
+    */
    @Override
-   public double getVelocityLimitLower()
+   public YoDouble getYoQdd()
    {
-      return velocityLimitLower.getValue();
+      return qdd;
    }
 
-   /** {@inheritDoc} */
+   /**
+    * Gets the yoVariable used to store this joint force/torque.
+    *
+    * @return the force/torque's yoVariable.
+    */
    @Override
-   public double getVelocityLimitUpper()
+   public YoDouble getYoTau()
    {
-      return velocityLimitUpper.getValue();
+      return tau;
    }
 
-   /** {@inheritDoc} */
+   /**
+    * Gets the yoVariable used to store this joint lower limit.
+    *
+    * @return the lower limit's yoVariable.
+    */
    @Override
-   public double getEffortLimitLower()
+   public YoDouble getYoJointLimitLower()
    {
-      return effortLimitLower.getValue();
+      return jointLimitLower;
    }
 
-   /** {@inheritDoc} */
+   /**
+    * Gets the yoVariable used to store this joint upper limit.
+    *
+    * @return the upper limit's yoVariable.
+    */
    @Override
-   public double getEffortLimitUpper()
+   public YoDouble getYoJointLimitUpper()
    {
-      return effortLimitUpper.getValue();
+      return jointLimitUpper;
+   }
+
+   /**
+    * Gets the yoVariable used to store this joint's velocity lower limit.
+    *
+    * @return the velocity lower limit's yoVariable.
+    */
+   @Override
+   public YoDouble getYoVelocityLimitLower()
+   {
+      return velocityLimitLower;
+   }
+
+   /**
+    * Gets the yoVariable used to store this joint's velocity upper limit.
+    *
+    * @return the velocity upper limit's yoVariable.
+    */
+   @Override
+   public YoDouble getYoVelocityLimitUpper()
+   {
+      return velocityLimitUpper;
+   }
+
+   /**
+    * Gets the yoVariable used to store this joint's force/torque lower limit.
+    *
+    * @return the force/torque lower limit's yoVariable.
+    */
+   @Override
+   public YoDouble getYoEffortLimitLower()
+   {
+      return effortLimitLower;
+   }
+
+   /**
+    * Gets the yoVariable used to store this joint's force/torque upper limit.
+    *
+    * @return the force/torque upper limit's yoVariable.
+    */
+   @Override
+   public YoDouble getYoEffortLimitUpper()
+   {
+      return effortLimitUpper;
+   }
+
+   @Override
+   public String toString()
+   {
+      String qAsString = String.format(EuclidCoreIOTools.DEFAULT_FORMAT, getQ());
+      String qdAsString = String.format(EuclidCoreIOTools.DEFAULT_FORMAT, getQd());
+      String qddAsString = String.format(EuclidCoreIOTools.DEFAULT_FORMAT, getQdd());
+      String tauAsString = String.format(EuclidCoreIOTools.DEFAULT_FORMAT, getTau());
+      return super.toString() + ", q: " + qAsString + ", qd: " + qdAsString + ", qdd: " + qddAsString + ", tau: " + tauAsString;
    }
 }

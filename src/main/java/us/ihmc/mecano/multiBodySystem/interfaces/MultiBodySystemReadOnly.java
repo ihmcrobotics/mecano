@@ -74,6 +74,16 @@ public interface MultiBodySystemReadOnly
    }
 
    /**
+    * Computes and returns the total number of degrees of freedom for the jonits to consider.
+    * 
+    * @return the total number of DoFs for {@link #getJointsToConsider()}.
+    */
+   default int getNumberOfDoFs()
+   {
+      return MultiBodySystemTools.computeDegreesOfFreedom(getJointsToConsider());
+   }
+
+   /**
     * Gets all the joints to be ignored in the algorithm.
     *
     * @return the list of all the joints to be ignored.

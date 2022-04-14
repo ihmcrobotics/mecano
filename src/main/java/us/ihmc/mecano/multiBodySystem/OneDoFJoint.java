@@ -3,7 +3,6 @@ package us.ihmc.mecano.multiBodySystem;
 import java.util.Collections;
 import java.util.List;
 
-import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.tools.EuclidCoreIOTools;
 import us.ihmc.euclid.transform.interfaces.RigidBodyTransformReadOnly;
 import us.ihmc.euclid.tuple3D.interfaces.Vector3DReadOnly;
@@ -11,7 +10,6 @@ import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointBasics;
 import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
 import us.ihmc.mecano.spatial.SpatialAcceleration;
 import us.ihmc.mecano.spatial.Twist;
-import us.ihmc.mecano.spatial.Wrench;
 import us.ihmc.mecano.spatial.interfaces.SpatialAccelerationReadOnly;
 import us.ihmc.mecano.spatial.interfaces.TwistReadOnly;
 import us.ihmc.mecano.spatial.interfaces.WrenchReadOnly;
@@ -161,7 +159,10 @@ public abstract class OneDoFJoint extends Joint implements OneDoFJointBasics
     * @param transformToParent    the transform from this joint to the {@code frameAfterJoint} of its
     *                             parent joint. Not modified.
     */
-   public OneDoFJoint(String name, RigidBodyBasics predecessor, Vector3DReadOnly jointAxisAngularPart, Vector3DReadOnly jointAxisLinearPart,
+   public OneDoFJoint(String name,
+                      RigidBodyBasics predecessor,
+                      Vector3DReadOnly jointAxisAngularPart,
+                      Vector3DReadOnly jointAxisLinearPart,
                       RigidBodyTransformReadOnly transformToParent)
    {
       super(name, predecessor, transformToParent);
@@ -178,49 +179,11 @@ public abstract class OneDoFJoint extends Joint implements OneDoFJointBasics
    public void setSuccessor(RigidBodyBasics successor)
    {
       this.successor = successor;
-
-      ReferenceFrame predecessorFrame = getPredecessor().getBodyFixedFrame();
-      ReferenceFrame successorFrame = getSuccessor().getBodyFixedFrame();
-
-      {
-         Twist twist = new Twist(unitJointTwist);
-         twist.setBaseFrame(predecessorFrame);
-         twist.setBodyFrame(successorFrame);
-         twist.changeFrame(successorFrame);
-         unitSuccessorTwist = twist;
-      }
-
-      {
-         Twist twist = new Twist(unitSuccessorTwist);
-         twist.invert();
-         twist.changeFrame(predecessorFrame);
-         unitPredecessorTwist = twist;
-      }
-
-      {
-         SpatialAcceleration acceleration = new SpatialAcceleration(unitJointAcceleration);
-         acceleration.setBaseFrame(predecessorFrame);
-         acceleration.setBodyFrame(successorFrame);
-         acceleration.changeFrame(successorFrame);
-         unitSuccessorAcceleration = acceleration;
-      }
-
-      {
-         SpatialAcceleration acceleration = new SpatialAcceleration(unitSuccessorAcceleration);
-         acceleration.invert();
-         acceleration.changeFrame(predecessorFrame); // actually, there is relative motion, but not in the directions that matter
-         unitPredecessorAcceleration = acceleration;
-
-      }
-
-      {
-         Wrench wrench = new Wrench();
-         wrench.setIncludingFrame(unitJointTwist);
-         wrench.setBodyFrame(successorFrame);
-         wrench.changeFrame(afterJointFrame);
-         unitJointWrench = wrench;
-      }
-
+      unitSuccessorTwist = MecanoFactories.newOneDoFJointUnitSuccessorTwist(this);
+      unitPredecessorTwist = MecanoFactories.newOneDoFJointUnitPredecessorTwist(this);
+      unitSuccessorAcceleration = MecanoFactories.newOneDoFJointUnitSuccessorAcceleration(this);
+      unitPredecessorAcceleration = MecanoFactories.newOneDoFJointUnitPredecessorAcceleration(this);
+      unitJointWrench = MecanoFactories.newOneDoFJointUnitJointWrench(this);
       jointWrench = MecanoFactories.newWrenchReadOnly(this::getTau, unitJointWrench);
    }
 
