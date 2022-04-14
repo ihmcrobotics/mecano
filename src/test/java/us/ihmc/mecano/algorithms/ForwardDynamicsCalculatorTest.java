@@ -22,6 +22,7 @@ import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.tools.EuclidCoreIOTools;
 import us.ihmc.euclid.tools.EuclidCoreRandomTools;
 import us.ihmc.log.LogTools;
+import us.ihmc.mecano.algorithms.ForwardDynamicsCalculator.JointSourceMode;
 import us.ihmc.mecano.algorithms.TablePrinter.Alignment;
 import us.ihmc.mecano.algorithms.interfaces.RigidBodyAccelerationProvider;
 import us.ihmc.mecano.multiBodySystem.Joint;
@@ -293,7 +294,7 @@ public class ForwardDynamicsCalculatorTest
    }
 
    @Test
-   public void testLockedJointZeroVelocityAccelerationForLockedJoints()
+   public void testJointAccelerationSourceWithZeroVelocityAcceleration()
    {
       Random random = new Random(2343);
 
@@ -332,7 +333,7 @@ public class ForwardDynamicsCalculatorTest
          jointsToLock.forEach(j ->
          {
             j.setJointTauToZero(); // Make sure the forward dynamics calculator does not use that info.
-            fwdDyn.setLockJoint(j, true);
+            fwdDyn.setJointSourceMode(j, JointSourceMode.ACCELERATION_SOURCE);
          });
 
          fwdDyn.compute();
@@ -399,7 +400,7 @@ public class ForwardDynamicsCalculatorTest
    }
 
    @Test
-   public void testLockedJointGeneral()
+   public void testJointMixedSourceModeGeneral()
    {
       Random random = new Random(2343);
 
@@ -433,8 +434,8 @@ public class ForwardDynamicsCalculatorTest
             jointsToLock.remove(jointsToLock.size() - 1);
          jointsToLock.forEach(j ->
          {
-            j.setJointTauToZero();
-            fwdDyn.setLockJoint(j, true);
+            j.setJointTauToZero(); // Make sure the forward dynamics calculator does not use that info.
+            fwdDyn.setJointSourceMode(j, JointSourceMode.ACCELERATION_SOURCE);
          });
 
          fwdDyn.compute();
