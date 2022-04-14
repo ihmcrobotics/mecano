@@ -491,7 +491,12 @@ public class ForwardDynamicsCalculator
     * {@link JointMatrixIndexProvider} that was used to configure this calculator.
     * </p>
     *
-    * @param jointTauInput the matrix containing the joint efforts to use. Not modified.
+    * @param jointTauInput          the matrix containing the joint efforts to use. If {@code null},
+    *                               the joint state is used.. Not modified.
+    * @param jointAccelerationInput the matrix containing the joint accelerations to use, only used for
+    *                               joints with source mode set to
+    *                               {@link JointSourceMode#ACCELERATION_SOURCE}. If {@code null}, the
+    *                               joint state is used. Not modified.
     */
    public void compute(DMatrix jointTauInput, DMatrix jointAccelerationInput)
    {
