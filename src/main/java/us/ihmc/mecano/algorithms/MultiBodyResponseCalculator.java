@@ -15,6 +15,7 @@ import us.ihmc.euclid.Axis3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.tools.EuclidCoreTools;
 import us.ihmc.mecano.algorithms.ForwardDynamicsCalculator.ArticulatedBodyRecursionStep;
+import us.ihmc.mecano.algorithms.ForwardDynamicsCalculator.JointSourceMode;
 import us.ihmc.mecano.algorithms.interfaces.RigidBodyAccelerationProvider;
 import us.ihmc.mecano.algorithms.interfaces.RigidBodyTwistProvider;
 import us.ihmc.mecano.frames.MovingReferenceFrame;
@@ -1222,7 +1223,7 @@ public class MultiBodyResponseCalculator
          totalDisturbancePlus.sub(testDisturbancePlus);
          totalDisturbancePlus.get(pAPlus);
 
-         if (!articulatedBodyRecursionStep.isJointLocked)
+         if (articulatedBodyRecursionStep.sourceMode == JointSourceMode.EFFORT_SOURCE)
          {
             DMatrixRMaj S = articulatedBodyRecursionStep.S;
 
@@ -1261,7 +1262,7 @@ public class MultiBodyResponseCalculator
          {
             int[] jointIndices = articulatedBodyRecursionStep.jointIndices;
 
-            if (!articulatedBodyRecursionStep.isJointLocked)
+            if (articulatedBodyRecursionStep.sourceMode == JointSourceMode.EFFORT_SOURCE)
             {
                for (int dofIndex = 0; dofIndex < getJoint().getDegreesOfFreedom(); dofIndex++)
                {
@@ -1303,7 +1304,7 @@ public class MultiBodyResponseCalculator
             parentMotionChange.setReferenceFrame(getFrameAfterJoint());
             parentMotionChange.get(aParentPlus);
 
-            if (!articulatedBodyRecursionStep.isJointLocked)
+            if (articulatedBodyRecursionStep.sourceMode == JointSourceMode.EFFORT_SOURCE)
             {
                DMatrixRMaj S = articulatedBodyRecursionStep.S;
                DMatrixRMaj U = articulatedBodyRecursionStep.U;
