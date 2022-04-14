@@ -408,14 +408,20 @@ public class ForwardDynamicsCalculator
     * acceleration. Note that in that mode, any provided effort input for that joint is ignored.
     * </ul>
     * 
-    * @param jointSourceModeFunction the function used to determine a joint source mode.
+    * @param jointSourceModeFunction the function used to determine a joint source mode. The function
+    *                                can return {@code null} for joints which source mode should not be
+    *                                changed.
     */
    public void setJointSourceModes(Function<JointReadOnly, JointSourceMode> jointSourceModeFunction)
    {
       for (ArticulatedBodyRecursionStep recursionStep : articulatedBodyRecursionSteps)
       {
          if (recursionStep.getJoint() != null)
-            recursionStep.sourceMode = jointSourceModeFunction.apply(recursionStep.getJoint());
+         {
+            JointSourceMode newMode = jointSourceModeFunction.apply(recursionStep.getJoint());
+            if (newMode != null)
+               recursionStep.sourceMode = newMode;
+         }
       }
    }
 
@@ -428,6 +434,28 @@ public class ForwardDynamicsCalculator
       {
          recursionStep.sourceMode = JointSourceMode.EFFORT_SOURCE;
       }
+   }
+
+   /**
+    * Gets the current source mode for the given joint.
+    * <ul>
+    * Source mode can be:
+    * <li>{@link JointSourceMode#EFFORT_SOURCE} (default): the joint effort is provided as an input to
+    * this calculator, via {@link JointReadOnly#getJointWrench()} or the given matrix when calling
+    * compute. The joint acceleration is computed in this calculator and depend on the joint's effort.
+    * Note that in that mode, any provided acceleration input for that joint is ignored.
+    * <li>{@link JointSourceMode#ACCELERATION_SOURCE}: the joint acceleration is provided as an input
+    * to this calculator, via {@link JointReadOnly#getJointAcceleration()} or the given matrix when
+    * calling compute. The joint effort is computed in this calculator and depend on the joint's
+    * acceleration. Note that in that mode, any provided effort input for that joint is ignored.
+    * </ul>
+    * 
+    * @param joint the joint to get the current source mode of.
+    * @return the current joint source mode.
+    */
+   public JointSourceMode getJointSourceMode(JointReadOnly joint)
+   {
+      return rigidBodyToRecursionStepMap.get(joint.getSuccessor()).sourceMode;
    }
 
    /**
