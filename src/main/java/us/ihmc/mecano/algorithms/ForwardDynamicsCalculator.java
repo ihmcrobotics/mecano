@@ -9,13 +9,17 @@ import java.util.Map;
 import java.util.function.Function;
 import java.util.function.Predicate;
 
+import org.ejml.MatrixDimensionException;
 import org.ejml.data.DMatrix;
+import org.ejml.data.DMatrix1Row;
+import org.ejml.data.DMatrixD1;
 import org.ejml.data.DMatrixRMaj;
 import org.ejml.dense.row.CommonOps_DDRM;
 import org.ejml.dense.row.factory.LinearSolverFactory_DDRM;
 import org.ejml.dense.row.misc.UnrolledInverseFromMinor_DDRM;
 import org.ejml.interfaces.linsol.LinearSolverDense;
 
+import us.ihmc.euclid.matrix.Matrix3D;
 import us.ihmc.euclid.referenceFrame.exceptions.ReferenceFrameMismatchException;
 import us.ihmc.euclid.referenceFrame.interfaces.FrameTuple3DReadOnly;
 import us.ihmc.euclid.transform.RigidBodyTransform;
@@ -638,10 +642,23 @@ public class ForwardDynamicsCalculator
       final ArticulatedBodyInertia articulatedInertia;
       /**
        * Apparent bias wrench to this joint.
+       * 
+       * <pre>
+       * p<sup>A</sup> = p + &sum;<sub>&forall;child</sub> p<sup>a</sup>
+       * </pre>
        */
       final SpatialForce articulatedBiasWrench;
       /**
        * Pre-transformed articulated-body inertia for the parent.
+       *
+       * <pre>
+       * I<sup>a</sup> = I<sup>A</sup> - U D<sup>-1</sup> U<sup>T</sup>
+       *  <sup> </sup> = I<sup>A</sup> - U ( S<sup>T</sup> U )<sup>-1</sup> U<sup>T</sup>
+       *  <sup> </sup> = I<sup>A</sup> - I<sup>A</sup> S ( S<sup>T</sup> I<sup>A</sup> S )<sup>-1</sup> S<sup>T</sup> I<sup>A</sup>
+       * </pre>
+       *
+       * where <tt>I<sup>A</sup></tt> is this handle's articulated-body inertia, and <tt>S</tt> is the
+       * parent joint motion subspace.
        */
       final ArticulatedBodyInertia articulatedInertiaForParent;
       /**
@@ -656,10 +673,6 @@ public class ForwardDynamicsCalculator
        * Spatial acceleration of this rigid-body ignoring joint velocities.
        */
       final SpatialAcceleration rigidBodyZeroVelocityAcceleration = new SpatialAcceleration();
-      /**
-       * <tt>IA</tt> is the 6-by-6 articulated-body inertia for this body.
-       */
-      final DMatrixRMaj IA;
       /**
        * <tt>S</tt> is the 6-by-N matrix representing the motion subspace of the parent joint, where N is
        * the number of DoFs of the joint.
@@ -726,31 +739,10 @@ public class ForwardDynamicsCalculator
        */
       final DMatrixRMaj U_Dinv_UT;
       /**
-       * This is the apparent articulated rigid-body inertia for the parent:
-       *
-       * <pre>
-       * I<sup>a</sup> = I<sup>A</sup> - U D<sup>-1</sup> U<sup>T</sup>
-       *  <sup> </sup> = I<sup>A</sup> - U ( S<sup>T</sup> U )<sup>-1</sup> U<sup>T</sup>
-       *  <sup> </sup> = I<sup>A</sup> - I<sup>A</sup> S ( S<sup>T</sup> I<sup>A</sup> S )<sup>-1</sup> S<sup>T</sup> I<sup>A</sup>
-       * </pre>
-       *
-       * where <tt>I<sup>A</sup></tt> is this handle's articulated-body inertia, and <tt>S</tt> is the
-       * parent joint motion subspace.
-       */
-      final DMatrixRMaj Ia;
-      /**
        * This is the N-by-1 vector representing the joint effort, where N is equal to the number of DoFs
        * that the joint has.
        */
       final DMatrixRMaj tau;
-      /**
-       * This is some bias force for this joint:
-       *
-       * <pre>
-       * p<sup>A</sup> = p + &sum;<sub>&forall;child</sub> p<sup>a</sup>
-       * </pre>
-       */
-      final DMatrixRMaj pA;
       /**
        * Intermediate result to save computation:
        *
@@ -789,14 +781,6 @@ public class ForwardDynamicsCalculator
        * <tt>c</tt> the bias acceleration for this joint.
        */
       final DMatrixRMaj pa;
-      /**
-       * Intermediate result to save computation:
-       *
-       * <pre>
-       * a' = a<sub>parent</sub> + c
-       * </pre>
-       */
-      final DMatrixRMaj aPrime;
       /**
        * This body acceleration:
        *
@@ -877,7 +861,6 @@ public class ForwardDynamicsCalculator
             rigidBodyAcceleration.setToZero(getBodyFixedFrame(), input.getInertialFrame(), getBodyFixedFrame());
             rigidBodyZeroVelocityAcceleration.setToZero(getBodyFixedFrame(), input.getInertialFrame(), getBodyFixedFrame());
 
-            IA = null;
             S = null;
             U = null;
             D = null;
@@ -885,14 +868,11 @@ public class ForwardDynamicsCalculator
             U_Dinv = null;
             U_Dinv_UT = null;
             tau = null;
-            pA = null;
             u = null;
             c = null;
             pa = null;
-            Ia = null;
             qdd = null;
             qdd_intermediate = null;
-            aPrime = null;
             a = null;
             inverseSolver = null;
             transformToParentJointFrame = null;
@@ -913,7 +893,6 @@ public class ForwardDynamicsCalculator
             articulatedInertiaForParent = parent.isRoot() ? null : new ArticulatedBodyInertia();
             articulatedBiasWrenchForParent = parent.isRoot() ? null : new SpatialForce();
 
-            IA = new DMatrixRMaj(SpatialVectorReadOnly.SIZE, SpatialVectorReadOnly.SIZE);
             S = new DMatrixRMaj(SpatialVectorReadOnly.SIZE, nDoFs);
             U = new DMatrixRMaj(SpatialVectorReadOnly.SIZE, nDoFs);
             D = new DMatrixRMaj(nDoFs, nDoFs);
@@ -921,14 +900,11 @@ public class ForwardDynamicsCalculator
             U_Dinv = new DMatrixRMaj(SpatialVectorReadOnly.SIZE, nDoFs);
             U_Dinv_UT = new DMatrixRMaj(SpatialVectorReadOnly.SIZE, SpatialVectorReadOnly.SIZE);
             tau = new DMatrixRMaj(nDoFs, 1);
-            pA = new DMatrixRMaj(SpatialVectorReadOnly.SIZE, 1);
             u = new DMatrixRMaj(nDoFs, 1);
             c = new DMatrixRMaj(SpatialVectorReadOnly.SIZE, 1);
             pa = new DMatrixRMaj(SpatialVectorReadOnly.SIZE, 1);
-            Ia = new DMatrixRMaj(SpatialVectorReadOnly.SIZE, SpatialVectorReadOnly.SIZE);
             qdd = new DMatrixRMaj(nDoFs, 1);
             qdd_intermediate = new DMatrixRMaj(nDoFs, 1);
-            aPrime = new DMatrixRMaj(SpatialVectorReadOnly.SIZE, 1);
             a = new DMatrixRMaj(SpatialVectorReadOnly.SIZE, 1);
             inverseSolver = nDoFs == 6 ? LinearSolverFactory_DDRM.symmPosDef(6) : null;
             transformToParentJointFrame = new RigidBodyTransform();
@@ -1042,9 +1018,8 @@ public class ForwardDynamicsCalculator
          // Computing intermediate variables used in later calculation
          if (!isJointLocked)
          {
-            articulatedInertia.get(IA);
             // U_[6xN] = IA_[6x6] * S_[6xN]
-            CommonOps_DDRM.mult(IA, S, U);
+            mult(articulatedInertia, S, U);
             // D_[NxN] = (S_[6xN])^T * U_[6xN]
             CommonOps_DDRM.multTransA(S, U, D);
 
@@ -1072,9 +1047,8 @@ public class ForwardDynamicsCalculator
                tau.set(dofIndex, 0, jointTauMatrix.get(jointIndices[dofIndex], 0));
             }
 
-            articulatedBiasWrench.get(pA);
             // u_[Nx1] = -(S_[6xN])^T * pA_[6x1]
-            CommonOps_DDRM.multTransA(-1.0, S, pA, u);
+            multTransA(-1.0, S, articulatedBiasWrench, u);
             // u_[Nx1] = u_[Nx1] + tau_[Nx1]
             CommonOps_DDRM.addEquals(u, tau);
 
@@ -1088,12 +1062,11 @@ public class ForwardDynamicsCalculator
                // Computing I_i^a = I_i^A - U_i * D_i^-1 * U_i^T
                articulatedInertiaForParent.setIncludingFrame(articulatedInertia);
                articulatedInertiaForParent.sub(U_Dinv_UT);
-               articulatedInertiaForParent.get(Ia);
 
                // Computing p_i^a = p_i^A + I_i^a * c_i + U_i * D_i^-1 * u_i
                articulatedBiasWrench.get(pa);
                // pa_[6x1] += Ia_[6x6] * c_[6x1]
-               CommonOps_DDRM.multAdd(Ia, c, pa);
+               multAdd(articulatedInertiaForParent, c, pa);
                // pa_[6x1] += U_Dinv_[6xN] * u_[Nx1]
                CommonOps_DDRM.multAdd(U_Dinv, u, pa);
                articulatedBiasWrenchForParent.setIncludingFrame(frameAfterJoint, pa);
@@ -1105,11 +1078,14 @@ public class ForwardDynamicsCalculator
             {
                // Computing I_i^a = I_i^A - U_i * D_i^-1 * U_i^T
                articulatedInertiaForParent.setIncludingFrame(articulatedInertia);
-               articulatedInertiaForParent.get(Ia);
 
                // Computing p_i^a = p_i^A + I_i^a * c_i + U_i * D_i^-1 * u_i
                articulatedBiasWrench.get(pa);
-               CommonOps_DDRM.multAdd(Ia, c, pa);
+               multAdd(articulatedInertiaForParent, c, pa);
+
+               getJoint().getJointAcceleration().get(a);
+               multAdd(articulatedInertiaForParent, a, pa);
+
                articulatedBiasWrenchForParent.setIncludingFrame(frameAfterJoint, pa);
             }
          }
@@ -1133,12 +1109,11 @@ public class ForwardDynamicsCalculator
             rigidBodyAcceleration.applyInverseTransform(transformToParentJointFrame);
             rigidBodyAcceleration.setReferenceFrame(getFrameAfterJoint());
             rigidBodyAcceleration.add((SpatialVectorReadOnly) biasAcceleration);
-            rigidBodyAcceleration.get(aPrime);
 
             if (!isJointLocked)
             {
                // Computing qdd_i = D_i^-1 * ( u_i - U_i^T * a'_i )
-               CommonOps_DDRM.multTransA(-1.0, U, aPrime, qdd_intermediate);
+               multTransA(-1.0, U, rigidBodyAcceleration, qdd_intermediate);
                CommonOps_DDRM.addEquals(qdd_intermediate, u);
                CommonOps_DDRM.mult(Dinv, qdd_intermediate, qdd);
 
@@ -1154,7 +1129,7 @@ public class ForwardDynamicsCalculator
 
             rigidBodyZeroVelocityAcceleration.add(a);
 
-            CommonOps_DDRM.addEquals(a, aPrime);
+            addEquals(a, rigidBodyAcceleration);
             rigidBodyAcceleration.setIncludingFrame(getBodyFixedFrame(), input.getInertialFrame(), getFrameAfterJoint(), a);
 
             for (int dofIndex = 0; dofIndex < getJoint().getDegreesOfFreedom(); dofIndex++)
@@ -1236,6 +1211,175 @@ public class ForwardDynamicsCalculator
       public String toString()
       {
          return "RigidBody: " + rigidBody + ", parent: " + parent.rigidBody + ", children: " + Arrays.asList(children.stream().map(c -> c.rigidBody).toArray());
+      }
+   }
+
+   /**
+    * Same as {@link CommonOps_DDRM#addEquals(DMatrixD1, DMatrixD1)}.
+    */
+   static void addEquals(DMatrixD1 a, SpatialVectorReadOnly b)
+   {
+      if (a.numCols != 1 || a.numRows != 6)
+         throw new MatrixDimensionException("The 'a' and 'b' matrices do not have compatible dimensions");
+
+      a.plus(0, b.getAngularPartX());
+      a.plus(1, b.getAngularPartY());
+      a.plus(2, b.getAngularPartZ());
+      a.plus(3, b.getLinearPartX());
+      a.plus(4, b.getLinearPartY());
+      a.plus(5, b.getLinearPartZ());
+   }
+
+   /**
+    * Same as {@link CommonOps_DDRM#mult(DMatrix1Row, DMatrix1Row, DMatrix1Row)}.
+    */
+   static void mult(ArticulatedBodyInertia a, DMatrix1Row b, DMatrix1Row c)
+   {
+      if (b.numRows != 6)
+         throw new MatrixDimensionException("The 'a' and 'b' matrices do not have compatible dimensions");
+
+      c.reshape(6, b.numCols);
+
+      Matrix3D angularInertia = a.getAngularInertia();
+      Matrix3D crossInertia = a.getCrossInertia();
+      Matrix3D linearInertia = a.getLinearInertia();
+
+      double a00 = angularInertia.getM00();
+      double a01 = angularInertia.getM01();
+      double a02 = angularInertia.getM02();
+      double a10 = angularInertia.getM10();
+      double a11 = angularInertia.getM11();
+      double a12 = angularInertia.getM12();
+      double a20 = angularInertia.getM20();
+      double a21 = angularInertia.getM21();
+      double a22 = angularInertia.getM22();
+
+      double a03 = crossInertia.getM00();
+      double a04 = crossInertia.getM01();
+      double a05 = crossInertia.getM02();
+      double a13 = crossInertia.getM10();
+      double a14 = crossInertia.getM11();
+      double a15 = crossInertia.getM12();
+      double a23 = crossInertia.getM20();
+      double a24 = crossInertia.getM21();
+      double a25 = crossInertia.getM22();
+
+      double a33 = linearInertia.getM00();
+      double a34 = linearInertia.getM01();
+      double a35 = linearInertia.getM02();
+      double a43 = linearInertia.getM10();
+      double a44 = linearInertia.getM11();
+      double a45 = linearInertia.getM12();
+      double a53 = linearInertia.getM20();
+      double a54 = linearInertia.getM21();
+      double a55 = linearInertia.getM22();
+
+      for (int i = 0; i < b.getNumCols(); i++)
+      {
+         double b0i = b.unsafe_get(0, i);
+         double b1i = b.unsafe_get(1, i);
+         double b2i = b.unsafe_get(2, i);
+         double b3i = b.unsafe_get(3, i);
+         double b4i = b.unsafe_get(4, i);
+         double b5i = b.unsafe_get(5, i);
+
+         c.unsafe_set(0, i, a00 * b0i + a01 * b1i + a02 * b2i + a03 * b3i + a04 * b4i + a05 * b5i);
+         c.unsafe_set(1, i, a10 * b0i + a11 * b1i + a12 * b2i + a13 * b3i + a14 * b4i + a15 * b5i);
+         c.unsafe_set(2, i, a20 * b0i + a21 * b1i + a22 * b2i + a23 * b3i + a24 * b4i + a25 * b5i);
+         c.unsafe_set(3, i, a03 * b0i + a13 * b1i + a23 * b2i + a33 * b3i + a34 * b4i + a35 * b5i);
+         c.unsafe_set(4, i, a04 * b0i + a14 * b1i + a24 * b2i + a43 * b3i + a44 * b4i + a45 * b5i);
+         c.unsafe_set(5, i, a05 * b0i + a15 * b1i + a25 * b2i + a53 * b3i + a54 * b4i + a55 * b5i);
+      }
+   }
+
+   /**
+    * Same as {@link CommonOps_DDRM#multTransA(double, DMatrix1Row, DMatrix1Row, DMatrix1Row)}.
+    */
+   static void multTransA(double alpha, DMatrix1Row a, SpatialVectorReadOnly b, DMatrix1Row c)
+   {
+      if (a.numRows != 6)
+         throw new MatrixDimensionException("The 'a' and 'b' matrices do not have compatible dimensions");
+      c.reshape(a.numCols, 1);
+
+      double b0 = b.getAngularPartX();
+      double b1 = b.getAngularPartY();
+      double b2 = b.getAngularPartZ();
+      double b3 = b.getLinearPartX();
+      double b4 = b.getLinearPartY();
+      double b5 = b.getLinearPartZ();
+
+      for (int aCol = 0; aCol < a.numCols; aCol++)
+      {
+         double total = a.unsafe_get(0, aCol) * b0;
+         total += a.unsafe_get(1, aCol) * b1;
+         total += a.unsafe_get(2, aCol) * b2;
+         total += a.unsafe_get(3, aCol) * b3;
+         total += a.unsafe_get(4, aCol) * b4;
+         total += a.unsafe_get(5, aCol) * b5;
+         c.set(aCol, 0, alpha * total);
+      }
+   }
+
+   /**
+    * Same as {@link CommonOps_DDRM#multAdd(DMatrix1Row, DMatrix1Row, DMatrix1Row)}.
+    */
+   static void multAdd(ArticulatedBodyInertia a, DMatrix1Row b, DMatrix1Row c)
+   {
+      if (b.numRows != 6)
+         throw new MatrixDimensionException("The 'a' and 'b' matrices do not have compatible dimensions");
+
+      if (c.numRows != 6 || c.numCols != b.numCols)
+         throw new MatrixDimensionException("The 'c' is not compatible");
+
+      Matrix3D angularInertia = a.getAngularInertia();
+      Matrix3D crossInertia = a.getCrossInertia();
+      Matrix3D linearInertia = a.getLinearInertia();
+
+      double a00 = angularInertia.getM00();
+      double a01 = angularInertia.getM01();
+      double a02 = angularInertia.getM02();
+      double a10 = angularInertia.getM10();
+      double a11 = angularInertia.getM11();
+      double a12 = angularInertia.getM12();
+      double a20 = angularInertia.getM20();
+      double a21 = angularInertia.getM21();
+      double a22 = angularInertia.getM22();
+
+      double a03 = crossInertia.getM00();
+      double a04 = crossInertia.getM01();
+      double a05 = crossInertia.getM02();
+      double a13 = crossInertia.getM10();
+      double a14 = crossInertia.getM11();
+      double a15 = crossInertia.getM12();
+      double a23 = crossInertia.getM20();
+      double a24 = crossInertia.getM21();
+      double a25 = crossInertia.getM22();
+
+      double a33 = linearInertia.getM00();
+      double a34 = linearInertia.getM01();
+      double a35 = linearInertia.getM02();
+      double a43 = linearInertia.getM10();
+      double a44 = linearInertia.getM11();
+      double a45 = linearInertia.getM12();
+      double a53 = linearInertia.getM20();
+      double a54 = linearInertia.getM21();
+      double a55 = linearInertia.getM22();
+
+      for (int i = 0; i < b.getNumCols(); i++)
+      {
+         double b0i = b.unsafe_get(0, i);
+         double b1i = b.unsafe_get(1, i);
+         double b2i = b.unsafe_get(2, i);
+         double b3i = b.unsafe_get(3, i);
+         double b4i = b.unsafe_get(4, i);
+         double b5i = b.unsafe_get(5, i);
+
+         c.unsafe_set(0, i, c.unsafe_get(0, i) + a00 * b0i + a01 * b1i + a02 * b2i + a03 * b3i + a04 * b4i + a05 * b5i);
+         c.unsafe_set(1, i, c.unsafe_get(1, i) + a10 * b0i + a11 * b1i + a12 * b2i + a13 * b3i + a14 * b4i + a15 * b5i);
+         c.unsafe_set(2, i, c.unsafe_get(2, i) + a20 * b0i + a21 * b1i + a22 * b2i + a23 * b3i + a24 * b4i + a25 * b5i);
+         c.unsafe_set(3, i, c.unsafe_get(3, i) + a03 * b0i + a13 * b1i + a23 * b2i + a33 * b3i + a34 * b4i + a35 * b5i);
+         c.unsafe_set(4, i, c.unsafe_get(4, i) + a04 * b0i + a14 * b1i + a24 * b2i + a43 * b3i + a44 * b4i + a45 * b5i);
+         c.unsafe_set(5, i, c.unsafe_get(5, i) + a05 * b0i + a15 * b1i + a25 * b2i + a53 * b3i + a54 * b4i + a55 * b5i);
       }
    }
 }
