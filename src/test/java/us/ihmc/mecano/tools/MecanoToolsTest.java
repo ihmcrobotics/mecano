@@ -1,10 +1,13 @@
 package us.ihmc.mecano.tools;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.util.Random;
 
+import org.ejml.data.DMatrix3x3;
 import org.ejml.data.DMatrixRMaj;
+import org.ejml.dense.fixed.MatrixFeatures_DDF3;
 import org.ejml.dense.row.CommonOps_DDRM;
 import org.junit.jupiter.api.Test;
 
@@ -14,6 +17,7 @@ import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.referenceFrame.tools.EuclidFrameRandomTools;
 import us.ihmc.euclid.tools.EuclidCoreRandomTools;
 import us.ihmc.euclid.tools.EuclidCoreTestTools;
+import us.ihmc.euclid.tools.EuclidCoreTools;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.mecano.spatial.SpatialAcceleration;
 import us.ihmc.mecano.spatial.SpatialInertia;
@@ -24,6 +28,145 @@ public class MecanoToolsTest
 {
    private static final double EPSILON = 1.0e-12;
    private static final int ITERATIONS = 1000;
+
+   @Test
+   public void testStringMethod()
+   { // Test empty input
+      String emptyString = new String();
+      assertEquals(emptyString, MecanoTools.capitalize(emptyString));
+      assertEquals(null, MecanoTools.capitalize(null));
+
+      int stringSize = 10;
+      String str = new String();
+      Random random = new Random(1243);
+      int randomInt = random.nextInt();
+      for (int i = 0; i < ITERATIONS; ++i)
+      { // Test capitalization
+         randomInt = random.nextInt();
+         boolean upper = (randomInt % 2 == 0) ? true : false;
+         char c;
+         for (int j = 0; j < stringSize; ++j)
+         {
+            randomInt = random.nextInt();
+            if (true == upper)
+               c = (char) ((int) 'A' + randomInt % 26);
+            else
+               c = (char) ((int) 'a' + randomInt % 26);
+            str += c;
+         }
+         if (true == upper)
+         { // Should return original string
+            assertEquals(str, MecanoTools.capitalize(str));
+         }
+         else
+         { // Should return first letter capitalized string
+            assertEquals(MecanoTools.capitalize(str), Character.toUpperCase(str.charAt(0)) + str.substring(1, str.length()));
+         }
+         str = "";
+      }
+   }
+
+   @Test
+   public void testMatrix3DChecks()
+   {
+      Random random = new Random(1234);
+      for (int i = 0; i < ITERATIONS; ++i)
+      { // Test symmetric matrix boolean feature
+         double a = random.nextDouble();
+         double b = random.nextDouble();
+         double c = random.nextDouble();
+         Matrix3D symmetricMatrix3D = EuclidCoreRandomTools.nextMatrix3D(random);
+         assertEquals(false, MecanoTools.isMatrix3DSymmetric(symmetricMatrix3D, EPSILON));
+         symmetricMatrix3D.setM01(a);
+         symmetricMatrix3D.setM10(a);
+         assertEquals(false, MecanoTools.isMatrix3DSymmetric(symmetricMatrix3D, EPSILON));
+         symmetricMatrix3D.setM02(b);
+         symmetricMatrix3D.setM20(b);
+         assertEquals(false, MecanoTools.isMatrix3DSymmetric(symmetricMatrix3D, EPSILON));
+         symmetricMatrix3D.setM12(c);
+         symmetricMatrix3D.setM21(c);
+         assertEquals(true, MecanoTools.isMatrix3DSymmetric(symmetricMatrix3D, EPSILON));
+
+         // Test diagonal matrix boolean feature
+         int randomInt = random.nextInt();
+         Matrix3D diagonalMatrix3D = EuclidCoreRandomTools.nextMatrix3D(random);
+         boolean diagonal = randomInt % 2 == 0 ? true : false;
+         if (true == diagonal)
+         {
+            diagonalMatrix3D.setM01(0);
+            diagonalMatrix3D.setM02(0);
+            diagonalMatrix3D.setM12(0);
+            diagonalMatrix3D.setM10(0);
+            diagonalMatrix3D.setM20(0);
+            diagonalMatrix3D.setM21(0);
+            assertEquals(true, MecanoTools.isMatrix3DDiagonal(diagonalMatrix3D, EPSILON));
+         }
+         else
+         {
+            assertEquals(false, MecanoTools.isMatrix3DDiagonal(diagonalMatrix3D, EPSILON));
+         }
+
+      }
+   }
+
+   @Test
+   public void testTildeForm()
+   {
+      Random random = new Random(5432);
+      for (int i = 0; i < ITERATIONS; ++i)
+      { // Test vector - > Skew Symmetric Matrix (tilde form for use in cross
+        // product)
+         Vector3D vector3D = EuclidCoreRandomTools.nextVector3D(random);
+         DMatrix3x3 expectedTildeMatrix3D = new DMatrix3x3(0,
+                                                           -vector3D.getZ(),
+                                                           vector3D.getY(),
+                                                           vector3D.getZ(),
+                                                           0,
+                                                           -vector3D.getX(),
+                                                           -vector3D.getY(),
+                                                           vector3D.getX(),
+                                                           0);
+         DMatrix3x3 toBeTestedTildeMatrix3D = new DMatrix3x3();
+
+         MecanoTools.toTildeForm(vector3D, 0, 0, toBeTestedTildeMatrix3D);
+         assertTrue(MatrixFeatures_DDF3.isIdentical(expectedTildeMatrix3D, toBeTestedTildeMatrix3D, 0));
+      }
+   }
+
+   @Test
+   public void testAddSubEquals()
+   {
+      Random random = new Random(1234);
+      for (int i = 0; i < ITERATIONS; ++i)
+      {
+         // set up matrices for testing.
+         Matrix3D operatorMatrix3D = EuclidCoreRandomTools.nextMatrix3D(random);
+         DMatrix3x3 operatorMatrix3x3 = new DMatrix3x3();
+         operatorMatrix3x3.set(0, 0, operatorMatrix3D.getM00());
+         operatorMatrix3x3.set(0, 1, operatorMatrix3D.getM01());
+         operatorMatrix3x3.set(0, 2, operatorMatrix3D.getM02());
+         operatorMatrix3x3.set(1, 0, operatorMatrix3D.getM10());
+         operatorMatrix3x3.set(1, 1, operatorMatrix3D.getM11());
+         operatorMatrix3x3.set(1, 2, operatorMatrix3D.getM12());
+         operatorMatrix3x3.set(2, 0, operatorMatrix3D.getM20());
+         operatorMatrix3x3.set(2, 1, operatorMatrix3D.getM21());
+         operatorMatrix3x3.set(2, 2, operatorMatrix3D.getM22());
+         Matrix3D expectedMatrix3D = EuclidCoreRandomTools.nextMatrix3D(random);
+         Matrix3D toBeTestedMatrix3D = new Matrix3D(expectedMatrix3D);
+
+         // Test addEquals method in MecanoTools.
+         expectedMatrix3D.add(operatorMatrix3D);
+         MecanoTools.addEquals(0, 0, operatorMatrix3x3, toBeTestedMatrix3D);
+         assertEquals(expectedMatrix3D, toBeTestedMatrix3D);
+
+         // Test subEquals method in MecanoTools.
+
+         expectedMatrix3D.sub((operatorMatrix3D));
+         MecanoTools.subEquals(0, 0, operatorMatrix3x3, toBeTestedMatrix3D);
+         assertEquals(expectedMatrix3D, toBeTestedMatrix3D);
+
+      }
+   }
 
    @Test
    public void testTranslateMomentOfInertia()
@@ -83,6 +226,25 @@ public class MecanoToolsTest
 
          EuclidCoreTestTools.assertMatrix3DEquals(expected, actual, EPSILON);
       }
+
+      for (int i = 0; i < ITERATIONS; ++i)
+      { // Test negate translation.
+         double mass = random.nextDouble();
+         Vector3D centerOfMass = EuclidCoreRandomTools.nextVector3D(random);
+         Vector3D translation = EuclidCoreRandomTools.nextVector3D(random);
+         Matrix3D inertiaOriginal = EuclidCoreRandomTools.nextMatrix3D(random);
+         Matrix3D pre_negatedTensor = new Matrix3D(inertiaOriginal); // EXPECTED
+         Matrix3D negationTestTensor = new Matrix3D(inertiaOriginal); // TO BE TESTED
+         MecanoTools.translateMomentOfInertia(mass, centerOfMass, true, translation, negationTestTensor);
+         translation.negate();
+         MecanoTools.translateMomentOfInertia(mass, centerOfMass, false, translation, pre_negatedTensor);
+         EuclidCoreTestTools.assertMatrix3DEquals(pre_negatedTensor, negationTestTensor, EPSILON);
+      }
+      for (int i = 0; i < ITERATIONS; ++i)
+      {
+
+      }
+
    }
 
    @Test
@@ -91,7 +253,8 @@ public class MecanoToolsTest
       Random random = new Random(3453);
 
       for (int i = 0; i < ITERATIONS; i++)
-      { // Let's compare computeDynamicForce(...) against computeDynamicForceFast(...)
+      { // Let's compare computeDynamicForce(...) against
+        // computeDynamicForceFast(...)
          double mass = random.nextDouble();
          Vector3D centerOfMassOffset = new Vector3D(); // It has to be zero for the comparison to be relevant.
          Vector3D angularAcceleration = EuclidCoreRandomTools.nextVector3D(random);
@@ -108,7 +271,8 @@ public class MecanoToolsTest
       }
 
       for (int i = 0; i < ITERATIONS; i++)
-      { // Let's assert that when the acceleration & velocity are zero, the resulting force is also zero
+      { // Let's assert that when the acceleration & velocity are zero, the
+        // resulting force is also zero
          double mass = random.nextDouble();
          // This should not affect the result.
          Vector3D centerOfMassOffset = EuclidCoreRandomTools.nextVector3D(random);
@@ -128,7 +292,8 @@ public class MecanoToolsTest
       }
 
       for (int i = 0; i < ITERATIONS; i++)
-      { // Let's assert that when the acceleration is zero, the resulting force is also zero
+      { // Let's assert that when the acceleration is zero, the resulting force
+        // is also zero
          double mass = random.nextDouble();
          // This should not affect the result.
          Vector3D centerOfMassOffset = EuclidCoreRandomTools.nextVector3D(random);
@@ -138,7 +303,8 @@ public class MecanoToolsTest
          // Rotate around the CoM offset axis to prevent generating centrifugal forces
          angularVelocity.setAndScale(EuclidCoreRandomTools.nextDouble(random, 10.0), centerOfMassOffset);
          Vector3D linearVelocity = new Vector3D();
-         // By aligning the angular and linear velocities we prevent generating Coriolis accelerations
+         // By aligning the angular and linear velocities we prevent generating Coriolis
+         // accelerations
          linearVelocity.setAndScale(EuclidCoreRandomTools.nextDouble(random, 10.0), angularVelocity);
          Vector3D expected = new Vector3D();
          Vector3D dynamicForce1 = EuclidCoreRandomTools.nextVector3D(random);
@@ -158,7 +324,8 @@ public class MecanoToolsTest
       Random random = new Random(3453);
 
       for (int i = 0; i < ITERATIONS; i++)
-      { // Let's compare computeDynamicMoment(...) against computeDynamicMomentFast(...)
+      { // Let's compare computeDynamicMoment(...) against
+        // computeDynamicMomentFast(...)
          Matrix3D momentOfInertia = EuclidCoreRandomTools.nextMatrix3D(random);
          double mass = random.nextDouble();
          Vector3D centerOfMassOffset = new Vector3D(); // It has to be zero for the comparison to be relevant.
@@ -183,7 +350,8 @@ public class MecanoToolsTest
       }
 
       for (int i = 0; i < ITERATIONS; i++)
-      { // Let's assert that when the acceleration & velocity are zero, the resulting moment is also zero
+      { // Let's assert that when the acceleration & velocity are zero, the
+        // resulting moment is also zero
          Matrix3D momentOfInertia = EuclidCoreRandomTools.nextMatrix3D(random);
          double mass = random.nextDouble();
          // This should not affect the result.
@@ -211,8 +379,10 @@ public class MecanoToolsTest
       }
 
       for (int i = 0; i < ITERATIONS; i++)
-      { // Let's assert that when the acceleration is zero, the resulting moment is also zero
-        // Need to make the matrix diagonal with all elements equal to get rid of Coriolis effect.
+      { // Let's assert that when the acceleration is zero, the resulting moment
+        // is also zero
+        // Need to make the matrix diagonal with all elements equal to get rid
+        // of Coriolis effect.
          Matrix3D momentOfInertia = new Matrix3D();
          momentOfInertia.setIdentity();
          momentOfInertia.scale(random.nextDouble());
@@ -225,7 +395,8 @@ public class MecanoToolsTest
          // Rotate around the CoM offset axis to prevent generating centrifugal forces
          angularVelocity.setAndScale(EuclidCoreRandomTools.nextDouble(random, 10.0), centerOfMassOffset);
          Vector3D linearVelocity = new Vector3D();
-         // By aligning the angular and linear velocities we prevent generating Coriolis accelerations
+         // By aligning the angular and linear velocities we prevent generating Coriolis
+         // accelerations
          linearVelocity.setAndScale(EuclidCoreRandomTools.nextDouble(random, 10.0), angularVelocity);
          Vector3D expected = new Vector3D();
          Vector3D dynamicMoment1 = EuclidCoreRandomTools.nextVector3D(random);
@@ -244,6 +415,7 @@ public class MecanoToolsTest
          EuclidCoreTestTools.assertTuple3DEquals(expected, dynamicMoment1, EPSILON);
          EuclidCoreTestTools.assertTuple3DEquals(expected, dynamicMoment2, EPSILON);
       }
+
    }
 
    @Test
@@ -256,7 +428,8 @@ public class MecanoToolsTest
       { // Let's compute the dynamic wrench in different frames for a sphere.
          ReferenceFrame bodyFrame = EuclidFrameRandomTools.nextReferenceFrame(random);
          ReferenceFrame frameA = EuclidFrameRandomTools.nextReferenceFrame(random);
-         // Let's create the inertia in body frame assuming the CoM is it the bodyFrame's origin.
+         // Let's create the inertia in body frame assuming the CoM is it the bodyFrame's
+         // origin.
          SpatialInertia inertia = MecanoRandomTools.nextSpatialInertia(random, bodyFrame, bodyFrame, 1.0, 1.0, 0.0);
          // Set the inertia of a sphere.
          inertia.getMomentOfInertia().setIdentity();
@@ -264,7 +437,8 @@ public class MecanoToolsTest
          inertia.getMomentOfInertia().scale(rotationalInertia);
          SpatialAcceleration acceleration = MecanoRandomTools.nextSpatialAcceleration(random, bodyFrame, worldFrame, bodyFrame);
          Twist twist = MecanoRandomTools.nextTwist(random, bodyFrame, worldFrame, bodyFrame);
-         // Need to make the linear velocity colinear with the angular velocity to prevent generating Coriolis forces.
+         // Need to make the linear velocity colinear with the angular velocity to
+         // prevent generating Coriolis forces.
          twist.getLinearPart().setAndScale(EuclidCoreRandomTools.nextDouble(random), twist.getAngularPart());
 
          // The wrench for a sphere is easy to calculate
@@ -275,7 +449,8 @@ public class MecanoToolsTest
          Wrench wrenchAtBody = new Wrench(bodyFrame, bodyFrame);
          Wrench wrenchAtFrameA = new Wrench(bodyFrame, frameA);
 
-         // Compute the wrench at the bodyFrame, with the center of mass offset set to zero.
+         // Compute the wrench at the bodyFrame, with the center of mass offset set to
+         // zero.
          MecanoTools.computeDynamicMomentFast(inertia.getMomentOfInertia(),
                                               acceleration.getAngularPart(),
                                               twist.getAngularPart(),
@@ -313,11 +488,13 @@ public class MecanoToolsTest
       }
 
       for (int i = 0; i < ITERATIONS; i++)
-      { // Let's compute the dynamic wrench in different frames and asserts that the result is actually the same.
+      { // Let's compute the dynamic wrench in different frames and asserts that
+        // the result is actually the same.
          ReferenceFrame bodyFrame = EuclidFrameRandomTools.nextReferenceFrame(random);
          ReferenceFrame frameA = EuclidFrameRandomTools.nextReferenceFrame(random);
          ReferenceFrame frameB = EuclidFrameRandomTools.nextReferenceFrame(random);
-         // Let's create the inertia in body frame assuming the CoM is it the bodyFrame's origin.
+         // Let's create the inertia in body frame assuming the CoM is it the bodyFrame's
+         // origin.
          SpatialInertia inertia = MecanoRandomTools.nextSpatialInertia(random, bodyFrame, bodyFrame, 1.0, 1.0, 0.0);
          SpatialAcceleration acceleration = MecanoRandomTools.nextSpatialAcceleration(random, bodyFrame, worldFrame, bodyFrame);
          Twist twist = MecanoRandomTools.nextTwist(random, bodyFrame, worldFrame, bodyFrame);
@@ -326,7 +503,8 @@ public class MecanoToolsTest
          Wrench wrenchAtFrameA = new Wrench(bodyFrame, frameA);
          Wrench wrenchAtFrameB = new Wrench(bodyFrame, frameB);
 
-         // Compute the wrench at the bodyFrame, with the center of mass offset set to zero.
+         // Compute the wrench at the bodyFrame, with the center of mass offset set to
+         // zero.
          MecanoTools.computeDynamicMomentFast(inertia.getMomentOfInertia(),
                                               acceleration.getAngularPart(),
                                               twist.getAngularPart(),
@@ -384,6 +562,15 @@ public class MecanoToolsTest
          // Let's change frame from bodyFrame to frameB and compare the wrenches
          wrenchAtBody.changeFrame(frameB);
          MecanoTestTools.assertWrenchEquals(wrenchAtFrameB, wrenchAtBody, EPSILON);
+      }
+      for (int i = 0; i < ITERATIONS; ++i)
+      { // Assert dynamic moment is set to zeros when angular velocity is not
+        // provided.
+         Matrix3D momentOfInertia = EuclidCoreRandomTools.nextMatrix3D(random);
+         Vector3D dynamicMoment = EuclidCoreRandomTools.nextVector3D(random);
+         MecanoTools.computeDynamicMomentFast(momentOfInertia, null, null, dynamicMoment);
+         assertEquals(EuclidCoreTools.zeroVector3D, dynamicMoment);
+
       }
    }
 
@@ -463,4 +650,5 @@ public class MecanoToolsTest
          MecanoTools.inverseTransformSymmetricMatrix3D(rotationMatrix, actual);
       }
    }
+
 }
