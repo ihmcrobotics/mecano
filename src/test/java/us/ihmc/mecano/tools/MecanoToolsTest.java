@@ -1,13 +1,13 @@
 package us.ihmc.mecano.tools;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.util.Random;
 
 import org.ejml.data.DMatrix3x3;
 import org.ejml.data.DMatrixRMaj;
-import org.ejml.dense.fixed.MatrixFeatures_DDF3;
 import org.ejml.dense.row.CommonOps_DDRM;
 import org.junit.jupiter.api.Test;
 
@@ -76,16 +76,16 @@ public class MecanoToolsTest
          double b = random.nextDouble();
          double c = random.nextDouble();
          Matrix3D symmetricMatrix3D = EuclidCoreRandomTools.nextMatrix3D(random);
-         assertEquals(false, MecanoTools.isMatrix3DSymmetric(symmetricMatrix3D, EPSILON));
+         assertFalse(MecanoTools.isMatrix3DSymmetric(symmetricMatrix3D, EPSILON));
          symmetricMatrix3D.setM01(a);
          symmetricMatrix3D.setM10(a);
-         assertEquals(false, MecanoTools.isMatrix3DSymmetric(symmetricMatrix3D, EPSILON));
+         assertFalse(MecanoTools.isMatrix3DSymmetric(symmetricMatrix3D, EPSILON));
          symmetricMatrix3D.setM02(b);
          symmetricMatrix3D.setM20(b);
-         assertEquals(false, MecanoTools.isMatrix3DSymmetric(symmetricMatrix3D, EPSILON));
+         assertFalse(MecanoTools.isMatrix3DSymmetric(symmetricMatrix3D, EPSILON));
          symmetricMatrix3D.setM12(c);
          symmetricMatrix3D.setM21(c);
-         assertEquals(true, MecanoTools.isMatrix3DSymmetric(symmetricMatrix3D, EPSILON));
+         assertTrue(MecanoTools.isMatrix3DSymmetric(symmetricMatrix3D, EPSILON));
 
          // Test diagonal matrix boolean feature
          int randomInt = random.nextInt();
@@ -99,11 +99,11 @@ public class MecanoToolsTest
             diagonalMatrix3D.setM10(0);
             diagonalMatrix3D.setM20(0);
             diagonalMatrix3D.setM21(0);
-            assertEquals(true, MecanoTools.isMatrix3DDiagonal(diagonalMatrix3D, EPSILON));
+            assertTrue(MecanoTools.isMatrix3DDiagonal(diagonalMatrix3D, EPSILON));
          }
          else
          {
-            assertEquals(false, MecanoTools.isMatrix3DDiagonal(diagonalMatrix3D, EPSILON));
+            assertFalse(MecanoTools.isMatrix3DDiagonal(diagonalMatrix3D, EPSILON));
          }
 
       }
@@ -113,23 +113,43 @@ public class MecanoToolsTest
    public void testTildeForm()
    {
       Random random = new Random(5432);
+      int min = -100000;
+      int max = 100000;
+      int dimension = 0;
       for (int i = 0; i < ITERATIONS; ++i)
-      { // Test vector - > Skew Symmetric Matrix (tilde form for use in cross
-        // product)
-         Vector3D vector3D = EuclidCoreRandomTools.nextVector3D(random);
-         DMatrix3x3 expectedTildeMatrix3D = new DMatrix3x3(0,
-                                                           -vector3D.getZ(),
-                                                           vector3D.getY(),
-                                                           vector3D.getZ(),
-                                                           0,
-                                                           -vector3D.getX(),
-                                                           -vector3D.getY(),
-                                                           vector3D.getX(),
-                                                           0);
-         DMatrix3x3 toBeTestedTildeMatrix3D = new DMatrix3x3();
+      { // Test vector - > Skew Symmetric Matrix (tilde form for use in cross product)
+        // Let's test this by asserting C = A X B == tilde(A) * B
+        // Also use random size matrix as input and random position to put the resulting sub-matrix in it.
+         Vector3D vector3D_A = EuclidCoreRandomTools.nextVector3D(random);
+         Vector3D vector3D_B = EuclidCoreRandomTools.nextVector3D(random);
+         Vector3D expectedCrossProduct = new Vector3D();
+         expectedCrossProduct.cross(vector3D_A, vector3D_B);
+         int randomInt = random.nextInt();
+         switch (randomInt % 4)
+         {
+            case 0:
+               dimension = 3;
+            case 1:
+               dimension = 4;
+            case 2:
+               dimension = 5;
+            case 3:
+               dimension = 6;
+         }
+         DMatrixRMaj random_matrix = EuclidCoreRandomTools.nextDMatrixRMaj(random, dimension, dimension, min, max);
+         int row = Math.abs(randomInt) % (dimension - 2);
+         randomInt = random.nextInt();
+         int col = Math.abs(randomInt) % (dimension - 2);
+         MecanoTools.toTildeForm(vector3D_A, row, col, random_matrix);
+         DMatrixRMaj tildeForm_A = CommonOps_DDRM.extract(random_matrix, row, row + 3, col, col + 3);
 
-         MecanoTools.toTildeForm(vector3D, 0, 0, toBeTestedTildeMatrix3D);
-         assertTrue(MatrixFeatures_DDF3.isIdentical(expectedTildeMatrix3D, toBeTestedTildeMatrix3D, 0));
+         Vector3D toBeTestedCrossProduct = new Vector3D(tildeForm_A.get(0, 0) * vector3D_B.getX() + tildeForm_A.get(0, 1) * vector3D_B.getY()
+               + tildeForm_A.get(0, 2) * vector3D_B.getZ(),
+                                                        tildeForm_A.get(1, 0) * vector3D_B.getX() + tildeForm_A.get(1, 1) * vector3D_B.getY()
+                                                              + tildeForm_A.get(1, 2) * vector3D_B.getZ(),
+                                                        tildeForm_A.get(2, 0) * vector3D_B.getX() + tildeForm_A.get(2, 1) * vector3D_B.getY()
+                                                              + tildeForm_A.get(2, 2) * vector3D_B.getZ());
+         assertEquals(expectedCrossProduct, toBeTestedCrossProduct);
       }
    }
 
@@ -142,15 +162,7 @@ public class MecanoToolsTest
          // set up matrices for testing.
          Matrix3D operatorMatrix3D = EuclidCoreRandomTools.nextMatrix3D(random);
          DMatrix3x3 operatorMatrix3x3 = new DMatrix3x3();
-         operatorMatrix3x3.set(0, 0, operatorMatrix3D.getM00());
-         operatorMatrix3x3.set(0, 1, operatorMatrix3D.getM01());
-         operatorMatrix3x3.set(0, 2, operatorMatrix3D.getM02());
-         operatorMatrix3x3.set(1, 0, operatorMatrix3D.getM10());
-         operatorMatrix3x3.set(1, 1, operatorMatrix3D.getM11());
-         operatorMatrix3x3.set(1, 2, operatorMatrix3D.getM12());
-         operatorMatrix3x3.set(2, 0, operatorMatrix3D.getM20());
-         operatorMatrix3x3.set(2, 1, operatorMatrix3D.getM21());
-         operatorMatrix3x3.set(2, 2, operatorMatrix3D.getM22());
+         operatorMatrix3D.get(operatorMatrix3x3);
          Matrix3D expectedMatrix3D = EuclidCoreRandomTools.nextMatrix3D(random);
          Matrix3D toBeTestedMatrix3D = new Matrix3D(expectedMatrix3D);
 
@@ -240,11 +252,6 @@ public class MecanoToolsTest
          MecanoTools.translateMomentOfInertia(mass, centerOfMass, false, translation, pre_negatedTensor);
          EuclidCoreTestTools.assertMatrix3DEquals(pre_negatedTensor, negationTestTensor, EPSILON);
       }
-      for (int i = 0; i < ITERATIONS; ++i)
-      {
-
-      }
-
    }
 
    @Test
