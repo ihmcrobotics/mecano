@@ -10,8 +10,8 @@ import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.referenceFrame.interfaces.FrameTuple3DReadOnly;
-import us.ihmc.euclid.transform.RigidBodyTransform;
-import us.ihmc.euclid.tuple3D.Vector3D;
+import us.ihmc.euclid.referenceFrame.interfaces.FrameVector3DReadOnly;
+import us.ihmc.euclid.tools.TupleTools;
 import us.ihmc.euclid.tuple3D.interfaces.Tuple3DReadOnly;
 import us.ihmc.mecano.frames.MovingReferenceFrame;
 import us.ihmc.mecano.multiBodySystem.interfaces.JointReadOnly;
@@ -19,7 +19,6 @@ import us.ihmc.mecano.multiBodySystem.interfaces.MultiBodySystemReadOnly;
 import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyReadOnly;
 import us.ihmc.mecano.spatial.SpatialInertia;
 import us.ihmc.mecano.spatial.Twist;
-import us.ihmc.mecano.spatial.interfaces.TwistBasics;
 import us.ihmc.mecano.spatial.interfaces.TwistReadOnly;
 import us.ihmc.mecano.tools.MultiBodySystemTools;
 
@@ -175,13 +174,10 @@ public class MultiBodyGravityGradientCalculator
       private final List<AlgorithmStep> children = new ArrayList<>();
 
       private double subTreeMass;
-      private final FramePoint3D centerOfMassTimesMass = new FramePoint3D();
       private final FramePoint3D centerOfMass = new FramePoint3D();
 
       private final FramePoint3D childCoM = new FramePoint3D();
       private final FrameVector3D gravity = new FrameVector3D();
-
-      private final RigidBodyTransform transformToInertial = new RigidBodyTransform();
 
       public AlgorithmStep(RigidBodyReadOnly rigidBody, AlgorithmStep parent, int[] jointIndices)
       {
@@ -232,35 +228,30 @@ public class MultiBodyGravityGradientCalculator
             subTreeMass += children.get(i).subTreeMass;
 
          ReferenceFrame frameToUse = isRoot() ? getBodyFixedFrame() : getFrameAfterJoint();
-         transformToInertial.set(frameToUse.getTransformToRoot());
          gravity.setIncludingFrame(gravitationalAcceleration);
-         transformToInertial.inverseTransform(gravity);
-         gravity.setReferenceFrame(frameToUse);
+         gravity.changeFrame(frameToUse);
 
          // The centerOfMassTimesMass can be used to obtain the overall center of mass position.
          if (bodyInertia == null)
          {
-            centerOfMassTimesMass.setToZero(getBodyFixedFrame());
+            centerOfMass.setToZero(getBodyFixedFrame());
          }
          else
          {
-            centerOfMassTimesMass.setIncludingFrame(bodyInertia.getCenterOfMassOffset());
-            centerOfMassTimesMass.changeFrame(frameToUse);
-            centerOfMassTimesMass.scale(bodyInertia.getMass());
+            centerOfMass.setIncludingFrame(bodyInertia.getCenterOfMassOffset());
+            centerOfMass.changeFrame(frameToUse);
+            centerOfMass.scale(bodyInertia.getMass());
          }
 
          for (int i = 0; i < children.size(); i++)
          {
             childCoM.setIncludingFrame(children.get(i).centerOfMass);
             childCoM.changeFrame(frameToUse);
-            centerOfMassTimesMass.scaleAdd(children.get(i).subTreeMass, childCoM, centerOfMassTimesMass);
+            centerOfMass.scaleAdd(children.get(i).subTreeMass, childCoM, centerOfMass);
          }
 
-         centerOfMass.setIncludingFrame(centerOfMassTimesMass);
          centerOfMass.scale(1.0 / subTreeMass);
       }
-
-      private final Vector3D tempCross = new Vector3D();
 
       /** From leaves to root, compute the elements of the gradient matrix. */
       public void passTwo()
@@ -273,31 +264,18 @@ public class MultiBodyGravityGradientCalculator
 
          for (int i = 0; i < getNumberOfDoFs(); i++)
          {
+            int index_i = jointIndices[i];
+
             TwistReadOnly unitTwist_i = getUnitTwist(i);
-            tempCross.cross(gravity, unitTwist_i.getAngularPart());
-            double gradient_ii = -tempCross.dot(unitTwist_i.getLinearPart());
-            tempCross.cross(centerOfMass);
-            gradient_ii += tempCross.dot(unitTwist_i.getAngularPart());
-            gradient_ii *= subTreeMass;
-            gradientMatrix.set(jointIndices[i], jointIndices[i], gradient_ii);
+            gradientMatrix.set(index_i, index_i, computeElement(unitTwist_i, unitTwist_i));
 
             for (int j = 0; j < i; j++)
             {
+               int index_j = jointIndices[j];
                TwistReadOnly unitTwist_j = getUnitTwist(j);
-               tempCross.cross(gravity, unitTwist_j.getAngularPart());
-               double gradient_ji = -tempCross.dot(unitTwist_i.getLinearPart());
-               tempCross.cross(gravity, unitTwist_j.getAngularPart());
-               tempCross.cross(centerOfMass);
-               gradient_ji += tempCross.dot(unitTwist_i.getAngularPart());
-               gradient_ji *= subTreeMass;
-               gradientMatrix.set(jointIndices[j], jointIndices[i], gradient_ji);
 
-//               tempCross.cross(gravity, unitTwist_i.getAngularPart());
-//               double gradient_ij = -subTreeMass * tempCross.dot(unitTwist_j.getLinearPart());
-//               tempCross.cross(centerOfMass);
-//               gradient_ij += tempCross.dot(unitTwist_j.getAngularPart());
-//               gradient_ij *= subTreeMass;
-//               gradientMatrix.set(jointIndices[i], jointIndices[j], gradient_ij);
+               gradientMatrix.set(index_i, index_j, computeElement(unitTwist_i, unitTwist_j));
+               gradientMatrix.set(index_j, index_i, computeElement(unitTwist_j, unitTwist_i));
             }
          }
 
@@ -308,19 +286,18 @@ public class MultiBodyGravityGradientCalculator
             for (int j = 0; j < getNumberOfDoFs(); j++)
             {
                int index_j = jointIndices[j];
+
                TwistReadOnly unitTwist_j = getUnitTwist(j);
 
                for (int i = 0; i < ancestor.getNumberOfDoFs(); i++)
                {
                   int index_i = ancestor.jointIndices[i];
-                  getUnitTwistInLocalFrame(ancestor, i, unitTwist_i);
+                  unitTwist_i.setIncludingFrame(ancestor.getUnitTwist(i));
+                  unitTwist_i.changeFrame(getFrameAfterJoint());
 
-                  tempCross.cross(gravity, unitTwist_i.getAngularPart());
-                  double gradient_ij = -subTreeMass * tempCross.dot(unitTwist_j.getLinearPart());
-                  tempCross.cross(centerOfMassTimesMass);
-                  gradient_ij += tempCross.dot(unitTwist_j.getAngularPart());
-                  gradientMatrix.set(index_i, index_j, gradient_ij);
-                  gradientMatrix.set(index_j, index_i, gradient_ij);
+                  double gradient_ji = computeElement(unitTwist_j, unitTwist_i);
+                  gradientMatrix.set(index_i, index_j, gradient_ji);
+                  gradientMatrix.set(index_j, index_i, gradient_ji);
                }
             }
 
@@ -328,11 +305,24 @@ public class MultiBodyGravityGradientCalculator
          }
       }
 
-      private void getUnitTwistInLocalFrame(AlgorithmStep other, int dofIndex, TwistBasics unitTwistToPack)
+      private double computeElement(TwistReadOnly unitTwist_i, TwistReadOnly unitTwist_j)
       {
-         unitTwistToPack.setIncludingFrame(other.getUnitTwist(dofIndex));
-         unitTwistToPack.applyTransform(other.transformToInertial);
-         unitTwistToPack.applyInverseTransform(transformToInertial);
+         FrameVector3DReadOnly velocity_i = unitTwist_i.getLinearPart();
+         FrameVector3DReadOnly omega_i = unitTwist_i.getAngularPart();
+         FrameVector3DReadOnly omega_j = unitTwist_j.getAngularPart();
+
+         // g x w_j
+         double lx = gravity.getY() * omega_j.getZ() - gravity.getZ() * omega_j.getY();
+         double ly = gravity.getZ() * omega_j.getX() - gravity.getX() * omega_j.getZ();
+         double lz = gravity.getX() * omega_j.getY() - gravity.getY() * omega_j.getX();
+         // (g x w_j) x x_CoM
+         double wx = ly * centerOfMass.getZ() - lz * centerOfMass.getY();
+         double wy = lz * centerOfMass.getX() - lx * centerOfMass.getZ();
+         double wz = lx * centerOfMass.getY() - ly * centerOfMass.getX();
+
+         // m_subtree * (((g x w_j) x x_CoM) . w_i - (g x w_j) . v_i)
+         double gradient_ij = TupleTools.dot(wx, wy, wz, omega_i) - TupleTools.dot(lx, ly, lz, velocity_i);
+         return subTreeMass * gradient_ij;
       }
 
       public boolean isRoot()

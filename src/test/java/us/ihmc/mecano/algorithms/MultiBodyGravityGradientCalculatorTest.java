@@ -2,6 +2,7 @@ package us.ihmc.mecano.algorithms;
 
 import java.util.List;
 import java.util.Random;
+import java.util.function.Function;
 
 import org.ejml.data.DMatrixRMaj;
 import org.ejml.dense.row.CommonOps_DDRM;
@@ -34,30 +35,32 @@ public class MultiBodyGravityGradientCalculatorTest
    {
       Random random = new Random(2342356);
 
+      double dt = 1.0e-6;
       double dq = 1.0e-7;
-      double epsilon = 1.0e-5;
 
       for (int i = 0; i < ITERATIONS; i++)
       {
-         int numberOfJoints = 5;
+         int numberOfJoints = 10;
          List<? extends JointBasics> joints = MultiBodySystemRandomTools.nextRevoluteJointChain(random, numberOfJoints);
-         compareAgainstFiniteDifference(random, joints, dq, epsilon, i);
+         compareAgainstFiniteDifference(random, joints, dq, 2.0e-5, i);
+         testMultiBodyGravityGradientCalculator(random, joints, dt, 1.0e-9, i);
       }
    }
-   
+
    @Test
    public void testCalculatorOneDoFJointChain()
    {
       Random random = new Random(2342356);
-      
+
+      double dt = 1.0e-6;
       double dq = 1.0e-7;
-      double epsilon = 1.0e-5;
-      
+
       for (int i = 0; i < ITERATIONS; i++)
       {
-         int numberOfJoints = 5;
+         int numberOfJoints = 10;
          List<? extends JointBasics> joints = MultiBodySystemRandomTools.nextOneDoFJointChain(random, numberOfJoints);
-         compareAgainstFiniteDifference(random, joints, dq, epsilon, i);
+         compareAgainstFiniteDifference(random, joints, dq, 2.0e-5, i);
+         testMultiBodyGravityGradientCalculator(random, joints, dt, 1.0e-9, i);
       }
    }
 
@@ -66,21 +69,73 @@ public class MultiBodyGravityGradientCalculatorTest
    {
       Random random = new Random(2342350);
 
+      double dt = 1.0e-6;
       double dq = 1.0e-7;
-      double epsilon = 1.0e-5;
 
       for (int i = 0; i < ITERATIONS; i++)
       {
-         int numberOfJoints = 1;
+         int numberOfJoints = 10;
          List<? extends JointBasics> joints = MultiBodySystemRandomTools.nextJointChain(random, numberOfJoints);
-         compareAgainstFiniteDifference(random, joints, dq, epsilon, i);
+         compareAgainstFiniteDifference(random, joints, dq, 2.0e-5, i);
+         testMultiBodyGravityGradientCalculator(random, joints, dt, 1.0e-9, i);
       }
    }
-   
+
+   @Test
+   public void testCalculatorRevoluteJointTree()
+   {
+      Random random = new Random(2342356);
+
+      double dt = 1.0e-6;
+      double dq = 1.0e-7;
+
+      for (int i = 0; i < ITERATIONS; i++)
+      {
+         int numberOfJoints = 10;
+         List<? extends JointBasics> joints = MultiBodySystemRandomTools.nextRevoluteJointTree(random, numberOfJoints);
+         compareAgainstFiniteDifference(random, joints, dq, 2.0e-5, i);
+         testMultiBodyGravityGradientCalculator(random, joints, dt, 1.0e-9, i);
+      }
+   }
+
+   @Test
+   public void testCalculatorOneDoFJointTree()
+   {
+      Random random = new Random(2342356);
+
+      double dt = 1.0e-6;
+      double dq = 1.0e-7;
+
+      for (int i = 0; i < ITERATIONS; i++)
+      {
+         int numberOfJoints = 10;
+         List<? extends JointBasics> joints = MultiBodySystemRandomTools.nextOneDoFJointTree(random, numberOfJoints);
+         compareAgainstFiniteDifference(random, joints, dq, 2.0e-5, i);
+         testMultiBodyGravityGradientCalculator(random, joints, dt, 1.0e-9, i);
+      }
+   }
+
+   @Test
+   public void testCalculatorJointTree()
+   {
+      Random random = new Random(2342350);
+
+      double dt = 1.0e-6;
+      double dq = 1.0e-7;
+
+      for (int i = 0; i < ITERATIONS; i++)
+      {
+         int numberOfJoints = 10;
+         List<? extends JointBasics> joints = MultiBodySystemRandomTools.nextJointTree(random, numberOfJoints);
+         compareAgainstFiniteDifference(random, joints, dq, 2.0e-5, i);
+         testMultiBodyGravityGradientCalculator(random, joints, dt, 1.0e-9, i);
+      }
+   }
+
    public void compareAgainstFiniteDifference(Random random, List<? extends JointBasics> joints, double dq, double epsilon, int iteration)
    {
       MultiBodySystemBasics input = MultiBodySystemBasics.toMultiBodySystemBasics(joints);
-//      MultiBodySystemRandomTools.nextState(random, JointStateType.CONFIGURATION, joints);
+      MultiBodySystemRandomTools.nextState(random, JointStateType.CONFIGURATION, joints);
       MultiBodySystemRandomTools.nextState(random, JointStateType.VELOCITY, joints);
       input.getRootBody().updateFramesRecursively();
 
@@ -111,7 +166,7 @@ public class MultiBodyGravityGradientCalculatorTest
          DMatrixRMaj diff = new DMatrixRMaj(input.getNumberOfDoFs(), input.getNumberOfDoFs());
          CommonOps_DDRM.subtract(expectedGradient, actualGradient, diff);
          CommonOps_DDRM.abs(diff);
-         tablePrinter.setSubTable(1, 1, diff);
+         tablePrinter.setSubTable(1, 1, expectedGradient);
          System.out.println(tablePrinter);
          throw e;
       }
@@ -137,77 +192,198 @@ public class MultiBodyGravityGradientCalculatorTest
    }
 
    @Test
-   public void testFiniteDifference()
+   public void testFiniteDifferenceWithRevoluteJointChain()
    {
       Random random = new Random(2342356);
 
       double dt = 1.0e-5;
       double dq = 1.0e-5;
       double epsilon = 1.0e-6;
-      MultiBodySystemStateIntegrator integrator = new MultiBodySystemStateIntegrator(dt);
 
       for (int i = 0; i < ITERATIONS; i++)
       {
          int numberOfJoints = 10;
          List<? extends JointBasics> joints = MultiBodySystemRandomTools.nextRevoluteJointChain(random, numberOfJoints);
-         MultiBodySystemBasics input = MultiBodySystemBasics.toMultiBodySystemBasics(joints);
+         testFiniteDifferenceCalculator(random, joints, dt, dq, epsilon, i);
+      }
+   }
 
-         DMatrixRMaj qDot = new DMatrixRMaj(input.getNumberOfDoFs(), 1);
-         DMatrixRMaj actualDeltaGravity = new DMatrixRMaj(input.getNumberOfDoFs(), 1);
-         DMatrixRMaj actualGravity = new DMatrixRMaj(input.getNumberOfDoFs(), 1);
-         DMatrixRMaj expectedDeltaGravity = new DMatrixRMaj(input.getNumberOfDoFs(), 1);
-         DMatrixRMaj errorDeltaGravity = new DMatrixRMaj(input.getNumberOfDoFs(), 1);
-         DMatrixRMaj prevGravity = new DMatrixRMaj(input.getNumberOfDoFs(), 1);
-         DMatrixRMaj expectedGravity = new DMatrixRMaj(input.getNumberOfDoFs(), 1);
+   @Test
+   public void testFiniteDifferenceWithOneDoFJointChain()
+   {
+      Random random = new Random(2342356);
 
-         MultiBodySystemRandomTools.nextState(random, JointStateType.CONFIGURATION, joints);
-         MultiBodySystemRandomTools.nextState(random, JointStateType.VELOCITY, joints);
-         input.getRootBody().updateFramesRecursively();
+      double dt = 1.0e-5;
+      double dq = 1.0e-5;
+      double epsilon = 1.0e-6;
 
-         DMatrixRMaj gradient = computeGradientByFD(input, dq);
+      for (int i = 0; i < ITERATIONS; i++)
+      {
+         int numberOfJoints = 10;
+         List<? extends JointBasics> joints = MultiBodySystemRandomTools.nextOneDoFJointChain(random, numberOfJoints);
+         testFiniteDifferenceCalculator(random, joints, dt, dq, epsilon, i);
+      }
+   }
 
-         MultiBodySystemTools.extractJointsState(input.getJointsToConsider(), JointStateType.VELOCITY, qDot);
-         CommonOps_DDRM.mult(gradient, qDot, actualDeltaGravity);
-         CommonOps_DDRM.scale(dt, actualDeltaGravity);
+   @Test
+   public void testFiniteDifferenceWithJointChain()
+   {
+      Random random = new Random(2342355);
 
-         InverseDynamicsCalculator calculator = new InverseDynamicsCalculator(input);
-         calculator.setConsiderCoriolisAndCentrifugalForces(false);
-         calculator.setConsiderJointAccelerations(false);
+      double dt = 1.0e-5;
+      double dq = 1.0e-5;
+      double epsilon = 1.0e-6;
+
+      for (int i = 0; i < ITERATIONS; i++)
+      {
+         int numberOfJoints = 1;
+         List<? extends JointBasics> joints = MultiBodySystemRandomTools.nextJointChain(random, numberOfJoints);
+         testFiniteDifferenceCalculator(random, joints, dt, dq, epsilon, i);
+      }
+   }
+
+   @Test
+   public void testFiniteDifferenceWithRevoluteJointTree()
+   {
+      Random random = new Random(2342356);
+
+      double dt = 1.0e-5;
+      double dq = 1.0e-5;
+      double epsilon = 1.0e-6;
+
+      for (int i = 0; i < ITERATIONS; i++)
+      {
+         int numberOfJoints = 20;
+         List<? extends JointBasics> joints = MultiBodySystemRandomTools.nextRevoluteJointTree(random, numberOfJoints);
+         testFiniteDifferenceCalculator(random, joints, dt, dq, epsilon, i);
+      }
+   }
+
+   @Test
+   public void testFiniteDifferenceWithOneDoFJointTree()
+   {
+      Random random = new Random(2342356);
+
+      double dt = 1.0e-5;
+      double dq = 1.0e-5;
+      double epsilon = 1.0e-6;
+
+      for (int i = 0; i < ITERATIONS; i++)
+      {
+         int numberOfJoints = 20;
+         List<? extends JointBasics> joints = MultiBodySystemRandomTools.nextOneDoFJointTree(random, numberOfJoints);
+         testFiniteDifferenceCalculator(random, joints, dt, dq, epsilon, i);
+      }
+   }
+
+   @Test
+   public void testFiniteDifferenceWithJointTree()
+   {
+      Random random = new Random(2342356);
+
+      double dt = 1.0e-5;
+      double dq = 1.0e-5;
+      double epsilon = 1.0e-6;
+
+      for (int i = 0; i < ITERATIONS; i++)
+      {
+         int numberOfJoints = 20;
+         List<? extends JointBasics> joints = MultiBodySystemRandomTools.nextJointTree(random, numberOfJoints);
+         testFiniteDifferenceCalculator(random, joints, dt, dq, epsilon, i);
+      }
+   }
+
+   public void testMultiBodyGravityGradientCalculator(Random random, List<? extends JointBasics> joints, double dt, double epsilon, int iteration)
+   {
+      testCalculatorAgainstFiniteDifference(random, joints, dt, input ->
+      {
+         MultiBodyGravityGradientCalculator calculator = new MultiBodyGravityGradientCalculator(input);
          calculator.setGravitionalAcceleration(-GRAVITY);
          calculator.compute();
-         prevGravity.set(calculator.getJointTauMatrix());
-         CommonOps_DDRM.add(prevGravity, actualDeltaGravity, actualGravity);
+         return calculator.getGradientMatrix();
+      }, epsilon, iteration);
+   }
 
-         input.getRootBody().updateFramesRecursively();
-         integrator.integrateFromVelocitySubtree(input.getRootBody());
-         input.getRootBody().updateFramesRecursively();
-         calculator.compute();
-         expectedGravity.set(calculator.getJointTauMatrix());
+   public void testFiniteDifferenceCalculator(Random random, List<? extends JointBasics> joints, double dt, double dq, double epsilon, int iteration)
+   {
+      testCalculatorAgainstFiniteDifference(random, joints, dt, input -> computeGradientByFD(input, dq), epsilon, iteration);
+   }
 
-         CommonOps_DDRM.subtract(expectedGravity, prevGravity, expectedDeltaGravity);
-         CommonOps_DDRM.subtract(expectedDeltaGravity, actualDeltaGravity, errorDeltaGravity);
+   public void testCalculatorAgainstFiniteDifference(Random random,
+                                                     List<? extends JointBasics> joints,
+                                                     double dt,
+                                                     Function<MultiBodySystemBasics, DMatrixRMaj> calculatorToTest,
+                                                     double epsilon,
+                                                     int iteration)
+   {
+      MultiBodySystemStateIntegrator integrator = new MultiBodySystemStateIntegrator(dt);
+      MultiBodySystemBasics input = MultiBodySystemBasics.toMultiBodySystemBasics(joints);
+      DMatrixRMaj qDot = new DMatrixRMaj(input.getNumberOfDoFs(), 1);
+      DMatrixRMaj actualDeltaGravity = new DMatrixRMaj(input.getNumberOfDoFs(), 1);
+      DMatrixRMaj actualGravity = new DMatrixRMaj(input.getNumberOfDoFs(), 1);
+      DMatrixRMaj expectedDeltaGravity = new DMatrixRMaj(input.getNumberOfDoFs(), 1);
+      DMatrixRMaj errorDeltaGravity = new DMatrixRMaj(input.getNumberOfDoFs(), 1);
+      DMatrixRMaj prevGravity = new DMatrixRMaj(input.getNumberOfDoFs(), 1);
+      DMatrixRMaj expectedGravity = new DMatrixRMaj(input.getNumberOfDoFs(), 1);
 
-         try
+      MultiBodySystemRandomTools.nextState(random, JointStateType.CONFIGURATION, joints);
+      MultiBodySystemRandomTools.nextState(random, JointStateType.VELOCITY, joints);
+      input.getRootBody().updateFramesRecursively();
+
+      DMatrixRMaj gradient = calculatorToTest.apply(input);
+
+      MultiBodySystemTools.extractJointsState(input.getJointsToConsider(), JointStateType.VELOCITY, qDot);
+      CommonOps_DDRM.mult(gradient, qDot, actualDeltaGravity);
+      CommonOps_DDRM.scale(dt, actualDeltaGravity);
+
+      InverseDynamicsCalculator calculator = new InverseDynamicsCalculator(input);
+      calculator.setConsiderCoriolisAndCentrifugalForces(false);
+      calculator.setConsiderJointAccelerations(false);
+      calculator.setGravitionalAcceleration(-GRAVITY);
+      calculator.compute();
+      prevGravity.set(calculator.getJointTauMatrix());
+      CommonOps_DDRM.add(prevGravity, actualDeltaGravity, actualGravity);
+
+      input.getRootBody().updateFramesRecursively();
+      integrator.integrateFromVelocitySubtree(input.getRootBody());
+      input.getRootBody().updateFramesRecursively();
+      calculator.compute();
+      expectedGravity.set(calculator.getJointTauMatrix());
+
+      CommonOps_DDRM.subtract(expectedGravity, prevGravity, expectedDeltaGravity);
+      CommonOps_DDRM.subtract(expectedDeltaGravity, actualDeltaGravity, errorDeltaGravity);
+
+      try
+      {
+         MecanoTestTools.assertDMatrixEquals("Iteration: " + iteration, expectedGravity, actualGravity, epsilon);
+         MecanoTestTools.assertDMatrixEquals("Iteration: " + iteration, expectedDeltaGravity, actualDeltaGravity, epsilon);
+      }
+      catch (Throwable e)
+      {
+         TablePrinter tablePrinter = new TablePrinter();
+         int col = 0;
+         tablePrinter.setCell(0, col, "Joint", Alignment.LEFT);
+         int row = 1;
+         for (JointBasics joint : input.getJointsToConsider())
          {
-            MecanoTestTools.assertDMatrixEquals(expectedGravity, actualGravity, epsilon);
-            MecanoTestTools.assertDMatrixEquals(expectedDeltaGravity, actualDeltaGravity, epsilon);
+            for (int j = 0; j < joint.getDegreesOfFreedom(); j++)
+            {
+               String dofName = joint.getName() + " [" + toShortTypeString(joint) + "]";
+               tablePrinter.setCell(row++, col, dofName, Alignment.LEFT);
+            }
          }
-         catch (Throwable e)
-         {
-            TablePrinter tablePrinter = new TablePrinter();
-            int col = 0;
-            tablePrinter.setCell(0, col, "Act. Delta", Alignment.LEFT);
-            tablePrinter.setSubTable(1, col++, actualDeltaGravity);
-            tablePrinter.setCell(0, col, "Exp. Delta", Alignment.LEFT);
-            tablePrinter.setSubTable(1, col++, expectedDeltaGravity);
-            tablePrinter.setCell(0, col, "Err. Delta", Alignment.LEFT);
-            tablePrinter.setSubTable(1, col++, errorDeltaGravity);
-            tablePrinter.setCell(0, col, "Act. Gradient", Alignment.LEFT);
-            CommonOps_DDRM.scale(dt, gradient);
-            tablePrinter.setSubTable(1, col++, gradient);
-            System.out.println(tablePrinter);
-            throw e;
-         }
+         col++;
+         tablePrinter.setCell(0, col, "Act. Delta", Alignment.LEFT);
+         tablePrinter.setSubTable(1, col++, actualDeltaGravity);
+         tablePrinter.setCell(0, col, "Exp. Delta", Alignment.LEFT);
+         tablePrinter.setSubTable(1, col++, expectedDeltaGravity);
+         tablePrinter.setCell(0, col, "Err. Delta", Alignment.LEFT);
+         tablePrinter.setSubTable(1, col++, errorDeltaGravity);
+         tablePrinter.setCell(0, col, "Act. Gradient", Alignment.LEFT);
+         CommonOps_DDRM.scale(dt, gradient);
+         tablePrinter.setSubTable(1, col++, gradient);
+         System.out.println(tablePrinter);
+         throw e;
       }
    }
 
@@ -256,7 +432,6 @@ public class MultiBodyGravityGradientCalculatorTest
       MultiBodySystemTools.insertJointsState(input.getJointsToConsider(), JointStateType.VELOCITY, originalVelocity);
       input.getRootBody().updateFramesRecursively();
 
-      CommonOps_DDRM.transpose(gradient);
       return gradient;
    }
 }
