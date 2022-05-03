@@ -29,7 +29,7 @@ public class MultiBodyGravityGradientCalculatorTest
       Random random = new Random(2342356);
 
       double dq = 1.0e-7;
-      double epsilon = 1.0e-6;
+      double epsilon = 1.0e-5;
 
       for (int i = 0; i < ITERATIONS; i++)
       {

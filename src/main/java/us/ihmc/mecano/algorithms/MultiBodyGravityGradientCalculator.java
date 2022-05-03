@@ -86,6 +86,7 @@ public class MultiBodyGravityGradientCalculator
    public void compute()
    {
       initialStep.passOne();
+      initialStep.passTwo();
    }
 
    public DMatrixRMaj getGradientMatrix()
@@ -154,7 +155,6 @@ public class MultiBodyGravityGradientCalculator
          for (int i = 0; i < children.size(); i++)
             children.get(i).passOne();
 
-
          // Update the subtree mass
          subTreeMass = bodyInertia == null ? 0.0 : bodyInertia.getMass();
          for (int i = 0; i < children.size(); i++)
@@ -174,6 +174,11 @@ public class MultiBodyGravityGradientCalculator
             centerOfMassTimesMass.setIncludingFrame(bodyInertia.getCenterOfMassOffset());
             centerOfMassTimesMass.changeFrame(frameToUse);
             centerOfMassTimesMass.scale(bodyInertia.getMass());
+
+            for (int i = 0; i < getNumberOfDoFs(); i++)
+            {
+               unitTwists[i].setIncludingFrame(getJoint().getUnitTwists().get(i));
+            }
          }
 
          for (int i = 0; i < children.size(); i++)
@@ -185,57 +190,69 @@ public class MultiBodyGravityGradientCalculator
 
          centerOfMass.setIncludingFrame(centerOfMassTimesMass);
          centerOfMass.scale(1.0 / subTreeMass);
-
-         if (!isRoot())
-         {
-            for (int i = 0; i < getJoint().getDegreesOfFreedom(); i++)
-            { // TODO Looks good
-               unitTwists[i].setIncludingFrame(getJoint().getUnitTwists().get(i));
-               tempCross.cross(gravity, unitTwists[i].getAngularPart());
-               tempCross.cross(centerOfMassTimesMass);
-               double gradientElement = tempCross.dot(unitTwists[i].getAngularPart());
-               gradientMatrix.set(jointIndices[i], jointIndices[i], gradientElement);
-
-               for (int j = 0; j < i; j++)
-               { // TODO Looks good
-                  tempCross.cross(gravity, unitTwists[j].getAngularPart());
-                  tempCross.cross(centerOfMassTimesMass);
-                  gradientElement = tempCross.dot(unitTwists[i].getAngularPart());
-                  gradientMatrix.set(jointIndices[j], jointIndices[i], gradientElement);
-
-                  tempCross.cross(gravity, unitTwists[i].getAngularPart());
-                  tempCross.cross(centerOfMassTimesMass);
-                  gradientElement = tempCross.dot(unitTwists[j].getAngularPart());
-                  gradientMatrix.set(jointIndices[i], jointIndices[j], gradientElement);
-               }
-
-               // TODO Following is wrong
-               for (int childIndex = 0; childIndex < children.size(); childIndex++)
-               {
-                  AlgorithmStep child = children.get(i);
-
-                  for (int j = 0; j < child.getJoint().getDegreesOfFreedom(); j++)
-                  {
-                     child.unitTwists[j].changeFrame(getFrameAfterJoint());
-
-                     tempCross.cross(child.gravity, child.unitTwists[j].getAngularPart());
-                     tempCross.cross(child.centerOfMassTimesMass);
-                     gradientElement = tempCross.dot(unitTwists[i].getAngularPart());
-                     gradientMatrix.set(jointIndices[i], child.jointIndices[j], gradientElement);
-//                     gradientMatrix.set(child.jointIndices[j], jointIndices[i], gradientElement);
-                     
-                     tempCross.cross(gravity, unitTwists[i].getAngularPart());
-                     tempCross.cross(centerOfMassTimesMass);
-                     gradientElement = tempCross.dot(child.unitTwists[j].getAngularPart());
-//                     gradientMatrix.set(jointIndices[i], child.jointIndices[j], gradientElement);
-                     gradientMatrix.set(child.jointIndices[j], jointIndices[i], gradientElement);
-                  }
-               }
-            }
-         }
       }
 
       private final Vector3D tempCross = new Vector3D();
+
+      /** From leaves to root, compute the elements of the gradient matrix. */
+      public void passTwo()
+      {
+         for (int i = 0; i < children.size(); i++)
+            children.get(i).passTwo();
+
+         if (isRoot())
+            return;
+
+         for (int i = 0; i < getNumberOfDoFs(); i++)
+         {
+            Twist unitTwist_i = unitTwists[i];
+            unitTwists[i].setIncludingFrame(getJoint().getUnitTwists().get(i));
+            tempCross.cross(gravity, unitTwist_i.getAngularPart());
+            tempCross.cross(centerOfMassTimesMass);
+            double gradient_ii = tempCross.dot(unitTwist_i.getAngularPart());
+            gradientMatrix.set(jointIndices[i], jointIndices[i], gradient_ii);
+
+            for (int j = 0; j < i; j++)
+            {
+               Twist unitTwist_j = unitTwists[j];
+               tempCross.cross(gravity, unitTwist_j.getAngularPart());
+               tempCross.cross(centerOfMassTimesMass);
+               double gradient_ji = tempCross.dot(unitTwist_i.getAngularPart());
+               gradientMatrix.set(jointIndices[j], jointIndices[i], gradient_ji);
+
+               tempCross.cross(gravity, unitTwist_i.getAngularPart());
+               tempCross.cross(centerOfMassTimesMass);
+               double gradient_ij = tempCross.dot(unitTwist_j.getAngularPart());
+               gradientMatrix.set(jointIndices[i], jointIndices[j], gradient_ij);
+            }
+         }
+
+         AlgorithmStep ancestor = parent;
+
+         while (!ancestor.isRoot())
+         {
+            for (int j = 0; j < getNumberOfDoFs(); j++)
+            {
+               int index_j = jointIndices[j];
+               Twist unitTwist_j = unitTwists[j];
+
+               for (int i = 0; i < ancestor.getNumberOfDoFs(); i++)
+               {
+                  int index_i = ancestor.jointIndices[i];
+                  Twist unitTwist_i = ancestor.unitTwists[i];
+
+                  unitTwist_i.changeFrame(getFrameAfterJoint());
+                  tempCross.cross(gravity, unitTwist_i.getAngularPart());
+                  tempCross.cross(centerOfMassTimesMass);
+                  double gradient_ij = tempCross.dot(unitTwist_j.getAngularPart());
+                  gradientMatrix.set(index_i, index_j, gradient_ij);
+                  gradientMatrix.set(index_j, index_i, gradient_ij);
+               }
+            }
+
+            ancestor = ancestor.parent;
+         }
+      }
 
       public boolean isRoot()
       {
@@ -245,6 +262,11 @@ public class MultiBodyGravityGradientCalculator
       public JointReadOnly getJoint()
       {
          return rigidBody.getParentJoint();
+      }
+
+      public int getNumberOfDoFs()
+      {
+         return getJoint().getDegreesOfFreedom();
       }
 
       public MovingReferenceFrame getFrameAfterJoint()
