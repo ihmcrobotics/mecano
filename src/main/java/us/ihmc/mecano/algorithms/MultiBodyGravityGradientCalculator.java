@@ -13,6 +13,7 @@ import us.ihmc.euclid.referenceFrame.interfaces.FrameTuple3DReadOnly;
 import us.ihmc.euclid.referenceFrame.interfaces.FrameVector3DReadOnly;
 import us.ihmc.euclid.tools.TupleTools;
 import us.ihmc.euclid.tuple3D.interfaces.Tuple3DReadOnly;
+import us.ihmc.euclid.tuple3D.interfaces.Vector3DReadOnly;
 import us.ihmc.mecano.frames.MovingReferenceFrame;
 import us.ihmc.mecano.multiBodySystem.interfaces.JointReadOnly;
 import us.ihmc.mecano.multiBodySystem.interfaces.MultiBodySystemReadOnly;
@@ -25,7 +26,8 @@ import us.ihmc.mecano.tools.MultiBodySystemTools;
 public class MultiBodyGravityGradientCalculator
 {
    private final MultiBodySystemReadOnly input;
-   private final DMatrixRMaj gradientMatrix;
+   private final DMatrixRMaj gravityMatrix;
+   private final DMatrixRMaj gravityGradientMatrix;
    private final AlgorithmStep initialStep;
    private final FrameVector3D gravitationalAcceleration = new FrameVector3D();
 
@@ -33,7 +35,8 @@ public class MultiBodyGravityGradientCalculator
    {
       this.input = input;
 
-      gradientMatrix = new DMatrixRMaj(input.getNumberOfDoFs(), input.getNumberOfDoFs());
+      gravityGradientMatrix = new DMatrixRMaj(input.getNumberOfDoFs(), input.getNumberOfDoFs());
+      gravityMatrix = new DMatrixRMaj(input.getNumberOfDoFs(), 1);
 
       initialStep = new AlgorithmStep(input.getRootBody(), null, null);
       buildMultiBodyTree(initialStep, input.getJointsToIgnore());
@@ -160,9 +163,14 @@ public class MultiBodyGravityGradientCalculator
       initialStep.passTwo();
    }
 
-   public DMatrixRMaj getGradientMatrix()
+   public DMatrixRMaj getGravityMatrix()
    {
-      return gradientMatrix;
+      return gravityMatrix;
+   }
+
+   public DMatrixRMaj getGravityGradientMatrix()
+   {
+      return gravityGradientMatrix;
    }
 
    private class AlgorithmStep
@@ -267,15 +275,16 @@ public class MultiBodyGravityGradientCalculator
             int index_i = jointIndices[i];
 
             TwistReadOnly unitTwist_i = getUnitTwist(i);
-            gradientMatrix.set(index_i, index_i, computeElement(unitTwist_i, unitTwist_i));
+            gravityMatrix.set(index_i, 0, computeGravityElement(unitTwist_i));
+            gravityGradientMatrix.set(index_i, index_i, computeGravityGradientElement(unitTwist_i, unitTwist_i));
 
             for (int j = 0; j < i; j++)
             {
                int index_j = jointIndices[j];
                TwistReadOnly unitTwist_j = getUnitTwist(j);
 
-               gradientMatrix.set(index_i, index_j, computeElement(unitTwist_i, unitTwist_j));
-               gradientMatrix.set(index_j, index_i, computeElement(unitTwist_j, unitTwist_i));
+               gravityGradientMatrix.set(index_i, index_j, computeGravityGradientElement(unitTwist_i, unitTwist_j));
+               gravityGradientMatrix.set(index_j, index_i, computeGravityGradientElement(unitTwist_j, unitTwist_i));
             }
          }
 
@@ -295,9 +304,9 @@ public class MultiBodyGravityGradientCalculator
                   unitTwist_i.setIncludingFrame(ancestor.getUnitTwist(i));
                   unitTwist_i.changeFrame(getFrameAfterJoint());
 
-                  double gradient_ji = computeElement(unitTwist_j, unitTwist_i);
-                  gradientMatrix.set(index_i, index_j, gradient_ji);
-                  gradientMatrix.set(index_j, index_i, gradient_ji);
+                  double gradient_ji = computeGravityGradientElement(unitTwist_j, unitTwist_i);
+                  gravityGradientMatrix.set(index_i, index_j, gradient_ji);
+                  gravityGradientMatrix.set(index_j, index_i, gradient_ji);
                }
             }
 
@@ -305,24 +314,36 @@ public class MultiBodyGravityGradientCalculator
          }
       }
 
-      private double computeElement(TwistReadOnly unitTwist_i, TwistReadOnly unitTwist_j)
+      private double computeGravityElement(TwistReadOnly unitTwist)
+      {
+         FrameVector3DReadOnly velocity = unitTwist.getLinearPart();
+         FrameVector3DReadOnly omega = unitTwist.getAngularPart();
+
+         // g x x_CoM
+         double tx = gravity.getY() * centerOfMass.getZ() - gravity.getZ() * centerOfMass.getY();
+         double ty = gravity.getZ() * centerOfMass.getX() - gravity.getX() * centerOfMass.getZ();
+         double tz = gravity.getX() * centerOfMass.getY() - gravity.getY() * centerOfMass.getX();
+
+         return subTreeMass * (TupleTools.dot(tx, ty, tz, omega) - gravity.dot((Vector3DReadOnly) velocity));
+      }
+
+      private double computeGravityGradientElement(TwistReadOnly unitTwist_i, TwistReadOnly unitTwist_j)
       {
          FrameVector3DReadOnly velocity_i = unitTwist_i.getLinearPart();
          FrameVector3DReadOnly omega_i = unitTwist_i.getAngularPart();
          FrameVector3DReadOnly omega_j = unitTwist_j.getAngularPart();
 
-         // g x w_j
-         double lx = gravity.getY() * omega_j.getZ() - gravity.getZ() * omega_j.getY();
-         double ly = gravity.getZ() * omega_j.getX() - gravity.getX() * omega_j.getZ();
-         double lz = gravity.getX() * omega_j.getY() - gravity.getY() * omega_j.getX();
-         // (g x w_j) x x_CoM
-         double wx = ly * centerOfMass.getZ() - lz * centerOfMass.getY();
-         double wy = lz * centerOfMass.getX() - lx * centerOfMass.getZ();
-         double wz = lx * centerOfMass.getY() - ly * centerOfMass.getX();
+         // w_j x g
+         double fxDot = omega_j.getY() * gravity.getZ() - omega_j.getZ() * gravity.getY();
+         double fyDot = omega_j.getZ() * gravity.getX() - omega_j.getX() * gravity.getZ();
+         double fzDot = omega_j.getX() * gravity.getY() - omega_j.getY() * gravity.getX();
+         // (w_j x g) x x_CoM
+         double txDot = fyDot * centerOfMass.getZ() - fzDot * centerOfMass.getY();
+         double tyDot = fzDot * centerOfMass.getX() - fxDot * centerOfMass.getZ();
+         double tzDot = fxDot * centerOfMass.getY() - fyDot * centerOfMass.getX();
 
-         // m_subtree * (((g x w_j) x x_CoM) . w_i - (g x w_j) . v_i)
-         double gradient_ij = TupleTools.dot(wx, wy, wz, omega_i) - TupleTools.dot(lx, ly, lz, velocity_i);
-         return subTreeMass * gradient_ij;
+         // m_subtree * (((w_j x g) x x_CoM) . w_i - (w_j x g) . v_i)
+         return subTreeMass * (-TupleTools.dot(txDot, tyDot, tzDot, omega_i) + TupleTools.dot(fxDot, fyDot, fzDot, velocity_i));
       }
 
       public boolean isRoot()

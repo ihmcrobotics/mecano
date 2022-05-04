@@ -31,6 +31,61 @@ public class MultiBodyGravityGradientCalculatorTest
    private static final double GRAVITY = 10.0;
 
    @Test
+   public void testGravityMAtrixAgainsInverseDynamics()
+   {
+      Random random = new Random(345345780);
+
+      for (int i = 0; i < ITERATIONS; i++)
+      {
+         int numberOfJoints = 20;
+         List<? extends JointBasics> joints = MultiBodySystemRandomTools.nextJointTree(random, numberOfJoints);
+         MultiBodySystemRandomTools.nextState(random, JointStateType.CONFIGURATION, joints);
+         MultiBodySystemBasics input = MultiBodySystemBasics.toMultiBodySystemBasics(joints);
+
+         InverseDynamicsCalculator inverseDynamics = new InverseDynamicsCalculator(input);
+         inverseDynamics.setGravitionalAcceleration(-GRAVITY);
+         inverseDynamics.setConsiderCoriolisAndCentrifugalForces(false);
+         inverseDynamics.setConsiderJointAccelerations(false);
+         inverseDynamics.compute();
+
+         MultiBodyGravityGradientCalculator calculator = new MultiBodyGravityGradientCalculator(input);
+         calculator.setGravitionalAcceleration(-GRAVITY);
+         calculator.compute();
+
+         try
+         {
+            MecanoTestTools.assertDMatrixEquals("Iteration: " + i, inverseDynamics.getJointTauMatrix(), calculator.getGravityMatrix(), 1.0e-12);
+         }
+         catch (Throwable e)
+         {
+            TablePrinter tablePrinter = new TablePrinter();
+            int col = 0;
+            int row = 1;
+            for (JointBasics joint : input.getJointsToConsider())
+            {
+               for (int j = 0; j < joint.getDegreesOfFreedom(); j++)
+               {
+                  String dofName = joint.getName() + " [" + toShortTypeString(joint) + "]";
+                  tablePrinter.setCell(row++, col, dofName, Alignment.LEFT);
+               }
+            }
+            col++;
+            DMatrixRMaj diff = new DMatrixRMaj(input.getNumberOfDoFs(), 1);
+            CommonOps_DDRM.subtract(inverseDynamics.getJointTauMatrix(), calculator.getGravityMatrix(), diff);
+            CommonOps_DDRM.abs(diff);
+            tablePrinter.setCell(0, col, "Exp.", Alignment.LEFT);
+            tablePrinter.setSubTable(1, col++, inverseDynamics.getJointTauMatrix());
+            tablePrinter.setCell(0, col, "Act.", Alignment.LEFT);
+            tablePrinter.setSubTable(1, col++, calculator.getGravityMatrix());
+            tablePrinter.setCell(0, col, "Err.", Alignment.LEFT);
+            tablePrinter.setSubTable(1, col++, diff);
+            System.out.println(tablePrinter);
+            throw e;
+         }
+      }
+   }
+
+   @Test
    public void testCalculatorRevoluteJointChain()
    {
       Random random = new Random(2342356);
@@ -143,7 +198,7 @@ public class MultiBodyGravityGradientCalculatorTest
       MultiBodyGravityGradientCalculator calculator = new MultiBodyGravityGradientCalculator(input);
       calculator.setGravitionalAcceleration(-GRAVITY);
       calculator.compute();
-      DMatrixRMaj actualGradient = calculator.getGradientMatrix();
+      DMatrixRMaj actualGradient = calculator.getGravityGradientMatrix();
 
       try
       {
@@ -300,7 +355,7 @@ public class MultiBodyGravityGradientCalculatorTest
          MultiBodyGravityGradientCalculator calculator = new MultiBodyGravityGradientCalculator(input);
          calculator.setGravitionalAcceleration(-GRAVITY);
          calculator.compute();
-         return calculator.getGradientMatrix();
+         return calculator.getGravityGradientMatrix();
       }, epsilon, iteration);
    }
 
