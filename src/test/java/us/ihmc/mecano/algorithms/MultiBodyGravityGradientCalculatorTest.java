@@ -50,7 +50,7 @@ public class MultiBodyGravityGradientCalculatorTest
 
          MultiBodyGravityGradientCalculator calculator = new MultiBodyGravityGradientCalculator(input);
          calculator.setGravitionalAcceleration(-GRAVITY);
-         calculator.compute();
+         calculator.reset();
 
          try
          {
@@ -197,7 +197,7 @@ public class MultiBodyGravityGradientCalculatorTest
       DMatrixRMaj expectedGradient = computeGradientByFD(input, dq);
       MultiBodyGravityGradientCalculator calculator = new MultiBodyGravityGradientCalculator(input);
       calculator.setGravitionalAcceleration(-GRAVITY);
-      calculator.compute();
+      calculator.reset();
       DMatrixRMaj actualGradient = calculator.getGravityGradientMatrix();
 
       try
@@ -354,7 +354,7 @@ public class MultiBodyGravityGradientCalculatorTest
       {
          MultiBodyGravityGradientCalculator calculator = new MultiBodyGravityGradientCalculator(input);
          calculator.setGravitionalAcceleration(-GRAVITY);
-         calculator.compute();
+         calculator.reset();
          return calculator.getGravityGradientMatrix();
       }, epsilon, iteration);
    }

@@ -31,6 +31,8 @@ public class MultiBodyGravityGradientCalculator
    private final AlgorithmStep initialStep;
    private final FrameVector3D gravitationalAcceleration = new FrameVector3D();
 
+   private boolean dirtyFlag = true;
+
    public MultiBodyGravityGradientCalculator(MultiBodySystemReadOnly input)
    {
       this.input = input;
@@ -157,19 +159,30 @@ public class MultiBodyGravityGradientCalculator
       return algorithmSteps;
    }
 
-   public void compute()
+   public void reset()
    {
+      dirtyFlag = true;
+   }
+
+   private void update()
+   {
+      if (!dirtyFlag)
+         return;
+
+      dirtyFlag = false;
       initialStep.passOne();
       initialStep.passTwo();
    }
 
    public DMatrixRMaj getGravityMatrix()
    {
+      update();
       return gravityMatrix;
    }
 
    public DMatrixRMaj getGravityGradientMatrix()
    {
+      update();
       return gravityGradientMatrix;
    }
 
