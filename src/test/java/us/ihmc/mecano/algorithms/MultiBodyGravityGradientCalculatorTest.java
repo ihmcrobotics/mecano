@@ -254,7 +254,7 @@ public class MultiBodyGravityGradientCalculatorTest
             int jointIndex = random.nextInt(joints.size());
             RigidBodyBasics body = joints.get(jointIndex).getSuccessor();
             Wrench wrench = MecanoRandomTools.nextWrench(random, body.getBodyFixedFrame(), body.getBodyFixedFrame(), 10.0, 10.0);
-//            wrench.getLinearPart().setToZero();
+            wrench.getLinearPart().setToZero();
 //            wrench.getAngularPart().setToZero();
             wrenches.put(body, wrench);
          }

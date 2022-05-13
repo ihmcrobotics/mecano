@@ -430,8 +430,8 @@ public class MultiBodyGravityGradientCalculator
 
                   double gradient_ji = computeGravityGradientElement(unitTwist_j, unitTwist_i);
                   double gradient_ij = gradient_ji;
-                  gradient_ji += computeSingleExtWrenchGradientElement(unitTwist_j, unitTwist_i, this)
-                        + computeSubTreeExtWrenchGradientElement(unitTwist_j, unitTwist_i, this);
+                  gradient_ji += computeSingleExtWrenchGradientElement(unitTwist_j, unitTwist_i, this);
+                  gradient_ji += computeSubTreeExtWrenchGradientElement(unitTwist_j, unitTwist_i, this);
                   tauGradientMatrix.set(index_i, index_j, gradient_ij);
                   tauGradientMatrix.set(index_j, index_i, gradient_ji);
                }
@@ -501,7 +501,7 @@ public class MultiBodyGravityGradientCalculator
             AlgorithmStep child = start_k.children.get(i);
 
             if (child.hasExternalWrench)
-               gradientElement = computeSingleExtWrenchGradientElement(unitTwist_i, unitTwist_j, child);
+               gradientElement += computeSingleExtWrenchGradientElement(unitTwist_i, unitTwist_j, child);
             gradientElement += computeSubTreeExtWrenchGradientElement(unitTwist_i, unitTwist_j, child);
          }
          return gradientElement;
