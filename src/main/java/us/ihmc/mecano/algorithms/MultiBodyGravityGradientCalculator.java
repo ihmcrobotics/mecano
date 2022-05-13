@@ -2,7 +2,9 @@ package us.ihmc.mecano.algorithms;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Map;
 
 import org.ejml.data.DMatrixRMaj;
 
@@ -13,38 +15,96 @@ import us.ihmc.euclid.referenceFrame.interfaces.FrameTuple3DReadOnly;
 import us.ihmc.euclid.referenceFrame.interfaces.FrameVector3DReadOnly;
 import us.ihmc.euclid.tools.TupleTools;
 import us.ihmc.euclid.tuple3D.interfaces.Tuple3DReadOnly;
-import us.ihmc.euclid.tuple3D.interfaces.Vector3DReadOnly;
 import us.ihmc.mecano.frames.MovingReferenceFrame;
 import us.ihmc.mecano.multiBodySystem.interfaces.JointReadOnly;
 import us.ihmc.mecano.multiBodySystem.interfaces.MultiBodySystemReadOnly;
 import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyReadOnly;
+import us.ihmc.mecano.spatial.SpatialForce;
 import us.ihmc.mecano.spatial.SpatialInertia;
+import us.ihmc.mecano.spatial.SpatialVector;
 import us.ihmc.mecano.spatial.Twist;
+import us.ihmc.mecano.spatial.Wrench;
+import us.ihmc.mecano.spatial.interfaces.FixedFrameWrenchBasics;
 import us.ihmc.mecano.spatial.interfaces.TwistReadOnly;
+import us.ihmc.mecano.spatial.interfaces.WrenchReadOnly;
 import us.ihmc.mecano.tools.MultiBodySystemTools;
 
 public class MultiBodyGravityGradientCalculator
 {
    private final MultiBodySystemReadOnly input;
-   private final DMatrixRMaj gravityMatrix;
-   private final DMatrixRMaj gravityGradientMatrix;
+   private final DMatrixRMaj tauMatrix;
+   private final DMatrixRMaj tauGradientMatrix;
    private final AlgorithmStep initialStep;
-   private final FrameVector3D gravitationalAcceleration = new FrameVector3D();
 
+   /** Map to quickly retrieve information for each rigid-body. */
+   private final Map<RigidBodyReadOnly, AlgorithmStep> rigidBodyToAlgorithmStepMap = new LinkedHashMap<>();
+
+   private final FrameVector3D gravitationalAcceleration = new FrameVector3D();
    private boolean dirtyFlag = true;
 
    public MultiBodyGravityGradientCalculator(MultiBodySystemReadOnly input)
    {
       this.input = input;
 
-      gravityGradientMatrix = new DMatrixRMaj(input.getNumberOfDoFs(), input.getNumberOfDoFs());
-      gravityMatrix = new DMatrixRMaj(input.getNumberOfDoFs(), 1);
+      tauGradientMatrix = new DMatrixRMaj(input.getNumberOfDoFs(), input.getNumberOfDoFs());
+      tauMatrix = new DMatrixRMaj(input.getNumberOfDoFs(), 1);
 
       initialStep = new AlgorithmStep(input.getRootBody(), null, null);
+      rigidBodyToAlgorithmStepMap.put(input.getRootBody(), initialStep);
       buildMultiBodyTree(initialStep, input.getJointsToIgnore());
       initialStep.includeIgnoredSubtreeInertia();
 
       gravitationalAcceleration.setToZero(input.getInertialFrame());
+   }
+
+   private List<AlgorithmStep> buildMultiBodyTree(AlgorithmStep parent, Collection<? extends JointReadOnly> jointsToIgnore)
+   {
+      List<AlgorithmStep> algorithmSteps = new ArrayList<>();
+      algorithmSteps.add(parent);
+
+      List<JointReadOnly> childrenJoints = new ArrayList<>(parent.rigidBody.getChildrenJoints());
+
+      if (childrenJoints.size() > 1)
+      { // Reorganize the joints in the children to ensure that loop closures are treated last.
+         List<JointReadOnly> loopClosureAncestors = new ArrayList<>();
+
+         for (int i = 0; i < childrenJoints.size();)
+         {
+            if (MultiBodySystemTools.doesSubtreeContainLoopClosure(childrenJoints.get(i).getSuccessor()))
+               loopClosureAncestors.add(childrenJoints.remove(i));
+            else
+               i++;
+         }
+
+         childrenJoints.addAll(loopClosureAncestors);
+      }
+
+      for (JointReadOnly childJoint : childrenJoints)
+      {
+         if (jointsToIgnore.contains(childJoint))
+            continue;
+
+         if (childJoint.isLoopClosure())
+         {
+            /*
+             * We simply skip any loop closure joint which will leave their columns in the matrix set to zero,
+             * which is what we want.
+             */
+            continue;
+         }
+
+         RigidBodyReadOnly childBody = childJoint.getSuccessor();
+
+         if (childBody != null && !rigidBodyToAlgorithmStepMap.containsKey(childBody))
+         {
+            int[] jointIndices = input.getJointMatrixIndexProvider().getJointDoFIndices(childJoint);
+            AlgorithmStep child = new AlgorithmStep(childBody, parent, jointIndices);
+            rigidBodyToAlgorithmStepMap.put(childBody, child);
+            algorithmSteps.addAll(buildMultiBodyTree(child, jointsToIgnore));
+         }
+      }
+
+      return algorithmSteps;
    }
 
    /**
@@ -111,52 +171,47 @@ public class MultiBodyGravityGradientCalculator
       gravitationalAcceleration.setIncludingFrame(input.getInertialFrame(), gravityX, gravityY, gravityZ);
    }
 
-   private List<AlgorithmStep> buildMultiBodyTree(AlgorithmStep parent, Collection<? extends JointReadOnly> jointsToIgnore)
+   /**
+    * Resets all the external wrenches that were added to the rigid-bodies.
+    */
+   public void setExternalWrenchesToZero()
    {
-      List<AlgorithmStep> algorithmSteps = new ArrayList<>();
-      algorithmSteps.add(parent);
+      initialStep.setExternalWrenchToZeroRecursive();
+   }
 
-      List<JointReadOnly> childrenJoints = new ArrayList<>(parent.rigidBody.getChildrenJoints());
+   /**
+    * Gets the internal reference to the external wrench associated with the given rigidBody.
+    * <p>
+    * Modify the return wrench to configure the wrench to be applied on this rigid-body.
+    * </p>
+    * <p>
+    * It is assumed to be independent from the system configuration while expressed in inertial frame.
+    * However, note that the wrench is actually expressed in local frame instead of inertial frame to
+    * keep the moment to a numerically reasonable value.
+    * </p>
+    *
+    * @param rigidBody the query. Not modified.
+    * @return the wrench associated to the query.
+    */
+   public FixedFrameWrenchBasics getExternalWrench(RigidBodyReadOnly rigidBody)
+   {
+      return rigidBodyToAlgorithmStepMap.get(rigidBody).externalWrench;
+   }
 
-      if (childrenJoints.size() > 1)
-      { // Reorganize the joints in the children to ensure that loop closures are treated last.
-         List<JointReadOnly> loopClosureAncestors = new ArrayList<>();
-
-         for (int i = 0; i < childrenJoints.size();)
-         {
-            if (MultiBodySystemTools.doesSubtreeContainLoopClosure(childrenJoints.get(i).getSuccessor()))
-               loopClosureAncestors.add(childrenJoints.remove(i));
-            else
-               i++;
-         }
-
-         childrenJoints.addAll(loopClosureAncestors);
-      }
-
-      for (JointReadOnly childJoint : childrenJoints)
-      {
-         if (jointsToIgnore.contains(childJoint))
-            continue;
-
-         if (childJoint.isLoopClosure())
-         {
-            /*
-             * We simply skip any loop closure joint which will leave their columns in the matrix set to zero,
-             * which is what we want.
-             */
-            continue;
-         }
-
-         RigidBodyReadOnly childBody = childJoint.getSuccessor();
-         if (childBody != null)
-         {
-            int[] jointIndices = input.getJointMatrixIndexProvider().getJointDoFIndices(childJoint);
-            AlgorithmStep child = new AlgorithmStep(childBody, parent, jointIndices);
-            algorithmSteps.addAll(buildMultiBodyTree(child, jointsToIgnore));
-         }
-      }
-
-      return algorithmSteps;
+   /**
+    * Sets external wrench to apply to the given {@code rigidBody}.
+    * <p>
+    * It is assumed to be independent from the system configuration while expressed in inertial frame.
+    * However, note that the wrench is actually expressed in local frame instead of inertial frame to
+    * keep the moment to a numerically reasonable value.
+    * </p>
+    *
+    * @param rigidBody      the rigid-body to which the wrench is to applied. Not modified.
+    * @param externalWrench the external wrench to apply to the rigid-body.
+    */
+   public void setExternalWrench(RigidBodyReadOnly rigidBody, WrenchReadOnly externalWrench)
+   {
+      getExternalWrench(rigidBody).setMatchingFrame(externalWrench);
    }
 
    public void reset()
@@ -174,16 +229,16 @@ public class MultiBodyGravityGradientCalculator
       initialStep.passTwo();
    }
 
-   public DMatrixRMaj getGravityMatrix()
+   public DMatrixRMaj getTauMatrix()
    {
       update();
-      return gravityMatrix;
+      return tauMatrix;
    }
 
-   public DMatrixRMaj getGravityGradientMatrix()
+   public DMatrixRMaj getTauGradientMatrix()
    {
       update();
-      return gravityGradientMatrix;
+      return tauGradientMatrix;
    }
 
    private class AlgorithmStep
@@ -194,11 +249,25 @@ public class MultiBodyGravityGradientCalculator
       private final int[] jointIndices;
       private final List<AlgorithmStep> children = new ArrayList<>();
 
+      /**
+       * User input: external wrench to be applied to this body.
+       * <p>
+       * It is assumed to be independent from the system configuration while expressed in inertial frame.
+       * The wrench is actually expressed in local frame instead of inertial frame to keep the moment to a
+       * numerically reasonable value.
+       * </p>
+       */
+      private final FixedFrameWrenchBasics externalWrench;
+      private boolean hasExternalWrench = false;
+      private boolean hasSubTreeExternalWrench = false;
+
       private double subTreeMass;
-      private final FramePoint3D centerOfMass = new FramePoint3D();
+      private final FramePoint3D subTreeCoM = new FramePoint3D();
+      private final SpatialForce subTreeExternalSpatialForce = new SpatialForce();
+      private final SpatialForce childExternalSpatialForce = new SpatialForce();
 
       private final FramePoint3D childCoM = new FramePoint3D();
-      private final FrameVector3D gravity = new FrameVector3D();
+      private final FrameVector3D gravityForceAtCoM = new FrameVector3D();
 
       public AlgorithmStep(RigidBodyReadOnly rigidBody, AlgorithmStep parent, int[] jointIndices)
       {
@@ -209,11 +278,13 @@ public class MultiBodyGravityGradientCalculator
          if (isRoot())
          {
             bodyInertia = null;
+            externalWrench = null;
          }
          else
          {
             parent.children.add(this);
             bodyInertia = new SpatialInertia(rigidBody.getInertia());
+            externalWrench = new Wrench(getBodyFixedFrame(), getBodyFixedFrame());
          }
       }
 
@@ -236,6 +307,17 @@ public class MultiBodyGravityGradientCalculator
             children.get(childIndex).includeIgnoredSubtreeInertia();
       }
 
+      public void setExternalWrenchToZeroRecursive()
+      {
+         if (!isRoot())
+            externalWrench.setToZero();
+
+         for (int childIndex = 0; childIndex < children.size(); childIndex++)
+         {
+            children.get(childIndex).setExternalWrenchToZeroRecursive();
+         }
+      }
+
       private final Twist unitTwist_i = new Twist();
 
       public void passOne()
@@ -243,35 +325,58 @@ public class MultiBodyGravityGradientCalculator
          for (int i = 0; i < children.size(); i++)
             children.get(i).passOne();
 
-         // Update the subtree mass
+         // Update the subtree mass and external wrenches
          subTreeMass = bodyInertia == null ? 0.0 : bodyInertia.getMass();
+
          for (int i = 0; i < children.size(); i++)
+         {
             subTreeMass += children.get(i).subTreeMass;
+         }
+
+         if (!isRoot())
+         {
+            hasExternalWrench = externalWrench.getLinearPartX() != 0.0 || externalWrench.getLinearPartY() != 0.0 || externalWrench.getLinearPartZ() != 0.0
+                  || externalWrench.getAngularPartX() != 0.0 || externalWrench.getAngularPartY() != 0.0 || externalWrench.getAngularPartZ() != 0.0;
+            hasSubTreeExternalWrench = hasExternalWrench;
+            subTreeExternalSpatialForce.setIncludingFrame(externalWrench);
+            subTreeExternalSpatialForce.changeFrame(getFrameAfterJoint());
+
+            for (int i = 0; i < children.size(); i++)
+            {
+               if (children.get(i).hasSubTreeExternalWrench)
+               {
+                  childExternalSpatialForce.setIncludingFrame(children.get(i).subTreeExternalSpatialForce);
+                  childExternalSpatialForce.changeFrame(getFrameAfterJoint());
+                  subTreeExternalSpatialForce.add(childExternalSpatialForce);
+                  hasSubTreeExternalWrench = true;
+               }
+            }
+         }
 
          ReferenceFrame frameToUse = isRoot() ? getBodyFixedFrame() : getFrameAfterJoint();
-         gravity.setIncludingFrame(gravitationalAcceleration);
-         gravity.changeFrame(frameToUse);
+         gravityForceAtCoM.setIncludingFrame(gravitationalAcceleration);
+         gravityForceAtCoM.changeFrame(frameToUse);
 
          // The centerOfMassTimesMass can be used to obtain the overall center of mass position.
          if (bodyInertia == null)
          {
-            centerOfMass.setToZero(getBodyFixedFrame());
+            subTreeCoM.setToZero(getBodyFixedFrame());
          }
          else
          {
-            centerOfMass.setIncludingFrame(bodyInertia.getCenterOfMassOffset());
-            centerOfMass.changeFrame(frameToUse);
-            centerOfMass.scale(bodyInertia.getMass());
+            subTreeCoM.setIncludingFrame(bodyInertia.getCenterOfMassOffset());
+            subTreeCoM.changeFrame(frameToUse);
+            subTreeCoM.scale(bodyInertia.getMass());
          }
 
          for (int i = 0; i < children.size(); i++)
          {
-            childCoM.setIncludingFrame(children.get(i).centerOfMass);
+            childCoM.setIncludingFrame(children.get(i).subTreeCoM);
             childCoM.changeFrame(frameToUse);
-            centerOfMass.scaleAdd(children.get(i).subTreeMass, childCoM, centerOfMass);
+            subTreeCoM.scaleAdd(children.get(i).subTreeMass, childCoM, subTreeCoM);
          }
 
-         centerOfMass.scale(1.0 / subTreeMass);
+         subTreeCoM.scale(1.0 / subTreeMass);
       }
 
       /** From leaves to root, compute the elements of the gradient matrix. */
@@ -288,16 +393,22 @@ public class MultiBodyGravityGradientCalculator
             int index_i = jointIndices[i];
 
             TwistReadOnly unitTwist_i = getUnitTwist(i);
-            gravityMatrix.set(index_i, 0, computeGravityElement(unitTwist_i));
-            gravityGradientMatrix.set(index_i, index_i, computeGravityGradientElement(unitTwist_i, unitTwist_i));
+            tauMatrix.set(index_i, 0, computeTauElement(unitTwist_i));
+            double gradient_ii = computeGravityGradientElement(unitTwist_i, unitTwist_i);
+            tauGradientMatrix.set(index_i, index_i, gradient_ii);
 
             for (int j = 0; j < i; j++)
             {
                int index_j = jointIndices[j];
                TwistReadOnly unitTwist_j = getUnitTwist(j);
 
-               gravityGradientMatrix.set(index_i, index_j, computeGravityGradientElement(unitTwist_i, unitTwist_j));
-               gravityGradientMatrix.set(index_j, index_i, computeGravityGradientElement(unitTwist_j, unitTwist_i));
+               double n_gravity_ij = computeGravityGradientElement(unitTwist_i, unitTwist_j);
+               double n_gravity_ji = computeGravityGradientElement(unitTwist_j, unitTwist_i);
+               double n_extWrench_iji = computeSingleExtWrenchGradientElement(unitTwist_i, unitTwist_j, this);
+               double gradient_ij = n_gravity_ij + n_extWrench_iji;
+               double gradient_ji = n_gravity_ji - n_extWrench_iji + computeSubTreeExtWrenchGradientElement(unitTwist_j, unitTwist_i, this);
+               tauGradientMatrix.set(index_i, index_j, gradient_ij);
+               tauGradientMatrix.set(index_j, index_i, gradient_ji);
             }
          }
 
@@ -318,8 +429,11 @@ public class MultiBodyGravityGradientCalculator
                   unitTwist_i.changeFrame(getFrameAfterJoint());
 
                   double gradient_ji = computeGravityGradientElement(unitTwist_j, unitTwist_i);
-                  gravityGradientMatrix.set(index_i, index_j, gradient_ji);
-                  gravityGradientMatrix.set(index_j, index_i, gradient_ji);
+                  double gradient_ij = gradient_ji;
+                  gradient_ji += computeSingleExtWrenchGradientElement(unitTwist_j, unitTwist_i, this)
+                        + computeSubTreeExtWrenchGradientElement(unitTwist_j, unitTwist_i, this);
+                  tauGradientMatrix.set(index_i, index_j, gradient_ij);
+                  tauGradientMatrix.set(index_j, index_i, gradient_ji);
                }
             }
 
@@ -327,17 +441,27 @@ public class MultiBodyGravityGradientCalculator
          }
       }
 
-      private double computeGravityElement(TwistReadOnly unitTwist)
+      private double computeTauElement(TwistReadOnly unitTwist)
       {
          FrameVector3DReadOnly velocity = unitTwist.getLinearPart();
          FrameVector3DReadOnly omega = unitTwist.getAngularPart();
 
-         // g x x_CoM
-         double tx = gravity.getY() * centerOfMass.getZ() - gravity.getZ() * centerOfMass.getY();
-         double ty = gravity.getZ() * centerOfMass.getX() - gravity.getX() * centerOfMass.getZ();
-         double tz = gravity.getX() * centerOfMass.getY() - gravity.getY() * centerOfMass.getX();
+         // f = f_g
+         double fx = -subTreeMass * gravityForceAtCoM.getX();
+         double fy = -subTreeMass * gravityForceAtCoM.getY();
+         double fz = -subTreeMass * gravityForceAtCoM.getZ();
 
-         return subTreeMass * (TupleTools.dot(tx, ty, tz, omega) - gravity.dot((Vector3DReadOnly) velocity));
+         // t = x_CoM x f + t_ext
+         double tx = subTreeCoM.getY() * fz - subTreeCoM.getZ() * fy - subTreeExternalSpatialForce.getAngularPartX();
+         double ty = subTreeCoM.getZ() * fx - subTreeCoM.getX() * fz - subTreeExternalSpatialForce.getAngularPartY();
+         double tz = subTreeCoM.getX() * fy - subTreeCoM.getY() * fx - subTreeExternalSpatialForce.getAngularPartZ();
+
+         // f -= f_ext
+         fx -= subTreeExternalSpatialForce.getLinearPartX();
+         fy -= subTreeExternalSpatialForce.getLinearPartY();
+         fz -= subTreeExternalSpatialForce.getLinearPartZ();
+
+         return TupleTools.dot(tx, ty, tz, omega) + TupleTools.dot(fx, fy, fz, velocity);
       }
 
       private double computeGravityGradientElement(TwistReadOnly unitTwist_i, TwistReadOnly unitTwist_j)
@@ -346,17 +470,97 @@ public class MultiBodyGravityGradientCalculator
          FrameVector3DReadOnly omega_i = unitTwist_i.getAngularPart();
          FrameVector3DReadOnly omega_j = unitTwist_j.getAngularPart();
 
-         // w_j x g
-         double fxDot = omega_j.getY() * gravity.getZ() - omega_j.getZ() * gravity.getY();
-         double fyDot = omega_j.getZ() * gravity.getX() - omega_j.getX() * gravity.getZ();
-         double fzDot = omega_j.getX() * gravity.getY() - omega_j.getY() * gravity.getX();
-         // (w_j x g) x x_CoM
-         double txDot = fyDot * centerOfMass.getZ() - fzDot * centerOfMass.getY();
-         double tyDot = fzDot * centerOfMass.getX() - fxDot * centerOfMass.getZ();
-         double tzDot = fxDot * centerOfMass.getY() - fyDot * centerOfMass.getX();
+         // f = f_g
+         double fx = -subTreeMass * gravityForceAtCoM.getX();
+         double fy = -subTreeMass * gravityForceAtCoM.getY();
+         double fz = -subTreeMass * gravityForceAtCoM.getZ();
 
-         // m_subtree * (((w_j x g) x x_CoM) . w_i - (w_j x g) . v_i)
-         return subTreeMass * (-TupleTools.dot(txDot, tyDot, tzDot, omega_i) + TupleTools.dot(fxDot, fyDot, fzDot, velocity_i));
+         // f x w_j
+         double fxDot = fy * omega_j.getZ() - fz * omega_j.getY();
+         double fyDot = fz * omega_j.getX() - fx * omega_j.getZ();
+         double fzDot = fx * omega_j.getY() - fy * omega_j.getX();
+
+         // x_CoM x (f x w_j)
+         double txDot = subTreeCoM.getY() * fzDot - subTreeCoM.getZ() * fyDot;
+         double tyDot = subTreeCoM.getZ() * fxDot - subTreeCoM.getX() * fzDot;
+         double tzDot = subTreeCoM.getX() * fyDot - subTreeCoM.getY() * fxDot;
+
+         // (x_CoM x (f x w_j)) . w_i + (f x w_j) . v_i
+         return TupleTools.dot(txDot, tyDot, tzDot, omega_i) + TupleTools.dot(fxDot, fyDot, fzDot, velocity_i);
+      }
+
+      private double computeSubTreeExtWrenchGradientElement(TwistReadOnly unitTwist_i, TwistReadOnly unitTwist_j, AlgorithmStep start_k)
+      {
+         if (!start_k.hasSubTreeExternalWrench)
+            return 0.0; // There's no external wrench down the subtree.
+
+         double gradientElement = 0.0;
+
+         for (int i = 0; i < start_k.children.size(); i++)
+         {
+            AlgorithmStep child = start_k.children.get(i);
+
+            if (child.hasExternalWrench)
+               gradientElement = computeSingleExtWrenchGradientElement(unitTwist_i, unitTwist_j, child);
+            gradientElement += computeSubTreeExtWrenchGradientElement(unitTwist_i, unitTwist_j, child);
+         }
+         return gradientElement;
+      }
+
+      private final SpatialVector descendantForce = new SpatialVector();
+      private final FramePoint3D pointOfApplication = new FramePoint3D();
+
+      private double computeSingleExtWrenchGradientElement(TwistReadOnly unitTwist_i, TwistReadOnly unitTwist_j, AlgorithmStep descendant_k)
+      {
+         // We only want the force/torque to be rotated, so we use a SpatialVector instead of SpatialForce/Wrench.
+         descendantForce.setIncludingFrame(descendant_k.externalWrench);
+         descendantForce.changeFrame(getFrameAfterJoint());
+         pointOfApplication.setToZero(descendant_k.getBodyFixedFrame());
+         pointOfApplication.changeFrame(getFrameAfterJoint());
+
+         // f_ext_k
+         double fx = -descendantForce.getLinearPartX();
+         double fy = -descendantForce.getLinearPartY();
+         double fz = -descendantForce.getLinearPartZ();
+         // t_ext_k
+         double tx = -descendantForce.getAngularPartX();
+         double ty = -descendantForce.getAngularPartY();
+         double tz = -descendantForce.getAngularPartZ();
+
+         FrameVector3DReadOnly velocity_i = unitTwist_i.getLinearPart();
+         FrameVector3DReadOnly velocity_j = unitTwist_j.getLinearPart();
+         FrameVector3DReadOnly omega_i = unitTwist_i.getAngularPart();
+         FrameVector3DReadOnly omega_j = unitTwist_j.getAngularPart();
+
+         // d_ext_k
+         double dx = pointOfApplication.getX();
+         double dy = pointOfApplication.getY();
+         double dz = pointOfApplication.getZ();
+
+         // f_ext_k x w_j
+         double fxDot_j = fy * omega_j.getZ() - fz * omega_j.getY();
+         double fyDot_j = fz * omega_j.getX() - fx * omega_j.getZ();
+         double fzDot_j = fx * omega_j.getY() - fy * omega_j.getX();
+         // f_ext_k x w_i
+         double fxDot_i = fy * omega_i.getZ() - fz * omega_i.getY();
+         double fyDot_i = fz * omega_i.getX() - fx * omega_i.getZ();
+         double fzDot_i = fx * omega_i.getY() - fy * omega_i.getX();
+
+         // d_ext_k x (f_ext_k x w_j) + t_ext_k
+         double txDot_j = dy * fzDot_j - dz * fyDot_j + ty * omega_j.getZ() - tz * omega_j.getY();
+         double tyDot_j = dz * fxDot_j - dx * fzDot_j + tz * omega_j.getX() - tx * omega_j.getZ();
+         double tzDot_j = dx * fyDot_j - dy * fxDot_j + tx * omega_j.getY() - ty * omega_j.getX();
+         // d_ext_k x (f_ext_k x w_i)
+         double txDot_i = dy * fzDot_i - dz * fyDot_i;
+         double tyDot_i = dz * fxDot_i - dx * fzDot_i;
+         double tzDot_i = dx * fyDot_i - dy * fxDot_i;
+
+         // (d_ext_k x (f_ext_k x w_j) + t_ext_k) . w_i + (d_ext_k x (f_ext_k x w_i)) . w_j + (f_ext_k x w_j) . v_i + (f_ext_k x w_i) . v_j
+         double gradient_ijk = TupleTools.dot(txDot_j, tyDot_j, tzDot_j, omega_i);
+         gradient_ijk += TupleTools.dot(fxDot_j, fyDot_j, fzDot_j, velocity_i);
+         gradient_ijk -= TupleTools.dot(txDot_i, tyDot_i, tzDot_i, omega_j);
+         gradient_ijk -= TupleTools.dot(fxDot_i, fyDot_i, fzDot_i, velocity_j);
+         return gradient_ijk;
       }
 
       public boolean isRoot()
