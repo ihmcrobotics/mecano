@@ -324,12 +324,27 @@ public class MultiBodyGravityGradientCalculator
       return tauGradientMatrix;
    }
 
+   /** Intermediate variable used to compute {@link AlgorithmStep#subTreeExternalSpatialForce}. */
+   private final SpatialForce childExternalSpatialForce = new SpatialForce();
+   /** Intermediate variable used to compute {@link AlgorithmStep#subTreeCoM}. */
+   private final FramePoint3D childCoM = new FramePoint3D();
+
+   /** This class represents a single step for this algorithm. */
    private class AlgorithmStep
    {
+      /** The rigid-body for which this step is for. */
       private final RigidBodyReadOnly rigidBody;
+      /**
+       * Body inertia: usually equal to {@code rigidBody.getInertial()}. However, if at least one child of
+       * {@code rigidBody} is ignored, it is equal to this rigid-body inertia and the subtree inertia
+       * attached to the ignored joint.
+       */
       private final SpatialInertia bodyInertia;
-      private final AlgorithmStep parent;
+      /** The corresponding matrix indices for each of this step's joint degree of freedom. */
       private final int[] jointIndices;
+      /** The algorithm step for the parent of this step's rigid-body. */
+      private final AlgorithmStep parent;
+      /** The algorithm steps for the children of this step's rigid-body. */
       private final List<AlgorithmStep> children = new ArrayList<>();
 
       /**
@@ -341,15 +356,27 @@ public class MultiBodyGravityGradientCalculator
        * </p>
        */
       private final FixedFrameWrenchBasics externalWrench;
+      /**
+       * Marker used to keep track of whether there is an external wrench being applied to this step's
+       * rigid-body.
+       */
       private boolean hasExternalWrench = false;
+      /**
+       * Marker used to keep track of whether there's at least one external wrench being applied to any of
+       * the descendants to this step's, including this step.
+       */
       private boolean hasSubTreeExternalWrench = false;
 
+      /** The total mass of the subtree starting at this step. */
       private double subTreeMass;
+      /** The total center of mass of the subtree starting at this step. */
       private final FramePoint3D subTreeCoM = new FramePoint3D();
+      /** The sum of external wrenches applied to the subtree starting at this step. */
       private final SpatialForce subTreeExternalSpatialForce = new SpatialForce();
-      private final SpatialForce childExternalSpatialForce = new SpatialForce();
-
-      private final FramePoint3D childCoM = new FramePoint3D();
+      /**
+       * The resulting force due to gravity on the subtree at the sutree's center of mass expressed in
+       * local coordinates of this step's joint.
+       */
       private final FrameVector3D gravityForceAtCoM = new FrameVector3D();
 
       public AlgorithmStep(RigidBodyReadOnly rigidBody, AlgorithmStep parent, int[] jointIndices)
@@ -403,6 +430,7 @@ public class MultiBodyGravityGradientCalculator
 
       private final Twist unitTwist_i = new Twist();
 
+      /** From leaves to root, updates the forces needed to calculate the effort matrix and its gradient. */
       public void passOne()
       {
          for (int i = 0; i < children.size(); i++)
@@ -436,11 +464,13 @@ public class MultiBodyGravityGradientCalculator
             }
          }
 
+         // Update the force due gravity in local coordinates.
          ReferenceFrame frameToUse = isRoot() ? getBodyFixedFrame() : getFrameAfterJoint();
          gravityForceAtCoM.setIncludingFrame(gravitationalAcceleration);
+         gravityForceAtCoM.scale(subTreeMass);
          gravityForceAtCoM.changeFrame(frameToUse);
 
-         // The centerOfMassTimesMass can be used to obtain the overall center of mass position.
+         // Update the center of mass position of the subtree in local coordinates.
          if (bodyInertia == null)
          {
             subTreeCoM.setToZero(getBodyFixedFrame());
@@ -527,9 +557,9 @@ public class MultiBodyGravityGradientCalculator
          FrameVector3DReadOnly omega = unitTwist.getAngularPart();
 
          // f = f_g
-         double fx = -subTreeMass * gravityForceAtCoM.getX();
-         double fy = -subTreeMass * gravityForceAtCoM.getY();
-         double fz = -subTreeMass * gravityForceAtCoM.getZ();
+         double fx = -gravityForceAtCoM.getX();
+         double fy = -gravityForceAtCoM.getY();
+         double fz = -gravityForceAtCoM.getZ();
 
          // t = x_CoM x f + t_ext
          double tx = subTreeCoM.getY() * fz - subTreeCoM.getZ() * fy - subTreeExternalSpatialForce.getAngularPartX();
@@ -551,9 +581,9 @@ public class MultiBodyGravityGradientCalculator
          FrameVector3DReadOnly omega_j = unitTwist_j.getAngularPart();
 
          // f = f_g
-         double fx = -subTreeMass * gravityForceAtCoM.getX();
-         double fy = -subTreeMass * gravityForceAtCoM.getY();
-         double fz = -subTreeMass * gravityForceAtCoM.getZ();
+         double fx = -gravityForceAtCoM.getX();
+         double fy = -gravityForceAtCoM.getY();
+         double fz = -gravityForceAtCoM.getZ();
 
          // f x w_j
          double fxDot = fy * omega_j.getZ() - fz * omega_j.getY();
