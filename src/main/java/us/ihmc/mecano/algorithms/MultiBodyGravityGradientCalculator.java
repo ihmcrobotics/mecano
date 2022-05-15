@@ -38,6 +38,19 @@ import us.ihmc.mecano.tools.MultiBodySystemTools;
  * allows to reduce joint efforts due to gravity and external wrenches by driving the joint to an
  * optimal configuration.
  * </p>
+ * <p>
+ * The gradient can be used to predict the joint efforts given a variation in joint
+ * configuration:<br>
+ * <tt>&tau;(q + &delta;q) = &tau;(q) + &nabla;&tau;(q) &delta;q</tt><br>
+ * where:
+ * <ul>
+ * <li>q is the N vector of joint configurations,
+ * <li>&delta;q is the N vector of variation in joint configurations,
+ * <li>&tau;(q) is the N vector of joint efforts given the joint configuration q,
+ * <li>&nabla;&tau;(q) is the N-by-N matrix representing the gradient of joint efforts for the given
+ * joint configuration.
+ * </ul>
+ * </p>
  * 
  * @author Sylvain Bertrand
  */
@@ -309,7 +322,7 @@ public class MultiBodyGravityGradientCalculator
     * where:
     * <ul>
     * <li>q is the N vector of joint configurations,
-    * <li>&Delta;q is the N vector of variation in joint configurations,
+    * <li>&delta;q is the N vector of variation in joint configurations,
     * <li>&tau;(q) is the N vector of joint efforts given the joint configuration q,
     * <li>&nabla;&tau;(q) is the N-by-N matrix representing the gradient of joint efforts for the given
     * joint configuration.
@@ -430,7 +443,9 @@ public class MultiBodyGravityGradientCalculator
 
       private final Twist unitTwist_i = new Twist();
 
-      /** From leaves to root, updates the forces needed to calculate the effort matrix and its gradient. */
+      /**
+       * From leaves to root, updates the forces needed to calculate the effort matrix and its gradient.
+       */
       public void passOne()
       {
          for (int i = 0; i < children.size(); i++)
