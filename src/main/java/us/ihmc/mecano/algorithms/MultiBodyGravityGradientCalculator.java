@@ -404,11 +404,9 @@ public class MultiBodyGravityGradientCalculator
 
                double n_gravity_ij = computeGravityGradientElement(unitTwist_i, unitTwist_j);
                double n_gravity_ji = computeGravityGradientElement(unitTwist_j, unitTwist_i);
-               double n_extWrench_ij = computeSingleExtWrenchGradientElement(unitTwist_i, unitTwist_j, this) + computeSubTreeExtWrenchGradientElement(unitTwist_i, unitTwist_j, this);
-               double gradient_ij = n_gravity_ij + n_extWrench_ij;
-               double gradient_ji = n_gravity_ji - n_extWrench_ij;
-               tauGradientMatrix.set(index_i, index_j, gradient_ij);
-               tauGradientMatrix.set(index_j, index_i, gradient_ji);
+               double n_extWrench_ij = computeSubTreeExtWrenchGradientElement(unitTwist_i, unitTwist_j, this);
+               tauGradientMatrix.set(index_i, index_j, n_gravity_ij + n_extWrench_ij);
+               tauGradientMatrix.set(index_j, index_i, n_gravity_ji - n_extWrench_ij);
             }
          }
 
@@ -430,7 +428,6 @@ public class MultiBodyGravityGradientCalculator
 
                   double gradient_ji = computeGravityGradientElement(unitTwist_j, unitTwist_i);
                   double gradient_ij = gradient_ji;
-                  gradient_ji += computeSingleExtWrenchGradientElement(unitTwist_j, unitTwist_i, this);
                   gradient_ji += computeSubTreeExtWrenchGradientElement(unitTwist_j, unitTwist_i, this);
                   tauGradientMatrix.set(index_i, index_j, gradient_ij);
                   tauGradientMatrix.set(index_j, index_i, gradient_ji);
@@ -496,12 +493,12 @@ public class MultiBodyGravityGradientCalculator
 
          double gradientElement = 0.0;
 
+         if (start_k.hasExternalWrench)
+            gradientElement = computeSingleExtWrenchGradientElement(unitTwist_i, unitTwist_j, start_k);
+
          for (int i = 0; i < start_k.children.size(); i++)
          {
             AlgorithmStep child = start_k.children.get(i);
-
-            if (child.hasExternalWrench)
-               gradientElement += computeSingleExtWrenchGradientElement(unitTwist_i, unitTwist_j, child);
             gradientElement += computeSubTreeExtWrenchGradientElement(unitTwist_i, unitTwist_j, child);
          }
          return gradientElement;
