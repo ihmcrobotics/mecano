@@ -29,19 +29,63 @@ import us.ihmc.mecano.spatial.interfaces.TwistReadOnly;
 import us.ihmc.mecano.spatial.interfaces.WrenchReadOnly;
 import us.ihmc.mecano.tools.MultiBodySystemTools;
 
+/**
+ * This calculator can be used to evaluate the joint efforts due to gravity and external wrenches,
+ * as well as to evaluate the gradient of these efforts.
+ * <p>
+ * The gradient can be used to predict the change in joint effort that the change in joint
+ * configuration can induce. In turn, this can be used to formulate a minimization problem that
+ * allows to reduce joint efforts due to gravity and external wrenches by driving the joint to an
+ * optimal configuration.
+ * </p>
+ * 
+ * @author Sylvain Bertrand
+ */
 public class MultiBodyGravityGradientCalculator
 {
+   /** Defines the multi-body system to use with this calculator. */
    private final MultiBodySystemReadOnly input;
+   /**
+    * Output of this algorithm: joint efforts due to gravity and external wrenches for all the joint to
+    * consider.
+    */
    private final DMatrixRMaj tauMatrix;
+   /** Output of this algorithm: gradient of the {@link #tauMatrix}. */
    private final DMatrixRMaj tauGradientMatrix;
+   /** The root of the internal recursive algorithm. */
    private final AlgorithmStep initialStep;
-
    /** Map to quickly retrieve information for each rigid-body. */
    private final Map<RigidBodyReadOnly, AlgorithmStep> rigidBodyToAlgorithmStepMap = new LinkedHashMap<>();
 
+   /**
+    * The gravitational acceleration expressed in the inertial frame, typically equal to
+    * {@code (0, 0, -9.81)}.
+    */
    private final FrameVector3D gravitationalAcceleration = new FrameVector3D();
+   /**
+    * Dirty bit used to indicate if the output of this algorithm needs to be refreshed next time it is
+    * accessed.
+    */
    private boolean dirtyFlag = true;
 
+   /**
+    * Creates a calculator for that considers all the descendants of the given {@code rootBody}.
+    * <p>
+    * Do not forgot to set the gravitational acceleration so this calculator can properly account for
+    * it.
+    * </p>
+    * 
+    * @param rootBody the supporting body of the subtree to be evaluated by this calculator. Not
+    *                 modified.
+    */
+   public MultiBodyGravityGradientCalculator(RigidBodyReadOnly rootBody)
+   {
+      this(MultiBodySystemReadOnly.toMultiBodySystemInput(rootBody));
+   }
+
+   /**
+    * @param input
+    */
    public MultiBodyGravityGradientCalculator(MultiBodySystemReadOnly input)
    {
       this.input = input;
@@ -214,6 +258,10 @@ public class MultiBodyGravityGradientCalculator
       getExternalWrench(rigidBody).setMatchingFrame(externalWrench);
    }
 
+   /**
+    * Marks the internal data as out-dated, it will be re-evaluated next time {@link #getTauMatrix()}
+    * or {@link #getTauGradientMatrix()} is called.
+    */
    public void reset()
    {
       dirtyFlag = true;
@@ -229,12 +277,47 @@ public class MultiBodyGravityGradientCalculator
       initialStep.passTwo();
    }
 
+   /**
+    * Gets the definition of the multi-body system that was used to create this calculator.
+    *
+    * @return this calculator input.
+    */
+   public MultiBodySystemReadOnly getInput()
+   {
+      return input;
+   }
+
+   /**
+    * Gets the N-by-1 matrix containing the joint efforts due to gravity and external wrenches applied
+    * to the multi-body system. (N is the number of degrees of freedom of the system).
+    * 
+    * @return this calculator output: the joint efforts.
+    */
    public DMatrixRMaj getTauMatrix()
    {
       update();
       return tauMatrix;
    }
 
+   /**
+    * Gets the N-by-N matrix representing the gradient of the joint efforts {@link #getTauMatrix()}. (N
+    * is the number of degrees of freedom of the system).
+    * <p>
+    * The gradient can be used to predict the joint efforts given a variation in joint
+    * configuration:<br>
+    * <tt>&tau;(q + &delta;q) = &tau;(q) + &nabla;&tau;(q) &delta;q</tt><br>
+    * where:
+    * <ul>
+    * <li>q is the N vector of joint configurations,
+    * <li>&Delta;q is the N vector of variation in joint configurations,
+    * <li>&tau;(q) is the N vector of joint efforts given the joint configuration q,
+    * <li>&nabla;&tau;(q) is the N-by-N matrix representing the gradient of joint efforts for the given
+    * joint configuration.
+    * </ul>
+    * </p>
+    * 
+    * @return the gradient of the joint efforts.
+    */
    public DMatrixRMaj getTauGradientMatrix()
    {
       update();
@@ -552,7 +635,10 @@ public class MultiBodyGravityGradientCalculator
          double tyDot_i = dz * fxDot_i - dx * fzDot_i;
          double tzDot_i = dx * fyDot_i - dy * fxDot_i;
 
-         // (d_ext_k x (f_ext_k x w_j) + t_ext_k) . w_i + (d_ext_k x (f_ext_k x w_i)) . w_j + (f_ext_k x w_j) . v_i + (f_ext_k x w_i) . v_j
+         //   (d_ext_k x (f_ext_k x w_j) + t_ext_k) . w_i 
+         // + (f_ext_k x w_j) . v_i
+         // - (d_ext_k x (f_ext_k x w_i)) . w_j
+         // - (f_ext_k x w_i) . v_j
          double gradient_ijk = TupleTools.dot(txDot_j, tyDot_j, tzDot_j, omega_i);
          gradient_ijk += TupleTools.dot(fxDot_j, fyDot_j, fzDot_j, velocity_i);
          gradient_ijk -= TupleTools.dot(txDot_i, tyDot_i, tzDot_i, omega_j);
