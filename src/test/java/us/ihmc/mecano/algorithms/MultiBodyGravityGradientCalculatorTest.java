@@ -35,7 +35,7 @@ public class MultiBodyGravityGradientCalculatorTest
 {
    private static final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
    private static final int ITERATIONS = 1000;
-   private static final double GRAVITY = 0.0;
+   private static final double GRAVITY = 10.0;
    private static final boolean ADD_EXT_WRENCHES = true;
 
    @Test
