@@ -404,9 +404,9 @@ public class MultiBodyGravityGradientCalculator
 
                double n_gravity_ij = computeGravityGradientElement(unitTwist_i, unitTwist_j);
                double n_gravity_ji = computeGravityGradientElement(unitTwist_j, unitTwist_i);
-               double n_extWrench_iji = computeSingleExtWrenchGradientElement(unitTwist_i, unitTwist_j, this);
-               double gradient_ij = n_gravity_ij + n_extWrench_iji;
-               double gradient_ji = n_gravity_ji - n_extWrench_iji + computeSubTreeExtWrenchGradientElement(unitTwist_j, unitTwist_i, this);
+               double n_extWrench_ij = computeSingleExtWrenchGradientElement(unitTwist_i, unitTwist_j, this) + computeSubTreeExtWrenchGradientElement(unitTwist_i, unitTwist_j, this);
+               double gradient_ij = n_gravity_ij + n_extWrench_ij;
+               double gradient_ji = n_gravity_ji - n_extWrench_ij;
                tauGradientMatrix.set(index_i, index_j, gradient_ij);
                tauGradientMatrix.set(index_j, index_i, gradient_ji);
             }
