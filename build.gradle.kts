@@ -29,6 +29,12 @@ testDependencies {
    api("org.ejml:ejml-simple:0.39")
 
    api("us.ihmc:log-tools:0.6.3")
+
+   var javaFXVersion = "17.0.2"
+   api(ihmc.javaFXModule("base", javaFXVersion))
+   api(ihmc.javaFXModule("controls", javaFXVersion))
+   api(ihmc.javaFXModule("graphics", javaFXVersion))
+   api(ihmc.javaFXModule("fxml", javaFXVersion))
 }
 
 graphvizDependencies {
