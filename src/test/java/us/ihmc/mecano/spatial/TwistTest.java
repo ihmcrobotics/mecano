@@ -68,12 +68,12 @@ public class TwistTest extends SpatialMotionTest<Twist>
       // test getters
       double epsilon = 1e-14;
       Vector3DBasics angularVelocity2 = twist.getAngularPart();
-      EuclidCoreTestTools.assertTuple3DEquals(angularVelocity, angularVelocity2, epsilon);
+      EuclidCoreTestTools.assertEquals(angularVelocity, angularVelocity2, epsilon);
 
       Vector3DBasics linearVelocity2 = twist.getLinearPart();
-      EuclidCoreTestTools.assertTuple3DEquals(linearVelocity, linearVelocity2, epsilon);
+      EuclidCoreTestTools.assertEquals(linearVelocity, linearVelocity2, epsilon);
 
-      EuclidCoreTestTools.assertTuple3DEquals(angularVelocity, angularVelocity2, epsilon); // make sure the linear velocity setter didn't change the angular velocity
+      EuclidCoreTestTools.assertEquals(angularVelocity, angularVelocity2, epsilon); // make sure the linear velocity setter didn't change the angular velocity
 
       // test setters
       Vector3D angularVelocity3 = new Vector3D(random.nextDouble(), random.nextDouble(), random.nextDouble());
@@ -85,8 +85,8 @@ public class TwistTest extends SpatialMotionTest<Twist>
       Vector3DBasics angularVelocity4 = twist.getAngularPart();
       Vector3DBasics linearVelocity4 = twist.getLinearPart();
 
-      EuclidCoreTestTools.assertTuple3DEquals(angularVelocity3, angularVelocity4, epsilon);
-      EuclidCoreTestTools.assertTuple3DEquals(linearVelocity3, linearVelocity4, epsilon);
+      EuclidCoreTestTools.assertEquals(angularVelocity3, angularVelocity4, epsilon);
+      EuclidCoreTestTools.assertEquals(linearVelocity3, linearVelocity4, epsilon);
    }
 
    /**
@@ -100,8 +100,8 @@ public class TwistTest extends SpatialMotionTest<Twist>
       assertNull(twist.getBaseFrame());
       assertNull(twist.getBodyFrame());
       assertNull(twist.getReferenceFrame());
-      EuclidCoreTestTools.assertTuple3DEquals(new Vector3D(), twist.getAngularPart(), 0.0);
-      EuclidCoreTestTools.assertTuple3DEquals(new Vector3D(), twist.getLinearPart(), 0.0);
+      EuclidCoreTestTools.assertEquals(new Vector3D(), twist.getAngularPart(), 0.0);
+      EuclidCoreTestTools.assertEquals(new Vector3D(), twist.getLinearPart(), 0.0);
    }
 
    /**
@@ -260,8 +260,8 @@ public class TwistTest extends SpatialMotionTest<Twist>
       linearVelocity1.add(linearVelocity2);
 
       double epsilon = 1e-14;
-      EuclidCoreTestTools.assertTuple3DEquals(angularVelocity1, twist1.getAngularPart(), epsilon);
-      EuclidCoreTestTools.assertTuple3DEquals(linearVelocity1, twist1.getLinearPart(), epsilon);
+      EuclidCoreTestTools.assertEquals(angularVelocity1, twist1.getAngularPart(), epsilon);
+      EuclidCoreTestTools.assertEquals(linearVelocity1, twist1.getLinearPart(), epsilon);
 
       // Should throw exception if try it the other way:
 
@@ -374,8 +374,8 @@ public class TwistTest extends SpatialMotionTest<Twist>
          Vector3DBasics v1InC2 = twist1.getLinearPart();
 
          double epsilon = 1e-8;
-         EuclidCoreTestTools.assertTuple3DEquals(omega1InC, omega1InC2, epsilon);
-         EuclidCoreTestTools.assertTuple3DEquals(v1InC, v1InC2, epsilon);
+         EuclidCoreTestTools.assertEquals(omega1InC, omega1InC2, epsilon);
+         EuclidCoreTestTools.assertEquals(v1InC, v1InC2, epsilon);
       }
    }
 
@@ -460,7 +460,7 @@ public class TwistTest extends SpatialMotionTest<Twist>
 
          // Verify that they are the same
          bodyFixedPointLinearVelocityInBody.changeFrame(baseFrame);
-         EuclidCoreTestTools.assertTuple3DEquals(bodyFixedPointLinearVelocityInBase, bodyFixedPointLinearVelocityInBody, 1.0e-12);
+         EuclidCoreTestTools.assertEquals(bodyFixedPointLinearVelocityInBase, bodyFixedPointLinearVelocityInBody, 1.0e-12);
       }
    }
 
@@ -486,7 +486,7 @@ public class TwistTest extends SpatialMotionTest<Twist>
          expectedLinearVelocity.setIncludingFrame(twist.getLinearPart());
          expectedLinearVelocity.changeFrame(expressedInFrame);
 
-         EuclidFrameTestTools.assertFrameTuple3DEquals(expectedLinearVelocity, actualLinearVelocity, EPSILON);
+         EuclidFrameTestTools.assertEquals(expectedLinearVelocity, actualLinearVelocity, EPSILON);
 
          assertThrows(ReferenceFrameMismatchException.class,
                       () -> twist.getLinearVelocityAt(new FramePoint3D(EuclidFrameRandomTools.nextReferenceFrame(random)), new FrameVector3D()));

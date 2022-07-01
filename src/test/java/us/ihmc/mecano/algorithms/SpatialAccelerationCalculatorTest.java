@@ -153,7 +153,7 @@ public class SpatialAccelerationCalculatorTest
             expectedAcceleration.getAngularPart().set(cumulatedAngularAcceleration);
             expectedAcceleration.checkReferenceFrameMatch(actualAcceleration);
 
-            EuclidCoreTestTools.assertTuple3DEquals(expectedAcceleration.getAngularPart(), actualAcceleration.getAngularPart(), 5.0e-12);
+            EuclidCoreTestTools.assertEquals(expectedAcceleration.getAngularPart(), actualAcceleration.getAngularPart(), 5.0e-12);
          }
       }
 
@@ -210,7 +210,7 @@ public class SpatialAccelerationCalculatorTest
             expectedAcceleration.checkReferenceFrameMatch(bodyFrame, worldFrame, bodyFrame);
             actualAcceleration.checkReferenceFrameMatch(bodyFrame, worldFrame, bodyFrame);
 
-            EuclidCoreTestTools.assertTuple3DEquals(expectedAcceleration.getAngularPart(), actualAcceleration.getAngularPart(), 1.0e-10);
+            EuclidCoreTestTools.assertEquals(expectedAcceleration.getAngularPart(), actualAcceleration.getAngularPart(), 1.0e-10);
          }
       }
    }
@@ -337,7 +337,7 @@ public class SpatialAccelerationCalculatorTest
                                                                                                            rootAcceleration);
 
             expectedLinearAcceleration.checkReferenceFrameMatch(actualLinearAcceleration);
-            EuclidCoreTestTools.assertTuple3DEquals(expectedLinearAcceleration, actualLinearAcceleration, 1.1e-4);
+            EuclidCoreTestTools.assertEquals(expectedLinearAcceleration, actualLinearAcceleration, 1.1e-4);
          }
       }
    }
@@ -424,7 +424,7 @@ public class SpatialAccelerationCalculatorTest
                                                                                                               bodyFixedPoint);
 
                expectedLinearAcceleration.checkReferenceFrameMatch(actualLinearAcceleration);
-               EuclidCoreTestTools.assertTuple3DEquals("iteration: " + i + ", joint index: " + baseJointIndex,
+               EuclidCoreTestTools.assertEquals("iteration: " + i + ", joint index: " + baseJointIndex,
                                                        expectedLinearAcceleration,
                                                        actualLinearAcceleration,
                                                        1.1e-4);
@@ -529,7 +529,7 @@ public class SpatialAccelerationCalculatorTest
                                                                                                                                     frameBodyFixedPoint));
 
             assertEquals(expectedLinearAcceleration.getReferenceFrame().getName(), actualLinearAcceleration.getReferenceFrame().getName());
-            EuclidCoreTestTools.assertTuple3DEquals(expectedLinearAcceleration, actualLinearAcceleration, 1.0e-12);
+            EuclidCoreTestTools.assertEquals(expectedLinearAcceleration, actualLinearAcceleration, 1.0e-12);
 
             // Assert relative twist
             for (int baseJointIndex = 0; baseJointIndex < numberOfRevoluteJoints + 1; baseJointIndex++)
@@ -552,7 +552,7 @@ public class SpatialAccelerationCalculatorTest
                                                                                                                        frameBodyFixedPoint));
 
                assertEquals(expectedLinearAcceleration.getReferenceFrame().getName(), actualLinearAcceleration.getReferenceFrame().getName());
-               EuclidCoreTestTools.assertTuple3DEquals(messagePrefix, expectedLinearAcceleration, actualLinearAcceleration, 1.0e-12);
+               EuclidCoreTestTools.assertEquals(messagePrefix, expectedLinearAcceleration, actualLinearAcceleration, 1.0e-12);
             }
          }
       }
@@ -703,8 +703,8 @@ public class SpatialAccelerationCalculatorTest
             assertEquals(expected.getBodyFrame().getName(), actual.getBodyFrame().getName());
             assertEquals(expected.getBaseFrame().getName(), actual.getBaseFrame().getName());
             assertEquals(expected.getReferenceFrame().getName(), actual.getReferenceFrame().getName());
-            EuclidCoreTestTools.assertTuple3DEquals(expected.getAngularPart(), actual.getAngularPart(), epsilon);
-            EuclidCoreTestTools.assertTuple3DEquals(expected.getLinearPart(), actual.getLinearPart(), epsilon);
+            EuclidCoreTestTools.assertEquals(expected.getAngularPart(), actual.getAngularPart(), epsilon);
+            EuclidCoreTestTools.assertEquals(expected.getLinearPart(), actual.getLinearPart(), epsilon);
          }
          else
          {

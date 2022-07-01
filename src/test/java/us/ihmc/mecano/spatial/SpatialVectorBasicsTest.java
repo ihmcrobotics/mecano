@@ -149,8 +149,8 @@ public abstract class SpatialVectorBasicsTest<T extends SpatialVectorBasics> ext
          assertEquals(randomSpatialVector.getReferenceFrame(), randomFrame);
          assertEquals(randomSpatialVector.getAngularPart().getReferenceFrame(), randomFrame);
          assertEquals(randomSpatialVector.getLinearPart().getReferenceFrame(), randomFrame);
-         EuclidCoreTestTools.assertTuple3DEquals(randomSpatialVector.getAngularPart(), randomAngularPart, getEpsilon());
-         EuclidCoreTestTools.assertTuple3DEquals(randomSpatialVector.getLinearPart(), randomLinearPart, getEpsilon());
+         EuclidCoreTestTools.assertEquals(randomSpatialVector.getAngularPart(), randomAngularPart, getEpsilon());
+         EuclidCoreTestTools.assertEquals(randomSpatialVector.getLinearPart(), randomLinearPart, getEpsilon());
       }
 
       //Test setIncludingFrame - sets a spatial vector equal to a ReferenceFrame, sets the angular/linear parts from an array. 

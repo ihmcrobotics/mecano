@@ -82,7 +82,7 @@ public class CentroidalMomentumRateCalculatorTest
          FrameVector3DReadOnly expectedCenterOfMassAcceleration = centroidalMomentumRateCalculator.getCenterOfMassAcceleration();
          FrameVector3D actualCenterOfMassAcceleration = new FrameVector3D();
          centroidalMomentumRateCalculator.getCenterOfMassAcceleration(jointAccelerationMatrix, actualCenterOfMassAcceleration);
-         EuclidFrameTestTools.assertFrameTuple3DEquals(expectedCenterOfMassAcceleration, actualCenterOfMassAcceleration, EPSILON);
+         EuclidFrameTestTools.assertEquals(expectedCenterOfMassAcceleration, actualCenterOfMassAcceleration, EPSILON);
       }
    }
 
@@ -130,7 +130,7 @@ public class CentroidalMomentumRateCalculatorTest
          FrameVector3DReadOnly expectedCenterOfMassAcceleration = centroidalMomentumRateCalculator.getCenterOfMassAcceleration();
          FrameVector3D actualCenterOfMassAcceleration = new FrameVector3D();
          centroidalMomentumRateCalculator.getCenterOfMassAcceleration(jointAccelerationMatrix, actualCenterOfMassAcceleration);
-         EuclidFrameTestTools.assertFrameTuple3DEquals(expectedCenterOfMassAcceleration, actualCenterOfMassAcceleration, EPSILON);
+         EuclidFrameTestTools.assertEquals(expectedCenterOfMassAcceleration, actualCenterOfMassAcceleration, EPSILON);
       }
    }
 
@@ -178,7 +178,7 @@ public class CentroidalMomentumRateCalculatorTest
          FrameVector3DReadOnly expectedCenterOfMassAcceleration = centroidalMomentumRateCalculator.getCenterOfMassAcceleration();
          FrameVector3D actualCenterOfMassAcceleration = new FrameVector3D();
          centroidalMomentumRateCalculator.getCenterOfMassAcceleration(jointAccelerationMatrix, actualCenterOfMassAcceleration);
-         EuclidFrameTestTools.assertFrameTuple3DEquals(expectedCenterOfMassAcceleration, actualCenterOfMassAcceleration, EPSILON);
+         EuclidFrameTestTools.assertEquals(expectedCenterOfMassAcceleration, actualCenterOfMassAcceleration, EPSILON);
       }
    }
 

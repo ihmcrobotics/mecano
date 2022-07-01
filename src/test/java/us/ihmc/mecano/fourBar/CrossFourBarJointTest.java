@@ -263,13 +263,13 @@ public class CrossFourBarJointTest
             {
                RigidBodyTransform expectedConfiguration = function.getJointD().getFrameAfterJoint()
                                                                   .getTransformToDesiredFrame(function.getJointA().getFrameBeforeJoint());
-               EuclidCoreTestTools.assertRigidBodyTransformEquals("Iteration: " + i, expectedConfiguration, actualConfiguration, SMALL_EPSILON);
+               EuclidCoreTestTools.assertEquals("Iteration: " + i, expectedConfiguration, actualConfiguration, SMALL_EPSILON);
             }
             else
             {
                RigidBodyTransform expectedConfiguration = function.getJointC().getFrameAfterJoint()
                                                                   .getTransformToDesiredFrame(function.getJointB().getFrameBeforeJoint());
-               EuclidCoreTestTools.assertRigidBodyTransformEquals("Iteration: " + i, expectedConfiguration, actualConfiguration, SMALL_EPSILON);
+               EuclidCoreTestTools.assertEquals("Iteration: " + i, expectedConfiguration, actualConfiguration, SMALL_EPSILON);
             }
          }
       }
@@ -416,7 +416,7 @@ public class CrossFourBarJointTest
             bottomJoint.getFrameAfterJoint().getTwistRelativeToOther(topJoint.getFrameBeforeJoint(), expectedTwist);
             TwistReadOnly actualTwist = fourBarJoint.getJointTwist();
 
-            EuclidCoreTestTools.assertRigidBodyTransformEquals(bottomJoint.getFrameAfterJoint().getTransformToDesiredFrame(topJoint.getFrameBeforeJoint()),
+            EuclidCoreTestTools.assertEquals(bottomJoint.getFrameAfterJoint().getTransformToDesiredFrame(topJoint.getFrameBeforeJoint()),
                                                                bottomJoint.getFrameAfterJoint().getTransformToDesiredFrame(topJoint.getFrameBeforeJoint()),
                                                                SMALL_EPSILON);
 
@@ -1299,8 +1299,8 @@ public class CrossFourBarJointTest
          assertEquals(expectedTwist.getBodyFrame().getName(), actualTwist.getBodyFrame().getName());
          assertEquals(expectedTwist.getBaseFrame().getName(), actualTwist.getBaseFrame().getName());
          assertEquals(expectedTwist.getReferenceFrame().getName(), actualTwist.getReferenceFrame().getName());
-         EuclidCoreTestTools.assertTuple3DEquals(expectedTwist.getAngularPart(), actualTwist.getAngularPart(), epsilon);
-         EuclidCoreTestTools.assertTuple3DEquals(expectedTwist.getLinearPart(), actualTwist.getLinearPart(), epsilon);
+         EuclidCoreTestTools.assertEquals(expectedTwist.getAngularPart(), actualTwist.getAngularPart(), epsilon);
+         EuclidCoreTestTools.assertEquals(expectedTwist.getLinearPart(), actualTwist.getLinearPart(), epsilon);
       }
       catch (AssertionError e)
       {
@@ -1327,8 +1327,8 @@ public class CrossFourBarJointTest
          assertEquals(expectedAcceleration.getBodyFrame().getName(), actualAcceleration.getBodyFrame().getName());
          assertEquals(expectedAcceleration.getBaseFrame().getName(), actualAcceleration.getBaseFrame().getName());
          assertEquals(expectedAcceleration.getReferenceFrame().getName(), actualAcceleration.getReferenceFrame().getName());
-         EuclidCoreTestTools.assertTuple3DEquals(expectedAcceleration.getAngularPart(), actualAcceleration.getAngularPart(), epsilon);
-         EuclidCoreTestTools.assertTuple3DEquals(expectedAcceleration.getLinearPart(), actualAcceleration.getLinearPart(), epsilon);
+         EuclidCoreTestTools.assertEquals(expectedAcceleration.getAngularPart(), actualAcceleration.getAngularPart(), epsilon);
+         EuclidCoreTestTools.assertEquals(expectedAcceleration.getLinearPart(), actualAcceleration.getLinearPart(), epsilon);
       }
       catch (AssertionError e)
       {

@@ -113,8 +113,8 @@ public class SpatialImpulseTest extends SpatialImpulseBasicsTest<SpatialImpulse>
          assertEquals(spatialImpulseByReferenceFramesAngularPartLinearPart.getReferenceFrame(), randomReferenceFrame);
          assertEquals(spatialImpulseByReferenceFramesAngularPartLinearPart.getAngularPart().getReferenceFrame(), randomReferenceFrame);
          assertEquals(spatialImpulseByReferenceFramesAngularPartLinearPart.getLinearPart().getReferenceFrame(), randomReferenceFrame);
-         EuclidCoreTestTools.assertTuple3DEquals(spatialImpulseByReferenceFramesAngularPartLinearPart.getAngularPart(), randomAngularPart, getEpsilon());
-         EuclidCoreTestTools.assertTuple3DEquals(spatialImpulseByReferenceFramesAngularPartLinearPart.getLinearPart(), randomLinearPart, getEpsilon());
+         EuclidCoreTestTools.assertEquals(spatialImpulseByReferenceFramesAngularPartLinearPart.getAngularPart(), randomAngularPart, getEpsilon());
+         EuclidCoreTestTools.assertEquals(spatialImpulseByReferenceFramesAngularPartLinearPart.getLinearPart(), randomLinearPart, getEpsilon());
       }
 
       for (int i = 0; i < ITERATIONS; i++)
@@ -297,8 +297,8 @@ public class SpatialImpulseTest extends SpatialImpulseBasicsTest<SpatialImpulse>
          assertEquals(expectedSpatialImpulse.getReferenceFrame(), expectedReferenceFrame);
          assertEquals(expectedSpatialImpulse.getAngularPart().getReferenceFrame(), expectedReferenceFrame);
          assertEquals(expectedSpatialImpulse.getLinearPart().getReferenceFrame(), expectedReferenceFrame);
-         EuclidCoreTestTools.assertTuple3DEquals(expectedSpatialImpulse.getAngularPart(), originalSpatialImpulse.getAngularPart(), getEpsilon());
-         EuclidCoreTestTools.assertTuple3DEquals(expectedSpatialImpulse.getLinearPart(), originalSpatialImpulse.getLinearPart(), getEpsilon());
+         EuclidCoreTestTools.assertEquals(expectedSpatialImpulse.getAngularPart(), originalSpatialImpulse.getAngularPart(), getEpsilon());
+         EuclidCoreTestTools.assertEquals(expectedSpatialImpulse.getLinearPart(), originalSpatialImpulse.getLinearPart(), getEpsilon());
       }
    }
 
@@ -344,7 +344,7 @@ public class SpatialImpulseTest extends SpatialImpulseBasicsTest<SpatialImpulse>
          assertEquals(expectedSpatialImpulse.getAngularPartX(), 0.0);
          assertEquals(expectedSpatialImpulse.getAngularPartY(), -transform.getTranslationX() * sourceLinearPart.getZ() + sourceAngularPart.getY());
          assertEquals(expectedSpatialImpulse.getAngularPartZ(), 0.0);
-         EuclidCoreTestTools.assertTuple3DEquals(expectedSpatialImpulse.getLinearPart(), originalSpatialImpulse.getLinearPart(), getEpsilon());
+         EuclidCoreTestTools.assertEquals(expectedSpatialImpulse.getLinearPart(), originalSpatialImpulse.getLinearPart(), getEpsilon());
       }
 
       for (int i = 0; i < ITERATIONS; i++)
@@ -363,7 +363,7 @@ public class SpatialImpulseTest extends SpatialImpulseBasicsTest<SpatialImpulse>
          assertEquals(expectedSpatialImpulse.getAngularPartX(), 0.0);
          assertEquals(expectedSpatialImpulse.getAngularPartY(), 0.0);
          assertEquals(expectedSpatialImpulse.getAngularPartZ(), -transform.getTranslationY() * sourceLinearPart.getX() + sourceAngularPart.getZ());
-         EuclidCoreTestTools.assertTuple3DEquals(expectedSpatialImpulse.getLinearPart(), originalSpatialImpulse.getLinearPart(), getEpsilon());
+         EuclidCoreTestTools.assertEquals(expectedSpatialImpulse.getLinearPart(), originalSpatialImpulse.getLinearPart(), getEpsilon());
       }
 
       for (int i = 0; i < ITERATIONS; i++)
@@ -382,7 +382,7 @@ public class SpatialImpulseTest extends SpatialImpulseBasicsTest<SpatialImpulse>
          assertEquals(expectedSpatialImpulse.getAngularPartX(), -transform.getTranslationZ() * sourceLinearPart.getY() + sourceAngularPart.getX());
          assertEquals(expectedSpatialImpulse.getAngularPartY(), 0.0);
          assertEquals(expectedSpatialImpulse.getAngularPartZ(), 0.0);
-         EuclidCoreTestTools.assertTuple3DEquals(expectedSpatialImpulse.getLinearPart(), originalSpatialImpulse.getLinearPart(), getEpsilon());
+         EuclidCoreTestTools.assertEquals(expectedSpatialImpulse.getLinearPart(), originalSpatialImpulse.getLinearPart(), getEpsilon());
       }
 
       for (int i = 0; i < ITERATIONS; i++)
@@ -401,8 +401,8 @@ public class SpatialImpulseTest extends SpatialImpulseBasicsTest<SpatialImpulse>
          sourceAngularPart.applyTransform(transform);
          sourceLinearPart.applyTransform(transform);
 
-         EuclidCoreTestTools.assertTuple3DEquals(expectedSpatialImpulse.getAngularPart(), sourceAngularPart, getEpsilon());
-         EuclidCoreTestTools.assertTuple3DEquals(expectedSpatialImpulse.getLinearPart(), sourceLinearPart, getEpsilon());
+         EuclidCoreTestTools.assertEquals(expectedSpatialImpulse.getAngularPart(), sourceAngularPart, getEpsilon());
+         EuclidCoreTestTools.assertEquals(expectedSpatialImpulse.getLinearPart(), sourceLinearPart, getEpsilon());
       }
 
    }
@@ -434,8 +434,8 @@ public class SpatialImpulseTest extends SpatialImpulseBasicsTest<SpatialImpulse>
          assertEquals(actualSpatialImpulse.getReferenceFrame(), destinationFrame);
          assertEquals(actualSpatialImpulse.getAngularPart().getReferenceFrame(), destinationFrame);
          assertEquals(actualSpatialImpulse.getLinearPart().getReferenceFrame(), destinationFrame);
-         EuclidCoreTestTools.assertTuple3DEquals(expectedSpatialImpulse.getAngularPart(), actualSpatialImpulse.getAngularPart(), getEpsilon());
-         EuclidCoreTestTools.assertTuple3DEquals(expectedSpatialImpulse.getLinearPart(), actualSpatialImpulse.getLinearPart(), getEpsilon());
+         EuclidCoreTestTools.assertEquals(expectedSpatialImpulse.getAngularPart(), actualSpatialImpulse.getAngularPart(), getEpsilon());
+         EuclidCoreTestTools.assertEquals(expectedSpatialImpulse.getLinearPart(), actualSpatialImpulse.getLinearPart(), getEpsilon());
       }
    }
 

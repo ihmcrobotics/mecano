@@ -548,7 +548,7 @@ public class MultiBodyResponseCalculatorTest
       SpatialAcceleration expectedAccelerationChange = new SpatialAcceleration(multiBodyResponseCalculator.getAccelerationChangeProvider()
                                                                                                           .getAccelerationOfBody(target));
       expectedAccelerationChange.changeFrame(testWrenchFrame);
-      EuclidFrameTestTools.assertFrameTuple3DEquals(expectedAccelerationChange.getLinearPart(),
+      EuclidFrameTestTools.assertEquals(expectedAccelerationChange.getLinearPart(),
                                                     actualLinearAccelerationChange,
                                                     Math.max(1.0, expectedAccelerationChange.getLinearPart().length()) * epsilon);
    }

@@ -253,8 +253,8 @@ public abstract class SpatialImpulseBasicsTest<T extends SpatialImpulseBasics> e
          assertEquals(randomSpatialImpulse.getReferenceFrame(), randomReferenceFrame);
          assertEquals(randomSpatialImpulse.getAngularPart().getReferenceFrame(), randomReferenceFrame);
          assertEquals(randomSpatialImpulse.getLinearPart().getReferenceFrame(), randomReferenceFrame);
-         EuclidCoreTestTools.assertTuple3DEquals(randomSpatialImpulse.getAngularPart(), randomAngularPart, getEpsilon());
-         EuclidCoreTestTools.assertTuple3DEquals(randomSpatialImpulse.getLinearPart(), randomLinearPart, getEpsilon());
+         EuclidCoreTestTools.assertEquals(randomSpatialImpulse.getAngularPart(), randomAngularPart, getEpsilon());
+         EuclidCoreTestTools.assertEquals(randomSpatialImpulse.getLinearPart(), randomLinearPart, getEpsilon());
       }
 
       //SetIncludingFrame using a body frame, a reference frame and a double array. The components are read in the following order: .angularPartX, angularPartY,
@@ -470,8 +470,8 @@ public abstract class SpatialImpulseBasicsTest<T extends SpatialImpulseBasics> e
          assertEquals(randomSpatialImpulse.getReferenceFrame(), randomReferenceFrame);
          assertEquals(randomSpatialImpulse.getAngularPart().getReferenceFrame(), randomReferenceFrame);
          assertEquals(randomSpatialImpulse.getLinearPart().getReferenceFrame(), randomReferenceFrame);
-         EuclidCoreTestTools.assertTuple3DEquals(randomSpatialImpulse.getAngularPart(), expectedAngularPart, getEpsilon());
-         EuclidCoreTestTools.assertTuple3DEquals(randomSpatialImpulse.getLinearPart(), randomLinearPart, getEpsilon());
+         EuclidCoreTestTools.assertEquals(randomSpatialImpulse.getAngularPart(), expectedAngularPart, getEpsilon());
+         EuclidCoreTestTools.assertEquals(randomSpatialImpulse.getLinearPart(), randomLinearPart, getEpsilon());
       }
 
       //SetIncludingFrame using a body frame, a angular and linear Frame Vector and sets the spatial impulse given a 3D moment and 3D force that are exerted at
@@ -494,8 +494,8 @@ public abstract class SpatialImpulseBasicsTest<T extends SpatialImpulseBasics> e
          assertEquals(randomSpatialImpulse.getReferenceFrame(), randomReferenceFrame);
          assertEquals(randomSpatialImpulse.getAngularPart().getReferenceFrame(), randomReferenceFrame);
          assertEquals(randomSpatialImpulse.getLinearPart().getReferenceFrame(), randomReferenceFrame);
-         EuclidCoreTestTools.assertTuple3DEquals(randomSpatialImpulse.getAngularPart(), expectedAngularPart, getEpsilon());
-         EuclidCoreTestTools.assertTuple3DEquals(randomSpatialImpulse.getLinearPart(), randomLinearPart, getEpsilon());
+         EuclidCoreTestTools.assertEquals(randomSpatialImpulse.getAngularPart(), expectedAngularPart, getEpsilon());
+         EuclidCoreTestTools.assertEquals(randomSpatialImpulse.getLinearPart(), randomLinearPart, getEpsilon());
       }
 
       //SetIncludingFrame using a body frame, a angular and linear Frame Vector and reference frames are different should cause a ReferenceFrameMismatchException.

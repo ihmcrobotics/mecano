@@ -80,8 +80,8 @@ public class SpatialAccelerationTest extends SpatialMotionTest<SpatialAccelerati
             Vector3DBasics linearAccelerationNewFrameAnalytic = acceleration.getLinearPart();
             Vector3DBasics angularAccelerationNewFrameAnalytic = acceleration.getAngularPart();
 
-            EuclidCoreTestTools.assertTuple3DEquals("t = " + t, linearAccelerationNewFrameNumeric, linearAccelerationNewFrameAnalytic, epsilon);
-            EuclidCoreTestTools.assertTuple3DEquals("t = " + t, angularAccelerationNewFrameNumeric, angularAccelerationNewFrameAnalytic, epsilon);
+            EuclidCoreTestTools.assertEquals("t = " + t, linearAccelerationNewFrameNumeric, linearAccelerationNewFrameAnalytic, epsilon);
+            EuclidCoreTestTools.assertEquals("t = " + t, angularAccelerationNewFrameNumeric, angularAccelerationNewFrameAnalytic, epsilon);
          }
 
          previousLinearVelocity.set(twistInA.getLinearPart());
@@ -108,7 +108,7 @@ public class SpatialAccelerationTest extends SpatialMotionTest<SpatialAccelerati
       expected.cross(twist.getAngularPart(), expected);
       expected.cross(twist.getAngularPart(), expected);
 
-      EuclidCoreTestTools.assertTuple3DEquals(expected, accelerationOfPointFixedInFrameB, 1e-7);
+      EuclidCoreTestTools.assertEquals(expected, accelerationOfPointFixedInFrameB, 1e-7);
    }
 
    /**
@@ -154,7 +154,7 @@ public class SpatialAccelerationTest extends SpatialMotionTest<SpatialAccelerati
 
          // Verify that they are the same
          bodyFixedPointLinearAccelerationInBody.changeFrame(baseFrame);
-         EuclidCoreTestTools.assertTuple3DEquals(bodyFixedPointLinearAccelerationInBase, bodyFixedPointLinearAccelerationInBody, 1.0e-12);
+         EuclidCoreTestTools.assertEquals(bodyFixedPointLinearAccelerationInBase, bodyFixedPointLinearAccelerationInBody, 1.0e-12);
       }
    }
 
@@ -217,9 +217,9 @@ public class SpatialAccelerationTest extends SpatialMotionTest<SpatialAccelerati
       linearVelocity1.add(linearVelocity2);
 
       double epsilon = 1e-14;
-      EuclidCoreTestTools.assertTuple3DEquals(angularVelocity1, spatialMotionVector1.getAngularPart(), epsilon);
+      EuclidCoreTestTools.assertEquals(angularVelocity1, spatialMotionVector1.getAngularPart(), epsilon);
 
-      EuclidCoreTestTools.assertTuple3DEquals(linearVelocity1, spatialMotionVector1.getLinearPart(), epsilon);
+      EuclidCoreTestTools.assertEquals(linearVelocity1, spatialMotionVector1.getLinearPart(), epsilon);
 
       // Should throw exception if try it the other way:
 
@@ -317,7 +317,7 @@ public class SpatialAccelerationTest extends SpatialMotionTest<SpatialAccelerati
          acceleration.getLinearAccelerationAtBodyOrigin(twistOfBodyWithRespectToBase, linearAccelerationCheck);
          linearAccelerationCheck.changeFrame(originAcceleration.getReferenceFrame());
 
-         EuclidCoreTestTools.assertTuple3DEquals(linearAccelerationCheck, originAcceleration, 1e-12);
+         EuclidCoreTestTools.assertEquals(linearAccelerationCheck, originAcceleration, 1e-12);
       }
 
       FrameVector3D originAccelerationBack = new FrameVector3D(twistOfBodyWithRespectToBase.getReferenceFrame());
@@ -329,7 +329,7 @@ public class SpatialAccelerationTest extends SpatialMotionTest<SpatialAccelerati
       acceleration.getLinearAccelerationAt(twistOfBodyWithRespectToBase, origin, originAccelerationBack);
 
       originAccelerationBack.changeFrame(originAcceleration.getReferenceFrame());
-      EuclidCoreTestTools.assertTuple3DEquals(originAccelerationBack, originAcceleration, 1e-12);
+      EuclidCoreTestTools.assertEquals(originAccelerationBack, originAcceleration, 1e-12);
    }
 
    @Test
@@ -346,8 +346,8 @@ public class SpatialAccelerationTest extends SpatialMotionTest<SpatialAccelerati
 
       double epsilon = 1e-12;
       assertEquals(twist.getReferenceFrame(), acceleration.getReferenceFrame());
-      EuclidCoreTestTools.assertTuple3DEquals(twist.getAngularPart(), acceleration.getAngularPart(), epsilon);
-      EuclidCoreTestTools.assertTuple3DEquals(twist.getLinearPart(), acceleration.getLinearPart(), epsilon);
+      EuclidCoreTestTools.assertEquals(twist.getAngularPart(), acceleration.getAngularPart(), epsilon);
+      EuclidCoreTestTools.assertEquals(twist.getLinearPart(), acceleration.getLinearPart(), epsilon);
    }
 
    @Test

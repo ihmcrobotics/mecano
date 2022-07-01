@@ -274,7 +274,7 @@ public class MecanoToolsTest
          MecanoTools.computeDynamicForce(mass, centerOfMassOffset, angularAcceleration, linearAcceleration, angularVelocity, linearVelocity, dynamicForce1);
          MecanoTools.computeDynamicForceFast(mass, linearAcceleration, angularVelocity, linearVelocity, dynamicForce2);
 
-         EuclidCoreTestTools.assertTuple3DEquals(dynamicForce1, dynamicForce2, EPSILON);
+         EuclidCoreTestTools.assertEquals(dynamicForce1, dynamicForce2, EPSILON);
       }
 
       for (int i = 0; i < ITERATIONS; i++)
@@ -294,8 +294,8 @@ public class MecanoToolsTest
          MecanoTools.computeDynamicForce(mass, centerOfMassOffset, angularAcceleration, linearAcceleration, angularVelocity, linearVelocity, dynamicForce1);
          MecanoTools.computeDynamicForceFast(mass, linearAcceleration, angularVelocity, linearVelocity, dynamicForce2);
 
-         EuclidCoreTestTools.assertTuple3DEquals(expected, dynamicForce1, EPSILON);
-         EuclidCoreTestTools.assertTuple3DEquals(expected, dynamicForce2, EPSILON);
+         EuclidCoreTestTools.assertEquals(expected, dynamicForce1, EPSILON);
+         EuclidCoreTestTools.assertEquals(expected, dynamicForce2, EPSILON);
       }
 
       for (int i = 0; i < ITERATIONS; i++)
@@ -320,8 +320,8 @@ public class MecanoToolsTest
          MecanoTools.computeDynamicForceFast(mass, linearAcceleration, angularVelocity, linearVelocity, dynamicForce1);
          MecanoTools.computeDynamicForce(mass, centerOfMassOffset, angularAcceleration, linearAcceleration, angularVelocity, linearVelocity, dynamicForce2);
 
-         EuclidCoreTestTools.assertTuple3DEquals(expected, dynamicForce1, EPSILON);
-         EuclidCoreTestTools.assertTuple3DEquals(expected, dynamicForce2, EPSILON);
+         EuclidCoreTestTools.assertEquals(expected, dynamicForce1, EPSILON);
+         EuclidCoreTestTools.assertEquals(expected, dynamicForce2, EPSILON);
       }
    }
 
@@ -353,7 +353,7 @@ public class MecanoToolsTest
                                           dynamicMoment1);
          MecanoTools.computeDynamicMomentFast(momentOfInertia, angularAcceleration, angularVelocity, dynamicMoment2);
 
-         EuclidCoreTestTools.assertTuple3DEquals(dynamicMoment1, dynamicMoment2, EPSILON);
+         EuclidCoreTestTools.assertEquals(dynamicMoment1, dynamicMoment2, EPSILON);
       }
 
       for (int i = 0; i < ITERATIONS; i++)
@@ -381,8 +381,8 @@ public class MecanoToolsTest
                                           dynamicMoment1);
          MecanoTools.computeDynamicMomentFast(momentOfInertia, angularAcceleration, angularVelocity, dynamicMoment2);
 
-         EuclidCoreTestTools.assertTuple3DEquals(expected, dynamicMoment1, EPSILON);
-         EuclidCoreTestTools.assertTuple3DEquals(expected, dynamicMoment2, EPSILON);
+         EuclidCoreTestTools.assertEquals(expected, dynamicMoment1, EPSILON);
+         EuclidCoreTestTools.assertEquals(expected, dynamicMoment2, EPSILON);
       }
 
       for (int i = 0; i < ITERATIONS; i++)
@@ -419,8 +419,8 @@ public class MecanoToolsTest
                                           linearVelocity,
                                           dynamicMoment2);
 
-         EuclidCoreTestTools.assertTuple3DEquals(expected, dynamicMoment1, EPSILON);
-         EuclidCoreTestTools.assertTuple3DEquals(expected, dynamicMoment2, EPSILON);
+         EuclidCoreTestTools.assertEquals(expected, dynamicMoment1, EPSILON);
+         EuclidCoreTestTools.assertEquals(expected, dynamicMoment2, EPSILON);
       }
 
    }

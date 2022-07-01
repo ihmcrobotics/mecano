@@ -177,9 +177,9 @@ public class MovingReferenceFrameTest
          }
       };
 
-      EuclidCoreTestTools.assertRigidBodyTransformEquals(testFrameA.getTransformToRoot(), testFrameB.getTransformToRoot(), EPSILON);
-      EuclidCoreTestTools.assertTuple3DEquals(testFrameA.getTwistOfFrame().getAngularPart(), testFrameB.getTwistOfFrame().getAngularPart(), EPSILON);
-      EuclidCoreTestTools.assertTuple3DEquals(testFrameA.getTwistOfFrame().getLinearPart(), testFrameB.getTwistOfFrame().getLinearPart(), EPSILON);
+      EuclidCoreTestTools.assertEquals(testFrameA.getTransformToRoot(), testFrameB.getTransformToRoot(), EPSILON);
+      EuclidCoreTestTools.assertEquals(testFrameA.getTwistOfFrame().getAngularPart(), testFrameB.getTwistOfFrame().getAngularPart(), EPSILON);
+      EuclidCoreTestTools.assertEquals(testFrameA.getTwistOfFrame().getLinearPart(), testFrameB.getTwistOfFrame().getLinearPart(), EPSILON);
       assertTrue(testFrameA.getTwistOfFrame().getBaseFrame() == testFrameB.getTwistOfFrame().getBaseFrame());
 
       assertTrue(testFrameA.getTwistOfFrame().getBodyFrame() == testFrameA);
@@ -204,7 +204,7 @@ public class MovingReferenceFrameTest
          RigidBodyTransform shouldBeIdentity = new RigidBodyTransform(frameB.getTransformToDesiredFrame(frameA));
          shouldBeIdentity.multiply(frameA.getTransformToDesiredFrame(frameB));
 
-         EuclidCoreTestTools.assertRigidBodyTransformEquals(new RigidBodyTransform(), shouldBeIdentity, EPSILON);
+         EuclidCoreTestTools.assertEquals(new RigidBodyTransform(), shouldBeIdentity, EPSILON);
 
          Twist twistARelativeToB = new Twist();
          Twist twistBRelativeToA = new Twist();
@@ -235,7 +235,7 @@ public class MovingReferenceFrameTest
          {
             RigidBodyTransform transformToParentOne = frame.getTransformToParent();
             RigidBodyTransform transformToParentTwo = frame.getTransformToDesiredFrame(parent);
-            EuclidCoreTestTools.assertRigidBodyTransformEquals(transformToParentOne, transformToParentTwo, EPSILON);
+            EuclidCoreTestTools.assertEquals(transformToParentOne, transformToParentTwo, EPSILON);
 
             Twist twistRelativeToParentOne = new Twist(frame.getTwistRelativeToParent());
             Twist twistRelativeToParentTwo = new Twist();
@@ -257,7 +257,7 @@ public class MovingReferenceFrameTest
          MovingReferenceFrame frame = treeFrame[random.nextInt(treeFrame.length)];
          RigidBodyTransform transformToRootOne = frame.getTransformToDesiredFrame(worldFrame);
          RigidBodyTransform transformToRootTwo = computeTransformToRootByClimbingTree(frame);
-         EuclidCoreTestTools.assertRigidBodyTransformEquals(transformToRootOne, transformToRootTwo, EPSILON);
+         EuclidCoreTestTools.assertEquals(transformToRootOne, transformToRootTwo, EPSILON);
 
          Twist twistOne = new Twist();
          frame.getTwistRelativeToOther(worldFrame, twistOne);
@@ -274,7 +274,7 @@ public class MovingReferenceFrameTest
          MovingReferenceFrame frame = treeFrame[random.nextInt(treeFrame.length)];
          RigidBodyTransform transformToRootOne = frame.getTransformToDesiredFrame(anotherRoot);
          RigidBodyTransform transformToRootTwo = computeTransformToRootByClimbingTree(frame);
-         EuclidCoreTestTools.assertRigidBodyTransformEquals(transformToRootOne, transformToRootTwo, EPSILON);
+         EuclidCoreTestTools.assertEquals(transformToRootOne, transformToRootTwo, EPSILON);
 
          Twist twistOne = new Twist();
          frame.getTwistRelativeToOther(anotherRoot, twistOne);
@@ -296,7 +296,7 @@ public class MovingReferenceFrameTest
          {
             RigidBodyTransform transformToRootOne = frame.getTransformToRoot();
             RigidBodyTransform transformToRootTwo = computeTransformToRootByClimbingTree(frame);
-            EuclidCoreTestTools.assertRigidBodyTransformEquals(transformToRootOne, transformToRootTwo, EPSILON);
+            EuclidCoreTestTools.assertEquals(transformToRootOne, transformToRootTwo, EPSILON);
 
             Twist twistOne = new Twist(frame.getTwistOfFrame());
             Twist twistTwo = computeTwistRelativeToRootByClimbingTree(frame);
