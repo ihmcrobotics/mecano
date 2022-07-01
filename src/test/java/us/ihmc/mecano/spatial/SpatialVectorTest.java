@@ -118,8 +118,8 @@ public class SpatialVectorTest extends SpatialVectorBasicsTest<SpatialVector>
          assertEquals(spatialVectorByReferenceFrameAngularPartLinearPart.getReferenceFrame(), randomFrame);
          assertEquals(spatialVectorByReferenceFrameAngularPartLinearPart.getAngularPart().getReferenceFrame(), randomFrame);
          assertEquals(spatialVectorByReferenceFrameAngularPartLinearPart.getLinearPart().getReferenceFrame(), randomFrame);
-         EuclidCoreTestTools.assertTuple3DEquals(spatialVectorByReferenceFrameAngularPartLinearPart.getAngularPart(), randomAngularPart, getEpsilon());
-         EuclidCoreTestTools.assertTuple3DEquals(spatialVectorByReferenceFrameAngularPartLinearPart.getLinearPart(), randomLinearPart, getEpsilon());
+         EuclidCoreTestTools.assertEquals(spatialVectorByReferenceFrameAngularPartLinearPart.getAngularPart(), randomAngularPart, getEpsilon());
+         EuclidCoreTestTools.assertEquals(spatialVectorByReferenceFrameAngularPartLinearPart.getLinearPart(), randomLinearPart, getEpsilon());
       }
     
       /*
@@ -143,8 +143,8 @@ public class SpatialVectorTest extends SpatialVectorBasicsTest<SpatialVector>
          assertEquals(spatialVectorByAngularPartLinearPart.getReferenceFrame(), randomFrame);
          assertEquals(spatialVectorByAngularPartLinearPart.getAngularPart().getReferenceFrame(), randomFrame);
          assertEquals(spatialVectorByAngularPartLinearPart.getLinearPart().getReferenceFrame(), randomFrame);        
-         EuclidCoreTestTools.assertTuple3DEquals(spatialVectorByAngularPartLinearPart.getAngularPart(), randomAngularPart, getEpsilon());
-         EuclidCoreTestTools.assertTuple3DEquals(spatialVectorByAngularPartLinearPart.getLinearPart(), randomLinearPart, getEpsilon());
+         EuclidCoreTestTools.assertEquals(spatialVectorByAngularPartLinearPart.getAngularPart(), randomAngularPart, getEpsilon());
+         EuclidCoreTestTools.assertEquals(spatialVectorByAngularPartLinearPart.getLinearPart(), randomLinearPart, getEpsilon());
          
          ReferenceFrame randomDifferentFrame = EuclidFrameRandomTools.nextReferenceFrame(random);
          randomLinearPart.setReferenceFrame(randomDifferentFrame);

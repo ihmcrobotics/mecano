@@ -48,8 +48,8 @@ public class CenterOfMassJacobianTest
          CenterOfMassCalculator centerOfMassCalculator = new CenterOfMassCalculator(rootBody, worldFrame);
 
          assertEquals(centerOfMassCalculator.getTotalMass(), centerOfMassJacobian.getTotalMass(), EPSILON);
-         EuclidFrameTestTools.assertFrameTuple3DEquals(centerOfMassCalculator.getCenterOfMass(), centerOfMassJacobian.getCenterOfMass(), EPSILON);
-         EuclidFrameTestTools.assertFrameTuple3DEquals(computeCenterOfMassVelocity(rootBody, centerOfMassJacobian.getReferenceFrame()),
+         EuclidFrameTestTools.assertEquals(centerOfMassCalculator.getCenterOfMass(), centerOfMassJacobian.getCenterOfMass(), EPSILON);
+         EuclidFrameTestTools.assertEquals(computeCenterOfMassVelocity(rootBody, centerOfMassJacobian.getReferenceFrame()),
                                                        centerOfMassJacobian.getCenterOfMassVelocity(),
                                                        EPSILON);
       }
@@ -70,8 +70,8 @@ public class CenterOfMassJacobianTest
          assertEquals(centerOfMassCalculator.getTotalMass(), centerOfMassJacobian.getTotalMass(), EPSILON);
          FramePoint3D centerOfMass = new FramePoint3D(centerOfMassJacobian.getCenterOfMass());
          centerOfMass.changeFrame(worldFrame);
-         EuclidFrameTestTools.assertFrameTuple3DEquals(centerOfMassCalculator.getCenterOfMass(), centerOfMass, EPSILON);
-         EuclidFrameTestTools.assertFrameTuple3DEquals(computeCenterOfMassVelocity(rootBody, centerOfMassJacobian.getReferenceFrame()),
+         EuclidFrameTestTools.assertEquals(centerOfMassCalculator.getCenterOfMass(), centerOfMass, EPSILON);
+         EuclidFrameTestTools.assertEquals(computeCenterOfMassVelocity(rootBody, centerOfMassJacobian.getReferenceFrame()),
                                                        centerOfMassJacobian.getCenterOfMassVelocity(),
                                                        EPSILON);
       }
@@ -95,8 +95,8 @@ public class CenterOfMassJacobianTest
          CenterOfMassJacobian centerOfMassJacobian = new CenterOfMassJacobian(rootBody, worldFrame);
          CenterOfMassCalculator centerOfMassCalculator = new CenterOfMassCalculator(rootBody, worldFrame);
 
-         EuclidFrameTestTools.assertFrameTuple3DEquals(centerOfMassCalculator.getCenterOfMass(), centerOfMassJacobian.getCenterOfMass(), EPSILON);
-         EuclidFrameTestTools.assertFrameTuple3DEquals(computeCenterOfMassVelocity(rootBody, centerOfMassJacobian.getReferenceFrame()),
+         EuclidFrameTestTools.assertEquals(centerOfMassCalculator.getCenterOfMass(), centerOfMassJacobian.getCenterOfMass(), EPSILON);
+         EuclidFrameTestTools.assertEquals(computeCenterOfMassVelocity(rootBody, centerOfMassJacobian.getReferenceFrame()),
                                                        centerOfMassJacobian.getCenterOfMassVelocity(),
                                                        EPSILON);
       }
@@ -117,8 +117,8 @@ public class CenterOfMassJacobianTest
          assertEquals(centerOfMassCalculator.getTotalMass(), centerOfMassJacobian.getTotalMass(), EPSILON);
          FramePoint3D centerOfMass = new FramePoint3D(centerOfMassJacobian.getCenterOfMass());
          centerOfMass.changeFrame(worldFrame);
-         EuclidFrameTestTools.assertFrameTuple3DEquals(centerOfMassCalculator.getCenterOfMass(), centerOfMass, EPSILON);
-         EuclidFrameTestTools.assertFrameTuple3DEquals(computeCenterOfMassVelocity(rootBody, centerOfMassJacobian.getReferenceFrame()),
+         EuclidFrameTestTools.assertEquals(centerOfMassCalculator.getCenterOfMass(), centerOfMass, EPSILON);
+         EuclidFrameTestTools.assertEquals(computeCenterOfMassVelocity(rootBody, centerOfMassJacobian.getReferenceFrame()),
                                                        centerOfMassJacobian.getCenterOfMassVelocity(),
                                                        EPSILON);
       }
@@ -142,8 +142,8 @@ public class CenterOfMassJacobianTest
          CenterOfMassJacobian centerOfMassJacobian = new CenterOfMassJacobian(rootBody, worldFrame);
          CenterOfMassCalculator centerOfMassCalculator = new CenterOfMassCalculator(rootBody, worldFrame);
 
-         EuclidFrameTestTools.assertFrameTuple3DEquals(centerOfMassCalculator.getCenterOfMass(), centerOfMassJacobian.getCenterOfMass(), EPSILON);
-         EuclidFrameTestTools.assertFrameTuple3DEquals(computeCenterOfMassVelocity(rootBody, centerOfMassJacobian.getReferenceFrame()),
+         EuclidFrameTestTools.assertEquals(centerOfMassCalculator.getCenterOfMass(), centerOfMassJacobian.getCenterOfMass(), EPSILON);
+         EuclidFrameTestTools.assertEquals(computeCenterOfMassVelocity(rootBody, centerOfMassJacobian.getReferenceFrame()),
                                                        centerOfMassJacobian.getCenterOfMassVelocity(),
                                                        EPSILON);
 
@@ -157,7 +157,7 @@ public class CenterOfMassJacobianTest
          Vector3D actualVelocity = new Vector3D();
          actualVelocity.set(centerOfMassVelocityMatrix);
 
-         EuclidCoreTestTools.assertTuple3DEquals(computeCenterOfMassVelocity(rootBody, centerOfMassJacobian.getReferenceFrame()), actualVelocity, EPSILON);
+         EuclidCoreTestTools.assertEquals(computeCenterOfMassVelocity(rootBody, centerOfMassJacobian.getReferenceFrame()), actualVelocity, EPSILON);
       }
 
       for (int i = 0; i < ITERATIONS; i++)
@@ -174,8 +174,8 @@ public class CenterOfMassJacobianTest
          CenterOfMassCalculator centerOfMassCalculator = new CenterOfMassCalculator(rootBody, worldFrame);
 
          FramePoint3D centerOfMass = new FramePoint3D(centerOfMassJacobian.getCenterOfMass());
-         EuclidFrameTestTools.assertFrameTuple3DEquals(centerOfMassCalculator.getCenterOfMass(), centerOfMass, EPSILON);
-         EuclidFrameTestTools.assertFrameTuple3DEquals(computeCenterOfMassVelocity(rootBody, centerOfMassJacobian.getReferenceFrame()),
+         EuclidFrameTestTools.assertEquals(centerOfMassCalculator.getCenterOfMass(), centerOfMass, EPSILON);
+         EuclidFrameTestTools.assertEquals(computeCenterOfMassVelocity(rootBody, centerOfMassJacobian.getReferenceFrame()),
                                                        centerOfMassJacobian.getCenterOfMassVelocity(),
                                                        EPSILON);
 
@@ -189,7 +189,7 @@ public class CenterOfMassJacobianTest
          Vector3D actualVelocity = new Vector3D();
          actualVelocity.set(centerOfMassVelocityMatrix);
 
-         EuclidCoreTestTools.assertTuple3DEquals(computeCenterOfMassVelocity(rootBody, centerOfMassJacobian.getReferenceFrame()), actualVelocity, EPSILON);
+         EuclidCoreTestTools.assertEquals(computeCenterOfMassVelocity(rootBody, centerOfMassJacobian.getReferenceFrame()), actualVelocity, EPSILON);
       }
    }
 

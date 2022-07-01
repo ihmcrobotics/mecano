@@ -222,8 +222,8 @@ public abstract class FixedFrameSpatialImpulseBasicsTest<T extends FixedFrameSpa
 
          assertEquals(destinationSpatialImpulse.getBodyFrame(), randomBodyFrame);
          assertEquals(destinationSpatialImpulse.getReferenceFrame(), randomReferenceFrame);
-         EuclidCoreTestTools.assertTuple3DEquals(destinationSpatialImpulse.getAngularPart(), randomAngularPart, getEpsilon());
-         EuclidCoreTestTools.assertTuple3DEquals(destinationSpatialImpulse.getLinearPart(), randomLinearPart, getEpsilon());
+         EuclidCoreTestTools.assertEquals(destinationSpatialImpulse.getAngularPart(), randomAngularPart, getEpsilon());
+         EuclidCoreTestTools.assertEquals(destinationSpatialImpulse.getLinearPart(), randomLinearPart, getEpsilon());
       }
 
       for (int i = 0; i < ITERATIONS; i++)
@@ -279,8 +279,8 @@ public abstract class FixedFrameSpatialImpulseBasicsTest<T extends FixedFrameSpa
          assertEquals(destinationSpatialImpulse.getReferenceFrame(), randomReferenceFrame);
          assertEquals(destinationSpatialImpulse.getAngularPart().getReferenceFrame(), randomReferenceFrame);
          assertEquals(destinationSpatialImpulse.getLinearPart().getReferenceFrame(), randomReferenceFrame);
-         EuclidCoreTestTools.assertTuple3DEquals(destinationSpatialImpulse.getAngularPart(), expectedAngularPart, getEpsilon());
-         EuclidCoreTestTools.assertTuple3DEquals(destinationSpatialImpulse.getLinearPart(), randomLinearPart, getEpsilon());
+         EuclidCoreTestTools.assertEquals(destinationSpatialImpulse.getAngularPart(), expectedAngularPart, getEpsilon());
+         EuclidCoreTestTools.assertEquals(destinationSpatialImpulse.getLinearPart(), randomLinearPart, getEpsilon());
       }
    }
 

@@ -376,8 +376,8 @@ public abstract class FixedFrameSpatialVectorBasicsTest<T extends FixedFrameSpat
 
          originalSpatialVector.set(randomAngularPart, randomLinearPart);
 
-         EuclidCoreTestTools.assertTuple3DEquals(originalSpatialVector.getAngularPart(), randomAngularPart, getEpsilon());
-         EuclidCoreTestTools.assertTuple3DEquals(originalSpatialVector.getLinearPart(), randomLinearPart, getEpsilon());
+         EuclidCoreTestTools.assertEquals(originalSpatialVector.getAngularPart(), randomAngularPart, getEpsilon());
+         EuclidCoreTestTools.assertEquals(originalSpatialVector.getLinearPart(), randomLinearPart, getEpsilon());
          assertEquals(originalSpatialVector.getReferenceFrame(), saveReferenceFrame);
          assertEquals(originalSpatialVector.getAngularPart().getReferenceFrame(), saveReferenceFrame);
          assertEquals(originalSpatialVector.getLinearPart().getReferenceFrame(), saveReferenceFrame);

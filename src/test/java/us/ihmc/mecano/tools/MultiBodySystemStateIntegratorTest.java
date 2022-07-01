@@ -8,7 +8,6 @@ import org.junit.jupiter.api.Test;
 
 import us.ihmc.euclid.geometry.Pose3D;
 import us.ihmc.euclid.geometry.interfaces.Pose3DBasics;
-import us.ihmc.euclid.geometry.tools.EuclidGeometryTestTools;
 import us.ihmc.euclid.matrix.Matrix3D;
 import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
@@ -74,7 +73,7 @@ public class MultiBodySystemStateIntegratorTest
             integrator.doubleIntegrateFromAcceleration(joint);
             root.updateFramesRecursively();
 
-            EuclidGeometryTestTools.assertPose3DEquals(messagePrefix, initialPose, jointPose, EPSILON);
+            EuclidCoreTestTools.assertEquals(messagePrefix, initialPose, jointPose, EPSILON);
             MecanoTestTools.assertTwistEquals(messagePrefix, initialTwist, jointTwist, EPSILON);
             MecanoTestTools.assertSpatialAccelerationEquals(messagePrefix, initialAcceleration, jointAcceleration, EPSILON);
 
@@ -100,15 +99,15 @@ public class MultiBodySystemStateIntegratorTest
             difference.difference(initialPose.getOrientation(), jointPose.getOrientation());
             difference.getRotationVector(angularVelocityFD);
             angularVelocityFD.scale(1.0 / dt);
-            EuclidCoreTestTools.assertTuple3DEquals(new Vector3D(), angularVelocityFD, LARGE_EPSILON);
+            EuclidCoreTestTools.assertEquals(new Vector3D(), angularVelocityFD, LARGE_EPSILON);
 
             linearVelocityFD.setReferenceFrame(worldFrame);
             linearVelocityFD.sub(jointPose.getPosition(), initialPose.getPosition());
             linearVelocityFD.scale(1.0 / dt);
             linearVelocityFD.changeFrame(joint.getFrameAfterJoint());
 
-            EuclidFrameTestTools.assertFrameTuple3DEquals(messagePrefix, angularVelocityFD, jointTwist.getAngularPart(), LARGE_EPSILON);
-            EuclidFrameTestTools.assertFrameTuple3DEquals(messagePrefix, linearVelocityFD, jointTwist.getLinearPart(), LARGE_EPSILON);
+            EuclidFrameTestTools.assertEquals(messagePrefix, angularVelocityFD, jointTwist.getAngularPart(), LARGE_EPSILON);
+            EuclidFrameTestTools.assertEquals(messagePrefix, linearVelocityFD, jointTwist.getLinearPart(), LARGE_EPSILON);
 
             MecanoTestTools.assertTwistEquals(messagePrefix, initialTwist, jointTwist, EPSILON);
             MecanoTestTools.assertSpatialAccelerationEquals(messagePrefix, initialAcceleration, jointAcceleration, EPSILON);
@@ -141,8 +140,8 @@ public class MultiBodySystemStateIntegratorTest
             linearVelocityFD.scale(1.0 / dt);
             linearVelocityFD.changeFrame(joint.getFrameAfterJoint());
 
-            EuclidFrameTestTools.assertFrameTuple3DEquals(messagePrefix, angularVelocityFD, jointTwist.getAngularPart(), LARGE_EPSILON);
-            EuclidFrameTestTools.assertFrameTuple3DEquals(messagePrefix, linearVelocityFD, jointTwist.getLinearPart(), EPSILON);
+            EuclidFrameTestTools.assertEquals(messagePrefix, angularVelocityFD, jointTwist.getAngularPart(), LARGE_EPSILON);
+            EuclidFrameTestTools.assertEquals(messagePrefix, linearVelocityFD, jointTwist.getLinearPart(), EPSILON);
 
             MecanoTestTools.assertSpatialAccelerationEquals(messagePrefix, initialAcceleration, jointAcceleration, EPSILON);
 
@@ -182,19 +181,19 @@ public class MultiBodySystemStateIntegratorTest
             linearVelocityFD.scale(1.0 / dt);
             linearVelocityFD.changeFrame(joint.getFrameAfterJoint());
 
-            EuclidFrameTestTools.assertFrameTuple3DEquals(messagePrefix, angularVelocityFD, jointTwist.getAngularPart(), LARGE_EPSILON);
-            EuclidFrameTestTools.assertFrameTuple3DEquals(messagePrefix, linearVelocityFD, jointTwist.getLinearPart(), LARGE_EPSILON);
+            EuclidFrameTestTools.assertEquals(messagePrefix, angularVelocityFD, jointTwist.getAngularPart(), LARGE_EPSILON);
+            EuclidFrameTestTools.assertEquals(messagePrefix, linearVelocityFD, jointTwist.getLinearPart(), LARGE_EPSILON);
 
-            EuclidFrameTestTools.assertFrameTuple3DEquals(messagePrefix,
+            EuclidFrameTestTools.assertEquals(messagePrefix,
                                                           initialAcceleration.getAngularPart(),
                                                           jointAcceleration.getAngularPart(),
                                                           LARGE_EPSILON);
             actualLinearAccelerationInWorld.setMatchingFrame(jointAcceleration.getLinearPart());
-            EuclidFrameTestTools.assertFrameTuple3DEquals(messagePrefix, expectedLinearAccelerationInWorld, actualLinearAccelerationInWorld, EPSILON);
+            EuclidFrameTestTools.assertEquals(messagePrefix, expectedLinearAccelerationInWorld, actualLinearAccelerationInWorld, EPSILON);
 
             SpatialVector finalVelocityInWorld = new SpatialVector(jointTwist);
             finalVelocityInWorld.changeFrame(worldFrame);
-            EuclidFrameTestTools.assertFrameTuple3DEquals(initialVelocityInWorld.getLinearPart(), finalVelocityInWorld.getLinearPart(), EPSILON);
+            EuclidFrameTestTools.assertEquals(initialVelocityInWorld.getLinearPart(), finalVelocityInWorld.getLinearPart(), EPSILON);
 
             double actualKineticCoEnergy = object.getInertia().computeKineticCoEnergy(object.getBodyFixedFrame().getTwistOfFrame());
             assertEquals(expectedKineticCoEnergy, actualKineticCoEnergy, EPSILON);
@@ -260,16 +259,16 @@ public class MultiBodySystemStateIntegratorTest
             integrator.doubleIntegrateFromAcceleration(joint);
             root.updateFramesRecursively();
 
-            EuclidCoreTestTools.assertTuple3DEquals(messagePrefix, expectedPosition, jointPose.getPosition(), EPSILON);
+            EuclidCoreTestTools.assertEquals(messagePrefix, expectedPosition, jointPose.getPosition(), EPSILON);
 
-            EuclidFrameTestTools.assertFrameTuple3DEquals(messagePrefix, initialTwist.getAngularPart(), jointTwist.getAngularPart(), EPSILON);
+            EuclidFrameTestTools.assertEquals(messagePrefix, initialTwist.getAngularPart(), jointTwist.getAngularPart(), EPSILON);
             actualLinearVelocity.setMatchingFrame(jointTwist.getLinearPart());
-            EuclidFrameTestTools.assertFrameTuple3DEquals(messagePrefix, expectedLinearVelocity, actualLinearVelocity, EPSILON);
+            EuclidFrameTestTools.assertEquals(messagePrefix, expectedLinearVelocity, actualLinearVelocity, EPSILON);
 
-            EuclidFrameTestTools.assertFrameTuple3DEquals(messagePrefix, expectedAngularAcceleration, jointAcceleration.getAngularPart(), EPSILON);
+            EuclidFrameTestTools.assertEquals(messagePrefix, expectedAngularAcceleration, jointAcceleration.getAngularPart(), EPSILON);
             jointAcceleration.getLinearAccelerationAtBodyOrigin(jointTwist, actualLinearAcceleration);
             actualLinearAcceleration.changeFrame(worldFrame);
-            EuclidFrameTestTools.assertFrameTuple3DEquals(messagePrefix, expectedLinearAcceleration, actualLinearAcceleration, EPSILON);
+            EuclidFrameTestTools.assertEquals(messagePrefix, expectedLinearAcceleration, actualLinearAcceleration, EPSILON);
          }
       }
    }
@@ -309,7 +308,7 @@ public class MultiBodySystemStateIntegratorTest
             integrator.doubleIntegrateFromAcceleration(joint);
             root.updateFramesRecursively();
 
-            EuclidGeometryTestTools.assertPose3DEquals(messagePrefix, initialPose, jointPose, EPSILON);
+            EuclidCoreTestTools.assertEquals(messagePrefix, initialPose, jointPose, EPSILON);
             MecanoTestTools.assertTwistEquals(messagePrefix, initialTwist, jointTwist, EPSILON);
             MecanoTestTools.assertSpatialAccelerationEquals(messagePrefix, initialAcceleration, jointAcceleration, EPSILON);
 
@@ -335,15 +334,15 @@ public class MultiBodySystemStateIntegratorTest
             difference.difference(initialPose.getOrientation(), jointPose.getOrientation());
             difference.getRotationVector(angularVelocityFD);
             angularVelocityFD.scale(1.0 / dt);
-            EuclidCoreTestTools.assertTuple3DEquals(new Vector3D(), angularVelocityFD, LARGE_EPSILON);
+            EuclidCoreTestTools.assertEquals(new Vector3D(), angularVelocityFD, LARGE_EPSILON);
 
             linearVelocityFD.setReferenceFrame(worldFrame);
             linearVelocityFD.sub(jointPose.getPosition(), initialPose.getPosition());
             linearVelocityFD.scale(1.0 / dt);
             linearVelocityFD.changeFrame(joint.getFrameAfterJoint());
 
-            EuclidFrameTestTools.assertFrameTuple3DEquals(messagePrefix, angularVelocityFD, jointTwist.getAngularPart(), LARGE_EPSILON);
-            EuclidFrameTestTools.assertFrameTuple3DEquals(messagePrefix, linearVelocityFD, jointTwist.getLinearPart(), LARGE_EPSILON);
+            EuclidFrameTestTools.assertEquals(messagePrefix, angularVelocityFD, jointTwist.getAngularPart(), LARGE_EPSILON);
+            EuclidFrameTestTools.assertEquals(messagePrefix, linearVelocityFD, jointTwist.getLinearPart(), LARGE_EPSILON);
 
             MecanoTestTools.assertTwistEquals(messagePrefix, initialTwist, jointTwist, EPSILON);
             MecanoTestTools.assertSpatialAccelerationEquals(messagePrefix, initialAcceleration, jointAcceleration, EPSILON);
@@ -376,8 +375,8 @@ public class MultiBodySystemStateIntegratorTest
             linearVelocityFD.scale(1.0 / dt);
             linearVelocityFD.changeFrame(joint.getFrameAfterJoint());
 
-            EuclidFrameTestTools.assertFrameTuple3DEquals(messagePrefix, angularVelocityFD, jointTwist.getAngularPart(), LARGE_EPSILON);
-            EuclidFrameTestTools.assertFrameTuple3DEquals(messagePrefix, linearVelocityFD, jointTwist.getLinearPart(), EPSILON);
+            EuclidFrameTestTools.assertEquals(messagePrefix, angularVelocityFD, jointTwist.getAngularPart(), LARGE_EPSILON);
+            EuclidFrameTestTools.assertEquals(messagePrefix, linearVelocityFD, jointTwist.getLinearPart(), EPSILON);
 
             MecanoTestTools.assertSpatialAccelerationEquals(messagePrefix, initialAcceleration, jointAcceleration, EPSILON);
 
@@ -417,19 +416,19 @@ public class MultiBodySystemStateIntegratorTest
             linearVelocityFD.scale(1.0 / dt);
             linearVelocityFD.changeFrame(joint.getFrameAfterJoint());
 
-            EuclidFrameTestTools.assertFrameTuple3DEquals(messagePrefix, angularVelocityFD, jointTwist.getAngularPart(), LARGE_EPSILON);
-            EuclidFrameTestTools.assertFrameTuple3DEquals(messagePrefix, linearVelocityFD, jointTwist.getLinearPart(), LARGE_EPSILON);
+            EuclidFrameTestTools.assertEquals(messagePrefix, angularVelocityFD, jointTwist.getAngularPart(), LARGE_EPSILON);
+            EuclidFrameTestTools.assertEquals(messagePrefix, linearVelocityFD, jointTwist.getLinearPart(), LARGE_EPSILON);
 
-            EuclidFrameTestTools.assertFrameTuple3DEquals(messagePrefix,
+            EuclidFrameTestTools.assertEquals(messagePrefix,
                                                           initialAcceleration.getAngularPart(),
                                                           jointAcceleration.getAngularPart(),
                                                           LARGE_EPSILON);
             actualLinearAccelerationInWorld.setMatchingFrame(jointAcceleration.getLinearPart());
-            EuclidFrameTestTools.assertFrameTuple3DEquals(messagePrefix, expectedLinearAccelerationInWorld, actualLinearAccelerationInWorld, EPSILON);
+            EuclidFrameTestTools.assertEquals(messagePrefix, expectedLinearAccelerationInWorld, actualLinearAccelerationInWorld, EPSILON);
 
             SpatialVector finalVelocityInWorld = new SpatialVector(jointTwist);
             finalVelocityInWorld.changeFrame(worldFrame);
-            EuclidFrameTestTools.assertFrameTuple3DEquals(initialVelocityInWorld.getLinearPart(), finalVelocityInWorld.getLinearPart(), EPSILON);
+            EuclidFrameTestTools.assertEquals(initialVelocityInWorld.getLinearPart(), finalVelocityInWorld.getLinearPart(), EPSILON);
 
             double actualKineticCoEnergy = object.getInertia().computeKineticCoEnergy(object.getBodyFixedFrame().getTwistOfFrame());
             assertEquals(expectedKineticCoEnergy, actualKineticCoEnergy, EPSILON);
@@ -495,16 +494,16 @@ public class MultiBodySystemStateIntegratorTest
             integrator.doubleIntegrateFromAcceleration(joint);
             root.updateFramesRecursively();
 
-            EuclidCoreTestTools.assertTuple3DEquals(messagePrefix, expectedPosition, jointPose.getPosition(), EPSILON);
+            EuclidCoreTestTools.assertEquals(messagePrefix, expectedPosition, jointPose.getPosition(), EPSILON);
 
-            EuclidFrameTestTools.assertFrameTuple3DEquals(messagePrefix, initialTwist.getAngularPart(), jointTwist.getAngularPart(), EPSILON);
+            EuclidFrameTestTools.assertEquals(messagePrefix, initialTwist.getAngularPart(), jointTwist.getAngularPart(), EPSILON);
             actualLinearVelocity.setMatchingFrame(jointTwist.getLinearPart());
-            EuclidFrameTestTools.assertFrameTuple3DEquals(messagePrefix, expectedLinearVelocity, actualLinearVelocity, EPSILON);
+            EuclidFrameTestTools.assertEquals(messagePrefix, expectedLinearVelocity, actualLinearVelocity, EPSILON);
 
-            EuclidFrameTestTools.assertFrameTuple3DEquals(messagePrefix, expectedAngularAcceleration, jointAcceleration.getAngularPart(), EPSILON);
+            EuclidFrameTestTools.assertEquals(messagePrefix, expectedAngularAcceleration, jointAcceleration.getAngularPart(), EPSILON);
             jointAcceleration.getLinearAccelerationAtBodyOrigin(jointTwist, actualLinearAcceleration);
             actualLinearAcceleration.changeFrame(worldFrame);
-            EuclidFrameTestTools.assertFrameTuple3DEquals(messagePrefix, expectedLinearAcceleration, actualLinearAcceleration, EPSILON);
+            EuclidFrameTestTools.assertEquals(messagePrefix, expectedLinearAcceleration, actualLinearAcceleration, EPSILON);
          }
       }
    }
@@ -543,9 +542,9 @@ public class MultiBodySystemStateIntegratorTest
             integrator.doubleIntegrateFromAcceleration(joint);
             root.updateFramesRecursively();
 
-            EuclidCoreTestTools.assertQuaternionGeometricallyEquals(messagePrefix, initialOrientation, jointOrientation, EPSILON);
-            EuclidFrameTestTools.assertFrameTuple3DEquals(messagePrefix, initialAngularVelocity, jointAngularVelocity, EPSILON);
-            EuclidFrameTestTools.assertFrameTuple3DEquals(messagePrefix, initialAngularAcceleration, jointAngularAcceleration, EPSILON);
+            EuclidCoreTestTools.assertOrientation3DGeometricallyEquals(messagePrefix, initialOrientation, jointOrientation, EPSILON);
+            EuclidFrameTestTools.assertEquals(messagePrefix, initialAngularVelocity, jointAngularVelocity, EPSILON);
+            EuclidFrameTestTools.assertEquals(messagePrefix, initialAngularAcceleration, jointAngularAcceleration, EPSILON);
 
             double actualKineticCoEnergy = object.getInertia().computeKineticCoEnergy(object.getBodyFixedFrame().getTwistOfFrame());
             assertEquals(expectedKineticCoEnergy, actualKineticCoEnergy, EPSILON);
@@ -572,9 +571,9 @@ public class MultiBodySystemStateIntegratorTest
             difference.getRotationVector(angularVelocityFD);
             angularVelocityFD.scale(1.0 / dt);
 
-            EuclidFrameTestTools.assertFrameTuple3DEquals(messagePrefix, angularVelocityFD, jointAngularVelocity, LARGE_EPSILON);
+            EuclidFrameTestTools.assertEquals(messagePrefix, angularVelocityFD, jointAngularVelocity, LARGE_EPSILON);
 
-            EuclidFrameTestTools.assertFrameTuple3DEquals(messagePrefix, initialAngularAcceleration, jointAngularAcceleration, LARGE_EPSILON);
+            EuclidFrameTestTools.assertEquals(messagePrefix, initialAngularAcceleration, jointAngularAcceleration, LARGE_EPSILON);
 
             double actualKineticCoEnergy = object.getInertia().computeKineticCoEnergy(object.getBodyFixedFrame().getTwistOfFrame());
             assertEquals(expectedKineticCoEnergy, actualKineticCoEnergy, EPSILON);
