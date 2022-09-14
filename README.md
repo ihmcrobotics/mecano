@@ -14,7 +14,7 @@ We have put our best effort into documenting and testing the entire library.
 This library is under the license Apache 2.0. Consult the license file for more information.
 
 ### Compatibility
-This library is compatible with Java 8+ and Gradle 4.10+.
+This library is compatible with Java 17+ and Gradle 7.5+.
 
 ### Dependency
 This library main source depends on the matrix library EJML [here](http://ejml.org/) and Euclid [here](https://github.com/ihmcrobotics/euclid).
