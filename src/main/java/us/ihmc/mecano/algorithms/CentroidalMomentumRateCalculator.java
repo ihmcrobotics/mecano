@@ -542,6 +542,14 @@ public class CentroidalMomentumRateCalculator implements ReferenceFrameHolder
       return biasSpatialForce;
    }
 
+   /**
+    * Computes the convective term while considering only a subset of the multi-body system.
+    * 
+    * @param jointSelection         the only joints that are considered.
+    * @param biasSpatialForceToPack the vector used to store the result. Modified.
+    * @return {@code true} if the convective term was successfully computed, {@code false} if not all
+    *         the joints could be found and the result is inaccurate.
+    */
    public boolean getBiasSpatialForceMatrix(List<? extends JointReadOnly> jointSelection, SpatialForceBasics biasSpatialForceToPack)
    {
       updateCentroidalMomentum();
@@ -576,6 +584,14 @@ public class CentroidalMomentumRateCalculator implements ReferenceFrameHolder
       return biasSpatialForceMatrix;
    }
 
+   /**
+    * Computes the convective term while considering only a subset of the multi-body system.
+    * 
+    * @param jointSelection         the only joints that are considered.
+    * @param biasSpatialForceToPack the matrix used to store the result. Modified.
+    * @return {@code true} if the convective term was successfully computed, {@code false} if not all
+    *         the joints could be found and the result is inaccurate.
+    */
    public boolean getBiasSpatialForceMatrix(List<? extends JointReadOnly> jointSelection, DMatrixRMaj biasSpatialForceMatrixToPack)
    {
       updateCentroidalMomentum();
