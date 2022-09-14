@@ -351,9 +351,9 @@ public class MecanoTools
       matrixToModify.add(startRow + 0, column, vectorToAdd.getAngularPartX());
       matrixToModify.add(startRow + 1, column, vectorToAdd.getAngularPartY());
       matrixToModify.add(startRow + 2, column, vectorToAdd.getAngularPartZ());
-      matrixToModify.add(startRow + 3, column, vectorToAdd.getAngularPartX());
-      matrixToModify.add(startRow + 4, column, vectorToAdd.getAngularPartY());
-      matrixToModify.add(startRow + 5, column, vectorToAdd.getAngularPartZ());
+      matrixToModify.add(startRow + 3, column, vectorToAdd.getLinearPartX());
+      matrixToModify.add(startRow + 4, column, vectorToAdd.getLinearPartY());
+      matrixToModify.add(startRow + 5, column, vectorToAdd.getLinearPartZ());
    }
 
    /**
@@ -757,7 +757,7 @@ public class MecanoTools
                                                Vector3DReadOnly linearVelocity)
    {
       // m v^2
-      double energy = mass * linearVelocity.lengthSquared();
+      double energy = mass * linearVelocity.normSquared();
 
       double cx = centerOfMassOffset.getX();
       double cy = centerOfMassOffset.getY();

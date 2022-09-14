@@ -9,6 +9,7 @@ import java.util.Random;
 import org.ejml.data.DMatrix3x3;
 import org.ejml.data.DMatrixRMaj;
 import org.ejml.dense.row.CommonOps_DDRM;
+import org.ejml.dense.row.RandomMatrices_DDRM;
 import org.junit.jupiter.api.Test;
 
 import us.ihmc.euclid.matrix.Matrix3D;
@@ -21,6 +22,7 @@ import us.ihmc.euclid.tools.EuclidCoreTools;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.mecano.spatial.SpatialAcceleration;
 import us.ihmc.mecano.spatial.SpatialInertia;
+import us.ihmc.mecano.spatial.SpatialVector;
 import us.ihmc.mecano.spatial.Twist;
 import us.ihmc.mecano.spatial.Wrench;
 
@@ -658,4 +660,49 @@ public class MecanoToolsTest
       }
    }
 
+   @Test
+   public void testAddEquals()
+   {
+      Random random = new Random(3424);
+
+      for (int i = 0; i < ITERATIONS; i++)
+      { // Test addEquals(int startRow, int column, SpatialVectorReadOnly vectorToAdd, DMatrixRMaj matrixToModify)
+         int numRow = 6 + random.nextInt(10);
+         int numCol = 1 + random.nextInt(10);
+         DMatrixRMaj original = RandomMatrices_DDRM.rectangle(numRow, numCol, -10.0, 10.0, random);
+         SpatialVector vector = MecanoRandomTools.nextSpatialVector(random, ReferenceFrame.getWorldFrame());
+
+         int startRow = numRow == 6 ? 0 : random.nextInt(numRow - 6);
+         int column = numCol == 1 ? 0 : random.nextInt(numCol - 1);
+
+         DMatrixRMaj expected = new DMatrixRMaj(original.getNumRows(), original.getNumCols());
+         vector.get(startRow, column, expected);
+         CommonOps_DDRM.addEquals(expected, original);
+
+         DMatrixRMaj actual = new DMatrixRMaj(original);
+         MecanoTools.addEquals(startRow, column, vector, actual);
+
+         MecanoTestTools.assertDMatrixEquals(expected, actual, 1.0e-12);
+      }
+
+      for (int i = 0; i < ITERATIONS; i++)
+      { // Test addEquals(int startRow, int startColumn, DMatrix matrixToAdd, Matrix3DBasics matrixToModify)
+         int numRow = 3 + random.nextInt(10);
+         int numCol = 3 + random.nextInt(10);
+         DMatrixRMaj matrixToAdd = RandomMatrices_DDRM.rectangle(numRow, numCol, -10.0, 10.0, random);
+         Matrix3D original = EuclidCoreRandomTools.nextMatrix3D(random);
+
+         int startRow = numRow == 3 ? 0 : random.nextInt(numRow - 3);
+         int startCol = numCol == 3 ? 0 : random.nextInt(numCol - 3);
+
+         Matrix3D expected = new Matrix3D();
+         expected.set(startRow, startCol, matrixToAdd);
+         expected.add(original);
+
+         Matrix3D actual = new Matrix3D(original);
+         MecanoTools.addEquals(startRow, startCol, matrixToAdd, actual);
+
+         EuclidCoreTestTools.assertEquals(expected, actual, 1.0e-12);
+      }
+   }
 }
