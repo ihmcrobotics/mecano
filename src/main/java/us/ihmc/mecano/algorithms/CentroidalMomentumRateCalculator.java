@@ -1,8 +1,12 @@
 package us.ihmc.mecano.algorithms;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
+import java.util.Map;
+import java.util.function.Function;
+import java.util.stream.Collectors;
 
 import org.ejml.data.DMatrix1Row;
 import org.ejml.data.DMatrixRMaj;
@@ -35,6 +39,7 @@ import us.ihmc.mecano.spatial.interfaces.SpatialForceReadOnly;
 import us.ihmc.mecano.spatial.interfaces.SpatialInertiaReadOnly;
 import us.ihmc.mecano.spatial.interfaces.TwistReadOnly;
 import us.ihmc.mecano.tools.JointStateType;
+import us.ihmc.mecano.tools.MecanoTools;
 import us.ihmc.mecano.tools.MultiBodySystemTools;
 
 /**
@@ -74,6 +79,7 @@ public class CentroidalMomentumRateCalculator implements ReferenceFrameHolder
     * provide a slight performance improvement.
     */
    private final RecursionStep[] recursionSteps;
+   private final Map<RigidBodyReadOnly, RecursionStep> rigidBodyToRecursionStepMap;
    /** Intermediate variable to store the unit-twist of the parent joint. */
    private final Twist jointUnitTwist;
    /** Intermediate variable for garbage free operations. */
@@ -82,10 +88,6 @@ public class CentroidalMomentumRateCalculator implements ReferenceFrameHolder
    private final Momentum unitMomentum;
    /** Intermediate variable for garbage free operations. */
    private final Momentum intermediateMomentum;
-   /**
-    * Intermediate variable to store the wrench resulting from Coriolis and centrifugal accelerations.
-    */
-   private final Wrench netCoriolisBodyWrench;
 
    /** The centroidal momentum matrix. */
    private final DMatrixRMaj centroidalMomentumMatrix;
@@ -189,6 +191,7 @@ public class CentroidalMomentumRateCalculator implements ReferenceFrameHolder
       RigidBodyReadOnly rootBody = input.getRootBody();
       initialRecursionStep = new RecursionStep(rootBody, null, null);
       recursionSteps = buildMultiBodyTree(initialRecursionStep, input.getJointsToIgnore()).toArray(new RecursionStep[0]);
+      rigidBodyToRecursionStepMap = Arrays.stream(recursionSteps).filter(s -> s.isRoot()).collect(Collectors.toMap(s -> s.rigidBody, Function.identity()));
 
       if (considerIgnoredSubtreesInertia)
          initialRecursionStep.includeIgnoredSubtreeInertia();
@@ -199,7 +202,6 @@ public class CentroidalMomentumRateCalculator implements ReferenceFrameHolder
       intermediateTwist = new Twist();
       unitMomentum = new Momentum(matrixFrame);
       intermediateMomentum = new Momentum();
-      netCoriolisBodyWrench = new Wrench();
 
       int nDegreesOfFreedom = MultiBodySystemTools.computeDegreesOfFreedom(input.getJointsToConsider());
       centroidalMomentumMatrix = new DMatrixRMaj(6, nDegreesOfFreedom);
@@ -541,6 +543,36 @@ public class CentroidalMomentumRateCalculator implements ReferenceFrameHolder
    }
 
    /**
+    * Computes the convective term while considering only a subset of the multi-body system.
+    * 
+    * @param jointSelection         the only joints that are considered.
+    * @param biasSpatialForceToPack the vector used to store the result. Modified.
+    * @return {@code true} if the convective term was successfully computed, {@code false} if not all
+    *         the joints could be found and the result is inaccurate.
+    */
+   public boolean getBiasSpatialForceMatrix(List<? extends JointReadOnly> jointSelection, SpatialForceBasics biasSpatialForceToPack)
+   {
+      updateCentroidalMomentum();
+
+      biasSpatialForceToPack.setToZero(getReferenceFrame());
+
+      boolean foundAllJoints = true;
+
+      for (int i = 0; i < jointSelection.size(); i++)
+      {
+         RigidBodyReadOnly rigidBody = jointSelection.get(i).getPredecessor();
+         RecursionStep step = rigidBodyToRecursionStepMap.get(rigidBody);
+         if (step == null)
+         {
+            foundAllJoints = false;
+            continue;
+         }
+         biasSpatialForceToPack.add(step.netCoriolisBodyWrench);
+      }
+      return foundAllJoints;
+   }
+
+   /**
     * Gets the convective term resulting from the Coriolis and centrifugal forces acting on the system.
     *
     * @return the bias spatial force.
@@ -550,6 +582,36 @@ public class CentroidalMomentumRateCalculator implements ReferenceFrameHolder
    {
       updateCentroidalMomentum();
       return biasSpatialForceMatrix;
+   }
+
+   /**
+    * Computes the convective term while considering only a subset of the multi-body system.
+    * 
+    * @param jointSelection         the only joints that are considered.
+    * @param biasSpatialForceToPack the matrix used to store the result. Modified.
+    * @return {@code true} if the convective term was successfully computed, {@code false} if not all
+    *         the joints could be found and the result is inaccurate.
+    */
+   public boolean getBiasSpatialForceMatrix(List<? extends JointReadOnly> jointSelection, DMatrixRMaj biasSpatialForceMatrixToPack)
+   {
+      updateCentroidalMomentum();
+
+      biasSpatialForceMatrixToPack.zero();
+
+      boolean foundAllJoints = true;
+
+      for (int i = 0; i < jointSelection.size(); i++)
+      {
+         RigidBodyReadOnly rigidBody = jointSelection.get(i).getPredecessor();
+         RecursionStep step = rigidBodyToRecursionStepMap.get(rigidBody);
+         if (step == null)
+         {
+            foundAllJoints = false;
+            continue;
+         }
+         MecanoTools.addEquals(0, 0, step.netCoriolisBodyWrench, biasSpatialForceMatrixToPack);
+      }
+      return foundAllJoints;
    }
 
    /**
@@ -578,6 +640,10 @@ public class CentroidalMomentumRateCalculator implements ReferenceFrameHolder
        * attached to the ignored joint.
        */
       private final SpatialInertia bodyInertia;
+      /**
+       * Intermediate variable to store the wrench resulting from Coriolis and centrifugal accelerations.
+       */
+      private final Wrench netCoriolisBodyWrench;
       /**
        * Result of this recursion step: the matrix block of the centroidal momentum matrix for the parent
        * joint.
@@ -614,6 +680,7 @@ public class CentroidalMomentumRateCalculator implements ReferenceFrameHolder
          {
             bodyInertia = null;
             coriolisBodyAcceleration = new SpatialAcceleration(getBodyFixedFrame(), input.getInertialFrame(), getBodyFixedFrame());
+            netCoriolisBodyWrench = null;
             centroidalMomentumMatrixBlock = null;
             matrixFrameToBodyFixedFrameTransform = null;
          }
@@ -622,6 +689,7 @@ public class CentroidalMomentumRateCalculator implements ReferenceFrameHolder
             parent.children.add(this);
             bodyInertia = new SpatialInertia(rigidBody.getInertia());
             coriolisBodyAcceleration = new SpatialAcceleration();
+            netCoriolisBodyWrench = new Wrench();
             centroidalMomentumMatrixBlock = new DMatrixRMaj(6, getJoint().getDegreesOfFreedom());
             matrixFrameToBodyFixedFrameTransform = new RigidBodyTransform();
          }

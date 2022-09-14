@@ -6,6 +6,7 @@ import java.util.List;
 
 import org.ejml.MatrixDimensionException;
 import org.ejml.data.DMatrix;
+import org.ejml.data.DMatrixRMaj;
 
 import us.ihmc.euclid.matrix.interfaces.Matrix3DBasics;
 import us.ihmc.euclid.matrix.interfaces.Matrix3DReadOnly;
@@ -24,6 +25,7 @@ import us.ihmc.mecano.multiBodySystem.interfaces.PlanarJointReadOnly;
 import us.ihmc.mecano.multiBodySystem.interfaces.SixDoFJointReadOnly;
 import us.ihmc.mecano.multiBodySystem.interfaces.SphericalJointReadOnly;
 import us.ihmc.mecano.spatial.Twist;
+import us.ihmc.mecano.spatial.interfaces.SpatialVectorReadOnly;
 import us.ihmc.mecano.spatial.interfaces.TwistReadOnly;
 
 /**
@@ -120,7 +122,15 @@ public class MecanoTools
     * @return {@code true} if all the off-diagonal terms of the matrix are equal to zero, {@code false}
     *         otherwise.
     */
-   public static boolean isMatrix3DDiagonal(double m00, double m01, double m02, double m10, double m11, double m12, double m20, double m21, double m22,
+   public static boolean isMatrix3DDiagonal(double m00,
+                                            double m01,
+                                            double m02,
+                                            double m10,
+                                            double m11,
+                                            double m12,
+                                            double m20,
+                                            double m21,
+                                            double m22,
                                             double epsilon)
    {
       if (Math.abs(m01) <= epsilon && Math.abs(m02) <= epsilon && Math.abs(m12) <= epsilon)
@@ -329,6 +339,24 @@ public class MecanoTools
    }
 
    /**
+    * Adds the given {@code vectorToAdd} as a column into {@code matrixToModify}
+    * 
+    * @param startRow       the first row index in {@code matrixToModify} to start adding.
+    * @param column         the column index in {@code matrixToModify} where the vector is added.
+    * @param vectorToAdd    the vector to be added. Not modified.
+    * @param matrixToModify the matrix to which the vector is added. Modified.
+    */
+   public static void addEquals(int startRow, int column, SpatialVectorReadOnly vectorToAdd, DMatrixRMaj matrixToModify)
+   {
+      matrixToModify.add(startRow + 0, column, vectorToAdd.getAngularPartX());
+      matrixToModify.add(startRow + 1, column, vectorToAdd.getAngularPartY());
+      matrixToModify.add(startRow + 2, column, vectorToAdd.getAngularPartZ());
+      matrixToModify.add(startRow + 3, column, vectorToAdd.getLinearPartX());
+      matrixToModify.add(startRow + 4, column, vectorToAdd.getLinearPartY());
+      matrixToModify.add(startRow + 5, column, vectorToAdd.getLinearPartZ());
+   }
+
+   /**
     * Applies a translation to the given moment of inertia.
     * <p>
     * The translation formula for the inertia is as follows:
@@ -361,7 +389,10 @@ public class MecanoTools
     *                                   Not modified.
     * @param momentOfInertiaToTransform the inertia matrix to transform. Modified.
     */
-   public static void translateMomentOfInertia(double mass, Tuple3DReadOnly centerOfMass, boolean negateTranslation, Tuple3DReadOnly translation,
+   public static void translateMomentOfInertia(double mass,
+                                               Tuple3DReadOnly centerOfMass,
+                                               boolean negateTranslation,
+                                               Tuple3DReadOnly translation,
                                                Matrix3DBasics momentOfInertiaToTransform)
    {
       double xp = translation.getX();
@@ -446,7 +477,9 @@ public class MecanoTools
     *                            {@code null}. Not modified.
     * @param dynamicMomentToPack vector used to store the net moment at the center of mass. Modified.
     */
-   public static void computeDynamicMomentFast(Matrix3DReadOnly momentOfInertia, Vector3DReadOnly angularAcceleration, Vector3DReadOnly angularVelocity,
+   public static void computeDynamicMomentFast(Matrix3DReadOnly momentOfInertia,
+                                               Vector3DReadOnly angularAcceleration,
+                                               Vector3DReadOnly angularVelocity,
                                                Vector3DBasics dynamicMomentToPack)
    {
       if (angularVelocity == null)
@@ -505,9 +538,14 @@ public class MecanoTools
     * @param dynamicMomentToPack vector used to store the net moment at the origin of the frame in
     *                            which the inertia is expressed. Modified.
     */
-   public static void computeDynamicMoment(Matrix3DReadOnly momentOfInertia, double mass, Vector3DReadOnly centerOfMassOffset,
-                                           Vector3DReadOnly angularAcceleration, Vector3DReadOnly linearAcceleration, Vector3DReadOnly angularVelocity,
-                                           Vector3DReadOnly linearVelocity, Vector3DBasics dynamicMomentToPack)
+   public static void computeDynamicMoment(Matrix3DReadOnly momentOfInertia,
+                                           double mass,
+                                           Vector3DReadOnly centerOfMassOffset,
+                                           Vector3DReadOnly angularAcceleration,
+                                           Vector3DReadOnly linearAcceleration,
+                                           Vector3DReadOnly angularVelocity,
+                                           Vector3DReadOnly linearVelocity,
+                                           Vector3DBasics dynamicMomentToPack)
    {
       // Temporary variables to store intermediate results.
       double mx, my, mz;
@@ -596,8 +634,11 @@ public class MecanoTools
     *                           frame as the inertia matrix. Can be {@code null}. Not modified.
     * @param dynamicForceToPack vector used to store the net force at the center of mass. Modified.
     */
-   public static void computeDynamicForceFast(double mass, Vector3DReadOnly linearAcceleration, Vector3DReadOnly angularVelocity,
-                                              Vector3DReadOnly linearVelocity, Vector3DBasics dynamicForceToPack)
+   public static void computeDynamicForceFast(double mass,
+                                              Vector3DReadOnly linearAcceleration,
+                                              Vector3DReadOnly angularVelocity,
+                                              Vector3DReadOnly linearVelocity,
+                                              Vector3DBasics dynamicForceToPack)
    {
       if (angularVelocity != null && linearVelocity != null)
       {
@@ -650,8 +691,12 @@ public class MecanoTools
     * @param dynamicForceToPack  vector used to store the net force at the origin of the frame in which
     *                            the inertia is expressed. Modified.
     */
-   public static void computeDynamicForce(double mass, Vector3DReadOnly centerOfMassOffset, Vector3DReadOnly angularAcceleration,
-                                          Vector3DReadOnly linearAcceleration, Vector3DReadOnly angularVelocity, Vector3DReadOnly linearVelocity,
+   public static void computeDynamicForce(double mass,
+                                          Vector3DReadOnly centerOfMassOffset,
+                                          Vector3DReadOnly angularAcceleration,
+                                          Vector3DReadOnly linearAcceleration,
+                                          Vector3DReadOnly angularVelocity,
+                                          Vector3DReadOnly linearVelocity,
                                           Vector3DBasics dynamicForceToPack)
    {
       if (angularVelocity != null)
@@ -705,11 +750,14 @@ public class MecanoTools
     *                           frame as the inertia matrix. Not modified.
     * @return the value of the kinetic co-energy.
     */
-   public static double computeKineticCoEnergy(Matrix3DReadOnly momentOfInertia, double mass, Vector3DReadOnly centerOfMassOffset,
-                                               Vector3DReadOnly angularVelocity, Vector3DReadOnly linearVelocity)
+   public static double computeKineticCoEnergy(Matrix3DReadOnly momentOfInertia,
+                                               double mass,
+                                               Vector3DReadOnly centerOfMassOffset,
+                                               Vector3DReadOnly angularVelocity,
+                                               Vector3DReadOnly linearVelocity)
    {
       // m v^2
-      double energy = mass * linearVelocity.lengthSquared();
+      double energy = mass * linearVelocity.normSquared();
 
       double cx = centerOfMassOffset.getX();
       double cy = centerOfMassOffset.getY();
