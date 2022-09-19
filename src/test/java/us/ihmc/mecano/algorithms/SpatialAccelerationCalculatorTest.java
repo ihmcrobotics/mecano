@@ -715,9 +715,9 @@ public class SpatialAccelerationCalculatorTest
       {
          Vector3D difference = new Vector3D();
          difference.sub(expected.getLinearPart(), actual.getLinearPart());
-         double linearPartDifference = difference.length();
+         double linearPartDifference = difference.norm();
          difference.sub(expected.getAngularPart(), actual.getAngularPart());
-         double angularPartDifference = difference.length();
+         double angularPartDifference = difference.norm();
          messagePrefix = messagePrefix != null ? messagePrefix + " " : "";
          throw new AssertionError(messagePrefix + "expected:\n<" + expected + ">\n but was:\n<" + actual + ">\n difference: linear part: "
                + linearPartDifference + ", angular part: " + angularPartDifference);

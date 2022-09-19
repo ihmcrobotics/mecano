@@ -3,7 +3,8 @@ package us.ihmc.mecano.algorithms;
 import org.ejml.data.DMatrix;
 import org.ejml.data.DMatrixRMaj;
 
-import us.ihmc.euclid.interfaces.GeometryObject;
+import us.ihmc.euclid.interfaces.Clearable;
+import us.ihmc.euclid.interfaces.Settable;
 import us.ihmc.euclid.matrix.Matrix3D;
 import us.ihmc.euclid.matrix.interfaces.Matrix3DReadOnly;
 import us.ihmc.euclid.matrix.interfaces.RotationMatrixReadOnly;
@@ -31,7 +32,7 @@ import us.ihmc.mecano.tools.MecanoTools;
  *
  * @author Sylvain Bertrand
  */
-public class ArticulatedBodyInertia implements GeometryObject<ArticulatedBodyInertia>, ReferenceFrameHolder, FrameChangeable
+public class ArticulatedBodyInertia implements Settable<ArticulatedBodyInertia>, ReferenceFrameHolder, FrameChangeable, Clearable
 {
    /** The frame in which this inertia is expressed. */
    private ReferenceFrame expressedInFrame = null;
@@ -400,8 +401,6 @@ public class ArticulatedBodyInertia implements GeometryObject<ArticulatedBodyIne
       }
    }
 
-   /** {@inheritDoc} */
-   @Override
    public boolean epsilonEquals(ArticulatedBodyInertia other, double epsilon)
    {
       if (getReferenceFrame() != other.getReferenceFrame())
@@ -422,7 +421,6 @@ public class ArticulatedBodyInertia implements GeometryObject<ArticulatedBodyIne
     * @throws ReferenceFrameMismatchException if {@code other} is not expressed in the same frame as
     *                                         {@code this}.
     */
-   @Override
    public boolean geometricallyEquals(ArticulatedBodyInertia other, double epsilon)
    {
       checkReferenceFrameMatch(other);

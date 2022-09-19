@@ -550,7 +550,7 @@ public class MultiBodyResponseCalculatorTest
       expectedAccelerationChange.changeFrame(testWrenchFrame);
       EuclidFrameTestTools.assertEquals(expectedAccelerationChange.getLinearPart(),
                                                     actualLinearAccelerationChange,
-                                                    Math.max(1.0, expectedAccelerationChange.getLinearPart().length()) * epsilon);
+                                                    Math.max(1.0, expectedAccelerationChange.getLinearPart().norm()) * epsilon);
    }
 
    private static void assertApplySingleJointWrench(Random random, int iteration, List<? extends JointBasics> joints, double epsilon)

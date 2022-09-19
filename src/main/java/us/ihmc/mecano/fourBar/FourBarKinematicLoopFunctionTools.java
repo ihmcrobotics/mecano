@@ -127,7 +127,7 @@ public class FourBarKinematicLoopFunctionTools
          throw new IllegalArgumentException("Could not find the loop closure joint.");
       RigidBodyTransform error = loopClosureJoint.getLoopClosureFrame()
                                                  .getTransformToDesiredFrame(loopClosureJoint.getSuccessor().getParentJoint().getFrameAfterJoint());
-      if (error.getTranslation().length() > epsilon)
+      if (error.getTranslation().norm() > epsilon)
          throw new IllegalArgumentException("The four bar is not properly closed at zero-configuration, error:\n" + error);
 
       ReferenceFrame fourBarLocalFrame = constructReferenceFrameFromPointAndAxis("LocalFrame",

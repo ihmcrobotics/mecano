@@ -2,9 +2,8 @@ package us.ihmc.mecano.spatial;
 
 import org.ejml.data.DMatrix;
 
-import us.ihmc.euclid.interfaces.GeometryObject;
+import us.ihmc.euclid.interfaces.Settable;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
-import us.ihmc.euclid.referenceFrame.exceptions.ReferenceFrameMismatchException;
 import us.ihmc.euclid.referenceFrame.interfaces.FixedFrameVector3DBasics;
 import us.ihmc.euclid.transform.interfaces.Transform;
 import us.ihmc.euclid.tuple3D.interfaces.Vector3DReadOnly;
@@ -49,7 +48,7 @@ import us.ihmc.mecano.tools.MecanoIOTools;
  * @author Twan Koolen
  * @author Sylvain Bertrand
  */
-public class Wrench implements WrenchBasics, GeometryObject<Wrench>
+public class Wrench implements WrenchBasics, Settable<Wrench>
 {
    /**
     * The reference of the frame rigidly attached to the body on which this wrench is applied.
@@ -220,46 +219,6 @@ public class Wrench implements WrenchBasics, GeometryObject<Wrench>
    public void applyInverseTransform(Transform transform)
    {
       spatialForceVector.applyInverseTransform(transform);
-   }
-
-   /**
-    * Tests on a per component basis if this wrench is equal to the given {@code other} to an
-    * {@code epsilon} and both vectors have the same frames.
-    *
-    * @param other   the other wrench to compare against this. Not modified.
-    * @param epsilon the tolerance to use when comparing each component.
-    * @return {@code true} if the two vectors are equal, {@code false} otherwise.
-    */
-   @Override
-   public boolean epsilonEquals(Wrench other, double epsilon)
-   {
-      return WrenchBasics.super.epsilonEquals(other, epsilon);
-   }
-
-   /**
-    * Tests if {@code this} and {@code other} represent the same wrench to an {@code epsilon}.
-    * <p>
-    * It is likely that the implementation of this method will change in the future as the definition
-    * of "geometrically-equal" for wrenches might evolve. In the meantime, the current assumption is
-    * that two wrenches are geometrically equal if both their 3D torque and 3D force are independently
-    * geometrically equal, see {@link Vector3DReadOnly#geometricallyEquals(Vector3DReadOnly, double)}.
-    * </p>
-    * <p>
-    * Note that {@code this.geometricallyEquals(other, epsilon) == true} does not necessarily imply
-    * {@code this.epsilonEquals(other, epsilon)} and vice versa.
-    * </p>
-    *
-    * @param other   the other wrench to compare against this. Not modified.
-    * @param epsilon the tolerance to use for the comparison.
-    * @return {@code true} if the two wrenches represent the same physical quantity, {@code false}
-    *         otherwise.
-    * @throws ReferenceFrameMismatchException if the reference frames of {@code other} do not
-    *                                         respectively match the reference frames of {@code this}.
-    */
-   @Override
-   public boolean geometricallyEquals(Wrench other, double epsilon)
-   {
-      return WrenchBasics.super.geometricallyEquals(other, epsilon);
    }
 
    /**

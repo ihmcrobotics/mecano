@@ -2,9 +2,8 @@ package us.ihmc.mecano.spatial;
 
 import org.ejml.data.DMatrix;
 
-import us.ihmc.euclid.interfaces.GeometryObject;
+import us.ihmc.euclid.interfaces.Settable;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
-import us.ihmc.euclid.referenceFrame.exceptions.ReferenceFrameMismatchException;
 import us.ihmc.euclid.referenceFrame.interfaces.FixedFrameVector3DBasics;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.transform.interfaces.Transform;
@@ -43,7 +42,7 @@ import us.ihmc.mecano.tools.MecanoIOTools;
  * @author Twan Koolen
  * @author Sylvain Bertrand
  */
-public class SpatialForce implements SpatialForceBasics, GeometryObject<SpatialForce>
+public class SpatialForce implements SpatialForceBasics, Settable<SpatialForce>
 {
    /** This is where we store the internal data. */
    private final SpatialVector spatialVector = new SpatialVector();
@@ -276,47 +275,6 @@ public class SpatialForce implements SpatialForceBasics, GeometryObject<SpatialF
          spatialVector.applyInverseTransform(transform);
          addCrossToAngularPart(pointOfApplication, getLinearPart()); // p x R * f
       }
-   }
-
-   /**
-    * Tests on a per component basis if this vector is equal to the given {@code other} to an
-    * {@code epsilon} and both vectors are expressed in the same reference frame.
-    *
-    * @param other   the other vector to compare against this. Not modified.
-    * @param epsilon the tolerance to use when comparing each component.
-    * @return {@code true} if the two vectors are equal, {@code false} otherwise.
-    */
-   @Override
-   public boolean epsilonEquals(SpatialForce other, double epsilon)
-   {
-      return SpatialForceBasics.super.epsilonEquals(other, epsilon);
-   }
-
-   /**
-    * Tests if {@code this} and {@code other} represent the same spatial force to an {@code epsilon}.
-    * <p>
-    * It is likely that the implementation of this method will change in the future as the definition
-    * of "geometrically-equal" for spatial forces might evolve. In the meantime, the current assumption
-    * is that two spatial forces are geometrically equal if both their 3D torque and 3D force are
-    * independently geometrically equal, see
-    * {@link Vector3DReadOnly#geometricallyEquals(Vector3DReadOnly, double)}.
-    * </p>
-    * <p>
-    * Note that {@code this.geometricallyEquals(other, epsilon) == true} does not necessarily imply
-    * {@code this.epsilonEquals(other, epsilon)} and vice versa.
-    * </p>
-    *
-    * @param other   the other vector to compare against this. Not modified.
-    * @param epsilon the tolerance to use for the comparison.
-    * @return {@code true} if the two spatial forces represent the same physical quantity,
-    *         {@code false} otherwise.
-    * @throws ReferenceFrameMismatchException if the reference frames of {@code other} do not
-    *                                         respectively match the reference frames of {@code this}.
-    */
-   @Override
-   public boolean geometricallyEquals(SpatialForce other, double epsilon)
-   {
-      return SpatialForceBasics.super.geometricallyEquals(other, epsilon);
    }
 
    /**

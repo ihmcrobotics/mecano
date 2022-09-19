@@ -1,11 +1,10 @@
 package us.ihmc.mecano.spatial;
 
-import us.ihmc.euclid.interfaces.GeometryObject;
+import us.ihmc.euclid.interfaces.Settable;
 import us.ihmc.euclid.matrix.Matrix3D;
 import us.ihmc.euclid.matrix.interfaces.Matrix3DBasics;
 import us.ihmc.euclid.matrix.interfaces.Matrix3DReadOnly;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
-import us.ihmc.euclid.referenceFrame.exceptions.ReferenceFrameMismatchException;
 import us.ihmc.euclid.referenceFrame.interfaces.FixedFrameVector3DBasics;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.transform.interfaces.Transform;
@@ -50,7 +49,7 @@ import us.ihmc.mecano.tools.MecanoTools;
  * @author Twan Koolen
  * @author Sylvain Bertrand
  */
-public class SpatialInertia implements SpatialInertiaBasics, GeometryObject<SpatialInertia>
+public class SpatialInertia implements SpatialInertiaBasics, Settable<SpatialInertia>
 {
    /**
     * Reference frame rigidly attached to the body that this spatial inertia matrix describes the
@@ -322,51 +321,6 @@ public class SpatialInertia implements SpatialInertiaBasics, GeometryObject<Spat
    public FixedFrameVector3DBasics getCenterOfMassOffset()
    {
       return centerOfMassOffset;
-   }
-
-   /**
-    * Tests if this spatial inertia and {@code other} are equal given the tolerance {@code epsilon}.
-    * <p>
-    * If the two spatial inertia matrices are expressed in different reference frames, this method
-    * returns automatically {@code false}.
-    * </p>
-    * <p>
-    * The test performs a component-wise comparison in turn on the mass, center of mass offset, and
-    * moment of inertia of both spatial inertia matrices. If any of these comparisons fails, this
-    * method returns {@code false}.
-    * </p>
-    *
-    * @param other   the other spatial inertia matrix to compare against this. Not modified.
-    * @param epsilon the tolerance to use.
-    * @return {@code true} if the two spatial inertia matrices are considered equal, {@code false}
-    *         otherwise.
-    */
-   @Override
-   public boolean epsilonEquals(SpatialInertia other, double epsilon)
-   {
-      return SpatialInertiaBasics.super.epsilonEquals(other, epsilon);
-   }
-
-   /**
-    * Tests if {@code this} and {@code other} represent the same spatial inertia to an {@code epsilon}.
-    * <p>
-    * It is likely that the implementation of this method will change in the future as the definition
-    * of "geometrically-equal" for spatial inertia might evolve. In the meantime, the current
-    * assumption is that two spatial inertia matrices are geometrically equal if they are epsilon
-    * equal, see {@link #epsilonEquals(SpatialInertiaReadOnly, double)}.
-    * </p>
-    *
-    * @param other   the other spatial inertia to compare against this. Not modified.
-    * @param epsilon the tolerance to use for the comparison.
-    * @return {@code true} if the two spatial inertia matrices represent the same physical quantity,
-    *         {@code false} otherwise.
-    * @throws ReferenceFrameMismatchException if the reference frames of {@code other} do not
-    *                                         respectively match the reference frames of {@code this}.
-    */
-   @Override
-   public boolean geometricallyEquals(SpatialInertia other, double epsilon)
-   {
-      return SpatialInertiaBasics.super.geometricallyEquals(other, epsilon);
    }
 
    /**

@@ -3,7 +3,8 @@ package us.ihmc.mecano.algorithms;
 import org.ejml.data.DMatrix;
 import org.ejml.data.DMatrixRMaj;
 
-import us.ihmc.euclid.interfaces.GeometryObject;
+import us.ihmc.euclid.interfaces.Clearable;
+import us.ihmc.euclid.interfaces.Settable;
 import us.ihmc.euclid.matrix.Matrix3D;
 import us.ihmc.euclid.matrix.interfaces.Matrix3DBasics;
 import us.ihmc.euclid.matrix.interfaces.Matrix3DReadOnly;
@@ -46,7 +47,7 @@ import us.ihmc.mecano.tools.MecanoTools;
  *
  * @author Sylvain Bertrand
  */
-class FactorizedBodyInertia implements GeometryObject<FactorizedBodyInertia>, ReferenceFrameHolder, FrameChangeable
+class FactorizedBodyInertia implements Settable<FactorizedBodyInertia>, ReferenceFrameHolder, FrameChangeable, Clearable
 {
    private ReferenceFrame referenceFrame = null;
    private final Matrix3D angularInertia = new Matrix3D();
@@ -417,7 +418,6 @@ class FactorizedBodyInertia implements GeometryObject<FactorizedBodyInertia>, Re
       resultToPack.set(c00, c01, c02, c10, c11, c12, c20, c21, c22);
    }
 
-   @Override
    public boolean epsilonEquals(FactorizedBodyInertia other, double epsilon)
    {
       if (getReferenceFrame() != other.getReferenceFrame())
@@ -433,7 +433,6 @@ class FactorizedBodyInertia implements GeometryObject<FactorizedBodyInertia>, Re
       return true;
    }
 
-   @Override
    public boolean geometricallyEquals(FactorizedBodyInertia other, double epsilon)
    {
       checkReferenceFrameMatch(other);

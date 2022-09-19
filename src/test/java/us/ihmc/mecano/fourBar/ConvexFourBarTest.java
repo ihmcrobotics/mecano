@@ -615,10 +615,10 @@ public class ConvexFourBarTest
       assertEquals(clockwise ? BC.cross(CD) <= 0.0 : BC.cross(CD) >= 0.0, vertexC.isConvex());
       assertEquals(clockwise ? CD.cross(DA) <= 0.0 : CD.cross(DA) >= 0.0, vertexD.isConvex());
 
-      double expectedAB = AB.length();
-      double expectedBC = BC.length();
-      double expectedCD = CD.length();
-      double expectedDA = DA.length();
+      double expectedAB = AB.norm();
+      double expectedBC = BC.norm();
+      double expectedCD = CD.norm();
+      double expectedDA = DA.norm();
       double expectedDAB = AD.angle(AB);
       double expectedABC = BA.angle(BC);
       double expectedBCD = CB.angle(CD);
