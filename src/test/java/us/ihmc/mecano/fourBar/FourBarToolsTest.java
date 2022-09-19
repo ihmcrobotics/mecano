@@ -67,7 +67,7 @@ public class FourBarToolsTest
          BC.sub(C, B);
 
          double expectedAngle = Math.abs(AB.angle(AC));
-         double actualAngle = FourBarTools.angleWithCosineLaw(AB.length(), AC.length(), BC.length());
+         double actualAngle = FourBarTools.angleWithCosineLaw(AB.norm(), AC.norm(), BC.norm());
 
          assertEquals(expectedAngle, actualAngle, EPSILON, "error=" + Math.abs(expectedAngle - actualAngle));
       }

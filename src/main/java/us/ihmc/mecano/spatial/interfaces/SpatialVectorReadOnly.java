@@ -287,6 +287,7 @@ public interface SpatialVectorReadOnly extends ReferenceFrameHolder
       return getAngularPart().dot(other.getAngularPart()) + getLinearPart().dot(other.getLinearPart());
    }
 
+   // TODO Should length be renamed norm as in euclid?
    /**
     * Calculates and returns the magnitude of this vector.
     * <p>
@@ -319,7 +320,7 @@ public interface SpatialVectorReadOnly extends ReferenceFrameHolder
     */
    default double lengthSquared()
    {
-      return getAngularPart().lengthSquared() + getLinearPart().lengthSquared();
+      return getAngularPart().normSquared() + getLinearPart().normSquared();
    }
 
    /**

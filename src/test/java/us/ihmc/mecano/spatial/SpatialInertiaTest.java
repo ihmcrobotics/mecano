@@ -279,10 +279,10 @@ public class SpatialInertiaTest
                                                                                                                               new Point3D()));
 
          SpatialInertia inertia = MecanoRandomTools.nextSpatialInertia(random, initialFrame, initialFrame);
-         double expected = inertia.getCenterOfMassOffset().length();
+         double expected = inertia.getCenterOfMassOffset().norm();
 
          inertia.changeFrame(finalFrame);
-         double actual = inertia.getCenterOfMassOffset().length();
+         double actual = inertia.getCenterOfMassOffset().norm();
 
          assertEquals(expected, actual, EPSILON);
       }

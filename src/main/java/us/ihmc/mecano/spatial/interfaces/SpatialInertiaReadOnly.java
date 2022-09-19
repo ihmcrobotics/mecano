@@ -103,7 +103,7 @@ public interface SpatialInertiaReadOnly extends ReferenceFrameHolder
     */
    default boolean isCenterOfMassOffsetZero()
    {
-      return getCenterOfMassOffset().lengthSquared() < COM_OFFSET_ZERO_EPSILON;
+      return getCenterOfMassOffset().normSquared() < COM_OFFSET_ZERO_EPSILON;
    }
 
    /**

@@ -1,12 +1,10 @@
 package us.ihmc.mecano.yoVariables.spatial;
 
-import us.ihmc.euclid.interfaces.GeometryObject;
+import us.ihmc.euclid.interfaces.Settable;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
-import us.ihmc.euclid.referenceFrame.exceptions.ReferenceFrameMismatchException;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.transform.interfaces.Transform;
 import us.ihmc.euclid.tuple3D.Point3D;
-import us.ihmc.euclid.tuple3D.interfaces.Vector3DReadOnly;
 import us.ihmc.mecano.spatial.interfaces.FixedFrameTwistBasics;
 import us.ihmc.mecano.spatial.interfaces.SpatialVectorReadOnly;
 import us.ihmc.mecano.spatial.interfaces.TwistReadOnly;
@@ -46,7 +44,7 @@ import us.ihmc.yoVariables.variable.YoVariable;
  *
  * @author Sylvain Bertrand
  */
-public class YoFixedFrameTwist implements FixedFrameTwistBasics, GeometryObject<YoFixedFrameTwist>
+public class YoFixedFrameTwist implements FixedFrameTwistBasics, Settable<YoFixedFrameTwist>
 {
    /**
     * Reference frame rigidly attached to the body that this twist describes the motion of.
@@ -238,47 +236,6 @@ public class YoFixedFrameTwist implements FixedFrameTwistBasics, GeometryObject<
    public YoFrameVector3D getLinearPart()
    {
       return spatialVector.getLinearPart();
-   }
-
-   /**
-    * Tests on a per component basis if this vector is equal to the given {@code other} to an
-    * {@code epsilon} and both vectors have the same frames.
-    *
-    * @param other   the other motion vector to compare against this. Not modified.
-    * @param epsilon the tolerance to use when comparing each component.
-    * @return {@code true} if the two vectors are equal, {@code false} otherwise.
-    */
-   @Override
-   public boolean epsilonEquals(YoFixedFrameTwist other, double epsilon)
-   {
-      return FixedFrameTwistBasics.super.epsilonEquals(other, epsilon);
-   }
-
-   /**
-    * Tests if {@code this} and {@code other} represent the same twist to an {@code epsilon}.
-    * <p>
-    * It is likely that the implementation of this method will change in the future as the definition
-    * of "geometrically-equal" for twists might evolve. In the meantime, the current assumption is that
-    * two twists are geometrically equal if both their 3D angular and 3D linear velocities are
-    * independently geometrically equal, see
-    * {@link Vector3DReadOnly#geometricallyEquals(Vector3DReadOnly, double)}.
-    * </p>
-    * <p>
-    * Note that {@code this.geometricallyEquals(other, epsilon) == true} does not necessarily imply
-    * {@code this.epsilonEquals(other, epsilon)} and vice versa.
-    * </p>
-    *
-    * @param other   the other twist to compare against this. Not modified.
-    * @param epsilon the tolerance to use for the comparison.
-    * @return {@code true} if the two twists represent the same physical quantity, {@code false}
-    *         otherwise.
-    * @throws ReferenceFrameMismatchException if the reference frames of {@code other} do not
-    *                                         respectively match the reference frames of {@code this}.
-    */
-   @Override
-   public boolean geometricallyEquals(YoFixedFrameTwist other, double epsilon)
-   {
-      return FixedFrameTwistBasics.super.geometricallyEquals(other, epsilon);
    }
 
    /**

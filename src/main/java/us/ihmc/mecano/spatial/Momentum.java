@@ -2,7 +2,7 @@ package us.ihmc.mecano.spatial;
 
 import org.ejml.data.DMatrix;
 
-import us.ihmc.euclid.interfaces.GeometryObject;
+import us.ihmc.euclid.interfaces.Settable;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.referenceFrame.interfaces.FixedFrameVector3DBasics;
 import us.ihmc.euclid.transform.interfaces.Transform;
@@ -38,7 +38,7 @@ import us.ihmc.mecano.tools.MecanoIOTools;
  * @author Twan Koolen
  * @author Sylvain Bertrand
  */
-public class Momentum implements MomentumBasics, GeometryObject<Momentum>
+public class Momentum implements MomentumBasics, Settable<Momentum>
 {
    /** This is where we store the internal data. */
    private final SpatialForce spatialForceVector = new SpatialForce();
@@ -174,24 +174,6 @@ public class Momentum implements MomentumBasics, GeometryObject<Momentum>
    public void changeFrame(ReferenceFrame desiredFrame)
    {
       spatialForceVector.changeFrame(desiredFrame);
-   }
-
-   /**
-    * @see SpatialForce#epsilonEquals(SpatialForce, double)
-    */
-   @Override
-   public boolean epsilonEquals(Momentum other, double epsilon)
-   {
-      return spatialForceVector.epsilonEquals(other, epsilon);
-   }
-
-   /**
-    * @see SpatialForce#geometricallyEquals(SpatialForce, double)
-    */
-   @Override
-   public boolean geometricallyEquals(Momentum other, double epsilon)
-   {
-      return spatialForceVector.geometricallyEquals(other, epsilon);
    }
 
    /**

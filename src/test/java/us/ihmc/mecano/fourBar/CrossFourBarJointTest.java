@@ -1311,8 +1311,8 @@ public class CrossFourBarJointTest
          String errorMessage = String.format("Expected:\n%s\nbut was:\n%s\nDifference: angular=%s, linear=%s",
                                              MecanoIOTools.getTwistString(EuclidCoreTestTools.DEFAULT_FORMAT, expectedTwist),
                                              MecanoIOTools.getTwistString(EuclidCoreTestTools.DEFAULT_FORMAT, actualTwist),
-                                             Double.toString(angularError.length()),
-                                             Double.toString(linearError.length()));
+                                             Double.toString(angularError.norm()),
+                                             Double.toString(linearError.norm()));
          throw new AssertionFailedError(EuclidCoreTestTools.addPrefixToMessage(messagePrefix, errorMessage));
       }
    }
@@ -1339,8 +1339,8 @@ public class CrossFourBarJointTest
          String errorMessage = String.format("Expected:\n%s\nbut was:\n%s\nDifference: angular=%s, linear=%s",
                                              MecanoIOTools.getSpatialAccelerationString(EuclidCoreTestTools.DEFAULT_FORMAT, expectedAcceleration),
                                              MecanoIOTools.getSpatialAccelerationString(EuclidCoreTestTools.DEFAULT_FORMAT, actualAcceleration),
-                                             Double.toString(angularError.length()),
-                                             Double.toString(linearError.length()));
+                                             Double.toString(angularError.norm()),
+                                             Double.toString(linearError.norm()));
          throw new AssertionFailedError(EuclidCoreTestTools.addPrefixToMessage(messagePrefix, errorMessage));
       }
    }
