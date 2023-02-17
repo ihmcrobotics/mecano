@@ -14,12 +14,14 @@ import org.ejml.interfaces.decomposition.EigenDecomposition_F64;
 import org.ejml.simple.SimpleMatrix;
 import org.junit.jupiter.api.Test;
 
+import us.ihmc.euclid.geometry.Pose3D;
 import us.ihmc.euclid.matrix.Matrix3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.referenceFrame.exceptions.ReferenceFrameMismatchException;
 import us.ihmc.euclid.referenceFrame.tools.EuclidFrameRandomTools;
 import us.ihmc.euclid.referenceFrame.tools.ReferenceFrameTools;
 import us.ihmc.euclid.tools.EuclidCoreRandomTools;
+import us.ihmc.euclid.transform.AffineTransform;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.mecano.tools.MecanoRandomTools;
@@ -46,6 +48,23 @@ public class SpatialInertiaTest
          actual.applyTransform(transform);
          actual.applyInverseTransform(transform);
 
+         MecanoTestTools.assertSpatialInertiaEquals(expected, actual, EPSILON);
+      }
+
+      for (int i = 0; i < ITERATIONS; i++)
+      { // Test different transform types
+         ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
+         RigidBodyTransform transform = EuclidCoreRandomTools.nextRigidBodyTransform(random);
+
+         SpatialInertia expected = MecanoRandomTools.nextSpatialInertia(random, worldFrame, worldFrame);
+         SpatialInertia actual = new SpatialInertia(expected);
+         expected.applyInverseTransform(transform);
+         actual.applyInverseTransform(new AffineTransform(transform));
+         MecanoTestTools.assertSpatialInertiaEquals(expected, actual, EPSILON);
+
+         actual = new SpatialInertia(expected);
+         expected.applyInverseTransform(transform);
+         actual.applyInverseTransform(new Pose3D(transform));
          MecanoTestTools.assertSpatialInertiaEquals(expected, actual, EPSILON);
       }
    }
@@ -330,6 +349,23 @@ public class SpatialInertiaTest
          spatialInertia.transform(vectorOriginal, actualVectorTransformed);
 
          MecanoTestTools.assertSpatialVectorEquals(expectedVectorTransformed, actualVectorTransformed, EPSILON);
+      }
+
+      for (int i = 0; i < ITERATIONS; i++)
+      { // Test different transform types
+         ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
+         RigidBodyTransform transform = EuclidCoreRandomTools.nextRigidBodyTransform(random);
+
+         SpatialInertia expected = MecanoRandomTools.nextSpatialInertia(random, worldFrame, worldFrame);
+         SpatialInertia actual = new SpatialInertia(expected);
+         expected.applyTransform(transform);
+         actual.applyTransform(new AffineTransform(transform));
+         MecanoTestTools.assertSpatialInertiaEquals(expected, actual, EPSILON);
+
+         actual = new SpatialInertia(expected);
+         expected.applyTransform(transform);
+         actual.applyTransform(new Pose3D(transform));
+         MecanoTestTools.assertSpatialInertiaEquals(expected, actual, EPSILON);
       }
    }
 

@@ -7,6 +7,7 @@ import us.ihmc.euclid.matrix.interfaces.Matrix3DReadOnly;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.referenceFrame.interfaces.FixedFrameVector3DBasics;
 import us.ihmc.euclid.transform.RigidBodyTransform;
+import us.ihmc.euclid.transform.interfaces.RigidBodyTransformReadOnly;
 import us.ihmc.euclid.transform.interfaces.Transform;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.interfaces.Tuple3DReadOnly;
@@ -147,7 +148,10 @@ public class SpatialInertia implements SpatialInertiaBasics, Settable<SpatialIne
     * @param centerOfMassOffset the offset of the body's center of mass position and the origin of the
     *                           given {@code expressedInFrame}. Not modified.
     */
-   public SpatialInertia(ReferenceFrame bodyFrame, ReferenceFrame expressedInFrame, Matrix3DReadOnly momentOfInertia, double mass,
+   public SpatialInertia(ReferenceFrame bodyFrame,
+                         ReferenceFrame expressedInFrame,
+                         Matrix3DReadOnly momentOfInertia,
+                         double mass,
                          Tuple3DReadOnly centerOfMassOffset)
    {
       setIncludingFrame(bodyFrame, expressedInFrame, momentOfInertia, mass, centerOfMassOffset);
@@ -236,20 +240,16 @@ public class SpatialInertia implements SpatialInertiaBasics, Settable<SpatialIne
    @Override
    public void applyTransform(Transform transform)
    {
-      if (transform instanceof RigidBodyTransform)
+      if (transform instanceof RigidBodyTransformReadOnly)
       {
-         applyTransform((RigidBodyTransform) transform);
+         applyTransform((RigidBodyTransformReadOnly) transform);
       }
       else
-      {
+      { // General transform, only applying rotation and translation.
          translation.setToZero();
          translation.applyTransform(transform);
-
-         // Let's first apply the rotation onto the CoM and the mass moment of inertia:
          momentOfInertia.applyTransform(transform);
          centerOfMassOffset.applyTransform(transform);
-
-         // Now we can simply apply the translation on the CoM and mass moment of inertia:
          MecanoTools.translateMomentOfInertia(mass, centerOfMassOffset, false, translation, momentOfInertia);
          centerOfMassOffset.add(translation);
       }
@@ -267,22 +267,18 @@ public class SpatialInertia implements SpatialInertiaBasics, Settable<SpatialIne
    @Override
    public void applyInverseTransform(Transform transform)
    {
-      if (transform instanceof RigidBodyTransform)
+      if (transform instanceof RigidBodyTransformReadOnly)
       {
-         applyInverseTransform((RigidBodyTransform) transform);
+         applyInverseTransform((RigidBodyTransformReadOnly) transform);
       }
       else
-      {
+      { // General transform, only applying rotation and translation.
          translation.setToZero();
-         translation.applyInverseTransform(transform);
-
-         // Let's first apply the rotation onto the CoM and the mass moment of inertia:
+         translation.applyTransform(transform);
+         MecanoTools.translateMomentOfInertia(mass, centerOfMassOffset, true, translation, momentOfInertia);
+         centerOfMassOffset.sub(translation);
          momentOfInertia.applyInverseTransform(transform);
          centerOfMassOffset.applyInverseTransform(transform);
-
-         // Now we can simply apply the translation on the CoM and mass moment of inertia:
-         MecanoTools.translateMomentOfInertia(mass, centerOfMassOffset, true, translation, momentOfInertia);
-         centerOfMassOffset.add(translation);
       }
    }
 

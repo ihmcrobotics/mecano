@@ -1,9 +1,11 @@
 package us.ihmc.mecano.spatial.interfaces;
 
 import us.ihmc.euclid.matrix.interfaces.Matrix3DReadOnly;
+import us.ihmc.euclid.matrix.interfaces.RotationMatrixReadOnly;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.referenceFrame.interfaces.FrameChangeable;
 import us.ihmc.euclid.transform.RigidBodyTransform;
+import us.ihmc.euclid.transform.interfaces.RigidBodyTransformReadOnly;
 import us.ihmc.euclid.transform.interfaces.Transform;
 import us.ihmc.euclid.tuple3D.interfaces.Tuple3DReadOnly;
 import us.ihmc.mecano.tools.MecanoTools;
@@ -151,7 +153,10 @@ public interface SpatialInertiaBasics extends FixedFrameSpatialInertiaBasics, Fr
     * @param centerOfMassOffset the new offset of the center of mass with respect to
     *                           {@code expressedInFrame}'s origin. Not modified.
     */
-   default void setIncludingFrame(ReferenceFrame bodyFrame, ReferenceFrame expressedInFrame, Matrix3DReadOnly momentOfInertia, double mass,
+   default void setIncludingFrame(ReferenceFrame bodyFrame,
+                                  ReferenceFrame expressedInFrame,
+                                  Matrix3DReadOnly momentOfInertia,
+                                  double mass,
                                   Tuple3DReadOnly centerOfMassOffset)
    {
       setBodyFrame(bodyFrame);
@@ -214,12 +219,14 @@ public interface SpatialInertiaBasics extends FixedFrameSpatialInertiaBasics, Fr
     *
     * @param transform the transform to use on this. Not modified.
     */
-   default void applyTransform(RigidBodyTransform transform)
+   default void applyTransform(RigidBodyTransformReadOnly transform)
    {
       if (transform.hasRotation())
-      {
-         // Let's first apply the rotation onto the CoM and the mass moment of inertia:
-         MecanoTools.transformSymmetricMatrix3D(transform.getRotation(), getMomentOfInertia());
+      { // Let's first apply the rotation onto the CoM and the mass moment of inertia:
+         if (transform.getRotation() instanceof RotationMatrixReadOnly rotationMatrix)
+            MecanoTools.transformSymmetricMatrix3D(rotationMatrix, getMomentOfInertia());
+         else
+            transform.getRotation().transform(getMomentOfInertia());
          getCenterOfMassOffset().applyTransform(transform);
       }
 
@@ -242,19 +249,21 @@ public interface SpatialInertiaBasics extends FixedFrameSpatialInertiaBasics, Fr
     *
     * @param transform the transform to use on this. Not modified.
     */
-   default void applyInverseTransform(RigidBodyTransform transform)
+   default void applyInverseTransform(RigidBodyTransformReadOnly transform)
    {
+      // Performing the operations in reverse order w.r.t. applyTransform(...)
       if (transform.hasTranslation())
-      {
-         // Now we can simply apply the translation on the CoM and mass moment of inertia:
+      { // Translate first
          MecanoTools.translateMomentOfInertia(getMass(), getCenterOfMassOffset(), true, transform.getTranslation(), getMomentOfInertia());
          getCenterOfMassOffset().sub(transform.getTranslation());
       }
 
       if (transform.hasRotation())
-      {
-         // Let's first apply the rotation onto the CoM and the mass moment of inertia:
-         MecanoTools.inverseTransformSymmetricMatrix3D(transform.getRotation(), getMomentOfInertia());
+      { // Rotate second
+         if (transform.getRotation() instanceof RotationMatrixReadOnly rotationMatrix)
+            MecanoTools.inverseTransformSymmetricMatrix3D(rotationMatrix, getMomentOfInertia());
+         else
+            transform.getRotation().inverseTransform(getMomentOfInertia());
          getCenterOfMassOffset().applyInverseTransform(transform);
       }
    }
