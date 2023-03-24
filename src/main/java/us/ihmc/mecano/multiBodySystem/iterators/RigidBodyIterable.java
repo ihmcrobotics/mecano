@@ -25,6 +25,7 @@ public class RigidBodyIterable<B extends RigidBodyReadOnly> implements Iterable<
    private final Collection<? extends RigidBodyReadOnly> roots;
    private final Predicate<B> selectionRule;
    private final Class<B> filteringClass;
+   private final IteratorSearchMode mode;
 
    /**
     * Creates a new iterable for a single subtree.
@@ -35,13 +36,13 @@ public class RigidBodyIterable<B extends RigidBodyReadOnly> implements Iterable<
     * @param selectionRule  rule to filter the rigid-bodies to iterate through. Rigid-bodies for which
     *                       {@code selectionRule.test(body)} returns {@code false} are ignored and will
     *                       not be part of the iteration.
+    * @param mode           how the search should be conducted, either depth-first search, or
+    *                       breadth-first search. Can be {@code null}.
     * @param root           rigid-body from which the subtree starts. Not modified.
     */
-   public RigidBodyIterable(Class<B> filteringClass, Predicate<B> selectionRule, RigidBodyReadOnly root)
+   public RigidBodyIterable(Class<B> filteringClass, Predicate<B> selectionRule, IteratorSearchMode mode, RigidBodyReadOnly root)
    {
-      this.selectionRule = selectionRule;
-      this.roots = Collections.singleton(root);
-      this.filteringClass = filteringClass;
+      this(filteringClass, selectionRule, mode, Collections.singletonList(root));
    }
 
    /**
@@ -53,20 +54,23 @@ public class RigidBodyIterable<B extends RigidBodyReadOnly> implements Iterable<
     * @param selectionRule  rule to filter the rigid-bodies to iterate through. Rigid-bodies for which
     *                       {@code selectionRule.test(body)} returns {@code false} are ignored and will
     *                       not be part of the iteration.
+    * @param mode           how the search should be conducted, either depth-first search, or
+    *                       breadth-first search. Can be {@code null}.
     * @param roots          rigid-bodies from which each subtree starts. Not modified.
     */
-   public RigidBodyIterable(Class<B> filteringClass, Predicate<B> selectionRule, Collection<? extends RigidBodyReadOnly> roots)
+   public RigidBodyIterable(Class<B> filteringClass, Predicate<B> selectionRule, IteratorSearchMode mode, Collection<? extends RigidBodyReadOnly> roots)
    {
       this.filteringClass = filteringClass;
       this.selectionRule = selectionRule;
       this.roots = roots;
+      this.mode = mode;
    }
 
    /** {@inheritDoc} */
    @Override
    public Iterator<B> iterator()
    {
-      return new RigidBodyIterator<>(filteringClass, selectionRule, roots);
+      return new RigidBodyIterator<>(filteringClass, selectionRule, mode, roots);
    }
 
    /**

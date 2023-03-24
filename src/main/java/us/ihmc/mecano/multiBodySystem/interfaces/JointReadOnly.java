@@ -556,7 +556,7 @@ public interface JointReadOnly
     */
    default Iterable<? extends JointReadOnly> subtreeIterable()
    {
-      return new JointIterable<>(JointReadOnly.class, null, this);
+      return new JointIterable<>(JointReadOnly.class, null, null, this);
    }
 
    /**

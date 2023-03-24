@@ -78,7 +78,7 @@ public class SubtreeStreams
     */
    public static <J extends JointReadOnly> Stream<J> from(Class<J> filteringClass, Collection<? extends JointReadOnly> roots)
    {
-      return new JointIterable<>(filteringClass, null, roots).toStream();
+      return new JointIterable<>(filteringClass, null, null, roots).toStream();
    }
 
    /**
@@ -156,6 +156,6 @@ public class SubtreeStreams
     */
    public static <B extends RigidBodyReadOnly> Stream<B> from(Class<B> filteringClass, B root)
    {
-      return new RigidBodyIterable<>(filteringClass, null, root).toStream();
+      return new RigidBodyIterable<>(filteringClass, null, null, root).toStream();
    }
 }

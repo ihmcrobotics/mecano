@@ -154,7 +154,7 @@ public interface RigidBodyReadOnly
     */
    default Iterable<? extends RigidBodyReadOnly> subtreeIterable()
    {
-      return new RigidBodyIterable<>(RigidBodyReadOnly.class, null, this);
+      return new RigidBodyIterable<>(RigidBodyReadOnly.class, null, null, this);
    }
 
    /**
@@ -169,7 +169,7 @@ public interface RigidBodyReadOnly
     */
    default Iterable<? extends JointReadOnly> childrenSubtreeIterable()
    {
-      return new JointIterable<>(JointReadOnly.class, null, getChildrenJoints());
+      return new JointIterable<>(JointReadOnly.class, null, null, getChildrenJoints());
    }
 
    /**

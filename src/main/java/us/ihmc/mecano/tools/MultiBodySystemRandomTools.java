@@ -1108,13 +1108,22 @@ public class MultiBodySystemRandomTools
    public static List<JointBasics> nextJointTree(Random random, String prefix, RigidBodyBasics rootBody, int numberOfJoints)
    {
       List<JointBasics> joints = new ArrayList<>();
+      String jointName = prefix + "Joint";
+      String bodyName = prefix + "Body";
 
       RigidBodyBasics predecessor = rootBody;
 
       for (int i = 0; i < numberOfJoints; i++)
       {
-         JointBasics joint = nextJoint(random, prefix + "Joint" + i, predecessor);
-         nextRigidBody(random, prefix + "Body" + i, joint);
+         JointBasics parentJoint = predecessor.getParentJoint();
+         String suffix;
+         if (parentJoint != null)
+            suffix = parentJoint.getName().substring(jointName.length()) + "_" + predecessor.getChildrenJoints().size();
+         else
+            suffix = Integer.toString(predecessor.getChildrenJoints().size());
+
+         JointBasics joint = nextJoint(random, jointName + suffix, predecessor);
+         nextRigidBody(random, bodyName + suffix, joint);
          joints.add(joint);
          predecessor = joints.get(random.nextInt(joints.size())).getSuccessor();
       }
@@ -1134,17 +1143,21 @@ public class MultiBodySystemRandomTools
     * @return the list of all the newly created joints.
     * @throws IllegalArgumentException if {@code start} is not the ancestor of {@code end}.
     */
-   public static List<RevoluteJoint> nextKinematicLoopRevoluteJoints(Random random, String prefix, RigidBodyBasics start, RigidBodyBasics end,
+   public static List<RevoluteJoint> nextKinematicLoopRevoluteJoints(Random random,
+                                                                     String prefix,
+                                                                     RigidBodyBasics start,
+                                                                     RigidBodyBasics end,
                                                                      int numberOfJoints)
    {
       if (!MultiBodySystemTools.isAncestor(end, start))
          throw new IllegalArgumentException("Improper rigid-bodies configuration: the end must be a descendant of start. Given bodies: [start: "
-               + start.getName() + ", end: " + end.getName() + "].");
+                                            + start.getName() + ", end: " + end.getName() + "].");
 
       List<RevoluteJoint> loopChain = nextRevoluteJointChain(random, prefix, start, numberOfJoints);
       RevoluteJoint loopClosureJoint = loopChain.get(numberOfJoints - 1);
       start.updateFramesRecursively();
-      RigidBodyTransform transformFromSuccessorParentJoint = end.getParentJoint().getFrameAfterJoint()
+      RigidBodyTransform transformFromSuccessorParentJoint = end.getParentJoint()
+                                                                .getFrameAfterJoint()
                                                                 .getTransformToDesiredFrame(loopClosureJoint.getFrameAfterJoint());
 
       loopClosureJoint.setupLoopClosure(end, transformFromSuccessorParentJoint);

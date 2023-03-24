@@ -3,6 +3,7 @@ package us.ihmc.mecano.multiBodySystem.iterators;
 import java.util.ArrayDeque;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.Deque;
 import java.util.Iterator;
 import java.util.List;
@@ -29,6 +30,7 @@ public class RigidBodyIterator<B extends RigidBodyReadOnly> implements Iterator<
    private final Deque<RigidBodyReadOnly> stack = new ArrayDeque<>();
    private final Predicate<RigidBodyReadOnly> selectionRule;
    private final List<RigidBodyReadOnly> roots = new ArrayList<>();
+   private final IteratorSearchMode mode;
 
    /**
     * Creates a new iterable for a single subtree.
@@ -39,20 +41,13 @@ public class RigidBodyIterator<B extends RigidBodyReadOnly> implements Iterator<
     * @param selectionRule  rule to filter the rigid-bodies to iterate through. Rigid-bodies for which
     *                       {@code selectionRule.test(body)} returns {@code false} are ignored and will
     *                       not be part of the iteration.
+    * @param mode           how the search should be conducted, either depth-first search, or
+    *                       breadth-first search. Can be {@code null}.
     * @param root           rigid-body from which the subtree starts. Not modified.
     */
-   public RigidBodyIterator(Class<B> filteringClass, Predicate<B> selectionRule, RigidBodyReadOnly root)
+   public RigidBodyIterator(Class<B> filteringClass, Predicate<B> selectionRule, IteratorSearchMode mode, RigidBodyReadOnly root)
    {
-      if (selectionRule == null)
-         this.selectionRule = body -> filteringClass.isInstance(body);
-      else
-         this.selectionRule = body -> filteringClass.isInstance(body) && selectionRule.test((B) body);
-
-      if (root != null)
-      {
-         stack.add(root);
-         roots.add(root);
-      }
+      this(filteringClass, selectionRule, mode, Collections.singletonList(root));
    }
 
    /**
@@ -64,14 +59,21 @@ public class RigidBodyIterator<B extends RigidBodyReadOnly> implements Iterator<
     * @param selectionRule  rule to filter the rigid-bodies to iterate through. Rigid-bodies for which
     *                       {@code selectionRule.test(body)} returns {@code false} are ignored and will
     *                       not be part of the iteration.
+    * @param mode           how the search should be conducted, either depth-first search, or
+    *                       breadth-first search. Can be {@code null}.
     * @param roots          rigid-bodies from which each subtree starts. Not modified.
     */
-   public RigidBodyIterator(Class<B> filteringClass, Predicate<B> selectionRule, Collection<? extends RigidBodyReadOnly> roots)
+   public RigidBodyIterator(Class<B> filteringClass, Predicate<B> selectionRule, IteratorSearchMode mode, Collection<? extends RigidBodyReadOnly> roots)
    {
       if (selectionRule == null)
          this.selectionRule = body -> filteringClass.isInstance(body);
       else
          this.selectionRule = body -> filteringClass.isInstance(body) && selectionRule.test((B) body);
+
+      if (mode == null)
+         this.mode = IteratorSearchMode.DEPTH_FIRST_SEARCH;
+      else
+         this.mode = mode;
 
       if (roots != null)
       {
@@ -133,28 +135,57 @@ public class RigidBodyIterator<B extends RigidBodyReadOnly> implements Iterator<
 
       if (childrenJoints != null)
       {
-         for (JointReadOnly childJoint : childrenJoints)
+         switch (mode)
          {
-            RigidBodyReadOnly childBody = childJoint.getSuccessor();
-
-            boolean registerChildBody = true;
-
-            if (childJoint.isLoopClosure())
-            { // Determine if the primary branch of the loop is included in the iteration.
-               for (int rootIndex = 0; rootIndex < roots.size(); rootIndex++)
+            case DEPTH_FIRST_SEARCH:
+            {
+               for (int i = childrenJoints.size() - 1; i >= 0; i--)
                {
-                  if (MultiBodySystemTools.isAncestor(childBody, roots.get(rootIndex)))
-                  { // The primary branch is included in the iteration, no need to recurse further down.
-                     registerChildBody = false;
-                  }
+                  addJointToStack(childrenJoints.get(i), false);
                }
+               break;
             }
-
-            if (registerChildBody)
-               stack.add(childBody);
+            case BREADTH_FIRST_SEARCH:
+            {
+               for (int i = 0; i < childrenJoints.size(); i++)
+               {
+                  addJointToStack(childrenJoints.get(i), true);
+               }
+               break;
+            }
+            default:
+            {
+               throw new IllegalArgumentException("Unexpected value: " + mode);
+            }
          }
       }
 
       return currentBody;
+   }
+
+   private void addJointToStack(JointReadOnly joint, boolean addLast)
+   {
+      RigidBodyReadOnly body = joint.getSuccessor();
+
+      boolean registerBody = true;
+
+      if (joint.isLoopClosure())
+      { // Determine if the primary branch of the loop is included in the iteration.
+         for (int rootIndex = 0; rootIndex < roots.size(); rootIndex++)
+         {
+            if (MultiBodySystemTools.isAncestor(body, roots.get(rootIndex)))
+            { // The primary branch is included in the iteration, no need to recurse further down.
+               registerBody = false;
+            }
+         }
+      }
+
+      if (registerBody)
+      {
+         if (addLast)
+            stack.addLast(body);
+         else
+            stack.addFirst(body);
+      }
    }
 }

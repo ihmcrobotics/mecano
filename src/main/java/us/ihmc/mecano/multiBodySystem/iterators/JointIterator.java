@@ -3,6 +3,7 @@ package us.ihmc.mecano.multiBodySystem.iterators;
 import java.util.ArrayDeque;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.Deque;
 import java.util.Iterator;
 import java.util.List;
@@ -29,6 +30,7 @@ public class JointIterator<J extends JointReadOnly> implements Iterator<J>
    private final Deque<JointReadOnly> stack = new ArrayDeque<>();
    private final Predicate<JointReadOnly> selectionRule;
    private final List<JointReadOnly> roots = new ArrayList<>();
+   private final IteratorSearchMode mode;
 
    /**
     * Creates a new iterator for multiple subtrees.
@@ -39,20 +41,13 @@ public class JointIterator<J extends JointReadOnly> implements Iterator<J>
     * @param selectionRule  rule to filter the joints to iterate through. Joints for which
     *                       {@code selectionRule.test(joint)} returns {@code false} are ignored and
     *                       will not be part of the iteration. Can be {@code null}.
+    * @param mode           how the search should be conducted, either depth-first search, or
+    *                       breadth-first search. Can be {@code null}.
     * @param root           joint from which the subtree starts. Not modified.
     */
-   public JointIterator(Class<J> filteringClass, Predicate<J> selectionRule, JointReadOnly root)
+   public JointIterator(Class<J> filteringClass, Predicate<J> selectionRule, IteratorSearchMode mode, JointReadOnly root)
    {
-      if (selectionRule == null)
-         this.selectionRule = joint -> filteringClass.isInstance(joint);
-      else
-         this.selectionRule = joint -> filteringClass.isInstance(joint) && selectionRule.test((J) joint);
-
-      if (root != null)
-      {
-         stack.add(root);
-         roots.add(root);
-      }
+      this(filteringClass, selectionRule, mode, Collections.singleton(root));
    }
 
    /**
@@ -64,14 +59,21 @@ public class JointIterator<J extends JointReadOnly> implements Iterator<J>
     * @param selectionRule  rule to filter the joints to iterate through. Joints for which
     *                       {@code selectionRule.test(joint)} returns {@code false} are ignored and
     *                       will not be part of the iteration. Can be {@code null}.
+    * @param mode           how the search should be conducted, either depth-first search, or
+    *                       breadth-first search. Can be {@code null}.
     * @param roots          joints from which each subtree starts. Not modified.
     */
-   public JointIterator(Class<J> filteringClass, Predicate<J> selectionRule, Collection<? extends JointReadOnly> roots)
+   public JointIterator(Class<J> filteringClass, Predicate<J> selectionRule, IteratorSearchMode mode, Collection<? extends JointReadOnly> roots)
    {
       if (selectionRule == null)
          this.selectionRule = joint -> filteringClass.isInstance(joint);
       else
          this.selectionRule = joint -> filteringClass.isInstance(joint) && selectionRule.test((J) joint);
+
+      if (mode == null)
+         this.mode = IteratorSearchMode.DEPTH_FIRST_SEARCH;
+      else
+         this.mode = mode;
 
       if (roots != null)
       {
@@ -147,7 +149,28 @@ public class JointIterator<J extends JointReadOnly> implements Iterator<J>
          List<? extends JointReadOnly> childrenJoints = successor.getChildrenJoints();
 
          if (childrenJoints != null)
-            stack.addAll(childrenJoints);
+         {
+            switch (mode)
+            {
+               case DEPTH_FIRST_SEARCH:
+               {
+                  for (int i = childrenJoints.size() - 1; i >= 0; i--)
+                  {
+                     stack.offerFirst(childrenJoints.get(i));
+                  }
+                  break;
+               }
+               case BREADTH_FIRST_SEARCH:
+               {
+                  stack.addAll(childrenJoints);
+                  break;
+               }
+               default:
+               {
+                  throw new IllegalArgumentException("Unexpected value: " + mode);
+               }
+            }
+         }
       }
 
       return currentJoint;
