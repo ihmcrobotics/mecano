@@ -1115,12 +1115,16 @@ public class MultiBodySystemRandomTools
 
       for (int i = 0; i < numberOfJoints; i++)
       {
-         JointBasics parentJoint = predecessor.getParentJoint();
          String suffix;
-         if (parentJoint != null)
-            suffix = parentJoint.getName().substring(jointName.length()) + "_" + predecessor.getChildrenJoints().size();
+         if (predecessor != rootBody)
+         {
+            String parentJointName = predecessor.getParentJoint().getName();
+            suffix = parentJointName.substring(jointName.length()) + "_" + predecessor.getChildrenJoints().size();
+         }
          else
+         {
             suffix = Integer.toString(predecessor.getChildrenJoints().size());
+         }
 
          JointBasics joint = nextJoint(random, jointName + suffix, predecessor);
          nextRigidBody(random, bodyName + suffix, joint);
