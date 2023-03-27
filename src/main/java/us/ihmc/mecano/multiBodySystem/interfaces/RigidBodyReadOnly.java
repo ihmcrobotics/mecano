@@ -154,7 +154,7 @@ public interface RigidBodyReadOnly
     */
    default Iterable<? extends RigidBodyReadOnly> subtreeIterable()
    {
-      return new RigidBodyIterable<>(RigidBodyReadOnly.class, null, this);
+      return new RigidBodyIterable<>(RigidBodyReadOnly.class, null, null, this);
    }
 
    /**
@@ -169,7 +169,7 @@ public interface RigidBodyReadOnly
     */
    default Iterable<? extends JointReadOnly> childrenSubtreeIterable()
    {
-      return new JointIterable<>(JointReadOnly.class, null, getChildrenJoints());
+      return new JointIterable<>(JointReadOnly.class, null, null, getChildrenJoints());
    }
 
    /**
@@ -192,6 +192,38 @@ public interface RigidBodyReadOnly
    }
 
    /**
+    * Gets a new stream to go through all the joints of the subtree that starts at this rigid-body.
+    * <p>
+    * This method generates garbage.
+    * </p>
+    * 
+    * @return the new subtree stream.
+    * @see SubtreeStreams
+    */
+   default Stream<? extends JointReadOnly> subtreeJointStream()
+   {
+      return subtreeJointStream(JointReadOnly.class);
+   }
+
+   /**
+    * Gets a new stream to go through all the joints of the subtree that starts at this rigid-body.
+    * <p>
+    * This method generates garbage.
+    * </p>
+    * 
+    * @param <J>            the desired joint type.
+    * @param filteringClass the class of the type of joint to iterate through. If a joint is not an
+    *                       instance of the {@code filteringClass}, then it will not be part of the
+    *                       stream.
+    * @return the new subtree stream.
+    * @see SubtreeStreams
+    */
+   default <J extends JointReadOnly> Stream<J> subtreeJointStream(Class<J> filteringClass)
+   {
+      return SubtreeStreams.fromChildren(filteringClass, this);
+   }
+
+   /**
     * Gets a list that contains all the rigid-bodies, including {@code this}, of the subtree that
     * starts at this rigid-body.
     * <p>
@@ -207,6 +239,32 @@ public interface RigidBodyReadOnly
    default List<? extends RigidBodyReadOnly> subtreeList()
    {
       return subtreeStream().collect(Collectors.toList());
+   }
+
+   /**
+    * Gets a list that contains all the joints of the subtree that starts at this rigid-body.
+    * <p>
+    * This method generates garbage.
+    * </p>
+    *
+    * @return the new subtree list.
+    */
+   default List<JointReadOnly> subtreeJointList()
+   {
+      return subtreeJointList(JointReadOnly.class);
+   }
+
+   /**
+    * Gets a list that contains all the joints of the subtree that starts at this rigid-body.
+    * <p>
+    * This method generates garbage.
+    * </p>
+    *
+    * @return the new subtree list.
+    */
+   default <J extends JointReadOnly> List<J> subtreeJointList(Class<J> filteringClass)
+   {
+      return subtreeJointStream(filteringClass).toList();
    }
 
    /**

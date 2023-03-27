@@ -2,16 +2,19 @@ package us.ihmc.mecano.multiBodySystem.iterators;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+import static us.ihmc.mecano.multiBodySystem.iterators.JointIterableTest.padRightToLength;
 
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Random;
+import java.util.stream.Collectors;
 
 import org.junit.jupiter.api.Test;
 
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
+import us.ihmc.euclid.tools.EuclidCoreRandomTools;
 import us.ihmc.mecano.frames.MovingReferenceFrame;
 import us.ihmc.mecano.multiBodySystem.RigidBody;
 import us.ihmc.mecano.multiBodySystem.interfaces.JointBasics;
@@ -35,8 +38,9 @@ public class RigidBodyIterableTest
       {
          int numberOfJoints = random.nextInt(50) + 1;
          List<? extends JointReadOnly> joints = MultiBodySystemRandomTools.nextJointChain(random, numberOfJoints);
+         IteratorSearchMode mode = EuclidCoreRandomTools.nextElementIn(random, IteratorSearchMode.values());
          RigidBodyReadOnly root = joints.get(0).getPredecessor();
-         RigidBodyIterable<RigidBodyReadOnly> bodyIterable = new RigidBodyIterable<>(RigidBodyReadOnly.class, null, root);
+         RigidBodyIterable<RigidBodyReadOnly> bodyIterable = new RigidBodyIterable<>(RigidBodyReadOnly.class, null, mode, root);
 
          for (int j = 0; j < 2; j++) // Doing 2 calls to RigidBodyIterable.iterator() to make sure the second time the iterator is brand new.
          {
@@ -57,6 +61,7 @@ public class RigidBodyIterableTest
       { // Testing the filtering class with CustomRigidBodyType
          int numberOfJoints = random.nextInt(50) + 1;
          List<JointBasics> joints = MultiBodySystemRandomTools.nextJointChain(random, numberOfJoints);
+         IteratorSearchMode mode = EuclidCoreRandomTools.nextElementIn(random, IteratorSearchMode.values());
          RigidBodyBasics rootBody = joints.get(0).getPredecessor();
          if (random.nextBoolean())
             rootBody = new CustomRigidBodyType(rootBody);
@@ -72,7 +77,7 @@ public class RigidBodyIterableTest
             bodies.add(successor);
          }
 
-         RigidBodyIterable<CustomRigidBodyType> bodyIterable = new RigidBodyIterable<>(CustomRigidBodyType.class, null, rootBody);
+         RigidBodyIterable<CustomRigidBodyType> bodyIterable = new RigidBodyIterable<>(CustomRigidBodyType.class, null, mode, rootBody);
 
          for (int j = 0; j < 2; j++) // Doing 2 calls to RigidBodyIterable.iterator() to make sure the second time the iterator is brand new.
          {
@@ -99,6 +104,7 @@ public class RigidBodyIterableTest
       { // We only assert that the iterator returned each joint only once.
          int numberOfJoints = random.nextInt(50) + 2;
          List<JointBasics> joints = MultiBodySystemRandomTools.nextJointChain(random, numberOfJoints);
+         IteratorSearchMode mode = EuclidCoreRandomTools.nextElementIn(random, IteratorSearchMode.values());
          RigidBodyBasics rootBody = MultiBodySystemTools.getRootBody(joints.get(0).getPredecessor());
          int loopStartIndex = random.nextInt(numberOfJoints);
          int loopEndIndex = random.nextInt(numberOfJoints);
@@ -118,7 +124,7 @@ public class RigidBodyIterableTest
          RigidBodyBasics loopEnd = joints.get(loopEndIndex).getSuccessor();
          MultiBodySystemRandomTools.nextKinematicLoopRevoluteJoints(random, "loop", loopStart, loopEnd, kinematicLoopSize);
 
-         RigidBodyIterable<RigidBodyBasics> bodyIterable = new RigidBodyIterable<>(RigidBodyBasics.class, null, rootBody);
+         RigidBodyIterable<RigidBodyBasics> bodyIterable = new RigidBodyIterable<>(RigidBodyBasics.class, null, mode, rootBody);
          List<RigidBodyBasics> iterableBodies = new ArrayList<>();
          bodyIterable.iterator().forEachRemaining(iterableBodies::add);
 
@@ -136,6 +142,7 @@ public class RigidBodyIterableTest
       {
          RigidBodyBasics rootBody = new RigidBody("rootBody", ReferenceFrame.getWorldFrame());
          JointBasics rootJoint = MultiBodySystemRandomTools.nextJoint(random, "root", rootBody);
+         IteratorSearchMode mode = EuclidCoreRandomTools.nextElementIn(random, IteratorSearchMode.values());
          RigidBody rootJointSuccessor = MultiBodySystemRandomTools.nextRigidBody(random, "rootJointSuccessor", rootJoint);
          int numberOfChildren = 10;
 
@@ -145,7 +152,7 @@ public class RigidBodyIterableTest
             MultiBodySystemRandomTools.nextRigidBody(random, "bodyDepth1", childJoint);
          }
 
-         RigidBodyIterable<RigidBodyReadOnly> bodyIterable = new RigidBodyIterable<>(RigidBodyReadOnly.class, null, rootBody);
+         RigidBodyIterable<RigidBodyReadOnly> bodyIterable = new RigidBodyIterable<>(RigidBodyReadOnly.class, null, mode, rootBody);
          Iterator<RigidBodyReadOnly> iterator = bodyIterable.iterator();
          assertTrue(iterator.hasNext());
          assertTrue(rootBody == iterator.next());
@@ -185,7 +192,10 @@ public class RigidBodyIterableTest
             }
          }
 
-         RigidBodyIterable<RigidBodyReadOnly> bodyIterable = new RigidBodyIterable<>(RigidBodyReadOnly.class, null, rootBody);
+         RigidBodyIterable<RigidBodyReadOnly> bodyIterable = new RigidBodyIterable<>(RigidBodyReadOnly.class,
+                                                                                     null,
+                                                                                     IteratorSearchMode.BREADTH_FIRST_SEARCH,
+                                                                                     rootBody);
          Iterator<RigidBodyReadOnly> iterator = bodyIterable.iterator();
          assertTrue(iterator.hasNext());
          assertTrue(rootBody == iterator.next());
@@ -231,7 +241,10 @@ public class RigidBodyIterableTest
             }
          }
 
-         RigidBodyIterable<CustomRigidBodyType> bodyIterable = new RigidBodyIterable<>(CustomRigidBodyType.class, null, rootBody);
+         RigidBodyIterable<CustomRigidBodyType> bodyIterable = new RigidBodyIterable<>(CustomRigidBodyType.class,
+                                                                                       null,
+                                                                                       IteratorSearchMode.BREADTH_FIRST_SEARCH,
+                                                                                       rootBody);
          Iterator<CustomRigidBodyType> iterator = bodyIterable.iterator();
 
          for (int childIndex = 0; childIndex < numberOfChildren; childIndex++)
@@ -247,6 +260,80 @@ public class RigidBodyIterableTest
             }
          }
       }
+   }
+
+   @Test
+   public void testRandomTree()
+   {
+      Random random = new Random(2342);
+
+      for (int i = 0; i < ITERATIONS; i++)
+      {
+         IteratorSearchMode mode = EuclidCoreRandomTools.nextElementIn(random, IteratorSearchMode.values());
+         List<JointBasics> joints = MultiBodySystemRandomTools.nextJointTree(random, 50);
+         RigidBodyBasics root = joints.get(0).getPredecessor();
+
+         List<RigidBodyReadOnly> expectedList = switch (mode)
+         {
+            case DEPTH_FIRST_SEARCH -> collectDFSRigidBodies(root);
+            case BREADTH_FIRST_SEARCH -> collectBFSRigidBodies(root);
+            default -> throw new IllegalArgumentException("Unexpected value: " + mode);
+         };
+
+         RigidBodyIterable<RigidBodyReadOnly> jointIterable = new RigidBodyIterable<>(RigidBodyReadOnly.class, null, mode, root);
+         List<RigidBodyReadOnly> actualList = jointIterable.toStream().toList();
+
+         try
+         {
+            assertEquals(expectedList, actualList);
+            if (mode == IteratorSearchMode.BREADTH_FIRST_SEARCH)
+            {
+               for (int j = 1; j < actualList.size(); j++)
+               {
+                  assertTrue(MultiBodySystemTools.computeDistanceToRoot(actualList.get(j - 1))
+                             <= MultiBodySystemTools.computeDistanceToRoot(actualList.get(j)));
+               }
+            }
+         }
+         catch (Throwable e)
+         {
+            System.out.println("Search mode: " + mode);
+            int maxNameLength = expectedList.stream().mapToInt(j -> j.getName().length()).max().getAsInt();
+            List<String> expectedNames = expectedList.stream().map(j -> padRightToLength(j.getName(), maxNameLength)).collect(Collectors.toList());
+            List<String> actualNames = actualList.stream().map(j -> padRightToLength(j.getName(), maxNameLength)).collect(Collectors.toList());
+
+            for (int j = 0; j < Math.max(expectedNames.size(), actualList.size()); j++)
+            {
+               if (j < expectedNames.size())
+                  System.out.printf("%s(%d)", expectedNames.get(j), MultiBodySystemTools.computeDistanceToRoot(expectedList.get(j)));
+               else
+                  System.out.print("\t");
+
+               System.out.print("\t");
+
+               if (j < actualList.size())
+                  System.out.printf("%s(%d)", actualNames.get(j), MultiBodySystemTools.computeDistanceToRoot(actualList.get(j)));
+               else
+                  System.out.print("\t");
+               System.out.println();
+            }
+            throw e;
+         }
+      }
+   }
+
+   static List<RigidBodyReadOnly> collectDFSRigidBodies(RigidBodyReadOnly root)
+   {
+      List<RigidBodyReadOnly> result = JointIterableTest.collectDFSJoints(root).stream().map(j -> j.getSuccessor()).collect(Collectors.toList());
+      result.add(0, root);
+      return result;
+   }
+
+   static List<RigidBodyReadOnly> collectBFSRigidBodies(RigidBodyReadOnly root)
+   {
+      List<RigidBodyReadOnly> result = JointIterableTest.collectBFSJoints(root).stream().map(j -> j.getSuccessor()).collect(Collectors.toList());
+      result.add(0, root);
+      return result;
    }
 
    private static class CustomRigidBodyType implements RigidBodyBasics

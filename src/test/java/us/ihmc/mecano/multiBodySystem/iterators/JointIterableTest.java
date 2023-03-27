@@ -3,21 +3,27 @@ package us.ihmc.mecano.multiBodySystem.iterators;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
+import java.util.ArrayDeque;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Queue;
 import java.util.Random;
+import java.util.stream.Collectors;
 
 import org.junit.jupiter.api.Test;
 
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
+import us.ihmc.euclid.tools.EuclidCoreRandomTools;
 import us.ihmc.mecano.multiBodySystem.RigidBody;
 import us.ihmc.mecano.multiBodySystem.interfaces.JointBasics;
 import us.ihmc.mecano.multiBodySystem.interfaces.JointReadOnly;
 import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointReadOnly;
 import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
+import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyReadOnly;
 import us.ihmc.mecano.tools.MultiBodySystemRandomTools;
+import us.ihmc.mecano.tools.MultiBodySystemTools;
 
 public class JointIterableTest
 {
@@ -32,7 +38,8 @@ public class JointIterableTest
       {
          int numberOfJoints = random.nextInt(50) + 1;
          List<? extends JointReadOnly> joints = MultiBodySystemRandomTools.nextJointChain(random, numberOfJoints);
-         JointIterable<JointReadOnly> jointIterable = new JointIterable<>(JointReadOnly.class, null, joints.get(0));
+         IteratorSearchMode mode = EuclidCoreRandomTools.nextElementIn(random, IteratorSearchMode.values());
+         JointIterable<JointReadOnly> jointIterable = new JointIterable<>(JointReadOnly.class, null, mode, joints.get(0));
          for (int j = 0; j < 2; j++) // Doing 2 calls to JointIterable.iterator() to make sure the second time the iterator is brand new.
          {
             Iterator<JointReadOnly> iterator = jointIterable.iterator();
@@ -49,7 +56,8 @@ public class JointIterableTest
       { // Testing the filtering class with OneDoFJointReadOnly
          int numberOfJoints = random.nextInt(50) + 1;
          List<JointBasics> joints = MultiBodySystemRandomTools.nextJointChain(random, numberOfJoints);
-         JointIterable<OneDoFJointReadOnly> jointIterable = new JointIterable<>(OneDoFJointReadOnly.class, null, joints.get(0));
+         IteratorSearchMode mode = EuclidCoreRandomTools.nextElementIn(random, IteratorSearchMode.values());
+         JointIterable<OneDoFJointReadOnly> jointIterable = new JointIterable<>(OneDoFJointReadOnly.class, null, mode, joints.get(0));
          for (int j = 0; j < 2; j++) // Doing 2 calls to JointIterable.iterator() to make sure the second time the iterator is brand new.
          {
             Iterator<OneDoFJointReadOnly> iterator = jointIterable.iterator();
@@ -75,6 +83,7 @@ public class JointIterableTest
       { // We only assert that the iterator returned each joint only once.
          int numberOfJoints = random.nextInt(50) + 2;
          List<JointBasics> joints = MultiBodySystemRandomTools.nextJointChain(random, numberOfJoints);
+         IteratorSearchMode mode = EuclidCoreRandomTools.nextElementIn(random, IteratorSearchMode.values());
          int loopStartIndex = random.nextInt(numberOfJoints);
          int loopEndIndex = random.nextInt(numberOfJoints);
 
@@ -93,7 +102,7 @@ public class JointIterableTest
          RigidBodyBasics loopEnd = joints.get(loopEndIndex).getSuccessor();
          MultiBodySystemRandomTools.nextKinematicLoopRevoluteJoints(random, "loop", loopStart, loopEnd, kinematicLoopSize);
 
-         JointIterable<JointBasics> jointIterable = new JointIterable<>(JointBasics.class, null, joints.get(0));
+         JointIterable<JointBasics> jointIterable = new JointIterable<>(JointBasics.class, null, mode, joints.get(0));
          List<JointBasics> iterableJoints = new ArrayList<>();
          jointIterable.iterator().forEachRemaining(iterableJoints::add);
 
@@ -109,6 +118,7 @@ public class JointIterableTest
 
       for (int i = 0; i < ITERATIONS; i++)
       {
+         IteratorSearchMode mode = EuclidCoreRandomTools.nextElementIn(random, IteratorSearchMode.values());
          RigidBodyBasics rootBody = new RigidBody("rootBody", ReferenceFrame.getWorldFrame());
          JointBasics rootJoint = MultiBodySystemRandomTools.nextJoint(random, "root", rootBody);
          RigidBody rootJointSuccessor = MultiBodySystemRandomTools.nextRigidBody(random, "rootJointSuccessor", rootJoint);
@@ -118,7 +128,7 @@ public class JointIterableTest
             JointBasics childJoint = MultiBodySystemRandomTools.nextJoint(random, "jointDepth1", rootJointSuccessor);
             MultiBodySystemRandomTools.nextRigidBody(random, "bodyDepth1", childJoint);
          }
-         JointIterable<JointReadOnly> jointIterable = new JointIterable<>(JointReadOnly.class, null, rootJoint);
+         JointIterable<JointReadOnly> jointIterable = new JointIterable<>(JointReadOnly.class, null, mode, rootJoint);
          Iterator<JointReadOnly> iterator = jointIterable.iterator();
          assertTrue(iterator.hasNext());
          assertTrue(rootJoint == iterator.next());
@@ -155,7 +165,7 @@ public class JointIterableTest
             }
          }
 
-         JointIterable<JointReadOnly> jointIterable = new JointIterable<>(JointReadOnly.class, null, rootJoint);
+         JointIterable<JointReadOnly> jointIterable = new JointIterable<>(JointReadOnly.class, null, IteratorSearchMode.BREADTH_FIRST_SEARCH, rootJoint);
          Iterator<JointReadOnly> iterator = jointIterable.iterator();
          assertTrue(iterator.hasNext());
          assertTrue(rootJoint == iterator.next());
@@ -197,7 +207,10 @@ public class JointIterableTest
             }
          }
 
-         JointIterable<OneDoFJointReadOnly> jointIterable = new JointIterable<>(OneDoFJointReadOnly.class, null, rootJoint);
+         JointIterable<OneDoFJointReadOnly> jointIterable = new JointIterable<>(OneDoFJointReadOnly.class,
+                                                                                null,
+                                                                                IteratorSearchMode.BREADTH_FIRST_SEARCH,
+                                                                                rootJoint);
          Iterator<OneDoFJointReadOnly> iterator = jointIterable.iterator();
 
          for (int childIndex = 0; childIndex < numberOfChildren; childIndex++)
@@ -211,9 +224,107 @@ public class JointIterableTest
                JointReadOnly actual = iterator.next();
                assertTrue(grandChildJoint == actual,
                           "child: " + childIndex + ", grand-child: " + grandChildIndex + ", expected: " + grandChildJoint.getName() + ", actual: "
-                                + actual.getName());
+                                                     + actual.getName());
             }
          }
       }
+   }
+
+   @Test
+   public void testRandomTree()
+   {
+      Random random = new Random(2342);
+
+      for (int i = 0; i < ITERATIONS; i++)
+      {
+         IteratorSearchMode mode = EuclidCoreRandomTools.nextElementIn(random, IteratorSearchMode.values());
+         List<JointBasics> joints = MultiBodySystemRandomTools.nextJointTree(random, 50);
+         RigidBodyBasics root = joints.get(0).getPredecessor();
+
+         List<JointReadOnly> expectedList = switch (mode)
+         {
+            case DEPTH_FIRST_SEARCH -> collectDFSJoints(root);
+            case BREADTH_FIRST_SEARCH -> collectBFSJoints(root);
+            default -> throw new IllegalArgumentException("Unexpected value: " + mode);
+         };
+
+         JointIterable<JointReadOnly> jointIterable = new JointIterable<>(JointReadOnly.class, null, mode, root);
+         List<JointReadOnly> actualList = jointIterable.toStream().toList();
+
+         try
+         {
+            assertEquals(expectedList, actualList);
+            if (mode == IteratorSearchMode.BREADTH_FIRST_SEARCH)
+            {
+               for (int j = 1; j < actualList.size(); j++)
+               {
+                  assertTrue(MultiBodySystemTools.computeDistanceToRoot(actualList.get(j - 1).getPredecessor())
+                             <= MultiBodySystemTools.computeDistanceToRoot(actualList.get(j).getPredecessor()));
+               }
+            }
+         }
+         catch (Throwable e)
+         {
+            System.out.println("Search mode: " + mode);
+            int maxNameLength = expectedList.stream().mapToInt(j -> j.getName().length()).max().getAsInt();
+            List<String> expectedNames = expectedList.stream().map(j -> padRightToLength(j.getName(), maxNameLength)).collect(Collectors.toList());
+            List<String> actualNames = actualList.stream().map(j -> padRightToLength(j.getName(), maxNameLength)).collect(Collectors.toList());
+
+            for (int j = 0; j < Math.max(expectedNames.size(), actualList.size()); j++)
+            {
+               if (j < expectedNames.size())
+                  System.out.printf("%s(%d)", expectedNames.get(j), MultiBodySystemTools.computeDistanceToRoot(expectedList.get(j).getPredecessor()));
+               else
+                  System.out.print("\t");
+
+               System.out.print("\t");
+
+               if (j < actualList.size())
+                  System.out.printf("%s(%d)", actualNames.get(j), MultiBodySystemTools.computeDistanceToRoot(actualList.get(j).getPredecessor()));
+               else
+                  System.out.print("\t");
+               System.out.println();
+            }
+            throw e;
+         }
+      }
+   }
+
+   static String padRightToLength(String input, int desiredLength)
+   {
+      return String.format("%" + (-desiredLength) + "s", input).replace(' ', '-');
+   }
+
+   static List<JointReadOnly> collectDFSJoints(RigidBodyReadOnly root)
+   {
+      return collectDFSJoints(root, new ArrayList<>());
+   }
+
+   static List<JointReadOnly> collectDFSJoints(RigidBodyReadOnly root, List<JointReadOnly> resultToPack)
+   {
+      for (JointReadOnly joint : root.getChildrenJoints())
+      {
+         resultToPack.add(joint);
+         collectDFSJoints(joint.getSuccessor(), resultToPack);
+      }
+      return resultToPack;
+   }
+
+   static List<JointReadOnly> collectBFSJoints(RigidBodyReadOnly root)
+   {
+      List<JointReadOnly> result = new ArrayList<>();
+      Queue<RigidBodyReadOnly> currentBodies = new ArrayDeque<>();
+      currentBodies.add(root);
+
+      while (!currentBodies.isEmpty())
+      {
+         RigidBodyReadOnly body = currentBodies.poll();
+         result.addAll(body.getChildrenJoints());
+         for (JointReadOnly child : body.getChildrenJoints())
+         {
+            currentBodies.add(child.getSuccessor());
+         }
+      }
+      return result;
    }
 }

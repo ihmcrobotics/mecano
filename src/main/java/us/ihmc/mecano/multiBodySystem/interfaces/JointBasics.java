@@ -721,7 +721,7 @@ public interface JointBasics extends JointReadOnly
    @Override
    default Iterable<? extends JointBasics> subtreeIterable()
    {
-      return new JointIterable<>(JointBasics.class, null, this);
+      return new JointIterable<>(JointBasics.class, null, null, this);
    }
 
    @Override
