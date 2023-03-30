@@ -6,8 +6,10 @@ import java.util.Random;
 
 import org.ejml.data.DMatrixRMaj;
 import org.ejml.dense.row.MatrixFeatures_DDRM;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
+import us.ihmc.euclid.referenceFrame.FrameNameRestrictionLevel;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.referenceFrame.tools.EuclidFrameRandomTools;
 import us.ihmc.euclid.tools.EuclidCoreRandomTools;
@@ -20,6 +22,12 @@ public class ArticulatedBodyInertiaTest
 {
    private static final int ITERATIONS = 1000;
    private static final double EPSILON = 1.0e-12;
+
+   @BeforeEach
+   public void disableNameRestriction()
+   {
+      ReferenceFrame.getWorldFrame().setNameRestrictionLevel(FrameNameRestrictionLevel.NONE);
+   }
 
    @Test
    public void testApplyTransform()

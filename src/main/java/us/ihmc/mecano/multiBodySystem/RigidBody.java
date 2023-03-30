@@ -97,12 +97,31 @@ public class RigidBody implements RigidBodyBasics
     */
    public RigidBody(String bodyName, RigidBodyTransformReadOnly transformToParent, ReferenceFrame parentStationaryFrame)
    {
+      this(bodyName, bodyName, transformToParent, parentStationaryFrame);
+   }
+
+   /**
+    * Creates a new root rigid-body to which the first joint of a robot kinematic chain can be added.
+    * <p>
+    * Note that there is only one root body per robot.
+    * </p>
+    *
+    * @param bodyName              the name for this rigid-body.
+    * @param transformToParent     provides the pose of this rigid-body's body-fixed-frame with respect
+    *                              to the {@code parentStationaryFrame}. Not modified.
+    * @param parentStationaryFrame the parent stationary, i.e. non-moving with respect to world frame,
+    *                              frame to which this rigid-body will create and attach its body fixed
+    *                              frame. Most of the time
+    *                              {@code parentStationaryFrame == ReferenceFrame.getWorldFrame()}.
+    */
+   public RigidBody(String bodyName, String bodyFixedFrameName, RigidBodyTransformReadOnly transformToParent, ReferenceFrame parentStationaryFrame)
+   {
       if (bodyName == null)
          throw new IllegalArgumentException("Name can not be null");
 
       name = bodyName;
       inertia = null;
-      bodyFixedFrame = MovingReferenceFrame.constructFrameFixedInParent(bodyName + "Frame", parentStationaryFrame, transformToParent);
+      bodyFixedFrame = MovingReferenceFrame.constructFrameFixedInParent(bodyFixedFrameName, parentStationaryFrame, transformToParent);
       parentJoint = null;
       nameId = bodyName;
    }

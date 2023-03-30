@@ -5,8 +5,10 @@ import java.util.Random;
 
 import org.ejml.data.DMatrixRMaj;
 import org.ejml.dense.row.CommonOps_DDRM;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
+import us.ihmc.euclid.referenceFrame.FrameNameRestrictionLevel;
 import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.referenceFrame.interfaces.FrameVector3DReadOnly;
@@ -37,6 +39,12 @@ public class CentroidalMomentumRateCalculatorTest
    private static final int ITERATIONS = 500;
    private static final double EPSILON = 2.0e-10;
    private static final double FD_EPSILON = 5.0e-4;
+
+   @BeforeEach
+   public void disableNameRestriction()
+   {
+      ReferenceFrame.getWorldFrame().setNameRestrictionLevel(FrameNameRestrictionLevel.NONE);
+   }
 
    @Test
    public void testMomentumRateWithOneDoFJointChain()
