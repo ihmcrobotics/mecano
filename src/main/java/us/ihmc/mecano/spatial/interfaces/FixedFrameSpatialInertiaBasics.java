@@ -104,6 +104,16 @@ public interface FixedFrameSpatialInertiaBasics extends SpatialInertiaReadOnly, 
       getMomentOfInertia().set(Ixx, 0.0, 0.0, 0.0, Iyy, 0.0, 0.0, 0.0, Izz);
    }
 
+   default void setMomentOfInertia(double Ixx, double Iyy, double Izz, double Ixy, double Ixz, double Iyz)
+   {
+      getMomentOfInertia().set(Ixx, Ixy, Ixz, Ixy, Iyy, Iyz, Ixz, Iyz, Izz);
+   }
+
+   default void setCenterOfMassOffset(double x, double y, double z)
+   {
+      getCenterOfMassOffset().set(x, y, z);
+   }
+
    /**
     * Sets this spatial inertia to {@code other}.
     *
