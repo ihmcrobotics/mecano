@@ -12,45 +12,53 @@ import us.ihmc.mecano.tools.MultiBodySystemRandomTools;
 import java.util.List;
 import java.util.Random;
 
-import static org.junit.jupiter.api.Assertions.assertArrayEquals;
+import static org.junit.jupiter.api.Assertions.*;
 
 public class JointTorqueRegressorCalculatorTest
 {
     private static final int WARMUP_ITERATIONS = 5000;
-    private static final int ITERATIONS = 50000;
+    private static final int STATE_ITERATIONS = 100;
+    private static final int SYSTEM_ITERATIONS = 5;
+
     private static final double EPSILON = 1.0e-12;
 
     @Test
-    public void test()  // TODO name me
-    {
+    public void testRegressorAndParametersMatchInverseDynamicsOneDoFJointChain() {
         Random random = new Random(25);
 
-        List<OneDoFJoint> joints = MultiBodySystemRandomTools.nextOneDoFJointChain(random, 2);
-        MultiBodySystemBasics system = MultiBodySystemBasics.toMultiBodySystemBasics(joints);
-
-        for (JointStateType stateToRandomize : JointStateType.values())
-            MultiBodySystemRandomTools.nextState(random, stateToRandomize, system.getAllJoints());
-
-        InverseDynamicsCalculator inverseDynamicsCalculator = new InverseDynamicsCalculator(system);
-        inverseDynamicsCalculator.compute();
-        DMatrixRMaj jointTau = inverseDynamicsCalculator.getJointTauMatrix();
-
-        DMatrixRMaj parameterVector = new DMatrixRMaj(10 * 2, 1);  // TODO hardcoded
-        for (int i = 0; i < 2; i++)  // TODO hardcoded
+        for (int i = 0; i < SYSTEM_ITERATIONS; i++)
         {
-            CommonOps_DDRM.insert(JointTorqueRegressorCalculator.toParameterVector((SpatialInertia) system.findRigidBody("Body" + String.valueOf(i)).getInertia()),
-                    parameterVector, i * 10, 0);
+            // Randomise the number of joints in the system
+            int numberOfJoints = random.nextInt(30) + 1;  // to avoid zero
+            List<OneDoFJoint> joints = MultiBodySystemRandomTools.nextOneDoFJointChain(random, numberOfJoints);
+            MultiBodySystemBasics system = MultiBodySystemBasics.toMultiBodySystemBasics(joints);
+
+            for (int j = 0; j < STATE_ITERATIONS; j++)
+            {
+                // Randomise the state of the system
+                for (JointStateType stateToRandomize : JointStateType.values())
+                    MultiBodySystemRandomTools.nextState(random, stateToRandomize, system.getAllJoints());
+
+                // Create an inverse dynamics calculator to compare torque results to
+                InverseDynamicsCalculator inverseDynamicsCalculator = new InverseDynamicsCalculator(system);
+                inverseDynamicsCalculator.compute();
+                DMatrixRMaj expectedjointTau = inverseDynamicsCalculator.getJointTauMatrix();
+
+                // We want the product of the regressor matrix and the parameter vector to equal the expected joint torques
+                JointTorqueRegressorCalculator regressorCalculator = new JointTorqueRegressorCalculator(system);
+                DMatrixRMaj parameterVector = regressorCalculator.getParameterVector();
+                regressorCalculator.compute();
+                DMatrixRMaj regressorMatrix = regressorCalculator.getJointTorqueRegressorMatrix();
+
+                // Compare results
+                DMatrixRMaj actualJointTau = new DMatrixRMaj(numberOfJoints, 1);
+                CommonOps_DDRM.mult(regressorMatrix, parameterVector, actualJointTau);
+                assertEquals(expectedjointTau.getData().length, actualJointTau.getData().length);
+                assertArrayEquals(expectedjointTau.getData(), actualJointTau.getData(), EPSILON);
+            }
         }
-
-        JointTorqueRegressorCalculator regressorCalculator = new JointTorqueRegressorCalculator(system);
-        DMatrixRMaj regressorMatrix = new DMatrixRMaj(2, 20); // TODO hardcoded
-        regressorCalculator.compute();
-        regressorMatrix.set(regressorCalculator.getJointTorqueRegressorMatrix());
-
-        DMatrixRMaj testResult = new DMatrixRMaj(2, 1);  // TODO hardcoded
-        CommonOps_DDRM.mult(regressorMatrix, parameterVector, testResult);
-        assertArrayEquals(jointTau.getData(), testResult.getData());
     }
+
 
     @Test
     public void testSpatialInertiaParameterBasis()
