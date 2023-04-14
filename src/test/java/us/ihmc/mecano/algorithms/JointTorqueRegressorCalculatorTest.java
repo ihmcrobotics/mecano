@@ -18,6 +18,7 @@ public class JointTorqueRegressorCalculatorTest
 {
     private static final int WARMUP_ITERATIONS = 5000;
     private static final int ITERATIONS = 50000;
+    private static final double EPSILON = 1.0e-12;
 
     @Test
     public void test()  // TODO name me
@@ -48,6 +49,130 @@ public class JointTorqueRegressorCalculatorTest
 
         DMatrixRMaj testResult = new DMatrixRMaj(2, 1);  // TODO hardcoded
         CommonOps_DDRM.mult(regressorMatrix, parameterVector, testResult);
-        assertArrayEquals(testResult.getData(), jointTau.getData());
+        assertArrayEquals(jointTau.getData(), testResult.getData());
+    }
+
+    @Test
+    public void testSpatialInertiaParameterBasis()
+    {
+        SpatialInertia spatialInertia = new SpatialInertia();
+        DMatrixRMaj expectedBasis = new DMatrixRMaj(6, 6);
+        DMatrixRMaj actualBasis = new DMatrixRMaj(6, 6);
+        double[][] expectedBasisToPack = new double[6][6];
+
+        for (JointTorqueRegressorCalculator.SpatialInertiaParameterBasisOptions basis : JointTorqueRegressorCalculator.SpatialInertiaParameterBasisOptions.values())
+            switch (basis)
+            {
+                case M:
+                    expectedBasisToPack = new double[][] {{0., 0., 0., 0., 0., 0.},
+                            {0., 0., 0., 0., 0., 0.},
+                            {0., 0., 0., 0., 0., 0.},
+                            {0., 0., 0., 1., 0., 0.},
+                            {0., 0., 0., 0., 1., 0.},
+                            {0., 0., 0., 0., 0., 1.}};
+                    expectedBasis.set(expectedBasisToPack);
+                    basis.getBasis(null, null).get(actualBasis);
+                    assertArrayEquals(expectedBasis.getData(), actualBasis.getData(), EPSILON);
+                    break;
+                case MCOM_X:
+                    expectedBasisToPack = new double[][] {{0., 0., 0., 0., 0., 0.},
+                            {0., 0., 0., 0., 0., -1.},
+                            {0., 0., 0., 0., 1., 0.},
+                            {0., 0., 0., 0., 0., 0.},
+                            {0., 0., 1., 0., 0., 0.},
+                            {0., -1., 0., 0., 0., 0.}};
+                    expectedBasis.set(expectedBasisToPack);
+                    basis.getBasis(null, null).get(actualBasis);
+                    assertArrayEquals(expectedBasis.getData(), actualBasis.getData(), EPSILON);
+                    break;
+                case MCOM_Y:
+                    expectedBasisToPack = new double[][] {{0., 0., 0., 0., 0., 1.},
+                            {0., 0., 0., 0., 0., 0.},
+                            {0., 0., 0., -1., 0., 0.},
+                            {0., 0., -1., 0., 0., 0.},
+                            {0., 0., 0., 0., 0., 0.},
+                            {1., 0., 0., 0., 0., 0.}};
+                    expectedBasis.set(expectedBasisToPack);
+                    basis.getBasis(null, null).get(actualBasis);
+                    assertArrayEquals(expectedBasis.getData(), actualBasis.getData(), EPSILON);
+                    break;
+                case MCOM_Z:
+                    expectedBasisToPack = new double[][] {{0., 0., 0., 0., -1., 0.},
+                            {0., 0., 0., 1., 0., 0.},
+                            {0., 0., 0., 0., 0., 0.},
+                            {0., 1., 0., 0., 0., 0.},
+                            {-1., 0., 0., 0., 0., 0.},
+                            {0., 0., 0., 0., 0., 0.}};
+                    expectedBasis.set(expectedBasisToPack);
+                    basis.getBasis(null, null).get(actualBasis);
+                    assertArrayEquals(expectedBasis.getData(), actualBasis.getData(), EPSILON);
+                    break;
+                case I_XX:
+                    expectedBasisToPack = new double[][] {{1., 0., 0., 0., 0., 0.},
+                            {0., 0., 0., 0., 0., 0.},
+                            {0., 0., 0., 0., 0., 0.},
+                            {0., 0., 0., 0., 0., 0.},
+                            {0., 0., 0., 0., 0., 0.},
+                            {0., 0., 0., 0., 0., 0.}};
+                    expectedBasis.set(expectedBasisToPack);
+                    basis.getBasis(null, null).get(actualBasis);
+                    assertArrayEquals(expectedBasis.getData(), actualBasis.getData(), EPSILON);
+                    break;
+                case I_YY:
+                    expectedBasisToPack = new double[][] {{0., 0., 0., 0., 0., 0.},
+                            {0., 1., 0., 0., 0., 0.},
+                            {0., 0., 0., 0., 0., 0.},
+                            {0., 0., 0., 0., 0., 0.},
+                            {0., 0., 0., 0., 0., 0.},
+                            {0., 0., 0., 0., 0., 0.}};
+                    expectedBasis.set(expectedBasisToPack);
+                    basis.getBasis(null, null).get(actualBasis);
+                    assertArrayEquals(expectedBasis.getData(), actualBasis.getData(), EPSILON);
+                    break;
+                case I_ZZ:
+                    expectedBasisToPack = new double[][] {{0., 0., 0., 0., 0., 0.},
+                            {0., 0., 0., 0., 0., 0.},
+                            {0., 0., 1., 0., 0., 0.},
+                            {0., 0., 0., 0., 0., 0.},
+                            {0., 0., 0., 0., 0., 0.},
+                            {0., 0., 0., 0., 0., 0.}};
+                    expectedBasis.set(expectedBasisToPack);
+                    basis.getBasis(null, null).get(actualBasis);
+                    assertArrayEquals(expectedBasis.getData(), actualBasis.getData(), EPSILON);
+                    break;
+                case I_XY:
+                    expectedBasisToPack = new double[][] {{0., 1., 0., 0., 0., 0.},
+                            {1., 0., 0., 0., 0., 0.},
+                            {0., 0., 0., 0., 0., 0.},
+                            {0., 0., 0., 0., 0., 0.},
+                            {0., 0., 0., 0., 0., 0.},
+                            {0., 0., 0., 0., 0., 0.}};
+                    expectedBasis.set(expectedBasisToPack);
+                    basis.getBasis(null, null).get(actualBasis);
+                    assertArrayEquals(expectedBasis.getData(), actualBasis.getData(), EPSILON);
+                    break;
+                case I_XZ:
+                    expectedBasisToPack = new double[][] {{0., 0., 1., 0., 0., 0.},
+                            {0., 0., 0., 0., 0., 0.},
+                            {1., 0., 0., 0., 0., 0.},
+                            {0., 0., 0., 0., 0., 0.},
+                            {0., 0., 0., 0., 0., 0.},
+                            {0., 0., 0., 0., 0., 0.}};
+                    expectedBasis.set(expectedBasisToPack);
+                    basis.getBasis(null, null).get(actualBasis);
+                    assertArrayEquals(expectedBasis.getData(), actualBasis.getData(), EPSILON);
+                    break;
+                case I_YZ:
+                    expectedBasisToPack = new double[][] {{0., 0., 0., 0., 0., 0.},
+                            {0., 0., 1., 0., 0., 0.},
+                            {0., 1., 0., 0., 0., 0.},
+                            {0., 0., 0., 0., 0., 0.},
+                            {0., 0., 0., 0., 0., 0.},
+                            {0., 0., 0., 0., 0., 0.}};
+                    expectedBasis.set(expectedBasisToPack);
+                    basis.getBasis(null, null).get(actualBasis);
+                    assertArrayEquals(expectedBasis.getData(), actualBasis.getData(), EPSILON);
+                    break;
+            }
     }
 }
