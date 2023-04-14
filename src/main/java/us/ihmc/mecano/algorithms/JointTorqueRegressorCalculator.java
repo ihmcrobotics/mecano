@@ -3,16 +3,12 @@ package us.ihmc.mecano.algorithms;
 import org.ejml.data.DMatrixRMaj;
 import org.ejml.dense.row.CommonOps_DDRM;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
-import us.ihmc.mecano.multiBodySystem.OneDoFJoint;
 import us.ihmc.mecano.multiBodySystem.interfaces.*;
 import us.ihmc.mecano.spatial.SpatialInertia;
-import us.ihmc.mecano.tools.JointStateType;
-import us.ihmc.mecano.tools.MultiBodySystemRandomTools;
+import us.ihmc.mecano.spatial.SpatialInertiaParameterBasis;
 import us.ihmc.mecano.tools.MultiBodySystemTools;
 
-import java.util.List;
 import java.util.Objects;
-import java.util.Random;
 
 public class JointTorqueRegressorCalculator
 {
@@ -22,7 +18,7 @@ public class JointTorqueRegressorCalculator
 
     private InverseDynamicsCalculator inverseDynamicsCalculator;
 
-    enum SpatialInertiaParameterBasis
+    enum SpatialInertiaParameterBasisOptions
     {
         M,
         MCOM_X,
@@ -35,23 +31,24 @@ public class JointTorqueRegressorCalculator
         I_XZ,
         I_YZ;
 
-        public SpatialInertia getBasis(ReferenceFrame bodyFrame, ReferenceFrame expressedInFrame)
+        public SpatialInertiaParameterBasis getBasis(ReferenceFrame bodyFrame, ReferenceFrame expressedInFrame)
         {
-            SpatialInertia spatialInertia = new SpatialInertia(bodyFrame, expressedInFrame);
-            spatialInertia.setToZero();
-            switch (this) {
-                case M -> spatialInertia.setMass(1.0);
-                case MCOM_X -> spatialInertia.setCenterOfMassOffset(1.0, 0.0, 0.0);
-                case MCOM_Y -> spatialInertia.setCenterOfMassOffset(0.0, 1.0, 0.0);
-                case MCOM_Z -> spatialInertia.setCenterOfMassOffset(0.0, 0.0, 1.0);
-                case I_XX -> spatialInertia.setMomentOfInertia(1.0, 0.0, 0.0);
-                case I_YY -> spatialInertia.setMomentOfInertia(0.0, 1.0, 0.0);
-                case I_ZZ -> spatialInertia.setMomentOfInertia(0.0, 0.0, 1.0);
-                case I_XY -> spatialInertia.setMomentOfInertia(0.0, 0.0, 0.0, 1.0, 0.0, 0.0);
-                case I_XZ -> spatialInertia.setMomentOfInertia(0.0, 0.0, 0.0, 0.0, 1.0, 0.0);
-                case I_YZ -> spatialInertia.setMomentOfInertia(0.0, 0.0, 0.0, 0.0, 0.0, 1.0);
+            SpatialInertiaParameterBasis spatialInertiaBasis = new SpatialInertiaParameterBasis(bodyFrame, expressedInFrame);
+            spatialInertiaBasis.setToZero();
+            switch (this)
+            {
+                case M -> spatialInertiaBasis.setMass(1.0);
+                case MCOM_X -> spatialInertiaBasis.setCenterOfMassOffset(1.0, 0.0, 0.0);
+                case MCOM_Y -> spatialInertiaBasis.setCenterOfMassOffset(0.0, 1.0, 0.0);
+                case MCOM_Z -> spatialInertiaBasis.setCenterOfMassOffset(0.0, 0.0, 1.0);
+                case I_XX -> spatialInertiaBasis.setMomentOfInertia(1.0, 0.0, 0.0);
+                case I_YY -> spatialInertiaBasis.setMomentOfInertia(0.0, 1.0, 0.0);
+                case I_ZZ -> spatialInertiaBasis.setMomentOfInertia(0.0, 0.0, 1.0);
+                case I_XY -> spatialInertiaBasis.setMomentOfInertia(0.0, 0.0, 0.0, 1.0, 0.0, 0.0);
+                case I_XZ -> spatialInertiaBasis.setMomentOfInertia(0.0, 0.0, 0.0, 0.0, 1.0, 0.0);
+                case I_YZ -> spatialInertiaBasis.setMomentOfInertia(0.0, 0.0, 0.0, 0.0, 0.0, 1.0);
             }
-            return spatialInertia;
+            return spatialInertiaBasis;
         }
     }
 
@@ -80,14 +77,14 @@ public class JointTorqueRegressorCalculator
         // Generate regressor matrix by calling RNEA several times, one for each body / parameter combination
         for (int i = 0; i < 2; i++)  // TODO hardcoded
         {
-            for (int j = 0; j < SpatialInertiaParameterBasis.values().length; j++){
-                CommonOps_DDRM.insert(calculateRegressorColumn(input, i, SpatialInertiaParameterBasis.values()[j]),
+            for (int j = 0; j < SpatialInertiaParameterBasisOptions.values().length; j++){
+                CommonOps_DDRM.insert(calculateRegressorColumn(input, i, SpatialInertiaParameterBasisOptions.values()[j]),
                                       jointTorqueRegressorMatrix, 0, (i * 10) + j);
             }
         }
     }
 
-    private DMatrixRMaj calculateRegressorColumn(MultiBodySystemBasics system, int bodyIndex, SpatialInertiaParameterBasis basis)
+    private DMatrixRMaj calculateRegressorColumn(MultiBodySystemBasics system, int bodyIndex, SpatialInertiaParameterBasisOptions basis)
     {
         String bodyName = "Body";
         bodyName = bodyName + String.valueOf(bodyIndex);
@@ -136,17 +133,5 @@ public class JointTorqueRegressorCalculator
 //        System.out.println(system.getRootBody().getInertia().getMass());
 //        System.out.println(system.getRootBody().getInertia().getCenterOfMassOffset());
 //        System.out.println(system.getRootBody().getInertia().getMomentOfInertia());
-
-//        JointTorqueRegressorCalculator calc = new JointTorqueRegressorCalculator(joints.get(0).getPredecessor());
-//        System.out.println(calc);
-
-        // TODO put this in a test, hand write what you expect the parameter bases to be
-//        for (SpatialInertiaParameterBasis basis : SpatialInertiaParameterBasis.values())
-//        {
-//            System.out.println(basis);
-//            System.out.println(basis.getBasis(null, null));
-//        }
-
-//        system.getAllJoints().forEach(joint -> System.out.println(joint.getSuccessor()));
     }
 }
