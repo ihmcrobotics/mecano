@@ -30,9 +30,9 @@ public class JointTorqueRegressorCalculatorTest
         for (JointStateType stateToRandomize : JointStateType.values())
             MultiBodySystemRandomTools.nextState(random, stateToRandomize, system.getAllJoints());
 
-        InverseDynamicsCalculator referenceCalculator = new InverseDynamicsCalculator(system);
-        referenceCalculator.compute();
-        DMatrixRMaj jointTau = referenceCalculator.getJointTauMatrix();
+        InverseDynamicsCalculator inverseDynamicsCalculator = new InverseDynamicsCalculator(system);
+        inverseDynamicsCalculator.compute();
+        DMatrixRMaj jointTau = inverseDynamicsCalculator.getJointTauMatrix();
 
         DMatrixRMaj parameterVector = new DMatrixRMaj(10 * 2, 1);  // TODO hardcoded
         for (int i = 0; i < 2; i++)  // TODO hardcoded
@@ -41,19 +41,13 @@ public class JointTorqueRegressorCalculatorTest
                     parameterVector, i * 10, 0);
         }
 
-        // Generate regressor matrix by calling RNEA several times, one for each body / parameter combination
+        JointTorqueRegressorCalculator regressorCalculator = new JointTorqueRegressorCalculator(system);
         DMatrixRMaj regressorMatrix = new DMatrixRMaj(2, 20); // TODO hardcoded
-        for (int i = 0; i < 2; i++)
-        {
-            for (int j = 0; j < JointTorqueRegressorCalculator.SpatialInertiaParameterBasis.values().length; j++){
-                DMatrixRMaj regressorColumn = JointTorqueRegressorCalculator.calculateRegressorColumn(system, i, JointTorqueRegressorCalculator.SpatialInertiaParameterBasis.values()[j]);
-                CommonOps_DDRM.insert(regressorColumn, regressorMatrix, 0, (i * 10) + j);
-            }
-        }
+        regressorCalculator.compute();
+        regressorMatrix.set(regressorCalculator.getJointTorqueRegressorMatrix());
 
         DMatrixRMaj testResult = new DMatrixRMaj(2, 1);  // TODO hardcoded
         CommonOps_DDRM.mult(regressorMatrix, parameterVector, testResult);
         assertArrayEquals(testResult.getData(), jointTau.getData());
     }
-
 }

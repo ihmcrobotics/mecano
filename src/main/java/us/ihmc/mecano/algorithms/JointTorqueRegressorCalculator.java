@@ -14,14 +14,13 @@ import java.util.List;
 import java.util.Objects;
 import java.util.Random;
 
-public class JointTorqueRegressorCalculator {
+public class JointTorqueRegressorCalculator
+{
+    private final MultiBodySystemBasics input;
 
     private final DMatrixRMaj jointTorqueRegressorMatrix;
 
-    public DMatrixRMaj getJointTorqueRegressorMatrix()
-    {
-        return  jointTorqueRegressorMatrix;
-    }
+    private InverseDynamicsCalculator inverseDynamicsCalculator;
 
     enum SpatialInertiaParameterBasis
     {
@@ -56,22 +55,40 @@ public class JointTorqueRegressorCalculator {
         }
     }
 
-    public JointTorqueRegressorCalculator(RigidBodyReadOnly rootBody)
+    public JointTorqueRegressorCalculator(RigidBodyBasics rootBody)
     {
-        this(MultiBodySystemReadOnly.toMultiBodySystemInput(rootBody), true);
+        this(MultiBodySystemBasics.toMultiBodySystemBasics(rootBody), true);
     }
 
-    public JointTorqueRegressorCalculator(MultiBodySystemReadOnly input, boolean considerIgnoredSubtreesInertia)
+    public JointTorqueRegressorCalculator(MultiBodySystemBasics system)
     {
+        this(system, true);
+    }
+
+    public JointTorqueRegressorCalculator(MultiBodySystemBasics input, boolean considerIgnoredSubtreesInertia)
+    {
+        this.input = input;
+        inverseDynamicsCalculator = new InverseDynamicsCalculator(input, considerIgnoredSubtreesInertia);
         int nDoFs = MultiBodySystemTools.computeDegreesOfFreedom(input.getJointsToConsider());
-        int nBodies = 3; // TODO: find a way to programatically get this
+        int nBodies = 2; // TODO find a way to programatically get this
         int nParams = 10 * nBodies;
         jointTorqueRegressorMatrix = new DMatrixRMaj(nDoFs, nParams);
     }
 
-    public static DMatrixRMaj calculateRegressorColumn(MultiBodySystemBasics system, int bodyIndex, SpatialInertiaParameterBasis basis)
+    public void compute()
     {
-        Random random = new Random(25);
+        // Generate regressor matrix by calling RNEA several times, one for each body / parameter combination
+        for (int i = 0; i < 2; i++)  // TODO hardcoded
+        {
+            for (int j = 0; j < SpatialInertiaParameterBasis.values().length; j++){
+                CommonOps_DDRM.insert(calculateRegressorColumn(input, i, SpatialInertiaParameterBasis.values()[j]),
+                                      jointTorqueRegressorMatrix, 0, (i * 10) + j);
+            }
+        }
+    }
+
+    private DMatrixRMaj calculateRegressorColumn(MultiBodySystemBasics system, int bodyIndex, SpatialInertiaParameterBasis basis)
+    {
         String bodyName = "Body";
         bodyName = bodyName + String.valueOf(bodyIndex);
         for (RigidBodyBasics body : system.getRootBody().subtreeArray())
@@ -79,30 +96,13 @@ public class JointTorqueRegressorCalculator {
             if (Objects.equals(body.getName(), "RootBody"))  // Just pass if it's the root body, TODO why is the root body null?
                 continue;
             if (Objects.equals(body.getName(), bodyName))
-            {
-//                System.out.println("------");
-//                System.out.println("CHANGING BODY!!!!");
-//                System.out.println("Before");
-//                System.out.println(body.getInertia());
-//                System.out.println("After");
-                // Param 1
                 body.getInertia().set(basis.getBasis(body.getInertia().getBodyFrame(), body.getInertia().getReferenceFrame()));
-//                System.out.println(body.getInertia());
-            }
             else
-            {
-//                System.out.println("------");
-//                System.out.println("Before");
-//                System.out.println(body.getInertia());
-//                System.out.println("After");
                 body.getInertia().setToZero();
-//                System.out.println(body.getInertia());
-            }
         }
 
-        InverseDynamicsCalculator inverseDynamicsCalculator = new InverseDynamicsCalculator(system);
+        inverseDynamicsCalculator = new InverseDynamicsCalculator(system);
 //        inverseDynamicsCalculator.setGravitionalAcceleration(-9.81); // TODO BIG TODO THIS, RESULTS DON'T MATCH IF WE SET A NON-ZERO GRAVITY
-
         inverseDynamicsCalculator.compute();
         DMatrixRMaj output = inverseDynamicsCalculator.getJointTauMatrix();
         return output;
@@ -124,30 +124,13 @@ public class JointTorqueRegressorCalculator {
         return parameters;
     }
 
-    public static void main(String[] args) {
-        Random random = new Random(25);
+    public DMatrixRMaj getJointTorqueRegressorMatrix()
+    {
+        return  jointTorqueRegressorMatrix;
+    }
 
-        List<OneDoFJoint> joints = MultiBodySystemRandomTools.nextOneDoFJointChain(random, 2);
-        MultiBodySystemBasics system = MultiBodySystemBasics.toMultiBodySystemBasics(joints);
-        System.out.println("system" + system);
-
-        for (JointStateType stateToRandomize : JointStateType.values())
-            MultiBodySystemRandomTools.nextState(random, stateToRandomize, system.getAllJoints());
-        InverseDynamicsCalculator referenceCalculator = new InverseDynamicsCalculator(system);
-        referenceCalculator.compute();
-        DMatrixRMaj torqueResultWeWant = referenceCalculator.getJointTauMatrix();
-        System.out.println("Result we want:");
-        System.out.println(torqueResultWeWant);
-
-        DMatrixRMaj parameterVector = new DMatrixRMaj(10 * 2, 1);  // TODO hardcoded
-        for (int i = 0; i < 2; i++)  // TODO hardcoded
-        {
-            CommonOps_DDRM.insert(JointTorqueRegressorCalculator.toParameterVector((SpatialInertia) system.findRigidBody("Body" + String.valueOf(i)).getInertia()),
-                    parameterVector, i * 10, 0);
-        }
-        System.out.println("Parameters:");
-        System.out.println(parameterVector);
-
+    public static void main(String[] args)
+    {
         // TODO: figure out why the root body has null inertial parameters, is it just a dummy world link
 //        System.out.println(system.getRootBody());
 //        System.out.println(system.getRootBody().getInertia().getMass());
@@ -165,26 +148,5 @@ public class JointTorqueRegressorCalculator {
 //        }
 
 //        system.getAllJoints().forEach(joint -> System.out.println(joint.getSuccessor()));
-
-        DMatrixRMaj regressorMatrix = new DMatrixRMaj(2, 20); // TODO hardcoded
-
-        for (int i = 0; i < 2; i++)
-        {
-            for (int j = 0; j < SpatialInertiaParameterBasis.values().length; j++){
-                DMatrixRMaj regressorColumn = JointTorqueRegressorCalculator.calculateRegressorColumn(system, i, SpatialInertiaParameterBasis.values()[j]);
-                System.out.println(regressorColumn);
-                CommonOps_DDRM.insert(regressorColumn, regressorMatrix, 0, (i * 10) + j);
-            }
-        }
-
-        System.out.println("Regressor matrix:");
-        System.out.println(regressorMatrix);
-
-        DMatrixRMaj testResult = new DMatrixRMaj(2, 1);  // TODO hardcoded
-        CommonOps_DDRM.mult(regressorMatrix, parameterVector, testResult);
-        System.out.println("Test result:");
-        System.out.println(testResult);
-
     }
-
 }
