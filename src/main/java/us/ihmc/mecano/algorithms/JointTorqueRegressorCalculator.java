@@ -2,7 +2,11 @@ package us.ihmc.mecano.algorithms;
 
 import org.ejml.data.DMatrixRMaj;
 import org.ejml.dense.row.CommonOps_DDRM;
+import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
+import us.ihmc.euclid.referenceFrame.interfaces.FrameTuple3DBasics;
+import us.ihmc.euclid.tuple3D.interfaces.Tuple3DBasics;
+import us.ihmc.euclid.tuple3D.interfaces.Tuple3DReadOnly;
 import us.ihmc.mecano.multiBodySystem.interfaces.*;
 import us.ihmc.mecano.spatial.SpatialInertia;
 import us.ihmc.mecano.spatial.SpatialInertiaParameterBasis;
@@ -22,6 +26,8 @@ public class JointTorqueRegressorCalculator
     private final int numberOfBodies;
 
     private InverseDynamicsCalculator inverseDynamicsCalculator;
+
+    private FrameVector3D gravitationalAcceleration;
 
     enum SpatialInertiaParameterBasisOptions
     {
@@ -71,10 +77,13 @@ public class JointTorqueRegressorCalculator
     {
         this.input = input;
         inverseDynamicsCalculator = new InverseDynamicsCalculator(input, considerIgnoredSubtreesInertia);
+        gravitationalAcceleration = new FrameVector3D();
+
         int nDoFs = MultiBodySystemTools.computeDegreesOfFreedom(input.getJointsToConsider());
         RigidBodyBasics[] bodies = input.getRootBody().subtreeArray();  // TODO this generates garbage, but acceptable in the constructor?
         numberOfBodies = bodies.length - 1;  // TODO Also -1 to dodge root body
         int nParams = 10 * numberOfBodies;
+
         jointTorqueRegressorMatrix = new DMatrixRMaj(nDoFs, nParams);
         parameterVector = new DMatrixRMaj(nParams, 1);
         for (int i = 1; i < bodies.length; i++)
@@ -110,10 +119,20 @@ public class JointTorqueRegressorCalculator
         }
 
         inverseDynamicsCalculator = new InverseDynamicsCalculator(system);
-//        inverseDynamicsCalculator.setGravitionalAcceleration(-9.81); // TODO BIG TODO THIS, RESULTS DON'T MATCH IF WE SET A NON-ZERO GRAVITY
+        inverseDynamicsCalculator.setGravitionalAcceleration(gravitationalAcceleration);
         inverseDynamicsCalculator.compute();
         DMatrixRMaj output = inverseDynamicsCalculator.getJointTauMatrix();
         return output;
+    }
+
+    public void setGravitationalAcceleration(double gravity)
+    {
+        setGravitationalAcceleration(0.0, 0.0, gravity);
+    }
+
+    public void setGravitationalAcceleration(double gravityX, double gravityY, double gravityZ)
+    {
+        gravitationalAcceleration.set(gravityX, gravityY, gravityZ);
     }
 
     // TODO there is a huge caveat to using this method that you should note -- it should only be used just after

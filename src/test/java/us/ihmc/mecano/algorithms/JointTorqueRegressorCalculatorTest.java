@@ -41,12 +41,14 @@ public class JointTorqueRegressorCalculatorTest
 
                 // Create an inverse dynamics calculator to compare torque results to
                 InverseDynamicsCalculator inverseDynamicsCalculator = new InverseDynamicsCalculator(system);
+                inverseDynamicsCalculator.setGravitionalAcceleration(-9.81);
                 inverseDynamicsCalculator.compute();
                 DMatrixRMaj expectedjointTau = inverseDynamicsCalculator.getJointTauMatrix();
 
                 // We want the product of the regressor matrix and the parameter vector to equal the expected joint torques
                 JointTorqueRegressorCalculator regressorCalculator = new JointTorqueRegressorCalculator(system);
                 DMatrixRMaj parameterVector = regressorCalculator.getParameterVector();
+                regressorCalculator.setGravitationalAcceleration(-9.81);
                 regressorCalculator.compute();
                 DMatrixRMaj regressorMatrix = regressorCalculator.getJointTorqueRegressorMatrix();
 
@@ -57,6 +59,12 @@ public class JointTorqueRegressorCalculatorTest
                 assertArrayEquals(expectedjointTau.getData(), actualJointTau.getData(), EPSILON);
             }
         }
+    }
+
+    @Test
+    public void testRegressorAndParametersMatchInverseDynamicsOneDoFJointTree()
+    {
+
     }
 
 
