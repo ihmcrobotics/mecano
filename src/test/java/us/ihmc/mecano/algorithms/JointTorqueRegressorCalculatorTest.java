@@ -3,12 +3,17 @@ package us.ihmc.mecano.algorithms;
 import org.ejml.data.DMatrixRMaj;
 import org.ejml.dense.row.CommonOps_DDRM;
 import org.junit.jupiter.api.Test;
+import us.ihmc.euclid.referenceFrame.ReferenceFrame;
+import us.ihmc.mecano.multiBodySystem.Joint;
 import us.ihmc.mecano.multiBodySystem.OneDoFJoint;
+import us.ihmc.mecano.multiBodySystem.RigidBody;
+import us.ihmc.mecano.multiBodySystem.SixDoFJoint;
 import us.ihmc.mecano.multiBodySystem.interfaces.MultiBodySystemBasics;
 import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
 import us.ihmc.mecano.tools.JointStateType;
 import us.ihmc.mecano.tools.MultiBodySystemRandomTools;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
 
@@ -31,6 +36,51 @@ public class JointTorqueRegressorCalculatorTest
             // Randomise the number of joints in the system
             int numberOfJoints = random.nextInt(30) + 1;  // to avoid zero
             List<OneDoFJoint> joints = MultiBodySystemRandomTools.nextOneDoFJointChain(random, numberOfJoints);
+            MultiBodySystemBasics system = MultiBodySystemBasics.toMultiBodySystemBasics(joints);
+
+            for (int j = 0; j < STATE_ITERATIONS; j++)
+            {
+                // Randomise the state of the system
+                for (JointStateType stateToRandomize : JointStateType.values())
+                    MultiBodySystemRandomTools.nextState(random, stateToRandomize, system.getAllJoints());
+
+                // Create an inverse dynamics calculator to compare torque results to
+                InverseDynamicsCalculator inverseDynamicsCalculator = new InverseDynamicsCalculator(system);
+                inverseDynamicsCalculator.setGravitionalAcceleration(-9.81);
+                inverseDynamicsCalculator.compute();
+                DMatrixRMaj expectedjointTau = inverseDynamicsCalculator.getJointTauMatrix();
+
+                // We want the product of the regressor matrix and the parameter vector to equal the expected joint torques
+                JointTorqueRegressorCalculator regressorCalculator = new JointTorqueRegressorCalculator(system);
+                DMatrixRMaj parameterVector = regressorCalculator.getParameterVector();
+                regressorCalculator.setGravitationalAcceleration(-9.81);
+                regressorCalculator.compute();
+                DMatrixRMaj regressorMatrix = regressorCalculator.getJointTorqueRegressorMatrix();
+
+                // Compare results
+                DMatrixRMaj actualJointTau = new DMatrixRMaj(numberOfJoints, 1);
+                CommonOps_DDRM.mult(regressorMatrix, parameterVector, actualJointTau);
+                assertEquals(expectedjointTau.getData().length, actualJointTau.getData().length);
+                assertArrayEquals(expectedjointTau.getData(), actualJointTau.getData(), EPSILON);
+            }
+        }
+    }
+
+    @Test
+    public void testRegressorAndParametersMatchInverseDynamicsFloatingOneDoFJointChain()
+    {
+        Random random = new Random(25);
+
+        for (int i = 0; i < SYSTEM_ITERATIONS; i++)
+        {
+            // Randomise the number of joints in the system
+            int numberOfJoints = random.nextInt(30) + 1;  // to avoid zero
+
+            List<Joint> joints = new ArrayList<>();
+            RigidBody elevator = new RigidBody("elevator", ReferenceFrame.getWorldFrame());
+            joints.add(new SixDoFJoint("floating", elevator));
+            RigidBody floatingBody = MultiBodySystemRandomTools.nextRigidBody(random, "floatingBody", joints.get(0));
+            joints.addAll(MultiBodySystemRandomTools.nextOneDoFJointChain(random, floatingBody, numberOfJoints));
             MultiBodySystemBasics system = MultiBodySystemBasics.toMultiBodySystemBasics(joints);
 
             for (int j = 0; j < STATE_ITERATIONS; j++)
