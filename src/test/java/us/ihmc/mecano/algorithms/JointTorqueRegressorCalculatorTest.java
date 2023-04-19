@@ -5,7 +5,7 @@ import org.ejml.dense.row.CommonOps_DDRM;
 import org.junit.jupiter.api.Test;
 import us.ihmc.mecano.multiBodySystem.OneDoFJoint;
 import us.ihmc.mecano.multiBodySystem.interfaces.MultiBodySystemBasics;
-import us.ihmc.mecano.spatial.SpatialInertia;
+import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
 import us.ihmc.mecano.tools.JointStateType;
 import us.ihmc.mecano.tools.MultiBodySystemRandomTools;
 
@@ -71,124 +71,131 @@ public class JointTorqueRegressorCalculatorTest
     @Test
     public void testSpatialInertiaParameterBasis()
     {
-        SpatialInertia spatialInertia = new SpatialInertia();
         DMatrixRMaj expectedBasis = new DMatrixRMaj(6, 6);
         DMatrixRMaj actualBasis = new DMatrixRMaj(6, 6);
-        double[][] expectedBasisToPack = new double[6][6];
+        double[][] expectedBasisToPack;
 
+        int numberOfJoints = 1;
+        Random random = new Random(25);
+        List<OneDoFJoint> joints = MultiBodySystemRandomTools.nextOneDoFJointChain(random, numberOfJoints);
+        MultiBodySystemBasics system = MultiBodySystemBasics.toMultiBodySystemBasics(joints);
+        // We'll test the parameter bases on the first (and this case, only) body after the root, because the root body
+        // usually is set to have null parameters and reference frames
+        RigidBodyBasics body = system.findRigidBody("Body0");
+
+        JointTorqueRegressorCalculator regressorCalculator = new JointTorqueRegressorCalculator(system);
         for (JointTorqueRegressorCalculator.SpatialInertiaParameterBasisOptions basis : JointTorqueRegressorCalculator.SpatialInertiaParameterBasisOptions.values())
-            switch (basis)
-            {
-                case M:
-                    expectedBasisToPack = new double[][] {{0., 0., 0., 0., 0., 0.},
+            switch (basis) {
+                case M -> {
+                    expectedBasisToPack = new double[][]{{0., 0., 0., 0., 0., 0.},
                             {0., 0., 0., 0., 0., 0.},
                             {0., 0., 0., 0., 0., 0.},
                             {0., 0., 0., 1., 0., 0.},
                             {0., 0., 0., 0., 1., 0.},
                             {0., 0., 0., 0., 0., 1.}};
                     expectedBasis.set(expectedBasisToPack);
-                    basis.getBasis(null, null).get(actualBasis);
+                    regressorCalculator.getBasis(basis, body).get(actualBasis);
                     assertArrayEquals(expectedBasis.getData(), actualBasis.getData(), EPSILON);
-                    break;
-                case MCOM_X:
-                    expectedBasisToPack = new double[][] {{0., 0., 0., 0., 0., 0.},
+                }
+                case MCOM_X -> {
+                    expectedBasisToPack = new double[][]{{0., 0., 0., 0., 0., 0.},
                             {0., 0., 0., 0., 0., -1.},
                             {0., 0., 0., 0., 1., 0.},
                             {0., 0., 0., 0., 0., 0.},
                             {0., 0., 1., 0., 0., 0.},
                             {0., -1., 0., 0., 0., 0.}};
                     expectedBasis.set(expectedBasisToPack);
-                    basis.getBasis(null, null).get(actualBasis);
+                    regressorCalculator.getBasis(basis, body).get(actualBasis);
                     assertArrayEquals(expectedBasis.getData(), actualBasis.getData(), EPSILON);
-                    break;
-                case MCOM_Y:
-                    expectedBasisToPack = new double[][] {{0., 0., 0., 0., 0., 1.},
+                }
+                case MCOM_Y -> {
+                    expectedBasisToPack = new double[][]{{0., 0., 0., 0., 0., 1.},
                             {0., 0., 0., 0., 0., 0.},
                             {0., 0., 0., -1., 0., 0.},
                             {0., 0., -1., 0., 0., 0.},
                             {0., 0., 0., 0., 0., 0.},
                             {1., 0., 0., 0., 0., 0.}};
                     expectedBasis.set(expectedBasisToPack);
-                    basis.getBasis(null, null).get(actualBasis);
+                    regressorCalculator.getBasis(basis, body).get(actualBasis);
                     assertArrayEquals(expectedBasis.getData(), actualBasis.getData(), EPSILON);
-                    break;
-                case MCOM_Z:
-                    expectedBasisToPack = new double[][] {{0., 0., 0., 0., -1., 0.},
+                }
+                case MCOM_Z -> {
+                    expectedBasisToPack = new double[][]{{0., 0., 0., 0., -1., 0.},
                             {0., 0., 0., 1., 0., 0.},
                             {0., 0., 0., 0., 0., 0.},
                             {0., 1., 0., 0., 0., 0.},
                             {-1., 0., 0., 0., 0., 0.},
                             {0., 0., 0., 0., 0., 0.}};
                     expectedBasis.set(expectedBasisToPack);
-                    basis.getBasis(null, null).get(actualBasis);
+                    regressorCalculator.getBasis(basis, body).get(actualBasis);
                     assertArrayEquals(expectedBasis.getData(), actualBasis.getData(), EPSILON);
-                    break;
-                case I_XX:
-                    expectedBasisToPack = new double[][] {{1., 0., 0., 0., 0., 0.},
+                }
+                case I_XX -> {
+                    expectedBasisToPack = new double[][]{{1., 0., 0., 0., 0., 0.},
                             {0., 0., 0., 0., 0., 0.},
                             {0., 0., 0., 0., 0., 0.},
                             {0., 0., 0., 0., 0., 0.},
                             {0., 0., 0., 0., 0., 0.},
                             {0., 0., 0., 0., 0., 0.}};
                     expectedBasis.set(expectedBasisToPack);
-                    basis.getBasis(null, null).get(actualBasis);
+                    regressorCalculator.getBasis(basis, body).get(actualBasis);
                     assertArrayEquals(expectedBasis.getData(), actualBasis.getData(), EPSILON);
-                    break;
-                case I_YY:
-                    expectedBasisToPack = new double[][] {{0., 0., 0., 0., 0., 0.},
+                }
+                case I_YY -> {
+                    expectedBasisToPack = new double[][]{{0., 0., 0., 0., 0., 0.},
                             {0., 1., 0., 0., 0., 0.},
                             {0., 0., 0., 0., 0., 0.},
                             {0., 0., 0., 0., 0., 0.},
                             {0., 0., 0., 0., 0., 0.},
                             {0., 0., 0., 0., 0., 0.}};
                     expectedBasis.set(expectedBasisToPack);
-                    basis.getBasis(null, null).get(actualBasis);
+                    regressorCalculator.getBasis(basis, body).get(actualBasis);
                     assertArrayEquals(expectedBasis.getData(), actualBasis.getData(), EPSILON);
-                    break;
-                case I_ZZ:
-                    expectedBasisToPack = new double[][] {{0., 0., 0., 0., 0., 0.},
+                }
+                case I_ZZ -> {
+                    expectedBasisToPack = new double[][]{{0., 0., 0., 0., 0., 0.},
                             {0., 0., 0., 0., 0., 0.},
                             {0., 0., 1., 0., 0., 0.},
                             {0., 0., 0., 0., 0., 0.},
                             {0., 0., 0., 0., 0., 0.},
                             {0., 0., 0., 0., 0., 0.}};
                     expectedBasis.set(expectedBasisToPack);
-                    basis.getBasis(null, null).get(actualBasis);
+                    regressorCalculator.getBasis(basis, body).get(actualBasis);
                     assertArrayEquals(expectedBasis.getData(), actualBasis.getData(), EPSILON);
-                    break;
-                case I_XY:
-                    expectedBasisToPack = new double[][] {{0., 1., 0., 0., 0., 0.},
+                }
+                case I_XY -> {
+                    expectedBasisToPack = new double[][]{{0., 1., 0., 0., 0., 0.},
                             {1., 0., 0., 0., 0., 0.},
                             {0., 0., 0., 0., 0., 0.},
                             {0., 0., 0., 0., 0., 0.},
                             {0., 0., 0., 0., 0., 0.},
                             {0., 0., 0., 0., 0., 0.}};
                     expectedBasis.set(expectedBasisToPack);
-                    basis.getBasis(null, null).get(actualBasis);
+                    regressorCalculator.getBasis(basis, body).get(actualBasis);
                     assertArrayEquals(expectedBasis.getData(), actualBasis.getData(), EPSILON);
-                    break;
-                case I_XZ:
-                    expectedBasisToPack = new double[][] {{0., 0., 1., 0., 0., 0.},
+                }
+                case I_XZ -> {
+                    expectedBasisToPack = new double[][]{{0., 0., 1., 0., 0., 0.},
                             {0., 0., 0., 0., 0., 0.},
                             {1., 0., 0., 0., 0., 0.},
                             {0., 0., 0., 0., 0., 0.},
                             {0., 0., 0., 0., 0., 0.},
                             {0., 0., 0., 0., 0., 0.}};
                     expectedBasis.set(expectedBasisToPack);
-                    basis.getBasis(null, null).get(actualBasis);
+                    regressorCalculator.getBasis(basis, body).get(actualBasis);
                     assertArrayEquals(expectedBasis.getData(), actualBasis.getData(), EPSILON);
-                    break;
-                case I_YZ:
-                    expectedBasisToPack = new double[][] {{0., 0., 0., 0., 0., 0.},
+                }
+                case I_YZ -> {
+                    expectedBasisToPack = new double[][]{{0., 0., 0., 0., 0., 0.},
                             {0., 0., 1., 0., 0., 0.},
                             {0., 1., 0., 0., 0., 0.},
                             {0., 0., 0., 0., 0., 0.},
                             {0., 0., 0., 0., 0., 0.},
                             {0., 0., 0., 0., 0., 0.}};
                     expectedBasis.set(expectedBasisToPack);
-                    basis.getBasis(null, null).get(actualBasis);
+                    regressorCalculator.getBasis(basis, body).get(actualBasis);
                     assertArrayEquals(expectedBasis.getData(), actualBasis.getData(), EPSILON);
-                    break;
+                }
             }
     }
 }

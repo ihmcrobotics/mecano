@@ -17,21 +17,13 @@ import us.ihmc.euclid.tools.EuclidCoreIOTools;
 import us.ihmc.euclid.tuple3D.interfaces.Tuple3DReadOnly;
 import us.ihmc.mecano.algorithms.interfaces.RigidBodyAccelerationProvider;
 import us.ihmc.mecano.frames.MovingReferenceFrame;
-import us.ihmc.mecano.multiBodySystem.interfaces.JointBasics;
-import us.ihmc.mecano.multiBodySystem.interfaces.JointMatrixIndexProvider;
-import us.ihmc.mecano.multiBodySystem.interfaces.JointReadOnly;
-import us.ihmc.mecano.multiBodySystem.interfaces.MultiBodySystemReadOnly;
-import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyReadOnly;
+import us.ihmc.mecano.multiBodySystem.interfaces.*;
 import us.ihmc.mecano.spatial.SpatialAcceleration;
 import us.ihmc.mecano.spatial.SpatialForce;
 import us.ihmc.mecano.spatial.SpatialInertia;
 import us.ihmc.mecano.spatial.Twist;
 import us.ihmc.mecano.spatial.Wrench;
-import us.ihmc.mecano.spatial.interfaces.FixedFrameWrenchBasics;
-import us.ihmc.mecano.spatial.interfaces.SpatialAccelerationReadOnly;
-import us.ihmc.mecano.spatial.interfaces.SpatialVectorReadOnly;
-import us.ihmc.mecano.spatial.interfaces.TwistReadOnly;
-import us.ihmc.mecano.spatial.interfaces.WrenchReadOnly;
+import us.ihmc.mecano.spatial.interfaces.*;
 import us.ihmc.mecano.tools.JointStateType;
 import us.ihmc.mecano.tools.MultiBodySystemTools;
 
@@ -496,6 +488,11 @@ public class InverseDynamicsCalculator
       return input;
    }
 
+   public SpatialInertia getBodyInertia(RigidBodyReadOnly rigidBody)
+   {
+      return rigidBodyToRecursionStepMap.get(rigidBody).getBodyInertia();
+   }
+
    /**
     * Returns whether this calculator is considering the efforts resulting from joint accelerations or
     * not.
@@ -890,6 +887,11 @@ public class InverseDynamicsCalculator
          jointForceFromChild.setIncludingFrame(child.getJointWrench());
          jointForceFromChild.changeFrame(joint.getFrameAfterJoint());
          jointWrench.add(jointForceFromChild);
+      }
+
+      public SpatialInertia getBodyInertia()
+      {
+         return bodyInertia;
       }
 
       @Override

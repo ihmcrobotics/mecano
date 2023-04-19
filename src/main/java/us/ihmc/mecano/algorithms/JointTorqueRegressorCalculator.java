@@ -3,12 +3,7 @@ package us.ihmc.mecano.algorithms;
 import org.ejml.data.DMatrixRMaj;
 import org.ejml.dense.row.CommonOps_DDRM;
 import us.ihmc.euclid.referenceFrame.FrameVector3D;
-import us.ihmc.euclid.referenceFrame.ReferenceFrame;
-import us.ihmc.euclid.referenceFrame.interfaces.FrameTuple3DBasics;
-import us.ihmc.euclid.tuple3D.interfaces.Tuple3DBasics;
-import us.ihmc.euclid.tuple3D.interfaces.Tuple3DReadOnly;
 import us.ihmc.mecano.multiBodySystem.interfaces.*;
-import us.ihmc.mecano.spatial.SpatialInertia;
 import us.ihmc.mecano.spatial.SpatialInertiaParameterBasis;
 import us.ihmc.mecano.spatial.interfaces.SpatialInertiaBasics;
 import us.ihmc.mecano.tools.MultiBodySystemTools;
@@ -17,6 +12,7 @@ import java.util.Objects;
 
 public class JointTorqueRegressorCalculator
 {
+    /** Defines the multi-body system to use with this calculator. */
     private final MultiBodySystemBasics input;
 
     private final DMatrixRMaj jointTorqueRegressorMatrix;
@@ -25,9 +21,9 @@ public class JointTorqueRegressorCalculator
 
     private final int numberOfBodies;
 
-    private InverseDynamicsCalculator inverseDynamicsCalculator;
+    private final InverseDynamicsCalculator inverseDynamicsCalculator;
 
-    private FrameVector3D gravitationalAcceleration;
+    private final SpatialInertiaParameterBasis spatialInertiaParameterBasis;
 
     enum SpatialInertiaParameterBasisOptions
     {
@@ -41,26 +37,27 @@ public class JointTorqueRegressorCalculator
         I_XY,
         I_XZ,
         I_YZ;
+    }
 
-        public SpatialInertiaParameterBasis getBasis(ReferenceFrame bodyFrame, ReferenceFrame expressedInFrame)
+    public SpatialInertiaParameterBasis getBasis(SpatialInertiaParameterBasisOptions basis, RigidBodyBasics rigidBody)
+    {
+        spatialInertiaParameterBasis.setBodyFrame(rigidBody.getInertia().getBodyFrame());
+        spatialInertiaParameterBasis.setReferenceFrame(rigidBody.getInertia().getReferenceFrame());
+        spatialInertiaParameterBasis.setToZero();
+        switch (basis)
         {
-            SpatialInertiaParameterBasis spatialInertiaBasis = new SpatialInertiaParameterBasis(bodyFrame, expressedInFrame);
-            spatialInertiaBasis.setToZero();
-            switch (this)
-            {
-                case M -> spatialInertiaBasis.setMass(1.0);
-                case MCOM_X -> spatialInertiaBasis.setCenterOfMassOffset(1.0, 0.0, 0.0);
-                case MCOM_Y -> spatialInertiaBasis.setCenterOfMassOffset(0.0, 1.0, 0.0);
-                case MCOM_Z -> spatialInertiaBasis.setCenterOfMassOffset(0.0, 0.0, 1.0);
-                case I_XX -> spatialInertiaBasis.setMomentOfInertia(1.0, 0.0, 0.0);
-                case I_YY -> spatialInertiaBasis.setMomentOfInertia(0.0, 1.0, 0.0);
-                case I_ZZ -> spatialInertiaBasis.setMomentOfInertia(0.0, 0.0, 1.0);
-                case I_XY -> spatialInertiaBasis.setMomentOfInertia(0.0, 0.0, 0.0, 1.0, 0.0, 0.0);
-                case I_XZ -> spatialInertiaBasis.setMomentOfInertia(0.0, 0.0, 0.0, 0.0, 1.0, 0.0);
-                case I_YZ -> spatialInertiaBasis.setMomentOfInertia(0.0, 0.0, 0.0, 0.0, 0.0, 1.0);
-            }
-            return spatialInertiaBasis;
+            case M -> spatialInertiaParameterBasis.setMass(1.0);
+            case MCOM_X -> spatialInertiaParameterBasis.setCenterOfMassOffset(1.0, 0.0, 0.0);
+            case MCOM_Y -> spatialInertiaParameterBasis.setCenterOfMassOffset(0.0, 1.0, 0.0);
+            case MCOM_Z -> spatialInertiaParameterBasis.setCenterOfMassOffset(0.0, 0.0, 1.0);
+            case I_XX -> spatialInertiaParameterBasis.setMomentOfInertia(1.0, 0.0, 0.0);
+            case I_YY -> spatialInertiaParameterBasis.setMomentOfInertia(0.0, 1.0, 0.0);
+            case I_ZZ -> spatialInertiaParameterBasis.setMomentOfInertia(0.0, 0.0, 1.0);
+            case I_XY -> spatialInertiaParameterBasis.setMomentOfInertia(0.0, 0.0, 0.0, 1.0, 0.0, 0.0);
+            case I_XZ -> spatialInertiaParameterBasis.setMomentOfInertia(0.0, 0.0, 0.0, 0.0, 1.0, 0.0);
+            case I_YZ -> spatialInertiaParameterBasis.setMomentOfInertia(0.0, 0.0, 0.0, 0.0, 0.0, 1.0);
         }
+        return spatialInertiaParameterBasis;
     }
 
     public JointTorqueRegressorCalculator(RigidBodyBasics rootBody)
@@ -77,7 +74,7 @@ public class JointTorqueRegressorCalculator
     {
         this.input = input;
         inverseDynamicsCalculator = new InverseDynamicsCalculator(input, considerIgnoredSubtreesInertia);
-        gravitationalAcceleration = new FrameVector3D();
+        spatialInertiaParameterBasis = new SpatialInertiaParameterBasis();
 
         int nDoFs = MultiBodySystemTools.computeDegreesOfFreedom(input.getJointsToConsider());
         RigidBodyBasics[] bodies = input.getRootBody().subtreeArray();  // TODO this generates garbage, but acceptable in the constructor?
@@ -112,17 +109,18 @@ public class JointTorqueRegressorCalculator
         {
             if (Objects.equals(body.getName(), "RootBody"))  // Just pass if it's the root body, TODO why is the root body null?
                 continue;
-            if (Objects.equals(body.getName(), bodyName))
-                body.getInertia().set(basis.getBasis(body.getInertia().getBodyFrame(), body.getInertia().getReferenceFrame()));
-            else
+            if (Objects.equals(body.getName(), bodyName)) {
+                body.getInertia().set(getBasis(basis, body));
+                inverseDynamicsCalculator.getBodyInertia(body).set(getBasis(basis, body));
+            }
+            else {
                 body.getInertia().setToZero();
+                inverseDynamicsCalculator.getBodyInertia(body).setToZero();
+            }
         }
 
-        inverseDynamicsCalculator = new InverseDynamicsCalculator(system);
-        inverseDynamicsCalculator.setGravitionalAcceleration(gravitationalAcceleration);
         inverseDynamicsCalculator.compute();
-        DMatrixRMaj output = inverseDynamicsCalculator.getJointTauMatrix();
-        return output;
+        return inverseDynamicsCalculator.getJointTauMatrix();
     }
 
     public void setGravitationalAcceleration(double gravity)
@@ -132,7 +130,7 @@ public class JointTorqueRegressorCalculator
 
     public void setGravitationalAcceleration(double gravityX, double gravityY, double gravityZ)
     {
-        gravitationalAcceleration.set(gravityX, gravityY, gravityZ);
+        inverseDynamicsCalculator.setGravitionalAcceleration(gravityX, gravityY, gravityZ);
     }
 
     // TODO there is a huge caveat to using this method that you should note -- it should only be used just after

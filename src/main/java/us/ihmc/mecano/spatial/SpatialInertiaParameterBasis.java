@@ -6,6 +6,11 @@ import us.ihmc.mecano.tools.MecanoTools;
 
 public class SpatialInertiaParameterBasis extends SpatialInertia
 {
+    public SpatialInertiaParameterBasis()
+    {
+        super();
+    }
+
     public SpatialInertiaParameterBasis(ReferenceFrame bodyFrame, ReferenceFrame expressedInFrame)
     {
         setToZero(bodyFrame, expressedInFrame);
