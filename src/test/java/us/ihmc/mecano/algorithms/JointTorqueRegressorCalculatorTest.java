@@ -247,8 +247,9 @@ public class JointTorqueRegressorCalculatorTest
         RigidBodyBasics body = system.findRigidBody("Body0");
 
         JointTorqueRegressorCalculator regressorCalculator = new JointTorqueRegressorCalculator(system);
-        for (JointTorqueRegressorCalculator.SpatialInertiaParameterBasisOptions basis : JointTorqueRegressorCalculator.SpatialInertiaParameterBasisOptions.values())
-            switch (basis) {
+        JointTorqueRegressorCalculator.SpatialInertiaParameterBasis basis = new JointTorqueRegressorCalculator.SpatialInertiaParameterBasis(body);
+        for (JointTorqueRegressorCalculator.SpatialInertiaParameterBasisOptions basisOption : JointTorqueRegressorCalculator.SpatialInertiaParameterBasisOptions.values())
+            switch (basisOption) {
                 case M -> {
                     expectedBasisToPack = new double[][]{{0., 0., 0., 0., 0., 0.},
                             {0., 0., 0., 0., 0., 0.},
@@ -257,7 +258,8 @@ public class JointTorqueRegressorCalculatorTest
                             {0., 0., 0., 0., 1., 0.},
                             {0., 0., 0., 0., 0., 1.}};
                     expectedBasis.set(expectedBasisToPack);
-                    regressorCalculator.getBasis(basis, body).get(actualBasis);
+                    basis.setBasis(basisOption);
+                    basis.get(actualBasis);
                     assertArrayEquals(expectedBasis.getData(), actualBasis.getData(), EPSILON);
                 }
                 case MCOM_X -> {
@@ -268,7 +270,8 @@ public class JointTorqueRegressorCalculatorTest
                             {0., 0., 1., 0., 0., 0.},
                             {0., -1., 0., 0., 0., 0.}};
                     expectedBasis.set(expectedBasisToPack);
-                    regressorCalculator.getBasis(basis, body).get(actualBasis);
+                    basis.setBasis(basisOption);
+                    basis.get(actualBasis);
                     assertArrayEquals(expectedBasis.getData(), actualBasis.getData(), EPSILON);
                 }
                 case MCOM_Y -> {
@@ -279,7 +282,8 @@ public class JointTorqueRegressorCalculatorTest
                             {0., 0., 0., 0., 0., 0.},
                             {1., 0., 0., 0., 0., 0.}};
                     expectedBasis.set(expectedBasisToPack);
-                    regressorCalculator.getBasis(basis, body).get(actualBasis);
+                    basis.setBasis(basisOption);
+                    basis.get(actualBasis);
                     assertArrayEquals(expectedBasis.getData(), actualBasis.getData(), EPSILON);
                 }
                 case MCOM_Z -> {
@@ -290,7 +294,8 @@ public class JointTorqueRegressorCalculatorTest
                             {-1., 0., 0., 0., 0., 0.},
                             {0., 0., 0., 0., 0., 0.}};
                     expectedBasis.set(expectedBasisToPack);
-                    regressorCalculator.getBasis(basis, body).get(actualBasis);
+                    basis.setBasis(basisOption);
+                    basis.get(actualBasis);
                     assertArrayEquals(expectedBasis.getData(), actualBasis.getData(), EPSILON);
                 }
                 case I_XX -> {
@@ -301,7 +306,8 @@ public class JointTorqueRegressorCalculatorTest
                             {0., 0., 0., 0., 0., 0.},
                             {0., 0., 0., 0., 0., 0.}};
                     expectedBasis.set(expectedBasisToPack);
-                    regressorCalculator.getBasis(basis, body).get(actualBasis);
+                    basis.setBasis(basisOption);
+                    basis.get(actualBasis);
                     assertArrayEquals(expectedBasis.getData(), actualBasis.getData(), EPSILON);
                 }
                 case I_YY -> {
@@ -312,7 +318,8 @@ public class JointTorqueRegressorCalculatorTest
                             {0., 0., 0., 0., 0., 0.},
                             {0., 0., 0., 0., 0., 0.}};
                     expectedBasis.set(expectedBasisToPack);
-                    regressorCalculator.getBasis(basis, body).get(actualBasis);
+                    basis.setBasis(basisOption);
+                    basis.get(actualBasis);
                     assertArrayEquals(expectedBasis.getData(), actualBasis.getData(), EPSILON);
                 }
                 case I_ZZ -> {
@@ -323,7 +330,8 @@ public class JointTorqueRegressorCalculatorTest
                             {0., 0., 0., 0., 0., 0.},
                             {0., 0., 0., 0., 0., 0.}};
                     expectedBasis.set(expectedBasisToPack);
-                    regressorCalculator.getBasis(basis, body).get(actualBasis);
+                    basis.setBasis(basisOption);
+                    basis.get(actualBasis);
                     assertArrayEquals(expectedBasis.getData(), actualBasis.getData(), EPSILON);
                 }
                 case I_XY -> {
@@ -334,7 +342,8 @@ public class JointTorqueRegressorCalculatorTest
                             {0., 0., 0., 0., 0., 0.},
                             {0., 0., 0., 0., 0., 0.}};
                     expectedBasis.set(expectedBasisToPack);
-                    regressorCalculator.getBasis(basis, body).get(actualBasis);
+                    basis.setBasis(basisOption);
+                    basis.get(actualBasis);
                     assertArrayEquals(expectedBasis.getData(), actualBasis.getData(), EPSILON);
                 }
                 case I_XZ -> {
@@ -345,7 +354,8 @@ public class JointTorqueRegressorCalculatorTest
                             {0., 0., 0., 0., 0., 0.},
                             {0., 0., 0., 0., 0., 0.}};
                     expectedBasis.set(expectedBasisToPack);
-                    regressorCalculator.getBasis(basis, body).get(actualBasis);
+                    basis.setBasis(basisOption);
+                    basis.get(actualBasis);
                     assertArrayEquals(expectedBasis.getData(), actualBasis.getData(), EPSILON);
                 }
                 case I_YZ -> {
@@ -356,7 +366,8 @@ public class JointTorqueRegressorCalculatorTest
                             {0., 0., 0., 0., 0., 0.},
                             {0., 0., 0., 0., 0., 0.}};
                     expectedBasis.set(expectedBasisToPack);
-                    regressorCalculator.getBasis(basis, body).get(actualBasis);
+                    basis.setBasis(basisOption);
+                    basis.get(actualBasis);
                     assertArrayEquals(expectedBasis.getData(), actualBasis.getData(), EPSILON);
                 }
             }

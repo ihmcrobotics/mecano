@@ -198,6 +198,76 @@ public class JointTorqueRegressorCalculator
         return parameters;
     }
 
+    enum SpatialInertiaParameterBasisOptions
+    {
+        M,
+        MCOM_X,
+        MCOM_Y,
+        MCOM_Z,
+        I_XX,
+        I_YY,
+        I_ZZ,
+        I_XY,
+        I_XZ,
+        I_YZ;
+    }
+
+    static class SpatialInertiaParameterBasis extends SpatialInertia
+    {
+        public SpatialInertiaParameterBasis(RigidBodyBasics rigidBody)
+        {
+            super(rigidBody.getInertia().getBodyFrame(), rigidBody.getInertia().getReferenceFrame());
+            setToZero();
+        }
+
+        public void setBasis(SpatialInertiaParameterBasisOptions basisOption)
+        {
+            setToZero();
+            switch (basisOption)
+            {
+                case M -> setMass(1.0);
+                case MCOM_X -> setCenterOfMassOffset(1.0, 0.0, 0.0);
+                case MCOM_Y -> setCenterOfMassOffset(0.0, 1.0, 0.0);
+                case MCOM_Z -> setCenterOfMassOffset(0.0, 0.0, 1.0);
+                case I_XX -> setMomentOfInertia(1.0, 0.0, 0.0);
+                case I_YY -> setMomentOfInertia(0.0, 1.0, 0.0);
+                case I_ZZ -> setMomentOfInertia(0.0, 0.0, 1.0);
+                case I_XY -> setMomentOfInertia(0.0, 0.0, 0.0, 1.0, 0.0, 0.0);
+                case I_XZ -> setMomentOfInertia(0.0, 0.0, 0.0, 0.0, 1.0, 0.0);
+                case I_YZ -> setMomentOfInertia(0.0, 0.0, 0.0, 0.0, 0.0, 1.0);
+            }
+        }
+
+        @Override
+        public void get(DMatrix matrixToPack)
+        {
+            get(0, 0, matrixToPack);
+        }
+
+        @Override
+        public void get(int startRow, int startColumn, DMatrix matrixToPack)
+        {
+            // Set upper left block corresponding to moment of inertia as normal
+            getMomentOfInertia().get(startRow, startColumn, matrixToPack);
+
+            // For upper right block and lower left block, which correspond to CoM offsets, assume mass is 1.0 for
+            // the time being
+            MecanoTools.toTildeForm(1.0, getCenterOfMassOffset(), false, startRow, startColumn + 3, matrixToPack);
+            MecanoTools.toTildeForm(1.0, getCenterOfMassOffset(), true, startRow + 3, startColumn, matrixToPack);
+
+            // For lower right block, which is a diagonal matrix of mass values, as normal
+            startRow += 3;
+            startColumn += 3;
+
+            for (int i = 0; i < 3; i++)
+            {
+                matrixToPack.set(startRow + i, startColumn + i, getMass());
+                matrixToPack.set(startRow + i, startColumn + (i + 1) % 3, 0.0);
+                matrixToPack.set(startRow + i, startColumn + (i + 2) % 3, 0.0);
+            }
+        }
+    }
+
     private class RecursionStep
     {
         private final RigidBodyBasics rigidBody;
@@ -207,6 +277,8 @@ public class JointTorqueRegressorCalculator
         private final List<RecursionStep> children = new ArrayList<>();
 
         private InverseDynamicsCalculator inverseDynamicsCalculator;
+
+        private SpatialInertiaParameterBasis spatialInertiaParameterBasis;
 
         /** Temporary variable to hold results of a column of the regressor matrix */
         private DMatrixRMaj regressorColumn;
@@ -223,6 +295,7 @@ public class JointTorqueRegressorCalculator
             {
                 parent.children.add(this);
                 this.inverseDynamicsCalculator = inverseDynamicsCalculator;
+                spatialInertiaParameterBasis = new SpatialInertiaParameterBasis(this.rigidBody);
                 regressorColumn = new DMatrixRMaj(inverseDynamicsCalculator.getJointTauMatrix().numRows, 1);
                 regressorMatrixBlock = new DMatrixRMaj(inverseDynamicsCalculator.getJointTauMatrix().numRows, 10);
             }
@@ -254,8 +327,9 @@ public class JointTorqueRegressorCalculator
                 for (SpatialInertiaParameterBasisOptions basis : SpatialInertiaParameterBasisOptions.values())
                 {
                     // Set spatial inertia of this rigid body to be the desired basis
-                    rigidBody.getInertia().set(getBasis(basis, rigidBody));
-                    inverseDynamicsCalculator.getBodyInertia(rigidBody).set(getBasis(basis, rigidBody));
+                    spatialInertiaParameterBasis.setBasis(basis);
+                    rigidBody.getInertia().set(spatialInertiaParameterBasis);
+                    inverseDynamicsCalculator.getBodyInertia(rigidBody).set(spatialInertiaParameterBasis);
                     inverseDynamicsCalculator.compute();
                     regressorColumn.set(inverseDynamicsCalculator.getJointTauMatrix());
                     setRegressorMatrixColumn(regressorColumn, basis);
