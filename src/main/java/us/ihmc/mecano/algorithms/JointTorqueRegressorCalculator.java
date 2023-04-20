@@ -2,13 +2,12 @@ package us.ihmc.mecano.algorithms;
 
 import org.ejml.data.DMatrixRMaj;
 import org.ejml.dense.row.CommonOps_DDRM;
-import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.mecano.multiBodySystem.interfaces.*;
 import us.ihmc.mecano.spatial.SpatialInertiaParameterBasis;
 import us.ihmc.mecano.spatial.interfaces.SpatialInertiaBasics;
 import us.ihmc.mecano.tools.MultiBodySystemTools;
 
-import java.util.Objects;
+import java.util.*;
 
 public class JointTorqueRegressorCalculator
 {
@@ -19,11 +18,13 @@ public class JointTorqueRegressorCalculator
 
     private final DMatrixRMaj parameterVector;
 
-    private final int numberOfBodies;
-
     private final InverseDynamicsCalculator inverseDynamicsCalculator;
 
     private final SpatialInertiaParameterBasis spatialInertiaParameterBasis;
+
+    private final RecursionStep initialRecursionStep;
+
+    private final Map<RigidBodyReadOnly, RecursionStep> rigidBodyToRecursionStepMap = new LinkedHashMap<>();
 
     enum SpatialInertiaParameterBasisOptions
     {
@@ -60,67 +61,105 @@ public class JointTorqueRegressorCalculator
         return spatialInertiaParameterBasis;
     }
 
-    public JointTorqueRegressorCalculator(RigidBodyBasics rootBody)
-    {
-        this(MultiBodySystemBasics.toMultiBodySystemBasics(rootBody), true);
-    }
-
-    public JointTorqueRegressorCalculator(MultiBodySystemBasics system)
-    {
-        this(system, true);
-    }
-
-    public JointTorqueRegressorCalculator(MultiBodySystemBasics input, boolean considerIgnoredSubtreesInertia)
+    public JointTorqueRegressorCalculator(MultiBodySystemBasics input)
     {
         this.input = input;
-        inverseDynamicsCalculator = new InverseDynamicsCalculator(input, considerIgnoredSubtreesInertia);
+        inverseDynamicsCalculator = new InverseDynamicsCalculator(input);
         spatialInertiaParameterBasis = new SpatialInertiaParameterBasis();
 
+        RigidBodyBasics rootBody = input.getRootBody();
+        initialRecursionStep = new RecursionStep(rootBody, null, inverseDynamicsCalculator, null);
+        rigidBodyToRecursionStepMap.put(rootBody, initialRecursionStep);
+        buildMultiBodyTree(initialRecursionStep, input.getJointsToIgnore());
+
         int nDoFs = MultiBodySystemTools.computeDegreesOfFreedom(input.getJointsToConsider());
-        RigidBodyBasics[] bodies = input.getRootBody().subtreeArray();  // TODO this generates garbage, but acceptable in the constructor?
-        numberOfBodies = bodies.length - 1;  // TODO Also -1 to dodge root body
-        int nParams = 10 * numberOfBodies;
+        int nBodies = rigidBodyToRecursionStepMap.size() - 1;  // -1 removes the root body
+        int nParams = 10 * nBodies;
 
         jointTorqueRegressorMatrix = new DMatrixRMaj(nDoFs, nParams);
         parameterVector = new DMatrixRMaj(nParams, 1);
-        for (int i = 1; i < bodies.length; i++)
+        collectParameterVectorFromRecursionSteps();
+    }
+
+    private void buildMultiBodyTree(RecursionStep parent, Collection<? extends JointReadOnly> jointsToIgnore)
+    {
+        List<JointReadOnly> childrenJoints = new ArrayList<>(parent.rigidBody.getChildrenJoints());
+
+        if (childrenJoints.size() > 1)
+        { // Reorganize the joints in the children to ensure that loop closures are treated last.
+            List<JointReadOnly> loopClosureAncestors = new ArrayList<>();
+
+            for (int i = 0; i < childrenJoints.size();)
+            {
+                if (MultiBodySystemTools.doesSubtreeContainLoopClosure(childrenJoints.get(i).getSuccessor()))
+                    loopClosureAncestors.add(childrenJoints.remove(i));
+                else
+                    i++;
+            }
+            childrenJoints.addAll(loopClosureAncestors);
+        }
+
+        for (JointReadOnly childJoint : childrenJoints)
         {
-            CommonOps_DDRM.insert(toParameterVector(bodies[i].getInertia()), parameterVector, (i-1) * 10, 0); // TODO (i-1) because of the loop offset dodging the root body
+            if (jointsToIgnore.contains(childJoint))
+                continue;
+
+            if (childJoint.isLoopClosure())
+            {
+                System.out.println(getClass().getSimpleName() + ": This calculator does not support kinematic loops. Ignoring joint: " + childJoint.getName());
+                continue;
+            }
+
+            RigidBodyBasics childBody = (RigidBodyBasics) childJoint.getSuccessor();
+            if (childBody != null)
+            {
+                int[] jointIndices = input.getJointMatrixIndexProvider().getJointDoFIndices(childJoint);
+                RecursionStep child = new RecursionStep(childBody, parent, inverseDynamicsCalculator, jointIndices);
+                rigidBodyToRecursionStepMap.put(childBody, child);
+                buildMultiBodyTree(child, jointsToIgnore);
+            }
         }
     }
 
     public void compute()
     {
-        // Generate regressor matrix by calling RNEA several times, one for each body / parameter combination
-        for (int i = 0; i < numberOfBodies; i++)
+        // Set all spatial inertias to zero
+        initialRecursionStep.setSpatialInertiasToZeroRecursively();
+
+        initialRecursionStep.calculateRegressorColumnsRecursively();
+
+        // Collect regressor results for all recursion steps together
+        collectJointTorqueRegressorFromRecursionSteps();
+    }
+
+    public void collectJointTorqueRegressorFromRecursionSteps()
+    {
+        int i = 0;
+        for (RecursionStep step : rigidBodyToRecursionStepMap.values())
         {
-            for (int j = 0; j < SpatialInertiaParameterBasisOptions.values().length; j++){  // TODO this assumes we're using every parameter
-                CommonOps_DDRM.insert(calculateRegressorColumn(input, i, SpatialInertiaParameterBasisOptions.values()[j]),
-                                      jointTorqueRegressorMatrix, 0, (i * 10) + j);
+            if (step.rigidBody.getInertia() != null) {
+                CommonOps_DDRM.insert(step.regressorMatrixBlock, jointTorqueRegressorMatrix, 0, i * 10);
+                i += 1;
             }
         }
     }
 
-    private DMatrixRMaj calculateRegressorColumn(MultiBodySystemBasics system, int bodyIndex, SpatialInertiaParameterBasisOptions basis)
+    /** NOTE: you can only use this *BEFORE* performing any regressor calculations. The reason for this is that regressor
+     * calculations involve manipulation of the multibody system's spatial inertia information, corrupting it from the
+     * initial input state. For that reason, only use this method before any regressor calculation, preferably as soon
+     * as possible after the constructor.
+     */
+    public void collectParameterVectorFromRecursionSteps()
     {
-        String bodyName = "Body";
-        bodyName = bodyName + String.valueOf(bodyIndex);
-        for (RigidBodyBasics body : system.getRootBody().subtreeArray())
+        int i = 0;
+        for (RecursionStep step : rigidBodyToRecursionStepMap.values())
         {
-            if (Objects.equals(body.getName(), "RootBody"))  // Just pass if it's the root body, TODO why is the root body null?
-                continue;
-            if (Objects.equals(body.getName(), bodyName)) {
-                body.getInertia().set(getBasis(basis, body));
-                inverseDynamicsCalculator.getBodyInertia(body).set(getBasis(basis, body));
-            }
-            else {
-                body.getInertia().setToZero();
-                inverseDynamicsCalculator.getBodyInertia(body).setToZero();
+            if (step.rigidBody.getInertia() != null) {
+                CommonOps_DDRM.insert(spatialInertiaToParameterVector(step.rigidBody.getInertia()),
+                                      parameterVector, i * 10, 0);
+                i += 1;
             }
         }
-
-        inverseDynamicsCalculator.compute();
-        return inverseDynamicsCalculator.getJointTauMatrix();
     }
 
     public void setGravitationalAcceleration(double gravity)
@@ -133,11 +172,17 @@ public class JointTorqueRegressorCalculator
         inverseDynamicsCalculator.setGravitionalAcceleration(gravityX, gravityY, gravityZ);
     }
 
-    // TODO there is a huge caveat to using this method that you should note -- it should only be used just after
-    //  construction, so that the spatial inertia values are still the correct (physical) values. If you call it later
-    //  after messing around with the SpatialInertiaParameterBasisOptions, the parameters will probably be set to their
-    //  basis values
-    private static DMatrixRMaj toParameterVector(SpatialInertiaBasics spatialInertia)
+    public DMatrixRMaj getParameterVector()
+    {
+        return parameterVector;
+    }
+
+    public DMatrixRMaj getJointTorqueRegressorMatrix()
+    {
+        return  jointTorqueRegressorMatrix;
+    }
+
+    private static DMatrixRMaj spatialInertiaToParameterVector(SpatialInertiaBasics spatialInertia)
     {
         DMatrixRMaj parameters = new DMatrixRMaj(10, 1);
         parameters.set(0, 0, spatialInertia.getMass());
@@ -153,22 +198,79 @@ public class JointTorqueRegressorCalculator
         return parameters;
     }
 
-    public DMatrixRMaj getParameterVector()
+    private class RecursionStep
     {
-        return parameterVector;
-    }
+        private final RigidBodyBasics rigidBody;
 
-    public DMatrixRMaj getJointTorqueRegressorMatrix()
-    {
-        return  jointTorqueRegressorMatrix;
-    }
+        private final RecursionStep parent;
 
-    public static void main(String[] args)
-    {
-        // TODO: figure out why the root body has null inertial parameters, is it just a dummy world link
-//        System.out.println(system.getRootBody());
-//        System.out.println(system.getRootBody().getInertia().getMass());
-//        System.out.println(system.getRootBody().getInertia().getCenterOfMassOffset());
-//        System.out.println(system.getRootBody().getInertia().getMomentOfInertia());
+        private final List<RecursionStep> children = new ArrayList<>();
+
+        private InverseDynamicsCalculator inverseDynamicsCalculator;
+
+        /** Temporary variable to hold results of a column of the regressor matrix */
+        private DMatrixRMaj regressorColumn;
+
+        private DMatrixRMaj regressorMatrixBlock;
+
+        public RecursionStep(RigidBodyBasics rigidBody, RecursionStep parent, InverseDynamicsCalculator inverseDynamicsCalculator, int[] jointsToIgnore)
+        {
+            this.rigidBody = rigidBody;
+            this.parent = parent;
+            this.inverseDynamicsCalculator = inverseDynamicsCalculator;
+
+            if (parent != null)
+            {
+                parent.children.add(this);
+                this.inverseDynamicsCalculator = inverseDynamicsCalculator;
+                regressorColumn = new DMatrixRMaj(inverseDynamicsCalculator.getJointTauMatrix().numRows, 1);
+                regressorMatrixBlock = new DMatrixRMaj(inverseDynamicsCalculator.getJointTauMatrix().numRows, 10);
+            }
+        }
+
+        /** First sweep sets all spatial inertias to zero */
+        public void setSpatialInertiasToZeroRecursively()
+        {
+            // Only make changes if the rigid body of concern isn't a null body like the root / elevator
+            if (rigidBody.getInertia() != null) {
+                rigidBody.getInertia().setToZero();
+                inverseDynamicsCalculator.getBodyInertia(rigidBody).setToZero();
+            }
+
+            for (RecursionStep child : children) {
+                child.setSpatialInertiasToZeroRecursively();
+            }
+        }
+
+        /** Second pass, assuming that all spatial inertias have been zeroed in the first sweep (therefore there are
+         * no spatial inertias earlier in the tree that we have to care about). Here, we pass in a basis and set the
+         * spatial inertia of the current rigid body
+         */
+        public void calculateRegressorColumnsRecursively()
+        {
+            // Only calculate if the rigid body of concern isn't a null body like the root / elevator
+            if (rigidBody.getInertia() != null)
+            {
+                for (SpatialInertiaParameterBasisOptions basis : SpatialInertiaParameterBasisOptions.values())
+                {
+                    // Set spatial inertia of this rigid body to be the desired basis
+                    rigidBody.getInertia().set(getBasis(basis, rigidBody));
+                    inverseDynamicsCalculator.getBodyInertia(rigidBody).set(getBasis(basis, rigidBody));
+                    inverseDynamicsCalculator.compute();
+                    regressorColumn.set(inverseDynamicsCalculator.getJointTauMatrix());
+                    setRegressorMatrixColumn(regressorColumn, basis);
+                    rigidBody.getInertia().setToZero();
+                    inverseDynamicsCalculator.getBodyInertia(rigidBody).setToZero();
+                }
+            }
+            for (RecursionStep child : children) {
+                child.calculateRegressorColumnsRecursively();
+            }
+        }
+
+        public void setRegressorMatrixColumn(DMatrixRMaj regressorColumn, SpatialInertiaParameterBasisOptions basis)
+        {
+            CommonOps_DDRM.insert(regressorColumn, regressorMatrixBlock, 0, basis.ordinal());
+        }
     }
 }
