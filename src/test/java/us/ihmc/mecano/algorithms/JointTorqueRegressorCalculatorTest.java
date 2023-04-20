@@ -27,6 +27,39 @@ public class JointTorqueRegressorCalculatorTest
 
     private static final double EPSILON = 1.0e-12;
 
+    // Simple two joint system that is useful for debugging -- keeps the matrices small and readable.
+    @Test
+    public void testRegressorAndParametersMatchInverseDynamicsSimple()
+    {
+        Random random = new Random(25);
+
+        int numberOfJoints = 2;
+        List<OneDoFJoint> joints = MultiBodySystemRandomTools.nextOneDoFJointChain(random, numberOfJoints);
+        MultiBodySystemBasics system = MultiBodySystemBasics.toMultiBodySystemBasics(joints);
+
+        for (JointStateType stateToRandomize : JointStateType.values())
+            MultiBodySystemRandomTools.nextState(random, stateToRandomize, system.getAllJoints());
+
+        // Create an inverse dynamics calculator to compare torque results to
+        InverseDynamicsCalculator inverseDynamicsCalculator = new InverseDynamicsCalculator(system);
+        inverseDynamicsCalculator.setGravitionalAcceleration(-9.81);
+        inverseDynamicsCalculator.compute();
+        DMatrixRMaj expectedjointTau = inverseDynamicsCalculator.getJointTauMatrix();
+
+        // We want the product of the regressor matrix and the parameter vector to equal the expected joint torques
+        JointTorqueRegressorCalculator regressorCalculator = new JointTorqueRegressorCalculator(system);
+        DMatrixRMaj parameterVector = regressorCalculator.getParameterVector();
+        regressorCalculator.setGravitationalAcceleration(-9.81);
+        regressorCalculator.compute();
+        DMatrixRMaj regressorMatrix = regressorCalculator.getJointTorqueRegressorMatrix();
+
+        // Compare results
+        DMatrixRMaj actualJointTau = new DMatrixRMaj(numberOfJoints, 1);
+        CommonOps_DDRM.mult(regressorMatrix, parameterVector, actualJointTau);
+        assertEquals(expectedjointTau.getData().length, actualJointTau.getData().length);
+        assertArrayEquals(expectedjointTau.getData(), actualJointTau.getData(), EPSILON);
+    }
+
     @Test
     public void testRegressorAndParametersMatchInverseDynamicsOneDoFJointChain() {
         Random random = new Random(25);
