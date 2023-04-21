@@ -171,7 +171,8 @@ public class JointTorqueRegressorCalculator
         }
     }
 
-    /** NOTE: you can only use this *BEFORE* performing any regressor calculations. The reason for this is that regressor
+    /**
+     * NOTE: you should only use this *before* performing any regressor calculations. The reason for this is that regressor
      * calculations involve manipulation of the multibody system's spatial inertia information, corrupting it from the
      * initial input state. For that reason, only use this method before any regressor calculation, preferably as soon
      * as possible after the constructor.
@@ -224,7 +225,7 @@ public class JointTorqueRegressorCalculator
     }
 
     /**
-     * Gets the 10-by-1 inertial parameter vector of the multi-body system {@code input}, where N is the number of rigid
+     * Gets the 10N-by-1 inertial parameter vector of the multi-body system {@code input}, where N is the number of rigid
      * bodies in the multi-body system.
      * <p>
      * In general, this should mostly be used for debugging purposes, and if called, should be called soon after the
@@ -272,7 +273,7 @@ public class JointTorqueRegressorCalculator
     /**
      * A {@code SpatialInertia} object is linear with respect to the ten inertial parameters that constitute it.
      * Therefore, we can create a basis for all spatial inertias with respect to these parameters. This enum is used in
-     * {@code SpatialInertiaParameterBasis} to generate these bassis matrices.
+     * {@code SpatialInertiaParameterBasis} to generate these basis matrices.
      */
     enum SpatialInertiaParameterBasisOptions
     {
@@ -396,7 +397,7 @@ public class JointTorqueRegressorCalculator
          * The inverse dynamics calculator used for regressor calculation.
          * <p>
          * Note: this calculator is shared throughout the whole algorithm, including all of the recursion steps. As
-         * such, be vary wary of arbitrarily changing its state.
+         * such, be wary of arbitrarily changing its state.
          * </p>
           */
         private InverseDynamicsCalculator inverseDynamicsCalculator;
@@ -486,8 +487,8 @@ public class JointTorqueRegressorCalculator
          * {@code SpatialInertiaParameterBasisOptions} to the appropriate place in this recursion step's
          * {@code regressorMatrixBlock}.
          * <p>
-         * The block of the joint torque regressor corresponding to a given rigid body will have ten columns. We choose
-         * to order them as they are ordered in the enum {@link SpatialInertiaParameterBasisOptions}.
+         * The block of the joint torque regressor matrix corresponding to a given rigid body will have ten columns. We
+         * choose to order them as they are ordered in the enum {@link SpatialInertiaParameterBasisOptions}.
          * </p>
          *
          * @param regressorColumn the n-by-1 vector representing the column for parameter {@code basis}.
