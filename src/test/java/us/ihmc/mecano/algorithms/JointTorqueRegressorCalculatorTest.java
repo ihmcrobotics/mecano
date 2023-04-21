@@ -217,7 +217,7 @@ public class JointTorqueRegressorCalculatorTest
             totalTime += System.nanoTime() - startTime;
         }
 
-        LogTools.info("1-DoF chain: Took on average per iteration: " + totalTime / 1e9 / ITERATIONS + " seconds");
+        LogTools.info("Floating 1-DoF chain: Took on average per iteration: " + totalTime / 1e9 / ITERATIONS + " seconds");
     }
 
     @Test
@@ -291,7 +291,7 @@ public class JointTorqueRegressorCalculatorTest
             totalTime += System.nanoTime() - startTime;
         }
 
-        LogTools.info("1-DoF chain: Took on average per iteration: " + totalTime / 1e9 / ITERATIONS + " seconds");
+        LogTools.info("1-DoF tree: Took on average per iteration: " + totalTime / 1e9 / ITERATIONS + " seconds");
     }
 
     @Test

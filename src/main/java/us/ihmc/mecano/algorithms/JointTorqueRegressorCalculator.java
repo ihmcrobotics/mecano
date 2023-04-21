@@ -147,6 +147,12 @@ public class JointTorqueRegressorCalculator
         // Set all spatial inertias to zero
         initialRecursionStep.setSpatialInertiasToZeroRecursively();
 
+        // Perform an initial forward pass of the inverse dynamics calculator (which roughly corresponds to the forward
+        // kinematics). We'll subsequently call the forward pass just one for every rigid body, instead of redundantly
+        // calling it once every rigid body / parameter combination
+        inverseDynamicsCalculator.initializeJointAccelerationMatrix(null);
+        inverseDynamicsCalculator.initialRecursionStep.passOne();
+
         // Calculate each column of the regressor, where every column represents a unique rigid body and parameter
         // combination. By stacking all of these columns together in the next step, we'll get the regressor
         initialRecursionStep.calculateRegressorColumnsRecursively();
@@ -468,7 +474,8 @@ public class JointTorqueRegressorCalculator
 
                     // Perform inverse dynamics calculation and store the result
                     inverseDynamicsCalculator.getBodyInertia(rigidBody).set(spatialInertiaParameterBasis);
-                    inverseDynamicsCalculator.compute();
+                    // The forward pass of the inverse dynamics has already been called, only call the backward pass
+                    inverseDynamicsCalculator.initialRecursionStep.passTwo();
                     regressorColumn.set(inverseDynamicsCalculator.getJointTauMatrix());
                     setRegressorMatrixColumn(regressorColumn, basis);
 

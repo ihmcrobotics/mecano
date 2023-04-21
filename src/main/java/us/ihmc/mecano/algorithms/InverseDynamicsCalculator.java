@@ -52,7 +52,7 @@ public class InverseDynamicsCalculator
    /** Defines the multi-body system to use with this calculator. */
    private final MultiBodySystemReadOnly input;
    /** The root of the internal recursive algorithm. */
-   private final RecursionStep initialRecursionStep;
+   protected final RecursionStep initialRecursionStep;
    /** Map to quickly retrieve information for each rigid-body. */
    private final Map<RigidBodyReadOnly, RecursionStep> rigidBodyToRecursionStepMap = new LinkedHashMap<>();
    /** Map to quickly retrieve information for each joint. */
@@ -464,6 +464,22 @@ public class InverseDynamicsCalculator
     */
    public void compute(DMatrix jointAccelerationMatrix)
    {
+      initializeJointAccelerationMatrix(jointAccelerationMatrix);
+      initialRecursionStep.passOne();
+      initialRecursionStep.passTwo();
+   }
+
+   /**
+    * Initialise the joint acceleration matrix containing the desired accelerations to achieve.
+    * <p>
+    * The given matrix is expected to have been configured using the same
+    * {@link JointMatrixIndexProvider} that was used to configure this calculator.
+    * </p>
+    *
+    * @param jointAccelerationMatrix the matrix containing the joint accelerations to use. Not
+    *                                modified.
+    */
+   void initializeJointAccelerationMatrix(DMatrix jointAccelerationMatrix) {
       if (jointAccelerationMatrix != null)
       {
          allJointAccelerationMatrix.set(jointAccelerationMatrix);
@@ -473,9 +489,6 @@ public class InverseDynamicsCalculator
          List<? extends JointReadOnly> indexedJointsInOrder = input.getJointMatrixIndexProvider().getIndexedJointsInOrder();
          MultiBodySystemTools.extractJointsState(indexedJointsInOrder, JointStateType.ACCELERATION, allJointAccelerationMatrix);
       }
-
-      initialRecursionStep.passOne();
-      initialRecursionStep.passTwo();
    }
 
    /**
@@ -676,7 +689,7 @@ public class InverseDynamicsCalculator
     *
     * @author Sylvain Bertrand
     */
-   private final class RecursionStep implements RecursionStepBasics
+   protected final class RecursionStep implements RecursionStepBasics
    {
       /**
        * The rigid-body for which this recursion is.
@@ -746,6 +759,10 @@ public class InverseDynamicsCalculator
        * Joint indices for storing {@code tau} in the main matrix {@code jointTauMatrix}.
        */
       private int[] jointIndices;
+      /**
+       * Intermediate variable for holding the body twist.
+       */
+      private TwistReadOnly bodyTwistToUse;
 
       public RecursionStep(RigidBodyReadOnly rigidBody, RecursionStep parent, int[] jointIndices)
       {
@@ -765,6 +782,7 @@ public class InverseDynamicsCalculator
             a = null;
             tau = null;
             jointWrenchMatrix = null;
+            bodyTwistToUse = null;
          }
          else
          {
@@ -782,6 +800,7 @@ public class InverseDynamicsCalculator
             jointWrenchMatrix = new DMatrixRMaj(SpatialVectorReadOnly.SIZE, 1);
             if (!joint.isMotionSubspaceVariable())
                joint.getMotionSubspace(S);
+            bodyTwistToUse = new Twist();
          }
       }
 
@@ -814,8 +833,6 @@ public class InverseDynamicsCalculator
                joint.getMotionSubspace(S);
 
             rigidBodyAcceleration.setIncludingFrame(parent.rigidBodyAcceleration);
-
-            TwistReadOnly bodyTwistToUse;
 
             if (considerCoriolisAndCentrifugalForces)
             {
@@ -851,8 +868,6 @@ public class InverseDynamicsCalculator
             {
                rigidBodyAcceleration.setBodyFrame(getBodyFixedFrame());
             }
-
-            bodyInertia.computeDynamicWrench(rigidBodyAcceleration, bodyTwistToUse, jointWrench);
          }
 
          for (int childIndex = 0; childIndex < children.size(); childIndex++)
@@ -871,6 +886,8 @@ public class InverseDynamicsCalculator
 
          if (isRoot())
             return;
+
+         bodyInertia.computeDynamicWrench(rigidBodyAcceleration, bodyTwistToUse, jointWrench);
 
          jointWrench.sub(externalWrench);
          jointWrench.changeFrame(joint.getFrameAfterJoint());
