@@ -4,6 +4,7 @@ import org.ejml.data.DMatrixRMaj;
 import org.ejml.dense.row.CommonOps_DDRM;
 import org.junit.jupiter.api.Test;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
+import us.ihmc.log.LogTools;
 import us.ihmc.mecano.multiBodySystem.Joint;
 import us.ihmc.mecano.multiBodySystem.OneDoFJoint;
 import us.ihmc.mecano.multiBodySystem.RigidBody;
@@ -21,11 +22,13 @@ import static org.junit.jupiter.api.Assertions.*;
 
 public class JointTorqueRegressorCalculatorTest
 {
-    private static final int WARMUP_ITERATIONS = 5000;
     private static final int STATE_ITERATIONS = 100;
     private static final int SYSTEM_ITERATIONS = 5;
 
     private static final double EPSILON = 1.0e-12;
+
+    private static final int WARMUP_ITERATIONS = 100;
+    private static final int ITERATIONS = 1000;
 
     // Simple two joint system that is useful for debugging -- keeps the matrices small and readable.
     @Test
@@ -101,6 +104,40 @@ public class JointTorqueRegressorCalculatorTest
     }
 
     @Test
+    public void benchmarkOneDoFJointChain()
+    {
+        Random random = new Random(25);
+
+        List<OneDoFJoint> joints = MultiBodySystemRandomTools.nextOneDoFJointChain(random, 30);
+        MultiBodySystemBasics system = MultiBodySystemBasics.toMultiBodySystemBasics(joints);
+
+        JointTorqueRegressorCalculator calculator = new JointTorqueRegressorCalculator(system);
+        calculator.setGravitationalAcceleration(-9.81);
+
+        long totalTime = 0L;
+
+        for (int i = 0; i < WARMUP_ITERATIONS; i++)
+        {
+            for (JointStateType stateToRandomize : JointStateType.values())
+                MultiBodySystemRandomTools.nextState(random, stateToRandomize, joints);
+
+            calculator.compute();
+        }
+
+        for (int i = 0; i < ITERATIONS; i++)
+        {
+            for (JointStateType stateToRandomize : JointStateType.values())
+                MultiBodySystemRandomTools.nextState(random, stateToRandomize, joints);
+
+            long startTime = System.nanoTime();
+            calculator.compute();
+            totalTime += System.nanoTime() - startTime;
+        }
+
+        LogTools.info("1-DoF chain: Took on average per iteration: " + totalTime / 1e9 / ITERATIONS + " seconds");
+    }
+
+    @Test
     public void testRegressorAndParametersMatchInverseDynamicsFloatingOneDoFJointChain()
     {
         Random random = new Random(25);
@@ -146,6 +183,44 @@ public class JointTorqueRegressorCalculatorTest
     }
 
     @Test
+    public void benchmarkForFloatingOneDoFJointChain()
+    {
+        Random random = new Random(25);
+
+        List<Joint> joints = new ArrayList<>();
+        RigidBody elevator = new RigidBody("elevator", ReferenceFrame.getWorldFrame());
+        joints.add(new SixDoFJoint("floating", elevator));
+        RigidBody floatingBody = MultiBodySystemRandomTools.nextRigidBody(random, "floatingBody", joints.get(0));
+        joints.addAll(MultiBodySystemRandomTools.nextOneDoFJointChain(random, floatingBody, 30));
+        MultiBodySystemBasics system = MultiBodySystemBasics.toMultiBodySystemBasics(joints);
+
+        JointTorqueRegressorCalculator calculator = new JointTorqueRegressorCalculator(system);
+        calculator.setGravitationalAcceleration(-9.81);
+
+        long totalTime = 0L;
+
+        for (int i = 0; i < WARMUP_ITERATIONS; i++)
+        {
+            for (JointStateType stateToRandomize : JointStateType.values())
+                MultiBodySystemRandomTools.nextState(random, stateToRandomize, joints);
+
+            calculator.compute();
+        }
+
+        for (int i = 0; i < ITERATIONS; i++)
+        {
+            for (JointStateType stateToRandomize : JointStateType.values())
+                MultiBodySystemRandomTools.nextState(random, stateToRandomize, joints);
+
+            long startTime = System.nanoTime();
+            calculator.compute();
+            totalTime += System.nanoTime() - startTime;
+        }
+
+        LogTools.info("1-DoF chain: Took on average per iteration: " + totalTime / 1e9 / ITERATIONS + " seconds");
+    }
+
+    @Test
     public void testRegressorAndParametersMatchInverseDynamicsOneDoFJointTree()
     {
         Random random = new Random(25);
@@ -183,7 +258,40 @@ public class JointTorqueRegressorCalculatorTest
                 assertArrayEquals(expectedjointTau.getData(), actualJointTau.getData(), EPSILON);
             }
         }
+    }
 
+    @Test
+    public void benchmarkForOneDoFJointTree()
+    {
+        Random random = new Random(25);
+
+        List<OneDoFJoint> joints = MultiBodySystemRandomTools.nextOneDoFJointTree(random, 30);
+        MultiBodySystemBasics system = MultiBodySystemBasics.toMultiBodySystemBasics(joints);
+
+        JointTorqueRegressorCalculator calculator = new JointTorqueRegressorCalculator(system);
+        calculator.setGravitationalAcceleration(-9.81);
+
+        long totalTime = 0L;
+
+        for (int i = 0; i < WARMUP_ITERATIONS; i++)
+        {
+            for (JointStateType stateToRandomize : JointStateType.values())
+                MultiBodySystemRandomTools.nextState(random, stateToRandomize, joints);
+
+            calculator.compute();
+        }
+
+        for (int i = 0; i < ITERATIONS; i++)
+        {
+            for (JointStateType stateToRandomize : JointStateType.values())
+                MultiBodySystemRandomTools.nextState(random, stateToRandomize, joints);
+
+            long startTime = System.nanoTime();
+            calculator.compute();
+            totalTime += System.nanoTime() - startTime;
+        }
+
+        LogTools.info("1-DoF chain: Took on average per iteration: " + totalTime / 1e9 / ITERATIONS + " seconds");
     }
 
     @Test
@@ -232,6 +340,44 @@ public class JointTorqueRegressorCalculatorTest
     }
 
     @Test
+    public void benchmarkForFloatingOneDoFJointTree()
+    {
+        Random random = new Random(25);
+
+        List<Joint> joints = new ArrayList<>();
+        RigidBody elevator = new RigidBody("elevator", ReferenceFrame.getWorldFrame());
+        joints.add(new SixDoFJoint("floating", elevator));
+        RigidBody floatingBody = MultiBodySystemRandomTools.nextRigidBody(random, "floatingBody", joints.get(0));
+        joints.addAll(MultiBodySystemRandomTools.nextOneDoFJointTree(random, floatingBody, 30));
+        MultiBodySystemBasics system = MultiBodySystemBasics.toMultiBodySystemBasics(joints);
+
+        JointTorqueRegressorCalculator calculator = new JointTorqueRegressorCalculator(system);
+        calculator.setGravitationalAcceleration(-9.81);
+
+        long totalTime = 0L;
+
+        for (int i = 0; i < WARMUP_ITERATIONS; i++)
+        {
+            for (JointStateType stateToRandomize : JointStateType.values())
+                MultiBodySystemRandomTools.nextState(random, stateToRandomize, joints);
+
+            calculator.compute();
+        }
+
+        for (int i = 0; i < ITERATIONS; i++)
+        {
+            for (JointStateType stateToRandomize : JointStateType.values())
+                MultiBodySystemRandomTools.nextState(random, stateToRandomize, joints);
+
+            long startTime = System.nanoTime();
+            calculator.compute();
+            totalTime += System.nanoTime() - startTime;
+        }
+
+        LogTools.info("Floating 1-DoF tree: Took on average per iteration: " + totalTime / 1e9 / ITERATIONS + " seconds");
+    }
+
+    @Test
     public void testSpatialInertiaParameterBasis()
     {
         DMatrixRMaj expectedBasis = new DMatrixRMaj(6, 6);
@@ -246,7 +392,6 @@ public class JointTorqueRegressorCalculatorTest
         // usually is set to have null parameters and reference frames
         RigidBodyBasics body = system.findRigidBody("Body0");
 
-        JointTorqueRegressorCalculator regressorCalculator = new JointTorqueRegressorCalculator(system);
         JointTorqueRegressorCalculator.SpatialInertiaParameterBasis basis = new JointTorqueRegressorCalculator.SpatialInertiaParameterBasis(body);
         for (JointTorqueRegressorCalculator.SpatialInertiaParameterBasisOptions basisOption : JointTorqueRegressorCalculator.SpatialInertiaParameterBasisOptions.values())
             switch (basisOption) {
