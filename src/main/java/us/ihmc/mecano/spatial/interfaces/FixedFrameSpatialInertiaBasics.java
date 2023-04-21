@@ -104,11 +104,28 @@ public interface FixedFrameSpatialInertiaBasics extends SpatialInertiaReadOnly, 
       getMomentOfInertia().set(Ixx, 0.0, 0.0, 0.0, Iyy, 0.0, 0.0, 0.0, Izz);
    }
 
+   /**
+    * Sets the upper-triangular part of the (symmetric) moment of inertia matrix element by element.
+    *
+    * @param Ixx The moment of inertia around the x-axis.
+    * @param Iyy The moment of inertia around the y-axis.
+    * @param Izz The moment of inertia around the z-axis.
+    * @param Ixy The product of inertia of rotation around the x-axis with respect to the y-axis.
+    * @param Ixz The product of inertia of rotation around the x-axis with respect to the z-axis.
+    * @param Iyz The product of inertia of rotation around the y-axis with respect to the z-axis.
+    */
    default void setMomentOfInertia(double Ixx, double Iyy, double Izz, double Ixy, double Ixz, double Iyz)
    {
       getMomentOfInertia().set(Ixx, Ixy, Ixz, Ixy, Iyy, Iyz, Ixz, Iyz, Izz);
    }
 
+   /**
+    * Sets the center of mass offset with respect to the origin of the frame in which this spatial inertia is expressed.
+    *
+    * @param x the x-axis component of the center of mass offset.
+    * @param y the y-axis component of the center of mass offset.
+    * @param z the z-axis component of the center of mass offset.
+    */
    default void setCenterOfMassOffset(double x, double y, double z)
    {
       getCenterOfMassOffset().set(x, y, z);

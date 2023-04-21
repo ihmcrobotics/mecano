@@ -488,6 +488,11 @@ public class InverseDynamicsCalculator
       return input;
    }
 
+   /**
+    * Gets the spatial inertia of the chosen {@code RigidBody}.
+    *
+    * @return the spatial inertia of the chosen rigid body.
+    */
    public SpatialInertia getBodyInertia(RigidBodyReadOnly rigidBody)
    {
       return rigidBodyToRecursionStepMap.get(rigidBody).getBodyInertia();
