@@ -202,7 +202,7 @@ public class JointTorqueRegressorCalculator
       {
          if (step.rigidBody.getInertia() != null)
          {
-            CommonOps_DDRM.insert(spatialInertiaToParameterVector(step.rigidBody.getInertia()), parameterVector, i * PARAMETERS_PER_BODY, 0);
+            CommonOps_DDRM.insert(step.parameterVector, parameterVector, i * PARAMETERS_PER_BODY, 0);
             i++;
          }
       }
@@ -269,25 +269,6 @@ public class JointTorqueRegressorCalculator
    public DMatrixRMaj getJointTorqueRegressorMatrix()
    {
       return jointTorqueRegressorMatrix;
-   }
-
-   /**
-    * Utility method for converting SpatialInertia objects to matrix form.
-    */
-   private static DMatrixRMaj spatialInertiaToParameterVector(SpatialInertiaBasics spatialInertia)
-   {
-      DMatrixRMaj parameters = new DMatrixRMaj(PARAMETERS_PER_BODY, 1);
-      parameters.set(0, 0, spatialInertia.getMass());
-      parameters.set(1, 0, spatialInertia.getCenterOfMassOffset().getX());
-      parameters.set(2, 0, spatialInertia.getCenterOfMassOffset().getY());
-      parameters.set(3, 0, spatialInertia.getCenterOfMassOffset().getZ());
-      parameters.set(4, 0, spatialInertia.getMomentOfInertia().getM00());  // Ixx
-      parameters.set(5, 0, spatialInertia.getMomentOfInertia().getM11());  // Iyy
-      parameters.set(6, 0, spatialInertia.getMomentOfInertia().getM22());  // Izz
-      parameters.set(7, 0, spatialInertia.getMomentOfInertia().getM01());  // Ixy
-      parameters.set(8, 0, spatialInertia.getMomentOfInertia().getM02());  // Ixz
-      parameters.set(9, 0, spatialInertia.getMomentOfInertia().getM12());  // Iyz
-      return parameters;
    }
 
    /**
@@ -409,6 +390,12 @@ public class JointTorqueRegressorCalculator
       private final List<JointTorqueRegressorRecursionStep> children = new ArrayList<>();
 
       /**
+       * A vector containing the 10 inertial parameters of the {@code rigidBody} in this recursion step. This is created on construction, and is not modified
+       * during the algorithm's run.
+       */
+      private final DMatrixRMaj parameterVector;
+
+      /**
        * The inverse dynamics calculator used for regressor calculation.
        * <p>
        * Note: this calculator is shared throughout the whole algorithm, including all of the recursion steps. As
@@ -461,11 +448,12 @@ public class JointTorqueRegressorCalculator
       {
          this.rigidBody = rigidBody;
          this.parent = parent;
-         this.inverseDynamicsCalculator = inverseDynamicsCalculator;
+         this.parameterVector = new DMatrixRMaj(PARAMETERS_PER_BODY, 1);
 
          if (parent != null)
          {
             parent.children.add(this);
+            spatialInertiaToParameterVector(rigidBody.getInertia(), parameterVector);
             this.inverseDynamicsCalculator = inverseDynamicsCalculator;
             spatialInertiaParameterBasis = new SpatialInertiaParameterBasis(this.rigidBody);
             regressorColumn = new DMatrixRMaj(inverseDynamicsCalculator.getJointTauMatrix().numRows, 1);
@@ -596,6 +584,23 @@ public class JointTorqueRegressorCalculator
       public void setRegressorMatrixColumn(DMatrixRMaj regressorColumn, SpatialInertiaParameterBasisOptions basis)
       {
          CommonOps_DDRM.insert(regressorColumn, regressorMatrixBlock, 0, basis.ordinal());
+      }
+
+      /**
+       * Utility method for converting SpatialInertia objects to matrix form.
+       */
+      private void spatialInertiaToParameterVector(SpatialInertiaBasics spatialInertia, DMatrixRMaj parameterVectorToPack)
+      {
+         parameterVectorToPack.set(0, 0, spatialInertia.getMass());
+         parameterVectorToPack.set(1, 0, spatialInertia.getCenterOfMassOffset().getX());
+         parameterVectorToPack.set(2, 0, spatialInertia.getCenterOfMassOffset().getY());
+         parameterVectorToPack.set(3, 0, spatialInertia.getCenterOfMassOffset().getZ());
+         parameterVectorToPack.set(4, 0, spatialInertia.getMomentOfInertia().getM00());  // Ixx
+         parameterVectorToPack.set(5, 0, spatialInertia.getMomentOfInertia().getM11());  // Iyy
+         parameterVectorToPack.set(6, 0, spatialInertia.getMomentOfInertia().getM22());  // Izz
+         parameterVectorToPack.set(7, 0, spatialInertia.getMomentOfInertia().getM01());  // Ixy
+         parameterVectorToPack.set(8, 0, spatialInertia.getMomentOfInertia().getM02());  // Ixz
+         parameterVectorToPack.set(9, 0, spatialInertia.getMomentOfInertia().getM12());  // Iyz
       }
    }
 }
