@@ -321,11 +321,11 @@ public class JointTorqueRegressorCalculator
             case MCOM_Y -> setCenterOfMassOffset(0.0, 1.0, 0.0);
             case MCOM_Z -> setCenterOfMassOffset(0.0, 0.0, 1.0);
             case I_XX -> setMomentOfInertia(1.0, 0.0, 0.0);
+            case I_XY -> setMomentOfInertia(0.0, 1.0, 0.0, 0.0, 0.0, 0.0);
+            case I_XZ -> setMomentOfInertia(0.0, 0.0, 1.0, 0.0, 0.0, 0.0);
             case I_YY -> setMomentOfInertia(0.0, 1.0, 0.0);
+            case I_YZ -> setMomentOfInertia(0.0, 0.0, 0.0, 0.0, 1.0, 0.0);
             case I_ZZ -> setMomentOfInertia(0.0, 0.0, 1.0);
-            case I_XY -> setMomentOfInertia(0.0, 0.0, 0.0, 1.0, 0.0, 0.0);
-            case I_XZ -> setMomentOfInertia(0.0, 0.0, 0.0, 0.0, 1.0, 0.0);
-            case I_YZ -> setMomentOfInertia(0.0, 0.0, 0.0, 0.0, 0.0, 1.0);
          }
       }
 
