@@ -30,6 +30,9 @@ import java.util.*;
  * <a href=https://sites.nd.edu/pwensing/teaching/>link</a> [Last accessed 2023-04-21].
  * </p>
  * <p>
+ * See the confluence page <a href=https://journals.sagepub.com/doi/10.1177/027836498600500306>link</a> for more details, and copies of the above files.
+ * </p>
+ * <p>
  * Note on kinematic loops: this calculator does not support kinematic loops yet.
  * </p>
  *
