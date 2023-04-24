@@ -184,7 +184,7 @@ public class JointTorqueRegressorCalculator
          if (step.rigidBody.getInertia() != null)
          {
             CommonOps_DDRM.insert(step.regressorMatrixBlock, jointTorqueRegressorMatrix, 0, i * PARAMETERS_PER_BODY);
-            i += 1;
+            i++;
          }
       }
    }
@@ -203,7 +203,7 @@ public class JointTorqueRegressorCalculator
          if (step.rigidBody.getInertia() != null)
          {
             CommonOps_DDRM.insert(spatialInertiaToParameterVector(step.rigidBody.getInertia()), parameterVector, i * PARAMETERS_PER_BODY, 0);
-            i += 1;
+            i++;
          }
       }
    }
