@@ -479,7 +479,8 @@ public class InverseDynamicsCalculator
     * @param jointAccelerationMatrix the matrix containing the joint accelerations to use. Not
     *                                modified.
     */
-   void initializeJointAccelerationMatrix(DMatrix jointAccelerationMatrix) {
+   void initializeJointAccelerationMatrix(DMatrix jointAccelerationMatrix)
+   {
       if (jointAccelerationMatrix != null)
       {
          allJointAccelerationMatrix.set(jointAccelerationMatrix);
@@ -835,7 +836,8 @@ public class InverseDynamicsCalculator
          }
       }
 
-      public void passOne() {
+      public void passOne()
+      {
          if (!isRoot())
          {
             if (joint.isMotionSubspaceVariable())
@@ -891,7 +893,8 @@ public class InverseDynamicsCalculator
          passTwo();
       }
 
-      public void passTwo() {
+      public void passTwo()
+      {
          if (isRoot())
             return;
 
