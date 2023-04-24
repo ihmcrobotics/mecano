@@ -52,9 +52,9 @@ public class InverseDynamicsCalculator
    /** Defines the multi-body system to use with this calculator. */
    private final MultiBodySystemReadOnly input;
    /** The root of the internal recursive algorithm. */
-   protected final RecursionStep initialRecursionStep;
+   final RecursionStep initialRecursionStep;
    /** Map to quickly retrieve information for each rigid-body. */
-   protected final Map<RigidBodyReadOnly, RecursionStep> rigidBodyToRecursionStepMap = new LinkedHashMap<>();
+   final Map<RigidBodyReadOnly, RecursionStep> rigidBodyToRecursionStepMap = new LinkedHashMap<>();
    /** Map to quickly retrieve information for each joint. */
    private final Map<JointReadOnly, RecursionStepBasics> jointToRecursionStepMap = new LinkedHashMap<>();
 
@@ -690,7 +690,7 @@ public class InverseDynamicsCalculator
     *
     * @author Sylvain Bertrand
     */
-   protected final class RecursionStep implements RecursionStepBasics
+   final class RecursionStep implements RecursionStepBasics
    {
       /**
        * The rigid-body for which this recursion is.
