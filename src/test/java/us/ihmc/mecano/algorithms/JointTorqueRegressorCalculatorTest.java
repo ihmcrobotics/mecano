@@ -5,10 +5,7 @@ import org.ejml.dense.row.CommonOps_DDRM;
 import org.junit.jupiter.api.Test;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.log.LogTools;
-import us.ihmc.mecano.multiBodySystem.Joint;
-import us.ihmc.mecano.multiBodySystem.OneDoFJoint;
-import us.ihmc.mecano.multiBodySystem.RigidBody;
-import us.ihmc.mecano.multiBodySystem.SixDoFJoint;
+import us.ihmc.mecano.multiBodySystem.*;
 import us.ihmc.mecano.multiBodySystem.interfaces.MultiBodySystemBasics;
 import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
 import us.ihmc.mecano.tools.JointStateType;
@@ -61,6 +58,35 @@ public class JointTorqueRegressorCalculatorTest
       CommonOps_DDRM.mult(regressorMatrix, parameterVector, actualJointTau);
       assertEquals(expectedjointTau.getData().length, actualJointTau.getData().length);
       assertArrayEquals(expectedjointTau.getData(), actualJointTau.getData(), EPSILON);
+   }
+
+   @Test
+   public void testThrowsUnsupportedOperationExceptionWithKinematicLoop()
+   {
+      Random random = new Random(25);
+
+      int numberOfJoints = 10;
+      List<RevoluteJoint> joints = MultiBodySystemRandomTools.nextRevoluteJointChain(random, numberOfJoints);
+
+      int loopStartIndex = 2;
+      int loopEndIndex = 7;
+      int kinematicLoopSize = 5;
+      RigidBodyBasics loopStart = joints.get(loopStartIndex).getSuccessor();
+      RigidBodyBasics loopEnd = joints.get(loopEndIndex).getSuccessor();
+      List<RevoluteJoint> loop = MultiBodySystemRandomTools.nextKinematicLoopRevoluteJoints(random, "loop", loopStart, loopEnd, kinematicLoopSize);
+
+      joints.addAll(loop);
+
+      MultiBodySystemBasics system = MultiBodySystemBasics.toMultiBodySystemBasics(joints);
+      try
+      {
+         JointTorqueRegressorCalculator regressorCalculator = new JointTorqueRegressorCalculator(system);
+         fail("Should have thrown an exception.");
+      }
+      catch (UnsupportedOperationException e)
+      {
+         // Good
+      }
    }
 
    @Test

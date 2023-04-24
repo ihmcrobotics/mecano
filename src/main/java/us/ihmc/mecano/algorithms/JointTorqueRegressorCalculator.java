@@ -134,8 +134,7 @@ public class JointTorqueRegressorCalculator
 
          if (childJoint.isLoopClosure())
          {
-            System.out.println(getClass().getSimpleName() + ": This calculator does not support kinematic loops. Ignoring joint: " + childJoint.getName());
-            continue;
+            throw new UnsupportedOperationException(getClass().getSimpleName() + ": This calculator does not support kinematic loops. Found loop closure at joint: " + childJoint.getName());
          }
 
          RigidBodyBasics childBody = (RigidBodyBasics) childJoint.getSuccessor();
