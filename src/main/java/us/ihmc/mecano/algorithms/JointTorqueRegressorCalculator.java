@@ -68,12 +68,12 @@ public class JointTorqueRegressorCalculator
    /**
     * The root of the internal recursive algorithm.
     */
-   private final RecursionStep initialRecursionStep;
+   private final JointTorqueRegressorRecursionStep initialRecursionStep;
 
    /**
     * Map to quickly retrieve information for each rigid-body.
     */
-   private final Map<RigidBodyReadOnly, RecursionStep> rigidBodyToRecursionStepMap = new LinkedHashMap<>();
+   private final Map<RigidBodyReadOnly, JointTorqueRegressorRecursionStep> rigidBodyToRecursionStepMap = new LinkedHashMap<>();
 
    /** Static convenience variable for the number of inertial parameters in a rigid body. */
    private static final int PARAMETERS_PER_BODY = 10;
@@ -93,7 +93,7 @@ public class JointTorqueRegressorCalculator
       inverseDynamicsCalculator = new InverseDynamicsCalculator(input);
 
       RigidBodyBasics rootBody = input.getRootBody();
-      initialRecursionStep = new RecursionStep(rootBody, null, inverseDynamicsCalculator, null);
+      initialRecursionStep = new JointTorqueRegressorRecursionStep(rootBody, null, inverseDynamicsCalculator, null);
       rigidBodyToRecursionStepMap.put(rootBody, initialRecursionStep);
       buildMultiBodyTree(initialRecursionStep, input.getJointsToIgnore());
 
@@ -106,7 +106,7 @@ public class JointTorqueRegressorCalculator
       collectParameterVectorFromRecursionSteps();
    }
 
-   private void buildMultiBodyTree(RecursionStep parent, Collection<? extends JointReadOnly> jointsToIgnore)
+   private void buildMultiBodyTree(JointTorqueRegressorRecursionStep parent, Collection<? extends JointReadOnly> jointsToIgnore)
    {
       List<JointReadOnly> childrenJoints = new ArrayList<>(parent.rigidBody.getChildrenJoints());
 
@@ -139,7 +139,7 @@ public class JointTorqueRegressorCalculator
          if (childBody != null)
          {
             int[] jointIndices = input.getJointMatrixIndexProvider().getJointDoFIndices(childJoint);
-            RecursionStep child = new RecursionStep(childBody, parent, inverseDynamicsCalculator, jointIndices);
+            JointTorqueRegressorRecursionStep child = new JointTorqueRegressorRecursionStep(childBody, parent, inverseDynamicsCalculator, jointIndices);
             rigidBodyToRecursionStepMap.put(childBody, child);
             buildMultiBodyTree(child, jointsToIgnore);
          }
@@ -179,7 +179,7 @@ public class JointTorqueRegressorCalculator
    public void collectJointTorqueRegressorFromRecursionSteps()
    {
       int i = 0;
-      for (RecursionStep step : rigidBodyToRecursionStepMap.values())
+      for (JointTorqueRegressorRecursionStep step : rigidBodyToRecursionStepMap.values())
       {
          if (step.rigidBody.getInertia() != null)
          {
@@ -198,7 +198,7 @@ public class JointTorqueRegressorCalculator
    public void collectParameterVectorFromRecursionSteps()
    {
       int i = 0;
-      for (RecursionStep step : rigidBodyToRecursionStepMap.values())
+      for (JointTorqueRegressorRecursionStep step : rigidBodyToRecursionStepMap.values())
       {
          if (step.rigidBody.getInertia() != null)
          {
@@ -390,7 +390,7 @@ public class JointTorqueRegressorCalculator
     *
     * @author James Foster
     */
-   private class RecursionStep
+   private class JointTorqueRegressorRecursionStep
    {
       /**
        * The rigid body belonging to this recursion step.
@@ -400,13 +400,13 @@ public class JointTorqueRegressorCalculator
       /**
        * The recursion step holding onto the direct predecessor of this recursion step's rigid body.
        */
-      private final RecursionStep parent;
+      private final JointTorqueRegressorRecursionStep parent;
 
       /**
        * A list containing the recursion steps holding onto the direct successors of this recursion step's
        * rigid body.
        */
-      private final List<RecursionStep> children = new ArrayList<>();
+      private final List<JointTorqueRegressorRecursionStep> children = new ArrayList<>();
 
       /**
        * The inverse dynamics calculator used for regressor calculation.
@@ -457,7 +457,7 @@ public class JointTorqueRegressorCalculator
        */
       boolean isUpToDate;
 
-      public RecursionStep(RigidBodyBasics rigidBody, RecursionStep parent, InverseDynamicsCalculator inverseDynamicsCalculator, int[] jointsToIgnore)
+      public JointTorqueRegressorRecursionStep(RigidBodyBasics rigidBody, JointTorqueRegressorRecursionStep parent, InverseDynamicsCalculator inverseDynamicsCalculator, int[] jointsToIgnore)
       {
          this.rigidBody = rigidBody;
          this.parent = parent;
@@ -488,7 +488,7 @@ public class JointTorqueRegressorCalculator
             inverseDynamicsCalculator.getBodyInertia(rigidBody).setToZero();
          }
 
-         for (RecursionStep child : children)
+         for (JointTorqueRegressorRecursionStep child : children)
          {
             child.setSpatialInertiasToZeroRecursively();
          }
@@ -500,7 +500,7 @@ public class JointTorqueRegressorCalculator
        */
       public void calculateRegressorRecursively()
       {
-         for (RecursionStep child : children)
+         for (JointTorqueRegressorRecursionStep child : children)
          {
             child.calculateRegressorRecursively();
          }
@@ -534,7 +534,7 @@ public class JointTorqueRegressorCalculator
 
       public void calculateInverseDynamicsToRootRecursively()
       {
-         for (RecursionStep child : children)
+         for (JointTorqueRegressorRecursionStep child : children)
          {
             child.calculateInverseDynamicsToRootRecursively();
          }
@@ -573,7 +573,7 @@ public class JointTorqueRegressorCalculator
        */
       public void clearModifiedMarkersRecursively()
       {
-         for (RecursionStep child : children)
+         for (JointTorqueRegressorRecursionStep child : children)
          {
             child.clearModifiedMarkersRecursively();
          }
