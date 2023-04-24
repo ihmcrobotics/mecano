@@ -283,7 +283,7 @@ public class JointTorqueRegressorCalculator
     */
    enum SpatialInertiaParameterBasisOptions
    {
-      M, MCOM_X, MCOM_Y, MCOM_Z, I_XX, I_YY, I_ZZ, I_XY, I_XZ, I_YZ;
+      M, MCOM_X, MCOM_Y, MCOM_Z, I_XX, I_XY, I_XZ, I_YY, I_YZ, I_ZZ;
    }
 
    /**
@@ -604,11 +604,11 @@ public class JointTorqueRegressorCalculator
          parameterVectorToPack.set(2, 0, spatialInertia.getCenterOfMassOffset().getY());
          parameterVectorToPack.set(3, 0, spatialInertia.getCenterOfMassOffset().getZ());
          parameterVectorToPack.set(4, 0, spatialInertia.getMomentOfInertia().getM00());  // Ixx
-         parameterVectorToPack.set(5, 0, spatialInertia.getMomentOfInertia().getM11());  // Iyy
-         parameterVectorToPack.set(6, 0, spatialInertia.getMomentOfInertia().getM22());  // Izz
-         parameterVectorToPack.set(7, 0, spatialInertia.getMomentOfInertia().getM01());  // Ixy
-         parameterVectorToPack.set(8, 0, spatialInertia.getMomentOfInertia().getM02());  // Ixz
-         parameterVectorToPack.set(9, 0, spatialInertia.getMomentOfInertia().getM12());  // Iyz
+         parameterVectorToPack.set(5, 0, spatialInertia.getMomentOfInertia().getM01());  // Ixy
+         parameterVectorToPack.set(6, 0, spatialInertia.getMomentOfInertia().getM02());  // Ixz
+         parameterVectorToPack.set(7, 0, spatialInertia.getMomentOfInertia().getM11());  // Iyy
+         parameterVectorToPack.set(8, 0, spatialInertia.getMomentOfInertia().getM12());  // Iyz
+         parameterVectorToPack.set(9, 0, spatialInertia.getMomentOfInertia().getM22());  // Izz
       }
    }
 }
