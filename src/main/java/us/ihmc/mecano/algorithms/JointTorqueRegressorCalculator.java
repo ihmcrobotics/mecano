@@ -78,7 +78,9 @@ public class JointTorqueRegressorCalculator
     */
    private final Map<RigidBodyReadOnly, JointTorqueRegressorRecursionStep> rigidBodyToRecursionStepMap = new LinkedHashMap<>();
 
-   /** Static convenience variable for the number of inertial parameters in a rigid body. */
+   /**
+    * Static convenience variable for the number of inertial parameters in a rigid body.
+    */
    private static final int PARAMETERS_PER_BODY = 10;
 
    /**
@@ -134,7 +136,8 @@ public class JointTorqueRegressorCalculator
 
          if (childJoint.isLoopClosure())
          {
-            throw new UnsupportedOperationException(getClass().getSimpleName() + ": This calculator does not support kinematic loops. Found loop closure at joint: " + childJoint.getName());
+            throw new UnsupportedOperationException(
+                  getClass().getSimpleName() + ": This calculator does not support kinematic loops. Found loop closure at joint: " + childJoint.getName());
          }
 
          RigidBodyBasics childBody = (RigidBodyBasics) childJoint.getSuccessor();
@@ -446,7 +449,10 @@ public class JointTorqueRegressorCalculator
        */
       boolean isUpToDate;
 
-      public JointTorqueRegressorRecursionStep(RigidBodyBasics rigidBody, JointTorqueRegressorRecursionStep parent, InverseDynamicsCalculator inverseDynamicsCalculator, int[] jointsToIgnore)
+      public JointTorqueRegressorRecursionStep(RigidBodyBasics rigidBody,
+                                               JointTorqueRegressorRecursionStep parent,
+                                               InverseDynamicsCalculator inverseDynamicsCalculator,
+                                               int[] jointsToIgnore)
       {
          this.rigidBody = rigidBody;
          this.parent = parent;
