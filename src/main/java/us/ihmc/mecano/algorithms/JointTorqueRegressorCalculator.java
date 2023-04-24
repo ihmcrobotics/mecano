@@ -75,6 +75,9 @@ public class JointTorqueRegressorCalculator
     */
    private final Map<RigidBodyReadOnly, RecursionStep> rigidBodyToRecursionStepMap = new LinkedHashMap<>();
 
+   /** Static convenience variable for the number of inertial parameters in a rigid body. */
+   private static final int PARAMETERS_PER_BODY = 10;
+
    /**
     * Creates a calculator for computing the joint torque regressor for the given multi-body system {@code input}.
     * <p>
@@ -96,7 +99,7 @@ public class JointTorqueRegressorCalculator
 
       int nDoFs = MultiBodySystemTools.computeDegreesOfFreedom(input.getJointsToConsider());
       int nBodies = rigidBodyToRecursionStepMap.size() - 1;  // -1 removes the root body
-      int nParams = 10 * nBodies;
+      int nParams = PARAMETERS_PER_BODY * nBodies;
 
       jointTorqueRegressorMatrix = new DMatrixRMaj(nDoFs, nParams);
       parameterVector = new DMatrixRMaj(nParams, 1);
@@ -180,7 +183,7 @@ public class JointTorqueRegressorCalculator
       {
          if (step.rigidBody.getInertia() != null)
          {
-            CommonOps_DDRM.insert(step.regressorMatrixBlock, jointTorqueRegressorMatrix, 0, i * 10);
+            CommonOps_DDRM.insert(step.regressorMatrixBlock, jointTorqueRegressorMatrix, 0, i * PARAMETERS_PER_BODY);
             i += 1;
          }
       }
@@ -199,7 +202,7 @@ public class JointTorqueRegressorCalculator
       {
          if (step.rigidBody.getInertia() != null)
          {
-            CommonOps_DDRM.insert(spatialInertiaToParameterVector(step.rigidBody.getInertia()), parameterVector, i * 10, 0);
+            CommonOps_DDRM.insert(spatialInertiaToParameterVector(step.rigidBody.getInertia()), parameterVector, i * PARAMETERS_PER_BODY, 0);
             i += 1;
          }
       }
@@ -273,7 +276,7 @@ public class JointTorqueRegressorCalculator
     */
    private static DMatrixRMaj spatialInertiaToParameterVector(SpatialInertiaBasics spatialInertia)
    {
-      DMatrixRMaj parameters = new DMatrixRMaj(10, 1);
+      DMatrixRMaj parameters = new DMatrixRMaj(PARAMETERS_PER_BODY, 1);
       parameters.set(0, 0, spatialInertia.getMass());
       parameters.set(1, 0, spatialInertia.getCenterOfMassOffset().getX());
       parameters.set(2, 0, spatialInertia.getCenterOfMassOffset().getY());
@@ -467,7 +470,7 @@ public class JointTorqueRegressorCalculator
             spatialInertiaParameterBasis = new SpatialInertiaParameterBasis(this.rigidBody);
             regressorColumn = new DMatrixRMaj(inverseDynamicsCalculator.getJointTauMatrix().numRows, 1);
             this.inverseDynamicsRecursionStep = inverseDynamicsCalculator.rigidBodyToRecursionStepMap.get(rigidBody);
-            regressorMatrixBlock = new DMatrixRMaj(inverseDynamicsCalculator.getJointTauMatrix().numRows, 10);
+            regressorMatrixBlock = new DMatrixRMaj(inverseDynamicsCalculator.getJointTauMatrix().numRows, PARAMETERS_PER_BODY);
             isOnModifiedBranch = false;
             isUpToDate = false;
          }
