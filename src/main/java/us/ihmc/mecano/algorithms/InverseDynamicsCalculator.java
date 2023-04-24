@@ -54,7 +54,7 @@ public class InverseDynamicsCalculator
    /** The root of the internal recursive algorithm. */
    protected final RecursionStep initialRecursionStep;
    /** Map to quickly retrieve information for each rigid-body. */
-   private final Map<RigidBodyReadOnly, RecursionStep> rigidBodyToRecursionStepMap = new LinkedHashMap<>();
+   protected final Map<RigidBodyReadOnly, RecursionStep> rigidBodyToRecursionStepMap = new LinkedHashMap<>();
    /** Map to quickly retrieve information for each joint. */
    private final Map<JointReadOnly, RecursionStepBasics> jointToRecursionStepMap = new LinkedHashMap<>();
 
@@ -465,8 +465,8 @@ public class InverseDynamicsCalculator
    public void compute(DMatrix jointAccelerationMatrix)
    {
       initializeJointAccelerationMatrix(jointAccelerationMatrix);
-      initialRecursionStep.passOne();
-      initialRecursionStep.passTwo();
+      initialRecursionStep.passOneRecursive();
+      initialRecursionStep.passTwoRecursive();
    }
 
    /**
@@ -656,7 +656,7 @@ public class InverseDynamicsCalculator
        * acceleration and velocity are computed.
        * </p>
        */
-      void passOne();
+      void passOneRecursive();
 
       /**
        * Second pass going from leaves to the root.
@@ -665,7 +665,7 @@ public class InverseDynamicsCalculator
        * effort.
        * </p>
        */
-      void passTwo();
+      void passTwoRecursive();
 
       RecursionStep getParent();
 
@@ -825,8 +825,17 @@ public class InverseDynamicsCalculator
       }
 
       @Override
-      public void passOne()
+      public void passOneRecursive()
       {
+         passOne();
+
+         for (int childIndex = 0; childIndex < children.size(); childIndex++)
+         {
+            children.get(childIndex).passOneRecursive();
+         }
+      }
+
+      public void passOne() {
          if (!isRoot())
          {
             if (joint.isMotionSubspaceVariable())
@@ -869,21 +878,20 @@ public class InverseDynamicsCalculator
                rigidBodyAcceleration.setBodyFrame(getBodyFixedFrame());
             }
          }
-
-         for (int childIndex = 0; childIndex < children.size(); childIndex++)
-         {
-            children.get(childIndex).passOne();
-         }
       }
 
       @Override
-      public void passTwo()
+      public void passTwoRecursive()
       {
          for (int childIndex = 0; childIndex < children.size(); childIndex++)
          {
-            children.get(childIndex).passTwo();
+            children.get(childIndex).passTwoRecursive();
          }
 
+         passTwo();
+      }
+
+      public void passTwo() {
          if (isRoot())
             return;
 
@@ -1029,7 +1037,7 @@ public class InverseDynamicsCalculator
       }
 
       @Override
-      public void passOne()
+      public void passOneRecursive()
       {
          /*
           * Do nothing, assume the joint acceleration satisfies the constraint such that the acceleration
@@ -1038,7 +1046,7 @@ public class InverseDynamicsCalculator
       }
 
       @Override
-      public void passTwo()
+      public void passTwoRecursive()
       {
          // The effort at the joint is set to zero and has to be handled externally once the effort for the loop joints has been computed.
          jointWrench.setToZero(getRigidBody().getBodyFixedFrame(), joint.getFrameAfterJoint());

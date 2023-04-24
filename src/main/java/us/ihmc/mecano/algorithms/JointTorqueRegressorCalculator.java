@@ -151,11 +151,11 @@ public class JointTorqueRegressorCalculator
         // kinematics). We'll subsequently call the forward pass just one for every rigid body, instead of redundantly
         // calling it once every rigid body / parameter combination
         inverseDynamicsCalculator.initializeJointAccelerationMatrix(null);
-        inverseDynamicsCalculator.initialRecursionStep.passOne();
+        inverseDynamicsCalculator.initialRecursionStep.passOneRecursive();
 
         // Calculate each column of the regressor, where every column represents a unique rigid body and parameter
         // combination. By stacking all of these columns together in the next step, we'll get the regressor
-        initialRecursionStep.calculateRegressorColumnsRecursively();
+        initialRecursionStep.calculateRegressorRecursively();
 
         // Collect regressor results for all recursion steps
         collectJointTorqueRegressorFromRecursionSteps();
@@ -422,10 +422,28 @@ public class JointTorqueRegressorCalculator
         private DMatrixRMaj regressorColumn;
 
         /**
-         * Intermediate variable the block of the regressor matrix corresponding to this {@rigidBody}. It is an n-by-10
-         * matrix, where n is the number of DoFs of the multi-body system {@code input}.
+         * Intermediate variable the block of the regressor matrix corresponding to this {@code rigidBody}. It is an
+         * n-by-10 matrix, where n is the number of DoFs of the multi-body system {@code input}.
          */
         private DMatrixRMaj regressorMatrixBlock;
+
+        /** The recursion step in the internal {@code inverseDynamicsCalculator} that corresponds to this {@code rigidBody}. */
+        private InverseDynamicsCalculator.RecursionStep inverseDynamicsRecursionStep;
+
+        /**
+         * Boolean indicating whether the {@code rigidBody} in this recursion step is on a modified branch of the
+         * multi-body system. It is classed as modified if it is upstream of another rigid body that is having its
+         * spatial inertia modified.
+         */
+        boolean isOnModifiedBranch;
+
+        /** Boolean indicating whether the inverse dynamics calculation for the {@code rigidBody} in this recursion step
+         * is up-to-date. If a link is either downstream or on a separate upstream branch from the link currently being
+         * modified, then the inverse dynamics calculation only needs to be performed once. A link is therefore stale
+         * on two occasions: i) on initialisation of the algorithm; ii) when the link has just finished its turn of
+         * having the spatial inertia modified, it needs one solve to refresh it.
+         */
+        boolean isUpToDate;
 
         public RecursionStep(RigidBodyBasics rigidBody, RecursionStep parent, InverseDynamicsCalculator inverseDynamicsCalculator, int[] jointsToIgnore)
         {
@@ -439,7 +457,10 @@ public class JointTorqueRegressorCalculator
                 this.inverseDynamicsCalculator = inverseDynamicsCalculator;
                 spatialInertiaParameterBasis = new SpatialInertiaParameterBasis(this.rigidBody);
                 regressorColumn = new DMatrixRMaj(inverseDynamicsCalculator.getJointTauMatrix().numRows, 1);
+                this.inverseDynamicsRecursionStep = inverseDynamicsCalculator.rigidBodyToRecursionStepMap.get(rigidBody);
                 regressorMatrixBlock = new DMatrixRMaj(inverseDynamicsCalculator.getJointTauMatrix().numRows, 10);
+                isOnModifiedBranch = false;
+                isUpToDate = false;
             }
         }
 
@@ -461,21 +482,24 @@ public class JointTorqueRegressorCalculator
          * Second pass: for each rigid body, iterate over and perform inverse dynamics for all the spatial inertia
          * parameter bases.
          */
-        public void calculateRegressorColumnsRecursively()
+        public void calculateRegressorRecursively()
         {
+            for (RecursionStep child : children) {
+                child.calculateRegressorRecursively();
+            }
             // Only calculate if the rigid body of concern isn't a null body like the root / elevator
             if (rigidBody.getInertia() != null)
             {
+                markUpstreamAsModifiedRecursively();
                 for (SpatialInertiaParameterBasisOptions basis : SpatialInertiaParameterBasisOptions.values())
                 {
                     // Set spatial inertia of this rigid body to be the desired basis
                     spatialInertiaParameterBasis.setBasis(basis);
                     rigidBody.getInertia().set(spatialInertiaParameterBasis);
 
-                    // Perform inverse dynamics calculation and store the result
-                    inverseDynamicsCalculator.getBodyInertia(rigidBody).set(spatialInertiaParameterBasis);
                     // The forward pass of the inverse dynamics has already been called, only call the backward pass
-                    inverseDynamicsCalculator.initialRecursionStep.passTwo();
+                    inverseDynamicsCalculator.getBodyInertia(rigidBody).set(spatialInertiaParameterBasis);
+                    initialRecursionStep.calculateInverseDynamicsToRootRecursively();
                     regressorColumn.set(inverseDynamicsCalculator.getJointTauMatrix());
                     setRegressorMatrixColumn(regressorColumn, basis);
 
@@ -483,10 +507,56 @@ public class JointTorqueRegressorCalculator
                     rigidBody.getInertia().setToZero();
                     inverseDynamicsCalculator.getBodyInertia(rigidBody).setToZero();
                 }
+                // When finished iterating over this link, clear all rigid bodies of modification markers, starting from
+                // the root body
+                initialRecursionStep.clearModifiedMarkersRecursively();
+                // This rigid body is now stale, and requires one more solve to get it up to date
+                isUpToDate = false;
             }
+        }
+
+        public void calculateInverseDynamicsToRootRecursively()
+        {
             for (RecursionStep child : children) {
-                child.calculateRegressorColumnsRecursively();
+                child.calculateInverseDynamicsToRootRecursively();
             }
+            // Null check on root body
+            if (rigidBody.getInertia() != null)
+            {
+                // If the rigid body is upstream of a modified link, re-run the backward pass. If the rigid body is not
+                // up-to-date (happens i. at initialisation; and ii. when we leave a rigid body), we need to re-run the
+                // backward pass.
+                if (isOnModifiedBranch || !isUpToDate)
+                {
+                    // If the rigid body is not on the modified branch, then after the inverse dynamics solve, it will
+                    // be up-to-date and won't change
+                    if (!isOnModifiedBranch)
+                        isUpToDate = true;
+                    inverseDynamicsRecursionStep.passTwo();
+                }
+            }
+        }
+
+        /**
+         * Set the {@code isOnModifiedBranch} booleans for the upstream branch of this recursion step to {@code true}.
+         * The upstream branch is found by recursively going through the parent of the current recursion step.
+         */
+        public void markUpstreamAsModifiedRecursively()
+        {
+            if (rigidBody.getInertia() != null)
+            {
+                isOnModifiedBranch = true;
+                parent.markUpstreamAsModifiedRecursively();
+            }
+        }
+
+        /** Set the {@code isOnModifiedBranch} booleans for all children subtree recursion steps to {@code false}. */
+        public void clearModifiedMarkersRecursively()
+        {
+            for (RecursionStep child : children) {
+                child.clearModifiedMarkersRecursively();
+            }
+            isOnModifiedBranch = false;
         }
 
         /**
