@@ -17,21 +17,13 @@ import us.ihmc.euclid.tools.EuclidCoreIOTools;
 import us.ihmc.euclid.tuple3D.interfaces.Tuple3DReadOnly;
 import us.ihmc.mecano.algorithms.interfaces.RigidBodyAccelerationProvider;
 import us.ihmc.mecano.frames.MovingReferenceFrame;
-import us.ihmc.mecano.multiBodySystem.interfaces.JointBasics;
-import us.ihmc.mecano.multiBodySystem.interfaces.JointMatrixIndexProvider;
-import us.ihmc.mecano.multiBodySystem.interfaces.JointReadOnly;
-import us.ihmc.mecano.multiBodySystem.interfaces.MultiBodySystemReadOnly;
-import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyReadOnly;
+import us.ihmc.mecano.multiBodySystem.interfaces.*;
 import us.ihmc.mecano.spatial.SpatialAcceleration;
 import us.ihmc.mecano.spatial.SpatialForce;
 import us.ihmc.mecano.spatial.SpatialInertia;
 import us.ihmc.mecano.spatial.Twist;
 import us.ihmc.mecano.spatial.Wrench;
-import us.ihmc.mecano.spatial.interfaces.FixedFrameWrenchBasics;
-import us.ihmc.mecano.spatial.interfaces.SpatialAccelerationReadOnly;
-import us.ihmc.mecano.spatial.interfaces.SpatialVectorReadOnly;
-import us.ihmc.mecano.spatial.interfaces.TwistReadOnly;
-import us.ihmc.mecano.spatial.interfaces.WrenchReadOnly;
+import us.ihmc.mecano.spatial.interfaces.*;
 import us.ihmc.mecano.tools.JointStateType;
 import us.ihmc.mecano.tools.MultiBodySystemTools;
 
@@ -60,9 +52,9 @@ public class InverseDynamicsCalculator
    /** Defines the multi-body system to use with this calculator. */
    private final MultiBodySystemReadOnly input;
    /** The root of the internal recursive algorithm. */
-   private final RecursionStep initialRecursionStep;
+   final RecursionStep initialRecursionStep;
    /** Map to quickly retrieve information for each rigid-body. */
-   private final Map<RigidBodyReadOnly, RecursionStep> rigidBodyToRecursionStepMap = new LinkedHashMap<>();
+   final Map<RigidBodyReadOnly, RecursionStep> rigidBodyToRecursionStepMap = new LinkedHashMap<>();
    /** Map to quickly retrieve information for each joint. */
    private final Map<JointReadOnly, RecursionStepBasics> jointToRecursionStepMap = new LinkedHashMap<>();
 
@@ -472,6 +464,23 @@ public class InverseDynamicsCalculator
     */
    public void compute(DMatrix jointAccelerationMatrix)
    {
+      initializeJointAccelerationMatrix(jointAccelerationMatrix);
+      initialRecursionStep.passOneRecursive();
+      initialRecursionStep.passTwoRecursive();
+   }
+
+   /**
+    * Initialise the joint acceleration matrix containing the desired accelerations to achieve.
+    * <p>
+    * The given matrix is expected to have been configured using the same
+    * {@link JointMatrixIndexProvider} that was used to configure this calculator.
+    * </p>
+    *
+    * @param jointAccelerationMatrix the matrix containing the joint accelerations to use. Not
+    *                                modified.
+    */
+   void initializeJointAccelerationMatrix(DMatrix jointAccelerationMatrix)
+   {
       if (jointAccelerationMatrix != null)
       {
          allJointAccelerationMatrix.set(jointAccelerationMatrix);
@@ -481,9 +490,6 @@ public class InverseDynamicsCalculator
          List<? extends JointReadOnly> indexedJointsInOrder = input.getJointMatrixIndexProvider().getIndexedJointsInOrder();
          MultiBodySystemTools.extractJointsState(indexedJointsInOrder, JointStateType.ACCELERATION, allJointAccelerationMatrix);
       }
-
-      initialRecursionStep.passOne();
-      initialRecursionStep.passTwo();
    }
 
    /**
@@ -494,6 +500,16 @@ public class InverseDynamicsCalculator
    public MultiBodySystemReadOnly getInput()
    {
       return input;
+   }
+
+   /**
+    * Gets the spatial inertia of the chosen {@code RigidBody}.
+    *
+    * @return the spatial inertia of the chosen rigid body.
+    */
+   public SpatialInertia getBodyInertia(RigidBodyReadOnly rigidBody)
+   {
+      return rigidBodyToRecursionStepMap.get(rigidBody).getBodyInertia();
    }
 
    /**
@@ -641,7 +657,7 @@ public class InverseDynamicsCalculator
        * acceleration and velocity are computed.
        * </p>
        */
-      void passOne();
+      void passOneRecursive();
 
       /**
        * Second pass going from leaves to the root.
@@ -650,7 +666,7 @@ public class InverseDynamicsCalculator
        * effort.
        * </p>
        */
-      void passTwo();
+      void passTwoRecursive();
 
       RecursionStep getParent();
 
@@ -674,7 +690,7 @@ public class InverseDynamicsCalculator
     *
     * @author Sylvain Bertrand
     */
-   private final class RecursionStep implements RecursionStepBasics
+   final class RecursionStep implements RecursionStepBasics
    {
       /**
        * The rigid-body for which this recursion is.
@@ -744,6 +760,10 @@ public class InverseDynamicsCalculator
        * Joint indices for storing {@code tau} in the main matrix {@code jointTauMatrix}.
        */
       private int[] jointIndices;
+      /**
+       * Intermediate variable for holding the body twist.
+       */
+      private TwistReadOnly bodyTwistToUse;
 
       public RecursionStep(RigidBodyReadOnly rigidBody, RecursionStep parent, int[] jointIndices)
       {
@@ -763,6 +783,7 @@ public class InverseDynamicsCalculator
             a = null;
             tau = null;
             jointWrenchMatrix = null;
+            bodyTwistToUse = null;
          }
          else
          {
@@ -780,6 +801,7 @@ public class InverseDynamicsCalculator
             jointWrenchMatrix = new DMatrixRMaj(SpatialVectorReadOnly.SIZE, 1);
             if (!joint.isMotionSubspaceVariable())
                joint.getMotionSubspace(S);
+            bodyTwistToUse = new Twist();
          }
       }
 
@@ -804,6 +826,16 @@ public class InverseDynamicsCalculator
       }
 
       @Override
+      public void passOneRecursive()
+      {
+         passOne();
+
+         for (int childIndex = 0; childIndex < children.size(); childIndex++)
+         {
+            children.get(childIndex).passOneRecursive();
+         }
+      }
+
       public void passOne()
       {
          if (!isRoot())
@@ -812,8 +844,6 @@ public class InverseDynamicsCalculator
                joint.getMotionSubspace(S);
 
             rigidBodyAcceleration.setIncludingFrame(parent.rigidBodyAcceleration);
-
-            TwistReadOnly bodyTwistToUse;
 
             if (considerCoriolisAndCentrifugalForces)
             {
@@ -849,26 +879,26 @@ public class InverseDynamicsCalculator
             {
                rigidBodyAcceleration.setBodyFrame(getBodyFixedFrame());
             }
-
-            bodyInertia.computeDynamicWrench(rigidBodyAcceleration, bodyTwistToUse, jointWrench);
-         }
-
-         for (int childIndex = 0; childIndex < children.size(); childIndex++)
-         {
-            children.get(childIndex).passOne();
          }
       }
 
       @Override
-      public void passTwo()
+      public void passTwoRecursive()
       {
          for (int childIndex = 0; childIndex < children.size(); childIndex++)
          {
-            children.get(childIndex).passTwo();
+            children.get(childIndex).passTwoRecursive();
          }
 
+         passTwo();
+      }
+
+      public void passTwo()
+      {
          if (isRoot())
             return;
+
+         bodyInertia.computeDynamicWrench(rigidBodyAcceleration, bodyTwistToUse, jointWrench);
 
          jointWrench.sub(externalWrench);
          jointWrench.changeFrame(joint.getFrameAfterJoint());
@@ -890,6 +920,11 @@ public class InverseDynamicsCalculator
          jointForceFromChild.setIncludingFrame(child.getJointWrench());
          jointForceFromChild.changeFrame(joint.getFrameAfterJoint());
          jointWrench.add(jointForceFromChild);
+      }
+
+      public SpatialInertia getBodyInertia()
+      {
+         return bodyInertia;
       }
 
       @Override
@@ -1005,7 +1040,7 @@ public class InverseDynamicsCalculator
       }
 
       @Override
-      public void passOne()
+      public void passOneRecursive()
       {
          /*
           * Do nothing, assume the joint acceleration satisfies the constraint such that the acceleration
@@ -1014,7 +1049,7 @@ public class InverseDynamicsCalculator
       }
 
       @Override
-      public void passTwo()
+      public void passTwoRecursive()
       {
          // The effort at the joint is set to zero and has to be handled externally once the effort for the loop joints has been computed.
          jointWrench.setToZero(getRigidBody().getBodyFixedFrame(), joint.getFrameAfterJoint());
