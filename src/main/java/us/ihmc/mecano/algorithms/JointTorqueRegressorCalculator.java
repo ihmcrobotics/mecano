@@ -100,7 +100,8 @@ public class JointTorqueRegressorCalculator
 
       RigidBodyBasics rootBody = input.getRootBody();
       initialRecursionStep = new JointTorqueRegressorRecursionStep(rootBody, null, inverseDynamicsCalculator, null);
-      jointTorqueRegressorRecursionSteps = buildMultiBodyTree(initialRecursionStep, input.getJointsToIgnore()).toArray(new JointTorqueRegressorRecursionStep[0]);
+      jointTorqueRegressorRecursionSteps = buildMultiBodyTree(initialRecursionStep,
+                                                              input.getJointsToIgnore()).toArray(new JointTorqueRegressorRecursionStep[0]);
 
       int nDoFs = MultiBodySystemTools.computeDegreesOfFreedom(input.getJointsToConsider());
       int nBodies = jointTorqueRegressorRecursionSteps.length;
@@ -111,7 +112,8 @@ public class JointTorqueRegressorCalculator
       collectParameterVectorFromRecursionSteps();
    }
 
-   private List<JointTorqueRegressorRecursionStep> buildMultiBodyTree(JointTorqueRegressorRecursionStep parent, Collection<? extends JointReadOnly> jointsToIgnore)
+   private List<JointTorqueRegressorRecursionStep> buildMultiBodyTree(JointTorqueRegressorRecursionStep parent,
+                                                                      Collection<? extends JointReadOnly> jointsToIgnore)
    {
       List<JointTorqueRegressorRecursionStep> recursionSteps = new ArrayList<>();
       // Omit root bodies and elevators from list of recursion steps, we don't want to calculate the regressor with respect to them
