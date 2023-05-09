@@ -89,6 +89,8 @@ public class FourBarKinematicLoopFunctionTools
     * </ul>
     * </p>
     * 
+    * @param fourBarName        the name of the four bar mechanism. It is only used to create unique
+    *                           name required for creating a new temporary reference frame.
     * @param joints             the array of joints to use in the four bar linkage, expected to be 4
     *                           joints. Modified.
     * @param converters         use for converting back and forth between joint angle and interior
@@ -101,7 +103,8 @@ public class FourBarKinematicLoopFunctionTools
     * @throws IllegalArgumentException if the given joints cannot be used to represent a four bar
     *                                  linkage.
     */
-   public static int configureFourBarKinematics(RevoluteJointBasics[] joints,
+   public static int configureFourBarKinematics(String fourBarName,
+                                                RevoluteJointBasics[] joints,
                                                 FourBarToJointConverter[] converters,
                                                 FourBar fourBar,
                                                 int actuatedJointIndex,
@@ -130,7 +133,8 @@ public class FourBarKinematicLoopFunctionTools
       if (error.getTranslation().norm() > epsilon)
          throw new IllegalArgumentException("The four bar is not properly closed at zero-configuration, error:\n" + error);
 
-      ReferenceFrame fourBarLocalFrame = constructReferenceFrameFromPointAndAxis("LocalFrame",
+      ReferenceFrame fourBarLocalFrame = constructReferenceFrameFromPointAndAxis(fourBarName + FourBarKinematicLoopFunctionTools.class.getSimpleName()
+                                                                                 + "-TempFrame",
                                                                                  new FramePoint3D(actuatedJoint.getFrameBeforeJoint()),
                                                                                  Axis3D.Z,
                                                                                  actuatedJoint.getJointAxis());

@@ -62,11 +62,11 @@ public class FourBarKinematicLoopFunction implements KinematicLoopFunction
     * Creates a new function to manage the physical constraint of a four bar linkage given its 4
     * joints.
     * 
-    * @param name             the name of this four bar.
-    * @param joints           the four joints composing the four bar linkage.
-    * @param actuatedJointIndex the index among {@code joints} of the actuated joint, i.e. the only joint
-    *                         which state defines the entire state of the four bar and which is
-    *                         expected to be the only actuated joint.
+    * @param name               the name of this four bar.
+    * @param joints             the four joints composing the four bar linkage.
+    * @param actuatedJointIndex the index among {@code joints} of the actuated joint, i.e. the only
+    *                           joint which state defines the entire state of the four bar and which is
+    *                           expected to be the only actuated joint.
     * @throws IllegalArgumentException if a four bar linkage could not be recognized from the given
     *                                  joints.
     * @see FourBarKinematicLoopFunctionTools#configureFourBarKinematics(RevoluteJointBasics[],
@@ -81,11 +81,11 @@ public class FourBarKinematicLoopFunction implements KinematicLoopFunction
     * Creates a new function to manage the physical constraint of a four bar linkage given its 4
     * joints.
     * 
-    * @param name             the name of this four bar.
-    * @param joints           the four joints composing the four bar linkage.
-    * @param actuatedJointIndex the index among {@code joints} of the actuated joint, i.e. the only joint
-    *                         which state defines the entire state of the four bar and which is
-    *                         expected to be the only actuated joint.
+    * @param name               the name of this four bar.
+    * @param joints             the four joints composing the four bar linkage.
+    * @param actuatedJointIndex the index among {@code joints} of the actuated joint, i.e. the only
+    *                           joint which state defines the entire state of the four bar and which is
+    *                           expected to be the only actuated joint.
     * @throws IllegalArgumentException if a four bar linkage could not be recognized from the given
     *                                  joints.
     * @see FourBarKinematicLoopFunctionTools#configureFourBarKinematics(RevoluteJointBasics[],
@@ -97,7 +97,7 @@ public class FourBarKinematicLoopFunction implements KinematicLoopFunction
 
       // Copy the array so it cannot modified externally and the argument doesn't get modified. 
       joints = Arrays.copyOf(joints, joints.length);
-      this.actuatedJointIndex = FourBarKinematicLoopFunctionTools.configureFourBarKinematics(joints, converters, fourBar, actuatedJointIndex, EPSILON);
+      this.actuatedJointIndex = FourBarKinematicLoopFunctionTools.configureFourBarKinematics(name, joints, converters, fourBar, actuatedJointIndex, EPSILON);
       actuatedJointIndices = new int[] {this.actuatedJointIndex};
       this.joints = Arrays.asList(joints);
       jointA = joints[0];
@@ -223,7 +223,7 @@ public class FourBarKinematicLoopFunction implements KinematicLoopFunction
    {
       if (jointConfigurations.getNumRows() != 4 || jointConfigurations.getNumCols() != 1)
          throw new IllegalArgumentException("Unexpected matrix size. [row=" + jointConfigurations.getNumRows() + ", col=" + jointConfigurations.getNumCols()
-               + "].");
+                                            + "].");
 
       double angle = EuclidCoreTools.clamp(jointConfigurations.get(actuatedJointIndex),
                                            getActuatedJoint().getJointLimitLower(),
