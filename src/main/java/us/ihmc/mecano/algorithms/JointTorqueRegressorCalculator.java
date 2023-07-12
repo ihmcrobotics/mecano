@@ -54,7 +54,7 @@ public class JointTorqueRegressorCalculator
    private final DMatrixRMaj jointTorqueRegressorMatrix;
 
    /**
-    * A vector containing the inertial parameters of the multi-body system {@link input}. Assuming a multi-body system
+    * A vector containing the inertial parameters of the multi-body system {@link #input}. Assuming a multi-body system
     * consisting of N bodies, with each body having 10 inertial parameters, this vector will be 10N-by-1. This variable
     * is most useful for testing purposes, especially considering that in theory, we shouldn't have (or need) access to
     * the inertial parameters in order to generate the joint torque regressor. However, one can multiply the joint
@@ -83,6 +83,19 @@ public class JointTorqueRegressorCalculator
     * Static convenience variable for the number of inertial parameters in a rigid body.
     */
    private static final int PARAMETERS_PER_BODY = 10;
+
+   /**
+    * Creates a calculator for computing the joint torque regressor for multi-body system associated with the rigid body {@code rootBody}.
+    * <p>
+    *  Do not forget to set the gravitational acceleration so this calculator can properly account for it.
+    * </p>
+    * @param rootBody the root rigid body of the multi-body system to be evaluated by this calculator.
+    * @throws UnsupportedOperationException if the multi-body system associated with the {@code rootBody} contains kinematic loop(s).
+    */
+   public JointTorqueRegressorCalculator(RigidBodyBasics rootBody)
+   {
+      this(MultiBodySystemBasics.toMultiBodySystemBasics(rootBody));
+   }
 
    /**
     * Creates a calculator for computing the joint torque regressor for the given multi-body system {@code input}.
@@ -263,7 +276,7 @@ public class JointTorqueRegressorCalculator
     * constructor, else the result wil be meaningless (e.g. set to all zeros, or all zeros with a few ones).
     * </p>
     * <p>
-    * For more details, see {@link parameterVector}.
+    * For more details, see {@link #parameterVector}.
     * </p>
     *
     * @return the 10N-by-1 vector of inertial parameters.
