@@ -28,8 +28,10 @@ public class YoSpatialInertia implements SpatialInertiaBasics
       expressedInFrame = input.getReferenceFrame();
 
       mass = new YoDouble(bodyFrame.getName() + "_mass", registry);
+      mass.set(input.getMass());
 
       centerOfMassOffset = new YoFrameVector3D(bodyFrame.getName() + "_centerOfMassOffset", expressedInFrame, registry);
+      centerOfMassOffset.set(input.getCenterOfMassOffset());
 
       Ixx = new YoDouble(bodyFrame.getName() + "_Ixx", registry);
       Ixy = new YoDouble(bodyFrame.getName() + "_Ixy", registry);
@@ -37,13 +39,14 @@ public class YoSpatialInertia implements SpatialInertiaBasics
       Ixz = new YoDouble(bodyFrame.getName() + "_Ixz", registry);
       Iyz = new YoDouble(bodyFrame.getName() + "_Iyz", registry);
       Izz = new YoDouble(bodyFrame.getName() + "_Izz", registry);
+      Ixx.set(input.getMomentOfInertia().getM00());
+      Ixy.set(input.getMomentOfInertia().getM01());
+      Iyy.set(input.getMomentOfInertia().getM11());
+      Ixz.set(input.getMomentOfInertia().getM02());
+      Iyz.set(input.getMomentOfInertia().getM12());
+      Izz.set(input.getMomentOfInertia().getM22());
 
       momentOfInertia = new Matrix3D(input.getMomentOfInertia());
-   }
-
-   @Override
-   public void setReferenceFrame(ReferenceFrame referenceFrame)
-   {
    }
 
    @Override
@@ -53,11 +56,33 @@ public class YoSpatialInertia implements SpatialInertiaBasics
    }
 
    @Override
+   public void setReferenceFrame(ReferenceFrame referenceFrame)
+   {
+   }
+
+   @Override
+   public ReferenceFrame getBodyFrame()
+   {
+      return bodyFrame;
+   }
+
+   @Override
+   public void setBodyFrame(ReferenceFrame bodyFrame)
+   {
+   }
+
+   @Override
    public Matrix3DBasics getMomentOfInertia()
    {
-      momentOfInertia.set(Ixx.getDoubleValue(), Ixy.getDoubleValue(), Ixz.getDoubleValue(),
-                          Ixy.getDoubleValue(), Iyy.getDoubleValue(), Iyz.getDoubleValue(),
-                          Ixz.getDoubleValue(), Iyz.getDoubleValue(), Izz.getDoubleValue());
+      momentOfInertia.set(Ixx.getDoubleValue(),
+                          Ixy.getDoubleValue(),
+                          Ixz.getDoubleValue(),
+                          Ixy.getDoubleValue(),
+                          Iyy.getDoubleValue(),
+                          Iyz.getDoubleValue(),
+                          Ixz.getDoubleValue(),
+                          Iyz.getDoubleValue(),
+                          Izz.getDoubleValue());
       return momentOfInertia;
    }
 
@@ -77,17 +102,5 @@ public class YoSpatialInertia implements SpatialInertiaBasics
    public FixedFrameVector3DBasics getCenterOfMassOffset()
    {
       return centerOfMassOffset;
-   }
-
-   @Override
-   public ReferenceFrame getBodyFrame()
-   {
-      return bodyFrame;
-   }
-
-   @Override
-   public void setBodyFrame(ReferenceFrame bodyFrame)
-   {
-
    }
 }
