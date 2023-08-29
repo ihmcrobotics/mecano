@@ -22,23 +22,23 @@ public class YoSpatialInertia implements SpatialInertiaBasics
 
    private final Matrix3DBasics momentOfInertia;  // for storing intermediate values
 
-   public YoSpatialInertia(SpatialInertiaReadOnly input, YoRegistry registry)
+   public YoSpatialInertia(SpatialInertiaReadOnly input, String nameSuffix, YoRegistry registry)
    {
       bodyFrame = input.getBodyFrame();
       expressedInFrame = input.getReferenceFrame();
 
-      mass = new YoDouble(bodyFrame.getName() + "_mass", registry);
+      mass = new YoDouble(bodyFrame.getName() + "_mass_" + nameSuffix, registry);
       mass.set(input.getMass());
 
-      centerOfMassOffset = new YoFrameVector3D(bodyFrame.getName() + "_centerOfMassOffset", expressedInFrame, registry);
+      centerOfMassOffset = new YoFrameVector3D(bodyFrame.getName() + "_centerOfMassOffset_" + nameSuffix, expressedInFrame, registry);
       centerOfMassOffset.set(input.getCenterOfMassOffset());
 
-      Ixx = new YoDouble(bodyFrame.getName() + "_Ixx", registry);
-      Ixy = new YoDouble(bodyFrame.getName() + "_Ixy", registry);
-      Iyy = new YoDouble(bodyFrame.getName() + "_Iyy", registry);
-      Ixz = new YoDouble(bodyFrame.getName() + "_Ixz", registry);
-      Iyz = new YoDouble(bodyFrame.getName() + "_Iyz", registry);
-      Izz = new YoDouble(bodyFrame.getName() + "_Izz", registry);
+      Ixx = new YoDouble(bodyFrame.getName() + "_Ixx_" + nameSuffix, registry);
+      Ixy = new YoDouble(bodyFrame.getName() + "_Ixy_" + nameSuffix, registry);
+      Iyy = new YoDouble(bodyFrame.getName() + "_Iyy_" + nameSuffix, registry);
+      Ixz = new YoDouble(bodyFrame.getName() + "_Ixz_" + nameSuffix, registry);
+      Iyz = new YoDouble(bodyFrame.getName() + "_Iyz_" + nameSuffix, registry);
+      Izz = new YoDouble(bodyFrame.getName() + "_Izz_" + nameSuffix, registry);
       Ixx.set(input.getMomentOfInertia().getM00());
       Ixy.set(input.getMomentOfInertia().getM01());
       Iyy.set(input.getMomentOfInertia().getM11());
