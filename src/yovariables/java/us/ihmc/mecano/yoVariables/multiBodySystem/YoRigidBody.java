@@ -17,7 +17,7 @@ import java.util.List;
 public class YoRigidBody implements RigidBodyBasics
 {
    /** This is where the physical properties of this rigid-body are stored. */
-   private final YoSpatialInertia inertia;
+   private final YoSpatialInertia spatialInertia;
 
    private final MovingReferenceFrame bodyFixedFrame;
 
@@ -31,18 +31,13 @@ public class YoRigidBody implements RigidBodyBasics
 
    private final String nameId;
    
-   public YoRigidBody(String bodyName, ReferenceFrame parentStationaryFrame)
-   {
-      this(bodyName, new RigidBodyTransform(), parentStationaryFrame);
-   }
-   
    public YoRigidBody(String bodyName, RigidBodyTransformReadOnly transformToParent, ReferenceFrame parentStationaryFrame)
    {
       if (bodyName == null)
          throw new IllegalArgumentException("Name can not be null");
 
       name = bodyName;
-      inertia = null;
+      spatialInertia = null;
       bodyFixedFrame = MovingReferenceFrame.constructFrameFixedInParent(bodyName + "Frame", parentStationaryFrame, transformToParent);
       parentJoint = null;
       nameId = bodyName;
@@ -58,9 +53,9 @@ public class YoRigidBody implements RigidBodyBasics
 
       ReferenceFrame frameAfterJoint = parentJoint.getFrameAfterJoint();
       bodyFixedFrame = MovingReferenceFrame.constructFrameFixedInParent(bodyName + "CoM", frameAfterJoint, inertiaPose);
-      inertia = new YoSpatialInertia(bodyFixedFrame, bodyFixedFrame, registry);
+      spatialInertia = new YoSpatialInertia(bodyFixedFrame, bodyFixedFrame, registry);
       // inertia should be expressed in body frame, otherwise it will change
-      inertia.getBodyFrame().checkReferenceFrameMatch(inertia.getReferenceFrame());
+      spatialInertia.getBodyFrame().checkReferenceFrameMatch(spatialInertia.getReferenceFrame());
       parentJoint.setSuccessor(this);
       nameId = parentJoint.getPredecessor().getNameId() + NAME_ID_SEPARATOR + bodyName;
    }
@@ -68,14 +63,14 @@ public class YoRigidBody implements RigidBodyBasics
    public YoRigidBody(String bodyName, JointBasics parentJoint, Matrix3DReadOnly momentOfInertia, double mass, RigidBodyTransformReadOnly inertiaPose, YoRegistry registry)
    {
       this(bodyName, parentJoint, inertiaPose, registry);
-      inertia.getMomentOfInertia().set(momentOfInertia);
-      inertia.setMass(mass);
+      spatialInertia.getMomentOfInertia().set(momentOfInertia);
+      spatialInertia.setMass(mass);
    }
 
    @Override
    public SpatialInertiaBasics getInertia()
    {
-      return null;
+      return spatialInertia;
    }
 
    @Override
@@ -106,5 +101,11 @@ public class YoRigidBody implements RigidBodyBasics
    public String getNameId()
    {
       return nameId;
+   }
+
+   @Override
+   public YoRigidBody[] subtreeArray()
+   {
+      return subtreeStream().toArray(YoRigidBody[]::new);
    }
 }
