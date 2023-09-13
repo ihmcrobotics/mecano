@@ -67,6 +67,11 @@ public class YoRigidBody implements RigidBodyBasics
       spatialInertia.setMass(mass);
    }
 
+   public YoSpatialInertia getYoSpatialInertia()
+   {
+      return spatialInertia;
+   }
+
    @Override
    public SpatialInertiaBasics getInertia()
    {
