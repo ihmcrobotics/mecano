@@ -1,5 +1,6 @@
 package us.ihmc.mecano.yoVariables.multiBodySystem.inertial;
 
+import us.ihmc.euclid.interfaces.Settable;
 import us.ihmc.euclid.matrix.interfaces.Matrix3DBasics;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.referenceFrame.interfaces.FixedFrameVector3DBasics;
@@ -12,7 +13,7 @@ import us.ihmc.yoVariables.euclid.referenceFrame.YoFrameVector3D;
 import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
 
-public class YoSpatialInertia implements SpatialInertiaBasics
+public class YoSpatialInertia implements SpatialInertiaBasics, Settable<SpatialInertia>
 {
    private final YoDouble mass;
    private final YoFrameVector3D centerOfMassOffset;
@@ -118,5 +119,13 @@ public class YoSpatialInertia implements SpatialInertiaBasics
    public void setCenterOfMassOffset(double x, double y, double z)
    {
       centerOfMassOffset.set(x, y, z);
+   }
+
+   @Override
+   public void set(SpatialInertia other)
+   {
+      mass.set(other.getMass());
+      centerOfMassOffset.set(other.getCenterOfMassOffset());
+      momentOfInertia.set(other.getMomentOfInertia());
    }
 }
