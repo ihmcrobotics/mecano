@@ -17,13 +17,21 @@ import us.ihmc.euclid.tools.EuclidCoreIOTools;
 import us.ihmc.euclid.tuple3D.interfaces.Tuple3DReadOnly;
 import us.ihmc.mecano.algorithms.interfaces.RigidBodyAccelerationProvider;
 import us.ihmc.mecano.frames.MovingReferenceFrame;
-import us.ihmc.mecano.multiBodySystem.interfaces.*;
+import us.ihmc.mecano.multiBodySystem.interfaces.JointBasics;
+import us.ihmc.mecano.multiBodySystem.interfaces.JointMatrixIndexProvider;
+import us.ihmc.mecano.multiBodySystem.interfaces.JointReadOnly;
+import us.ihmc.mecano.multiBodySystem.interfaces.MultiBodySystemReadOnly;
+import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyReadOnly;
 import us.ihmc.mecano.spatial.SpatialAcceleration;
 import us.ihmc.mecano.spatial.SpatialForce;
 import us.ihmc.mecano.spatial.SpatialInertia;
 import us.ihmc.mecano.spatial.Twist;
 import us.ihmc.mecano.spatial.Wrench;
-import us.ihmc.mecano.spatial.interfaces.*;
+import us.ihmc.mecano.spatial.interfaces.FixedFrameWrenchBasics;
+import us.ihmc.mecano.spatial.interfaces.SpatialAccelerationReadOnly;
+import us.ihmc.mecano.spatial.interfaces.SpatialVectorReadOnly;
+import us.ihmc.mecano.spatial.interfaces.TwistReadOnly;
+import us.ihmc.mecano.spatial.interfaces.WrenchReadOnly;
 import us.ihmc.mecano.tools.JointStateType;
 import us.ihmc.mecano.tools.MultiBodySystemTools;
 
@@ -72,6 +80,11 @@ public class InverseDynamicsCalculator
     * {@link SpatialAccelerationCalculator}.
     */
    private final RigidBodyAccelerationProvider accelerationProvider;
+   /**
+    * Whether the inertia of the rigid-bodies which parent joint is ignored should still be considered
+    * with their closest ancestor.
+    */
+   private final boolean considerIgnoredSubtreesInertia;
 
    /**
     * Creates a calculator for computing the joint efforts for all the descendants of the given
@@ -166,7 +179,9 @@ public class InverseDynamicsCalculator
     *             </pre>
     */
    @Deprecated
-   public InverseDynamicsCalculator(MultiBodySystemReadOnly input, boolean considerCoriolisAndCentrifugalForces, boolean considerJointAccelerations,
+   public InverseDynamicsCalculator(MultiBodySystemReadOnly input,
+                                    boolean considerCoriolisAndCentrifugalForces,
+                                    boolean considerJointAccelerations,
                                     boolean considerIgnoredSubtreesInertia)
    {
       this(input, considerIgnoredSubtreesInertia);
@@ -228,14 +243,14 @@ public class InverseDynamicsCalculator
    public InverseDynamicsCalculator(MultiBodySystemReadOnly input, boolean considerIgnoredSubtreesInertia)
    {
       this.input = input;
+      this.considerIgnoredSubtreesInertia = considerIgnoredSubtreesInertia;
 
       RigidBodyReadOnly rootBody = input.getRootBody();
       initialRecursionStep = new RecursionStep(rootBody, null, null);
       rigidBodyToRecursionStepMap.put(rootBody, initialRecursionStep);
       buildMultiBodyTree(initialRecursionStep, input.getJointsToIgnore());
 
-      if (considerIgnoredSubtreesInertia)
-         initialRecursionStep.includeIgnoredSubtreeInertia();
+      updateIgnoredSubtreeInertia();
 
       int nDoFs = MultiBodySystemTools.computeDegreesOfFreedom(input.getJointsToConsider());
       allJointAccelerationMatrix = new DMatrixRMaj(nDoFs, 1);
@@ -408,6 +423,18 @@ public class InverseDynamicsCalculator
    }
 
    /**
+    * If {@link #considerIgnoredSubtreesInertia} is set to true, this method will update the inertia of
+    * the rigid-bodies which parent joint is ignored and bundle them up to the inertia of the closest
+    * considered ancestor.If {@link #considerIgnoredSubtreesInertia} is set to false, this does
+    * nothing.
+    */
+   public void updateIgnoredSubtreeInertia()
+   {
+      if (considerIgnoredSubtreesInertia)
+         initialRecursionStep.updateIgnoredSubtreeInertia();
+   }
+
+   /**
     * Resets all the external wrenches that were added to the rigid-bodies.
     */
    public void setExternalWrenchesToZero()
@@ -500,16 +527,6 @@ public class InverseDynamicsCalculator
    public MultiBodySystemReadOnly getInput()
    {
       return input;
-   }
-
-   /**
-    * Gets the spatial inertia of the chosen {@code RigidBody}.
-    *
-    * @return the spatial inertia of the chosen rigid body.
-    */
-   public SpatialInertia getBodyInertia(RigidBodyReadOnly rigidBody)
-   {
-      return rigidBodyToRecursionStepMap.get(rigidBody).getBodyInertia();
    }
 
    /**
@@ -643,7 +660,7 @@ public class InverseDynamicsCalculator
 
    private interface RecursionStepBasics
    {
-      void includeIgnoredSubtreeInertia();
+      void updateIgnoredSubtreeInertia();
 
       /**
        * Resets the external wrenches from here down the leaves recursively.
@@ -701,11 +718,15 @@ public class InverseDynamicsCalculator
        */
       private final JointReadOnly joint;
       /**
-       * Body inertia: usually equal to {@code rigidBody.getInertial()}. However, if at least one child of
-       * {@code rigidBody} is ignored, it is equal to this rigid-body inertia and the subtree inertia
-       * attached to the ignored joint.
+       * Used for storing intermediate result when part of the subtree is ignored but the subtree inertia
+       * is still to be considered.
        */
-      private final SpatialInertia bodyInertia;
+      private SpatialInertia bodyInertia;
+      /**
+       * Combined inertia of the subtree that is ignored but inertia is still to be considered for this
+       * recursion step.
+       */
+      private SpatialInertia bodySubtreeInertia;
       /**
        * The recursion step holding onto the direct predecessor of this recursion step's rigid-body.
        */
@@ -775,7 +796,6 @@ public class InverseDynamicsCalculator
          if (isRoot())
          {
             joint = null;
-            bodyInertia = null;
             jointWrench = null;
             externalWrench = null;
             S = null;
@@ -791,7 +811,6 @@ public class InverseDynamicsCalculator
             parent.children.add(this);
             int nDoFs = joint.getDegreesOfFreedom();
 
-            bodyInertia = new SpatialInertia(rigidBody.getInertia());
             jointWrench = new Wrench();
             externalWrench = new Wrench(getBodyFixedFrame(), getBodyFixedFrame());
             S = new DMatrixRMaj(SpatialVectorReadOnly.SIZE, nDoFs);
@@ -806,8 +825,14 @@ public class InverseDynamicsCalculator
       }
 
       @Override
-      public void includeIgnoredSubtreeInertia()
+      public void updateIgnoredSubtreeInertia()
       {
+         if (bodySubtreeInertia != null)
+         {
+            bodyInertia.setToZero();
+            bodySubtreeInertia.setToZero();
+         }
+
          if (!isRoot() && children.size() != rigidBody.getChildrenJoints().size())
          {
             for (JointReadOnly childJoint : rigidBody.getChildrenJoints())
@@ -816,13 +841,18 @@ public class InverseDynamicsCalculator
                {
                   SpatialInertia subtreeIneria = MultiBodySystemTools.computeSubtreeInertia(childJoint);
                   subtreeIneria.changeFrame(getBodyFixedFrame());
+                  if (bodySubtreeInertia == null)
+                  {
+                     bodyInertia = new SpatialInertia(getBodyFixedFrame(), getBodyFixedFrame());
+                     bodySubtreeInertia = new SpatialInertia(getBodyFixedFrame(), getBodyFixedFrame());
+                  }
                   bodyInertia.add(subtreeIneria);
                }
             }
          }
 
          for (int childIndex = 0; childIndex < children.size(); childIndex++)
-            children.get(childIndex).includeIgnoredSubtreeInertia();
+            children.get(childIndex).updateIgnoredSubtreeInertia();
       }
 
       @Override
@@ -898,7 +928,16 @@ public class InverseDynamicsCalculator
          if (isRoot())
             return;
 
-         bodyInertia.computeDynamicWrench(rigidBodyAcceleration, bodyTwistToUse, jointWrench);
+         if (bodyInertia != null)
+         {
+            bodyInertia.setIncludingFrame(rigidBody.getInertia());
+            bodyInertia.add(bodySubtreeInertia);
+            bodyInertia.computeDynamicWrench(rigidBodyAcceleration, bodyTwistToUse, jointWrench);
+         }
+         else
+         {
+            rigidBody.getInertia().computeDynamicWrench(rigidBodyAcceleration, bodyTwistToUse, jointWrench);
+         }
 
          jointWrench.sub(externalWrench);
          jointWrench.changeFrame(joint.getFrameAfterJoint());
@@ -920,11 +959,6 @@ public class InverseDynamicsCalculator
          jointForceFromChild.setIncludingFrame(child.getJointWrench());
          jointForceFromChild.changeFrame(joint.getFrameAfterJoint());
          jointWrench.add(jointForceFromChild);
-      }
-
-      public SpatialInertia getBodyInertia()
-      {
-         return bodyInertia;
       }
 
       @Override
@@ -1018,7 +1052,7 @@ public class InverseDynamicsCalculator
          this.parent = parent;
          if (loopClosureJoint.getSuccessor() != successorRecursion.rigidBody)
             throw new IllegalArgumentException("Rigid-body mismatch. Joint's successor: " + loopClosureJoint.getSuccessor() + ", recursion body: "
-                  + successorRecursion.rigidBody);
+                                               + successorRecursion.rigidBody);
          if (loopClosureJoint == successorRecursion.joint)
             throw new IllegalArgumentException("This recursion joint should not be equal to the successor joint, joint: " + loopClosureJoint);
 
@@ -1034,7 +1068,7 @@ public class InverseDynamicsCalculator
       }
 
       @Override
-      public void includeIgnoredSubtreeInertia()
+      public void updateIgnoredSubtreeInertia()
       {
          // Do nothing, it's done in the successorRecursion
       }
