@@ -439,7 +439,7 @@ public class CentroidalMomentumCalculator implements ReferenceFrameHolder
          }
       }
 
-      public void updateIgnoredSubtreeInertia()
+      private void updateIgnoredSubtreeInertia()
       {
          if (bodySubtreeInertia != null)
          {

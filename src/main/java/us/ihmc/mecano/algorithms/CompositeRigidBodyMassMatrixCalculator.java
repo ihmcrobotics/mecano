@@ -573,7 +573,7 @@ public class CompositeRigidBodyMassMatrixCalculator
          }
       }
 
-      public void updateIgnoredSubtreeInertia()
+      private void updateIgnoredSubtreeInertia()
       {
          if (bodySubtreeInertia != null)
          {
