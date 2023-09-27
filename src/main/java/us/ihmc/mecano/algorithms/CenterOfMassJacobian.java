@@ -573,37 +573,22 @@ public class CenterOfMassJacobian implements ReferenceFrameHolder
        */
       private void passOneInner(ReferenceFrame frameToUse, SpatialInertiaReadOnly inertiaToUse)
       {
-         if (isRoot())
+         if (inertiaToUse == null)
          {
             // Update the total mass
-            subTreeMass = inertiaToUse == null ? 0.0 : inertiaToUse.getMass();
-            for (int i = 0; i < children.size(); i++)
-               subTreeMass += children.get(i).subTreeMass;
-
-            // The centerOfMassTimesMass can be used to obtain the overall center of mass position.
-            if (inertiaToUse == null)
-            {
-               centerOfMassTimesMass.setToZero(frameToUse);
-            }
-            else
-            {
-               centerOfMassTimesMass.setIncludingFrame(inertiaToUse.getCenterOfMassOffset());
-               centerOfMassTimesMass.changeFrame(frameToUse);
-               centerOfMassTimesMass.scale(inertiaToUse.getMass());
-            }
+            subTreeMass = 0.0;
+            centerOfMassTimesMass.setToZero(frameToUse);
          }
          else
          {
-            // Update the sub-tree mass
             subTreeMass = inertiaToUse.getMass();
-            for (int i = 0; i < children.size(); i++)
-               subTreeMass += children.get(i).subTreeMass;
-
-            // Update the sub-tree center of mass
             centerOfMassTimesMass.setIncludingFrame(inertiaToUse.getCenterOfMassOffset());
             centerOfMassTimesMass.changeFrame(frameToUse);
             centerOfMassTimesMass.scale(inertiaToUse.getMass());
          }
+
+         for (int i = 0; i < children.size(); i++)
+            subTreeMass += children.get(i).subTreeMass;
       }
 
       /**
