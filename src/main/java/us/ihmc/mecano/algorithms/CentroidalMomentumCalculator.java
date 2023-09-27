@@ -536,28 +536,19 @@ public class CentroidalMomentumCalculator implements ReferenceFrameHolder
       {
          ReferenceFrame inertiaFrame = rigidBody.getInertia().getReferenceFrame();
 
+         intermediateUnitTwist.setIncludingFrame(ancestorUnitTwist);
+         intermediateUnitTwist.applyTransform(matrixFrameToBodyFixedFrameTransform);
+         intermediateUnitTwist.setReferenceFrame(inertiaFrame);
+
+         intermediateMomentum.setReferenceFrame(inertiaFrame);
+
          if (bodyInertia != null)
-         {
-            intermediateUnitTwist.setIncludingFrame(ancestorUnitTwist);
-            intermediateUnitTwist.applyTransform(matrixFrameToBodyFixedFrameTransform);
-            intermediateUnitTwist.setReferenceFrame(inertiaFrame);
-
-            intermediateMomentum.setReferenceFrame(inertiaFrame);
             intermediateMomentum.compute(bodyInertia, intermediateUnitTwist);
-            intermediateMomentum.applyInverseTransform(matrixFrameToBodyFixedFrameTransform);
-            intermediateMomentum.setReferenceFrame(matrixFrame);
-         }
          else
-         {
-            intermediateUnitTwist.setIncludingFrame(ancestorUnitTwist);
-            intermediateUnitTwist.applyTransform(matrixFrameToBodyFixedFrameTransform);
-            intermediateUnitTwist.setReferenceFrame(inertiaFrame);
-
-            intermediateMomentum.setReferenceFrame(inertiaFrame);
             intermediateMomentum.compute(rigidBody.getInertia(), intermediateUnitTwist);
-            intermediateMomentum.applyInverseTransform(matrixFrameToBodyFixedFrameTransform);
-            intermediateMomentum.setReferenceFrame(matrixFrame);
-         }
+
+         intermediateMomentum.applyInverseTransform(matrixFrameToBodyFixedFrameTransform);
+         intermediateMomentum.setReferenceFrame(matrixFrame);
 
          unitMomentumToAddTo.add(intermediateMomentum);
 
