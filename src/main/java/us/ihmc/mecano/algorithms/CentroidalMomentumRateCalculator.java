@@ -194,7 +194,7 @@ public class CentroidalMomentumRateCalculator implements ReferenceFrameHolder
       rigidBodyToRecursionStepMap = Arrays.stream(recursionSteps).filter(s -> s.isRoot()).collect(Collectors.toMap(s -> s.rigidBody, Function.identity()));
 
       if (considerIgnoredSubtreesInertia)
-         initialRecursionStep.includeIgnoredSubtreeInertia();
+         initialRecursionStep.updateIgnoredSubtreeInertia();
 
       biasSpatialForce = new SpatialForce(matrixFrame);
 
@@ -635,11 +635,15 @@ public class CentroidalMomentumRateCalculator implements ReferenceFrameHolder
       /** The rigid-body for which this recursion is. */
       private final RigidBodyReadOnly rigidBody;
       /**
-       * Body inertia: usually equal to {@code rigidBody.getInertial()}. However, if at least one child of
-       * {@code rigidBody} is ignored, it is equal to this rigid-body inertia and the subtree inertia
-       * attached to the ignored joint.
+       * Used for storing intermediate result when part of the subtree is ignored but the subtree inertia
+       * is still to be considered.
        */
-      private final SpatialInertia bodyInertia;
+      private SpatialInertia bodyInertia;
+      /**
+       * Combined inertia of the subtree that is ignored but inertia is still to be considered for this
+       * recursion step.
+       */
+      private SpatialInertia bodySubtreeInertia;
       /**
        * Intermediate variable to store the wrench resulting from Coriolis and centrifugal accelerations.
        */
@@ -678,7 +682,6 @@ public class CentroidalMomentumRateCalculator implements ReferenceFrameHolder
 
          if (isRoot())
          {
-            bodyInertia = null;
             coriolisBodyAcceleration = new SpatialAcceleration(getBodyFixedFrame(), input.getInertialFrame(), getBodyFixedFrame());
             netCoriolisBodyWrench = null;
             centroidalMomentumMatrixBlock = null;
@@ -687,7 +690,6 @@ public class CentroidalMomentumRateCalculator implements ReferenceFrameHolder
          else
          {
             parent.children.add(this);
-            bodyInertia = new SpatialInertia(rigidBody.getInertia());
             coriolisBodyAcceleration = new SpatialAcceleration();
             netCoriolisBodyWrench = new Wrench();
             centroidalMomentumMatrixBlock = new DMatrixRMaj(6, getJoint().getDegreesOfFreedom());
@@ -695,8 +697,14 @@ public class CentroidalMomentumRateCalculator implements ReferenceFrameHolder
          }
       }
 
-      public void includeIgnoredSubtreeInertia()
+      public void updateIgnoredSubtreeInertia()
       {
+         if (bodySubtreeInertia != null)
+         {
+            bodyInertia.setToZero();
+            bodySubtreeInertia.setToZero();
+         }
+
          if (!isRoot() && children.size() != rigidBody.getChildrenJoints().size())
          {
             for (JointReadOnly childJoint : rigidBody.getChildrenJoints())
@@ -705,13 +713,18 @@ public class CentroidalMomentumRateCalculator implements ReferenceFrameHolder
                {
                   SpatialInertia subtreeIneria = MultiBodySystemTools.computeSubtreeInertia(childJoint);
                   subtreeIneria.changeFrame(getBodyFixedFrame());
-                  bodyInertia.add(subtreeIneria);
+                  if (bodySubtreeInertia == null)
+                  {
+                     bodyInertia = new SpatialInertia(getBodyFixedFrame(), getBodyFixedFrame());
+                     bodySubtreeInertia = new SpatialInertia(getBodyFixedFrame(), getBodyFixedFrame());
+                  }
+                  bodySubtreeInertia.add(subtreeIneria);
                }
             }
          }
 
          for (int childIndex = 0; childIndex < children.size(); childIndex++)
-            children.get(childIndex).includeIgnoredSubtreeInertia();
+            children.get(childIndex).updateIgnoredSubtreeInertia();
       }
 
       /**
@@ -726,7 +739,7 @@ public class CentroidalMomentumRateCalculator implements ReferenceFrameHolder
          if (isRoot())
             return;
 
-         ReferenceFrame inertiaFrame = bodyInertia.getReferenceFrame();
+         ReferenceFrame inertiaFrame = rigidBody.getInertia().getReferenceFrame();
          matrixFrame.getTransformToDesiredFrame(matrixFrameToBodyFixedFrameTransform, inertiaFrame);
 
          coriolisBodyAcceleration.setIncludingFrame(parent.coriolisBodyAcceleration);
@@ -734,7 +747,15 @@ public class CentroidalMomentumRateCalculator implements ReferenceFrameHolder
          coriolisBodyAcceleration.changeFrame(getBodyFixedFrame(), intermediateTwist, parent.getBodyFixedFrame().getTwistOfFrame());
          coriolisBodyAcceleration.setBodyFrame(getBodyFixedFrame());
 
-         bodyInertia.computeDynamicWrench(coriolisBodyAcceleration, getBodyFixedFrame().getTwistOfFrame(), netCoriolisBodyWrench);
+         if (bodyInertia != null)
+         {
+            bodyInertia.setIncludingFrame(rigidBody.getInertia());
+            bodyInertia.add(bodySubtreeInertia);
+            bodyInertia.computeDynamicWrench(coriolisBodyAcceleration, getBodyFixedFrame().getTwistOfFrame(), netCoriolisBodyWrench);
+         }
+         else
+            rigidBody.getInertia().computeDynamicWrench(coriolisBodyAcceleration, getBodyFixedFrame().getTwistOfFrame(), netCoriolisBodyWrench);
+
          netCoriolisBodyWrench.applyInverseTransform(matrixFrameToBodyFixedFrameTransform);
          netCoriolisBodyWrench.setReferenceFrame(matrixFrame);
          biasSpatialForce.add(netCoriolisBodyWrench);
