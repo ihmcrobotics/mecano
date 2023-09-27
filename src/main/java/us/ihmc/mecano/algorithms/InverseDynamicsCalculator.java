@@ -428,7 +428,7 @@ public class InverseDynamicsCalculator
     * considered ancestor.If {@link #considerIgnoredSubtreesInertia} is set to false, this does
     * nothing.
     */
-   public void updateIgnoredSubtreeInertia()
+   private void updateIgnoredSubtreeInertia()
    {
       if (considerIgnoredSubtreesInertia)
          initialRecursionStep.updateIgnoredSubtreeInertia();
@@ -846,7 +846,7 @@ public class InverseDynamicsCalculator
                      bodyInertia = new SpatialInertia(getBodyFixedFrame(), getBodyFixedFrame());
                      bodySubtreeInertia = new SpatialInertia(getBodyFixedFrame(), getBodyFixedFrame());
                   }
-                  bodyInertia.add(subtreeIneria);
+                  bodySubtreeInertia.add(subtreeIneria);
                }
             }
          }
