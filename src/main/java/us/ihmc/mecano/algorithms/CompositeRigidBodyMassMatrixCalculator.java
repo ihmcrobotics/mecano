@@ -228,7 +228,7 @@ public class CompositeRigidBodyMassMatrixCalculator
       compositeInertias = buildMultiBodyTree(rootCompositeInertia, input.getJointsToIgnore()).toArray(new CompositeRigidBodyInertia[0]);
 
       if (considerIgnoredSubtreesInertia)
-         rootCompositeInertia.includeIgnoredSubtreeInertia();
+         rootCompositeInertia.updateIgnoredSubtreeInertia();
 
       int nDoFs = MultiBodySystemTools.computeDegreesOfFreedom(input.getJointsToConsider());
       massMatrix = new DMatrixRMaj(nDoFs, nDoFs);
@@ -472,11 +472,17 @@ public class CompositeRigidBodyMassMatrixCalculator
        */
       private final RigidBodyReadOnly rigidBody;
       /**
-       * Body inertia: usually equal to {@code rigidBody.getInertial()}. However, if at least one child of
-       * {@code rigidBody} is ignored, it is equal to this rigid-body inertia and the subtree inertia
-       * attached to the ignored joint.
+       * Used for storing intermediate result when part of the subtree is ignored but the subtree inertia
+       * is still to be considered.
        */
-      private final SpatialInertia bodyInertia, bodyInertiaAtJointFrame;
+      private SpatialInertia bodyInertia;
+      /**
+       * Combined inertia of the subtree that is ignored but inertia is still to be considered for this
+       * recursion step.
+       */
+      private SpatialInertia bodySubtreeInertia;
+
+      private final SpatialInertia bodyInertiaAtJointFrame;
       /**
        * The recursion step holding onto the direct predecessor of this recursion step's rigid-body.
        */
@@ -522,7 +528,6 @@ public class CompositeRigidBodyMassMatrixCalculator
 
          if (parent == null)
          {
-            bodyInertia = null;
             bodyInertiaAtJointFrame = null;
             compositeInertia = null;
             compositeFactorizedInertia = null;
@@ -539,7 +544,6 @@ public class CompositeRigidBodyMassMatrixCalculator
             parent.children.add(this);
 
             int nDoFs = getNumberOfDoFs();
-            bodyInertia = new SpatialInertia(rigidBody.getInertia());
             bodyInertiaAtJointFrame = new SpatialInertia(rigidBody.getInertia());
             bodyInertiaAtJointFrame.changeFrame(getFrameAfterJoint());
             compositeInertia = new SpatialInertia();
@@ -569,8 +573,14 @@ public class CompositeRigidBodyMassMatrixCalculator
          }
       }
 
-      public void includeIgnoredSubtreeInertia()
+      public void updateIgnoredSubtreeInertia()
       {
+         if (bodySubtreeInertia != null)
+         {
+            bodyInertia.setToZero();
+            bodySubtreeInertia.setToZero();
+         }
+
          if (!isRoot() && children.size() != rigidBody.getChildrenJoints().size())
          {
             for (JointReadOnly childJoint : rigidBody.getChildrenJoints())
@@ -579,7 +589,12 @@ public class CompositeRigidBodyMassMatrixCalculator
                {
                   SpatialInertia subtreeIneria = MultiBodySystemTools.computeSubtreeInertia(childJoint);
                   subtreeIneria.changeFrame(getBodyFixedFrame());
-                  bodyInertia.add(subtreeIneria);
+                  if (bodySubtreeInertia == null)
+                  {
+                     bodyInertia = new SpatialInertia(getBodyFixedFrame(), getBodyFixedFrame());
+                     bodySubtreeInertia = new SpatialInertia(getBodyFixedFrame(), getBodyFixedFrame());
+                  }
+                  bodySubtreeInertia.add(subtreeIneria);
                   subtreeIneria.changeFrame(getFrameAfterJoint());
                   bodyInertiaAtJointFrame.add(subtreeIneria);
                }
@@ -587,7 +602,7 @@ public class CompositeRigidBodyMassMatrixCalculator
          }
 
          for (int childIndex = 0; childIndex < children.size(); childIndex++)
-            children.get(childIndex).includeIgnoredSubtreeInertia();
+            children.get(childIndex).updateIgnoredSubtreeInertia();
       }
 
       /**
@@ -808,7 +823,15 @@ public class CompositeRigidBodyMassMatrixCalculator
       {
          if (!isRoot())
          {
-            SpatialInertiaReadOnly inertia = bodyInertia;
+            SpatialInertiaReadOnly inertia;
+            if (bodyInertia != null)
+            {
+               bodyInertia.setIncludingFrame(rigidBody.getInertia());
+               bodyInertia.add(bodySubtreeInertia);
+               inertia = bodyInertia;
+            }
+            else
+               inertia = rigidBody.getInertia();
 
             coriolisBodyAcceleration.setIncludingFrame(parent.coriolisBodyAcceleration);
             getJoint().getPredecessorTwist(intermediateTwist);
