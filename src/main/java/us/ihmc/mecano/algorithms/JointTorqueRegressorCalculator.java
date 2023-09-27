@@ -500,10 +500,7 @@ public class JointTorqueRegressorCalculator
       {
          // Only make changes if the rigid body of concern isn't a null body like the root / elevator
          if (rigidBody.getInertia() != null)
-         {
             rigidBody.getInertia().setToZero();
-            inverseDynamicsCalculator.getBodyInertia(rigidBody).setToZero();
-         }
 
          for (JointTorqueRegressorRecursionStep child : children)
          {
@@ -532,14 +529,13 @@ public class JointTorqueRegressorCalculator
                rigidBody.getInertia().set(spatialInertiaParameterBasis);
 
                // The forward pass of the inverse dynamics has already been called, only call the backward pass
-               inverseDynamicsCalculator.getBodyInertia(rigidBody).set(spatialInertiaParameterBasis);
+               rigidBody.getInertia().set(spatialInertiaParameterBasis);
                initialRecursionStep.calculateInverseDynamicsToRootRecursively();
                regressorColumn.set(inverseDynamicsCalculator.getJointTauMatrix());
                setRegressorMatrixColumn(regressorColumn, basis);
 
                // Set the spatial inertia of the rigid body back to zero for subsequent iterations / recursions
                rigidBody.getInertia().setToZero();
-               inverseDynamicsCalculator.getBodyInertia(rigidBody).setToZero();
             }
             // When finished iterating over this link, clear all rigid bodies of modification markers, starting from
             // the root body
