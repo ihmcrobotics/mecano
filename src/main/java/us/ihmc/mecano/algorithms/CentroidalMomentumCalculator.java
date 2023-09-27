@@ -15,6 +15,7 @@ import us.ihmc.euclid.referenceFrame.interfaces.FrameVector3DBasics;
 import us.ihmc.euclid.referenceFrame.interfaces.FrameVector3DReadOnly;
 import us.ihmc.euclid.referenceFrame.interfaces.ReferenceFrameHolder;
 import us.ihmc.euclid.transform.RigidBodyTransform;
+import us.ihmc.mecano.frames.MovingReferenceFrame;
 import us.ihmc.mecano.multiBodySystem.interfaces.JointMatrixIndexProvider;
 import us.ihmc.mecano.multiBodySystem.interfaces.JointReadOnly;
 import us.ihmc.mecano.multiBodySystem.interfaces.MultiBodySystemReadOnly;
@@ -136,7 +137,7 @@ public class CentroidalMomentumCalculator implements ReferenceFrameHolder
       iterativeSteps = buildMultiBodyTree(initialIterativeStep, input.getJointsToIgnore()).toArray(new IterativeStep[0]);
 
       if (considerIgnoredSubtreesInertia)
-         initialIterativeStep.includeIgnoredSubtreeInertia();
+         initialIterativeStep.updateIgnoredSubtreeInertia();
 
       jointUnitTwist = new Twist();
       unitMomentum = new Momentum(matrixFrame);
@@ -392,11 +393,15 @@ public class CentroidalMomentumCalculator implements ReferenceFrameHolder
        */
       private final RigidBodyReadOnly rigidBody;
       /**
-       * Body inertia: usually equal to {@code rigidBody.getInertial()}. However, if at least one child of
-       * {@code rigidBody} is ignored, it is equal to this rigid-body inertia and the subtree inertia
-       * attached to the ignored joint.
+       * Used for storing intermediate result when part of the subtree is ignored but the subtree inertia
+       * is still to be considered.
        */
-      private final SpatialInertia bodyInertia;
+      private SpatialInertia bodyInertia;
+      /**
+       * Combined inertia of the subtree that is ignored but inertia is still to be considered for this
+       * recursion step.
+       */
+      private SpatialInertia bodySubtreeInertia;
       /**
        * Result of this recursion step: the matrix block of the centroidal momentum matrix for the parent
        * joint.
@@ -424,20 +429,24 @@ public class CentroidalMomentumCalculator implements ReferenceFrameHolder
 
          if (isRoot())
          {
-            bodyInertia = null;
             centroidalMomentumMatrixBlock = null;
             matrixFrameToBodyFixedFrameTransform = null;
          }
          else
          {
-            bodyInertia = new SpatialInertia(rigidBody.getInertia());
             centroidalMomentumMatrixBlock = new DMatrixRMaj(6, getJoint().getDegreesOfFreedom());
             matrixFrameToBodyFixedFrameTransform = new RigidBodyTransform();
          }
       }
 
-      public void includeIgnoredSubtreeInertia()
+      public void updateIgnoredSubtreeInertia()
       {
+         if (bodySubtreeInertia != null)
+         {
+            bodyInertia.setToZero();
+            bodySubtreeInertia.setToZero();
+         }
+
          if (!isRoot() && children.size() != rigidBody.getChildrenJoints().size())
          {
             for (JointReadOnly childJoint : rigidBody.getChildrenJoints())
@@ -445,14 +454,19 @@ public class CentroidalMomentumCalculator implements ReferenceFrameHolder
                if (input.getJointsToIgnore().contains(childJoint))
                {
                   SpatialInertia subtreeIneria = MultiBodySystemTools.computeSubtreeInertia(childJoint);
-                  subtreeIneria.changeFrame(rigidBody.getBodyFixedFrame());
-                  bodyInertia.add(subtreeIneria);
+                  subtreeIneria.changeFrame(getBodyFixedFrame());
+                  if (bodySubtreeInertia == null)
+                  {
+                     bodyInertia = new SpatialInertia(getBodyFixedFrame(), getBodyFixedFrame());
+                     bodySubtreeInertia = new SpatialInertia(getBodyFixedFrame(), getBodyFixedFrame());
+                  }
+                  bodySubtreeInertia.add(subtreeIneria);
                }
             }
          }
 
          for (int childIndex = 0; childIndex < children.size(); childIndex++)
-            children.get(childIndex).includeIgnoredSubtreeInertia();
+            children.get(childIndex).updateIgnoredSubtreeInertia();
       }
 
       /**
@@ -466,7 +480,7 @@ public class CentroidalMomentumCalculator implements ReferenceFrameHolder
          if (isRoot())
             return;
 
-         ReferenceFrame inertiaFrame = bodyInertia.getReferenceFrame();
+         ReferenceFrame inertiaFrame = rigidBody.getInertia().getReferenceFrame();
          matrixFrame.getTransformToDesiredFrame(matrixFrameToBodyFixedFrameTransform, inertiaFrame);
       }
 
@@ -520,16 +534,30 @@ public class CentroidalMomentumCalculator implements ReferenceFrameHolder
        */
       private void addToUnitMomentumRecursively(TwistReadOnly ancestorUnitTwist, FixedFrameMomentumBasics unitMomentumToAddTo)
       {
-         ReferenceFrame inertiaFrame = bodyInertia.getReferenceFrame();
+         ReferenceFrame inertiaFrame = rigidBody.getInertia().getReferenceFrame();
 
-         intermediateUnitTwist.setIncludingFrame(ancestorUnitTwist);
-         intermediateUnitTwist.applyTransform(matrixFrameToBodyFixedFrameTransform);
-         intermediateUnitTwist.setReferenceFrame(inertiaFrame);
+         if (bodyInertia != null)
+         {
+            intermediateUnitTwist.setIncludingFrame(ancestorUnitTwist);
+            intermediateUnitTwist.applyTransform(matrixFrameToBodyFixedFrameTransform);
+            intermediateUnitTwist.setReferenceFrame(inertiaFrame);
 
-         intermediateMomentum.setReferenceFrame(inertiaFrame);
-         intermediateMomentum.compute(bodyInertia, intermediateUnitTwist);
-         intermediateMomentum.applyInverseTransform(matrixFrameToBodyFixedFrameTransform);
-         intermediateMomentum.setReferenceFrame(matrixFrame);
+            intermediateMomentum.setReferenceFrame(inertiaFrame);
+            intermediateMomentum.compute(bodyInertia, intermediateUnitTwist);
+            intermediateMomentum.applyInverseTransform(matrixFrameToBodyFixedFrameTransform);
+            intermediateMomentum.setReferenceFrame(matrixFrame);
+         }
+         else
+         {
+            intermediateUnitTwist.setIncludingFrame(ancestorUnitTwist);
+            intermediateUnitTwist.applyTransform(matrixFrameToBodyFixedFrameTransform);
+            intermediateUnitTwist.setReferenceFrame(inertiaFrame);
+
+            intermediateMomentum.setReferenceFrame(inertiaFrame);
+            intermediateMomentum.compute(rigidBody.getInertia(), intermediateUnitTwist);
+            intermediateMomentum.applyInverseTransform(matrixFrameToBodyFixedFrameTransform);
+            intermediateMomentum.setReferenceFrame(matrixFrame);
+         }
 
          unitMomentumToAddTo.add(intermediateMomentum);
 
@@ -545,6 +573,11 @@ public class CentroidalMomentumCalculator implements ReferenceFrameHolder
       public JointReadOnly getJoint()
       {
          return rigidBody.getParentJoint();
+      }
+
+      public MovingReferenceFrame getBodyFixedFrame()
+      {
+         return rigidBody.getBodyFixedFrame();
       }
    }
 }
