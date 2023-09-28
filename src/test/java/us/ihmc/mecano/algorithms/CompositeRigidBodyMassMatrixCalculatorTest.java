@@ -14,13 +14,8 @@ import org.junit.jupiter.api.Test;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.referenceFrame.tools.EuclidFrameRandomTools;
 import us.ihmc.log.LogTools;
-import us.ihmc.mecano.multiBodySystem.interfaces.JointBasics;
-import us.ihmc.mecano.multiBodySystem.interfaces.MultiBodySystemBasics;
-import us.ihmc.mecano.multiBodySystem.interfaces.MultiBodySystemReadOnly;
-import us.ihmc.mecano.tools.JointStateType;
-import us.ihmc.mecano.tools.MecanoTestTools;
-import us.ihmc.mecano.tools.MultiBodySystemRandomTools;
-import us.ihmc.mecano.tools.MultiBodySystemTools;
+import us.ihmc.mecano.multiBodySystem.interfaces.*;
+import us.ihmc.mecano.tools.*;
 
 public class CompositeRigidBodyMassMatrixCalculatorTest
 {
@@ -138,6 +133,54 @@ public class CompositeRigidBodyMassMatrixCalculatorTest
          inverseDynamicsCalculator.compute();
          DMatrixRMaj expectedJointTaus = inverseDynamicsCalculator.getJointTauMatrix();
          
+         MecanoTestTools.assertDMatrixEquals("Iteration " + i, expectedJointTaus, actualJointTaus, 1.0e-11);
+      }
+   }
+
+   @Test
+   public void testModifiedRigidBodyParameters()
+   {
+      Random random = new Random(3249875);
+
+      for (int i = 0; i < ITERATIONS; i++)
+      {
+         int numberOfJoints = random.nextInt(20) + 1;
+         List<JointBasics> joints = MultiBodySystemRandomTools.nextJointChain(random, numberOfJoints);
+         MultiBodySystemRandomTools.nextState(random, JointStateType.CONFIGURATION, joints);
+         MultiBodySystemRandomTools.nextState(random, JointStateType.VELOCITY, joints);
+
+         RigidBodyBasics rootBody = joints.get(0).getPredecessor();
+         rootBody.updateFramesRecursively();
+
+         CompositeRigidBodyMassMatrixCalculator massMatrixCalculator = new CompositeRigidBodyMassMatrixCalculator(rootBody);
+         massMatrixCalculator.setEnableCoriolisMatrixCalculation(true);
+
+         DMatrixRMaj jointVelocities = new DMatrixRMaj(MultiBodySystemTools.computeDegreesOfFreedom(joints), 1);
+         MultiBodySystemTools.extractJointsState(joints, JointStateType.VELOCITY, jointVelocities);
+
+         DMatrixRMaj actualJointTaus = new DMatrixRMaj(MultiBodySystemTools.computeDegreesOfFreedom(joints), 1);
+         CommonOps_DDRM.mult(massMatrixCalculator.getCoriolisMatrix(), jointVelocities, actualJointTaus);
+
+         InverseDynamicsCalculator inverseDynamicsCalculator = new InverseDynamicsCalculator(rootBody);
+         inverseDynamicsCalculator.setConsiderJointAccelerations(false);
+         inverseDynamicsCalculator.compute();
+         DMatrixRMaj expectedJointTaus = inverseDynamicsCalculator.getJointTauMatrix();
+
+         MecanoTestTools.assertDMatrixEquals("Iteration " + i, expectedJointTaus, actualJointTaus, 1.0e-11);
+
+         RigidBodyBasics body = joints.get(random.nextInt(numberOfJoints)).getSuccessor();
+         body.getInertia().set(MecanoRandomTools.nextSpatialInertia(random, body.getInertia().getBodyFrame(), body.getInertia().getReferenceFrame()));
+
+         massMatrixCalculator.reset();
+
+         actualJointTaus = new DMatrixRMaj(MultiBodySystemTools.computeDegreesOfFreedom(joints), 1);
+         CommonOps_DDRM.mult(massMatrixCalculator.getCoriolisMatrix(), jointVelocities, actualJointTaus);
+
+         inverseDynamicsCalculator = new InverseDynamicsCalculator(rootBody);
+         inverseDynamicsCalculator.setConsiderJointAccelerations(false);
+         inverseDynamicsCalculator.compute();
+         expectedJointTaus = inverseDynamicsCalculator.getJointTauMatrix();
+
          MecanoTestTools.assertDMatrixEquals("Iteration " + i, expectedJointTaus, actualJointTaus, 1.0e-11);
       }
    }
