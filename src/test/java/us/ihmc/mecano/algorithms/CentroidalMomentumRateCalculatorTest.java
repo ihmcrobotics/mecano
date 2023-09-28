@@ -25,11 +25,7 @@ import us.ihmc.mecano.spatial.interfaces.MomentumReadOnly;
 import us.ihmc.mecano.spatial.interfaces.SpatialForceReadOnly;
 import us.ihmc.mecano.spatial.interfaces.SpatialInertiaReadOnly;
 import us.ihmc.mecano.spatial.interfaces.TwistReadOnly;
-import us.ihmc.mecano.tools.JointStateType;
-import us.ihmc.mecano.tools.MecanoTestTools;
-import us.ihmc.mecano.tools.MultiBodySystemRandomTools;
-import us.ihmc.mecano.tools.MultiBodySystemStateIntegrator;
-import us.ihmc.mecano.tools.MultiBodySystemTools;
+import us.ihmc.mecano.tools.*;
 
 public class CentroidalMomentumRateCalculatorTest
 {
@@ -232,6 +228,89 @@ public class CentroidalMomentumRateCalculatorTest
             previousMomentum = currentMomentum;
             integrator.doubleIntegrateFromAccelerationSubtree(rootBody);
          }
+      }
+   }
+
+   @Test
+   public void testModifiedRigidBodyParameters()
+   {
+      Random random = new Random(128342);
+
+      for (int i = 0; i < ITERATIONS; i++)
+      {
+         int numberOfJoints = random.nextInt(50) + 1;
+         List<? extends JointBasics> joints = MultiBodySystemRandomTools.nextJointChain(random, numberOfJoints);
+         MultiBodySystemRandomTools.nextState(random, JointStateType.CONFIGURATION, joints);
+         MultiBodySystemRandomTools.nextState(random, JointStateType.VELOCITY, joints);
+         MultiBodySystemRandomTools.nextState(random, JointStateType.ACCELERATION, joints);
+
+         RigidBodyBasics rootBody = joints.get(0).getPredecessor();
+         rootBody.updateFramesRecursively();
+
+         CenterOfMassReferenceFrame centerOfMassFrame = new CenterOfMassReferenceFrame("centerOfMassFrame", worldFrame, rootBody);
+         centerOfMassFrame.update();
+
+         CentroidalMomentumCalculator centroidalMomentumCalculator = new CentroidalMomentumCalculator(rootBody, centerOfMassFrame);
+         centroidalMomentumCalculator.reset();
+         CentroidalMomentumRateCalculator centroidalMomentumRateCalculator = new CentroidalMomentumRateCalculator(rootBody, centerOfMassFrame);
+         centroidalMomentumRateCalculator.reset();
+
+         MomentumReadOnly actualMomentumBeforeUpdate = centroidalMomentumRateCalculator.getMomentum();
+         MomentumReadOnly expectedMomentumBeforeUpdate = centroidalMomentumCalculator.getMomentum();
+         MecanoTestTools.assertMomentumEquals(expectedMomentumBeforeUpdate, actualMomentumBeforeUpdate, EPSILON);
+
+         SpatialAccelerationCalculator spatialAccelerationCalculator = new SpatialAccelerationCalculator(rootBody, worldFrame);
+         spatialAccelerationCalculator.reset();
+
+         SpatialForce actualMomentumRateBeforeUpdate = new SpatialForce(centroidalMomentumRateCalculator.getMomentumRate());
+         SpatialForce expectedMomentumRateBeforeUpdate = computeMomentumRate(rootBody, spatialAccelerationCalculator, centroidalMomentumRateCalculator.getReferenceFrame());
+         MecanoTestTools.assertSpatialVectorEquals(expectedMomentumRateBeforeUpdate, actualMomentumRateBeforeUpdate, EPSILON);
+
+         DMatrixRMaj jointAccelerationMatrix = new DMatrixRMaj(centroidalMomentumCalculator.getCentroidalMomentumMatrix().getNumCols(), 1);
+         MultiBodySystemTools.extractJointsState(joints, JointStateType.ACCELERATION, jointAccelerationMatrix);
+         actualMomentumRateBeforeUpdate = new SpatialForce();
+         centroidalMomentumRateCalculator.getMomentumRate(jointAccelerationMatrix, actualMomentumRateBeforeUpdate);
+         MecanoTestTools.assertSpatialVectorEquals(expectedMomentumRateBeforeUpdate, actualMomentumRateBeforeUpdate, EPSILON);
+
+         FrameVector3DReadOnly expectedCenterOfMassAccelerationBeforeUpdate = centroidalMomentumRateCalculator.getCenterOfMassAcceleration();
+         FrameVector3D actualCenterOfMassAccelerationBeforeUpdate = new FrameVector3D();
+         centroidalMomentumRateCalculator.getCenterOfMassAcceleration(jointAccelerationMatrix, actualCenterOfMassAccelerationBeforeUpdate);
+         EuclidFrameTestTools.assertEquals(expectedCenterOfMassAccelerationBeforeUpdate, actualCenterOfMassAccelerationBeforeUpdate, EPSILON);
+
+         // TODO: we cannot pass the tests if the center of mass offset is varied. In {@link #CentroidalMomentumRateCalculator.computeMomentumRate} we use a
+         //    {@link #SpatialInertiaReadOnly.computeDynamicWrenchFast} method which asserts that the center of mass offset is zero.
+         RigidBodyBasics body = joints.get(random.nextInt(numberOfJoints)).getSuccessor();
+         //         body.getInertia().set(MecanoRandomTools.nextSpatialInertia(random, body.getInertia().getBodyFrame(), body.getInertia().getReferenceFrame()));
+         body.getInertia().setMass(random.nextDouble(0, 1.0));
+         body.getInertia().setMomentOfInertia(random.nextDouble(0, 1.0),
+                                              random.nextDouble(0, 1.0),
+                                              random.nextDouble(0, 1.0));
+//         body.getInertia().setCenterOfMassOffset(random.nextDouble(-1.0, 1.0),
+//                                                 random.nextDouble(-1.0, 1.0),
+//                                                 random.nextDouble(-1.0, 1.0));
+
+         centroidalMomentumCalculator.reset();
+         centroidalMomentumRateCalculator.reset();
+         spatialAccelerationCalculator.reset();
+
+         MomentumReadOnly actualMomentumAfterUpdate = centroidalMomentumRateCalculator.getMomentum();
+         MomentumReadOnly expectedMomentumAfterUpdate = centroidalMomentumCalculator.getMomentum();
+         MecanoTestTools.assertMomentumEquals(expectedMomentumAfterUpdate, actualMomentumAfterUpdate, EPSILON);
+
+         SpatialForce actualMomentumRateAfterUpdate = new SpatialForce(centroidalMomentumRateCalculator.getMomentumRate());
+         SpatialForce expectedMomentumRateAfterUpdate = computeMomentumRate(rootBody, spatialAccelerationCalculator, centroidalMomentumRateCalculator.getReferenceFrame());
+         MecanoTestTools.assertSpatialVectorEquals(expectedMomentumRateAfterUpdate, actualMomentumRateAfterUpdate, EPSILON);
+
+         jointAccelerationMatrix = new DMatrixRMaj(centroidalMomentumCalculator.getCentroidalMomentumMatrix().getNumCols(), 1);
+         MultiBodySystemTools.extractJointsState(joints, JointStateType.ACCELERATION, jointAccelerationMatrix);
+         actualMomentumRateAfterUpdate = new SpatialForce();
+         centroidalMomentumRateCalculator.getMomentumRate(jointAccelerationMatrix, actualMomentumRateAfterUpdate);
+         MecanoTestTools.assertSpatialVectorEquals(expectedMomentumRateAfterUpdate, actualMomentumRateAfterUpdate, EPSILON);
+
+         FrameVector3DReadOnly expectedCenterOfMassAccelerationAfterUpdate = centroidalMomentumRateCalculator.getCenterOfMassAcceleration();
+         FrameVector3D actualCenterOfMassAccelerationAfterUpdate = new FrameVector3D();
+         centroidalMomentumRateCalculator.getCenterOfMassAcceleration(jointAccelerationMatrix, actualCenterOfMassAccelerationAfterUpdate);
+         EuclidFrameTestTools.assertEquals(expectedCenterOfMassAccelerationAfterUpdate, actualCenterOfMassAccelerationAfterUpdate, EPSILON);
       }
    }
 
