@@ -664,12 +664,14 @@ public class CompositeRigidBodyMassMatrixCalculator
          {
             bodyInertia.setIncludingFrame(rigidBody.getInertia());
             bodyInertia.add(bodySubtreeInertia);
-            bodyInertiaAtJointFrame.setIncludingFrame(rigidBody.getInertia());
+            bodyInertiaAtJointFrame.setIncludingFrame(bodyInertia);
             bodyInertiaAtJointFrame.changeFrame(getFrameAfterJoint());
          }
          else
          {
             bodyInertiaAtJointFrame.setIncludingFrame(rigidBody.getInertia());
+            if (bodySubtreeInertia != null)
+               bodyInertiaAtJointFrame.add(bodySubtreeInertia);
             bodyInertiaAtJointFrame.changeFrame(getFrameAfterJoint());
          }
          compositeInertia.setIncludingFrame(bodyInertiaAtJointFrame);
