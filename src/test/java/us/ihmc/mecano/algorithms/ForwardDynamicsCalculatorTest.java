@@ -29,12 +29,7 @@ import us.ihmc.mecano.multiBodySystem.Joint;
 import us.ihmc.mecano.multiBodySystem.OneDoFJoint;
 import us.ihmc.mecano.multiBodySystem.PrismaticJoint;
 import us.ihmc.mecano.multiBodySystem.RevoluteJoint;
-import us.ihmc.mecano.multiBodySystem.interfaces.JointBasics;
-import us.ihmc.mecano.multiBodySystem.interfaces.JointReadOnly;
-import us.ihmc.mecano.multiBodySystem.interfaces.MultiBodySystemBasics;
-import us.ihmc.mecano.multiBodySystem.interfaces.MultiBodySystemReadOnly;
-import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
-import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyReadOnly;
+import us.ihmc.mecano.multiBodySystem.interfaces.*;
 import us.ihmc.mecano.spatial.SpatialAcceleration;
 import us.ihmc.mecano.spatial.SpatialVector;
 import us.ihmc.mecano.spatial.interfaces.SpatialAccelerationReadOnly;
@@ -591,6 +586,69 @@ public class ForwardDynamicsCalculatorTest
          CommonOps_DDRM.multAdd(a_ejml, b, expected_c);
 
          MecanoTestTools.assertDMatrixEquals(expected_c, actual_c, 1.0e-12);
+      }
+   }
+
+   @Test
+   public void testModifiedRigidBodyParameters()
+   {
+      Random random = new Random(120398);
+
+      for (int i = 0; i < ITERATIONS; i++)
+      {
+         int numberOfJoints = random.nextInt(40) + 1;
+         List<JointBasics> joints = MultiBodySystemRandomTools.nextJointChain(random, numberOfJoints);
+         compareAgainstInverseDynamicsCalculator(random, i, joints, Collections.emptyMap(), Collections.emptyList(), ALL_JOINT_EPSILON);
+         compareAgainstCompositeRigidBodyMassMatrixCalculator(random, i, joints, ALL_JOINT_EPSILON);
+         compareAgainstCompositeRigidBodyMassMatrixCalculator(random,
+                                                              i,
+                                                              joints,
+                                                              Collections.singletonList(joints.get(random.nextInt(numberOfJoints))),
+                                                              ALL_JOINT_EPSILON);
+
+         compareAgainstInverseDynamicsCalculator(random, i, joints, nextExternalWrenches(random, joints), Collections.emptyList(), ALL_JOINT_EPSILON);
+
+         compareAgainstInverseDynamicsCalculator(random,
+                                                 i,
+                                                 joints,
+                                                 Collections.emptyMap(),
+                                                 Collections.singletonList(joints.get(random.nextInt(numberOfJoints))),
+                                                 ALL_JOINT_EPSILON);
+
+         compareAgainstSpatialAccelerationCalculator(random, i, joints, nextExternalWrenches(random, joints), Collections.emptyList(), ALL_JOINT_EPSILON);
+
+         // TODO: we cannot pass the tests if the center of mass position is varied. The test will pass for OneDoFJoint chains, but not for more general Joint
+         //    chains which contain SixDoFFloatingJoints. In the case of these floating joints, the articulated body inertia will end up being not positive definite,
+         //    causing a Cholesky decomposition to fail. This needs further investigation, but may be due to the assumption of the body fixed frame coinciding with
+         //    the body center of mass, which is then varied, invalidating the assumption.
+         RigidBodyBasics body = joints.get(random.nextInt(numberOfJoints)).getSuccessor();
+//         body.getInertia().set(MecanoRandomTools.nextSpatialInertia(random, body.getInertia().getBodyFrame(), body.getInertia().getReferenceFrame()));
+         body.getInertia().setMass(random.nextDouble(0, 1.0));
+         body.getInertia().setMomentOfInertia(random.nextDouble(0, 1.0),
+                                              random.nextDouble(0, 1.0),
+                                              random.nextDouble(0, 1.0));
+//         body.getInertia().setCenterOfMassOffset(random.nextDouble(-1.0, 1.0),
+//                                                 random.nextDouble(-1.0, 1.0),
+//                                                 random.nextDouble(-1.0, 1.0));
+
+         compareAgainstInverseDynamicsCalculator(random, i, joints, Collections.emptyMap(), Collections.emptyList(), ALL_JOINT_EPSILON);
+         compareAgainstCompositeRigidBodyMassMatrixCalculator(random, i, joints, ALL_JOINT_EPSILON);
+         compareAgainstCompositeRigidBodyMassMatrixCalculator(random,
+                                                              i,
+                                                              joints,
+                                                              Collections.singletonList(joints.get(random.nextInt(numberOfJoints))),
+                                                              ALL_JOINT_EPSILON);
+
+         compareAgainstInverseDynamicsCalculator(random, i, joints, nextExternalWrenches(random, joints), Collections.emptyList(), ALL_JOINT_EPSILON);
+
+         compareAgainstInverseDynamicsCalculator(random,
+                                                 i,
+                                                 joints,
+                                                 Collections.emptyMap(),
+                                                 Collections.singletonList(joints.get(random.nextInt(numberOfJoints))),
+                                                 ALL_JOINT_EPSILON);
+
+         compareAgainstSpatialAccelerationCalculator(random, i, joints, nextExternalWrenches(random, joints), Collections.emptyList(), ALL_JOINT_EPSILON);
       }
    }
 
