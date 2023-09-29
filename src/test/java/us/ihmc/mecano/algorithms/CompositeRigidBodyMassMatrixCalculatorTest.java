@@ -176,8 +176,6 @@ public class CompositeRigidBodyMassMatrixCalculatorTest
          actualJointTaus = new DMatrixRMaj(MultiBodySystemTools.computeDegreesOfFreedom(joints), 1);
          CommonOps_DDRM.mult(massMatrixCalculator.getCoriolisMatrix(), jointVelocities, actualJointTaus);
 
-         inverseDynamicsCalculator = new InverseDynamicsCalculator(rootBody);
-         inverseDynamicsCalculator.setConsiderJointAccelerations(false);
          inverseDynamicsCalculator.compute();
          expectedJointTaus = inverseDynamicsCalculator.getJointTauMatrix();
 
