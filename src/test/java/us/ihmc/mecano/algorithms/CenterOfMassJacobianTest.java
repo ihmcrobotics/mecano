@@ -335,7 +335,10 @@ public class CenterOfMassJacobianTest
       {
          if (rigidBody.getInertia() == null)
             continue;
-         FrameVector3D bodyLinearMomentum = new FrameVector3D(rigidBody.getBodyFixedFrame().getTwistOfFrame().getLinearPart());
+         FramePoint3D com = new FramePoint3D(rigidBody.getInertia().getCenterOfMassOffset());
+         com.changeFrame(rigidBody.getBodyFixedFrame());
+         FrameVector3D bodyLinearMomentum = new FrameVector3D();
+         rigidBody.getBodyFixedFrame().getTwistOfFrame().getLinearVelocityAt(com, bodyLinearMomentum);
          bodyLinearMomentum.scale(rigidBody.getInertia().getMass());
          bodyLinearMomentum.changeFrame(referenceFrame);
          centerOfMassVelocity.add(bodyLinearMomentum);
