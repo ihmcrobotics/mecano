@@ -1,12 +1,10 @@
 package us.ihmc.mecano.tools;
 
-import static us.ihmc.euclid.tools.EuclidCoreRandomTools.nextDiagonalMatrix3D;
-import static us.ihmc.euclid.tools.EuclidCoreRandomTools.nextVector3D;
-
 import java.util.Random;
 import java.util.stream.IntStream;
 
 import org.ejml.data.DMatrixRMaj;
+import org.ejml.dense.row.CommonOps_DDRM;
 import org.ejml.dense.row.factory.DecompositionFactory_DDRM;
 import org.ejml.interfaces.decomposition.EigenDecomposition_F64;
 
@@ -15,7 +13,9 @@ import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.tools.EuclidCoreRandomTools;
 import us.ihmc.euclid.tools.EuclidCoreTools;
 import us.ihmc.euclid.transform.RigidBodyTransform;
+import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
+import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
 import us.ihmc.mecano.frames.MovingReferenceFrame;
 import us.ihmc.mecano.spatial.Momentum;
 import us.ihmc.mecano.spatial.SpatialAcceleration;
@@ -25,6 +25,8 @@ import us.ihmc.mecano.spatial.SpatialInertia;
 import us.ihmc.mecano.spatial.SpatialVector;
 import us.ihmc.mecano.spatial.Twist;
 import us.ihmc.mecano.spatial.Wrench;
+
+import static us.ihmc.euclid.tools.EuclidCoreRandomTools.*;
 
 /**
  * This class provides random generators to generate random spatial vectors.
@@ -577,11 +579,21 @@ public class MecanoRandomTools
       if (massMax < 0.0)
          throw new IllegalArgumentException("The mass cannot be negative.");
 
+      double mass = massMax * random.nextDouble();
+
+      Point3D centerOfMassOffset = nextPoint3D(random, centerOfMassOffsetMinMax);
+
+      Matrix3D parallelAxisContribution = toSkewSymmetricMatrix(centerOfMassOffset);
+      parallelAxisContribution.multiplyOuter();
+
+      Matrix3D momentOfInertia = nextDiagonalMatrix3D(random, 0.0, inertiaMax);
+      momentOfInertia.add(parallelAxisContribution);
+
       return new SpatialInertia(bodyFrame,
                                 expressedInFrame,
-                                nextDiagonalMatrix3D(random, 0.0, inertiaMax),
-                                massMax * random.nextDouble(),
-                                EuclidCoreRandomTools.nextPoint3D(random, centerOfMassOffsetMinMax));
+                                momentOfInertia,
+                                mass,
+                                centerOfMassOffset);
    }
 
    /**
@@ -649,5 +661,23 @@ public class MecanoRandomTools
          if (eigRealPart <= 0.0)
             throw new RuntimeException("The matrix has at least one non-positive eigen value.");
       }
+   }
+
+   private static Matrix3D toSkewSymmetricMatrix(Point3DReadOnly point)
+   {
+      double x = point.getX();
+      double y = point.getY();
+      double z = point.getZ();
+
+      Matrix3D matrix = new Matrix3D();
+
+      matrix.setM01(-z);
+      matrix.setM02(y);
+      matrix.setM12(-x);
+
+      matrix.setM10(z);
+      matrix.setM20(-y);
+      matrix.setM21(x);
+      return matrix;
    }
 }
