@@ -3,14 +3,24 @@ package us.ihmc.mecano.tools;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
+import java.util.concurrent.atomic.AtomicReferenceArray;
 import java.util.stream.Collectors;
 
 import us.ihmc.euclid.matrix.Matrix3D;
+import us.ihmc.euclid.matrix.RotationMatrix;
+import us.ihmc.euclid.matrix.interfaces.Matrix3DReadOnly;
+import us.ihmc.euclid.orientation.interfaces.Orientation3DReadOnly;
+import us.ihmc.euclid.referenceFrame.FramePoint3D;
+import us.ihmc.euclid.referenceFrame.FrameUnitVector3D;
+import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
+import us.ihmc.euclid.referenceFrame.interfaces.FrameVector3DReadOnly;
 import us.ihmc.euclid.tools.EuclidCoreRandomTools;
 import us.ihmc.euclid.transform.RigidBodyTransform;
+import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple3D.interfaces.Vector3DReadOnly;
+import us.ihmc.mecano.frames.MovingReferenceFrame;
 import us.ihmc.mecano.multiBodySystem.FixedJoint;
 import us.ihmc.mecano.multiBodySystem.Joint;
 import us.ihmc.mecano.multiBodySystem.OneDoFJoint;
@@ -20,10 +30,11 @@ import us.ihmc.mecano.multiBodySystem.RevoluteJoint;
 import us.ihmc.mecano.multiBodySystem.RigidBody;
 import us.ihmc.mecano.multiBodySystem.SixDoFJoint;
 import us.ihmc.mecano.multiBodySystem.SphericalJoint;
-import us.ihmc.mecano.multiBodySystem.interfaces.JointBasics;
-import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointBasics;
-import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
+import us.ihmc.mecano.multiBodySystem.interfaces.*;
 import us.ihmc.mecano.multiBodySystem.iterators.SubtreeStreams;
+import us.ihmc.mecano.spatial.SpatialInertia;
+import us.ihmc.mecano.spatial.interfaces.SpatialInertiaBasics;
+import us.ihmc.mecano.spatial.interfaces.SpatialInertiaReadOnly;
 
 /**
  * This class provides random generators to create and/or randomize multi-body systems.
@@ -1484,4 +1495,18 @@ public class MultiBodySystemRandomTools
             return rootJoint.getSuccessor();
       }
    }
+
+//   public static void cloneRigidBodyWithEquivalentBodyFixedFrameAtCoMOffset(RigidBodyReadOnly original)
+//   {
+//      FrameVector3DReadOnly comOffset = original.getInertia().getCenterOfMassOffset();
+//
+//      // The CoM offset does not induce any frame rotation
+//      Orientation3DReadOnly transformRotation = new RotationMatrix();
+//
+//      RigidBodyTransform transformFromBodyFrameToCoMOffset = new RigidBodyTransform(transformRotation, comOffset);
+//
+//      SpatialInertiaReadOnly originalSpatialInertia = original.getInertia();
+//
+//      original.getInertia().getBodyFrame().getParent().
+//   }
 }
