@@ -17,23 +17,48 @@ import us.ihmc.yoVariables.euclid.referenceFrame.YoFrameVector3D;
 import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
 
+/**
+ * A YoVariable backed version of {@link SpatialInertia} (see that documentation for more details).
+ *
+ * @author James Foster
+ */
 public class YoSpatialInertia implements SpatialInertiaBasics, Settable<SpatialInertia>
 {
+   /** YoVariable-backed total mass of the body. */
    private final YoDouble mass;
+   /** YoVariable-backed offset of the body's center of mass position and the origin of {@link #expressedInFrame}. */
    private final YoFrameVector3D centerOfMassOffset;
+   /** YoVariable-backed moment of inertia, or rotational inertia. */
    private final YoMatrix3D momentOfInertia;
 
+   /** Reference frame rigidly attached to the body that this spatial inertia matrix describes the inertia of. */
    private ReferenceFrame bodyFrame;
+   /** The reference frame in which this inertia is expressed. */
    private ReferenceFrame expressedInFrame;
 
    /** Variable to store intermediate results for garbage-free operations. */
    private final Point3D translation = new Point3D();
 
+   /**
+    * Creates a new YoVariable-backed spatial inertia with its components set to zero and initializes its reference frames.
+    *
+    * @param bodyFrame what we are specifying the spatial inertia of.
+    * @param expressedInFrame in which reference frame the spatial inertia is expressed.
+    * @param registry the registry to add the YoVariables to.
+    */
    public YoSpatialInertia(ReferenceFrame bodyFrame, ReferenceFrame expressedInFrame, YoRegistry registry)
    {
       this("", bodyFrame, expressedInFrame, registry);
    }
 
+   /**
+    * Creates a new YoVariable-backed spatial inertia matrix from an existing {@link SpatialInertiaReadOnly}, copying {@code input}s components and
+    * reference frames.
+    *
+    * @param input the spatial inertia to copy.
+    * @param nameSuffix a string to append to the end of the YoVariables that will be constructed.
+    * @param registry the registry to add the YoVariables to.
+    */
    public YoSpatialInertia(SpatialInertiaReadOnly input, String nameSuffix, YoRegistry registry)
    {
       this(nameSuffix, input.getBodyFrame(), input.getReferenceFrame(), registry);
@@ -43,6 +68,14 @@ public class YoSpatialInertia implements SpatialInertiaBasics, Settable<SpatialI
       momentOfInertia.set(input.getMomentOfInertia());
    }
 
+   /**
+    * Creates a new YoVariable-backed spatial inertia matrix, initializing its reference frames but setting the components to zero.
+    *
+    * @param nameSuffix a string to append to the end of the YoVariables that will be constructed.
+    * @param bodyFrame what we are specifying the spatial inertia of.
+    * @param expressedInFrame in which reference frame the spatial inertia is expressed.
+    * @param registry the registry to add the YoVariables to.
+    */
    public YoSpatialInertia(String nameSuffix, ReferenceFrame bodyFrame, ReferenceFrame expressedInFrame, YoRegistry registry)
    {
       this.bodyFrame = bodyFrame;
@@ -53,6 +86,7 @@ public class YoSpatialInertia implements SpatialInertiaBasics, Settable<SpatialI
       momentOfInertia = new YoMatrix3D(bodyFrame.getName() + "_momentOfInertia", registry);
    }
 
+   /** {@inheritDoc} */
    @Override
    public void applyTransform(Transform transform)
    {
@@ -71,6 +105,7 @@ public class YoSpatialInertia implements SpatialInertiaBasics, Settable<SpatialI
       }
    }
 
+   /** {@inheritDoc} */
    @Override
    public void applyInverseTransform(Transform transform)
    {
@@ -89,81 +124,77 @@ public class YoSpatialInertia implements SpatialInertiaBasics, Settable<SpatialI
       }
    }
 
-   public YoDouble getYoMass()
-   {
-      return mass;
-   }
-
-   public YoFrameVector3D getYoCenterOfMassOffset()
-   {
-      return centerOfMassOffset;
-   }
-
-   public YoMatrix3D getYoMomentOfInertia()
-   {
-      return momentOfInertia;
-   }
-
+   /** {@inheritDoc} */
    @Override
    public ReferenceFrame getBodyFrame()
    {
       return bodyFrame;
    }
 
+   /** {@inheritDoc} */
    @Override
    public ReferenceFrame getReferenceFrame()
    {
       return expressedInFrame;
    }
 
+   /** {@inheritDoc} */
    @Override
    public double getMass()
    {
       return mass.getDoubleValue();
    }
 
+   /** {@inheritDoc} */
    @Override
    public FixedFrameVector3DBasics getCenterOfMassOffset()
    {
       return centerOfMassOffset;
    }
 
+   /** {@inheritDoc} */
    @Override
    public Matrix3DBasics getMomentOfInertia()
    {
       return momentOfInertia;
    }
 
+   /** {@inheritDoc} */
    @Override
    public void setBodyFrame(ReferenceFrame bodyFrame)
    {
       this.bodyFrame = bodyFrame;
    }
 
+   /** {@inheritDoc} */
    @Override
    public void setReferenceFrame(ReferenceFrame referenceFrame)
    {
       this.expressedInFrame = referenceFrame;
    }
 
+   /** {@inheritDoc} */
    @Override
    public void setMass(double mass)
    {
       this.mass.set(mass);
    }
 
+   /** {@inheritDoc} */
    @Override
    public void setCenterOfMassOffset(Tuple3DReadOnly offset)
    {
       centerOfMassOffset.set(offset);
    }
 
+   /** {@inheritDoc} */
    @Override
    public void setCenterOfMassOffset(double x, double y, double z)
    {
       centerOfMassOffset.set(x, y, z);
    }
 
+   /** {@inheritDoc} */
    @Override
    public void set(SpatialInertia other)
    {
