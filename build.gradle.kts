@@ -24,12 +24,13 @@ mainDependencies {
 }
 
 testDependencies {
+   api(ihmc.sourceSetProject("yovariables"))
+
    api("org.ejml:ejml-core:0.39")
    api("org.ejml:ejml-ddense:0.39")
    api("org.ejml:ejml-simple:0.39")
 
    api("us.ihmc:log-tools:0.6.3")
-   api("us.ihmc:mecano-yovariables:source")
 
    var javaFXVersion = "17.0.2"
    api(ihmc.javaFXModule("base", javaFXVersion))
