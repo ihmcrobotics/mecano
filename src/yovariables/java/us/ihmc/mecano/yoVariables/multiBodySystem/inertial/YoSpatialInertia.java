@@ -4,10 +4,14 @@ import us.ihmc.euclid.interfaces.Settable;
 import us.ihmc.euclid.matrix.interfaces.Matrix3DBasics;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.referenceFrame.interfaces.FixedFrameVector3DBasics;
+import us.ihmc.euclid.transform.interfaces.RigidBodyTransformReadOnly;
+import us.ihmc.euclid.transform.interfaces.Transform;
+import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.interfaces.Tuple3DReadOnly;
 import us.ihmc.mecano.spatial.SpatialInertia;
 import us.ihmc.mecano.spatial.interfaces.SpatialInertiaBasics;
 import us.ihmc.mecano.spatial.interfaces.SpatialInertiaReadOnly;
+import us.ihmc.mecano.tools.MecanoTools;
 import us.ihmc.yoVariables.euclid.YoMatrix3D;
 import us.ihmc.yoVariables.euclid.referenceFrame.YoFrameVector3D;
 import us.ihmc.yoVariables.registry.YoRegistry;
@@ -21,6 +25,9 @@ public class YoSpatialInertia implements SpatialInertiaBasics, Settable<SpatialI
 
    private ReferenceFrame bodyFrame;
    private ReferenceFrame expressedInFrame;
+
+   /** Variable to store intermediate results for garbage-free operations. */
+   private final Point3D translation = new Point3D();
 
    public YoSpatialInertia(ReferenceFrame bodyFrame, ReferenceFrame expressedInFrame, YoRegistry registry)
    {
@@ -44,6 +51,42 @@ public class YoSpatialInertia implements SpatialInertiaBasics, Settable<SpatialI
       mass = new YoDouble(bodyFrame.getName() + "_mass" + nameSuffix, registry);
       centerOfMassOffset = new YoFrameVector3D(bodyFrame.getName() + "_centerOfMassOffset" + nameSuffix, expressedInFrame, registry);
       momentOfInertia = new YoMatrix3D(bodyFrame.getName() + "_momentOfInertia", registry);
+   }
+
+   @Override
+   public void applyTransform(Transform transform)
+   {
+      if (transform instanceof RigidBodyTransformReadOnly)
+      {
+         applyTransform((RigidBodyTransformReadOnly) transform);
+      }
+      else
+      { // General transform, only applying rotation and translation.
+         translation.setToZero();
+         translation.applyTransform(transform);
+         momentOfInertia.applyTransform(transform);
+         centerOfMassOffset.applyTransform(transform);
+         MecanoTools.translateMomentOfInertia(mass.getDoubleValue(), centerOfMassOffset, false, translation, momentOfInertia);
+         centerOfMassOffset.add(translation);
+      }
+   }
+
+   @Override
+   public void applyInverseTransform(Transform transform)
+   {
+      if (transform instanceof RigidBodyTransformReadOnly)
+      {
+         applyInverseTransform((RigidBodyTransformReadOnly) transform);
+      }
+      else
+      { // General transform, only applying rotation and translation.
+         translation.setToZero();
+         translation.applyTransform(transform);
+         MecanoTools.translateMomentOfInertia(mass.getDoubleValue(), centerOfMassOffset, true, translation, momentOfInertia);
+         centerOfMassOffset.sub(translation);
+         momentOfInertia.applyInverseTransform(transform);
+         centerOfMassOffset.applyInverseTransform(transform);
+      }
    }
 
    public YoDouble getYoMass()
