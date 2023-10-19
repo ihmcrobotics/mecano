@@ -2,13 +2,12 @@ package us.ihmc.mecano.yoVariables.multiBodySystem;
 
 import us.ihmc.euclid.matrix.interfaces.Matrix3DReadOnly;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
-import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.transform.interfaces.RigidBodyTransformReadOnly;
 import us.ihmc.mecano.frames.MovingReferenceFrame;
 import us.ihmc.mecano.multiBodySystem.interfaces.JointBasics;
 import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
 import us.ihmc.mecano.spatial.interfaces.SpatialInertiaBasics;
-import us.ihmc.mecano.yoVariables.multiBodySystem.inertial.YoSpatialInertia;
+import us.ihmc.mecano.yoVariables.spatial.YoSpatialInertia;
 import us.ihmc.yoVariables.registry.YoRegistry;
 
 import java.util.ArrayList;

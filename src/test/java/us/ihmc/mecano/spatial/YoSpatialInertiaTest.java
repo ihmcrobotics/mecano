@@ -1,8 +1,7 @@
-package us.ihmc.mecano.multiBodySystem.inertial;
+package us.ihmc.mecano.spatial;
 
-import us.ihmc.mecano.spatial.SpatialInertiaBasicsTest;
 import us.ihmc.mecano.spatial.interfaces.SpatialInertiaReadOnly;
-import us.ihmc.mecano.yoVariables.multiBodySystem.inertial.YoSpatialInertia;
+import us.ihmc.mecano.yoVariables.spatial.YoSpatialInertia;
 
 public class YoSpatialInertiaTest extends SpatialInertiaBasicsTest<YoSpatialInertia>
 {

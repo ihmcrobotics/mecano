@@ -1,4 +1,4 @@
-package us.ihmc.mecano.yoVariables.multiBodySystem.inertial;
+package us.ihmc.mecano.yoVariables.spatial;
 
 import us.ihmc.euclid.interfaces.Settable;
 import us.ihmc.euclid.matrix.interfaces.Matrix3DBasics;
