@@ -42,9 +42,9 @@ public class YoSpatialInertia implements SpatialInertiaBasics, Settable<SpatialI
    /**
     * Creates a new YoVariable-backed spatial inertia with its components set to zero and initializes its reference frames.
     *
-    * @param bodyFrame what we are specifying the spatial inertia of.
+    * @param bodyFrame        what we are specifying the spatial inertia of.
     * @param expressedInFrame in which reference frame the spatial inertia is expressed.
-    * @param registry the registry to add the YoVariables to.
+    * @param registry         the registry to add the YoVariables to.
     */
    public YoSpatialInertia(ReferenceFrame bodyFrame, ReferenceFrame expressedInFrame, YoRegistry registry)
    {
@@ -55,9 +55,9 @@ public class YoSpatialInertia implements SpatialInertiaBasics, Settable<SpatialI
     * Creates a new YoVariable-backed spatial inertia matrix from an existing {@link SpatialInertiaReadOnly}, copying {@code input}s components and
     * reference frames.
     *
-    * @param input the spatial inertia to copy.
+    * @param input      the spatial inertia to copy.
     * @param nameSuffix a string to append to the end of the YoVariables that will be constructed.
-    * @param registry the registry to add the YoVariables to.
+    * @param registry   the registry to add the YoVariables to.
     */
    public YoSpatialInertia(SpatialInertiaReadOnly input, String nameSuffix, YoRegistry registry)
    {
@@ -71,10 +71,10 @@ public class YoSpatialInertia implements SpatialInertiaBasics, Settable<SpatialI
    /**
     * Creates a new YoVariable-backed spatial inertia matrix, initializing its reference frames but setting the components to zero.
     *
-    * @param nameSuffix a string to append to the end of the YoVariables that will be constructed.
-    * @param bodyFrame what we are specifying the spatial inertia of.
+    * @param nameSuffix       a string to append to the end of the YoVariables that will be constructed.
+    * @param bodyFrame        what we are specifying the spatial inertia of.
     * @param expressedInFrame in which reference frame the spatial inertia is expressed.
-    * @param registry the registry to add the YoVariables to.
+    * @param registry         the registry to add the YoVariables to.
     */
    public YoSpatialInertia(String nameSuffix, ReferenceFrame bodyFrame, ReferenceFrame expressedInFrame, YoRegistry registry)
    {
