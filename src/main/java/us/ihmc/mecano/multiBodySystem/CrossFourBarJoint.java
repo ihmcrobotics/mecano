@@ -46,7 +46,7 @@ import us.ihmc.mecano.tools.MultiBodySystemFactories.RigidBodyBuilder;
  * A cross four bar joint is a joint that has 1 degree of freedom of rotation and which has a
  * variable center of rotation which changes with its configuration. Example of a cross four bar
  * joint:
- * 
+ *
  * <pre>
  *    root
  *      |
@@ -61,7 +61,7 @@ import us.ihmc.mecano.tools.MultiBodySystemFactories.RigidBodyBuilder;
  *      |
  * end-effector
  * </pre>
- * 
+ * <p>
  * where A, B, C, and D are all revolute joint around the same axis. It is assumed that only one
  * joint in this sub-system composed of {A, B, C, and D} is a torque source, this is the actuated
  * joint.
@@ -95,73 +95,81 @@ public class CrossFourBarJoint implements CrossFourBarJointBasics
    private final Wrench unitJointWrench = new Wrench();
    private WrenchReadOnly jointWrench;
 
-   /** Variable to store intermediate results for garbage-free operations. */
+   /**
+    * Variable to store intermediate results for garbage-free operations.
+    */
    private final Vector3D rotationVector = new Vector3D();
 
    /**
-    * The minimum value {@link #q} can have:
+    * The minimum value {@link #getQ()} can have:
     *
     * <pre>
     * this.q &in; [this.jointLimitLower; this.jointLimitUpper]
     * </pre>
-    *
+    * <p>
     * It is initialized to -&infin;.
+    * </p>
     */
    private double jointLimitLower = Double.NEGATIVE_INFINITY;
    /**
-    * The maximum value {@link #q} can have:
+    * The maximum value {@link #getQ()} can have:
     *
     * <pre>
     * this.q &in; [this.jointLimitLower; this.jointLimitUpper]
     * </pre>
-    *
+    * <p>
     * It is initialized to +&infin;.
+    * </p>
     */
    private double jointLimitUpper = Double.POSITIVE_INFINITY;
    /**
-    * The minimum value {@link #qd} can have:
+    * The minimum value {@link #getQd()} can have:
     *
     * <pre>
     * this.qd &in; [this.velocityLimitLower; this.velocityLimitUpper]
     * </pre>
-    *
+    * <p>
     * It is initialized to -&infin;.
+    * </p>
     */
    private double velocityLimitLower = Double.NEGATIVE_INFINITY;
    /**
-    * The maximum value {@link #qd} can have:
+    * The maximum value {@link #getQd()} can have:
     *
     * <pre>
     * this.qd &in; [this.velocityLimitLower; this.velocityLimitUpper]
     * </pre>
-    *
+    * <p>
     * It is initialized to +&infin;.
+    * </p>
     */
    private double velocityLimitUpper = Double.POSITIVE_INFINITY;
    /**
-    * The minimum value {@link #tau} can have:
+    * The minimum value {@link #getTau()} can have:
     *
     * <pre>
     * this.tau &in; [this.effortLimitLower; this.effortLimitUpper]
     * </pre>
-    *
+    * <p>
     * It is initialized to -&infin;.
+    * </p>
     */
    private double effortLimitLower = Double.NEGATIVE_INFINITY;
    /**
-    * The maximum value {@link #tau} can have:
+    * The maximum value {@link #getTau()} can have:
     *
     * <pre>
     * this.tau &in; [this.effortLimitLower; this.effortLimitUpper]
     * </pre>
-    *
+    * <p>
     * It is initialized to +&infin;.
+    * </p>
     */
    private double effortLimitUpper = Double.POSITIVE_INFINITY;
 
    /**
     * Creates a new cross four bar joint with the following structure:
-    * 
+    *
     * <pre>
     *    root
     *      |
@@ -179,14 +187,14 @@ public class CrossFourBarJoint implements CrossFourBarJointBasics
     * <p>
     * Internally, this joint creates a kinematics that represents the above diagram using revolute
     * joints and rigid-bodies. The kinematics is isolated from the kinematics that this cross four bar
-    * joint is connected to. This internal kinematics is only used to facilitates computation of this
+    * joint is connected to. This internal kinematics is only used to facilitate computation of this
     * joint properties.
     * </p>
     * <p>
     * Note that the mass properties of the two cross bars, i.e. rigid bodies DA and BC, are not used in
     * the rigid-body algorithms such as inverse and forward dynamics calculators.
     * </p>
-    * 
+    *
     * @param name                    the name of this joint.
     * @param predecessor             the rigid-body connected to and preceding this joint.
     * @param jointNameA              the name of the joint A, see diagram above. Can be {@code null}.
@@ -274,7 +282,7 @@ public class CrossFourBarJoint implements CrossFourBarJointBasics
 
    /**
     * Creates a new cross four bar joint with the following structure:
-    * 
+    *
     * <pre>
     *    root
     *      |
@@ -299,7 +307,7 @@ public class CrossFourBarJoint implements CrossFourBarJointBasics
     * Note that the mass properties of the two cross bars, i.e. rigid bodies DA and BC, are not used in
     * the rigid-body algorithms such as inverse and forward dynamics calculators.
     * </p>
-    * 
+    *
     * @param name                    the name of this joint.
     * @param predecessor             the rigid-body connected to and preceding this joint.
     * @param jointNameA              the name of the joint A, see diagram above. Can be {@code null}.
@@ -451,8 +459,9 @@ public class CrossFourBarJoint implements CrossFourBarJointBasics
    {
       if (internalName == null)
          return jointName + "_" + defaultNameSuffix;
-      else
-         return internalName;
+
+      JointReadOnly.checkJointNameSanity(internalName);
+      return internalName;
    }
 
    /**
@@ -479,9 +488,9 @@ public class CrossFourBarJoint implements CrossFourBarJointBasics
     * @param actuatedJointIndex the index in {@code fourBarJoints} of the joints that is actuated.
     * @throws IllegalArgumentException if the given joints do not represent a cross four bar joints.
     * @throws IllegalArgumentException if a subtree is already attached to the last two joints closing
-    *                                  the four bar.
+    *       the four bar.
     * @see FourBarKinematicLoopFunction#FourBarKinematicLoopFunction(String, RevoluteJointBasics[],
-    *      int)
+    *       int)
     */
    public CrossFourBarJoint(String name, RevoluteJointBasics[] fourBarJoints, int actuatedJointIndex)
    {
@@ -508,10 +517,7 @@ public class CrossFourBarJoint implements CrossFourBarJointBasics
          afterJointFrame = getJointC().getFrameAfterJoint();
       }
 
-      if (predecessor.isRootBody())
-         nameId = name;
-      else
-         nameId = predecessor.getParentJoint().getNameId() + NAME_ID_SEPARATOR + name;
+      nameId = JointReadOnly.computeNameId(this);
 
       unitTwists = Collections.singletonList(unitJointTwist);
       jointTwist = MecanoFactories.newTwistReadOnly(this::getQd, unitJointTwist);
@@ -537,7 +543,9 @@ public class CrossFourBarJoint implements CrossFourBarJointBasics
       ikSolver.setConverters(fourBarFunction.getConverters());
    }
 
-   /** {@inheritDoc} */
+   /**
+    * {@inheritDoc}
+    */
    @Override
    public void updateFrame()
    {
@@ -557,7 +565,9 @@ public class CrossFourBarJoint implements CrossFourBarJointBasics
    private final Twist deltaTwist = new Twist();
    private final Twist bodyTwist = new Twist();
 
-   /** {@inheritDoc} */
+   /**
+    * {@inheritDoc}
+    */
    @Override
    public void updateMotionSubspace()
    {
@@ -599,7 +609,7 @@ public class CrossFourBarJoint implements CrossFourBarJointBasics
     * <p>
     * This method relies on {@link CrossFourBarJointReadOnly#getLoopJacobian()} to be up-to-date.
     * </p>
-    * 
+    *
     * @param joint                the joint to update the unit-twist of. Not modified.
     * @param unitJointTwistToPack the twist in which the result is stored. Modified.
     */
@@ -644,7 +654,7 @@ public class CrossFourBarJoint implements CrossFourBarJointBasics
     * <p>
     * This method relies on {@link CrossFourBarJointReadOnly#getLoopConvectiveTerm()} and
     * {@link CrossFourBarJointReadOnly#getUnitJointAcceleration()} to be up-to-date.
-    * 
+    *
     * @param joint                 the joint to compute the bias acceleration of. Not Modified.
     * @param deltaTwist            twist used to stores intermediate result. Modified.
     * @param bodyTwist             twist used to stores intermediate result. Modified.
@@ -705,7 +715,7 @@ public class CrossFourBarJoint implements CrossFourBarJointBasics
    /**
     * Gets the reference to the calculator this joint uses to compute the internal Jacobian and
     * convective term.
-    * 
+    *
     * @return the reference to the calculator.
     */
    public FourBarKinematicLoopFunction getFourBarFunction()
@@ -713,56 +723,72 @@ public class CrossFourBarJoint implements CrossFourBarJointBasics
       return fourBarFunction;
    }
 
-   /** {@inheritDoc} */
+   /**
+    * {@inheritDoc}
+    */
    @Override
    public RevoluteJointBasics getActuatedJoint()
    {
       return fourBarFunction.getActuatedJoint();
    }
 
-   /** {@inheritDoc} */
+   /**
+    * {@inheritDoc}
+    */
    @Override
    public RevoluteJointBasics getJointA()
    {
       return fourBarFunction.getJointA();
    }
 
-   /** {@inheritDoc} */
+   /**
+    * {@inheritDoc}
+    */
    @Override
    public RevoluteJointBasics getJointB()
    {
       return fourBarFunction.getJointB();
    }
 
-   /** {@inheritDoc} */
+   /**
+    * {@inheritDoc}
+    */
    @Override
    public RevoluteJointBasics getJointC()
    {
       return fourBarFunction.getJointC();
    }
 
-   /** {@inheritDoc} */
+   /**
+    * {@inheritDoc}
+    */
    @Override
    public RevoluteJointBasics getJointD()
    {
       return fourBarFunction.getJointD();
    }
 
-   /** {@inheritDoc} */
+   /**
+    * {@inheritDoc}
+    */
    @Override
    public int getActuatedJointIndex()
    {
       return fourBarFunction.getActuatedJointIndex();
    }
 
-   /** {@inheritDoc} */
+   /**
+    * {@inheritDoc}
+    */
    @Override
    public DMatrixRMaj getLoopJacobian()
    {
       return fourBarFunction.getLoopJacobian();
    }
 
-   /** {@inheritDoc} */
+   /**
+    * {@inheritDoc}
+    */
    @Override
    public DMatrixRMaj getLoopConvectiveTerm()
    {
@@ -772,7 +798,7 @@ public class CrossFourBarJoint implements CrossFourBarJointBasics
    /**
     * Gets the reference to the solver this joint uses to compute the actuated joint angle given this
     * joint angle.
-    * 
+    *
     * @return the reference to the solver.
     */
    public CrossFourBarJointIKSolver getIKSolver()
@@ -780,49 +806,63 @@ public class CrossFourBarJoint implements CrossFourBarJointBasics
       return ikSolver;
    }
 
-   /** {@inheritDoc} */
+   /**
+    * {@inheritDoc}
+    */
    @Override
    public MovingReferenceFrame getFrameBeforeJoint()
    {
       return beforeJointFrame;
    }
 
-   /** {@inheritDoc} */
+   /**
+    * {@inheritDoc}
+    */
    @Override
    public MovingReferenceFrame getFrameAfterJoint()
    {
       return afterJointFrame;
    }
 
-   /** {@inheritDoc} */
+   /**
+    * {@inheritDoc}
+    */
    @Override
    public RigidBodyBasics getPredecessor()
    {
       return predecessor;
    }
 
-   /** {@inheritDoc} */
+   /**
+    * {@inheritDoc}
+    */
    @Override
    public RigidBodyBasics getSuccessor()
    {
       return successor;
    }
 
-   /** {@inheritDoc} */
+   /**
+    * {@inheritDoc}
+    */
    @Override
    public MovingReferenceFrame getLoopClosureFrame()
    {
       return null;
    }
 
-   /** {@inheritDoc} */
+   /**
+    * {@inheritDoc}
+    */
    @Override
    public String getName()
    {
       return name;
    }
 
-   /** {@inheritDoc} */
+   /**
+    * {@inheritDoc}
+    */
    @Override
    public String getNameId()
    {
@@ -838,7 +878,9 @@ public class CrossFourBarJoint implements CrossFourBarJointBasics
       throw new UnsupportedOperationException("Loop closure using a four bar joint has not been implemented.");
    }
 
-   /** {@inheritDoc} */
+   /**
+    * {@inheritDoc}
+    */
    @Override
    public double getTau()
    {
@@ -851,84 +893,108 @@ public class CrossFourBarJoint implements CrossFourBarJointBasics
          return getActuatedJoint().getTau() / (loopJacobian.get(1) + loopJacobian.get(2));
    }
 
-   /** {@inheritDoc} */
+   /**
+    * {@inheritDoc}
+    */
    @Override
    public TwistReadOnly getUnitJointTwist()
    {
       return unitJointTwist;
    }
 
-   /** {@inheritDoc} */
+   /**
+    * {@inheritDoc}
+    */
    @Override
    public TwistReadOnly getUnitSuccessorTwist()
    {
       return unitSuccessorTwist;
    }
 
-   /** {@inheritDoc} */
+   /**
+    * {@inheritDoc}
+    */
    @Override
    public TwistReadOnly getUnitPredecessorTwist()
    {
       return unitPredecessorTwist;
    }
 
-   /** {@inheritDoc} */
+   /**
+    * {@inheritDoc}
+    */
    @Override
    public SpatialAccelerationReadOnly getUnitJointAcceleration()
    {
       return unitJointAcceleration;
    }
 
-   /** {@inheritDoc} */
+   /**
+    * {@inheritDoc}
+    */
    @Override
    public SpatialAccelerationReadOnly getUnitSuccessorAcceleration()
    {
       return unitSuccessorAcceleration;
    }
 
-   /** {@inheritDoc} */
+   /**
+    * {@inheritDoc}
+    */
    @Override
    public SpatialAccelerationReadOnly getUnitPredecessorAcceleration()
    {
       return unitPredecessorAcceleration;
    }
 
-   /** {@inheritDoc} */
+   /**
+    * {@inheritDoc}
+    */
    @Override
    public void getJointConfiguration(RigidBodyTransform jointConfigurationToPack)
    {
       afterJointFrame.getTransformToDesiredFrame(jointConfigurationToPack, beforeJointFrame);
    }
 
-   /** {@inheritDoc} */
+   /**
+    * {@inheritDoc}
+    */
    @Override
    public TwistReadOnly getJointTwist()
    {
       return jointTwist;
    }
 
-   /** {@inheritDoc} */
+   /**
+    * {@inheritDoc}
+    */
    @Override
    public List<TwistReadOnly> getUnitTwists()
    {
       return unitTwists;
    }
 
-   /** {@inheritDoc} */
+   /**
+    * {@inheritDoc}
+    */
    @Override
    public SpatialAccelerationReadOnly getJointAcceleration()
    {
       return jointAcceleration;
    }
 
-   /** {@inheritDoc} */
+   /**
+    * {@inheritDoc}
+    */
    @Override
    public SpatialAccelerationReadOnly getJointBiasAcceleration()
    {
       return jointBiasAcceleration;
    }
 
-   /** {@inheritDoc} */
+   /**
+    * {@inheritDoc}
+    */
    @Override
    public SpatialAccelerationReadOnly getSuccessorBiasAcceleration()
    {
@@ -957,14 +1023,18 @@ public class CrossFourBarJoint implements CrossFourBarJointBasics
       throw new UnsupportedOperationException("Implement me!");
    }
 
-   /** {@inheritDoc} */
+   /**
+    * {@inheritDoc}
+    */
    @Override
    public WrenchReadOnly getJointWrench()
    {
       return jointWrench;
    }
 
-   /** {@inheritDoc} */
+   /**
+    * {@inheritDoc}
+    */
    @Override
    public void setJointOrientation(Orientation3DReadOnly jointOrientation)
    {
@@ -972,14 +1042,18 @@ public class CrossFourBarJoint implements CrossFourBarJointBasics
       setQ(rotationVector.dot(getJointAxis()));
    }
 
-   /** {@inheritDoc} */
+   /**
+    * {@inheritDoc}
+    */
    @Override
    public double computeActuatedJointQ(double q)
    {
       return ikSolver.solve(q, fourBarFunction.getActuatedVertex());
    }
 
-   /** {@inheritDoc} */
+   /**
+    * {@inheritDoc}
+    */
    @Override
    public double computeActuatedJointQd(double qd)
    {
@@ -989,7 +1063,9 @@ public class CrossFourBarJoint implements CrossFourBarJointBasics
       return qd / (loopJacobian.get(0) + loopJacobian.get(3));
    }
 
-   /** {@inheritDoc} */
+   /**
+    * {@inheritDoc}
+    */
    @Override
    public double computeActuatedJointQdd(double qdd)
    {
@@ -1002,7 +1078,9 @@ public class CrossFourBarJoint implements CrossFourBarJointBasics
       return qdd_actuated;
    }
 
-   /** {@inheritDoc} */
+   /**
+    * {@inheritDoc}
+    */
    @Override
    public double computeActuatedJointTau(double tau)
    {
@@ -1013,84 +1091,108 @@ public class CrossFourBarJoint implements CrossFourBarJointBasics
          return ((loopJacobian.get(1) + loopJacobian.get(2)) * tau);
    }
 
-   /** {@inheritDoc} */
+   /**
+    * {@inheritDoc}
+    */
    @Override
    public void setJointLimitLower(double jointLimitLower)
    {
       this.jointLimitLower = jointLimitLower;
    }
 
-   /** {@inheritDoc} */
+   /**
+    * {@inheritDoc}
+    */
    @Override
    public void setJointLimitUpper(double jointLimitUpper)
    {
       this.jointLimitUpper = jointLimitUpper;
    }
 
-   /** {@inheritDoc} */
+   /**
+    * {@inheritDoc}
+    */
    @Override
    public void setVelocityLimitLower(double velocityLimitLower)
    {
       this.velocityLimitLower = velocityLimitLower;
    }
 
-   /** {@inheritDoc} */
+   /**
+    * {@inheritDoc}
+    */
    @Override
    public void setVelocityLimitUpper(double velocityLimitUpper)
    {
       this.velocityLimitUpper = velocityLimitUpper;
    }
 
-   /** {@inheritDoc} */
+   /**
+    * {@inheritDoc}
+    */
    @Override
    public void setEffortLimitLower(double effortLimitLower)
    {
       this.effortLimitLower = effortLimitLower;
    }
 
-   /** {@inheritDoc} */
+   /**
+    * {@inheritDoc}
+    */
    @Override
    public void setEffortLimitUpper(double effortLimitUpper)
    {
       this.effortLimitUpper = effortLimitUpper;
    }
 
-   /** {@inheritDoc} */
+   /**
+    * {@inheritDoc}
+    */
    @Override
    public double getJointLimitLower()
    {
       return Math.max(CrossFourBarJointBasics.super.getJointLimitLower(), jointLimitLower);
    }
 
-   /** {@inheritDoc} */
+   /**
+    * {@inheritDoc}
+    */
    @Override
    public double getJointLimitUpper()
    {
       return Math.min(CrossFourBarJointBasics.super.getJointLimitUpper(), jointLimitUpper);
    }
 
-   /** {@inheritDoc} */
+   /**
+    * {@inheritDoc}
+    */
    @Override
    public double getVelocityLimitLower()
    {
       return Math.max(CrossFourBarJointBasics.super.getVelocityLimitLower(), velocityLimitLower);
    }
 
-   /** {@inheritDoc} */
+   /**
+    * {@inheritDoc}
+    */
    @Override
    public double getVelocityLimitUpper()
    {
       return Math.min(CrossFourBarJointBasics.super.getVelocityLimitUpper(), velocityLimitUpper);
    }
 
-   /** {@inheritDoc} */
+   /**
+    * {@inheritDoc}
+    */
    @Override
    public double getEffortLimitLower()
    {
       return Math.max(CrossFourBarJointBasics.super.getEffortLimitLower(), effortLimitLower);
    }
 
-   /** {@inheritDoc} */
+   /**
+    * {@inheritDoc}
+    */
    @Override
    public double getEffortLimitUpper()
    {
@@ -1123,7 +1225,7 @@ public class CrossFourBarJoint implements CrossFourBarJointBasics
 
    /**
     * Clones the given joint and attached the clone to a stationary frame.
-    * 
+    *
     * @param original        the original cross four bar joint to be cloned.
     * @param stationaryFrame the frame to which the clone should be attached to.
     * @param cloneSuffix     the suffix for name of the clone, i.e. the name of the clone is
@@ -1140,7 +1242,7 @@ public class CrossFourBarJoint implements CrossFourBarJointBasics
    /**
     * Clones the given cross four bar joint {@code original} and attach the clone to
     * {@code clonePredecessor}.
-    * 
+    *
     * @param original         the original cross four bar joint to be cloned.
     * @param cloneSuffix      the suffix for name of the clone, i.e. the name of the clone is
     *                         {@code original.getName() + cloneSuffix}.
