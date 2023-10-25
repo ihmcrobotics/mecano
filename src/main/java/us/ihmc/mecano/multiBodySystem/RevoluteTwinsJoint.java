@@ -283,10 +283,10 @@ public class RevoluteTwinsJoint implements RevoluteTwinsJointBasics
 
       JointReadOnly.checkJointNameSanity(name);
 
-      jointNameA = getInternalName(name, jointNameA, "A");
-      jointNameB = getInternalName(name, jointNameB, "B");
+      jointNameA = CrossFourBarJoint.getInternalName(name, jointNameA, "A");
+      jointNameB = CrossFourBarJoint.getInternalName(name, jointNameB, "B");
 
-      bodyNameAB = getInternalName(name, bodyNameAB, "AB");
+      bodyNameAB = CrossFourBarJoint.getInternalName(name, bodyNameAB, "AB");
 
       if (bodyInertiaAB == null)
          bodyInertiaAB = new Matrix3D();
@@ -324,15 +324,9 @@ public class RevoluteTwinsJoint implements RevoluteTwinsJointBasics
       constraintJacobian.set(actuatedJointIndex, 0, 1.0);
       constraintJacobian.set(1 - actuatedJointIndex, 0, constraintRatio);
       // The convection term is zero because the constraint ratio is constant.
-   }
 
-   private static String getInternalName(String jointName, String internalName, String defaultNameSuffix)
-   {
-      if (internalName == null)
-         return jointName + "_" + defaultNameSuffix;
-
-      JointReadOnly.checkJointNameSanity(internalName);
-      return internalName;
+      updateJointLimits(true);
+      updateVelocityLimits(true);
    }
 
    public RevoluteTwinsJoint(String name, RevoluteJointBasics[] revoluteTwinsJoints, int actuatedJointIndex, double constraintRatio, double constraintOffset)
@@ -385,6 +379,63 @@ public class RevoluteTwinsJoint implements RevoluteTwinsJointBasics
       constraintJacobian.set(actuatedJointIndex, 0, 1.0);
       constraintJacobian.set(1 - actuatedJointIndex, 0, constraintRatio);
       // The convection term is zero because the constraint ratio is constant.
+
+      updateJointLimits(true);
+      updateVelocityLimits(true);
+   }
+
+   private double qMinA, qMaxA, qMinB, qMaxB;
+
+   private void updateJointLimits(boolean forceUpdate)
+   {
+      double qMinANew = jointA.getJointLimitLower();
+      double qMaxANew = jointA.getJointLimitUpper();
+      double qMinBNew = jointB.getJointLimitLower();
+      double qMaxBNew = jointB.getJointLimitUpper();
+
+      if (forceUpdate || qMinA != qMinANew || qMaxA != qMaxANew || qMinB != qMinBNew || qMaxB != qMaxBNew)
+      {
+         qMinA = qMinANew;
+         qMaxA = qMaxANew;
+         qMinB = qMinBNew;
+         qMaxB = qMaxBNew;
+
+         jointLimitLower = Math.max(jointLimitLower, RevoluteTwinsJointReadOnly.computeJointLimitLower(this));
+         jointLimitUpper = Math.min(jointLimitUpper, RevoluteTwinsJointReadOnly.computeJointLimitUpper(this));
+      }
+
+      if (jointLimitLower > jointLimitUpper)
+      {
+         throw new IllegalStateException("The joint limits are inconsistent: [" + jointLimitLower + ", " + jointLimitUpper
+                                         + "]. This probably means that limits for the joints A and B are incompatible given the constraint ratio.");
+      }
+   }
+
+   private double qdMinA, qdMaxA, qdMinB, qdMaxB;
+
+   private void updateVelocityLimits(boolean forceUpdate)
+   {
+      double qdMinANew = jointA.getVelocityLimitLower();
+      double qdMaxANew = jointA.getVelocityLimitUpper();
+      double qdMinBNew = jointB.getVelocityLimitLower();
+      double qdMaxBNew = jointB.getVelocityLimitUpper();
+
+      if (forceUpdate || qdMinA != qdMinANew || qdMaxA != qdMaxANew || qdMinB != qdMinBNew || qdMaxB != qdMaxBNew)
+      {
+         qdMinA = qdMinANew;
+         qdMaxA = qdMaxANew;
+         qdMinB = qdMinBNew;
+         qdMaxB = qdMaxBNew;
+
+         velocityLimitLower = Math.max(velocityLimitLower, RevoluteTwinsJointReadOnly.computeVelocityLimitLower(this));
+         velocityLimitUpper = Math.min(velocityLimitUpper, RevoluteTwinsJointReadOnly.computeVelocityLimitUpper(this));
+      }
+
+      if (velocityLimitLower > velocityLimitUpper)
+      {
+         throw new IllegalStateException("The velocity limits are inconsistent: [" + velocityLimitLower + ", " + velocityLimitUpper
+                                         + "]. This probably means that limits for the joints A and B are incompatible given the constraint ratio.");
+      }
    }
 
    /**
@@ -889,6 +940,7 @@ public class RevoluteTwinsJoint implements RevoluteTwinsJointBasics
    public void setJointLimitLower(double jointLimitLower)
    {
       this.jointLimitLower = jointLimitLower;
+      updateJointLimits(true);
    }
 
    /**
@@ -898,6 +950,7 @@ public class RevoluteTwinsJoint implements RevoluteTwinsJointBasics
    public void setJointLimitUpper(double jointLimitUpper)
    {
       this.jointLimitUpper = jointLimitUpper;
+      updateJointLimits(true);
    }
 
    /**
@@ -907,6 +960,7 @@ public class RevoluteTwinsJoint implements RevoluteTwinsJointBasics
    public void setVelocityLimitLower(double velocityLimitLower)
    {
       this.velocityLimitLower = velocityLimitLower;
+      updateVelocityLimits(true);
    }
 
    /**
@@ -916,6 +970,7 @@ public class RevoluteTwinsJoint implements RevoluteTwinsJointBasics
    public void setVelocityLimitUpper(double velocityLimitUpper)
    {
       this.velocityLimitUpper = velocityLimitUpper;
+      updateVelocityLimits(true);
    }
 
    /**
@@ -942,7 +997,8 @@ public class RevoluteTwinsJoint implements RevoluteTwinsJointBasics
    @Override
    public double getJointLimitLower()
    {
-      return Math.max(RevoluteTwinsJointBasics.super.getJointLimitLower(), jointLimitLower);
+      updateJointLimits(false);
+      return jointLimitLower;
    }
 
    /**
@@ -951,7 +1007,8 @@ public class RevoluteTwinsJoint implements RevoluteTwinsJointBasics
    @Override
    public double getJointLimitUpper()
    {
-      return Math.min(RevoluteTwinsJointBasics.super.getJointLimitUpper(), jointLimitUpper);
+      updateJointLimits(false);
+      return jointLimitUpper;
    }
 
    /**
@@ -960,7 +1017,8 @@ public class RevoluteTwinsJoint implements RevoluteTwinsJointBasics
    @Override
    public double getVelocityLimitLower()
    {
-      return Math.max(RevoluteTwinsJointBasics.super.getVelocityLimitLower(), velocityLimitLower);
+      updateVelocityLimits(false);
+      return velocityLimitLower;
    }
 
    /**
@@ -969,7 +1027,8 @@ public class RevoluteTwinsJoint implements RevoluteTwinsJointBasics
    @Override
    public double getVelocityLimitUpper()
    {
-      return Math.min(RevoluteTwinsJointBasics.super.getVelocityLimitUpper(), velocityLimitUpper);
+      updateVelocityLimits(false);
+      return velocityLimitUpper;
    }
 
    /**
@@ -1023,11 +1082,11 @@ public class RevoluteTwinsJoint implements RevoluteTwinsJointBasics
     *                        {@code original.getName() + cloneSuffix}.
     * @return the clone cross four bar joint.
     */
-   public static RevoluteTwinsJoint cloneCrossFourBarJoint(RevoluteTwinsJointReadOnly original, ReferenceFrame stationaryFrame, String cloneSuffix)
+   public static RevoluteTwinsJoint cloneRevoluteTwinsJoint(RevoluteTwinsJointReadOnly original, ReferenceFrame stationaryFrame, String cloneSuffix)
    {
       RigidBodyReadOnly originalPredecessor = original.getPredecessor();
       RigidBodyBasics clonePredecessor = new RigidBody(originalPredecessor.getName() + cloneSuffix, stationaryFrame);
-      return cloneCrossFourBarJoint(original, clonePredecessor, cloneSuffix);
+      return cloneRevoluteTwinsJoint(original, clonePredecessor, cloneSuffix);
    }
 
    /**
@@ -1040,7 +1099,7 @@ public class RevoluteTwinsJoint implements RevoluteTwinsJointBasics
     * @param clonePredecessor the predecessor of the clone.
     * @return the clone cross four bar joint.
     */
-   public static RevoluteTwinsJoint cloneCrossFourBarJoint(RevoluteTwinsJointReadOnly original, RigidBodyBasics clonePredecessor, String cloneSuffix)
+   public static RevoluteTwinsJoint cloneRevoluteTwinsJoint(RevoluteTwinsJointReadOnly original, RigidBodyBasics clonePredecessor, String cloneSuffix)
    {
       return (RevoluteTwinsJoint) MultiBodySystemFactories.DEFAULT_JOINT_BUILDER.cloneRevoluteTwinsJoint(original, cloneSuffix, clonePredecessor);
    }

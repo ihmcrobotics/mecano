@@ -1,8 +1,5 @@
 package us.ihmc.mecano.fourBar;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertTrue;
-
 import java.util.Random;
 
 import org.ejml.data.DMatrixRMaj;
@@ -24,6 +21,7 @@ import us.ihmc.euclid.tuple3D.interfaces.Vector3DReadOnly;
 import us.ihmc.mecano.multiBodySystem.RevoluteJoint;
 import us.ihmc.mecano.multiBodySystem.RevoluteTwinsJoint;
 import us.ihmc.mecano.multiBodySystem.RigidBody;
+import us.ihmc.mecano.multiBodySystem.interfaces.RevoluteTwinsJointReadOnly;
 import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
 import us.ihmc.mecano.spatial.SpatialAcceleration;
 import us.ihmc.mecano.spatial.SpatialVector;
@@ -31,6 +29,8 @@ import us.ihmc.mecano.spatial.Twist;
 import us.ihmc.mecano.spatial.interfaces.SpatialVectorReadOnly;
 import us.ihmc.mecano.tools.MecanoTestTools;
 import us.ihmc.mecano.tools.MultiBodySystemRandomTools;
+
+import static org.junit.jupiter.api.Assertions.*;
 
 public class RevoluteTwinsJointTest
 {
@@ -349,6 +349,88 @@ public class RevoluteTwinsJointTest
          assertEquals(joint.getJointB().getQd(), qdMatrix.get(1, 0), epsilon);
          assertEquals(joint.getJointA().getQdd(), qddMatrix.get(0, 0), epsilon);
          assertEquals(joint.getJointB().getQdd(), qddMatrix.get(1, 0), epsilon);
+      }
+   }
+
+   @Test
+   public void testJointLimits()
+   {
+      Random random = new Random(346346L);
+
+      for (int i = 0; i < ITERATIONS; i++)
+      {
+         RevoluteTwinsJoint joint = nextRevoluteTwinsJoint(random, "joint" + i, EuclidCoreRandomTools.nextUnitVector3D(random));
+         double qMinA = EuclidCoreRandomTools.nextDouble(random, -Math.PI, Math.PI);
+         double qRangeA = EuclidCoreRandomTools.nextDouble(random, 0.0, 2.0 * Math.PI);
+         double qMaxA = qMinA + qRangeA;
+         joint.getJointA().setJointLimitLower(qMinA);
+         joint.getJointA().setJointLimitUpper(qMaxA);
+         double qMinB = EuclidCoreRandomTools.nextDouble(random, -Math.PI, Math.PI);
+         double qRangeB = EuclidCoreRandomTools.nextDouble(random, 0.0, 2.0 * Math.PI);
+         double qMaxB = qMinB + qRangeB;
+         joint.getJointB().setJointLimitLower(qMinB);
+         joint.getJointB().setJointLimitUpper(qMaxB);
+
+         if (RevoluteTwinsJointReadOnly.computeJointLimitLower(joint) > RevoluteTwinsJointReadOnly.computeJointLimitUpper(joint))
+         {
+            assertThrows(IllegalStateException.class, () -> joint.getJointLimitLower());
+            assertThrows(IllegalStateException.class, () -> joint.getJointLimitUpper());
+            continue;
+         }
+
+         joint.setQ(joint.getJointLimitLower());
+         joint.updateFramesRecursively();
+         double qA = joint.getJointA().getQ();
+         double qB = joint.getJointB().getQ();
+
+         assertTrue(qA >= qMinA, "Iteration: " + i + ", jointA is violating its lower limit. q=" + qA + ", qMinA=" + qMinA);
+         assertTrue(qA <= qMaxA, "Iteration: " + i + ", jointA is violating its upper limit. q=" + qA + ", qMaxA=" + qMaxA);
+         assertTrue(qB >= qMinB, "Iteration: " + i + ", jointB is violating its lower limit. q=" + qB + ", qMinB=" + qMinB);
+         assertTrue(qB <= qMaxB, "Iteration: " + i + ", jointB is violating its upper limit. q=" + qB + ", qMaxB=" + qMaxB);
+
+         joint.setQ(joint.getJointLimitUpper());
+         joint.updateFramesRecursively();
+         qA = joint.getJointA().getQ();
+         qB = joint.getJointB().getQ();
+
+         assertTrue(qA >= qMinA, "Iteration: " + i + ", jointA is violating its lower limit. q=" + qA + ", qMinA=" + qMinA);
+         assertTrue(qA <= qMaxA, "Iteration: " + i + ", jointA is violating its upper limit. q=" + qA + ", qMaxA=" + qMaxA);
+         assertTrue(qB >= qMinB, "Iteration: " + i + ", jointB is violating its lower limit. q=" + qB + ", qMinB=" + qMinB);
+         assertTrue(qB <= qMaxB, "Iteration: " + i + ", jointB is violating its upper limit. q=" + qB + ", qMaxB=" + qMaxB);
+      }
+   }
+
+   @Test
+   public  void testJointVelocityLimits()
+   {
+      Random random = new Random(346346L);
+
+      for (int i = 0; i < ITERATIONS; i++)
+      {
+         RevoluteTwinsJoint joint = nextRevoluteTwinsJoint(random, "joint" + i, EuclidCoreRandomTools.nextUnitVector3D(random));
+         double qDotMinA = EuclidCoreRandomTools.nextDouble(random, 10.0);
+         double qDotRangeA = EuclidCoreRandomTools.nextDouble(random, 0.0, 10.0);
+         double qDotMaxA = qDotMinA + qDotRangeA;
+         joint.getJointA().setVelocityLimitLower(qDotMinA);
+         joint.getJointA().setVelocityLimitUpper(qDotMaxA);
+         double qDotMinB = EuclidCoreRandomTools.nextDouble(random, 10.0);
+         double qDotRangeB = EuclidCoreRandomTools.nextDouble(random, 0.0, 2.0 * Math.PI);
+         double qDotMaxB = qDotMinB + qDotRangeB;
+         joint.getJointB().setVelocityLimitLower(qDotMinB);
+         joint.getJointB().setVelocityLimitUpper(qDotMaxB);
+
+         if (RevoluteTwinsJointReadOnly.computeJointLimitLower(joint) > RevoluteTwinsJointReadOnly.computeJointLimitUpper(joint))
+         {
+            assertThrows(IllegalStateException.class, () -> joint.getJointLimitLower());
+            assertThrows(IllegalStateException.class, () -> joint.getJointLimitUpper());
+            continue;
+         }
+
+         joint.setQ(joint.getJointLimitLower());
+         joint.updateFramesRecursively();
+         double qdA = joint.getJointA().getQd();
+         double qdB = joint.getJointB().getQd();
+
       }
    }
 

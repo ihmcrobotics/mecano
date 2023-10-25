@@ -455,7 +455,15 @@ public class CrossFourBarJoint implements CrossFourBarJointBasics
       jointAcceleration = MecanoFactories.newSpatialAccelerationVectorReadOnly(this::getQdd, unitJointAcceleration, jointBiasAcceleration);
    }
 
-   private static String getInternalName(String jointName, String internalName, String defaultNameSuffix)
+   /**
+    * Utility method to compute the name of the internal joints and rigid-bodies used for cross four bar joint or revolute twins joint.
+    *
+    * @param jointName         the name of the joint to use if {@code internalName} is {@code null}.
+    * @param internalName      the name of the joint.
+    * @param defaultNameSuffix the suffix to use if {@code internalName} is {@code null}.
+    * @return the name of the internal joint.
+    */
+   public static String getInternalName(String jointName, String internalName, String defaultNameSuffix)
    {
       if (internalName == null)
          return jointName + "_" + defaultNameSuffix;

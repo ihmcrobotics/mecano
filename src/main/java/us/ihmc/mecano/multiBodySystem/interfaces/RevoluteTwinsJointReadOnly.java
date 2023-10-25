@@ -254,7 +254,20 @@ public interface RevoluteTwinsJointReadOnly extends OneDoFJointReadOnly
    @Override
    default double getJointLimitLower()
    {
-      return getJointA().getJointLimitLower() + getJointB().getJointLimitLower();
+      return computeJointLimitLower(this);
+   }
+
+   static double computeJointLimitLower(RevoluteTwinsJointReadOnly joint)
+   {
+      double qMinA = joint.getJointA().getJointLimitLower();
+      double qMinB = joint.getJointB().getJointLimitLower();
+      double ratio = joint.getConstraintRatio();
+      double offset = joint.getConstraintOffset();
+      // Compute the lower limit with jointA
+      double qMin1 = qMinA * (1.0 + ratio) + offset;
+      // Compute the lower limit with the jointB and take the most constraining one.
+      double qMin2 = (qMinB - offset) / ratio + qMinB;
+      return Math.max(qMin1, qMin2);
    }
 
    /**
@@ -263,7 +276,20 @@ public interface RevoluteTwinsJointReadOnly extends OneDoFJointReadOnly
    @Override
    default double getJointLimitUpper()
    {
-      return getJointA().getJointLimitUpper() + getJointB().getJointLimitUpper();
+      return computeJointLimitUpper(this);
+   }
+
+   static double computeJointLimitUpper(RevoluteTwinsJointReadOnly joint)
+   {
+      double qMaxA = joint.getJointA().getJointLimitUpper();
+      double qMaxB = joint.getJointB().getJointLimitUpper();
+      double ratio = joint.getConstraintRatio();
+      double offset = joint.getConstraintOffset();
+      // Compute the upper limit with jointA
+      double qMax1 = qMaxA * (1.0 + ratio) + offset;
+      // Compute the upper limit with the jointB and take the most constraining one.
+      double qMax2 = (qMaxB - offset) / ratio + qMaxB;
+      return Math.min(qMax1, qMax2);
    }
 
    /**
@@ -272,7 +298,15 @@ public interface RevoluteTwinsJointReadOnly extends OneDoFJointReadOnly
    @Override
    default double getVelocityLimitLower()
    {
-      return getJointA().getVelocityLimitLower() + getJointB().getVelocityLimitLower();
+      return computeVelocityLimitLower(this);
+   }
+
+   static double computeVelocityLimitLower(RevoluteTwinsJointReadOnly joint)
+   {
+      double qDotMinA = joint.getJointA().getVelocityLimitLower();
+      double qDotMinB = joint.getJointB().getVelocityLimitLower();
+      double ratio = joint.getConstraintRatio();
+      return Math.min(qDotMinA * (1.0 + ratio), qDotMinB * (1.0 + 1.0 / ratio));
    }
 
    /**
@@ -281,7 +315,15 @@ public interface RevoluteTwinsJointReadOnly extends OneDoFJointReadOnly
    @Override
    default double getVelocityLimitUpper()
    {
-      return getJointA().getVelocityLimitUpper() + getJointB().getVelocityLimitUpper();
+      return computeVelocityLimitUpper(this);
+   }
+
+   static double computeVelocityLimitUpper(RevoluteTwinsJointReadOnly joint)
+   {
+      double qDotMaxA = joint.getJointA().getVelocityLimitUpper();
+      double qDotMaxB = joint.getJointB().getVelocityLimitUpper();
+      double ratio = joint.getConstraintRatio();
+      return Math.max(qDotMaxA * (1.0 + ratio), qDotMaxB * (1.0 + 1.0 / ratio));
    }
 
    /**
