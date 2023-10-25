@@ -2,6 +2,7 @@ package us.ihmc.mecano.multiBodySystem;
 
 import org.ejml.data.DMatrix;
 import org.ejml.data.DMatrixRMaj;
+import org.ejml.dense.row.CommonOps_DDRM;
 import us.ihmc.euclid.matrix.Matrix3D;
 import us.ihmc.euclid.matrix.interfaces.Matrix3DReadOnly;
 import us.ihmc.euclid.orientation.interfaces.Orientation3DReadOnly;
@@ -83,7 +84,10 @@ public class RevoluteTwinsJoint implements RevoluteTwinsJointBasics
 
    private final int actuatedJointIndex;
    private final DMatrixRMaj constraintJacobian;
-   private final DMatrixRMaj constraintConvectiveTerm;
+   /**
+    * Because the constraint ratio is constant, there is no convective term for this joint.
+    */
+   private final DMatrixRMaj constraintConvectiveTerm = new DMatrixRMaj(2, 1);
    private final double constraintRatio, constraintOffset;
 
    /**
@@ -322,9 +326,7 @@ public class RevoluteTwinsJoint implements RevoluteTwinsJointBasics
       constraintJacobian = new DMatrixRMaj(2, 1);
       constraintJacobian.set(actuatedJointIndex, 0, 1.0);
       constraintJacobian.set(1 - actuatedJointIndex, 0, constraintRatio);
-      constraintConvectiveTerm = new DMatrixRMaj(2, 1);
-      constraintConvectiveTerm.set(actuatedJointIndex, 0, 0.0);
-      constraintConvectiveTerm.set(1 - actuatedJointIndex, 0, constraintOffset);
+      // The convection term is zero because the constraint ratio is constant.
    }
 
    private static String getInternalName(String jointName, String internalName, String defaultNameSuffix)
@@ -385,9 +387,7 @@ public class RevoluteTwinsJoint implements RevoluteTwinsJointBasics
       constraintJacobian = new DMatrixRMaj(2, 1);
       constraintJacobian.set(actuatedJointIndex, 0, 1.0);
       constraintJacobian.set(1 - actuatedJointIndex, 0, constraintRatio);
-      constraintConvectiveTerm = new DMatrixRMaj(2, 1);
-      constraintConvectiveTerm.set(actuatedJointIndex, 0, 0.0);
-      constraintConvectiveTerm.set(1 - actuatedJointIndex, 0, constraintOffset);
+      // The convection term is zero because the constraint ratio is constant.
    }
 
    /**
@@ -696,10 +696,10 @@ public class RevoluteTwinsJoint implements RevoluteTwinsJointBasics
    @Override
    public double getTau()
    {
-      // First we update this joint tau
-      double tau = actuatedJoint.getTau() + constrainedJoint.getTau() * constraintRatio;
+      // First we update the actuated joint tau
+      double tau_actuated = actuatedJoint.getTau() + constrainedJoint.getTau() * constraintRatio;
       constrainedJoint.setTau(0.0);
-      setTau(tau);
+      actuatedJoint.setTau(tau_actuated);
       // equivalent to: actuatedJoint.getTau() / (constraintJacobian.get(0, 0) + constraintJacobian.get(1, 0));
       return actuatedJoint.getTau() / (1.0 + constraintRatio);
    }
