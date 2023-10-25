@@ -13,34 +13,8 @@ import us.ihmc.euclid.transform.interfaces.RigidBodyTransformReadOnly;
 import us.ihmc.euclid.tuple3D.interfaces.Tuple3DReadOnly;
 import us.ihmc.euclid.tuple3D.interfaces.Vector3DReadOnly;
 import us.ihmc.mecano.frames.MovingReferenceFrame;
-import us.ihmc.mecano.multiBodySystem.CrossFourBarJoint;
-import us.ihmc.mecano.multiBodySystem.FixedJoint;
-import us.ihmc.mecano.multiBodySystem.OneDoFJoint;
-import us.ihmc.mecano.multiBodySystem.PlanarJoint;
-import us.ihmc.mecano.multiBodySystem.PrismaticJoint;
-import us.ihmc.mecano.multiBodySystem.RevoluteJoint;
-import us.ihmc.mecano.multiBodySystem.RigidBody;
-import us.ihmc.mecano.multiBodySystem.SixDoFJoint;
-import us.ihmc.mecano.multiBodySystem.SphericalJoint;
-import us.ihmc.mecano.multiBodySystem.interfaces.CrossFourBarJointBasics;
-import us.ihmc.mecano.multiBodySystem.interfaces.CrossFourBarJointReadOnly;
-import us.ihmc.mecano.multiBodySystem.interfaces.FixedJointBasics;
-import us.ihmc.mecano.multiBodySystem.interfaces.FixedJointReadOnly;
-import us.ihmc.mecano.multiBodySystem.interfaces.JointBasics;
-import us.ihmc.mecano.multiBodySystem.interfaces.JointReadOnly;
-import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointBasics;
-import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointReadOnly;
-import us.ihmc.mecano.multiBodySystem.interfaces.PlanarJointBasics;
-import us.ihmc.mecano.multiBodySystem.interfaces.PlanarJointReadOnly;
-import us.ihmc.mecano.multiBodySystem.interfaces.PrismaticJointBasics;
-import us.ihmc.mecano.multiBodySystem.interfaces.RevoluteJointBasics;
-import us.ihmc.mecano.multiBodySystem.interfaces.RevoluteJointReadOnly;
-import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
-import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyReadOnly;
-import us.ihmc.mecano.multiBodySystem.interfaces.SixDoFJointBasics;
-import us.ihmc.mecano.multiBodySystem.interfaces.SixDoFJointReadOnly;
-import us.ihmc.mecano.multiBodySystem.interfaces.SphericalJointBasics;
-import us.ihmc.mecano.multiBodySystem.interfaces.SphericalJointReadOnly;
+import us.ihmc.mecano.multiBodySystem.*;
+import us.ihmc.mecano.multiBodySystem.interfaces.*;
 import us.ihmc.mecano.spatial.interfaces.SpatialInertiaReadOnly;
 
 /**
@@ -89,7 +63,7 @@ public class MultiBodySystemFactories
     * @param end   the rigid-body where the kinematic chain ends.
     * @return the clone kinematic chain.
     * @throws UnsupportedOperationException if the kinematic chain contains one or more loop closure
-    *                                       joints.
+    *       joints.
     */
    public static OneDoFJointBasics[] cloneOneDoFJointKinematicChain(RigidBodyBasics start, RigidBodyBasics end)
    {
@@ -113,7 +87,7 @@ public class MultiBodySystemFactories
     * @param originalJoints the kinematic chain to clone. Not modified.
     * @return the clone kinematic chain.
     * @throws UnsupportedOperationException if {@code originalJoints} contains one or more loop closure
-    *                                       joints.
+    *       joints.
     */
    public static OneDoFJointBasics[] cloneOneDoFJointKinematicChain(OneDoFJointBasics[] originalJoints)
    {
@@ -139,7 +113,7 @@ public class MultiBodySystemFactories
     * @param clazz          class used to filter the cloned joints that are to be returned.
     * @return the clone kinematic chain.
     * @throws UnsupportedOperationException if {@code originalJoints} contains one or more loop closure
-    *                                       joints.
+    *       joints.
     */
    public static <T extends JointReadOnly> T[] cloneKinematicChainAndFilter(T[] originalJoints, Class<T> clazz)
    {
@@ -166,7 +140,7 @@ public class MultiBodySystemFactories
     * @param cloneSuffix    suffix to append to the cloned joints and rigid-bodies.
     * @return the clone kinematic chain.
     * @throws UnsupportedOperationException if {@code originalJoints} contains one or more loop closure
-    *                                       joints.
+    *       joints.
     */
    public static <T extends JointReadOnly> T[] cloneKinematicChainAndFilter(T[] originalJoints, Class<T> clazz, String cloneSuffix)
    {
@@ -189,7 +163,7 @@ public class MultiBodySystemFactories
     * @param originalJoints the kinematic chain to clone. Not modified.
     * @return the clone kinematic chain.
     * @throws UnsupportedOperationException if {@code originalJoints} contains one or more loop closure
-    *                                       joints.
+    *       joints.
     */
    public static JointBasics[] cloneKinematicChain(JointReadOnly[] originalJoints)
    {
@@ -213,7 +187,7 @@ public class MultiBodySystemFactories
     * @param cloneSuffix    suffix to append to the cloned joints and rigid-bodies.
     * @return the clone kinematic chain.
     * @throws UnsupportedOperationException if {@code originalJoints} contains one or more loop closure
-    *                                       joints.
+    *       joints.
     */
    public static JointBasics[] cloneKinematicChain(JointReadOnly[] originalJoints, String cloneSuffix)
    {
@@ -241,7 +215,7 @@ public class MultiBodySystemFactories
     *                       {@code originalJoints[0]}.
     * @return the clone kinematic chain.
     * @throws UnsupportedOperationException if {@code originalJoints} contains one or more loop closure
-    *                                       joints.
+    *       joints.
     */
    public static JointBasics[] cloneKinematicChain(JointReadOnly[] originalJoints, String cloneSuffix, ReferenceFrame chainRootFrame)
    {
@@ -273,7 +247,7 @@ public class MultiBodySystemFactories
     *                         {@link #DEFAULT_JOINT_BUILDER} is used.
     * @return the clone kinematic chain.
     * @throws UnsupportedOperationException if {@code originalJoints} contains one or more loop closure
-    *                                       joints.
+    *       joints.
     */
    public static JointBasics[] cloneKinematicChain(JointReadOnly[] originalJoints,
                                                    String cloneSuffix,
@@ -282,8 +256,8 @@ public class MultiBodySystemFactories
                                                    JointBuilder jointBuilder)
    {
       if (!MultiBodySystemTools.areJointsInContinuousOrder(originalJoints))
-         throw new IllegalArgumentException("The given joints do not represent a continuous kinematic chain or are out of order: "
-               + Arrays.toString(originalJoints));
+         throw new IllegalArgumentException(
+               "The given joints do not represent a continuous kinematic chain or are out of order: " + Arrays.toString(originalJoints));
 
       JointBasics[] cloneJoints = new JointBasics[originalJoints.length];
       Map<RigidBodyReadOnly, RigidBodyBasics> originalToCloneBodyMap = new HashMap<>();
@@ -335,7 +309,7 @@ public class MultiBodySystemFactories
     * @param cloneSuffix          suffix to append to the cloned joints and rigid-bodies.
     * @return the clone multi-body system.
     * @throws IllegalArgumentException if the given {@code originalRootBody} is not the root body of
-    *                                  its system.
+    *       its system.
     */
    public static RigidBodyBasics cloneMultiBodySystem(RigidBodyReadOnly originalRootBody, ReferenceFrame cloneStationaryFrame, String cloneSuffix)
    {
@@ -359,7 +333,7 @@ public class MultiBodySystemFactories
     *                             {@link #DEFAULT_JOINT_BUILDER} is used.
     * @return the clone multi-body system.
     * @throws IllegalArgumentException if the given {@code originalRootBody} is not the root body of
-    *                                  its system.
+    *       its system.
     */
    public static RigidBodyBasics cloneMultiBodySystem(RigidBodyReadOnly originalRootBody,
                                                       ReferenceFrame cloneStationaryFrame,
@@ -394,9 +368,9 @@ public class MultiBodySystemFactories
     * @param cloneSuffix              suffix to append to the cloned joints and rigid-bodies.
     * @return the clone subtree.
     * @throws IllegalArgumentException if {@code originalSubtreeStartBody} is a root body, in which
-    *                                  case
-    *                                  {@link #cloneMultiBodySystem(RigidBodyReadOnly, ReferenceFrame, String, RigidBodyBuilder, JointBuilder)}
-    *                                  should be used.
+    *       case
+    *       {@link #cloneMultiBodySystem(RigidBodyReadOnly, ReferenceFrame, String, RigidBodyBuilder, JointBuilder)}
+    *       should be used.
     */
    public static RigidBodyBasics cloneSubtree(RigidBodyReadOnly originalSubtreeStartBody, String cloneSuffix)
    {
@@ -424,9 +398,9 @@ public class MultiBodySystemFactories
     *                                 {@link #DEFAULT_JOINT_BUILDER} is used.
     * @return the clone subtree.
     * @throws IllegalArgumentException if {@code originalSubtreeStartBody} is a root body, in which
-    *                                  case
-    *                                  {@link #cloneMultiBodySystem(RigidBodyReadOnly, ReferenceFrame, String, RigidBodyBuilder, JointBuilder)}
-    *                                  should be used.
+    *       case
+    *       {@link #cloneMultiBodySystem(RigidBodyReadOnly, ReferenceFrame, String, RigidBodyBuilder, JointBuilder)}
+    *       should be used.
     */
    public static RigidBodyBasics cloneSubtree(RigidBodyReadOnly originalSubtreeStartBody,
                                               String cloneSuffix,
@@ -434,7 +408,8 @@ public class MultiBodySystemFactories
                                               JointBuilder jointBuilder)
    {
       if (originalSubtreeStartBody.isRootBody())
-         throw new IllegalArgumentException("originalSubtreeStartBody is a root body of its multi-body system, use MultiBodyFactories.cloneMultiBodySystem(...) instead");
+         throw new IllegalArgumentException(
+               "originalSubtreeStartBody is a root body of its multi-body system, use MultiBodyFactories.cloneMultiBodySystem(...) instead");
 
       if (rigidBodyBuilder == null)
          rigidBodyBuilder = DEFAULT_RIGID_BODY_BUILDER;
@@ -513,7 +488,7 @@ public class MultiBodySystemFactories
    {
       /**
        * Creates a new joint.
-       * 
+       *
        * @param jointType         the type of the joint to be build.
        * @param name              the joint name.
        * @param predecessor       the predecessor of the joint.
@@ -538,7 +513,7 @@ public class MultiBodySystemFactories
 
       /**
        * Creates a new 1-DoF joint.
-       * 
+       *
        * @param jointType         the type of the joint to be build.
        * @param name              the joint name.
        * @param predecessor       the predecessor of the joint.
@@ -647,7 +622,7 @@ public class MultiBodySystemFactories
 
       /**
        * Clone the given joint {@code original} and attach the clone to {@code clonePredecessor}.
-       * 
+       *
        * @param original         the original joint to be cloned.
        * @param cloneSuffix      the suffix for name of the clone, i.e. the name of the clone is
        *                         {@code original.getName() + cloneSuffix}.
@@ -673,7 +648,7 @@ public class MultiBodySystemFactories
 
       /**
        * Clone the given 1-DoF joint {@code original} and attach the clone to {@code clonePredecessor}.
-       * 
+       *
        * @param original         the original 1-DoF joint to be cloned.
        * @param cloneSuffix      the suffix for name of the clone, i.e. the name of the clone is
        *                         {@code original.getName() + cloneSuffix}.
@@ -682,17 +657,24 @@ public class MultiBodySystemFactories
        */
       default OneDoFJointBasics cloneOneDoFJoint(OneDoFJointReadOnly original, String cloneSuffix, RigidBodyBasics clonePredecessor)
       {
+         OneDoFJointBasics clone;
          if (original instanceof CrossFourBarJointReadOnly)
-            return cloneCrossFourBarJoint((CrossFourBarJointReadOnly) original, cloneSuffix, clonePredecessor);
+         {
+            clone = cloneCrossFourBarJoint((CrossFourBarJointReadOnly) original, cloneSuffix, clonePredecessor);
+         }
+         else if (original instanceof RevoluteTwinsJointReadOnly)
+         {
+            clone = cloneRevoluteTwinsJoint((RevoluteTwinsJointReadOnly) original, cloneSuffix, clonePredecessor);
+         }
+         else
+         {
+            clone = buildOneDoFJoint(original.getClass(),
+                                     original.getName() + cloneSuffix,
+                                     clonePredecessor,
+                                     cloneJointTransformToParent(original),
+                                     original.getJointAxis());
+         }
 
-         String jointNameOriginal = original.getName();
-         RigidBodyTransform jointTransform = cloneJointTransformToParent(original);
-
-         OneDoFJointBasics clone = buildOneDoFJoint(original.getClass(),
-                                                    jointNameOriginal + cloneSuffix,
-                                                    clonePredecessor,
-                                                    jointTransform,
-                                                    original.getJointAxis());
          if (clone == null)
             throw new RuntimeException("Unhandled type of " + OneDoFJoint.class.getSimpleName() + ": " + original.getClass().getSimpleName());
 
@@ -706,7 +688,7 @@ public class MultiBodySystemFactories
       /**
        * Clones the given cross four bar joint {@code original} and attach the clone to
        * {@code clonePredecessor}.
-       * 
+       *
        * @param original         the original cross four bar joint to be cloned.
        * @param cloneSuffix      the suffix for name of the clone, i.e. the name of the clone is
        *                         {@code original.getName() + cloneSuffix}.
@@ -754,9 +736,32 @@ public class MultiBodySystemFactories
                                       original.getJointAxis());
       }
 
+      default RevoluteTwinsJoint cloneRevoluteTwinsJoint(RevoluteTwinsJointReadOnly original, String cloneSuffix, RigidBodyBasics clonePredecessor)
+      {
+         RevoluteJointReadOnly originalJointA = original.getJointA();
+         RevoluteJointReadOnly originalJointB = original.getJointB();
+         RigidBodyReadOnly originalBodyAB = originalJointA.getSuccessor();
+
+         RevoluteTwinsJoint clone = new RevoluteTwinsJoint(original.getName() + cloneSuffix,
+                                                           clonePredecessor,
+                                                           originalJointA.getName() + cloneSuffix,
+                                                           originalJointB.getName() + cloneSuffix,
+                                                           originalBodyAB.getName() + cloneSuffix,
+                                                           originalJointA.getFrameBeforeJoint().getTransformToParent(),
+                                                           originalJointB.getFrameBeforeJoint().getTransformToParent(),
+                                                           originalBodyAB.getInertia().getMomentOfInertia(),
+                                                           originalBodyAB.getInertia().getMass(),
+                                                           originalBodyAB.getBodyFixedFrame().getTransformToParent(),
+                                                           original.getActuatedJointIndex(),
+                                                           original.getConstraintRatio(),
+                                                           original.getConstraintOffset(),
+                                                           original.getJointAxis());
+         return clone;
+      }
+
       /**
        * Clone the transform from the given {@code original} to its parent joint.
-       * 
+       *
        * @param original the joint to clone the transform from.
        * @return the transform from the given {@code original} to its parent joint.
        */
@@ -823,7 +828,7 @@ public class MultiBodySystemFactories
 
       /**
        * Clone the given rigid-body {@code original} and attach the clone to {@code clonePredecessor}.
-       * 
+       *
        * @param original             the original rigid-body to be cloned.
        * @param cloneStationaryFrame if {@code original} is a root body, it is used to attach the clone.
        *                             Can be {@code null} if {@code original} is not a root body.
