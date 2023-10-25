@@ -8,7 +8,6 @@ import us.ihmc.euclid.orientation.interfaces.Orientation3DReadOnly;
 import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.referenceFrame.interfaces.FixedFrameVector3DBasics;
-import us.ihmc.euclid.referenceFrame.tools.EuclidFrameTools;
 import us.ihmc.euclid.tools.EuclidCoreIOTools;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.transform.interfaces.RigidBodyTransformReadOnly;
@@ -83,8 +82,8 @@ public class RevoluteTwinsJoint implements RevoluteTwinsJointBasics
    private WrenchReadOnly jointWrench;
 
    private final int actuatedJointIndex;
-   private final DMatrixRMaj constraintJacobian = new DMatrixRMaj(2, 1);
-   private final DMatrixRMaj constraintConvectiveTerm = new DMatrixRMaj(2, 1);
+   private final DMatrixRMaj constraintJacobian;
+   private final DMatrixRMaj constraintConvectiveTerm;
    private final double constraintRatio, constraintOffset;
 
    /**
@@ -320,6 +319,12 @@ public class RevoluteTwinsJoint implements RevoluteTwinsJointBasics
 
       this.constraintRatio = constraintRatio;
       this.constraintOffset = constraintOffset;
+      constraintJacobian = new DMatrixRMaj(2, 1);
+      constraintJacobian.set(actuatedJointIndex, 0, 1.0);
+      constraintJacobian.set(1 - actuatedJointIndex, 0, constraintRatio);
+      constraintConvectiveTerm = new DMatrixRMaj(2, 1);
+      constraintConvectiveTerm.set(actuatedJointIndex, 0, 0.0);
+      constraintConvectiveTerm.set(1 - actuatedJointIndex, 0, constraintOffset);
    }
 
    private static String getInternalName(String jointName, String internalName, String defaultNameSuffix)
@@ -377,10 +382,12 @@ public class RevoluteTwinsJoint implements RevoluteTwinsJointBasics
 
       this.constraintRatio = constraintRatio;
       this.constraintOffset = constraintOffset;
-      constraintJacobian.set(0, 0, 1.0);
-      constraintJacobian.set(1, 0, constraintRatio);
-      constraintConvectiveTerm.set(0, 0, 0.0);
-      constraintConvectiveTerm.set(1, 0, constraintOffset);
+      constraintJacobian = new DMatrixRMaj(2, 1);
+      constraintJacobian.set(actuatedJointIndex, 0, 1.0);
+      constraintJacobian.set(1 - actuatedJointIndex, 0, constraintRatio);
+      constraintConvectiveTerm = new DMatrixRMaj(2, 1);
+      constraintConvectiveTerm.set(actuatedJointIndex, 0, 0.0);
+      constraintConvectiveTerm.set(1 - actuatedJointIndex, 0, constraintOffset);
    }
 
    /**
@@ -399,16 +406,17 @@ public class RevoluteTwinsJoint implements RevoluteTwinsJointBasics
    @Override
    public void updateFrame()
    {
-      double qA = jointA.getQ();
-      double qB = constraintRatio * qA + constraintOffset;
-      double qDotA = jointA.getQd();
-      double qDotB = constraintRatio * qDotA;
-      double qDDotA = jointA.getQdd();
-      double qDDotB = constraintRatio * qDDotA;
+      double q_actuated = actuatedJoint.getQ();
+      double qDot_actuated = actuatedJoint.getQd();
+      double qDDot_actuated = actuatedJoint.getQdd();
 
-      jointB.setQ(qB);
-      jointB.setQd(qDotB);
-      jointB.setQdd(qDDotB);
+      double q_constrained = constraintRatio * q_actuated + constraintOffset;
+      double qDot_constrained = constraintRatio * qDot_actuated;
+      double qDDot_constrained = constraintRatio * qDDot_actuated;
+
+      constrainedJoint.setQ(q_constrained);
+      constrainedJoint.setQd(qDot_constrained);
+      constrainedJoint.setQdd(qDDot_constrained);
 
       jointA.updateFrame();
       jointB.updateFrame();
@@ -483,7 +491,7 @@ public class RevoluteTwinsJoint implements RevoluteTwinsJointBasics
       unitJointTwistToPack.getAngularPart().scaleAdd(jB, unitTwistB.getAngularPart(), unitJointTwistToPack.getAngularPart());
       unitJointTwistToPack.getLinearPart().scaleAdd(jB, unitTwistB.getLinearPart(), unitJointTwistToPack.getLinearPart());
       unitJointTwistToPack.scale(1.0 / (jA + jB));
-      unitJointTwistToPack.changeFrame(joint.getFrameAfterJoint());
+      unitJointTwistToPack.setBodyFrame(joint.getFrameAfterJoint());
    }
 
    /**

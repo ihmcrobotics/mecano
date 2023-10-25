@@ -127,8 +127,8 @@ public interface RevoluteTwinsJointReadOnly extends OneDoFJointReadOnly
    /**
     * Gets the index in [0, 3] corresponding to the actuated joint.
     * <p>
-    * The index can be used with the matrices {@link #getLoopJacobian()} and
-    * {@link CrossFourBarJointReadOnly#getLoopConvectiveTerm()} to retrieve the row that correspond to
+    * The index can be used with the matrices {@link #getConstraintJacobian()} and
+    * {@link RevoluteTwinsJointReadOnly#getConstraintConvectiveTerm()} to retrieve the row that correspond to
     * the mast joint.
     * </p>
     *

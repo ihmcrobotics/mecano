@@ -15,6 +15,7 @@ import org.ejml.data.DMatrixRMaj;
 import org.ejml.dense.row.MatrixFeatures_DDRM;
 import org.ejml.ops.MatrixFeatures_D;
 
+import us.ihmc.euclid.tuple3D.interfaces.Vector3DReadOnly;
 import us.ihmc.mecano.spatial.SpatialVector;
 import us.ihmc.mecano.spatial.interfaces.MomentumReadOnly;
 import us.ihmc.mecano.spatial.interfaces.SpatialAccelerationReadOnly;
@@ -44,7 +45,7 @@ public class MecanoTestTools
     * @param actual   the actual spatial vector. Not modified.
     * @param epsilon  the tolerance to use.
     * @throws AssertionError if the two spatial vectors are not equal. If only one of the arguments is
-    *                        equal to {@code null}.
+    *       equal to {@code null}.
     */
    public static void assertSpatialVectorEquals(SpatialVectorReadOnly expected, SpatialVectorReadOnly actual, double epsilon)
    {
@@ -62,7 +63,7 @@ public class MecanoTestTools
     * @param actual        the actual spatial vector. Not modified.
     * @param epsilon       the tolerance to use.
     * @throws AssertionError if the two spatial vectors are not equal. If only one of the arguments is
-    *                        equal to {@code null}.
+    *       equal to {@code null}.
     */
    public static void assertSpatialVectorEquals(String messagePrefix, SpatialVectorReadOnly expected, SpatialVectorReadOnly actual, double epsilon)
    {
@@ -82,9 +83,12 @@ public class MecanoTestTools
     * @param format        the format to use for printing each component when an {@code AssertionError}
     *                      is thrown.
     * @throws AssertionError if the two spatial vectors are not equal. If only one of the arguments is
-    *                        equal to {@code null}.
+    *       equal to {@code null}.
     */
-   public static void assertSpatialVectorEquals(String messagePrefix, SpatialVectorReadOnly expected, SpatialVectorReadOnly actual, double epsilon,
+   public static void assertSpatialVectorEquals(String messagePrefix,
+                                                SpatialVectorReadOnly expected,
+                                                SpatialVectorReadOnly actual,
+                                                double epsilon,
                                                 String format)
    {
       if (expected == null && actual == null)
@@ -110,7 +114,7 @@ public class MecanoTestTools
     * @param actual   the actual spatial force vector. Not modified.
     * @param epsilon  the tolerance to use.
     * @throws AssertionError if the two spatial force vectors are not equal. If only one of the
-    *                        arguments is equal to {@code null}.
+    *       arguments is equal to {@code null}.
     */
    public static void assertSpatialForceEquals(SpatialForceReadOnly expected, SpatialForceReadOnly actual, double epsilon)
    {
@@ -129,7 +133,7 @@ public class MecanoTestTools
     * @param actual        the actual spatial force vector. Not modified.
     * @param epsilon       the tolerance to use.
     * @throws AssertionError if the two spatial force vectors are not equal. If only one of the
-    *                        arguments is equal to {@code null}.
+    *       arguments is equal to {@code null}.
     */
    public static void assertSpatialForceEquals(String messagePrefix, SpatialForceReadOnly expected, SpatialForceReadOnly actual, double epsilon)
    {
@@ -150,7 +154,7 @@ public class MecanoTestTools
     * @param format        the format to use for printing each component when an {@code AssertionError}
     *                      is thrown.
     * @throws AssertionError if the two spatial force vectors are not equal. If only one of the
-    *                        arguments is equal to {@code null}.
+    *       arguments is equal to {@code null}.
     */
    public static void assertSpatialForceEquals(String messagePrefix, SpatialForceReadOnly expected, SpatialForceReadOnly actual, double epsilon, String format)
    {
@@ -176,7 +180,7 @@ public class MecanoTestTools
     * @param actual   the actual wrench. Not modified.
     * @param epsilon  the tolerance to use.
     * @throws AssertionError if the two wrenches are not equal. If only one of the arguments is equal
-    *                        to {@code null}.
+    *       to {@code null}.
     */
    public static void assertWrenchEquals(WrenchReadOnly expected, WrenchReadOnly actual, double epsilon)
    {
@@ -194,7 +198,7 @@ public class MecanoTestTools
     * @param actual        the actual wrench. Not modified.
     * @param epsilon       the tolerance to use.
     * @throws AssertionError if the two wrenches are not equal. If only one of the arguments is equal
-    *                        to {@code null}.
+    *       to {@code null}.
     */
    public static void assertWrenchEquals(String messagePrefix, WrenchReadOnly expected, WrenchReadOnly actual, double epsilon)
    {
@@ -214,7 +218,7 @@ public class MecanoTestTools
     * @param format        the format to use for printing each component when an {@code AssertionError}
     *                      is thrown.
     * @throws AssertionError if the two wrenches are not equal. If only one of the arguments is equal
-    *                        to {@code null}.
+    *       to {@code null}.
     */
    public static void assertWrenchEquals(String messagePrefix, WrenchReadOnly expected, WrenchReadOnly actual, double epsilon, String format)
    {
@@ -240,7 +244,7 @@ public class MecanoTestTools
     * @param actual   the actual spatial twist. Not modified.
     * @param epsilon  the tolerance to use.
     * @throws AssertionError if the two twists are not equal. If only one of the arguments is equal to
-    *                        {@code null}.
+    *       {@code null}.
     */
    public static void assertTwistEquals(TwistReadOnly expected, TwistReadOnly actual, double epsilon)
    {
@@ -258,7 +262,7 @@ public class MecanoTestTools
     * @param actual        the actual spatial twist. Not modified.
     * @param epsilon       the tolerance to use.
     * @throws AssertionError if the two twists are not equal. If only one of the arguments is equal to
-    *                        {@code null}.
+    *       {@code null}.
     */
    public static void assertTwistEquals(String messagePrefix, TwistReadOnly expected, TwistReadOnly actual, double epsilon)
    {
@@ -278,7 +282,7 @@ public class MecanoTestTools
     * @param format        the format to use for printing each component when an {@code AssertionError}
     *                      is thrown.
     * @throws AssertionError if the two twists are not equal. If only one of the arguments is equal to
-    *                        {@code null}.
+    *       {@code null}.
     */
    public static void assertTwistEquals(String messagePrefix, TwistReadOnly expected, TwistReadOnly actual, double epsilon, String format)
    {
@@ -305,7 +309,7 @@ public class MecanoTestTools
     * @param actual   the actual spatial acceleration vector. Not modified.
     * @param epsilon  the tolerance to use.
     * @throws AssertionError if the two spatial acceleration vectors are not equal. If only one of the
-    *                        arguments is equal to {@code null}.
+    *       arguments is equal to {@code null}.
     */
    public static void assertSpatialAccelerationEquals(SpatialAccelerationReadOnly expected, SpatialAccelerationReadOnly actual, double epsilon)
    {
@@ -324,9 +328,11 @@ public class MecanoTestTools
     * @param actual        the actual spatial acceleration vector. Not modified.
     * @param epsilon       the tolerance to use.
     * @throws AssertionError if the two spatial acceleration vectors are not equal. If only one of the
-    *                        arguments is equal to {@code null}.
+    *       arguments is equal to {@code null}.
     */
-   public static void assertSpatialAccelerationEquals(String messagePrefix, SpatialAccelerationReadOnly expected, SpatialAccelerationReadOnly actual,
+   public static void assertSpatialAccelerationEquals(String messagePrefix,
+                                                      SpatialAccelerationReadOnly expected,
+                                                      SpatialAccelerationReadOnly actual,
                                                       double epsilon)
    {
       assertSpatialAccelerationEquals(messagePrefix, expected, actual, epsilon, DEFAULT_FORMAT);
@@ -346,10 +352,13 @@ public class MecanoTestTools
     * @param format        the format to use for printing each component when an {@code AssertionError}
     *                      is thrown.
     * @throws AssertionError if the two spatial acceleration vectors are not equal. If only one of the
-    *                        arguments is equal to {@code null}.
+    *       arguments is equal to {@code null}.
     */
-   public static void assertSpatialAccelerationEquals(String messagePrefix, SpatialAccelerationReadOnly expected, SpatialAccelerationReadOnly actual,
-                                                      double epsilon, String format)
+   public static void assertSpatialAccelerationEquals(String messagePrefix,
+                                                      SpatialAccelerationReadOnly expected,
+                                                      SpatialAccelerationReadOnly actual,
+                                                      double epsilon,
+                                                      String format)
    {
       if (expected == null && actual == null)
          return;
@@ -373,7 +382,7 @@ public class MecanoTestTools
     * @param actual   the actual momentum vector. Not modified.
     * @param epsilon  the tolerance to use.
     * @throws AssertionError if the two momentum vectors are not equal. If only one of the arguments is
-    *                        equal to {@code null}.
+    *       equal to {@code null}.
     */
    public static void assertMomentumEquals(MomentumReadOnly expected, MomentumReadOnly actual, double epsilon)
    {
@@ -391,7 +400,7 @@ public class MecanoTestTools
     * @param actual        the actual momentum vector. Not modified.
     * @param epsilon       the tolerance to use.
     * @throws AssertionError if the two momentum vectors are not equal. If only one of the arguments is
-    *                        equal to {@code null}.
+    *       equal to {@code null}.
     */
    public static void assertMomentumEquals(String messagePrefix, MomentumReadOnly expected, MomentumReadOnly actual, double epsilon)
    {
@@ -411,7 +420,7 @@ public class MecanoTestTools
     * @param format        the format to use for printing each component when an {@code AssertionError}
     *                      is thrown.
     * @throws AssertionError if the two momentum vectors are not equal. If only one of the arguments is
-    *                        equal to {@code null}.
+    *       equal to {@code null}.
     */
    public static void assertMomentumEquals(String messagePrefix, MomentumReadOnly expected, MomentumReadOnly actual, double epsilon, String format)
    {
@@ -438,7 +447,7 @@ public class MecanoTestTools
     * @param actual   the actual spatial inertia matrix. Not modified.
     * @param epsilon  the tolerance to use.
     * @throws AssertionError if the two spatial inertia matrices are not equal. If only one of the
-    *                        arguments is equal to {@code null}.
+    *       arguments is equal to {@code null}.
     */
    public static void assertSpatialInertiaEquals(SpatialInertiaReadOnly expected, SpatialInertiaReadOnly actual, double epsilon)
    {
@@ -457,7 +466,7 @@ public class MecanoTestTools
     * @param actual        the actual spatial inertia matrix. Not modified.
     * @param epsilon       the tolerance to use.
     * @throws AssertionError if the two spatial inertia matrices are not equal. If only one of the
-    *                        arguments is equal to {@code null}.
+    *       arguments is equal to {@code null}.
     */
    public static void assertSpatialInertiaEquals(String messagePrefix, SpatialInertiaReadOnly expected, SpatialInertiaReadOnly actual, double epsilon)
    {
@@ -478,9 +487,12 @@ public class MecanoTestTools
     * @param format        the format to use for printing each component when an {@code AssertionError}
     *                      is thrown.
     * @throws AssertionError if the two spatial inertia matrices are not equal. If only one of the
-    *                        arguments is equal to {@code null}.
+    *       arguments is equal to {@code null}.
     */
-   public static void assertSpatialInertiaEquals(String messagePrefix, SpatialInertiaReadOnly expected, SpatialInertiaReadOnly actual, double epsilon,
+   public static void assertSpatialInertiaEquals(String messagePrefix,
+                                                 SpatialInertiaReadOnly expected,
+                                                 SpatialInertiaReadOnly actual,
+                                                 double epsilon,
                                                  String format)
    {
       if (expected == null && actual == null)
@@ -505,7 +517,7 @@ public class MecanoTestTools
     * @param actual   the actual matrix. Not modified.
     * @param epsilon  the tolerance to use.
     * @throws AssertionError if the two matrices are not equal. If only one of the arguments is equal
-    *                        to {@code null}.
+    *       to {@code null}.
     */
    public static void assertDMatrixEquals(DMatrix expected, DMatrix actual, double epsilon)
    {
@@ -523,7 +535,7 @@ public class MecanoTestTools
     * @param actual        the actual matrix. Not modified.
     * @param epsilon       the tolerance to use.
     * @throws AssertionError if the two matrices are not equal. If only one of the arguments is equal
-    *                        to {@code null}.
+    *       to {@code null}.
     */
    public static void assertDMatrixEquals(String messagePrefix, DMatrix expected, DMatrix actual, double epsilon)
    {
@@ -571,7 +583,7 @@ public class MecanoTestTools
     * @param expectedExceptionType the expected type of the exception to catch when executing the
     *                              runnable.
     * @throws AssertionError if the no exception is thrown or if the thrown exception is not equal to
-    *                        {@code expectedExceptionType}.
+    *       {@code expectedExceptionType}.
     */
    public static void assertExceptionIsThrown(Runnable runnable, Class<? extends Exception> expectedExceptionType)
    {
@@ -590,8 +602,8 @@ public class MecanoTestTools
          if (exceptionCaught == null)
             throw new AssertionError("The operation should have thrown an exception.");
          if (!exceptionCaught.getClass().equals(expectedExceptionType))
-            throw new AssertionError("Unexpected exception: expected = " + expectedExceptionType.getSimpleName() + ", actual = "
-                  + exceptionCaught.getClass().getSimpleName());
+            throw new AssertionError(
+                  "Unexpected exception: expected = " + expectedExceptionType.getSimpleName() + ", actual = " + exceptionCaught.getClass().getSimpleName());
       }
    }
 
@@ -623,7 +635,9 @@ public class MecanoTestTools
       throwNotEqualAssertionError(messagePrefix, expectedAsString, actualAsString, Double.toString(computeNormError(expected, actual)));
    }
 
-   private static void throwNotEqualAssertionError(String messagePrefix, SpatialAccelerationReadOnly expected, SpatialAccelerationReadOnly actual,
+   private static void throwNotEqualAssertionError(String messagePrefix,
+                                                   SpatialAccelerationReadOnly expected,
+                                                   SpatialAccelerationReadOnly actual,
                                                    String format)
    {
       String expectedAsString = getSpatialAccelerationString(format, expected);
@@ -670,7 +684,14 @@ public class MecanoTestTools
    private static double computeNormError(SpatialVectorReadOnly expected, SpatialVectorReadOnly actual)
    {
       SpatialVector spatialError = new SpatialVector(expected);
-      spatialError.sub(actual);
+      if (expected.getReferenceFrame() == null || actual.getReferenceFrame() == null)
+      { // Skip the reference frame check if there is no frame to avoid a NullPointerException.
+         spatialError.sub((Vector3DReadOnly) actual.getAngularPart(), (Vector3DReadOnly) expected.getLinearPart());
+      }
+      else
+      {
+         spatialError.sub(actual);
+      }
       return spatialError.length();
    }
 }
