@@ -1,9 +1,15 @@
 package us.ihmc.mecano.fourBar;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+
+import java.util.Random;
+
 import org.ejml.data.DMatrixRMaj;
 import org.ejml.dense.row.CommonOps_DDRM;
 import org.ejml.dense.row.MatrixFeatures_DDRM;
 import org.junit.jupiter.api.Test;
+
 import us.ihmc.euclid.matrix.Matrix3D;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.FrameQuaternion;
@@ -24,10 +30,7 @@ import us.ihmc.mecano.spatial.SpatialVector;
 import us.ihmc.mecano.spatial.Twist;
 import us.ihmc.mecano.spatial.interfaces.SpatialVectorReadOnly;
 import us.ihmc.mecano.tools.MecanoTestTools;
-
-import java.util.Random;
-
-import static org.junit.jupiter.api.Assertions.*;
+import us.ihmc.mecano.tools.MultiBodySystemRandomTools;
 
 public class RevoluteTwinsJointTest
 {
@@ -154,6 +157,26 @@ public class RevoluteTwinsJointTest
          expectedTwist.getAngularPart().setMatchingFrame(finiteDifference(poseCurr.getOrientation(), posePrev.getOrientation(), dt));
 
          MecanoTestTools.assertTwistEquals("Iteration: " + i, expectedTwist, actualTwist, 1.0e-6);
+
+         // Test the unit-twist against the joint twist
+         actualTwist.setIncludingFrame(joint.getUnitJointTwist());
+         actualTwist.scale(qd);
+
+         MecanoTestTools.assertTwistEquals("Iteration: " + i, joint.getJointTwist(), actualTwist, 1.0e-12);
+
+         // Test the unit-successor-twist against the unit-twist
+         expectedTwist.setIncludingFrame(joint.getUnitJointTwist());
+         expectedTwist.changeFrame(joint.getSuccessor().getBodyFixedFrame());
+         expectedTwist.setBodyFrame(joint.getSuccessor().getBodyFixedFrame());
+         expectedTwist.setBaseFrame(joint.getPredecessor().getBodyFixedFrame());
+
+         MecanoTestTools.assertTwistEquals("Iteration: " + i, expectedTwist, joint.getUnitSuccessorTwist(), 1.0e-12);
+
+         // Test the unit-predecessor-twist
+         expectedTwist.invert();
+         expectedTwist.changeFrame(joint.getPredecessor().getBodyFixedFrame());
+
+         MecanoTestTools.assertTwistEquals("Iteration: " + i, expectedTwist, joint.getUnitPredecessorTwist(), 1.0e-12);
       }
    }
 
@@ -198,6 +221,77 @@ public class RevoluteTwinsJointTest
          expectedAcceleration.changeFrame(joint.getFrameAfterJoint(), twistCurr, twistCurr);
 
          MecanoTestTools.assertSpatialAccelerationEquals("Iteration: " + i, expectedAcceleration, actualAcceleration, 5.0e-6);
+
+         // Test the unit-acceleration against the joint acceleration
+         actualAcceleration.setIncludingFrame(joint.getUnitJointAcceleration());
+         actualAcceleration.scale(qdd);
+         actualAcceleration.add((SpatialVectorReadOnly) joint.getJointBiasAcceleration());
+
+         MecanoTestTools.assertSpatialAccelerationEquals("Iteration: " + i, joint.getJointAcceleration(), actualAcceleration, 1.0e-12);
+
+         // Test the unit-successor-acceleration against the unit-acceleration
+         expectedAcceleration.setIncludingFrame(joint.getUnitJointAcceleration());
+         expectedAcceleration.changeFrame(joint.getSuccessor().getBodyFixedFrame());
+         expectedAcceleration.setBodyFrame(joint.getSuccessor().getBodyFixedFrame());
+         expectedAcceleration.setBaseFrame(joint.getPredecessor().getBodyFixedFrame());
+
+         MecanoTestTools.assertSpatialAccelerationEquals("Iteration: " + i, expectedAcceleration, joint.getUnitSuccessorAcceleration(), 1.0e-12);
+
+         // Test the unit-predecessor-acceleration
+         expectedAcceleration.invert();
+         expectedAcceleration.changeFrame(joint.getPredecessor().getBodyFixedFrame());
+
+         MecanoTestTools.assertSpatialAccelerationEquals("Iteration: " + i, expectedAcceleration, joint.getUnitPredecessorAcceleration(), 1.0e-12);
+      }
+   }
+
+   @Test
+   public void testJointBiasAcceleration()
+   {
+      Random random = new Random(346346L);
+      double dt = 0.5e-8;
+
+      for (int i = 0; i < ITERATIONS; i++)
+      {
+         RevoluteTwinsJoint joint = nextRevoluteTwinsJoint(random, "joint" + i, EuclidCoreRandomTools.nextUnitVector3D(random));
+         double qMin = Math.max(joint.getJointLimitLower(), -Math.PI);
+         double qMax = Math.min(joint.getJointLimitUpper(), Math.PI);
+
+         double q = EuclidCoreRandomTools.nextDouble(random, qMin, qMax);
+         double qd = EuclidCoreRandomTools.nextDouble(random, 10.0);
+
+         joint.setQ(q);
+         joint.setQd(qd);
+         joint.setQdd(0);
+         joint.updateFramesRecursively();
+
+         SpatialAcceleration actualAcceleration = new SpatialAcceleration(joint.getJointBiasAcceleration());
+         Twist twistPrev = new Twist(joint.getJointTwist());
+         twistPrev.changeFrame(joint.getFrameBeforeJoint());
+
+         q += qd * dt;
+         joint.setQ(q);
+         joint.setQd(qd);
+         joint.updateFramesRecursively();
+
+         Twist twistCurr = new Twist(joint.getJointTwist());
+         twistCurr.changeFrame(joint.getFrameBeforeJoint());
+
+         SpatialAcceleration expectedAcceleration = new SpatialAcceleration(joint.getFrameAfterJoint(),
+                                                                            joint.getFrameBeforeJoint(),
+                                                                            joint.getFrameBeforeJoint());
+         expectedAcceleration.set(finiteDifference(twistCurr, twistPrev, dt));
+         expectedAcceleration.changeFrame(joint.getFrameAfterJoint(), joint.getJointTwist(), joint.getJointTwist());
+
+         MecanoTestTools.assertSpatialAccelerationEquals("Iteration: " + i, expectedAcceleration, actualAcceleration, 5.0e-6);
+
+         // Test the successor bias acceleration
+         expectedAcceleration.setIncludingFrame(joint.getJointBiasAcceleration());
+         expectedAcceleration.changeFrame(joint.getSuccessor().getBodyFixedFrame());
+         expectedAcceleration.setBodyFrame(joint.getSuccessor().getBodyFixedFrame());
+         expectedAcceleration.setBaseFrame(joint.getPredecessor().getBodyFixedFrame());
+
+         MecanoTestTools.assertSpatialAccelerationEquals("Iteration: " + i, expectedAcceleration, joint.getSuccessorBiasAcceleration(), 1.0e-12);
       }
    }
 
@@ -302,19 +396,21 @@ public class RevoluteTwinsJointTest
       int actuatedJointIndex = 0;//random.nextInt(2);
       double constraintRatio = 1.0;//EuclidCoreRandomTools.nextDouble(random, 0.25, 1.5);
       double constraintOffset = 0.0;//EuclidCoreRandomTools.nextDouble(random, -1.0, 1.0);
-      return new RevoluteTwinsJoint(name,
-                                    predecessor,
-                                    null,
-                                    null,
-                                    null,
-                                    transformAToPredecessor,
-                                    transformBToA,
-                                    null,
-                                    0.0,
-                                    null,
-                                    actuatedJointIndex,
-                                    constraintRatio,
-                                    constraintOffset,
-                                    jointAxis);
+      RevoluteTwinsJoint joint = new RevoluteTwinsJoint(name,
+                                                        predecessor,
+                                                        null,
+                                                        null,
+                                                        null,
+                                                        transformAToPredecessor,
+                                                        transformBToA,
+                                                        null,
+                                                        0.0,
+                                                        null,
+                                                        actuatedJointIndex,
+                                                        constraintRatio,
+                                                        constraintOffset,
+                                                        jointAxis);
+      MultiBodySystemRandomTools.nextRigidBody(random, "endEffector", joint);
+      return joint;
    }
 }

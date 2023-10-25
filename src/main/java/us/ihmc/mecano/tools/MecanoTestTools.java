@@ -683,6 +683,11 @@ public class MecanoTestTools
 
    private static double computeNormError(SpatialVectorReadOnly expected, SpatialVectorReadOnly actual)
    {
+      if (expected == null || actual == null)
+         return Double.NaN;
+      if (expected.getReferenceFrame() != actual.getReferenceFrame())
+         return Double.NaN;
+
       SpatialVector spatialError = new SpatialVector(expected);
       if (expected.getReferenceFrame() == null || actual.getReferenceFrame() == null)
       { // Skip the reference frame check if there is no frame to avoid a NullPointerException.
