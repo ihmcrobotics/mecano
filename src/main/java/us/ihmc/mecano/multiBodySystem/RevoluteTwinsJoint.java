@@ -497,7 +497,7 @@ public class RevoluteTwinsJoint implements RevoluteTwinsJointBasics
     * @param joint                the joint to update the unit-twist of. Not modified.
     * @param unitJointTwistToPack the twist in which the result is stored. Modified.
     */
-   private static void updateUnitJointTwist(RevoluteTwinsJointReadOnly joint, TwistBasics unitJointTwistToPack)
+   public static void updateUnitJointTwist(RevoluteTwinsJointReadOnly joint, TwistBasics unitJointTwistToPack)
    {
       RevoluteJointReadOnly jointA = joint.getJointA();
       TwistReadOnly unitTwistA = jointA.getUnitJointTwist();
@@ -708,11 +708,7 @@ public class RevoluteTwinsJoint implements RevoluteTwinsJointBasics
    @Override
    public double getTau()
    {
-      // First we update the actuated joint tau
-      double tau_actuated = actuatedJoint.getTau() + constrainedJoint.getTau() * constraintRatio;
       constrainedJoint.setTau(0.0);
-      actuatedJoint.setTau(tau_actuated);
-      // equivalent to: actuatedJoint.getTau() / (constraintJacobian.get(0, 0) + constraintJacobian.get(1, 0));
       return actuatedJoint.getTau() / (1.0 + constraintRatio);
    }
 
@@ -872,7 +868,6 @@ public class RevoluteTwinsJoint implements RevoluteTwinsJointBasics
    public void setJointLimitLower(double jointLimitLower)
    {
       this.jointLimitLower = jointLimitLower;
-      updateJointLimits();
    }
 
    /**
@@ -882,7 +877,6 @@ public class RevoluteTwinsJoint implements RevoluteTwinsJointBasics
    public void setJointLimitUpper(double jointLimitUpper)
    {
       this.jointLimitUpper = jointLimitUpper;
-      updateJointLimits();
    }
 
    /**
@@ -892,7 +886,6 @@ public class RevoluteTwinsJoint implements RevoluteTwinsJointBasics
    public void setVelocityLimitLower(double velocityLimitLower)
    {
       this.velocityLimitLower = velocityLimitLower;
-      updateVelocityLimits();
    }
 
    /**
@@ -902,7 +895,6 @@ public class RevoluteTwinsJoint implements RevoluteTwinsJointBasics
    public void setVelocityLimitUpper(double velocityLimitUpper)
    {
       this.velocityLimitUpper = velocityLimitUpper;
-      updateVelocityLimits();
    }
 
    /**
