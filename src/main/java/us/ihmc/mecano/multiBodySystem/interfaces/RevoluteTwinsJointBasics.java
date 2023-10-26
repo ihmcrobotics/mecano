@@ -26,55 +26,84 @@ import us.ihmc.euclid.tuple3D.interfaces.Vector3DReadOnly;
  */
 public interface RevoluteTwinsJointBasics extends RevoluteTwinsJointReadOnly, OneDoFJointBasics
 {
-   /** {@inheritDoc} */
+   /**
+    * {@inheritDoc}
+    */
    @Override
    RevoluteJointBasics getActuatedJoint();
 
-   /** {@inheritDoc} */
+   /**
+    * {@inheritDoc}
+    */
+   @Override
+   RevoluteJointBasics getConstrainedJoint();
+
+   /**
+    * {@inheritDoc}
+    */
    @Override
    RevoluteJointBasics getJointA();
 
-   /** {@inheritDoc} */
+   /**
+    * {@inheritDoc}
+    */
    @Override
    RevoluteJointBasics getJointB();
 
-   /** {@inheritDoc} */
+   /**
+    * {@inheritDoc}
+    */
    @Override
    default RigidBodyBasics getBodyAB()
    {
       return getJointA().getSuccessor();
    }
 
-   /** {@inheritDoc} */
+   /**
+    * {@inheritDoc}
+    */
    @Override
    void updateFrame();
 
-   /** {@inheritDoc} */
+   /**
+    * {@inheritDoc}
+    */
    @Override
    void updateMotionSubspace();
 
-   /** {@inheritDoc} */
+   /**
+    * {@inheritDoc}
+    */
    @Override
    default void setQ(double q)
    {
       getActuatedJoint().setQ(computeActuatedJointQ(q));
+      getConstrainedJoint().setQ(q - getActuatedJoint().getQ());
    }
 
-   /** {@inheritDoc} */
+   /**
+    * {@inheritDoc}
+    */
    @Override
    default void setQd(double qd)
    {
       getActuatedJoint().setQd(computeActuatedJointQd(qd));
+      getConstrainedJoint().setQd(qd - getActuatedJoint().getQd());
    }
 
-   /** {@inheritDoc} */
+   /**
+    * {@inheritDoc}
+    */
    @Override
    default void setQdd(double qdd)
    {
       getActuatedJoint().setQdd(computeActuatedJointQdd(qdd));
+      getConstrainedJoint().setQdd(qdd - getActuatedJoint().getQdd());
    }
 
-   /** {@inheritDoc} */
+   /**
+    * {@inheritDoc}
+    */
    @Override
    default void setTau(double tau)
    {
@@ -107,7 +136,9 @@ public interface RevoluteTwinsJointBasics extends RevoluteTwinsJointReadOnly, On
       // This joint type behaves more like a revolute joint.
    }
 
-   /** {@inheritDoc} */
+   /**
+    * {@inheritDoc}
+    */
    @Override
    default void setJointAngularAcceleration(Vector3DReadOnly jointAngularAcceleration)
    {
@@ -123,7 +154,9 @@ public interface RevoluteTwinsJointBasics extends RevoluteTwinsJointReadOnly, On
       // This joint type behaves more like a revolute joint.
    }
 
-   /** {@inheritDoc} */
+   /**
+    * {@inheritDoc}
+    */
    @Override
    default void setJointTorque(Vector3DReadOnly jointTorque)
    {

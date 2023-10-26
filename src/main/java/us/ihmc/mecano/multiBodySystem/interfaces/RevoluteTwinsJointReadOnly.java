@@ -32,7 +32,21 @@ public interface RevoluteTwinsJointReadOnly extends OneDoFJointReadOnly
     *
     * @return the reference to the actuated joint.
     */
-   RevoluteJointReadOnly getActuatedJoint();
+   default RevoluteJointReadOnly getActuatedJoint()
+   {
+      return getActuatedJointIndex() == 0 ? getJointA() : getJointB();
+   }
+
+   /**
+    * Returns the reference to the constrained joint of this revolute twins. Its state is constrained by the state of the {@link #getActuatedJoint()}. It is the
+    * other joint, i.e. {@code  getActuatedJoint() != getConstrainedJoint()}.
+    *
+    * @return the reference to the constrained joint.
+    */
+   default RevoluteJointReadOnly getConstrainedJoint()
+   {
+      return getActuatedJointIndex() == 0 ? getJointB() : getJointA();
+   }
 
    /**
     * Returns one of the two joints starting the linkage:
@@ -98,7 +112,15 @@ public interface RevoluteTwinsJointReadOnly extends OneDoFJointReadOnly
     * @param q the revolute twins joint angle to compute the actuated joint angle for.
     * @return the corresponding actuated joint angle.
     */
-   double computeActuatedJointQ(double q);
+   default double computeActuatedJointQ(double q)
+   {
+      //             q = q_actuated + q_constrained
+      // q_constrained = constraintRatio * q_actuated + constraintOffset
+      //             q = q_actuated + constraintRatio * q_actuated + constraintOffset
+      //             q = (1 + constraintRatio) * q_actuated + constraintOffset
+      //    q_actuated = (q - constraintOffset) / (1 + constraintRatio)
+      return (q - getConstraintOffset()) / (1.0 + getConstraintRatio());
+   }
 
    /**
     * Given the revolute twins joint velocity {@code qDot}, computes the corresponding velocity for the actuated joint.
@@ -106,7 +128,15 @@ public interface RevoluteTwinsJointReadOnly extends OneDoFJointReadOnly
     * @param qDot the revolute twins joint velocity to compute the actuated joint velocity for.
     * @return the corresponding actuated joint velocity.
     */
-   double computeActuatedJointQd(double qDot);
+   default double computeActuatedJointQd(double qDot)
+   {
+      //             qd = qd_actuated + qd_constrained
+      // qd_constrained = constraintRatio * qd_actuated
+      //             qd = qd_actuated + constraintRatio * qd_actuated
+      //             qd = (1 + constraintRatio) * qd_actuated
+      //    qd_actuated = qd / (1 + constraintRatio)
+      return qDot / (1.0 + getConstraintRatio());
+   }
 
    /**
     * Given the revolute twins joint acceleration {@code qDDot}, computes the corresponding acceleration for the actuated joint.
@@ -114,7 +144,15 @@ public interface RevoluteTwinsJointReadOnly extends OneDoFJointReadOnly
     * @param qDDot the revolute twins joint acceleration to compute the actuated joint acceleration for.
     * @return the corresponding actuated joint acceleration.
     */
-   double computeActuatedJointQdd(double qDDot);
+   default double computeActuatedJointQdd(double qDDot)
+   {
+      //             qdd = qdd_actuated + qdd_constrained
+      // qdd_constrained = constraintRatio * qdd_actuated
+      //             qdd = qdd_actuated + constraintRatio * qdd_actuated
+      //             qdd = (1 + constraintRatio) * qdd_actuated
+      //    qdd_actuated = qdd / (1 + constraintRatio)
+      return qDDot / (1.0 + getConstraintRatio());
+   }
 
    /**
     * Given the revolute twins joint torque {@code tau}, computes the corresponding torque for the actuated joint.
@@ -122,17 +160,20 @@ public interface RevoluteTwinsJointReadOnly extends OneDoFJointReadOnly
     * @param tau the revolute twins joint torque to compute the actuated joint torque for.
     * @return the corresponding actuated joint torque.
     */
-   double computeActuatedJointTau(double tau);
+   default double computeActuatedJointTau(double tau)
+   {
+      return tau * (1.0 + getConstraintRatio());
+   }
 
    /**
-    * Gets the index in [0, 3] corresponding to the actuated joint.
+    * Gets the index in [0, 1] corresponding to the actuated joint.
     * <p>
     * The index can be used with the matrices {@link #getConstraintJacobian()} and
     * {@link RevoluteTwinsJointReadOnly#getConstraintConvectiveTerm()} to retrieve the row that correspond to
     * the mast joint.
     * </p>
     *
-    * @return the index in [0, 3] corresponding to the actuated joint.
+    * @return the index in [0, 1] corresponding to the actuated joint.
     */
    int getActuatedJointIndex();
 
@@ -259,14 +300,14 @@ public interface RevoluteTwinsJointReadOnly extends OneDoFJointReadOnly
 
    static double computeJointLimitLower(RevoluteTwinsJointReadOnly joint)
    {
-      double qMinA = joint.getJointA().getJointLimitLower();
-      double qMinB = joint.getJointB().getJointLimitLower();
+      double qMinActuated = joint.getActuatedJoint().getJointLimitLower();
+      double qMinConstrained = joint.getConstrainedJoint().getJointLimitLower();
       double ratio = joint.getConstraintRatio();
       double offset = joint.getConstraintOffset();
-      // Compute the lower limit with jointA
-      double qMin1 = qMinA * (1.0 + ratio) + offset;
-      // Compute the lower limit with the jointB and take the most constraining one.
-      double qMin2 = (qMinB - offset) / ratio + qMinB;
+      // Compute the lower limit with actuated joint
+      double qMin1 = qMinActuated * (1.0 + ratio) + offset;
+      // Compute the lower limit with the constrained joint and take the most constraining one.
+      double qMin2 = (qMinConstrained - offset) / ratio + qMinConstrained;
       return Math.max(qMin1, qMin2);
    }
 
@@ -281,14 +322,14 @@ public interface RevoluteTwinsJointReadOnly extends OneDoFJointReadOnly
 
    static double computeJointLimitUpper(RevoluteTwinsJointReadOnly joint)
    {
-      double qMaxA = joint.getJointA().getJointLimitUpper();
-      double qMaxB = joint.getJointB().getJointLimitUpper();
+      double qMaxActuated = joint.getActuatedJoint().getJointLimitUpper();
+      double qMaxConstrained = joint.getConstrainedJoint().getJointLimitUpper();
       double ratio = joint.getConstraintRatio();
       double offset = joint.getConstraintOffset();
-      // Compute the upper limit with jointA
-      double qMax1 = qMaxA * (1.0 + ratio) + offset;
-      // Compute the upper limit with the jointB and take the most constraining one.
-      double qMax2 = (qMaxB - offset) / ratio + qMaxB;
+      // Compute the upper limit with actuated joint
+      double qMax1 = qMaxActuated * (1.0 + ratio) + offset;
+      // Compute the upper limit with the constrained joint and take the most constraining one.
+      double qMax2 = (qMaxConstrained - offset) / ratio + qMaxConstrained;
       return Math.min(qMax1, qMax2);
    }
 
@@ -303,10 +344,10 @@ public interface RevoluteTwinsJointReadOnly extends OneDoFJointReadOnly
 
    static double computeVelocityLimitLower(RevoluteTwinsJointReadOnly joint)
    {
-      double qDotMinA = joint.getJointA().getVelocityLimitLower();
-      double qDotMinB = joint.getJointB().getVelocityLimitLower();
+      double qDotMinActuated = joint.getActuatedJoint().getVelocityLimitLower();
+      double qDotMinConstrained = joint.getConstrainedJoint().getVelocityLimitLower();
       double ratio = joint.getConstraintRatio();
-      return Math.min(qDotMinA * (1.0 + ratio), qDotMinB * (1.0 + 1.0 / ratio));
+      return Math.max(qDotMinActuated * (1.0 + ratio), qDotMinConstrained * (1.0 + 1.0 / ratio));
    }
 
    /**
@@ -320,10 +361,10 @@ public interface RevoluteTwinsJointReadOnly extends OneDoFJointReadOnly
 
    static double computeVelocityLimitUpper(RevoluteTwinsJointReadOnly joint)
    {
-      double qDotMaxA = joint.getJointA().getVelocityLimitUpper();
-      double qDotMaxB = joint.getJointB().getVelocityLimitUpper();
+      double qDotMaxActuated = joint.getActuatedJoint().getVelocityLimitUpper();
+      double qDotMaxConstrained = joint.getConstrainedJoint().getVelocityLimitUpper();
       double ratio = joint.getConstraintRatio();
-      return Math.max(qDotMaxA * (1.0 + ratio), qDotMaxB * (1.0 + 1.0 / ratio));
+      return Math.min(qDotMaxActuated * (1.0 + ratio), qDotMaxConstrained * (1.0 + 1.0 / ratio));
    }
 
    /**

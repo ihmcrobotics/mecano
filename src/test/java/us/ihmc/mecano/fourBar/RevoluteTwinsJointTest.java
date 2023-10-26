@@ -21,6 +21,7 @@ import us.ihmc.euclid.tuple3D.interfaces.Vector3DReadOnly;
 import us.ihmc.mecano.multiBodySystem.RevoluteJoint;
 import us.ihmc.mecano.multiBodySystem.RevoluteTwinsJoint;
 import us.ihmc.mecano.multiBodySystem.RigidBody;
+import us.ihmc.mecano.multiBodySystem.interfaces.RevoluteJointBasics;
 import us.ihmc.mecano.multiBodySystem.interfaces.RevoluteTwinsJointReadOnly;
 import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
 import us.ihmc.mecano.spatial.SpatialAcceleration;
@@ -325,12 +326,14 @@ public class RevoluteTwinsJointTest
          assertEquals(tau, joint.getTau(), epsilon);
 
          // Let's make sure the joint is properly constrained.
-         assertEquals(joint.getJointA().getQ(), joint.getJointB().getQ() * joint.getConstraintRatio() + joint.getConstraintOffset(), epsilon);
-         assertEquals(joint.getJointA().getQd(), joint.getJointB().getQd() * joint.getConstraintRatio(), epsilon);
-         assertEquals(joint.getJointA().getQdd(), joint.getJointB().getQdd() * joint.getConstraintRatio(), epsilon);
+         RevoluteJointBasics jointActuated = joint.getActuatedJoint();
+         RevoluteJointBasics jointConstrained = joint.getConstrainedJoint();
+         assertEquals(jointActuated.getQ() * joint.getConstraintRatio() + joint.getConstraintOffset(), jointConstrained.getQ(), epsilon, "Iteration: " + i);
+         assertEquals(jointActuated.getQd() * joint.getConstraintRatio(), jointConstrained.getQd(), epsilon, "Iteration: " + i);
+         assertEquals(jointActuated.getQdd() * joint.getConstraintRatio(), jointConstrained.getQdd(), epsilon, "Iteration: " + i);
          // Only jointA can be used as a torque source
-         assertEquals(joint.getJointA().getTau(), joint.computeActuatedJointTau(joint.getTau()), epsilon);
-         assertEquals(0.0, joint.getJointB().getTau(), epsilon);
+         assertEquals(jointActuated.getTau(), joint.computeActuatedJointTau(joint.getTau()), epsilon, "Iteration: " + i);
+         assertEquals(0.0, jointConstrained.getTau(), epsilon);
 
          // Let's check with the matrices
          DMatrixRMaj qdMatrix = new DMatrixRMaj(2, 1);
@@ -339,16 +342,17 @@ public class RevoluteTwinsJointTest
          DMatrixRMaj ydMatrix = new DMatrixRMaj(1, 1);
          DMatrixRMaj yddMatrix = new DMatrixRMaj(1, 1);
 
-         ydMatrix.set(0, 0, joint.getActuatedJoint().getQd());
-         yddMatrix.set(0, 0, joint.getActuatedJoint().getQdd());
+         ydMatrix.set(0, 0, jointActuated.getQd());
+         yddMatrix.set(0, 0, jointActuated.getQdd());
          CommonOps_DDRM.mult(joint.getConstraintJacobian(), ydMatrix, qdMatrix);
          CommonOps_DDRM.mult(joint.getConstraintJacobian(), yddMatrix, qddMatrix);
          CommonOps_DDRM.addEquals(qddMatrix, joint.getConstraintConvectiveTerm());
 
-         assertEquals(joint.getJointA().getQd(), qdMatrix.get(0, 0), epsilon);
-         assertEquals(joint.getJointB().getQd(), qdMatrix.get(1, 0), epsilon);
-         assertEquals(joint.getJointA().getQdd(), qddMatrix.get(0, 0), epsilon);
-         assertEquals(joint.getJointB().getQdd(), qddMatrix.get(1, 0), epsilon);
+         int actuatedJointIndex = joint.getActuatedJointIndex();
+         assertEquals(jointActuated.getQd(), qdMatrix.get(actuatedJointIndex, 0), epsilon);
+         assertEquals(jointConstrained.getQd(), qdMatrix.get(1 - actuatedJointIndex, 0), epsilon);
+         assertEquals(jointActuated.getQdd(), qddMatrix.get(actuatedJointIndex, 0), epsilon);
+         assertEquals(jointConstrained.getQdd(), qddMatrix.get(1 - actuatedJointIndex, 0), epsilon);
       }
    }
 
@@ -373,8 +377,8 @@ public class RevoluteTwinsJointTest
 
          if (RevoluteTwinsJointReadOnly.computeJointLimitLower(joint) > RevoluteTwinsJointReadOnly.computeJointLimitUpper(joint))
          {
-            assertThrows(IllegalStateException.class, () -> joint.getJointLimitLower());
-            assertThrows(IllegalStateException.class, () -> joint.getJointLimitUpper());
+            assertThrows(IllegalStateException.class, joint::getJointLimitLower);
+            assertThrows(IllegalStateException.class, joint::getJointLimitUpper);
             continue;
          }
 
@@ -383,25 +387,25 @@ public class RevoluteTwinsJointTest
          double qA = joint.getJointA().getQ();
          double qB = joint.getJointB().getQ();
 
-         assertTrue(qA >= qMinA, "Iteration: " + i + ", jointA is violating its lower limit. q=" + qA + ", qMinA=" + qMinA);
-         assertTrue(qA <= qMaxA, "Iteration: " + i + ", jointA is violating its upper limit. q=" + qA + ", qMaxA=" + qMaxA);
-         assertTrue(qB >= qMinB, "Iteration: " + i + ", jointB is violating its lower limit. q=" + qB + ", qMinB=" + qMinB);
-         assertTrue(qB <= qMaxB, "Iteration: " + i + ", jointB is violating its upper limit. q=" + qB + ", qMaxB=" + qMaxB);
+         assertTrue(qA >= qMinA - 1.0e-12, "Iteration: " + i + ", jointA is violating its lower limit. q=" + qA + ", qMinA=" + qMinA);
+         assertTrue(qA <= qMaxA + 1.0e-12, "Iteration: " + i + ", jointA is violating its upper limit. q=" + qA + ", qMaxA=" + qMaxA);
+         assertTrue(qB >= qMinB - 1.0e-12, "Iteration: " + i + ", jointB is violating its lower limit. q=" + qB + ", qMinB=" + qMinB);
+         assertTrue(qB <= qMaxB + 1.0e-12, "Iteration: " + i + ", jointB is violating its upper limit. q=" + qB + ", qMaxB=" + qMaxB);
 
          joint.setQ(joint.getJointLimitUpper());
          joint.updateFramesRecursively();
          qA = joint.getJointA().getQ();
          qB = joint.getJointB().getQ();
 
-         assertTrue(qA >= qMinA, "Iteration: " + i + ", jointA is violating its lower limit. q=" + qA + ", qMinA=" + qMinA);
-         assertTrue(qA <= qMaxA, "Iteration: " + i + ", jointA is violating its upper limit. q=" + qA + ", qMaxA=" + qMaxA);
-         assertTrue(qB >= qMinB, "Iteration: " + i + ", jointB is violating its lower limit. q=" + qB + ", qMinB=" + qMinB);
-         assertTrue(qB <= qMaxB, "Iteration: " + i + ", jointB is violating its upper limit. q=" + qB + ", qMaxB=" + qMaxB);
+         assertTrue(qA >= qMinA - 1.0e-12, "Iteration: " + i + ", jointA is violating its lower limit. q=" + qA + ", qMinA=" + qMinA);
+         assertTrue(qA <= qMaxA + 1.0e-12, "Iteration: " + i + ", jointA is violating its upper limit. q=" + qA + ", qMaxA=" + qMaxA);
+         assertTrue(qB >= qMinB - 1.0e-12, "Iteration: " + i + ", jointB is violating its lower limit. q=" + qB + ", qMinB=" + qMinB);
+         assertTrue(qB <= qMaxB + 1.0e-12, "Iteration: " + i + ", jointB is violating its upper limit. q=" + qB + ", qMaxB=" + qMaxB);
       }
    }
 
    @Test
-   public  void testJointVelocityLimits()
+   public void testJointVelocityLimits()
    {
       Random random = new Random(346346L);
 
@@ -414,23 +418,38 @@ public class RevoluteTwinsJointTest
          joint.getJointA().setVelocityLimitLower(qDotMinA);
          joint.getJointA().setVelocityLimitUpper(qDotMaxA);
          double qDotMinB = EuclidCoreRandomTools.nextDouble(random, 10.0);
-         double qDotRangeB = EuclidCoreRandomTools.nextDouble(random, 0.0, 2.0 * Math.PI);
+         double qDotRangeB = EuclidCoreRandomTools.nextDouble(random, 0.0, 10.0);
          double qDotMaxB = qDotMinB + qDotRangeB;
          joint.getJointB().setVelocityLimitLower(qDotMinB);
          joint.getJointB().setVelocityLimitUpper(qDotMaxB);
 
-         if (RevoluteTwinsJointReadOnly.computeJointLimitLower(joint) > RevoluteTwinsJointReadOnly.computeJointLimitUpper(joint))
+         if (RevoluteTwinsJointReadOnly.computeVelocityLimitLower(joint) > RevoluteTwinsJointReadOnly.computeVelocityLimitUpper(joint))
          {
-            assertThrows(IllegalStateException.class, () -> joint.getJointLimitLower());
-            assertThrows(IllegalStateException.class, () -> joint.getJointLimitUpper());
+            assertThrows(IllegalStateException.class, joint::getVelocityLimitLower);
+            assertThrows(IllegalStateException.class, joint::getVelocityLimitUpper);
             continue;
          }
 
-         joint.setQ(joint.getJointLimitLower());
+         double velocityLimitLower = joint.getVelocityLimitLower();
+         joint.setQd(velocityLimitLower);
          joint.updateFramesRecursively();
          double qdA = joint.getJointA().getQd();
          double qdB = joint.getJointB().getQd();
 
+         assertTrue(qdA >= qDotMinA - 1.0e-12, "Iteration: " + i + ", jointA is violating its lower limit. qd=" + qdA + ", qDotMinA=" + qDotMinA);
+         assertTrue(qdA <= qDotMaxA + 1.0e-12, "Iteration: " + i + ", jointA is violating its upper limit. qd=" + qdA + ", qDotMaxA=" + qDotMaxA);
+         assertTrue(qdB >= qDotMinB - 1.0e-12, "Iteration: " + i + ", jointB is violating its lower limit. qd=" + qdB + ", qDotMinB=" + qDotMinB);
+         assertTrue(qdB <= qDotMaxB + 1.0e-12, "Iteration: " + i + ", jointB is violating its upper limit. qd=" + qdB + ", qDotMaxB=" + qDotMaxB);
+
+         joint.setQd(joint.getVelocityLimitUpper());
+         joint.updateFramesRecursively();
+         qdA = joint.getJointA().getQd();
+         qdB = joint.getJointB().getQd();
+
+         assertTrue(qdA >= qDotMinA - 1.0e-12, "Iteration: " + i + ", jointA is violating its lower limit. qd=" + qdA + ", qDotMinA=" + qDotMinA);
+         assertTrue(qdA <= qDotMaxA + 1.0e-12, "Iteration: " + i + ", jointA is violating its upper limit. qd=" + qdA + ", qDotMaxA=" + qDotMaxA);
+         assertTrue(qdB >= qDotMinB - 1.0e-12, "Iteration: " + i + ", jointB is violating its lower limit. qd=" + qdB + ", qDotMinB=" + qDotMinB);
+         assertTrue(qdB <= qDotMaxB + 1.0e-12, "Iteration: " + i + ", jointB is violating its upper limit. qd=" + qdB + ", qDotMaxB=" + qDotMaxB);
       }
    }
 
@@ -472,12 +491,10 @@ public class RevoluteTwinsJointTest
    public static RevoluteTwinsJoint nextRevoluteTwinsJoint(Random random, String name, Vector3DReadOnly jointAxis, RigidBodyBasics predecessor)
    {
       RigidBodyTransform transformAToPredecessor = EuclidCoreRandomTools.nextRigidBodyTransform(random);
-      transformAToPredecessor.setToZero();
       RigidBodyTransform transformBToA = EuclidCoreRandomTools.nextRigidBodyTransform(random);
-      //      transformBToA.getRotation().setToZero();
-      int actuatedJointIndex = 0;//random.nextInt(2);
-      double constraintRatio = 1.0;//EuclidCoreRandomTools.nextDouble(random, 0.25, 1.5);
-      double constraintOffset = 0.0;//EuclidCoreRandomTools.nextDouble(random, -1.0, 1.0);
+      int actuatedJointIndex = random.nextInt(2);
+      double constraintRatio = EuclidCoreRandomTools.nextDouble(random, 0.25, 1.5);
+      double constraintOffset = EuclidCoreRandomTools.nextDouble(random, -1.0, 1.0);
       RevoluteTwinsJoint joint = new RevoluteTwinsJoint(name,
                                                         predecessor,
                                                         null,
