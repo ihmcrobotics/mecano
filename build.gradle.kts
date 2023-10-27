@@ -24,6 +24,8 @@ mainDependencies {
 }
 
 testDependencies {
+   api(ihmc.sourceSetProject("yovariables"))
+
    api("org.ejml:ejml-core:0.39")
    api("org.ejml:ejml-ddense:0.39")
    api("org.ejml:ejml-simple:0.39")
@@ -46,5 +48,5 @@ graphvizDependencies {
 yovariablesDependencies {
    api(ihmc.sourceSetProject("main"))
 
-   api("us.ihmc:ihmc-yovariables:0.9.18")
+   api("us.ihmc:ihmc-yovariables:0.10.0")
 }

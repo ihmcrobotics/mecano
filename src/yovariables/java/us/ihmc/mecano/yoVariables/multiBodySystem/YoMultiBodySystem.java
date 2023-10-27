@@ -30,7 +30,7 @@ import us.ihmc.yoVariables.registry.YoRegistry;
  */
 public class YoMultiBodySystem implements MultiBodySystemBasics
 {
-   private final RigidBodyBasics yoRootBody;
+   private final YoRigidBody yoRootBody;
    private final List<? extends JointBasics> allJoints;
    private final List<? extends JointBasics> jointsToConsider;
    private final List<? extends JointBasics> jointsToIgnore;
@@ -46,7 +46,7 @@ public class YoMultiBodySystem implements MultiBodySystemBasics
     */
    public YoMultiBodySystem(MultiBodySystemReadOnly input, ReferenceFrame stationaryFrame, YoRegistry registry)
    {
-      this(input, stationaryFrame, registry, MultiBodySystemFactories.DEFAULT_RIGID_BODY_BUILDER, YoMultiBodySystemFactories.newYoJointBuilder(registry));
+      this(input, stationaryFrame, registry, YoMultiBodySystemFactories.newYoRigidBodyBuilder(registry), YoMultiBodySystemFactories.newYoJointBuilder(registry));
    }
 
    /**
@@ -64,7 +64,7 @@ public class YoMultiBodySystem implements MultiBodySystemBasics
    public YoMultiBodySystem(MultiBodySystemReadOnly input, ReferenceFrame stationaryFrame, YoRegistry registry, RigidBodyBuilder rigidBodyBuilder,
                             JointBuilder yoJointBuilder)
    {
-      yoRootBody = MultiBodySystemFactories.cloneMultiBodySystem(input.getRootBody(), stationaryFrame, "", rigidBodyBuilder, yoJointBuilder);
+      yoRootBody = (YoRigidBody) MultiBodySystemFactories.cloneMultiBodySystem(input.getRootBody(), stationaryFrame, "", rigidBodyBuilder, yoJointBuilder);
       allJoints = SubtreeStreams.fromChildren(yoRootBody).collect(Collectors.toList());
 
       Set<String> nameOfJointsToConsider = input.getJointsToConsider().stream().map(JointReadOnly::getName).collect(Collectors.toSet());
@@ -78,7 +78,7 @@ public class YoMultiBodySystem implements MultiBodySystemBasics
 
    /** {@inheritDoc} */
    @Override
-   public RigidBodyBasics getRootBody()
+   public YoRigidBody getRootBody()
    {
       return yoRootBody;
    }
