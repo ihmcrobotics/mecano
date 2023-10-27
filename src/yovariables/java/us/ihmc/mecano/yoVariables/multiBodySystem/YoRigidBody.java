@@ -1,5 +1,8 @@
 package us.ihmc.mecano.yoVariables.multiBodySystem;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import us.ihmc.euclid.matrix.interfaces.Matrix3DReadOnly;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.transform.interfaces.RigidBodyTransformReadOnly;
@@ -9,9 +12,6 @@ import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
 import us.ihmc.mecano.spatial.interfaces.SpatialInertiaBasics;
 import us.ihmc.mecano.yoVariables.spatial.YoSpatialInertia;
 import us.ihmc.yoVariables.registry.YoRegistry;
-
-import java.util.ArrayList;
-import java.util.List;
 
 /**
  * {@code YoRigidBody} describes a link which used with {@code Joints}s describe a multi-body system
@@ -147,6 +147,19 @@ public class YoRigidBody implements RigidBodyBasics
       return parentJoint;
    }
 
+   @Override
+   public List<JointBasics> getParentLoopClosureJoints()
+   {
+      return parentLoopClosureJoints;
+   }
+
+   /** {@inheritDoc} */
+   @Override
+   public void addChildJoint(JointBasics joint)
+   {
+      childrenJoints.add(joint);
+   }
+
    /** {@inheritDoc} */
    @Override
    public List<JointBasics> getChildrenJoints()
@@ -173,5 +186,28 @@ public class YoRigidBody implements RigidBodyBasics
    public YoRigidBody[] subtreeArray()
    {
       return subtreeStream().toArray(YoRigidBody[]::new);
+   }
+
+   /**
+    * Returns the name of this rigid-body.
+    * <p>
+    * This should probably include more information such as the mass.
+    * </p>
+    */
+   @Override
+   public String toString()
+   {
+      return name;
+   }
+
+   /**
+    * The hash code of a rigid-body is based on its {@link #getNameId()}.
+    *
+    * @return the hash code of the {@link #getNameId()} of this rigid-body.
+    */
+   @Override
+   public int hashCode()
+   {
+      return nameId.hashCode();
    }
 }

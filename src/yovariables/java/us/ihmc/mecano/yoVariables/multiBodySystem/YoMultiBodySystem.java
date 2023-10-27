@@ -10,7 +10,6 @@ import us.ihmc.mecano.multiBodySystem.interfaces.JointMatrixIndexProvider;
 import us.ihmc.mecano.multiBodySystem.interfaces.JointReadOnly;
 import us.ihmc.mecano.multiBodySystem.interfaces.MultiBodySystemBasics;
 import us.ihmc.mecano.multiBodySystem.interfaces.MultiBodySystemReadOnly;
-import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
 import us.ihmc.mecano.multiBodySystem.iterators.SubtreeStreams;
 import us.ihmc.mecano.tools.MultiBodySystemFactories;
 import us.ihmc.mecano.tools.MultiBodySystemFactories.JointBuilder;
