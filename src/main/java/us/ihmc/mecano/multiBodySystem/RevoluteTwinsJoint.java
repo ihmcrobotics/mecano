@@ -329,6 +329,28 @@ public class RevoluteTwinsJoint implements RevoluteTwinsJointBasics
       updateVelocityLimits();
    }
 
+   /**
+    * Creates a new revolute twins joint that is to wrap the 2 given revolute joints into a single
+    * 1-DoF joint.
+    * <p>
+    * <b>WARNING: This joint is somewhat tricky to create, as the 2 given revolute joints are only used
+    * as a template to setup this complex joint and for internal calculation.</b><br>
+    * Here are the expected construction steps of a robot system:
+    * <ol>
+    * <li>The user should create the branch of the robot up to the 2 revolute joints composing the revolute twins.
+    * <li>Instead of adding the successor to the last 1 joint, create a dummy rigid-body to terminate
+    * the revolute twins.
+    * <li>Create the {@code RevoluteTwinsJoint} given the two joints.
+    * <li>Finally proceed to creating the subtree following the revolute twins by attaching the next
+    * successor to this. The transform, a.k.a. inertia pose, that is to be provided
+    * to the successor should expressed with respect to {@link #getJointB()}'s frame after joint.
+    * </ol>
+    * </p>
+    *
+    * @param name                the name of this joint.
+    * @param revoluteTwinsJoints the 2 revolute joints composing the revolute twins joint.
+    * @param actuatedJointIndex  the index in {@code revoluteTwinsJoints} of the joints that is actuated.
+    */
    public RevoluteTwinsJoint(String name, RevoluteJointBasics[] revoluteTwinsJoints, int actuatedJointIndex, double constraintRatio, double constraintOffset)
    {
       if (revoluteTwinsJoints.length != 2)
