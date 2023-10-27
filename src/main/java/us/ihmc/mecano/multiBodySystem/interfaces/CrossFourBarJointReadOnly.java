@@ -35,7 +35,7 @@ public interface CrossFourBarJointReadOnly extends OneDoFJointReadOnly
 {
    /**
     * Returns the reference to the actuated joint of this cross four bar. It is assumed to be the sole
-    * torque source and is used to define the state of the this cross four bar joint.
+    * torque source and is used to define the state of this cross four bar joint.
     * 
     * @return the reference to the actuated joint.
     */

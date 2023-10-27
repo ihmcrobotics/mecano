@@ -58,13 +58,19 @@ public class YoMultiBodySystemFactories
          }
 
          @Override
-         public YoRevoluteJoint buildRevoluteJoint(String name, RigidBodyBasics predecessor, RigidBodyTransformReadOnly transformToParent, Vector3DReadOnly jointAxis)
+         public YoRevoluteJoint buildRevoluteJoint(String name,
+                                                   RigidBodyBasics predecessor,
+                                                   RigidBodyTransformReadOnly transformToParent,
+                                                   Vector3DReadOnly jointAxis)
          {
             return new YoRevoluteJoint(name, predecessor, transformToParent, jointAxis, registry);
          }
 
          @Override
-         public YoPrismaticJoint buildPrismaticJoint(String name, RigidBodyBasics predecessor, RigidBodyTransformReadOnly transformToParent, Vector3DReadOnly jointAxis)
+         public YoPrismaticJoint buildPrismaticJoint(String name,
+                                                     RigidBodyBasics predecessor,
+                                                     RigidBodyTransformReadOnly transformToParent,
+                                                     Vector3DReadOnly jointAxis)
          {
             return new YoPrismaticJoint(name, predecessor, transformToParent, jointAxis, registry);
          }
@@ -111,6 +117,30 @@ public class YoMultiBodySystemFactories
                                            original.getJointAxis(),
                                            registry);
          }
+
+         @Override
+         public YoRevoluteTwinsJoint cloneRevoluteTwinsJoint(RevoluteTwinsJointReadOnly original, String cloneSuffix, RigidBodyBasics clonePredecessor)
+         {
+            RevoluteJointReadOnly originalJointA = original.getJointA();
+            RevoluteJointReadOnly originalJointB = original.getJointB();
+            RigidBodyReadOnly originalBodyAB = originalJointA.getSuccessor();
+
+            return new YoRevoluteTwinsJoint(original.getName() + cloneSuffix,
+                                            clonePredecessor,
+                                            originalJointA.getName() + cloneSuffix,
+                                            originalJointB.getName() + cloneSuffix,
+                                            originalBodyAB.getName() + cloneSuffix,
+                                            originalJointA.getFrameBeforeJoint().getTransformToParent(),
+                                            originalJointB.getFrameBeforeJoint().getTransformToParent(),
+                                            originalBodyAB.getInertia().getMomentOfInertia(),
+                                            originalBodyAB.getInertia().getMass(),
+                                            originalBodyAB.getBodyFixedFrame().getTransformToParent(),
+                                            original.getActuatedJointIndex(),
+                                            original.getConstraintRatio(),
+                                            original.getConstraintOffset(),
+                                            original.getJointAxis(),
+                                            registry);
+         }
       };
    }
 
@@ -126,19 +156,16 @@ public class YoMultiBodySystemFactories
 
          @Override
          public YoRigidBody build(String bodyName,
-                                      JointBasics parentJoint,
-                                      Matrix3DReadOnly momentOfInertia,
-                                      double mass,
-                                      RigidBodyTransformReadOnly inertiaPose)
+                                  JointBasics parentJoint,
+                                  Matrix3DReadOnly momentOfInertia,
+                                  double mass,
+                                  RigidBodyTransformReadOnly inertiaPose)
          {
             return new YoRigidBody(bodyName, parentJoint, momentOfInertia, mass, inertiaPose, registry);
          }
 
          @Override
-         public YoRigidBody cloneRigidBody(RigidBodyReadOnly original,
-                                               ReferenceFrame cloneStationaryFrame,
-                                               String cloneSuffix,
-                                               JointBasics parentJointOfClone)
+         public YoRigidBody cloneRigidBody(RigidBodyReadOnly original, ReferenceFrame cloneStationaryFrame, String cloneSuffix, JointBasics parentJointOfClone)
          {
             if (original.isRootBody() && parentJointOfClone != null)
                throw new IllegalArgumentException("Inconsistent set of arguments. If the original body is the root body, the parent joint should be null.");

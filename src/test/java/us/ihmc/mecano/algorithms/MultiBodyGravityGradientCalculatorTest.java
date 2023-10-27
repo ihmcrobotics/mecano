@@ -12,17 +12,7 @@ import org.junit.jupiter.api.Test;
 
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.mecano.algorithms.TablePrinter.Alignment;
-import us.ihmc.mecano.multiBodySystem.interfaces.CrossFourBarJointReadOnly;
-import us.ihmc.mecano.multiBodySystem.interfaces.FixedJointReadOnly;
-import us.ihmc.mecano.multiBodySystem.interfaces.JointBasics;
-import us.ihmc.mecano.multiBodySystem.interfaces.JointReadOnly;
-import us.ihmc.mecano.multiBodySystem.interfaces.MultiBodySystemBasics;
-import us.ihmc.mecano.multiBodySystem.interfaces.PlanarJointReadOnly;
-import us.ihmc.mecano.multiBodySystem.interfaces.PrismaticJointReadOnly;
-import us.ihmc.mecano.multiBodySystem.interfaces.RevoluteJointReadOnly;
-import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
-import us.ihmc.mecano.multiBodySystem.interfaces.SixDoFJointReadOnly;
-import us.ihmc.mecano.multiBodySystem.interfaces.SphericalJointReadOnly;
+import us.ihmc.mecano.multiBodySystem.interfaces.*;
 import us.ihmc.mecano.spatial.Wrench;
 import us.ihmc.mecano.tools.JointStateType;
 import us.ihmc.mecano.tools.MecanoRandomTools;
@@ -364,6 +354,8 @@ public class MultiBodyGravityGradientCalculatorTest
          return "P";
       if (joint instanceof CrossFourBarJointReadOnly)
          return "C";
+      if (joint instanceof RevoluteTwinsJointReadOnly)
+         return "R2";
       if (joint instanceof SphericalJointReadOnly)
          return "S";
       if (joint instanceof SixDoFJointReadOnly)

@@ -116,9 +116,29 @@ public class YoCrossFourBarJoint extends CrossFourBarJoint implements YoOneDoFJo
                               Vector3DReadOnly jointAxis,
                               YoRegistry registry)
    {
-      this(name, predecessor, jointNameA, jointNameB, jointNameC, jointNameD, bodyNameDA, bodyNameBC, transformAToPredecessor, transformBToPredecessor,
-           transformDToA, transformCToB, bodyInertiaDA, bodyInertiaBC, bodyMassDA, bodyMassBC, bodyInertiaPoseDA, bodyInertiaPoseBC,
-           MultiBodySystemFactories.DEFAULT_RIGID_BODY_BUILDER, actuatedJointIndex, loopClosureJointIndex, jointAxis, registry);
+      this(name,
+           predecessor,
+           jointNameA,
+           jointNameB,
+           jointNameC,
+           jointNameD,
+           bodyNameDA,
+           bodyNameBC,
+           transformAToPredecessor,
+           transformBToPredecessor,
+           transformDToA,
+           transformCToB,
+           bodyInertiaDA,
+           bodyInertiaBC,
+           bodyMassDA,
+           bodyMassBC,
+           bodyInertiaPoseDA,
+           bodyInertiaPoseBC,
+           MultiBodySystemFactories.DEFAULT_RIGID_BODY_BUILDER,
+           actuatedJointIndex,
+           loopClosureJointIndex,
+           jointAxis,
+           registry);
    }
 
    /**
@@ -215,9 +235,28 @@ public class YoCrossFourBarJoint extends CrossFourBarJoint implements YoOneDoFJo
                               Vector3DReadOnly jointAxis,
                               YoRegistry registry)
    {
-      super(name, predecessor, jointNameA, jointNameB, jointNameC, jointNameD, bodyNameDA, bodyNameBC, transformAToPredecessor, transformBToPredecessor,
-            transformDToA, transformCToB, bodyInertiaDA, bodyInertiaBC, bodyMassDA, bodyMassBC, bodyInertiaPoseDA, bodyInertiaPoseBC, rigidBodyBuilder,
-            actuatedJointIndex, loopClosureJointIndex, jointAxis);
+      super(name,
+            predecessor,
+            jointNameA,
+            jointNameB,
+            jointNameC,
+            jointNameD,
+            bodyNameDA,
+            bodyNameBC,
+            transformAToPredecessor,
+            transformBToPredecessor,
+            transformDToA,
+            transformCToB,
+            bodyInertiaDA,
+            bodyInertiaBC,
+            bodyMassDA,
+            bodyMassBC,
+            bodyInertiaPoseDA,
+            bodyInertiaPoseBC,
+            rigidBodyBuilder,
+            actuatedJointIndex,
+            loopClosureJointIndex,
+            jointAxis);
 
       q = new YoDouble("q_" + getName(), registry);
       qd = new YoDouble("qd_" + getName(), registry);
@@ -242,35 +281,45 @@ public class YoCrossFourBarJoint extends CrossFourBarJoint implements YoOneDoFJo
       effortLimitUpper.addListener(v -> super.setEffortLimitUpper(effortLimitUpper.getValue()));
    }
 
-   /** {@inheritDoc} */
+   /**
+    * {@inheritDoc}
+    */
    @Override
    public void setQ(double q)
    {
       this.q.set(q);
    }
 
-   /** {@inheritDoc} */
+   /**
+    * {@inheritDoc}
+    */
    @Override
    public void setQd(double qd)
    {
       this.qd.set(qd);
    }
 
-   /** {@inheritDoc} */
+   /**
+    * {@inheritDoc}
+    */
    @Override
    public void setQdd(double qdd)
    {
       this.qdd.set(qdd);
    }
 
-   /** {@inheritDoc} */
+   /**
+    * {@inheritDoc}
+    */
    @Override
    public void setTau(double tau)
    {
       this.tau.set(tau);
    }
 
-   /** {@inheritDoc} */
+   /**
+    * {@inheritDoc}
+    */
    @Override
    public void setJointOrientation(Orientation3DReadOnly jointOrientation)
    {
@@ -278,7 +327,9 @@ public class YoCrossFourBarJoint extends CrossFourBarJoint implements YoOneDoFJo
       getQ(); // Update YoVariable
    }
 
-   /** {@inheritDoc} */
+   /**
+    * {@inheritDoc}
+    */
    @Override
    public void setJointAngularVelocity(Vector3DReadOnly jointAngularVelocity)
    {
@@ -286,7 +337,9 @@ public class YoCrossFourBarJoint extends CrossFourBarJoint implements YoOneDoFJo
       getQd(); // Update YoVariable
    }
 
-   /** {@inheritDoc} */
+   /**
+    * {@inheritDoc}
+    */
    @Override
    public void setJointAngularAcceleration(Vector3DReadOnly jointAngularAcceleration)
    {
@@ -294,7 +347,9 @@ public class YoCrossFourBarJoint extends CrossFourBarJoint implements YoOneDoFJo
       getQdd(); // Update YoVariable
    }
 
-   /** {@inheritDoc} */
+   /**
+    * {@inheritDoc}
+    */
    @Override
    public void setJointTorque(Vector3DReadOnly jointTorque)
    {
@@ -302,49 +357,63 @@ public class YoCrossFourBarJoint extends CrossFourBarJoint implements YoOneDoFJo
       getTau(); // Update YoVariable
    }
 
-   /** {@inheritDoc} */
+   /**
+    * {@inheritDoc}
+    */
    @Override
    public void setJointLimitLower(double jointLimitLower)
    {
       this.jointLimitLower.set(jointLimitLower);
    }
 
-   /** {@inheritDoc} */
+   /**
+    * {@inheritDoc}
+    */
    @Override
    public void setJointLimitUpper(double jointLimitUpper)
    {
       this.jointLimitUpper.set(jointLimitUpper);
    }
 
-   /** {@inheritDoc} */
+   /**
+    * {@inheritDoc}
+    */
    @Override
    public void setVelocityLimitLower(double velocityLimitLower)
    {
       this.velocityLimitLower.set(velocityLimitLower);
    }
 
-   /** {@inheritDoc} */
+   /**
+    * {@inheritDoc}
+    */
    @Override
    public void setVelocityLimitUpper(double velocityLimitUpper)
    {
       this.velocityLimitUpper.set(velocityLimitUpper);
    }
 
-   /** {@inheritDoc} */
+   /**
+    * {@inheritDoc}
+    */
    @Override
    public void setEffortLimitLower(double effortLimitLower)
    {
       this.effortLimitLower.set(effortLimitLower);
    }
 
-   /** {@inheritDoc} */
+   /**
+    * {@inheritDoc}
+    */
    @Override
    public void setEffortLimitUpper(double effortLimitUpper)
    {
       this.effortLimitUpper.set(effortLimitUpper);
    }
 
-   /** {@inheritDoc} */
+   /**
+    * {@inheritDoc}
+    */
    @Override
    public double getQ()
    {
@@ -352,7 +421,9 @@ public class YoCrossFourBarJoint extends CrossFourBarJoint implements YoOneDoFJo
       return q.getValue();
    }
 
-   /** {@inheritDoc} */
+   /**
+    * {@inheritDoc}
+    */
    @Override
    public double getQd()
    {
@@ -360,7 +431,9 @@ public class YoCrossFourBarJoint extends CrossFourBarJoint implements YoOneDoFJo
       return qd.getValue();
    }
 
-   /** {@inheritDoc} */
+   /**
+    * {@inheritDoc}
+    */
    @Override
    public double getQdd()
    {
@@ -368,7 +441,9 @@ public class YoCrossFourBarJoint extends CrossFourBarJoint implements YoOneDoFJo
       return qdd.getValue();
    }
 
-   /** {@inheritDoc} */
+   /**
+    * {@inheritDoc}
+    */
    @Override
    public double getTau()
    {
@@ -376,7 +451,9 @@ public class YoCrossFourBarJoint extends CrossFourBarJoint implements YoOneDoFJo
       return tau.getValue();
    }
 
-   /** {@inheritDoc} */
+   /**
+    * {@inheritDoc}
+    */
    @Override
    public double getJointLimitLower()
    {
@@ -384,7 +461,9 @@ public class YoCrossFourBarJoint extends CrossFourBarJoint implements YoOneDoFJo
       return jointLimitLower.getValue();
    }
 
-   /** {@inheritDoc} */
+   /**
+    * {@inheritDoc}
+    */
    @Override
    public double getJointLimitUpper()
    {
@@ -392,7 +471,9 @@ public class YoCrossFourBarJoint extends CrossFourBarJoint implements YoOneDoFJo
       return jointLimitUpper.getValue();
    }
 
-   /** {@inheritDoc} */
+   /**
+    * {@inheritDoc}
+    */
    @Override
    public double getVelocityLimitLower()
    {
@@ -400,7 +481,9 @@ public class YoCrossFourBarJoint extends CrossFourBarJoint implements YoOneDoFJo
       return velocityLimitLower.getValue();
    }
 
-   /** {@inheritDoc} */
+   /**
+    * {@inheritDoc}
+    */
    @Override
    public double getVelocityLimitUpper()
    {
@@ -408,7 +491,9 @@ public class YoCrossFourBarJoint extends CrossFourBarJoint implements YoOneDoFJo
       return velocityLimitUpper.getValue();
    }
 
-   /** {@inheritDoc} */
+   /**
+    * {@inheritDoc}
+    */
    @Override
    public double getEffortLimitLower()
    {
@@ -416,7 +501,9 @@ public class YoCrossFourBarJoint extends CrossFourBarJoint implements YoOneDoFJo
       return effortLimitLower.getValue();
    }
 
-   /** {@inheritDoc} */
+   /**
+    * {@inheritDoc}
+    */
    @Override
    public double getEffortLimitUpper()
    {
