@@ -25,6 +25,7 @@ mainDependencies {
 
 testDependencies {
    api(ihmc.sourceSetProject("yovariables"))
+
    api("org.ejml:ejml-core:0.39")
    api("org.ejml:ejml-ddense:0.39")
    api("org.ejml:ejml-simple:0.39")
@@ -37,6 +38,7 @@ testDependencies {
    api(ihmc.javaFXModule("graphics", javaFXVersion))
    api(ihmc.javaFXModule("fxml", javaFXVersion))
 }
+
 graphvizDependencies {
    api(ihmc.sourceSetProject("main"))
 
