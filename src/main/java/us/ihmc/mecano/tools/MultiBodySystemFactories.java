@@ -1,11 +1,5 @@
 package us.ihmc.mecano.tools;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-
 import us.ihmc.euclid.matrix.interfaces.Matrix3DReadOnly;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.transform.RigidBodyTransform;
@@ -16,6 +10,8 @@ import us.ihmc.mecano.frames.MovingReferenceFrame;
 import us.ihmc.mecano.multiBodySystem.*;
 import us.ihmc.mecano.multiBodySystem.interfaces.*;
 import us.ihmc.mecano.spatial.interfaces.SpatialInertiaReadOnly;
+
+import java.util.*;
 
 /**
  * This class provides factories to clone multi-body systems.
@@ -736,27 +732,26 @@ public class MultiBodySystemFactories
                                       original.getJointAxis());
       }
 
-      default RevoluteTwinsJoint cloneRevoluteTwinsJoint(RevoluteTwinsJointReadOnly original, String cloneSuffix, RigidBodyBasics clonePredecessor)
+      default RevoluteTwinsJointBasics cloneRevoluteTwinsJoint(RevoluteTwinsJointReadOnly original, String cloneSuffix, RigidBodyBasics clonePredecessor)
       {
          RevoluteJointReadOnly originalJointA = original.getJointA();
          RevoluteJointReadOnly originalJointB = original.getJointB();
          RigidBodyReadOnly originalBodyAB = originalJointA.getSuccessor();
 
-         RevoluteTwinsJoint clone = new RevoluteTwinsJoint(original.getName() + cloneSuffix,
-                                                           clonePredecessor,
-                                                           originalJointA.getName() + cloneSuffix,
-                                                           originalJointB.getName() + cloneSuffix,
-                                                           originalBodyAB.getName() + cloneSuffix,
-                                                           originalJointA.getFrameBeforeJoint().getTransformToParent(),
-                                                           originalJointB.getFrameBeforeJoint().getTransformToParent(),
-                                                           originalBodyAB.getInertia().getMomentOfInertia(),
-                                                           originalBodyAB.getInertia().getMass(),
-                                                           originalBodyAB.getBodyFixedFrame().getTransformToParent(),
-                                                           original.getActuatedJointIndex(),
-                                                           original.getConstraintRatio(),
-                                                           original.getConstraintOffset(),
-                                                           original.getJointAxis());
-         return clone;
+         return new RevoluteTwinsJoint(original.getName() + cloneSuffix,
+                                       clonePredecessor,
+                                       originalJointA.getName() + cloneSuffix,
+                                       originalJointB.getName() + cloneSuffix,
+                                       originalBodyAB.getName() + cloneSuffix,
+                                       originalJointA.getFrameBeforeJoint().getTransformToParent(),
+                                       originalJointB.getFrameBeforeJoint().getTransformToParent(),
+                                       originalBodyAB.getInertia().getMomentOfInertia(),
+                                       originalBodyAB.getInertia().getMass(),
+                                       originalBodyAB.getBodyFixedFrame().getTransformToParent(),
+                                       original.getActuatedJointIndex(),
+                                       original.getConstraintRatio(),
+                                       original.getConstraintOffset(),
+                                       original.getJointAxis());
       }
 
       /**
