@@ -5,6 +5,7 @@ import org.ejml.data.DMatrix1Row;
 import org.ejml.dense.row.CommonOps_DDRM;
 
 import us.ihmc.euclid.referenceFrame.interfaces.FrameVector3DReadOnly;
+import us.ihmc.euclid.tools.EuclidCoreTools;
 import us.ihmc.mecano.multiBodySystem.PrismaticJoint;
 import us.ihmc.mecano.multiBodySystem.RevoluteJoint;
 import us.ihmc.mecano.spatial.interfaces.SpatialAccelerationBasics;
@@ -29,7 +30,9 @@ import us.ihmc.mecano.spatial.interfaces.TwistReadOnly;
  */
 public interface OneDoFJointReadOnly extends JointReadOnly
 {
-   /** The number of DoFs, i.e. degrees of freedom, that a {@code OneDoFJointReadOnly} has. */
+   /**
+    * The number of DoFs, i.e. degrees of freedom, that a {@code OneDoFJointReadOnly} has.
+    */
    public static final int NUMBER_OF_DOFS = 1;
 
    /**
@@ -136,15 +139,25 @@ public interface OneDoFJointReadOnly extends JointReadOnly
     */
    double getEffortLimitUpper();
 
-   /** {@inheritDoc} */
+   /**
+    * {@inheritDoc}
+    */
    @Override
    default boolean getMotionSubspaceDot(DMatrix1Row matrixToPack)
    {
       if (!isMotionSubspaceVariable())
          return false;
 
-      getJointBiasAcceleration().get(matrixToPack);
-      CommonOps_DDRM.scale(1.0 / getQd(), matrixToPack);
+      double qd = getQd();
+      if (EuclidCoreTools.isZero(qd, 1.0e-12))
+      {
+         matrixToPack.zero();
+      }
+      else
+      {
+         getJointBiasAcceleration().get(matrixToPack);
+         CommonOps_DDRM.scale(1.0 / qd, matrixToPack);
+      }
       return true;
    }
 
@@ -262,7 +275,9 @@ public interface OneDoFJointReadOnly extends JointReadOnly
     */
    SpatialAccelerationReadOnly getUnitPredecessorAcceleration();
 
-   /** {@inheritDoc} */
+   /**
+    * {@inheritDoc}
+    */
    @Override
    default void getSuccessorTwist(TwistBasics twistToPack)
    {
@@ -270,7 +285,9 @@ public interface OneDoFJointReadOnly extends JointReadOnly
       twistToPack.scale(getQd());
    }
 
-   /** {@inheritDoc} */
+   /**
+    * {@inheritDoc}
+    */
    @Override
    default void getPredecessorTwist(TwistBasics twistToPack)
    {
@@ -278,7 +295,9 @@ public interface OneDoFJointReadOnly extends JointReadOnly
       twistToPack.scale(getQd());
    }
 
-   /** {@inheritDoc} */
+   /**
+    * {@inheritDoc}
+    */
    @Override
    default void getSuccessorAcceleration(SpatialAccelerationBasics accelerationToPack)
    {
@@ -292,7 +311,9 @@ public interface OneDoFJointReadOnly extends JointReadOnly
       }
    }
 
-   /** {@inheritDoc} */
+   /**
+    * {@inheritDoc}
+    */
    @Override
    default void getPredecessorAcceleration(SpatialAccelerationBasics accelerationToPack)
    {
@@ -306,7 +327,9 @@ public interface OneDoFJointReadOnly extends JointReadOnly
       }
    }
 
-   /** {@inheritDoc} */
+   /**
+    * {@inheritDoc}
+    */
    @Override
    default int getJointConfiguration(int rowStart, DMatrix matrixToPack)
    {
@@ -314,7 +337,9 @@ public interface OneDoFJointReadOnly extends JointReadOnly
       return rowStart + getConfigurationMatrixSize();
    }
 
-   /** {@inheritDoc} */
+   /**
+    * {@inheritDoc}
+    */
    @Override
    default int getJointVelocity(int rowStart, DMatrix matrixToPack)
    {
@@ -322,7 +347,9 @@ public interface OneDoFJointReadOnly extends JointReadOnly
       return rowStart + getDegreesOfFreedom();
    }
 
-   /** {@inheritDoc} */
+   /**
+    * {@inheritDoc}
+    */
    @Override
    default int getJointAcceleration(int rowStart, DMatrix matrixToPack)
    {
@@ -330,7 +357,9 @@ public interface OneDoFJointReadOnly extends JointReadOnly
       return rowStart + getDegreesOfFreedom();
    }
 
-   /** {@inheritDoc} */
+   /**
+    * {@inheritDoc}
+    */
    @Override
    default int getJointTau(int rowStart, DMatrix matrixToPack)
    {
@@ -338,14 +367,18 @@ public interface OneDoFJointReadOnly extends JointReadOnly
       return rowStart + getDegreesOfFreedom();
    }
 
-   /** {@inheritDoc} */
+   /**
+    * {@inheritDoc}
+    */
    @Override
    default int getDegreesOfFreedom()
    {
       return NUMBER_OF_DOFS;
    }
 
-   /** {@inheritDoc} */
+   /**
+    * {@inheritDoc}
+    */
    @Override
    default int getConfigurationMatrixSize()
    {

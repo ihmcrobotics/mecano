@@ -88,8 +88,7 @@ public class FourBarKinematicLoopFunction implements KinematicLoopFunction
     *                           expected to be the only actuated joint.
     * @throws IllegalArgumentException if a four bar linkage could not be recognized from the given
     *                                  joints.
-    * @see FourBarKinematicLoopFunctionTools#configureFourBarKinematics(RevoluteJointBasics[],
-    *      FourBarToJointConverter[], FourBar, int, double)
+    * @see FourBarKinematicLoopFunctionTools#configureFourBarKinematics(String, RevoluteJointBasics[], FourBarToJointConverter[], FourBar, int, double)
     */
    public FourBarKinematicLoopFunction(String name, RevoluteJointBasics[] joints, int actuatedJointIndex)
    {

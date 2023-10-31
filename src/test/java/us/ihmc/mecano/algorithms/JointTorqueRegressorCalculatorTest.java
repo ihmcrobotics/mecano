@@ -8,12 +8,13 @@ import us.ihmc.log.LogTools;
 import us.ihmc.mecano.multiBodySystem.*;
 import us.ihmc.mecano.multiBodySystem.interfaces.MultiBodySystemBasics;
 import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
+import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyReadOnly;
+import us.ihmc.mecano.spatial.Wrench;
 import us.ihmc.mecano.tools.JointStateType;
+import us.ihmc.mecano.tools.MecanoRandomTools;
 import us.ihmc.mecano.tools.MultiBodySystemRandomTools;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Random;
+import java.util.*;
 
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -401,6 +402,73 @@ public class JointTorqueRegressorCalculatorTest
       }
 
       LogTools.info("Floating 1-DoF tree: Took on average per iteration: " + totalTime / 1e9 / ITERATIONS + " seconds");
+   }
+
+   @Test
+   public void testRegressorAndParametersMatchInverseDynamicsOneDoFJointChainWithExternalWrenches()
+   {
+      Random random = new Random(25);
+
+      for (int i = 0; i < SYSTEM_ITERATIONS; i++)
+      {
+         // Randomise the number of joints in the system
+         int numberOfJoints = random.nextInt(30) + 1;  // to avoid zero
+         List<OneDoFJoint> joints = MultiBodySystemRandomTools.nextOneDoFJointChain(random, numberOfJoints);
+         MultiBodySystemBasics system = MultiBodySystemBasics.toMultiBodySystemBasics(joints);
+
+         for (int j = 0; j < STATE_ITERATIONS; j++)
+         {
+            // Randomise the state of the system
+            for (JointStateType stateToRandomize : JointStateType.values())
+               MultiBodySystemRandomTools.nextState(random, stateToRandomize, system.getAllJoints());
+
+            // Create an inverse dynamics calculator to compare torque results to
+            InverseDynamicsCalculator inverseDynamicsCalculator = new InverseDynamicsCalculator(system);
+            inverseDynamicsCalculator.setGravitionalAcceleration(-9.81);
+            // Randomly pick rigid bodies to apply external wrenches to
+            Map<RigidBodyReadOnly, Wrench> rigidBodiesToExternalWrenchMap = new LinkedHashMap<>();
+            for (RigidBodyBasics body : system.getRootBody().subtreeArray())
+            {
+               if (body.getInertia() != null && random.nextBoolean())  // null check to exclude dummy base link
+               {
+                  Wrench wrenchToApply = MecanoRandomTools.nextWrench(random, body.getBodyFixedFrame(), body.getBodyFixedFrame());
+                  inverseDynamicsCalculator.setExternalWrench(body, wrenchToApply);
+                  rigidBodiesToExternalWrenchMap.put(body, wrenchToApply);
+               }
+            }
+            inverseDynamicsCalculator.compute();
+            DMatrixRMaj expectedjointTau = inverseDynamicsCalculator.getJointTauMatrix();
+
+            // We want the product of the regressor matrix and the parameter vector to equal the expected joint torques
+            JointTorqueRegressorCalculator regressorCalculator = new JointTorqueRegressorCalculator(system);
+            DMatrixRMaj parameterVector = regressorCalculator.getParameterVector();
+            regressorCalculator.setGravitationalAcceleration(-9.81);
+            // Need to add in the contribution of the external wrenches we applied to the inverse dynamics calculator
+            Map<RigidBodyReadOnly, DMatrixRMaj> rigidBodyToContactJacobianMap = new LinkedHashMap<>();
+            GeometricJacobianCalculator jacobianCalculator = new GeometricJacobianCalculator();
+            DMatrixRMaj torques = new DMatrixRMaj(system.getNumberOfDoFs());
+            for (RigidBodyReadOnly body : rigidBodiesToExternalWrenchMap.keySet())
+            {
+               jacobianCalculator.setKinematicChain(system.getRootBody(), body);
+               jacobianCalculator.getJointTorques(rigidBodiesToExternalWrenchMap.get(body), torques);
+               rigidBodyToContactJacobianMap.put(body, new DMatrixRMaj(torques));
+               rigidBodyToContactJacobianMap.get(body).reshape(system.getNumberOfDoFs(), 1, true);
+            }
+            regressorCalculator.compute();
+            DMatrixRMaj regressorMatrix = regressorCalculator.getJointTorqueRegressorMatrix();
+            DMatrixRMaj actualJointTau = new DMatrixRMaj(numberOfJoints, 1);
+
+            // The term corresponding to the regressor and the inertial parameters
+            CommonOps_DDRM.mult(regressorMatrix, parameterVector, actualJointTau);
+            // Torque contribution from the external wrenches
+            for (DMatrixRMaj torque : rigidBodyToContactJacobianMap.values())
+               CommonOps_DDRM.add(actualJointTau, -1.0, torque, actualJointTau);
+
+            // Compare results
+            assertEquals(expectedjointTau.getData().length, actualJointTau.getData().length);
+            assertArrayEquals(expectedjointTau.getData(), actualJointTau.getData(), EPSILON);
+         }
+      }
    }
 
    @Test

@@ -20,6 +20,7 @@ import us.ihmc.euclid.Axis3D;
 import us.ihmc.euclid.geometry.tools.EuclidGeometryRandomTools;
 import us.ihmc.euclid.matrix.Matrix3D;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
+import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.referenceFrame.tools.EuclidFrameRandomTools;
@@ -38,6 +39,7 @@ import us.ihmc.mecano.algorithms.GeometricJacobianCalculator;
 import us.ihmc.mecano.algorithms.SpatialAccelerationCalculator;
 import us.ihmc.mecano.multiBodySystem.CrossFourBarJoint;
 import us.ihmc.mecano.multiBodySystem.RevoluteJoint;
+import us.ihmc.mecano.multiBodySystem.RevoluteTwinsJoint;
 import us.ihmc.mecano.multiBodySystem.RigidBody;
 import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointBasics;
 import us.ihmc.mecano.multiBodySystem.interfaces.RevoluteJointBasics;
@@ -116,6 +118,50 @@ public class CrossFourBarJointTest
       CommonOps_DDRM.subtractEquals(derivativeToPack, previousMatrixToUpdate);
       CommonOps_DDRM.scale(1.0 / dt, derivativeToPack);
       previousMatrixToUpdate.set(newMatrix);
+   }
+
+   @Test
+   public void testJointTwist()
+   {
+      Random random = new Random(346346L);
+      double dt = 0.5e-6;
+
+      for (Function<String, CrossFourBarJoint> generator : createCrossFourBarExampleGenerators())
+      { // Test with known four bar
+         for (int i = 0; i < ITERATIONS; i++)
+         {
+            CrossFourBarJoint joint = generator.apply("fourBar1");
+            double qMin = Math.max(joint.getJointLimitLower(), -Math.PI);
+            double qMax = Math.min(joint.getJointLimitUpper(), Math.PI);
+            double qRange = qMax - qMin;
+            qMin += 0.05 * qRange;
+            qMax -= 0.05 * qRange;
+
+            double q = EuclidCoreRandomTools.nextDouble(random, qMin, qMax);
+            double qd = EuclidCoreRandomTools.nextDouble(random, 10.0);
+
+            joint.setQ(q);
+            joint.setQd(qd);
+            joint.updateFramesRecursively();
+
+            Twist actualTwist = new Twist(joint.getJointTwist());
+            FramePose3D posePrev = new FramePose3D(joint.getFrameAfterJoint());
+            posePrev.changeFrame(joint.getFrameBeforeJoint());
+
+            q += qd * dt;
+            joint.setQ(q);
+            joint.updateFramesRecursively();
+
+            FramePose3D poseCurr = new FramePose3D(joint.getFrameAfterJoint());
+            poseCurr.changeFrame(joint.getFrameBeforeJoint());
+
+            Twist expectedTwist = new Twist(joint.getFrameAfterJoint(), joint.getFrameBeforeJoint(), joint.getFrameAfterJoint());
+            expectedTwist.getLinearPart().setMatchingFrame(RevoluteTwinsJointTest.finiteDifference(poseCurr.getPosition(), posePrev.getPosition(), dt));
+            expectedTwist.getAngularPart().setMatchingFrame(RevoluteTwinsJointTest.finiteDifference(poseCurr.getOrientation(), posePrev.getOrientation(), dt));
+
+            MecanoTestTools.assertTwistEquals(expectedTwist, actualTwist, 1.0e-5);
+         }
+      }
    }
 
    @Test
@@ -261,13 +307,15 @@ public class CrossFourBarJointTest
 
             if (fourBarJoint.getFrameBeforeJoint() == fourBarJoint.getJointA().getFrameBeforeJoint())
             {
-               RigidBodyTransform expectedConfiguration = function.getJointD().getFrameAfterJoint()
+               RigidBodyTransform expectedConfiguration = function.getJointD()
+                                                                  .getFrameAfterJoint()
                                                                   .getTransformToDesiredFrame(function.getJointA().getFrameBeforeJoint());
                EuclidCoreTestTools.assertEquals("Iteration: " + i, expectedConfiguration, actualConfiguration, SMALL_EPSILON);
             }
             else
             {
-               RigidBodyTransform expectedConfiguration = function.getJointC().getFrameAfterJoint()
+               RigidBodyTransform expectedConfiguration = function.getJointC()
+                                                                  .getFrameAfterJoint()
                                                                   .getTransformToDesiredFrame(function.getJointB().getFrameBeforeJoint());
                EuclidCoreTestTools.assertEquals("Iteration: " + i, expectedConfiguration, actualConfiguration, SMALL_EPSILON);
             }
@@ -417,8 +465,8 @@ public class CrossFourBarJointTest
             TwistReadOnly actualTwist = fourBarJoint.getJointTwist();
 
             EuclidCoreTestTools.assertEquals(bottomJoint.getFrameAfterJoint().getTransformToDesiredFrame(topJoint.getFrameBeforeJoint()),
-                                                               bottomJoint.getFrameAfterJoint().getTransformToDesiredFrame(topJoint.getFrameBeforeJoint()),
-                                                               SMALL_EPSILON);
+                                             bottomJoint.getFrameAfterJoint().getTransformToDesiredFrame(topJoint.getFrameBeforeJoint()),
+                                             SMALL_EPSILON);
 
             assertEquals(function.getJointA().getQ(), fourBarJoint.getJointA().getQ(), SMALL_EPSILON);
             assertEquals(function.getJointB().getQ(), fourBarJoint.getJointB().getQ(), SMALL_EPSILON);
@@ -467,8 +515,10 @@ public class CrossFourBarJointTest
             function.getJointA().getPredecessor().updateFramesRecursively();
 
             Twist expectedTwist = new Twist();
-            function.getJointD().getSuccessor().getBodyFixedFrame().getTwistRelativeToOther(function.getJointA().getPredecessor().getBodyFixedFrame(),
-                                                                                            expectedTwist);
+            function.getJointD()
+                    .getSuccessor()
+                    .getBodyFixedFrame()
+                    .getTwistRelativeToOther(function.getJointA().getPredecessor().getBodyFixedFrame(), expectedTwist);
 
             expectedTwist.setBaseFrame(fourBarJoint.getPredecessor().getBodyFixedFrame());
             expectedTwist.setBodyFrame(fourBarJoint.getSuccessor().getBodyFixedFrame());
@@ -509,8 +559,10 @@ public class CrossFourBarJointTest
             function.getJointA().getPredecessor().updateFramesRecursively();
 
             Twist expectedTwist = new Twist();
-            function.getJointA().getPredecessor().getBodyFixedFrame().getTwistRelativeToOther(function.getJointD().getSuccessor().getBodyFixedFrame(),
-                                                                                              expectedTwist);
+            function.getJointA()
+                    .getPredecessor()
+                    .getBodyFixedFrame()
+                    .getTwistRelativeToOther(function.getJointD().getSuccessor().getBodyFixedFrame(), expectedTwist);
             expectedTwist.setBaseFrame(fourBarJoint.getSuccessor().getBodyFixedFrame());
             expectedTwist.setBodyFrame(fourBarJoint.getPredecessor().getBodyFixedFrame());
             expectedTwist.setReferenceFrame(fourBarJoint.getPredecessor().getBodyFixedFrame());
@@ -598,8 +650,10 @@ public class CrossFourBarJointTest
             function.getJointA().getPredecessor().updateFramesRecursively();
 
             Twist expectedTwist = new Twist();
-            function.getJointD().getSuccessor().getBodyFixedFrame().getTwistRelativeToOther(function.getJointA().getPredecessor().getBodyFixedFrame(),
-                                                                                            expectedTwist);
+            function.getJointD()
+                    .getSuccessor()
+                    .getBodyFixedFrame()
+                    .getTwistRelativeToOther(function.getJointA().getPredecessor().getBodyFixedFrame(), expectedTwist);
             expectedTwist.scale(1.0 / (function.getJointA().getQd() + function.getJointD().getQd()));
             expectedTwist.setBaseFrame(fourBarJoint.getPredecessor().getBodyFixedFrame());
             expectedTwist.setBodyFrame(fourBarJoint.getSuccessor().getBodyFixedFrame());
@@ -638,8 +692,10 @@ public class CrossFourBarJointTest
             function.getJointA().getPredecessor().updateFramesRecursively();
 
             Twist expectedTwist = new Twist();
-            function.getJointA().getPredecessor().getBodyFixedFrame().getTwistRelativeToOther(function.getJointD().getSuccessor().getBodyFixedFrame(),
-                                                                                              expectedTwist);
+            function.getJointA()
+                    .getPredecessor()
+                    .getBodyFixedFrame()
+                    .getTwistRelativeToOther(function.getJointD().getSuccessor().getBodyFixedFrame(), expectedTwist);
             expectedTwist.scale(1.0 / (function.getJointA().getQd() + function.getJointD().getQd()));
             expectedTwist.setBaseFrame(fourBarJoint.getSuccessor().getBodyFixedFrame());
             expectedTwist.setBodyFrame(fourBarJoint.getPredecessor().getBodyFixedFrame());
