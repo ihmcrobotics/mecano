@@ -271,18 +271,8 @@ public class CenterOfMassJacobianTest
          FrameVector3DReadOnly expectedCenterOfMassVelocityBeforeUpdate = new FrameVector3D(computeCenterOfMassVelocity(rootBody, centerOfMassJacobian.getReferenceFrame()));
          EuclidFrameTestTools.assertEquals(expectedCenterOfMassVelocityBeforeUpdate, centerOfMassJacobian.getCenterOfMassVelocity(), EPSILON);
 
-         // TODO: we cannot pass the tests if the center of mass offset is varied. This is because we often assume frames are located at the given rigid body's
-         //    CoM. If we vary this CoM, we invalidate this assumption. The difference between expected and actual does not appear too drastic, but it is nowhere
-         //    near EPSILON. See {@link #RigidBodyBasics.setCenterOfMass} documentation for more info
          RigidBodyBasics body = joints.get(random.nextInt(numberOfJoints)).getSuccessor();
-//         body.getInertia().set(MecanoRandomTools.nextSpatialInertia(random, body.getInertia().getBodyFrame(), body.getInertia().getReferenceFrame()));
-         body.getInertia().setMass(random.nextDouble(0, 1.0));
-         body.getInertia().setMomentOfInertia(random.nextDouble(0, 1.0),
-                                              random.nextDouble(0, 1.0),
-                                              random.nextDouble(0, 1.0));
-//         body.getInertia().setCenterOfMassOffset(random.nextDouble(-1.0, 1.0),
-//                                                 random.nextDouble(-1.0, 1.0),
-//                                                 random.nextDouble(-1.0, 1.0));
+         body.getInertia().set(MecanoRandomTools.nextSpatialInertia(random, body.getInertia().getBodyFrame(), body.getInertia().getReferenceFrame()));
 
          centerOfMassJacobian.reset();
 
@@ -307,18 +297,8 @@ public class CenterOfMassJacobianTest
          FrameVector3DReadOnly expectedCenterOfMassVelocityBeforeUpdate = new FrameVector3D(computeCenterOfMassVelocity(rootBody, centerOfMassJacobian.getReferenceFrame()));
          EuclidFrameTestTools.assertEquals(expectedCenterOfMassVelocityBeforeUpdate, centerOfMassJacobian.getCenterOfMassVelocity(), EPSILON);
 
-         // TODO: we cannot pass the tests if the center of mass offset is varied. This is because we often assume frames are located at the given rigid body's
-         //    CoM. If we vary this CoM, we invalidate this assumption. The difference between expected and actual does not appear too drastic, but it is nowhere
-         //    near EPSILON. See {@link #RigidBodyBasics.setCenterOfMass} documentation for more info
          RigidBodyBasics body = joints.get(random.nextInt(numberOfJoints)).getSuccessor();
-         //         body.getInertia().set(MecanoRandomTools.nextSpatialInertia(random, body.getInertia().getBodyFrame(), body.getInertia().getReferenceFrame()));
-         body.getInertia().setMass(random.nextDouble(0, 1.0));
-         body.getInertia().setMomentOfInertia(random.nextDouble(0, 1.0),
-                                              random.nextDouble(0, 1.0),
-                                              random.nextDouble(0, 1.0));
-//                  body.getInertia().setCenterOfMassOffset(random.nextDouble(-1.0, 1.0),
-//                                                          random.nextDouble(-1.0, 1.0),
-//                                                          random.nextDouble(-1.0, 1.0));
+         body.getInertia().set(MecanoRandomTools.nextSpatialInertia(random, body.getInertia().getBodyFrame(), body.getInertia().getReferenceFrame()));
 
          centerOfMassJacobian.reset();
 
