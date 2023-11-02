@@ -277,17 +277,8 @@ public class CentroidalMomentumRateCalculatorTest
          centroidalMomentumRateCalculator.getCenterOfMassAcceleration(jointAccelerationMatrix, actualCenterOfMassAccelerationBeforeUpdate);
          EuclidFrameTestTools.assertEquals(expectedCenterOfMassAccelerationBeforeUpdate, actualCenterOfMassAccelerationBeforeUpdate, EPSILON);
 
-         // TODO: we cannot pass the tests if the center of mass offset is varied. In {@link #CentroidalMomentumRateCalculator.computeMomentumRate} we use a
-         //    {@link #SpatialInertiaReadOnly.computeDynamicWrenchFast} method which asserts that the center of mass offset is zero.
          RigidBodyBasics body = joints.get(random.nextInt(numberOfJoints)).getSuccessor();
-         //         body.getInertia().set(MecanoRandomTools.nextSpatialInertia(random, body.getInertia().getBodyFrame(), body.getInertia().getReferenceFrame()));
-         body.getInertia().setMass(random.nextDouble(0, 1.0));
-         body.getInertia().setMomentOfInertia(random.nextDouble(0, 1.0),
-                                              random.nextDouble(0, 1.0),
-                                              random.nextDouble(0, 1.0));
-//         body.getInertia().setCenterOfMassOffset(random.nextDouble(-1.0, 1.0),
-//                                                 random.nextDouble(-1.0, 1.0),
-//                                                 random.nextDouble(-1.0, 1.0));
+         body.getInertia().set(MecanoRandomTools.nextSpatialInertia(random, body.getInertia().getBodyFrame(), body.getInertia().getReferenceFrame()));
 
          centroidalMomentumCalculator.reset();
          centroidalMomentumRateCalculator.reset();
@@ -341,7 +332,7 @@ public class CentroidalMomentumRateCalculatorTest
          bodyAcceleration.setIncludingFrame(spatialAccelerationCalculator.getAccelerationOfBody(rigidBody));
          TwistReadOnly bodyTwist = rigidBody.getBodyFixedFrame().getTwistOfFrame();
 
-         inertia.computeDynamicWrenchFast(bodyAcceleration, bodyTwist, bodyDynamicWrench);
+         inertia.computeDynamicWrench(bodyAcceleration, bodyTwist, bodyDynamicWrench);
 
          bodyDynamicWrench.changeFrame(referenceFrame);
          momentumRate.add(bodyDynamicWrench);
