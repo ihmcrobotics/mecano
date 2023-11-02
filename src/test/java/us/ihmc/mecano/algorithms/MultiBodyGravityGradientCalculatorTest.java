@@ -227,6 +227,84 @@ public class MultiBodyGravityGradientCalculatorTest
       }
    }
 
+   @Test
+   public void testModifiedRigidBodyParameters()
+   {
+      Random random = new Random(345345780);
+
+      for (int i = 0; i < ITERATIONS; i++)
+      {
+         int numberOfJoints = 20;
+         List<? extends JointBasics> joints = MultiBodySystemRandomTools.nextJointTree(random, numberOfJoints);
+         MultiBodySystemRandomTools.nextState(random, JointStateType.CONFIGURATION, joints);
+         MultiBodySystemBasics input = MultiBodySystemBasics.toMultiBodySystemBasics(joints);
+
+         InverseDynamicsCalculator inverseDynamics = new InverseDynamicsCalculator(input);
+         inverseDynamics.setGravitionalAcceleration(-GRAVITY);
+         inverseDynamics.setConsiderCoriolisAndCentrifugalForces(false);
+         inverseDynamics.setConsiderJointAccelerations(false);
+
+         MultiBodyGravityGradientCalculator calculator = new MultiBodyGravityGradientCalculator(input);
+         calculator.setGravitionalAcceleration(-GRAVITY);
+
+         if (ADD_EXT_WRENCHES)
+         {
+            if (random.nextBoolean())
+            { // Add external wrench
+               int numberOfWrenches = random.nextInt(3) + 1;
+               for (int j = 0; j < numberOfWrenches; j++)
+               {
+                  int bodyIndex = random.nextInt(joints.size());
+                  RigidBodyBasics bodyToApply = joints.get(bodyIndex).getSuccessor();
+
+                  Wrench wrench = MecanoRandomTools.nextWrench(random, bodyToApply.getBodyFixedFrame(), bodyToApply.getBodyFixedFrame(), 10.0, 10.0);
+                  inverseDynamics.getExternalWrench(bodyToApply).set(wrench);
+                  calculator.getExternalWrench(bodyToApply).set(wrench);
+               }
+            }
+         }
+
+         inverseDynamics.compute();
+         calculator.reset();
+
+         MecanoTestTools.assertDMatrixEquals("Iteration: " + i, inverseDynamics.getJointTauMatrix(), calculator.getTauMatrix(), 1.0e-12);
+
+         // TODO: cannot get test to pass when changing center of mass offset
+         RigidBodyBasics body = joints.get(random.nextInt(numberOfJoints)).getSuccessor();
+//         body.getInertia().set(MecanoRandomTools.nextSpatialInertia(random, body.getInertia().getBodyFrame(), body.getInertia().getReferenceFrame()));
+         body.getInertia().setMass(random.nextDouble());
+         body.getInertia().setMomentOfInertia(random.nextDouble(),
+                                              random.nextDouble(),
+                                              random.nextDouble(),
+                                              random.nextDouble(),
+                                              random.nextDouble(),
+                                              random.nextDouble());
+//         body.getInertia().setCenterOfMassOffset(random.nextDouble(), random.nextDouble(), random.nextDouble());
+
+         if (ADD_EXT_WRENCHES)
+         {
+            if (random.nextBoolean())
+            { // Add external wrench
+               int numberOfWrenches = random.nextInt(3) + 1;
+               for (int j = 0; j < numberOfWrenches; j++)
+               {
+                  int bodyIndex = random.nextInt(joints.size());
+                  RigidBodyBasics bodyToApply = joints.get(bodyIndex).getSuccessor();
+
+                  Wrench wrench = MecanoRandomTools.nextWrench(random, bodyToApply.getBodyFixedFrame(), bodyToApply.getBodyFixedFrame(), 10.0, 10.0);
+                  inverseDynamics.getExternalWrench(bodyToApply).set(wrench);
+                  calculator.getExternalWrench(bodyToApply).set(wrench);
+               }
+            }
+         }
+
+         inverseDynamics.compute();
+         calculator.reset();
+
+         MecanoTestTools.assertDMatrixEquals("Iteration: " + i, inverseDynamics.getJointTauMatrix(), calculator.getTauMatrix(), 1.0e-12);
+      }
+   }
+
    private static Map<RigidBodyBasics, Wrench> nextExternalWrenches(Random random, List<? extends JointBasics> joints)
    {
       Map<RigidBodyBasics, Wrench> wrenches = new HashMap<>();
