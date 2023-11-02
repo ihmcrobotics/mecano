@@ -5,6 +5,7 @@ import org.ejml.data.DMatrixRMaj;
 import org.ejml.dense.row.CommonOps_DDRM;
 import us.ihmc.mecano.multiBodySystem.interfaces.*;
 import us.ihmc.mecano.spatial.SpatialInertia;
+import us.ihmc.mecano.spatial.SpatialInertiaBasisOption;
 import us.ihmc.mecano.spatial.interfaces.SpatialInertiaBasics;
 import us.ihmc.mecano.tools.MecanoTools;
 import us.ihmc.mecano.tools.MultiBodySystemTools;
@@ -298,16 +299,6 @@ public class JointTorqueRegressorCalculator
    }
 
    /**
-    * A {@code SpatialInertia} object is linear with respect to the ten inertial parameters that constitute it.
-    * Therefore, we can create a basis for all spatial inertias with respect to these parameters. This enum is used in
-    * {@code SpatialInertiaParameterBasis} to generate these basis matrices.
-    */
-   enum SpatialInertiaParameterBasisOptions
-   {
-      M, MCOM_X, MCOM_Y, MCOM_Z, I_XX, I_XY, I_XZ, I_YY, I_YZ, I_ZZ;
-   }
-
-   /**
     * A {@code SpatialInertia} object is linearly parameterised with respect to the ten inertial parameters that
     * constitute it. Therefore, we can create a basis for all spatial inertias with respect to these parameters. This
     * class is a simple wrapper around {@code SpatialInertia} that facilitates generation of the spatial inertia basis
@@ -333,11 +324,11 @@ public class JointTorqueRegressorCalculator
       }
 
       /**
-       * Set the spatial inertia to the basis specified by the chosen {@code SpatialInertiaParameterBasisOptions}.
+       * Set the spatial inertia to the basis specified by the chosen {@code SpatialInertiaBasisOption}.
        *
        * @param basisOption the basis to set the spatial inertia to.
        */
-      public void setBasis(SpatialInertiaParameterBasisOptions basisOption)
+      public void setBasis(SpatialInertiaBasisOption basisOption)
       {
          setToZero();
          switch (basisOption)
@@ -525,7 +516,7 @@ public class JointTorqueRegressorCalculator
          if (rigidBody.getInertia() != null)
          {
             markUpstreamAsModifiedRecursively();
-            for (SpatialInertiaParameterBasisOptions basis : SpatialInertiaParameterBasisOptions.values())
+            for (SpatialInertiaBasisOption basis : SpatialInertiaBasisOption.values())
             {
                // Set spatial inertia of this rigid body to be the desired basis
                spatialInertiaParameterBasis.setBasis(basis);
@@ -599,18 +590,18 @@ public class JointTorqueRegressorCalculator
 
       /**
        * Utility method for inserting a calculated column (vector) of the regressor corresponding to a chosen
-       * {@code SpatialInertiaParameterBasisOptions} to the appropriate place in this recursion step's
+       * {@code SpatialInertiaBasisOption} to the appropriate place in this recursion step's
        * {@code regressorMatrixBlock}.
        * <p>
        * The block of the joint torque regressor matrix corresponding to a given rigid body will have ten columns. We
-       * choose to order them as they are ordered in the enum {@link SpatialInertiaParameterBasisOptions}.
+       * choose to order them as they are ordered in the enum {@link SpatialInertiaBasisOption}.
        * </p>
        *
        * @param regressorColumn the n-by-1 vector representing the column for parameter {@code basis}.
-       * @param basis           the {@code SpatialInertiaParameterBasisOptions} parameter basis, which informs the ordering and
+       * @param basis           the {@code SpatialInertiaBasisOption} parameter basis, which informs the ordering and
        *                        placement of regressor column entries.
        */
-      public void setRegressorMatrixColumn(DMatrixRMaj regressorColumn, SpatialInertiaParameterBasisOptions basis)
+      public void setRegressorMatrixColumn(DMatrixRMaj regressorColumn, SpatialInertiaBasisOption basis)
       {
          CommonOps_DDRM.insert(regressorColumn, regressorMatrixBlock, 0, basis.ordinal());
       }

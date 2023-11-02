@@ -9,6 +9,7 @@ import us.ihmc.mecano.multiBodySystem.*;
 import us.ihmc.mecano.multiBodySystem.interfaces.MultiBodySystemBasics;
 import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
 import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyReadOnly;
+import us.ihmc.mecano.spatial.SpatialInertiaBasisOption;
 import us.ihmc.mecano.spatial.Wrench;
 import us.ihmc.mecano.tools.JointStateType;
 import us.ihmc.mecano.tools.MecanoRandomTools;
@@ -487,7 +488,7 @@ public class JointTorqueRegressorCalculatorTest
       RigidBodyBasics body = system.findRigidBody("Body0");
 
       JointTorqueRegressorCalculator.SpatialInertiaParameterBasis basis = new JointTorqueRegressorCalculator.SpatialInertiaParameterBasis(body);
-      for (JointTorqueRegressorCalculator.SpatialInertiaParameterBasisOptions basisOption : JointTorqueRegressorCalculator.SpatialInertiaParameterBasisOptions.values())
+      for (SpatialInertiaBasisOption basisOption : SpatialInertiaBasisOption.values())
          switch (basisOption)
          {
             case M ->
