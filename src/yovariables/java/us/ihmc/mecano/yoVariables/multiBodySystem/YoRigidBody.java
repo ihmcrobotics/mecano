@@ -5,6 +5,7 @@ import java.util.List;
 
 import us.ihmc.euclid.matrix.interfaces.Matrix3DReadOnly;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
+import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.transform.interfaces.RigidBodyTransformReadOnly;
 import us.ihmc.mecano.frames.MovingReferenceFrame;
 import us.ihmc.mecano.multiBodySystem.interfaces.JointBasics;
@@ -62,6 +63,23 @@ public class YoRigidBody implements RigidBodyBasics
     * its ancestors.
     */
    private final String nameId;
+
+   /**
+    * Creates a new root rigid-body to which the first joint of a robot kinematic chain can be added.
+    * <p>
+    * Note that there is only one root body per robot.
+    * </p>
+    *
+    * @param bodyName              the name for this rigid-body.
+    * @param parentStationaryFrame the parent stationary, i.e. non-moving with respect to world frame,
+    *                              frame to which this rigid-body will create and attach its body fixed
+    *                              frame. Most of the time
+    *                              {@code parentStationaryFrame == ReferenceFrame.getWorldFrame()}.
+    */
+   public YoRigidBody(String bodyName, ReferenceFrame parentStationaryFrame)
+   {
+      this(bodyName, new RigidBodyTransform(), parentStationaryFrame);
+   }
 
    /**
     * Creates a new root rigid-body to which the first joint of a robot kinematic chain can be added.
