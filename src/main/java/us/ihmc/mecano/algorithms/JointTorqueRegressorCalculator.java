@@ -299,12 +299,40 @@ public class JointTorqueRegressorCalculator
 
    /**
     * A {@code SpatialInertia} object is linear with respect to the ten inertial parameters that constitute it.
-    * Therefore, we can create a basis for all spatial inertias with respect to these parameters. This enum is used in
-    * {@code SpatialInertiaParameterBasis} to generate these basis matrices.
+    * Therefore, we can create a basis for all spatial inertias with respect to these inertial parameters. This
+    * enum represents the unit vectors of this basis:
+    * <ul>
+    * <li> mass
+    * <li> first moment of mass (mass multiplied by center of mass offset, also known as "lever")
+    * <li> unique components of the moment of inertia
+    * </ul>
     */
-   enum SpatialInertiaParameterBasisOptions
+   public enum SpatialInertiaBasisOption
    {
       M, MCOM_X, MCOM_Y, MCOM_Z, I_XX, I_XY, I_XZ, I_YY, I_YZ, I_ZZ;
+
+      /** Utility method to get all the basis options, for use in loops. */
+      public static final SpatialInertiaBasisOption[] values = values();
+
+      /**
+       * Populates a list with randomly chosen elements of the {@link SpatialInertiaBasisOption} enum.
+       * <p>
+       * This method generates garbage, and is predominantly intended for testing purposes.
+       * </p>
+       *
+       * @param random the random number generator to use when determining whether to include or exclude {@link SpatialInertiaBasisOption}s.
+       * @return a list containing randomly chosen {@link SpatialInertiaBasisOption}s.
+       */
+      public static List<SpatialInertiaBasisOption> generateRandomBases(Random random)
+      {
+         List<SpatialInertiaBasisOption> result = new ArrayList<>();
+         for (SpatialInertiaBasisOption option : values)
+         {
+            if (random.nextBoolean())
+               result.add(option);
+         }
+         return result;
+      }
    }
 
    /**
@@ -333,11 +361,11 @@ public class JointTorqueRegressorCalculator
       }
 
       /**
-       * Set the spatial inertia to the basis specified by the chosen {@code SpatialInertiaParameterBasisOptions}.
+       * Set the spatial inertia to the basis specified by the chosen {@code SpatialInertiaBasisOption}.
        *
        * @param basisOption the basis to set the spatial inertia to.
        */
-      public void setBasis(SpatialInertiaParameterBasisOptions basisOption)
+      public void setBasis(SpatialInertiaBasisOption basisOption)
       {
          setToZero();
          switch (basisOption)
@@ -438,7 +466,7 @@ public class JointTorqueRegressorCalculator
 
       /**
        * Intermediate variable to hold a column of the regressor matrix. This column will correspond to a
-       * {@code rigidBody} and {@code SpatialInertiaParameterBasisOption} combination. It is an n-by-1 vector, where n
+       * {@code rigidBody} and {@code SpatialInertiaBasisOption} combination. It is an n-by-1 vector, where n
        * is the number of DoFs of the multi-body system {@code input}.
        */
       private DMatrixRMaj regressorColumn;
@@ -525,7 +553,7 @@ public class JointTorqueRegressorCalculator
          if (rigidBody.getInertia() != null)
          {
             markUpstreamAsModifiedRecursively();
-            for (SpatialInertiaParameterBasisOptions basis : SpatialInertiaParameterBasisOptions.values())
+            for (SpatialInertiaBasisOption basis : SpatialInertiaBasisOption.values())
             {
                // Set spatial inertia of this rigid body to be the desired basis
                spatialInertiaParameterBasis.setBasis(basis);
@@ -599,18 +627,18 @@ public class JointTorqueRegressorCalculator
 
       /**
        * Utility method for inserting a calculated column (vector) of the regressor corresponding to a chosen
-       * {@code SpatialInertiaParameterBasisOptions} to the appropriate place in this recursion step's
+       * {@code SpatialInertiaBasisOption} to the appropriate place in this recursion step's
        * {@code regressorMatrixBlock}.
        * <p>
        * The block of the joint torque regressor matrix corresponding to a given rigid body will have ten columns. We
-       * choose to order them as they are ordered in the enum {@link SpatialInertiaParameterBasisOptions}.
+       * choose to order them as they are ordered in the enum {@link SpatialInertiaBasisOption}.
        * </p>
        *
        * @param regressorColumn the n-by-1 vector representing the column for parameter {@code basis}.
-       * @param basis           the {@code SpatialInertiaParameterBasisOptions} parameter basis, which informs the ordering and
+       * @param basis           the {@code SpatialInertiaBasisOption} parameter basis, which informs the ordering and
        *                        placement of regressor column entries.
        */
-      public void setRegressorMatrixColumn(DMatrixRMaj regressorColumn, SpatialInertiaParameterBasisOptions basis)
+      public void setRegressorMatrixColumn(DMatrixRMaj regressorColumn, SpatialInertiaBasisOption basis)
       {
          CommonOps_DDRM.insert(regressorColumn, regressorMatrixBlock, 0, basis.ordinal());
       }
