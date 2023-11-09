@@ -595,8 +595,6 @@ public class CompositeRigidBodyMassMatrixCalculator
                      bodySubtreeInertia = new SpatialInertia(getBodyFixedFrame(), getBodyFixedFrame());
                   }
                   bodySubtreeInertia.add(subtreeIneria);
-                  subtreeIneria.changeFrame(getFrameAfterJoint());
-                  bodyInertiaAtJointFrame.add(subtreeIneria);
                }
             }
          }
@@ -670,8 +668,6 @@ public class CompositeRigidBodyMassMatrixCalculator
          else
          {
             bodyInertiaAtJointFrame.setIncludingFrame(rigidBody.getInertia());
-            if (bodySubtreeInertia != null)
-               bodyInertiaAtJointFrame.add(bodySubtreeInertia);
             bodyInertiaAtJointFrame.changeFrame(getFrameAfterJoint());
          }
          compositeInertia.setIncludingFrame(bodyInertiaAtJointFrame);
