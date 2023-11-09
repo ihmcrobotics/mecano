@@ -1077,7 +1077,9 @@ public class ForwardDynamicsCalculator
                bodyInertia.computeDynamicWrench(null, getBodyTwist(), biasWrench);
             }
             else
+            {
                rigidBody.getInertia().computeDynamicWrench(null, getBodyTwist(), biasWrench);
+            }
             biasWrench.sub(externalWrench);
             biasWrench.changeFrame(frameAfterJoint);
 

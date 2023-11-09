@@ -552,7 +552,9 @@ public class CenterOfMassJacobian implements ReferenceFrameHolder
             passOneInner(frameToUse, bodyInertia);
          }
          else
+         {
             passOneInner(frameToUse, rigidBody.getInertia());
+         }
 
          for (int i = 0; i < children.size(); i++)
          {

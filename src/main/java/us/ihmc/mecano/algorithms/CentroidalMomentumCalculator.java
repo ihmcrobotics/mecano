@@ -549,7 +549,9 @@ public class CentroidalMomentumCalculator implements ReferenceFrameHolder
             intermediateMomentum.compute(bodyInertia, intermediateUnitTwist);
          }
          else
+         {
             intermediateMomentum.compute(rigidBody.getInertia(), intermediateUnitTwist);
+         }
 
          intermediateMomentum.applyInverseTransform(matrixFrameToBodyFixedFrameTransform);
          intermediateMomentum.setReferenceFrame(matrixFrame);
