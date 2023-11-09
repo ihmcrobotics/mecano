@@ -3,6 +3,7 @@ package us.ihmc.mecano.tools;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+import static us.ihmc.mecano.tools.MecanoTools.toTildeForm;
 
 import java.util.Random;
 
@@ -115,6 +116,8 @@ public class MecanoToolsTest
    public void testTildeForm()
    {
       Random random = new Random(5432);
+
+      // Test for DMatrixRMaj
       int min = -100000;
       int max = 100000;
       int dimension = 0;
@@ -152,6 +155,43 @@ public class MecanoToolsTest
                                                         tildeForm_A.get(2, 0) * vector3D_B.getX() + tildeForm_A.get(2, 1) * vector3D_B.getY()
                                                               + tildeForm_A.get(2, 2) * vector3D_B.getZ());
          assertEquals(expectedCrossProduct, toBeTestedCrossProduct);
+      }
+
+      // Test for Matrix3D, non-packed version
+      for (int j = 0; j < ITERATIONS; ++j)
+      {
+         // Test if A /cross B == tilde(A) * B
+         Vector3D A = EuclidCoreRandomTools.nextVector3D(random);
+         Vector3D B = EuclidCoreRandomTools.nextVector3D(random);
+
+         Vector3D expected = new Vector3D();
+         expected.cross(A, B);
+
+         Matrix3D tilde = MecanoTools.toTildeForm(A);  // non-packed version
+
+         Vector3D actual = new Vector3D();
+         tilde.transform(B, actual);
+
+         assertEquals(expected, actual);
+      }
+
+      // Test for Matrix3D, packed version
+      for (int k = 0; k < ITERATIONS; ++k)
+      {
+         // Test if A /cross B == tilde(A) * B
+         Vector3D A = EuclidCoreRandomTools.nextVector3D(random);
+         Vector3D B = EuclidCoreRandomTools.nextVector3D(random);
+
+         Vector3D expected = new Vector3D();
+         expected.cross(A, B);
+
+         Matrix3D tilde = new Matrix3D();
+         MecanoTools.toTildeForm(A, tilde);  // packed version
+
+         Vector3D actual = new Vector3D();
+         tilde.transform(B, actual);
+
+         assertEquals(expected, actual);
       }
    }
 

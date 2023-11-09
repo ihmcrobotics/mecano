@@ -26,6 +26,7 @@ import us.ihmc.mecano.spatial.Twist;
 import us.ihmc.mecano.spatial.Wrench;
 
 import static us.ihmc.euclid.tools.EuclidCoreRandomTools.*;
+import static us.ihmc.mecano.tools.MecanoTools.toTildeForm;
 
 /**
  * This class provides random generators to generate random spatial vectors.
@@ -582,7 +583,7 @@ public class MecanoRandomTools
 
       Point3D centerOfMassOffset = nextPoint3D(random, centerOfMassOffsetMinMax);
 
-      Matrix3D parallelAxisContribution = toSkewSymmetricMatrix(centerOfMassOffset);
+      Matrix3D parallelAxisContribution = MecanoTools.toTildeForm(centerOfMassOffset);
       parallelAxisContribution.multiplyOuter();
 
       Matrix3D momentOfInertia = nextDiagonalMatrix3D(random, 0.0, inertiaMax);
@@ -660,23 +661,5 @@ public class MecanoRandomTools
          if (eigRealPart <= 0.0)
             throw new RuntimeException("The matrix has at least one non-positive eigen value.");
       }
-   }
-
-   private static Matrix3D toSkewSymmetricMatrix(Point3DReadOnly point)
-   {
-      double x = point.getX();
-      double y = point.getY();
-      double z = point.getZ();
-
-      Matrix3D matrix = new Matrix3D();
-
-      matrix.setM01(-z);
-      matrix.setM02(y);
-      matrix.setM12(-x);
-
-      matrix.setM10(z);
-      matrix.setM20(-y);
-      matrix.setM21(x);
-      return matrix;
    }
 }
