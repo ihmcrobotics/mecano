@@ -487,7 +487,7 @@ public class JointTorqueRegressorCalculatorTest
       RigidBodyBasics body = system.findRigidBody("Body0");
 
       JointTorqueRegressorCalculator.SpatialInertiaParameterBasis basis = new JointTorqueRegressorCalculator.SpatialInertiaParameterBasis(body);
-      for (JointTorqueRegressorCalculator.SpatialInertiaParameterBasisOptions basisOption : JointTorqueRegressorCalculator.SpatialInertiaParameterBasisOptions.values())
+      for (JointTorqueRegressorCalculator.SpatialInertiaBasisOption basisOption : JointTorqueRegressorCalculator.SpatialInertiaBasisOption.values)
          switch (basisOption)
          {
             case M ->
