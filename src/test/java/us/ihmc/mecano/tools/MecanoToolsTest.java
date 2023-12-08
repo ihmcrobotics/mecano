@@ -1,9 +1,5 @@
 package us.ihmc.mecano.tools;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertFalse;
-import static org.junit.jupiter.api.Assertions.assertTrue;
-
 import java.util.Random;
 
 import org.ejml.data.DMatrix3x3;
@@ -20,11 +16,14 @@ import us.ihmc.euclid.tools.EuclidCoreRandomTools;
 import us.ihmc.euclid.tools.EuclidCoreTestTools;
 import us.ihmc.euclid.tools.EuclidCoreTools;
 import us.ihmc.euclid.tuple3D.Vector3D;
+import us.ihmc.euclid.tuple3D.interfaces.Tuple3DReadOnly;
 import us.ihmc.mecano.spatial.SpatialAcceleration;
 import us.ihmc.mecano.spatial.SpatialInertia;
 import us.ihmc.mecano.spatial.SpatialVector;
 import us.ihmc.mecano.spatial.Twist;
 import us.ihmc.mecano.spatial.Wrench;
+
+import static org.junit.jupiter.api.Assertions.*;
 
 public class MecanoToolsTest
 {
@@ -112,7 +111,7 @@ public class MecanoToolsTest
    }
 
    @Test
-   public void testTildeForm()
+   public void testTildeFormReturningDMatrix()
    {
       Random random = new Random(5432);
       int min = -100000;
@@ -152,6 +151,39 @@ public class MecanoToolsTest
                                                         tildeForm_A.get(2, 0) * vector3D_B.getX() + tildeForm_A.get(2, 1) * vector3D_B.getY()
                                                               + tildeForm_A.get(2, 2) * vector3D_B.getZ());
          assertEquals(expectedCrossProduct, toBeTestedCrossProduct);
+      }
+   }
+
+   @Test
+   public void testTildeFormReturningMatrix3D()
+   {
+      Random random = new Random(5432);
+
+      for (int i = 0; i < ITERATIONS; ++i)
+      {  // Test vector - > Skew Symmetric Matrix (tilde form for use in cross product)
+         // Let's test this by asserting C = A X B == tilde(A) * B
+         Tuple3DReadOnly A = EuclidCoreRandomTools.nextVector3D(random);
+         Tuple3DReadOnly B = EuclidCoreRandomTools.nextVector3D(random);
+         double scale = random.nextDouble();
+
+         Matrix3D tildeA = MecanoTools.toTildeForm(scale, A);
+
+         // In order to check the math, we'll transform everything into DMatrix form
+         DMatrixRMaj tildeAData = new DMatrixRMaj(3, 3);
+         tildeA.get(tildeAData);
+         DMatrixRMaj BData = new DMatrixRMaj(3, 1);
+         B.get(BData);
+
+         DMatrixRMaj actualData = new DMatrixRMaj(3, 1);
+         CommonOps_DDRM.mult(tildeAData, BData, actualData);
+
+         Vector3D expected = new Vector3D();
+         expected.cross(A, B);
+         expected.scale(scale);
+         DMatrixRMaj expectedData = new DMatrixRMaj(3, 1);
+         expected.get(expectedData);
+
+         assertArrayEquals(expectedData.getData(), actualData.getData(), EPSILON);
       }
    }
 
