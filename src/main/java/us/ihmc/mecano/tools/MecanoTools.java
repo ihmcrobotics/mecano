@@ -8,6 +8,7 @@ import org.ejml.MatrixDimensionException;
 import org.ejml.data.DMatrix;
 import org.ejml.data.DMatrixRMaj;
 
+import us.ihmc.euclid.matrix.Matrix3D;
 import us.ihmc.euclid.matrix.interfaces.Matrix3DBasics;
 import us.ihmc.euclid.matrix.interfaces.Matrix3DReadOnly;
 import us.ihmc.euclid.matrix.interfaces.RotationMatrixReadOnly;
@@ -285,6 +286,96 @@ public class MecanoTools
       matrixToPack.set(row, startColumn, -y);
       matrixToPack.set(row, startColumn + 1, x);
       matrixToPack.set(row, startColumn + 2, 0.0);
+   }
+
+   /**
+    * Converts a tuple to tilde form (matrix implementation of cross product).
+    * <p>
+    * This method creates garbage.
+    * </p>
+    *
+    * <pre>
+    *     /  0 -z  y \
+    * M = |  z  0 -x |
+    *     \ -y  x  0 /
+    * </pre>
+    *
+    * @param tuple the tuple to create the tilde form of. Not modified.
+    * @return the matrix used to store the result.
+    */
+   public static Matrix3D toTildeForm(Tuple3DReadOnly tuple)
+   {
+      return toTildeForm(1.0, tuple);
+   }
+
+   /**
+    * Converts a tuple to tilde form (matrix implementation of cross product).
+    * <p>
+    * This method creates garbage.
+    * </p>
+    *
+    * <pre>
+    *         /  0 -z  y \
+    * M = s * |  z  0 -x |
+    *         \ -y  x  0 /
+    * </pre>
+    *
+    * @param scale scale factor to apply to the components of the resulting matrix.
+    * @param tuple the tuple to create the tilde form of. Not modified.
+    * @return the matrix used to store the result.
+    */
+   public static Matrix3D toTildeForm(double scale, Tuple3DReadOnly tuple)
+   {
+      Matrix3D matrix = new Matrix3D();
+      toTildeForm(scale, tuple, matrix);
+      return matrix;
+   }
+
+   /**
+    * Converts a tuple to tilde form (matrix implementation of cross product).
+    *
+    * <pre>
+    *     /  0 -z  y \
+    * M = |  z  0 -x |
+    *     \ -y  x  0 /
+    * </pre>
+    *
+    * @param tuple        the tuple to create the tilde form of. Not modified.
+    * @param matrixToPack the matrix in which the result is stored. Modified.
+    */
+   public static void toTildeForm(Tuple3DReadOnly tuple, Matrix3D matrixToPack)
+   {
+      toTildeForm(1.0, tuple, matrixToPack);
+   }
+
+   /**
+    * Converts a tuple to tilde form (matrix implementation of cross product).
+    *
+    * <pre>
+    *         /  0 -z  y \
+    * M = s * |  z  0 -x |
+    *         \ -y  x  0 /
+    * </pre>
+    *
+    * @param scale        scale factor to apply to the components of the resulting matrix.
+    * @param tuple        the tuple to create the tilde form of. Not modified.
+    * @param matrixToPack the matrix in which the result is stored. Modified.
+    */
+   public static void toTildeForm(double scale, Tuple3DReadOnly tuple, Matrix3D matrixToPack)
+   {
+      double x = tuple.getX();
+      double y = tuple.getY();
+      double z = tuple.getZ();
+
+      matrixToPack.setM01(-z);
+      matrixToPack.setM02(y);
+      matrixToPack.setM12(-x);
+
+      matrixToPack.setM10(z);
+      matrixToPack.setM20(-y);
+      matrixToPack.setM21(x);
+
+      matrixToPack.scale(scale);
    }
 
    /**

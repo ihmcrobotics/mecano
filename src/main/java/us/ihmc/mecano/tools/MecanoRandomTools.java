@@ -1,8 +1,5 @@
 package us.ihmc.mecano.tools;
 
-import static us.ihmc.euclid.tools.EuclidCoreRandomTools.nextDiagonalMatrix3D;
-import static us.ihmc.euclid.tools.EuclidCoreRandomTools.nextVector3D;
-
 import java.util.Random;
 import java.util.stream.IntStream;
 
@@ -15,6 +12,7 @@ import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.tools.EuclidCoreRandomTools;
 import us.ihmc.euclid.tools.EuclidCoreTools;
 import us.ihmc.euclid.transform.RigidBodyTransform;
+import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.mecano.frames.MovingReferenceFrame;
 import us.ihmc.mecano.spatial.Momentum;
@@ -25,6 +23,8 @@ import us.ihmc.mecano.spatial.SpatialInertia;
 import us.ihmc.mecano.spatial.SpatialVector;
 import us.ihmc.mecano.spatial.Twist;
 import us.ihmc.mecano.spatial.Wrench;
+
+import static us.ihmc.euclid.tools.EuclidCoreRandomTools.*;
 
 /**
  * This class provides random generators to generate random spatial vectors.
@@ -577,11 +577,25 @@ public class MecanoRandomTools
       if (massMax < 0.0)
          throw new IllegalArgumentException("The mass cannot be negative.");
 
+      double mass = massMax * random.nextDouble();
+
+      Point3D centerOfMassOffset = nextPoint3D(random, centerOfMassOffsetMinMax);
+
+      double[] principalInertias = generatePrincipalInertiasToSatisfyTriangleInequality(random, inertiaMax);
+      Matrix3D momentOfInertia = new Matrix3D(principalInertias[0], 0.0, 0.0,
+                                              0.0, principalInertias[1], 0.0,
+                                              0.0, 0.0, principalInertias[2]);
+
+      Matrix3D parallelAxisContribution = MecanoTools.toTildeForm(centerOfMassOffset);
+      parallelAxisContribution.multiplyOuter();
+
+      momentOfInertia.add(parallelAxisContribution);
+
       return new SpatialInertia(bodyFrame,
                                 expressedInFrame,
-                                nextDiagonalMatrix3D(random, 0.0, inertiaMax),
-                                massMax * random.nextDouble(),
-                                EuclidCoreRandomTools.nextPoint3D(random, centerOfMassOffsetMinMax));
+                                momentOfInertia,
+                                mass,
+                                centerOfMassOffset);
    }
 
    /**
@@ -649,5 +663,41 @@ public class MecanoRandomTools
          if (eigRealPart <= 0.0)
             throw new RuntimeException("The matrix has at least one non-positive eigen value.");
       }
+   }
+
+   /**
+    * Maximum number of attempts when drawing three doubles to satisfy the triangle inequality. Empirically, the chance of failure is already vanishingly small
+    * at 10 iterations, set to 50 here to be safe.
+    * */
+   private static final int SAMPLING_ITERATIONS = 50;
+
+   /**
+    * Generate a 3-dimensional double array corresponding to physically consistent principal inertias of a rigid-body.
+    * <p>
+    * In order to be physically consistent, the principal inertias must satisfy the triangle inequality. Failing to satisfy the triangle inequality implies a
+    * region of negative mass density somewhere in the rigid body, which is physically impossible.
+    * </p>
+    * @param random     the random generator to use.
+    * @param inertiaMax the maximum value for each principal inertia.
+    * @return a double array containing the principal inertias.
+    */
+   private static double[] generatePrincipalInertiasToSatisfyTriangleInequality(Random random, double inertiaMax)
+   {
+      double[] principalInertias = new double[3];
+
+      for (int i = 0; i < SAMPLING_ITERATIONS; ++i)
+      {
+         principalInertias[0] = inertiaMax * random.nextDouble();
+         principalInertias[1] = inertiaMax * random.nextDouble();
+         principalInertias[2] = inertiaMax * random.nextDouble();
+
+         if (principalInertias[0] < principalInertias[1] + principalInertias[2] &&
+             principalInertias[1] < principalInertias[0] + principalInertias[2] &&
+             principalInertias[2] < principalInertias[0] + principalInertias[1])
+         {
+            return principalInertias;
+         }
+      }
+      throw new RuntimeException("Failed to generate principal inertias to satisfy the triangle inequality.");
    }
 }
