@@ -1,13 +1,6 @@
 package us.ihmc.mecano.algorithms;
 
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.LinkedHashMap;
-import java.util.List;
-import java.util.Map;
-
 import org.ejml.data.DMatrixRMaj;
-
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
@@ -19,15 +12,13 @@ import us.ihmc.mecano.frames.MovingReferenceFrame;
 import us.ihmc.mecano.multiBodySystem.interfaces.JointReadOnly;
 import us.ihmc.mecano.multiBodySystem.interfaces.MultiBodySystemReadOnly;
 import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyReadOnly;
-import us.ihmc.mecano.spatial.SpatialForce;
-import us.ihmc.mecano.spatial.SpatialInertia;
-import us.ihmc.mecano.spatial.SpatialVector;
-import us.ihmc.mecano.spatial.Twist;
-import us.ihmc.mecano.spatial.Wrench;
+import us.ihmc.mecano.spatial.*;
 import us.ihmc.mecano.spatial.interfaces.FixedFrameWrenchBasics;
 import us.ihmc.mecano.spatial.interfaces.TwistReadOnly;
 import us.ihmc.mecano.spatial.interfaces.WrenchReadOnly;
 import us.ihmc.mecano.tools.MultiBodySystemTools;
+
+import java.util.*;
 
 /**
  * This calculator can be used to evaluate the joint efforts due to gravity and external wrenches,
@@ -51,23 +42,31 @@ import us.ihmc.mecano.tools.MultiBodySystemTools;
  * joint configuration.
  * </ul>
  * </p>
- * 
+ *
  * @author Sylvain Bertrand
  */
 public class MultiBodyGravityGradientCalculator
 {
-   /** Defines the multi-body system to use with this calculator. */
+   /**
+    * Defines the multi-body system to use with this calculator.
+    */
    private final MultiBodySystemReadOnly input;
    /**
     * Output of this algorithm: joint efforts due to gravity and external wrenches for all the joint to
     * consider.
     */
    private final DMatrixRMaj tauMatrix;
-   /** Output of this algorithm: gradient of the {@link #tauMatrix}. */
+   /**
+    * Output of this algorithm: gradient of the {@link #tauMatrix}.
+    */
    private final DMatrixRMaj tauGradientMatrix;
-   /** The root of the internal recursive algorithm. */
+   /**
+    * The root of the internal recursive algorithm.
+    */
    private final AlgorithmStep initialStep;
-   /** Map to quickly retrieve information for each rigid-body. */
+   /**
+    * Map to quickly retrieve information for each rigid-body.
+    */
    private final Map<RigidBodyReadOnly, AlgorithmStep> rigidBodyToAlgorithmStepMap = new LinkedHashMap<>();
 
    /**
@@ -87,7 +86,7 @@ public class MultiBodyGravityGradientCalculator
     * Do not forgot to set the gravitational acceleration so this calculator can properly account for
     * it.
     * </p>
-    * 
+    *
     * @param rootBody the supporting body of the subtree to be evaluated by this calculator. Not
     *                 modified.
     */
@@ -119,22 +118,7 @@ public class MultiBodyGravityGradientCalculator
       List<AlgorithmStep> algorithmSteps = new ArrayList<>();
       algorithmSteps.add(parent);
 
-      List<JointReadOnly> childrenJoints = new ArrayList<>(parent.rigidBody.getChildrenJoints());
-
-      if (childrenJoints.size() > 1)
-      { // Reorganize the joints in the children to ensure that loop closures are treated last.
-         List<JointReadOnly> loopClosureAncestors = new ArrayList<>();
-
-         for (int i = 0; i < childrenJoints.size();)
-         {
-            if (MultiBodySystemTools.doesSubtreeContainLoopClosure(childrenJoints.get(i).getSuccessor()))
-               loopClosureAncestors.add(childrenJoints.remove(i));
-            else
-               i++;
-         }
-
-         childrenJoints.addAll(loopClosureAncestors);
-      }
+      List<JointReadOnly> childrenJoints = MultiBodySystemTools.sortLoopClosureInChildrenJoints(parent.rigidBody);
 
       for (JointReadOnly childJoint : childrenJoints)
       {
@@ -303,7 +287,7 @@ public class MultiBodyGravityGradientCalculator
    /**
     * Gets the N-by-1 matrix containing the joint efforts due to gravity and external wrenches applied
     * to the multi-body system. (N is the number of degrees of freedom of the system).
-    * 
+    *
     * @return this calculator output: the joint efforts.
     */
    public DMatrixRMaj getTauMatrix()
@@ -328,7 +312,7 @@ public class MultiBodyGravityGradientCalculator
     * joint configuration.
     * </ul>
     * </p>
-    * 
+    *
     * @return the gradient of the joint efforts.
     */
    public DMatrixRMaj getTauGradientMatrix()
@@ -337,15 +321,23 @@ public class MultiBodyGravityGradientCalculator
       return tauGradientMatrix;
    }
 
-   /** Intermediate variable used to compute {@link AlgorithmStep#subTreeExternalSpatialForce}. */
+   /**
+    * Intermediate variable used to compute {@link AlgorithmStep#subTreeExternalSpatialForce}.
+    */
    private final SpatialForce childExternalSpatialForce = new SpatialForce();
-   /** Intermediate variable used to compute {@link AlgorithmStep#subTreeCoM}. */
+   /**
+    * Intermediate variable used to compute {@link AlgorithmStep#subTreeCoM}.
+    */
    private final FramePoint3D childCoM = new FramePoint3D();
 
-   /** This class represents a single step for this algorithm. */
+   /**
+    * This class represents a single step for this algorithm.
+    */
    private class AlgorithmStep
    {
-      /** The rigid-body for which this step is for. */
+      /**
+       * The rigid-body for which this step is for.
+       */
       private final RigidBodyReadOnly rigidBody;
       /**
        * Body inertia: usually equal to {@code rigidBody.getInertial()}. However, if at least one child of
@@ -353,11 +345,17 @@ public class MultiBodyGravityGradientCalculator
        * attached to the ignored joint.
        */
       private final SpatialInertia bodyInertia;
-      /** The corresponding matrix indices for each of this step's joint degree of freedom. */
+      /**
+       * The corresponding matrix indices for each of this step's joint degree of freedom.
+       */
       private final int[] jointIndices;
-      /** The algorithm step for the parent of this step's rigid-body. */
+      /**
+       * The algorithm step for the parent of this step's rigid-body.
+       */
       private final AlgorithmStep parent;
-      /** The algorithm steps for the children of this step's rigid-body. */
+      /**
+       * The algorithm steps for the children of this step's rigid-body.
+       */
       private final List<AlgorithmStep> children = new ArrayList<>();
 
       /**
@@ -380,11 +378,17 @@ public class MultiBodyGravityGradientCalculator
        */
       private boolean hasSubTreeExternalWrench = false;
 
-      /** The total mass of the subtree starting at this step. */
+      /**
+       * The total mass of the subtree starting at this step.
+       */
       private double subTreeMass;
-      /** The total center of mass of the subtree starting at this step. */
+      /**
+       * The total center of mass of the subtree starting at this step.
+       */
       private final FramePoint3D subTreeCoM = new FramePoint3D();
-      /** The sum of external wrenches applied to the subtree starting at this step. */
+      /**
+       * The sum of external wrenches applied to the subtree starting at this step.
+       */
       private final SpatialForce subTreeExternalSpatialForce = new SpatialForce();
       /**
        * The resulting force due to gravity on the subtree at the sutree's center of mass expressed in
@@ -462,7 +466,8 @@ public class MultiBodyGravityGradientCalculator
          if (!isRoot())
          {
             hasExternalWrench = externalWrench.getLinearPartX() != 0.0 || externalWrench.getLinearPartY() != 0.0 || externalWrench.getLinearPartZ() != 0.0
-                  || externalWrench.getAngularPartX() != 0.0 || externalWrench.getAngularPartY() != 0.0 || externalWrench.getAngularPartZ() != 0.0;
+                                || externalWrench.getAngularPartX() != 0.0 || externalWrench.getAngularPartY() != 0.0
+                                || externalWrench.getAngularPartZ() != 0.0;
             hasSubTreeExternalWrench = hasExternalWrench;
             subTreeExternalSpatialForce.setIncludingFrame(externalWrench);
             subTreeExternalSpatialForce.changeFrame(getFrameAfterJoint());
@@ -507,7 +512,9 @@ public class MultiBodyGravityGradientCalculator
          subTreeCoM.scale(1.0 / subTreeMass);
       }
 
-      /** From leaves to root, compute the elements of the gradient matrix. */
+      /**
+       * From leaves to root, compute the elements of the gradient matrix.
+       */
       public void passTwo()
       {
          for (int i = 0; i < children.size(); i++)

@@ -1,28 +1,22 @@
 package us.ihmc.mecano.algorithms;
 
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.List;
-
 import org.ejml.data.DMatrix;
 import org.ejml.data.DMatrixRMaj;
-
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.mecano.frames.MovingReferenceFrame;
 import us.ihmc.mecano.multiBodySystem.interfaces.JointReadOnly;
 import us.ihmc.mecano.multiBodySystem.interfaces.MultiBodySystemReadOnly;
 import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyReadOnly;
-import us.ihmc.mecano.spatial.Momentum;
-import us.ihmc.mecano.spatial.SpatialAcceleration;
-import us.ihmc.mecano.spatial.SpatialForce;
-import us.ihmc.mecano.spatial.SpatialInertia;
-import us.ihmc.mecano.spatial.Twist;
-import us.ihmc.mecano.spatial.Wrench;
+import us.ihmc.mecano.spatial.*;
 import us.ihmc.mecano.spatial.interfaces.SpatialForceReadOnly;
 import us.ihmc.mecano.spatial.interfaces.SpatialInertiaReadOnly;
 import us.ihmc.mecano.spatial.interfaces.TwistReadOnly;
 import us.ihmc.mecano.tools.MultiBodySystemTools;
+
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.List;
 
 /**
  * This calculator computes:
@@ -53,7 +47,7 @@ import us.ihmc.mecano.tools.MultiBodySystemTools;
  * <pre>
  * &tau; = H(q) qDDot + C(q, qDot) qDot + G(q) + &sum;<sub>i</sub> J<sub>i</sub> W<sub>i, ext</sub>
  * </pre>
- *
+ * <p>
  * where <tt>&tau;</tt>, <tt>q</tt>, <tt>qDot</tt>, and <tt>qDDot</tt> are the joint effort,
  * configuration, velocity, and acceleration vectors, <tt>H</tt> is the joint-space inertia matrix
  * or also called here mass matrix, <tt>C</tt> is the Coriolis and centrifugal matrix, <tt>G</tt>
@@ -76,7 +70,7 @@ import us.ihmc.mecano.tools.MultiBodySystemTools;
  * -- = A * qDDot + -- * qDot = A * qDDot + b
  * dt               dt
  * </pre>
- *
+ * <p>
  * where <tt>h</tt> is the system's momentum and <tt>A</tt> is the centroidal momentum matrix, the
  * term introduce <tt>b</tt> represents the convective term.
  * </p>
@@ -91,25 +85,37 @@ import us.ihmc.mecano.tools.MultiBodySystemTools;
  */
 public class CompositeRigidBodyMassMatrixCalculator
 {
-   /** Defines the multi-body system to use with this calculator. */
+   /**
+    * Defines the multi-body system to use with this calculator.
+    */
    private final MultiBodySystemReadOnly input;
 
-   /** The root of the internal recursive algorithm. */
+   /**
+    * The root of the internal recursive algorithm.
+    */
    private final CompositeRigidBodyInertia rootCompositeInertia;
    /**
     * Array of all the recursion steps but the root. This allows to efficiently iterate through when
     * computing the centroidal momentum matrix.
     */
    private final CompositeRigidBodyInertia[] compositeInertias;
-   /** The mass matrix of the system. */
+   /**
+    * The mass matrix of the system.
+    */
    private final DMatrixRMaj massMatrix;
    private final DMatrixRMaj coriolisMatrix;
-   /** Intermediate variable to store the child inertia. */
+   /**
+    * Intermediate variable to store the child inertia.
+    */
    private final SpatialInertia childInertia = new SpatialInertia();
-   /** Intermediate variable to store the child factorized inertia. */
+   /**
+    * Intermediate variable to store the child factorized inertia.
+    */
    private final FactorizedBodyInertia childFactorizedInertia = new FactorizedBodyInertia();
 
-   /** Intermediate variable for garbage free operations. */
+   /**
+    * Intermediate variable for garbage free operations.
+    */
    private final Twist intermediateTwist = new Twist();
    /**
     * Intermediate variable to store the wrench resulting from Coriolis and centrifugal accelerations.
@@ -128,7 +134,9 @@ public class CompositeRigidBodyMassMatrixCalculator
     */
    private final DMatrixRMaj centroidalConvectiveTermMatrix = new DMatrixRMaj(6, 1);
 
-   /** Frame in which the centroidal momentum matrix and its convective term are to be calculated. */
+   /**
+    * Frame in which the centroidal momentum matrix and its convective term are to be calculated.
+    */
    private ReferenceFrame centroidalMomentumFrame;
    /**
     * The centroidal momentum matrix represents the map from joint velocity space to momentum space.
@@ -242,22 +250,7 @@ public class CompositeRigidBodyMassMatrixCalculator
    {
       List<CompositeRigidBodyInertia> inertiaList = new ArrayList<>();
 
-      List<JointReadOnly> childrenJoints = new ArrayList<>(parent.rigidBody.getChildrenJoints());
-
-      if (childrenJoints.size() > 1)
-      { // Reorganize the joints in the children to ensure that loop closures are treated last.
-         List<JointReadOnly> loopClosureAncestors = new ArrayList<>();
-
-         for (int i = 0; i < childrenJoints.size();)
-         {
-            if (MultiBodySystemTools.doesSubtreeContainLoopClosure(childrenJoints.get(i).getSuccessor()))
-               loopClosureAncestors.add(childrenJoints.remove(i));
-            else
-               i++;
-         }
-
-         childrenJoints.addAll(loopClosureAncestors);
-      }
+      List<JointReadOnly> childrenJoints = MultiBodySystemTools.sortLoopClosureInChildrenJoints(parent.rigidBody);
 
       for (JointReadOnly childJoint : childrenJoints)
       {
@@ -292,7 +285,7 @@ public class CompositeRigidBodyMassMatrixCalculator
     * Note that enabling the calculation of the Coriolis and centrifugal matrix will increase the
     * computational load when updating the mass matrix.
     * </p>
-    * 
+    *
     * @param enableCoriolisMatrixCalculation whether to enable or disable the calculation of the
     *                                        Coriolis and centrifugal matrix. Disabled by default.
     */
@@ -370,10 +363,10 @@ public class CompositeRigidBodyMassMatrixCalculator
 
    /**
     * Gets the Coriolis and centrifugal matrix for this multi-body system.
-    * 
+    *
     * @return the Coriolis and centrifugal matrix.
     * @throws UnsupportedOperationException if the calculation of the Coriolis and centrifugal matrix
-    *                                       was not enabled.
+    *       was not enabled.
     * @see #setEnableCoriolisMatrixCalculation(boolean)
     */
    public DMatrixRMaj getCoriolisMatrix()
@@ -490,9 +483,13 @@ public class CompositeRigidBodyMassMatrixCalculator
        */
       private final int[] jointIndices;
 
-      /** Spatial inertia representing the subtree starting off this rigid-body. */
+      /**
+       * Spatial inertia representing the subtree starting off this rigid-body.
+       */
       private final SpatialInertia compositeInertia;
-      /** Spatial factorized inertia representing the subtree starting off this rigid-body. */
+      /**
+       * Spatial factorized inertia representing the subtree starting off this rigid-body.
+       */
       private final FactorizedBodyInertia compositeFactorizedInertia;
 
       /**
@@ -501,12 +498,18 @@ public class CompositeRigidBodyMassMatrixCalculator
        */
       private final Momentum[] F1, F2, F3;
       private final DMatrixRMaj motionSubspaceDot;
-      /** This parent joint unit-twists. */
+      /**
+       * This parent joint unit-twists.
+       */
       private final Twist[] unitTwists;
-      /** The time-derivative of this parent joint unit-twists. */
+      /**
+       * The time-derivative of this parent joint unit-twists.
+       */
       private final SpatialAcceleration[] unitTwistDots;
 
-      /** The Coriolis and centrifugal accelerations for this rigid-body. */
+      /**
+       * The Coriolis and centrifugal accelerations for this rigid-body.
+       */
       private final SpatialAcceleration coriolisBodyAcceleration;
       /**
        * Transform from {@code this.getFrameAfterJoint()} to {@code parent.getFrameAfterJoint()} used to

@@ -1,21 +1,12 @@
 package us.ihmc.mecano.algorithms;
 
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.List;
-
 import org.ejml.data.DMatrix1Row;
 import org.ejml.data.DMatrixRMaj;
 import org.ejml.dense.row.CommonOps_DDRM;
-
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
-import us.ihmc.euclid.referenceFrame.interfaces.FixedFrameVector3DBasics;
-import us.ihmc.euclid.referenceFrame.interfaces.FramePoint3DReadOnly;
-import us.ihmc.euclid.referenceFrame.interfaces.FrameVector3DBasics;
-import us.ihmc.euclid.referenceFrame.interfaces.FrameVector3DReadOnly;
-import us.ihmc.euclid.referenceFrame.interfaces.ReferenceFrameHolder;
+import us.ihmc.euclid.referenceFrame.interfaces.*;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.mecano.multiBodySystem.interfaces.JointMatrixIndexProvider;
 import us.ihmc.mecano.multiBodySystem.interfaces.JointReadOnly;
@@ -26,6 +17,10 @@ import us.ihmc.mecano.spatial.Twist;
 import us.ihmc.mecano.tools.JointStateType;
 import us.ihmc.mecano.tools.MecanoFactories;
 import us.ihmc.mecano.tools.MultiBodySystemTools;
+
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.List;
 
 /**
  * Computes the center of mass Jacobian that maps from joint velocity space to center of mass
@@ -56,9 +51,13 @@ public class CenterOfMassJacobian implements ReferenceFrameHolder
     * expressed in the center of mass frame.
     */
    private final ReferenceFrame rootFrame;
-   /** Defines the multi-body system to use with this calculator. */
+   /**
+    * Defines the multi-body system to use with this calculator.
+    */
    private final MultiBodySystemReadOnly input;
-   /** The root of the internal recursive algorithm. */
+   /**
+    * The root of the internal recursive algorithm.
+    */
    private final RecursionStep initialRecursionStep;
    /**
     * Only the first pass of this algorithm has to be recursive, the two other passes can be iterative
@@ -66,22 +65,36 @@ public class CenterOfMassJacobian implements ReferenceFrameHolder
     */
    private final RecursionStep[] recursionSteps;
 
-   /** The center of mass Jacobian. */
+   /**
+    * The center of mass Jacobian.
+    */
    private final DMatrixRMaj jacobianMatrix;
-   /** Matrix containing the velocities of the joints to consider. */
+   /**
+    * Matrix containing the velocities of the joints to consider.
+    */
    private final DMatrixRMaj jointVelocityMatrix;
-   /** Intermediate variable for garbage free operations. */
+   /**
+    * Intermediate variable for garbage free operations.
+    */
    private final DMatrixRMaj centerOfMassVelocityMatrix = new DMatrixRMaj(3, 1);
 
-   /** Intermediate variable to store one column of the Jacobian matrix. */
+   /**
+    * Intermediate variable to store one column of the Jacobian matrix.
+    */
    private final FixedFrameVector3DBasics jacobianColumn;
-   /** Intermediate variable to store the unit-twist of the parent joint. */
+   /**
+    * Intermediate variable to store the unit-twist of the parent joint.
+    */
    private final Twist jointUnitTwist = new Twist();
 
-   /** The center of mass velocity. */
+   /**
+    * The center of mass velocity.
+    */
    private final FixedFrameVector3DBasics centerOfMassVelocity = MecanoFactories.newFixedFrameVector3DBasics(this);
 
-   /** Whether the Jacobian has been updated since the last call to {@link #reset()}. */
+   /**
+    * Whether the Jacobian has been updated since the last call to {@link #reset()}.
+    */
    private boolean isJacobianUpToDate = false;
    /**
     * Whether the center of mass velocity has been updated since the last call to {@link #reset()}.
@@ -190,7 +203,9 @@ public class CenterOfMassJacobian implements ReferenceFrameHolder
       this(input, jacobianFrame, null, considerIgnoredSubtreesInertia);
    }
 
-   private CenterOfMassJacobian(MultiBodySystemReadOnly input, ReferenceFrame jacobianFrame, String centerOfMassFrameName,
+   private CenterOfMassJacobian(MultiBodySystemReadOnly input,
+                                ReferenceFrame jacobianFrame,
+                                String centerOfMassFrameName,
                                 boolean considerIgnoredSubtreesInertia)
    {
       this.input = input;
@@ -231,22 +246,7 @@ public class CenterOfMassJacobian implements ReferenceFrameHolder
       List<RecursionStep> recursionSteps = new ArrayList<>();
       recursionSteps.add(parent);
 
-      List<JointReadOnly> childrenJoints = new ArrayList<>(parent.rigidBody.getChildrenJoints());
-
-      if (childrenJoints.size() > 1)
-      { // Reorganize the joints in the children to ensure that loop closures are treated last.
-         List<JointReadOnly> loopClosureAncestors = new ArrayList<>();
-
-         for (int i = 0; i < childrenJoints.size();)
-         {
-            if (MultiBodySystemTools.doesSubtreeContainLoopClosure(childrenJoints.get(i).getSuccessor()))
-               loopClosureAncestors.add(childrenJoints.remove(i));
-            else
-               i++;
-         }
-
-         childrenJoints.addAll(loopClosureAncestors);
-      }
+      List<JointReadOnly> childrenJoints = MultiBodySystemTools.sortLoopClosureInChildrenJoints(parent.rigidBody);
 
       for (JointReadOnly childJoint : childrenJoints)
       {

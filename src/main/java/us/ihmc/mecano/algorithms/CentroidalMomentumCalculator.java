@@ -1,13 +1,8 @@
 package us.ihmc.mecano.algorithms;
 
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.List;
-
 import org.ejml.data.DMatrix1Row;
 import org.ejml.data.DMatrixRMaj;
 import org.ejml.dense.row.CommonOps_DDRM;
-
 import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.referenceFrame.interfaces.FixedFrameVector3DBasics;
@@ -29,6 +24,10 @@ import us.ihmc.mecano.spatial.interfaces.TwistReadOnly;
 import us.ihmc.mecano.tools.JointStateType;
 import us.ihmc.mecano.tools.MultiBodySystemTools;
 
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.List;
+
 /**
  * Computes the centroidal momentum matrix that maps from joint velocity space to the system linear
  * and angular momentum.
@@ -42,35 +41,61 @@ import us.ihmc.mecano.tools.MultiBodySystemTools;
  */
 public class CentroidalMomentumCalculator implements ReferenceFrameHolder
 {
-   /** Defines the multi-body system to use with this calculator. */
+   /**
+    * Defines the multi-body system to use with this calculator.
+    */
    private final MultiBodySystemReadOnly input;
-   /** The center of mass centroidal momentum matrix. */
+   /**
+    * The center of mass centroidal momentum matrix.
+    */
    private final ReferenceFrame matrixFrame;
 
-   /** Array for each iteration of this algorithm. */
+   /**
+    * Array for each iteration of this algorithm.
+    */
    private final IterativeStep[] iterativeSteps;
 
-   /** Intermediate variable to store the unit-twist of the parent joint. */
+   /**
+    * Intermediate variable to store the unit-twist of the parent joint.
+    */
    private final Twist jointUnitTwist;
-   /** Intermediate variable for garbage free operations. */
+   /**
+    * Intermediate variable for garbage free operations.
+    */
    private final Twist intermediateUnitTwist;
-   /** Intermediate variable to store one column of the centroidal momentum matrix. */
+   /**
+    * Intermediate variable to store one column of the centroidal momentum matrix.
+    */
    private final Momentum unitMomentum;
-   /** Intermediate variable for garbage free operations. */
+   /**
+    * Intermediate variable for garbage free operations.
+    */
    private final Momentum intermediateMomentum;
-   /** The total momentum of the system. */
+   /**
+    * The total momentum of the system.
+    */
    private final FixedFrameMomentumBasics momentum;
-   /** The center of mass velocity. */
+   /**
+    * The center of mass velocity.
+    */
    private final FixedFrameVector3DBasics centerOfMassVelocity;
 
-   /** The centroidal momentum matrix. */
+   /**
+    * The centroidal momentum matrix.
+    */
    private final DMatrixRMaj centroidalMomentumMatrix;
-   /** Matrix containing the velocities of the joints to consider. */
+   /**
+    * Matrix containing the velocities of the joints to consider.
+    */
    private final DMatrixRMaj jointVelocityMatrix;
-   /** The total momentum of the system. */
+   /**
+    * The total momentum of the system.
+    */
    private final DMatrixRMaj momentumMatrix = new DMatrixRMaj(6, 1);
 
-   /** The total system mass. */
+   /**
+    * The total system mass.
+    */
    private double totalMass = 0.0;
 
    /**
@@ -81,9 +106,13 @@ public class CentroidalMomentumCalculator implements ReferenceFrameHolder
     * Whether the joint velocity matrix has been updated since the last call to {@link #reset()}.
     */
    private boolean isJointVelocityMatrixUpToDate = false;
-   /** Whether the momentum has been updated since the last call to {@link #reset()}. */
+   /**
+    * Whether the momentum has been updated since the last call to {@link #reset()}.
+    */
    private boolean isMomentumUpToDate = false;
-   /** Whether the total mass has been updated since the last call to {@link #reset()}. */
+   /**
+    * Whether the total mass has been updated since the last call to {@link #reset()}.
+    */
    private boolean isTotalMassUpToDate = false;
    /**
     * Whether the center of mass velocity has been updated since the last call to {@link #reset()}.
@@ -156,22 +185,7 @@ public class CentroidalMomentumCalculator implements ReferenceFrameHolder
       List<IterativeStep> iterativeSteps = new ArrayList<>();
       iterativeSteps.add(parent);
 
-      List<JointReadOnly> childrenJoints = new ArrayList<>(parent.rigidBody.getChildrenJoints());
-
-      if (childrenJoints.size() > 1)
-      { // Reorganize the joints in the children to ensure that loop closures are treated last.
-         List<JointReadOnly> loopClosureAncestors = new ArrayList<>();
-
-         for (int i = 0; i < childrenJoints.size();)
-         {
-            if (MultiBodySystemTools.doesSubtreeContainLoopClosure(childrenJoints.get(i).getSuccessor()))
-               loopClosureAncestors.add(childrenJoints.remove(i));
-            else
-               i++;
-         }
-
-         childrenJoints.addAll(loopClosureAncestors);
-      }
+      List<JointReadOnly> childrenJoints = MultiBodySystemTools.sortLoopClosureInChildrenJoints(parent.rigidBody);
 
       for (JointReadOnly childJoint : childrenJoints)
       {
@@ -510,7 +524,7 @@ public class CentroidalMomentumCalculator implements ReferenceFrameHolder
        * <pre>
        * h = (&sum;<sub>i=0:n</sub> I<sub>i</sub>) * T &equiv; &sum;<sub>i=0:n</sub> (I<sub>i</sub> * T)
        * </pre>
-       *
+       * <p>
        * where <tt>h</tt> is the resulting unit-momentum, <tt>I<sub>i</sub></tt> is the spatial inertia of
        * the i<sup>th</sup> body, and <tt>T</tt> is the unit-twist.
        *

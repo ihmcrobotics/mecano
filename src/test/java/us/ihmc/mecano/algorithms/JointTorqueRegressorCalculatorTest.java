@@ -43,7 +43,7 @@ public class JointTorqueRegressorCalculatorTest
 
       // Create an inverse dynamics calculator to compare torque results to
       InverseDynamicsCalculator inverseDynamicsCalculator = new InverseDynamicsCalculator(system);
-      inverseDynamicsCalculator.setGravitionalAcceleration(-9.81);
+      inverseDynamicsCalculator.setGravitationalAcceleration(-9.81);
       inverseDynamicsCalculator.compute();
       DMatrixRMaj expectedjointTau = inverseDynamicsCalculator.getJointTauMatrix();
 
@@ -110,7 +110,7 @@ public class JointTorqueRegressorCalculatorTest
 
             // Create an inverse dynamics calculator to compare torque results to
             InverseDynamicsCalculator inverseDynamicsCalculator = new InverseDynamicsCalculator(system);
-            inverseDynamicsCalculator.setGravitionalAcceleration(-9.81);
+            inverseDynamicsCalculator.setGravitationalAcceleration(-9.81);
             inverseDynamicsCalculator.compute();
             DMatrixRMaj expectedjointTau = inverseDynamicsCalculator.getJointTauMatrix();
 
@@ -189,7 +189,7 @@ public class JointTorqueRegressorCalculatorTest
 
             // Create an inverse dynamics calculator to compare torque results to
             InverseDynamicsCalculator inverseDynamicsCalculator = new InverseDynamicsCalculator(system);
-            inverseDynamicsCalculator.setGravitionalAcceleration(-9.81);
+            inverseDynamicsCalculator.setGravitationalAcceleration(-9.81);
             inverseDynamicsCalculator.compute();
             DMatrixRMaj expectedjointTau = inverseDynamicsCalculator.getJointTauMatrix();
 
@@ -267,7 +267,7 @@ public class JointTorqueRegressorCalculatorTest
 
             // Create an inverse dynamics calculator to compare torque results to
             InverseDynamicsCalculator inverseDynamicsCalculator = new InverseDynamicsCalculator(system);
-            inverseDynamicsCalculator.setGravitionalAcceleration(-9.81);
+            inverseDynamicsCalculator.setGravitationalAcceleration(-9.81);
             inverseDynamicsCalculator.compute();
             DMatrixRMaj expectedjointTau = inverseDynamicsCalculator.getJointTauMatrix();
 
@@ -346,7 +346,7 @@ public class JointTorqueRegressorCalculatorTest
 
             // Create an inverse dynamics calculator to compare torque results to
             InverseDynamicsCalculator inverseDynamicsCalculator = new InverseDynamicsCalculator(system);
-            inverseDynamicsCalculator.setGravitionalAcceleration(-9.81);
+            inverseDynamicsCalculator.setGravitationalAcceleration(-9.81);
             inverseDynamicsCalculator.compute();
             DMatrixRMaj expectedjointTau = inverseDynamicsCalculator.getJointTauMatrix();
 
@@ -424,7 +424,7 @@ public class JointTorqueRegressorCalculatorTest
 
             // Create an inverse dynamics calculator to compare torque results to
             InverseDynamicsCalculator inverseDynamicsCalculator = new InverseDynamicsCalculator(system);
-            inverseDynamicsCalculator.setGravitionalAcceleration(-9.81);
+            inverseDynamicsCalculator.setGravitationalAcceleration(-9.81);
             // Randomly pick rigid bodies to apply external wrenches to
             Map<RigidBodyReadOnly, Wrench> rigidBodiesToExternalWrenchMap = new LinkedHashMap<>();
             for (RigidBodyBasics body : system.getRootBody().subtreeArray())

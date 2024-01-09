@@ -1,12 +1,7 @@
 package us.ihmc.mecano.algorithms;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Random;
-
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
-
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.log.LogTools;
 import us.ihmc.mecano.multiBodySystem.Joint;
@@ -15,6 +10,10 @@ import us.ihmc.mecano.multiBodySystem.RigidBody;
 import us.ihmc.mecano.multiBodySystem.SixDoFJoint;
 import us.ihmc.mecano.tools.JointStateType;
 import us.ihmc.mecano.tools.MultiBodySystemRandomTools;
+
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Random;
 
 @Disabled
 public class InverseDynamicsCalculatorTest
@@ -29,7 +28,7 @@ public class InverseDynamicsCalculatorTest
 
       List<OneDoFJoint> joints = MultiBodySystemRandomTools.nextOneDoFJointChain(random, 30);
       InverseDynamicsCalculator calculator = new InverseDynamicsCalculator(joints.get(0).getPredecessor());
-      calculator.setGravitionalAcceleration(-9.81);
+      calculator.setGravitationalAcceleration(-9.81);
 
       long totalTime = 0L;
 
@@ -65,7 +64,7 @@ public class InverseDynamicsCalculatorTest
       RigidBody floatingBody = MultiBodySystemRandomTools.nextRigidBody(random, "floatingBody", joints.get(0));
       joints.addAll(MultiBodySystemRandomTools.nextOneDoFJointChain(random, floatingBody, 30));
       InverseDynamicsCalculator calculator = new InverseDynamicsCalculator(elevator);
-      calculator.setGravitionalAcceleration(-9.81);
+      calculator.setGravitationalAcceleration(-9.81);
 
       long totalTime = 0L;
 
@@ -97,7 +96,7 @@ public class InverseDynamicsCalculatorTest
 
       List<OneDoFJoint> joints = MultiBodySystemRandomTools.nextOneDoFJointTree(random, 30);
       InverseDynamicsCalculator calculator = new InverseDynamicsCalculator(joints.get(0).getPredecessor());
-      calculator.setGravitionalAcceleration(-9.81);
+      calculator.setGravitationalAcceleration(-9.81);
 
       long totalTime = 0L;
 
@@ -133,7 +132,7 @@ public class InverseDynamicsCalculatorTest
       RigidBody floatingBody = MultiBodySystemRandomTools.nextRigidBody(random, "floatingBody", joints.get(0));
       joints.addAll(MultiBodySystemRandomTools.nextOneDoFJointTree(random, floatingBody, 30));
       InverseDynamicsCalculator calculator = new InverseDynamicsCalculator(elevator);
-      calculator.setGravitionalAcceleration(-9.81);
+      calculator.setGravitationalAcceleration(-9.81);
 
       long totalTime = 0L;
 

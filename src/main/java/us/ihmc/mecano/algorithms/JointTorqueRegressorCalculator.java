@@ -3,13 +3,19 @@ package us.ihmc.mecano.algorithms;
 import org.ejml.data.DMatrix;
 import org.ejml.data.DMatrixRMaj;
 import org.ejml.dense.row.CommonOps_DDRM;
-import us.ihmc.mecano.multiBodySystem.interfaces.*;
+import us.ihmc.mecano.multiBodySystem.interfaces.JointReadOnly;
+import us.ihmc.mecano.multiBodySystem.interfaces.MultiBodySystemBasics;
+import us.ihmc.mecano.multiBodySystem.interfaces.MultiBodySystemReadOnly;
+import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
 import us.ihmc.mecano.spatial.SpatialInertia;
 import us.ihmc.mecano.spatial.interfaces.SpatialInertiaBasics;
 import us.ihmc.mecano.tools.MecanoTools;
 import us.ihmc.mecano.tools.MultiBodySystemTools;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.List;
+import java.util.Random;
 
 /**
  * Computes the joint torque regressor matrix of a rigid body system based on joint acceleration.
@@ -87,8 +93,9 @@ public class JointTorqueRegressorCalculator
    /**
     * Creates a calculator for computing the joint torque regressor for multi-body system associated with the rigid body {@code rootBody}.
     * <p>
-    *  Do not forget to set the gravitational acceleration so this calculator can properly account for it.
+    * Do not forget to set the gravitational acceleration so this calculator can properly account for it.
     * </p>
+    *
     * @param rootBody the root rigid body of the multi-body system to be evaluated by this calculator.
     * @throws UnsupportedOperationException if the multi-body system associated with the {@code rootBody} contains kinematic loop(s).
     */
@@ -133,21 +140,7 @@ public class JointTorqueRegressorCalculator
       if (!parent.rigidBody.isRootBody())
          recursionSteps.add(parent);
 
-      List<JointReadOnly> childrenJoints = new ArrayList<>(parent.rigidBody.getChildrenJoints());
-
-      if (childrenJoints.size() > 1)
-      { // Reorganize the joints in the children to ensure that loop closures are treated last.
-         List<JointReadOnly> loopClosureAncestors = new ArrayList<>();
-
-         for (int i = 0; i < childrenJoints.size(); )
-         {
-            if (MultiBodySystemTools.doesSubtreeContainLoopClosure(childrenJoints.get(i).getSuccessor()))
-               loopClosureAncestors.add(childrenJoints.remove(i));
-            else
-               i++;
-         }
-         childrenJoints.addAll(loopClosureAncestors);
-      }
+      List<JointReadOnly> childrenJoints = MultiBodySystemTools.sortLoopClosureInChildrenJoints(parent.rigidBody);
 
       for (JointReadOnly childJoint : childrenJoints)
       {
@@ -265,7 +258,7 @@ public class JointTorqueRegressorCalculator
     */
    public void setGravitationalAcceleration(double gravityX, double gravityY, double gravityZ)
    {
-      inverseDynamicsCalculator.setGravitionalAcceleration(gravityX, gravityY, gravityZ);
+      inverseDynamicsCalculator.setGravitationalAcceleration(gravityX, gravityY, gravityZ);
    }
 
    /**
@@ -311,7 +304,9 @@ public class JointTorqueRegressorCalculator
    {
       M, MCOM_X, MCOM_Y, MCOM_Z, I_XX, I_XY, I_XZ, I_YY, I_YZ, I_ZZ;
 
-      /** Utility method to get all the basis options, for use in loops. */
+      /**
+       * Utility method to get all the basis options, for use in loops.
+       */
       public static final SpatialInertiaBasisOption[] values = values();
 
       /**

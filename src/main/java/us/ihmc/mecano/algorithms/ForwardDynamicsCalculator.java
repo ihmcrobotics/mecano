@@ -1,13 +1,5 @@
 package us.ihmc.mecano.algorithms;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.LinkedHashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.function.Function;
-
 import org.ejml.MatrixDimensionException;
 import org.ejml.data.DMatrix;
 import org.ejml.data.DMatrix1Row;
@@ -17,7 +9,6 @@ import org.ejml.dense.row.CommonOps_DDRM;
 import org.ejml.dense.row.factory.LinearSolverFactory_DDRM;
 import org.ejml.dense.row.misc.UnrolledInverseFromMinor_DDRM;
 import org.ejml.interfaces.linsol.LinearSolverDense;
-
 import us.ihmc.euclid.matrix.Matrix3D;
 import us.ihmc.euclid.referenceFrame.exceptions.ReferenceFrameMismatchException;
 import us.ihmc.euclid.referenceFrame.interfaces.FrameTuple3DReadOnly;
@@ -25,21 +16,16 @@ import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.interfaces.Tuple3DReadOnly;
 import us.ihmc.mecano.algorithms.interfaces.RigidBodyAccelerationProvider;
 import us.ihmc.mecano.frames.MovingReferenceFrame;
-import us.ihmc.mecano.multiBodySystem.interfaces.JointBasics;
-import us.ihmc.mecano.multiBodySystem.interfaces.JointMatrixIndexProvider;
-import us.ihmc.mecano.multiBodySystem.interfaces.JointReadOnly;
-import us.ihmc.mecano.multiBodySystem.interfaces.MultiBodySystemReadOnly;
-import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyReadOnly;
+import us.ihmc.mecano.multiBodySystem.interfaces.*;
 import us.ihmc.mecano.spatial.SpatialAcceleration;
 import us.ihmc.mecano.spatial.SpatialForce;
 import us.ihmc.mecano.spatial.SpatialInertia;
 import us.ihmc.mecano.spatial.Wrench;
-import us.ihmc.mecano.spatial.interfaces.FixedFrameWrenchBasics;
-import us.ihmc.mecano.spatial.interfaces.SpatialAccelerationReadOnly;
-import us.ihmc.mecano.spatial.interfaces.SpatialVectorReadOnly;
-import us.ihmc.mecano.spatial.interfaces.TwistReadOnly;
-import us.ihmc.mecano.spatial.interfaces.WrenchReadOnly;
+import us.ihmc.mecano.spatial.interfaces.*;
 import us.ihmc.mecano.tools.MultiBodySystemTools;
+
+import java.util.*;
+import java.util.function.Function;
 
 /**
  * Computed joint accelerations based on joint efforts.
@@ -70,14 +56,22 @@ public class ForwardDynamicsCalculator
       ACCELERATION_SOURCE;
    }
 
-   /** Defines the multi-body system to use with this calculator. */
+   /**
+    * Defines the multi-body system to use with this calculator.
+    */
    private final MultiBodySystemReadOnly input;
 
-   /** The root of the internal recursive algorithm. */
+   /**
+    * The root of the internal recursive algorithm.
+    */
    private final ArticulatedBodyRecursionStep initialRecursionStep;
-   /** Map to quickly retrieve information for each rigid-body. */
+   /**
+    * Map to quickly retrieve information for each rigid-body.
+    */
    private final Map<RigidBodyReadOnly, ArticulatedBodyRecursionStep> rigidBodyToRecursionStepMap = new LinkedHashMap<>();
-   /** For iterating over each rigid-body quickly. */
+   /**
+    * For iterating over each rigid-body quickly.
+    */
    private final ArticulatedBodyRecursionStep[] articulatedBodyRecursionSteps;
 
    private boolean isJointTauOutputDirty = true;
@@ -211,22 +205,7 @@ public class ForwardDynamicsCalculator
 
    private void buildMultiBodyTree(ArticulatedBodyRecursionStep parent, Collection<? extends JointReadOnly> jointsToIgnore)
    {
-      List<JointReadOnly> childrenJoints = new ArrayList<>(parent.rigidBody.getChildrenJoints());
-
-      if (childrenJoints.size() > 1)
-      { // Reorganize the joints in the children to ensure that loop closures are treated last.
-         List<JointReadOnly> loopClosureAncestors = new ArrayList<>();
-
-         for (int i = 0; i < childrenJoints.size();)
-         {
-            if (MultiBodySystemTools.doesSubtreeContainLoopClosure(childrenJoints.get(i).getSuccessor()))
-               loopClosureAncestors.add(childrenJoints.remove(i));
-            else
-               i++;
-         }
-
-         childrenJoints.addAll(loopClosureAncestors);
-      }
+      List<JointReadOnly> childrenJoints = MultiBodySystemTools.sortLoopClosureInChildrenJoints(parent.rigidBody);
 
       for (JointReadOnly childJoint : childrenJoints)
       {
@@ -260,10 +239,19 @@ public class ForwardDynamicsCalculator
     * @param gravity the gravitational linear acceleration, it is usually equal to
     *                {@code (0, 0, -9.81)}.
     */
-   public void setGravitionalAcceleration(FrameTuple3DReadOnly gravity)
+   public void setGravitationalAcceleration(FrameTuple3DReadOnly gravity)
    {
       gravity.checkReferenceFrameMatch(input.getInertialFrame());
-      setGravitionalAcceleration((Tuple3DReadOnly) gravity);
+      setGravitationalAcceleration((Tuple3DReadOnly) gravity);
+   }
+
+   /**
+    * @deprecated Use {@link #setGravitationalAcceleration(FrameTuple3DReadOnly)} instead.
+    */
+   @Deprecated
+   public void setGravitionalAcceleration(FrameTuple3DReadOnly gravity)
+   {
+      setGravitationalAcceleration(gravity);
    }
 
    /**
@@ -276,11 +264,20 @@ public class ForwardDynamicsCalculator
     * @param gravity the gravitational linear acceleration, it is usually equal to
     *                {@code (0, 0, -9.81)}.
     */
-   public void setGravitionalAcceleration(Tuple3DReadOnly gravity)
+   public void setGravitationalAcceleration(Tuple3DReadOnly gravity)
    {
       SpatialAcceleration rootAcceleration = initialRecursionStep.rigidBodyAcceleration;
       rootAcceleration.setToZero();
       rootAcceleration.getLinearPart().setAndNegate(gravity);
+   }
+
+   /**
+    * @deprecated Use {@link #setGravitationalAcceleration(Tuple3DReadOnly)} instead.
+    */
+   @Deprecated
+   public void setGravitionalAcceleration(Tuple3DReadOnly gravity)
+   {
+      setGravitationalAcceleration(gravity);
    }
 
    /**
@@ -293,9 +290,18 @@ public class ForwardDynamicsCalculator
     * @param gravity the gravitational linear acceleration along the z-axis, it is usually equal to
     *                {@code -9.81}.
     */
+   public void setGravitationalAcceleration(double gravity)
+   {
+      setGravitationalAcceleration(0.0, 0.0, gravity);
+   }
+
+   /**
+    * @deprecated Use {@link #setGravitationalAcceleration(double)} instead.
+    */
+   @Deprecated
    public void setGravitionalAcceleration(double gravity)
    {
-      setGravitionalAcceleration(0.0, 0.0, gravity);
+      setGravitationalAcceleration(gravity);
    }
 
    /**
@@ -312,12 +318,21 @@ public class ForwardDynamicsCalculator
     * @param gravityZ the gravitational linear acceleration along the z-axis, it is usually equal to
     *                 {@code -9.81}.
     */
-   public void setGravitionalAcceleration(double gravityX, double gravityY, double gravityZ)
+   public void setGravitationalAcceleration(double gravityX, double gravityY, double gravityZ)
    {
       SpatialAcceleration rootAcceleration = initialRecursionStep.rigidBodyAcceleration;
       rootAcceleration.setToZero();
       rootAcceleration.getLinearPart().set(gravityX, gravityY, gravityZ);
       rootAcceleration.negate();
+   }
+
+   /**
+    * @deprecated Use {@link #setGravitationalAcceleration(double, double, double)} instead.
+    */
+   @Deprecated
+   public void setGravitionalAcceleration(double gravityX, double gravityY, double gravityZ)
+   {
+      setGravitationalAcceleration(gravityX, gravityY, gravityZ);
    }
 
    /**
@@ -327,8 +342,8 @@ public class ForwardDynamicsCalculator
     *
     * @param newRootAcceleration the new spatial acceleration of the root.
     * @throws ReferenceFrameMismatchException if any of the reference frames of
-    *                                         {@code newRootAcceleration} does not match this
-    *                                         calculator's root spatial acceleration's frames.
+    *       {@code newRootAcceleration} does not match this
+    *       calculator's root spatial acceleration's frames.
     */
    public void setRootAcceleration(SpatialAccelerationReadOnly newRootAcceleration)
    {
@@ -385,7 +400,7 @@ public class ForwardDynamicsCalculator
     * is computed in this calculator and depend on the joint's acceleration. Note that in that mode,
     * any provided effort input for that joint is ignored.
     * </ul>
-    * 
+    *
     * @param joint the joint set the source mode of. Not modified.
     * @param mode  the desired mode for the joint. Default value is
     *              {@link JointSourceMode#ACCELERATION_SOURCE}.
@@ -407,7 +422,7 @@ public class ForwardDynamicsCalculator
     * calling compute. The joint effort is computed in this calculator and depend on the joint's
     * acceleration. Note that in that mode, any provided effort input for that joint is ignored.
     * </ul>
-    * 
+    *
     * @param jointSourceModeFunction the function used to determine a joint source mode. The function
     *                                can return {@code null} for joints which source mode should not be
     *                                changed.
@@ -449,7 +464,7 @@ public class ForwardDynamicsCalculator
     * calling compute. The joint effort is computed in this calculator and depend on the joint's
     * acceleration. Note that in that mode, any provided effort input for that joint is ignored.
     * </ul>
-    * 
+    *
     * @param joint the joint to get the current source mode of.
     * @return the current joint source mode.
     */
@@ -567,7 +582,7 @@ public class ForwardDynamicsCalculator
     * <li>if the joint source mode is {@link JointSourceMode#ACCELERATION_SOURCE}, the effort is
     * computed by this calculator.
     * </ul>
-    * 
+    *
     * @return the joint efforts.
     */
    public DMatrixRMaj getJointTauMatrix()
@@ -620,6 +635,26 @@ public class ForwardDynamicsCalculator
          return null;
       else
          return recursionStep.qdd;
+   }
+
+   /**
+    * Gets the wrench exerted by the given {@code joint} on its predecessor.
+    * <p>
+    * This method returns the full 6-D joint wrench before projection onto the joint motion subspace. It can be used to examine the internal forces and torques
+    * exerted at the joint.
+    * </p>
+    *
+    * @param joint the joint to get the wrench of. Not modified.
+    * @return the joint wrench.
+    */
+   public WrenchReadOnly getJointWrench(JointReadOnly joint)
+   {
+      ArticulatedBodyRecursionStep recursionStep = rigidBodyToRecursionStepMap.get(joint.getSuccessor());
+
+      if (recursionStep == null)
+         return null;
+      else
+         return recursionStep.getJointWrench();
    }
 
    /**
@@ -703,7 +738,9 @@ public class ForwardDynamicsCalculator
       return considerVelocities ? accelerationProvider : zeroVelocityAccelerationProvider;
    }
 
-   /** Intermediate result used for garbage free operations. */
+   /**
+    * Intermediate result used for garbage free operations.
+    */
    private final SpatialForce jointForceFromChild = new SpatialForce();
 
    /**
@@ -747,7 +784,7 @@ public class ForwardDynamicsCalculator
       final ArticulatedBodyInertia articulatedInertia;
       /**
        * Apparent bias wrench to this joint.
-       * 
+       *
        * <pre>
        * p<sup>A</sup> = p + &sum;<sub>&forall;child</sub> p<sup>a</sup>
        * </pre>
@@ -761,7 +798,7 @@ public class ForwardDynamicsCalculator
        *  <sup> </sup> = I<sup>A</sup> - U ( S<sup>T</sup> U )<sup>-1</sup> U<sup>T</sup>
        *  <sup> </sup> = I<sup>A</sup> - I<sup>A</sup> S ( S<sup>T</sup> I<sup>A</sup> S )<sup>-1</sup> S<sup>T</sup> I<sup>A</sup>
        * </pre>
-       *
+       * <p>
        * where <tt>I<sup>A</sup></tt> is this handle's articulated-body inertia, and <tt>S</tt> is the
        * parent joint motion subspace.
        */
@@ -790,7 +827,7 @@ public class ForwardDynamicsCalculator
        * <pre>
        * U = I<sup>A</sup> S
        * </pre>
-       *
+       * <p>
        * where <tt>I<sup>A</sup></tt> is this handle's articulated-body inertia, and <tt>S</tt> is the
        * parent joint motion subspace.
        */
@@ -802,7 +839,7 @@ public class ForwardDynamicsCalculator
        * D = S<sup>T</sup> U
        *   = S<sup>T</sup> I<sup>A</sup> S
        * </pre>
-       *
+       * <p>
        * where <tt>I<sup>A</sup></tt> is this handle's articulated-body inertia, and <tt>S</tt> is the
        * parent joint motion subspace.
        */
@@ -814,7 +851,7 @@ public class ForwardDynamicsCalculator
        * D<sup>-1</sup> = ( S<sup>T</sup> U )<sup>-1</sup>
        *  <sub>  </sub> = ( S<sup>T</sup> I<sup>A</sup> S )<sup>-1</sup>
        * </pre>
-       *
+       * <p>
        * where <tt>I<sup>A</sup></tt> is this handle's articulated-body inertia, and <tt>S</tt> is the
        * parent joint motion subspace.
        */
@@ -826,7 +863,7 @@ public class ForwardDynamicsCalculator
        * U D<sup>-1</sup> = U ( S<sup>T</sup> U )<sup>-1</sup>
        *    <sub>  </sub> = I<sup>A</sup> S ( S<sup>T</sup> I<sup>A</sup> S )<sup>-1</sup>
        * </pre>
-       *
+       * <p>
        * where <tt>I<sup>A</sup></tt> is this handle's articulated-body inertia, and <tt>S</tt> is the
        * parent joint motion subspace.
        */
@@ -838,7 +875,7 @@ public class ForwardDynamicsCalculator
        * U D<sup>-1</sup> U<sup>T</sup> = U ( S<sup>T</sup> U )<sup>-1</sup> U<sup>T</sup>
        *      <sub>   </sub> = I<sup>A</sup> S ( S<sup>T</sup> I<sup>A</sup> S )<sup>-1</sup> S<sup>T</sup> I<sup>A</sup>
        * </pre>
-       *
+       * <p>
        * where <tt>I<sup>A</sup></tt> is this handle's articulated-body inertia, and <tt>S</tt> is the
        * parent joint motion subspace.
        */
@@ -854,7 +891,7 @@ public class ForwardDynamicsCalculator
        * <pre>
        * u = &tau; - S<sup>T</sup> p<sup>A</sup>
        * </pre>
-       *
+       * <p>
        * where <tt>&tau;</tt> is the N-by-1 vector representing the joint effort, N being the number of
        * DoFs for this joint, <tt>S</tt> is the joint motion subspace, and <tt>p<sup>A</sup></tt> some
        * bias forces exerted on this joint.
@@ -866,7 +903,7 @@ public class ForwardDynamicsCalculator
        * <pre>
        * c = v &times; ( S qDot )
        * </pre>
-       *
+       * <p>
        * where <tt>v</tt> is the twist of this body, <tt>S</tt> the joint motion subspace, and
        * <tt>qDot</tt> the N-by-1 vector for this joint velocity, with N being the number of DoFs for this
        * joint.
@@ -879,7 +916,7 @@ public class ForwardDynamicsCalculator
        * p<sup>a</sup> = p<sup>A</sup> + I<sup>a</sup> c + U D<sup>-1</sup> u
        *  <sup> </sup> = p<sup>A</sup> + I<sup>a</sup> c + I<sup>A</sup> S ( S<sup>T</sup> I<sup>A</sup> S )<sup>-1</sup> ( &tau; - S<sup>T</sup> p<sup>A</sup> )
        * </pre>
-       *
+       * <p>
        * where <tt>p<sup>A</sup></tt> are the bias forces acting on this joint, <tt>I<sup>a</sup></tt> is
        * the apparent articulated-body inertia for the parent, <tt>S</tt> is the joint motion subspace,
        * <tt>I<sup>A</sup></tt> this handle's articulated-body inertia, <tt>&tau;</tt> this joint effort,
@@ -940,6 +977,7 @@ public class ForwardDynamicsCalculator
        */
       private final Wrench jointWrench;
       private final DMatrixRMaj jointWrenchMatrix;
+      private boolean isJointWrenchDirty = true;
 
       private ArticulatedBodyRecursionStep(RigidBodyReadOnly rigidBody, ArticulatedBodyRecursionStep parent, int[] jointIndices)
       {
@@ -1024,9 +1062,9 @@ public class ForwardDynamicsCalculator
             {
                if (input.getJointsToIgnore().contains(childJoint))
                {
-                  SpatialInertia subtreeIneria = MultiBodySystemTools.computeSubtreeInertia(childJoint);
-                  subtreeIneria.changeFrame(getBodyFixedFrame());
-                  bodyInertia.add(subtreeIneria);
+                  SpatialInertia subtreeInertia = MultiBodySystemTools.computeSubtreeInertia(childJoint);
+                  subtreeInertia.changeFrame(getBodyFixedFrame());
+                  bodyInertia.add(subtreeInertia);
                }
             }
          }
@@ -1038,7 +1076,7 @@ public class ForwardDynamicsCalculator
       /**
        * The first pass consists in calculating the bias wrench resulting from external and Coriolis
        * forces, and the bias acceleration resulting from the Coriolis acceleration.
-       * 
+       *
        * @return {@code true} if there is at least one joint that is locked.
        */
       public boolean passOne()
@@ -1068,6 +1106,7 @@ public class ForwardDynamicsCalculator
             biasAcceleration.get(c);
          }
 
+         isJointWrenchDirty = true;
          boolean atLeastOneAccelSourceJoint = sourceMode == JointSourceMode.ACCELERATION_SOURCE;
 
          for (int childIndex = 0; childIndex < children.size(); childIndex++)
@@ -1200,7 +1239,7 @@ public class ForwardDynamicsCalculator
       }
 
       /**
-       * The third and last pass calculates the joint acceleration and body spatial acceleration.
+       * The third and last pass calculate the joint acceleration and body spatial acceleration.
        */
       public void passThree(DMatrix jointAccelerationInput)
       {
@@ -1226,7 +1265,6 @@ public class ForwardDynamicsCalculator
                multTransA(-1.0, U, rigidBodyAcceleration, qdd_intermediate);
                CommonOps_DDRM.addEquals(qdd_intermediate, u);
                CommonOps_DDRM.mult(Dinv, qdd_intermediate, qdd);
-
             }
             else
             {
@@ -1267,27 +1305,47 @@ public class ForwardDynamicsCalculator
          if (isRoot())
             return;
 
-         MovingReferenceFrame frameAfterJoint = getFrameAfterJoint();
-
-         rigidBodyAcceleration.changeFrame(getBodyFixedFrame());
-         bodyInertia.computeDynamicWrench(rigidBodyAcceleration, null, jointWrench);
-         jointWrench.sub(externalWrench);
-         jointWrench.changeFrame(frameAfterJoint);
-         jointWrench.add(biasWrench);
-
-         for (int childIndex = 0; childIndex < children.size(); childIndex++)
-            addJointWrenchFromChild(children.get(childIndex));
-
          if (sourceMode == JointSourceMode.ACCELERATION_SOURCE)
          {
-            jointWrench.get(jointWrenchMatrix);
+            getJointWrench().get(jointWrenchMatrix);
             CommonOps_DDRM.multTransA(S, jointWrenchMatrix, tau);
          }
       }
 
+      private WrenchReadOnly getJointWrench()
+      {
+         if (isJointWrenchDirty)
+         {
+            if (!isRoot())
+            {
+               MovingReferenceFrame frameAfterJoint = getFrameAfterJoint();
+
+               rigidBodyAcceleration.changeFrame(getBodyFixedFrame());
+               if (bodyInertia.isCenterOfMassOffsetZero())
+               { // The interaction with the velocity can be decoupled from the acceleration, we just need to add the already computed bias wrench.
+                  bodyInertia.computeDynamicWrench(rigidBodyAcceleration, null, jointWrench);
+                  jointWrench.changeFrame(frameAfterJoint);
+                  jointWrench.add(biasWrench);
+               }
+               else
+               { // The interaction with the velocity needs to be accounted for directly in the dynamic wrench.
+                  bodyInertia.computeDynamicWrench(rigidBodyAcceleration, getBodyTwist(), jointWrench);
+                  jointWrench.sub(externalWrench);
+                  jointWrench.changeFrame(frameAfterJoint);
+               }
+
+               for (int childIndex = 0; childIndex < children.size(); childIndex++)
+                  addJointWrenchFromChild(children.get(childIndex));
+            }
+
+            isJointWrenchDirty = false;
+         }
+         return jointWrench;
+      }
+
       private void addJointWrenchFromChild(ArticulatedBodyRecursionStep child)
       {
-         jointForceFromChild.setIncludingFrame(child.jointWrench);
+         jointForceFromChild.setIncludingFrame(child.getJointWrench());
          jointForceFromChild.changeFrame(getFrameAfterJoint());
          jointWrench.add(jointForceFromChild);
       }
