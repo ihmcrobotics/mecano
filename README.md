@@ -1,6 +1,7 @@
 # ![Mecano](logo/Mecano.png)
-[ ![mecano](https://maven-badges.herokuapp.com/maven-central/us.ihmc/mecano/badge.svg?style=plastic)](https://maven-badges.herokuapp.com/maven-central/us.ihmc/mecano)
-[ ![buildstatus](https://bamboo.ihmc.us/plugins/servlet/wittified/build-status/LIBS-MECANO)](https://bamboo.ihmc.us/plugins/servlet/wittified/build-status/LIBS-MECANO)
+![mecano](https://maven-badges.herokuapp.com/maven-central/us.ihmc/mecano/badge.svg?style=plastic)
+![buildstatus](https://github.com/ihmcrobotics/mecano/actions/workflows/gradle.yml/badge.svg)
+
 
 ## Minutiae
 

@@ -18,7 +18,6 @@ import us.ihmc.euclid.tools.EuclidCoreTools;
 import us.ihmc.euclid.tools.Matrix3DTools;
 import us.ihmc.euclid.tools.TupleTools;
 import us.ihmc.euclid.transform.RigidBodyTransform;
-import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
 import us.ihmc.euclid.tuple3D.interfaces.Tuple3DReadOnly;
 import us.ihmc.euclid.tuple3D.interfaces.Vector3DBasics;
 import us.ihmc.euclid.tuple3D.interfaces.Vector3DReadOnly;
@@ -327,21 +326,8 @@ public class MecanoTools
     */
    public static Matrix3D toTildeForm(double scale, Tuple3DReadOnly tuple)
    {
-      double x = tuple.getX();
-      double y = tuple.getY();
-      double z = tuple.getZ();
-
       Matrix3D matrix = new Matrix3D();
-
-      matrix.setM01(-z);
-      matrix.setM02(y);
-      matrix.setM12(-x);
-
-      matrix.setM10(z);
-      matrix.setM20(-y);
-      matrix.setM21(x);
-
-      matrix.scale(scale);
+      toTildeForm(scale, tuple, matrix);
       return matrix;
    }
 
