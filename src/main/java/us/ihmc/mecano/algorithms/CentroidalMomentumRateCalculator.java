@@ -36,7 +36,7 @@ import java.util.stream.Collectors;
  * -- h = A * qDDot + | -- A | * qDot = A * qDDot + b
  * dt                 \ dt   /
  * </pre>
- * <p>
+ *
  * where <tt>h</tt> is the system's momentum, <tt>qDot</tt> and <tt>qDDot</tt> are the joint
  * velocity and acceleration vectors, <tt>A</tt> is the centroidal momentum matrix, and <tt>b</tt>
  * represents the convective term that this calculator also compute and that can be obtained via
@@ -51,17 +51,11 @@ import java.util.stream.Collectors;
  */
 public class CentroidalMomentumRateCalculator implements ReferenceFrameHolder
 {
-   /**
-    * Defines the multi-body system to use with this calculator.
-    */
+   /** Defines the multi-body system to use with this calculator. */
    private final MultiBodySystemReadOnly input;
-   /**
-    * The center of mass centroidal momentum matrix.
-    */
+   /** The center of mass centroidal momentum matrix. */
    private final ReferenceFrame matrixFrame;
-   /**
-    * The root of the internal recursive algorithm.
-    */
+   /** The root of the internal recursive algorithm. */
    private final RecursionStep initialRecursionStep;
    /**
     * Only the first pass of this algorithm has to be recursive, the rest can be iterative which can
@@ -69,68 +63,42 @@ public class CentroidalMomentumRateCalculator implements ReferenceFrameHolder
     */
    private final RecursionStep[] recursionSteps;
    private final Map<RigidBodyReadOnly, RecursionStep> rigidBodyToRecursionStepMap;
-   /**
-    * Intermediate variable to store the unit-twist of the parent joint.
-    */
+   /** Intermediate variable to store the unit-twist of the parent joint. */
    private final Twist jointUnitTwist;
-   /**
-    * Intermediate variable for garbage free operations.
-    */
+   /** Intermediate variable for garbage free operations. */
    private final Twist intermediateTwist;
-   /**
-    * Intermediate variable to store one column of the centroidal momentum matrix.
-    */
+   /** Intermediate variable to store one column of the centroidal momentum matrix. */
    private final Momentum unitMomentum;
-   /**
-    * Intermediate variable for garbage free operations.
-    */
+   /** Intermediate variable for garbage free operations. */
    private final Momentum intermediateMomentum;
 
-   /**
-    * The centroidal momentum matrix.
-    */
+   /** The centroidal momentum matrix. */
    private final DMatrixRMaj centroidalMomentumMatrix;
    /**
     * The convective term resulting from the Coriolis and centrifugal forces acting on the system.
     */
    private final SpatialForce biasSpatialForce;
-   /**
-    * The total momentum of the system.
-    */
+   /** The total momentum of the system. */
    private final FixedFrameMomentumBasics momentum;
-   /**
-    * The total rate of change of momentum of the system.
-    */
+   /** The total rate of change of momentum of the system. */
    private final FixedFrameSpatialForceBasics momentumRate;
-   /**
-    * The center of mass velocity.
-    */
+   /** The center of mass velocity. */
    private final FixedFrameVector3DBasics centerOfMassVelocity;
-   /**
-    * The center of mass acceleration.
-    */
+   /** The center of mass acceleration. */
    private final FixedFrameVector3DBasics centerOfMassAcceleration;
 
    /**
     * The convective term resulting from the Coriolis and centrifugal forces acting on the system.
     */
    private final DMatrixRMaj biasSpatialForceMatrix = new DMatrixRMaj(6, 1);
-   /**
-    * Matrix containing the velocities of the joints to consider.
-    */
+   /** Matrix containing the velocities of the joints to consider. */
    private final DMatrixRMaj jointVelocityMatrix;
-   /**
-    * Matrix containing the accelerations of the joints to consider.
-    */
+   /** Matrix containing the accelerations of the joints to consider. */
    private final DMatrixRMaj jointAccelerationMatrix;
-   /**
-    * The total momentum of the system.
-    */
+   /** The total momentum of the system. */
    private final DMatrixRMaj momentumMatrix = new DMatrixRMaj(6, 1);
 
-   /**
-    * The total system mass.
-    */
+   /** The total system mass. */
    private double totalMass = 0.0;
 
    /**
@@ -145,17 +113,13 @@ public class CentroidalMomentumRateCalculator implements ReferenceFrameHolder
     * Whether the joint acceleration matrix has been updated since the last call to {@link #reset()}.
     */
    private boolean isJointAccelerationMatrixUpToDate = false;
-   /**
-    * Whether the momentum has been updated since the last call to {@link #reset()}.
-    */
+   /** Whether the momentum has been updated since the last call to {@link #reset()}. */
    private boolean isMomentumUpToDate = false;
    /**
     * Whether the rate of change of momentum has been updated since the last call to {@link #reset()}.
     */
    private boolean isMomentumRateUpToDate = false;
-   /**
-    * Whether the total mass has been updated since the last call to {@link #reset()}.
-    */
+   /** Whether the total mass has been updated since the last call to {@link #reset()}. */
    private boolean isTotalMassUpToDate = false;
    /**
     * Whether the center of mass velocity has been updated since the last call to {@link #reset()}.
@@ -591,8 +555,8 @@ public class CentroidalMomentumRateCalculator implements ReferenceFrameHolder
    /**
     * Computes the convective term while considering only a subset of the multi-body system.
     *
-    * @param jointSelection         the only joints that are considered.
-    * @param biasSpatialForceToPack the matrix used to store the result. Modified.
+    * @param jointSelection               the only joints that are considered.
+    * @param biasSpatialForceMatrixToPack the matrix used to store the result. Modified.
     * @return {@code true} if the convective term was successfully computed, {@code false} if not all
     *       the joints could be found and the result is inaccurate.
     */
@@ -636,9 +600,7 @@ public class CentroidalMomentumRateCalculator implements ReferenceFrameHolder
     */
    private class RecursionStep
    {
-      /**
-       * The rigid-body for which this recursion is.
-       */
+      /** The rigid-body for which this recursion is. */
       private final RigidBodyReadOnly rigidBody;
       /**
        * Body inertia: usually equal to {@code rigidBody.getInertial()}. However, if at least one child of
@@ -655,9 +617,7 @@ public class CentroidalMomentumRateCalculator implements ReferenceFrameHolder
        * joint.
        */
       private final DMatrixRMaj centroidalMomentumMatrixBlock;
-      /**
-       * The Coriolis and centrifugal accelerations for this rigid-body.
-       */
+      /** The Coriolis and centrifugal accelerations for this rigid-body. */
       private final SpatialAcceleration coriolisBodyAcceleration;
       /**
        * Intermediate variable to prevent repetitive calculation of a transform between this rigid-body's
@@ -785,7 +745,7 @@ public class CentroidalMomentumRateCalculator implements ReferenceFrameHolder
        * <pre>
        * h = (&sum;<sub>i=0:n</sub> I<sub>i</sub>) * T &equiv; &sum;<sub>i=0:n</sub> (I<sub>i</sub> * T)
        * </pre>
-       * <p>
+       *
        * where <tt>h</tt> is the resulting unit-momentum, <tt>I<sub>i</sub></tt> is the spatial inertia of
        * the i<sup>th</sup> body, and <tt>T</tt> is the unit-twist.
        *

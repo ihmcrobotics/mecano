@@ -47,7 +47,7 @@ import java.util.List;
  * <pre>
  * &tau; = H(q) qDDot + C(q, qDot) qDot + G(q) + &sum;<sub>i</sub> J<sub>i</sub> W<sub>i, ext</sub>
  * </pre>
- * <p>
+ *
  * where <tt>&tau;</tt>, <tt>q</tt>, <tt>qDot</tt>, and <tt>qDDot</tt> are the joint effort,
  * configuration, velocity, and acceleration vectors, <tt>H</tt> is the joint-space inertia matrix
  * or also called here mass matrix, <tt>C</tt> is the Coriolis and centrifugal matrix, <tt>G</tt>
@@ -70,7 +70,7 @@ import java.util.List;
  * -- = A * qDDot + -- * qDot = A * qDDot + b
  * dt               dt
  * </pre>
- * <p>
+ *
  * where <tt>h</tt> is the system's momentum and <tt>A</tt> is the centroidal momentum matrix, the
  * term introduce <tt>b</tt> represents the convective term.
  * </p>
@@ -85,37 +85,25 @@ import java.util.List;
  */
 public class CompositeRigidBodyMassMatrixCalculator
 {
-   /**
-    * Defines the multi-body system to use with this calculator.
-    */
+   /** Defines the multi-body system to use with this calculator. */
    private final MultiBodySystemReadOnly input;
 
-   /**
-    * The root of the internal recursive algorithm.
-    */
+   /** The root of the internal recursive algorithm. */
    private final CompositeRigidBodyInertia rootCompositeInertia;
    /**
     * Array of all the recursion steps but the root. This allows to efficiently iterate through when
     * computing the centroidal momentum matrix.
     */
    private final CompositeRigidBodyInertia[] compositeInertias;
-   /**
-    * The mass matrix of the system.
-    */
+   /** The mass matrix of the system. */
    private final DMatrixRMaj massMatrix;
    private final DMatrixRMaj coriolisMatrix;
-   /**
-    * Intermediate variable to store the child inertia.
-    */
+   /** Intermediate variable to store the child inertia. */
    private final SpatialInertia childInertia = new SpatialInertia();
-   /**
-    * Intermediate variable to store the child factorized inertia.
-    */
+   /** Intermediate variable to store the child factorized inertia. */
    private final FactorizedBodyInertia childFactorizedInertia = new FactorizedBodyInertia();
 
-   /**
-    * Intermediate variable for garbage free operations.
-    */
+   /** Intermediate variable for garbage free operations. */
    private final Twist intermediateTwist = new Twist();
    /**
     * Intermediate variable to store the wrench resulting from Coriolis and centrifugal accelerations.
@@ -134,9 +122,7 @@ public class CompositeRigidBodyMassMatrixCalculator
     */
    private final DMatrixRMaj centroidalConvectiveTermMatrix = new DMatrixRMaj(6, 1);
 
-   /**
-    * Frame in which the centroidal momentum matrix and its convective term are to be calculated.
-    */
+   /** Frame in which the centroidal momentum matrix and its convective term are to be calculated. */
    private ReferenceFrame centroidalMomentumFrame;
    /**
     * The centroidal momentum matrix represents the map from joint velocity space to momentum space.
@@ -483,13 +469,9 @@ public class CompositeRigidBodyMassMatrixCalculator
        */
       private final int[] jointIndices;
 
-      /**
-       * Spatial inertia representing the subtree starting off this rigid-body.
-       */
+      /** Spatial inertia representing the subtree starting off this rigid-body. */
       private final SpatialInertia compositeInertia;
-      /**
-       * Spatial factorized inertia representing the subtree starting off this rigid-body.
-       */
+      /** Spatial factorized inertia representing the subtree starting off this rigid-body. */
       private final FactorizedBodyInertia compositeFactorizedInertia;
 
       /**
@@ -498,18 +480,12 @@ public class CompositeRigidBodyMassMatrixCalculator
        */
       private final Momentum[] F1, F2, F3;
       private final DMatrixRMaj motionSubspaceDot;
-      /**
-       * This parent joint unit-twists.
-       */
+      /** This parent joint unit-twists. */
       private final Twist[] unitTwists;
-      /**
-       * The time-derivative of this parent joint unit-twists.
-       */
+      /** The time-derivative of this parent joint unit-twists. */
       private final SpatialAcceleration[] unitTwistDots;
 
-      /**
-       * The Coriolis and centrifugal accelerations for this rigid-body.
-       */
+      /** The Coriolis and centrifugal accelerations for this rigid-body. */
       private final SpatialAcceleration coriolisBodyAcceleration;
       /**
        * Transform from {@code this.getFrameAfterJoint()} to {@code parent.getFrameAfterJoint()} used to

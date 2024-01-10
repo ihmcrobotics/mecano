@@ -304,9 +304,7 @@ public class JointTorqueRegressorCalculator
    {
       M, MCOM_X, MCOM_Y, MCOM_Z, I_XX, I_XY, I_XZ, I_YY, I_YZ, I_ZZ;
 
-      /**
-       * Utility method to get all the basis options, for use in loops.
-       */
+      /** Utility method to get all the basis options, for use in loops. */
       public static final SpatialInertiaBasisOption[] values = values();
 
       /**

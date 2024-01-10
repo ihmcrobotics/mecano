@@ -40,39 +40,23 @@ public class InverseDynamicsCalculator
    private static final boolean DEFAULT_CONSIDER_ACCELERATIONS = true;
    private static final boolean DEFAULT_CONSIDER_CORIOLIS = true;
 
-   /**
-    * Defines the multi-body system to use with this calculator.
-    */
+   /** Defines the multi-body system to use with this calculator. */
    private final MultiBodySystemReadOnly input;
-   /**
-    * The root of the internal recursive algorithm.
-    */
+   /** The root of the internal recursive algorithm. */
    final RecursionStep initialRecursionStep;
-   /**
-    * Map to quickly retrieve information for each rigid-body.
-    */
+   /** Map to quickly retrieve information for each rigid-body. */
    final Map<RigidBodyReadOnly, RecursionStep> rigidBodyToRecursionStepMap = new LinkedHashMap<>();
-   /**
-    * Map to quickly retrieve information for each joint.
-    */
+   /** Map to quickly retrieve information for each joint. */
    private final Map<JointReadOnly, RecursionStepBasics> jointToRecursionStepMap = new LinkedHashMap<>();
 
-   /**
-    * The input of this algorithm: the acceleration matrix for all the joints to consider.
-    */
+   /** The input of this algorithm: the acceleration matrix for all the joints to consider. */
    private final DMatrixRMaj allJointAccelerationMatrix;
-   /**
-    * The output of this algorithm: the effort matrix for all the joints to consider.
-    */
+   /** The output of this algorithm: the effort matrix for all the joints to consider. */
    private final DMatrixRMaj allJointTauMatrix;
 
-   /**
-    * Whether the effort resulting from the joint accelerations should be considered.
-    */
+   /** Whether the effort resulting from the joint accelerations should be considered. */
    private boolean considerJointAccelerations = DEFAULT_CONSIDER_ACCELERATIONS;
-   /**
-    * Whether the effort resulting from the Coriolis and centrifugal forces should be considered.
-    */
+   /** Whether the effort resulting from the Coriolis and centrifugal forces should be considered. */
    private boolean considerCoriolisAndCentrifugalForces = DEFAULT_CONSIDER_CORIOLIS;
    /**
     * Extension of this algorithm into an acceleration provider that be used instead of a
@@ -97,10 +81,10 @@ public class InverseDynamicsCalculator
     * @deprecated Use the following code snippet instead:
     *
     *       <pre>
-    *                                                                                                                               InverseDynamicsCalculator calculator = new InverseDynamicsCalculator(rootBody);
-    *                                                                                                                               calculator.setConsiderCoriolisAndCentrifugalForces(considerCoriolisAndCentrifugalForces);
-    *                                                                                                                               calculator.setConsiderJointAccelerations(considerJointAccelerations);
-    *                                                                                                                               </pre>
+    *                                                                                                                                     InverseDynamicsCalculator calculator = new InverseDynamicsCalculator(rootBody);
+    *                                                                                                                                     calculator.setConsiderCoriolisAndCentrifugalForces(considerCoriolisAndCentrifugalForces);
+    *                                                                                                                                     calculator.setConsiderJointAccelerations(considerJointAccelerations);
+    *                                                                                                                                     </pre>
     */
    @Deprecated
    public InverseDynamicsCalculator(RigidBodyReadOnly rootBody, boolean considerCoriolisAndCentrifugalForces, boolean considerJointAccelerations)
@@ -127,10 +111,10 @@ public class InverseDynamicsCalculator
     * @deprecated Use the following code snippet instead:
     *
     *       <pre>
-    *                                                                                                                               InverseDynamicsCalculator calculator = new InverseDynamicsCalculator(input);
-    *                                                                                                                               calculator.setConsiderCoriolisAndCentrifugalForces(considerCoriolisAndCentrifugalForces);
-    *                                                                                                                               calculator.setConsiderJointAccelerations(considerJointAccelerations);
-    *                                                                                                                               </pre>
+    *                                                                                                                                     InverseDynamicsCalculator calculator = new InverseDynamicsCalculator(input);
+    *                                                                                                                                     calculator.setConsiderCoriolisAndCentrifugalForces(considerCoriolisAndCentrifugalForces);
+    *                                                                                                                                     calculator.setConsiderJointAccelerations(considerJointAccelerations);
+    *                                                                                                                                     </pre>
     */
    @Deprecated
    public InverseDynamicsCalculator(MultiBodySystemReadOnly input, boolean considerCoriolisAndCentrifugalForces, boolean considerJointAccelerations)
@@ -167,10 +151,10 @@ public class InverseDynamicsCalculator
     * @deprecated Use the following code snippet instead:
     *
     *       <pre>
-    *                                                                                                                               InverseDynamicsCalculator calculator = new InverseDynamicsCalculator(input, considerIgnoredSubtreesInertia);
-    *                                                                                                                               calculator.setConsiderCoriolisAndCentrifugalForces(considerCoriolisAndCentrifugalForces);
-    *                                                                                                                               calculator.setConsiderJointAccelerations(considerJointAccelerations);
-    *                                                                                                                               </pre>
+    *                                                                                                                                     InverseDynamicsCalculator calculator = new InverseDynamicsCalculator(input, considerIgnoredSubtreesInertia);
+    *                                                                                                                                     calculator.setConsiderCoriolisAndCentrifugalForces(considerCoriolisAndCentrifugalForces);
+    *                                                                                                                                     calculator.setConsiderJointAccelerations(considerJointAccelerations);
+    *                                                                                                                                     </pre>
     */
    @Deprecated
    public InverseDynamicsCalculator(MultiBodySystemReadOnly input,
@@ -712,9 +696,7 @@ public class InverseDynamicsCalculator
       }
    }
 
-   /**
-    * Intermediate result used for garbage free operations.
-    */
+   /** Intermediate result used for garbage free operations. */
    private final SpatialForce jointForceFromChild = new SpatialForce();
 
    /**

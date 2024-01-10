@@ -51,13 +51,9 @@ public class CenterOfMassJacobian implements ReferenceFrameHolder
     * expressed in the center of mass frame.
     */
    private final ReferenceFrame rootFrame;
-   /**
-    * Defines the multi-body system to use with this calculator.
-    */
+   /** Defines the multi-body system to use with this calculator. */
    private final MultiBodySystemReadOnly input;
-   /**
-    * The root of the internal recursive algorithm.
-    */
+   /** The root of the internal recursive algorithm. */
    private final RecursionStep initialRecursionStep;
    /**
     * Only the first pass of this algorithm has to be recursive, the two other passes can be iterative
@@ -65,36 +61,22 @@ public class CenterOfMassJacobian implements ReferenceFrameHolder
     */
    private final RecursionStep[] recursionSteps;
 
-   /**
-    * The center of mass Jacobian.
-    */
+   /** The center of mass Jacobian. */
    private final DMatrixRMaj jacobianMatrix;
-   /**
-    * Matrix containing the velocities of the joints to consider.
-    */
+   /** Matrix containing the velocities of the joints to consider. */
    private final DMatrixRMaj jointVelocityMatrix;
-   /**
-    * Intermediate variable for garbage free operations.
-    */
+   /** Intermediate variable for garbage free operations. */
    private final DMatrixRMaj centerOfMassVelocityMatrix = new DMatrixRMaj(3, 1);
 
-   /**
-    * Intermediate variable to store one column of the Jacobian matrix.
-    */
+   /** Intermediate variable to store one column of the Jacobian matrix. */
    private final FixedFrameVector3DBasics jacobianColumn;
-   /**
-    * Intermediate variable to store the unit-twist of the parent joint.
-    */
+   /** Intermediate variable to store the unit-twist of the parent joint. */
    private final Twist jointUnitTwist = new Twist();
 
-   /**
-    * The center of mass velocity.
-    */
+   /** The center of mass velocity. */
    private final FixedFrameVector3DBasics centerOfMassVelocity = MecanoFactories.newFixedFrameVector3DBasics(this);
 
-   /**
-    * Whether the Jacobian has been updated since the last call to {@link #reset()}.
-    */
+   /** Whether the Jacobian has been updated since the last call to {@link #reset()}. */
    private boolean isJacobianUpToDate = false;
    /**
     * Whether the center of mass velocity has been updated since the last call to {@link #reset()}.

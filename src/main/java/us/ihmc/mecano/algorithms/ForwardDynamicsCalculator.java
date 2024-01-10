@@ -56,22 +56,14 @@ public class ForwardDynamicsCalculator
       ACCELERATION_SOURCE;
    }
 
-   /**
-    * Defines the multi-body system to use with this calculator.
-    */
+   /** Defines the multi-body system to use with this calculator. */
    private final MultiBodySystemReadOnly input;
 
-   /**
-    * The root of the internal recursive algorithm.
-    */
+   /** The root of the internal recursive algorithm. */
    private final ArticulatedBodyRecursionStep initialRecursionStep;
-   /**
-    * Map to quickly retrieve information for each rigid-body.
-    */
+   /** Map to quickly retrieve information for each rigid-body. */
    private final Map<RigidBodyReadOnly, ArticulatedBodyRecursionStep> rigidBodyToRecursionStepMap = new LinkedHashMap<>();
-   /**
-    * For iterating over each rigid-body quickly.
-    */
+   /** For iterating over each rigid-body quickly. */
    private final ArticulatedBodyRecursionStep[] articulatedBodyRecursionSteps;
 
    private boolean isJointTauOutputDirty = true;
@@ -738,9 +730,7 @@ public class ForwardDynamicsCalculator
       return considerVelocities ? accelerationProvider : zeroVelocityAccelerationProvider;
    }
 
-   /**
-    * Intermediate result used for garbage free operations.
-    */
+   /** Intermediate result used for garbage free operations. */
    private final SpatialForce jointForceFromChild = new SpatialForce();
 
    /**
@@ -798,7 +788,7 @@ public class ForwardDynamicsCalculator
        *  <sup> </sup> = I<sup>A</sup> - U ( S<sup>T</sup> U )<sup>-1</sup> U<sup>T</sup>
        *  <sup> </sup> = I<sup>A</sup> - I<sup>A</sup> S ( S<sup>T</sup> I<sup>A</sup> S )<sup>-1</sup> S<sup>T</sup> I<sup>A</sup>
        * </pre>
-       * <p>
+       *
        * where <tt>I<sup>A</sup></tt> is this handle's articulated-body inertia, and <tt>S</tt> is the
        * parent joint motion subspace.
        */
@@ -827,7 +817,7 @@ public class ForwardDynamicsCalculator
        * <pre>
        * U = I<sup>A</sup> S
        * </pre>
-       * <p>
+       *
        * where <tt>I<sup>A</sup></tt> is this handle's articulated-body inertia, and <tt>S</tt> is the
        * parent joint motion subspace.
        */
@@ -839,7 +829,7 @@ public class ForwardDynamicsCalculator
        * D = S<sup>T</sup> U
        *   = S<sup>T</sup> I<sup>A</sup> S
        * </pre>
-       * <p>
+       *
        * where <tt>I<sup>A</sup></tt> is this handle's articulated-body inertia, and <tt>S</tt> is the
        * parent joint motion subspace.
        */
@@ -851,7 +841,7 @@ public class ForwardDynamicsCalculator
        * D<sup>-1</sup> = ( S<sup>T</sup> U )<sup>-1</sup>
        *  <sub>  </sub> = ( S<sup>T</sup> I<sup>A</sup> S )<sup>-1</sup>
        * </pre>
-       * <p>
+       *
        * where <tt>I<sup>A</sup></tt> is this handle's articulated-body inertia, and <tt>S</tt> is the
        * parent joint motion subspace.
        */
@@ -863,7 +853,7 @@ public class ForwardDynamicsCalculator
        * U D<sup>-1</sup> = U ( S<sup>T</sup> U )<sup>-1</sup>
        *    <sub>  </sub> = I<sup>A</sup> S ( S<sup>T</sup> I<sup>A</sup> S )<sup>-1</sup>
        * </pre>
-       * <p>
+       *
        * where <tt>I<sup>A</sup></tt> is this handle's articulated-body inertia, and <tt>S</tt> is the
        * parent joint motion subspace.
        */
@@ -875,7 +865,7 @@ public class ForwardDynamicsCalculator
        * U D<sup>-1</sup> U<sup>T</sup> = U ( S<sup>T</sup> U )<sup>-1</sup> U<sup>T</sup>
        *      <sub>   </sub> = I<sup>A</sup> S ( S<sup>T</sup> I<sup>A</sup> S )<sup>-1</sup> S<sup>T</sup> I<sup>A</sup>
        * </pre>
-       * <p>
+       *
        * where <tt>I<sup>A</sup></tt> is this handle's articulated-body inertia, and <tt>S</tt> is the
        * parent joint motion subspace.
        */
@@ -891,7 +881,7 @@ public class ForwardDynamicsCalculator
        * <pre>
        * u = &tau; - S<sup>T</sup> p<sup>A</sup>
        * </pre>
-       * <p>
+       *
        * where <tt>&tau;</tt> is the N-by-1 vector representing the joint effort, N being the number of
        * DoFs for this joint, <tt>S</tt> is the joint motion subspace, and <tt>p<sup>A</sup></tt> some
        * bias forces exerted on this joint.
@@ -903,7 +893,7 @@ public class ForwardDynamicsCalculator
        * <pre>
        * c = v &times; ( S qDot )
        * </pre>
-       * <p>
+       *
        * where <tt>v</tt> is the twist of this body, <tt>S</tt> the joint motion subspace, and
        * <tt>qDot</tt> the N-by-1 vector for this joint velocity, with N being the number of DoFs for this
        * joint.
@@ -916,7 +906,7 @@ public class ForwardDynamicsCalculator
        * p<sup>a</sup> = p<sup>A</sup> + I<sup>a</sup> c + U D<sup>-1</sup> u
        *  <sup> </sup> = p<sup>A</sup> + I<sup>a</sup> c + I<sup>A</sup> S ( S<sup>T</sup> I<sup>A</sup> S )<sup>-1</sup> ( &tau; - S<sup>T</sup> p<sup>A</sup> )
        * </pre>
-       * <p>
+       *
        * where <tt>p<sup>A</sup></tt> are the bias forces acting on this joint, <tt>I<sup>a</sup></tt> is
        * the apparent articulated-body inertia for the parent, <tt>S</tt> is the joint motion subspace,
        * <tt>I<sup>A</sup></tt> this handle's articulated-body inertia, <tt>&tau;</tt> this joint effort,

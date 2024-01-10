@@ -41,61 +41,35 @@ import java.util.List;
  */
 public class CentroidalMomentumCalculator implements ReferenceFrameHolder
 {
-   /**
-    * Defines the multi-body system to use with this calculator.
-    */
+   /** Defines the multi-body system to use with this calculator. */
    private final MultiBodySystemReadOnly input;
-   /**
-    * The center of mass centroidal momentum matrix.
-    */
+   /** The center of mass centroidal momentum matrix. */
    private final ReferenceFrame matrixFrame;
 
-   /**
-    * Array for each iteration of this algorithm.
-    */
+   /** Array for each iteration of this algorithm. */
    private final IterativeStep[] iterativeSteps;
 
-   /**
-    * Intermediate variable to store the unit-twist of the parent joint.
-    */
+   /** Intermediate variable to store the unit-twist of the parent joint. */
    private final Twist jointUnitTwist;
-   /**
-    * Intermediate variable for garbage free operations.
-    */
+   /** Intermediate variable for garbage free operations. */
    private final Twist intermediateUnitTwist;
-   /**
-    * Intermediate variable to store one column of the centroidal momentum matrix.
-    */
+   /** Intermediate variable to store one column of the centroidal momentum matrix. */
    private final Momentum unitMomentum;
-   /**
-    * Intermediate variable for garbage free operations.
-    */
+   /** Intermediate variable for garbage free operations. */
    private final Momentum intermediateMomentum;
-   /**
-    * The total momentum of the system.
-    */
+   /** The total momentum of the system. */
    private final FixedFrameMomentumBasics momentum;
-   /**
-    * The center of mass velocity.
-    */
+   /** The center of mass velocity. */
    private final FixedFrameVector3DBasics centerOfMassVelocity;
 
-   /**
-    * The centroidal momentum matrix.
-    */
+   /** The centroidal momentum matrix. */
    private final DMatrixRMaj centroidalMomentumMatrix;
-   /**
-    * Matrix containing the velocities of the joints to consider.
-    */
+   /** Matrix containing the velocities of the joints to consider. */
    private final DMatrixRMaj jointVelocityMatrix;
-   /**
-    * The total momentum of the system.
-    */
+   /** The total momentum of the system. */
    private final DMatrixRMaj momentumMatrix = new DMatrixRMaj(6, 1);
 
-   /**
-    * The total system mass.
-    */
+   /** The total system mass. */
    private double totalMass = 0.0;
 
    /**
@@ -106,13 +80,9 @@ public class CentroidalMomentumCalculator implements ReferenceFrameHolder
     * Whether the joint velocity matrix has been updated since the last call to {@link #reset()}.
     */
    private boolean isJointVelocityMatrixUpToDate = false;
-   /**
-    * Whether the momentum has been updated since the last call to {@link #reset()}.
-    */
+   /** Whether the momentum has been updated since the last call to {@link #reset()}. */
    private boolean isMomentumUpToDate = false;
-   /**
-    * Whether the total mass has been updated since the last call to {@link #reset()}.
-    */
+   /** Whether the total mass has been updated since the last call to {@link #reset()}. */
    private boolean isTotalMassUpToDate = false;
    /**
     * Whether the center of mass velocity has been updated since the last call to {@link #reset()}.
@@ -524,7 +494,7 @@ public class CentroidalMomentumCalculator implements ReferenceFrameHolder
        * <pre>
        * h = (&sum;<sub>i=0:n</sub> I<sub>i</sub>) * T &equiv; &sum;<sub>i=0:n</sub> (I<sub>i</sub> * T)
        * </pre>
-       * <p>
+       *
        * where <tt>h</tt> is the resulting unit-momentum, <tt>I<sub>i</sub></tt> is the spatial inertia of
        * the i<sup>th</sup> body, and <tt>T</tt> is the unit-twist.
        *
