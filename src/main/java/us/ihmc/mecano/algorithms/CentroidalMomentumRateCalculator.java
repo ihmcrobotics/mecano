@@ -1,17 +1,8 @@
 package us.ihmc.mecano.algorithms;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.List;
-import java.util.Map;
-import java.util.function.Function;
-import java.util.stream.Collectors;
-
 import org.ejml.data.DMatrix1Row;
 import org.ejml.data.DMatrixRMaj;
 import org.ejml.dense.row.CommonOps_DDRM;
-
 import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.referenceFrame.interfaces.FixedFrameVector3DBasics;
@@ -24,23 +15,15 @@ import us.ihmc.mecano.multiBodySystem.interfaces.JointMatrixIndexProvider;
 import us.ihmc.mecano.multiBodySystem.interfaces.JointReadOnly;
 import us.ihmc.mecano.multiBodySystem.interfaces.MultiBodySystemReadOnly;
 import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyReadOnly;
-import us.ihmc.mecano.spatial.Momentum;
-import us.ihmc.mecano.spatial.SpatialAcceleration;
-import us.ihmc.mecano.spatial.SpatialForce;
-import us.ihmc.mecano.spatial.SpatialInertia;
-import us.ihmc.mecano.spatial.Twist;
-import us.ihmc.mecano.spatial.Wrench;
-import us.ihmc.mecano.spatial.interfaces.FixedFrameMomentumBasics;
-import us.ihmc.mecano.spatial.interfaces.FixedFrameSpatialForceBasics;
-import us.ihmc.mecano.spatial.interfaces.MomentumBasics;
-import us.ihmc.mecano.spatial.interfaces.MomentumReadOnly;
-import us.ihmc.mecano.spatial.interfaces.SpatialForceBasics;
-import us.ihmc.mecano.spatial.interfaces.SpatialForceReadOnly;
-import us.ihmc.mecano.spatial.interfaces.SpatialInertiaReadOnly;
-import us.ihmc.mecano.spatial.interfaces.TwistReadOnly;
+import us.ihmc.mecano.spatial.*;
+import us.ihmc.mecano.spatial.interfaces.*;
 import us.ihmc.mecano.tools.JointStateType;
 import us.ihmc.mecano.tools.MecanoTools;
 import us.ihmc.mecano.tools.MultiBodySystemTools;
+
+import java.util.*;
+import java.util.function.Function;
+import java.util.stream.Collectors;
 
 /**
  * Computes the centroidal momentum matrix that maps from joint velocity space to the system linear
@@ -219,22 +202,7 @@ public class CentroidalMomentumRateCalculator implements ReferenceFrameHolder
       List<RecursionStep> recursionSteps = new ArrayList<>();
       recursionSteps.add(parent);
 
-      List<JointReadOnly> childrenJoints = new ArrayList<>(parent.rigidBody.getChildrenJoints());
-
-      if (childrenJoints.size() > 1)
-      { // Reorganize the joints in the children to ensure that loop closures are treated last.
-         List<JointReadOnly> loopClosureAncestors = new ArrayList<>();
-
-         for (int i = 0; i < childrenJoints.size();)
-         {
-            if (MultiBodySystemTools.doesSubtreeContainLoopClosure(childrenJoints.get(i).getSuccessor()))
-               loopClosureAncestors.add(childrenJoints.remove(i));
-            else
-               i++;
-         }
-
-         childrenJoints.addAll(loopClosureAncestors);
-      }
+      List<JointReadOnly> childrenJoints = MultiBodySystemTools.sortLoopClosureInChildrenJoints(parent.rigidBody);
 
       for (JointReadOnly childJoint : childrenJoints)
       {
@@ -544,11 +512,11 @@ public class CentroidalMomentumRateCalculator implements ReferenceFrameHolder
 
    /**
     * Computes the convective term while considering only a subset of the multi-body system.
-    * 
+    *
     * @param jointSelection         the only joints that are considered.
     * @param biasSpatialForceToPack the vector used to store the result. Modified.
     * @return {@code true} if the convective term was successfully computed, {@code false} if not all
-    *         the joints could be found and the result is inaccurate.
+    *       the joints could be found and the result is inaccurate.
     */
    public boolean getBiasSpatialForceMatrix(List<? extends JointReadOnly> jointSelection, SpatialForceBasics biasSpatialForceToPack)
    {
@@ -586,11 +554,11 @@ public class CentroidalMomentumRateCalculator implements ReferenceFrameHolder
 
    /**
     * Computes the convective term while considering only a subset of the multi-body system.
-    * 
-    * @param jointSelection         the only joints that are considered.
-    * @param biasSpatialForceToPack the matrix used to store the result. Modified.
+    *
+    * @param jointSelection               the only joints that are considered.
+    * @param biasSpatialForceMatrixToPack the matrix used to store the result. Modified.
     * @return {@code true} if the convective term was successfully computed, {@code false} if not all
-    *         the joints could be found and the result is inaccurate.
+    *       the joints could be found and the result is inaccurate.
     */
    public boolean getBiasSpatialForceMatrix(List<? extends JointReadOnly> jointSelection, DMatrixRMaj biasSpatialForceMatrixToPack)
    {
@@ -762,7 +730,6 @@ public class CentroidalMomentumRateCalculator implements ReferenceFrameHolder
             int column = jointIndices[dofIndex];
             CommonOps_DDRM.extract(centroidalMomentumMatrixBlock, 0, 6, dofIndex, dofIndex + 1, centroidalMomentumMatrix, 0, column);
          }
-
       }
 
       /**

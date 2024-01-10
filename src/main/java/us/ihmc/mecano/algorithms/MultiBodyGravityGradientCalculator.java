@@ -1,13 +1,6 @@
 package us.ihmc.mecano.algorithms;
 
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.LinkedHashMap;
-import java.util.List;
-import java.util.Map;
-
 import org.ejml.data.DMatrixRMaj;
-
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
@@ -19,15 +12,13 @@ import us.ihmc.mecano.frames.MovingReferenceFrame;
 import us.ihmc.mecano.multiBodySystem.interfaces.JointReadOnly;
 import us.ihmc.mecano.multiBodySystem.interfaces.MultiBodySystemReadOnly;
 import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyReadOnly;
-import us.ihmc.mecano.spatial.SpatialForce;
-import us.ihmc.mecano.spatial.SpatialInertia;
-import us.ihmc.mecano.spatial.SpatialVector;
-import us.ihmc.mecano.spatial.Twist;
-import us.ihmc.mecano.spatial.Wrench;
+import us.ihmc.mecano.spatial.*;
 import us.ihmc.mecano.spatial.interfaces.FixedFrameWrenchBasics;
 import us.ihmc.mecano.spatial.interfaces.TwistReadOnly;
 import us.ihmc.mecano.spatial.interfaces.WrenchReadOnly;
 import us.ihmc.mecano.tools.MultiBodySystemTools;
+
+import java.util.*;
 
 /**
  * This calculator can be used to evaluate the joint efforts due to gravity and external wrenches,
@@ -51,7 +42,7 @@ import us.ihmc.mecano.tools.MultiBodySystemTools;
  * joint configuration.
  * </ul>
  * </p>
- * 
+ *
  * @author Sylvain Bertrand
  */
 public class MultiBodyGravityGradientCalculator
@@ -87,7 +78,7 @@ public class MultiBodyGravityGradientCalculator
     * Do not forgot to set the gravitational acceleration so this calculator can properly account for
     * it.
     * </p>
-    * 
+    *
     * @param rootBody the supporting body of the subtree to be evaluated by this calculator. Not
     *                 modified.
     */
@@ -119,22 +110,7 @@ public class MultiBodyGravityGradientCalculator
       List<AlgorithmStep> algorithmSteps = new ArrayList<>();
       algorithmSteps.add(parent);
 
-      List<JointReadOnly> childrenJoints = new ArrayList<>(parent.rigidBody.getChildrenJoints());
-
-      if (childrenJoints.size() > 1)
-      { // Reorganize the joints in the children to ensure that loop closures are treated last.
-         List<JointReadOnly> loopClosureAncestors = new ArrayList<>();
-
-         for (int i = 0; i < childrenJoints.size();)
-         {
-            if (MultiBodySystemTools.doesSubtreeContainLoopClosure(childrenJoints.get(i).getSuccessor()))
-               loopClosureAncestors.add(childrenJoints.remove(i));
-            else
-               i++;
-         }
-
-         childrenJoints.addAll(loopClosureAncestors);
-      }
+      List<JointReadOnly> childrenJoints = MultiBodySystemTools.sortLoopClosureInChildrenJoints(parent.rigidBody);
 
       for (JointReadOnly childJoint : childrenJoints)
       {
@@ -303,7 +279,7 @@ public class MultiBodyGravityGradientCalculator
    /**
     * Gets the N-by-1 matrix containing the joint efforts due to gravity and external wrenches applied
     * to the multi-body system. (N is the number of degrees of freedom of the system).
-    * 
+    *
     * @return this calculator output: the joint efforts.
     */
    public DMatrixRMaj getTauMatrix()
@@ -328,7 +304,7 @@ public class MultiBodyGravityGradientCalculator
     * joint configuration.
     * </ul>
     * </p>
-    * 
+    *
     * @return the gradient of the joint efforts.
     */
    public DMatrixRMaj getTauGradientMatrix()
@@ -462,7 +438,8 @@ public class MultiBodyGravityGradientCalculator
          if (!isRoot())
          {
             hasExternalWrench = externalWrench.getLinearPartX() != 0.0 || externalWrench.getLinearPartY() != 0.0 || externalWrench.getLinearPartZ() != 0.0
-                  || externalWrench.getAngularPartX() != 0.0 || externalWrench.getAngularPartY() != 0.0 || externalWrench.getAngularPartZ() != 0.0;
+                                || externalWrench.getAngularPartX() != 0.0 || externalWrench.getAngularPartY() != 0.0
+                                || externalWrench.getAngularPartZ() != 0.0;
             hasSubTreeExternalWrench = hasExternalWrench;
             subTreeExternalSpatialForce.setIncludingFrame(externalWrench);
             subTreeExternalSpatialForce.changeFrame(getFrameAfterJoint());

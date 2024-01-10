@@ -1,22 +1,10 @@
 package us.ihmc.mecano.algorithms;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertTrue;
-
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Map.Entry;
-import java.util.Random;
-import java.util.stream.Collectors;
-
 import org.ejml.data.DMatrixRMaj;
 import org.ejml.dense.row.CommonOps_DDRM;
 import org.ejml.dense.row.MatrixFeatures_DDRM;
 import org.ejml.dense.row.RandomMatrices_DDRM;
 import org.junit.jupiter.api.Test;
-
 import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.referenceFrame.tools.EuclidFrameRandomTools;
@@ -31,14 +19,7 @@ import us.ihmc.mecano.multiBodySystem.Joint;
 import us.ihmc.mecano.multiBodySystem.OneDoFJoint;
 import us.ihmc.mecano.multiBodySystem.PrismaticJoint;
 import us.ihmc.mecano.multiBodySystem.RevoluteJoint;
-import us.ihmc.mecano.multiBodySystem.interfaces.JointBasics;
-import us.ihmc.mecano.multiBodySystem.interfaces.JointMatrixIndexProvider;
-import us.ihmc.mecano.multiBodySystem.interfaces.JointReadOnly;
-import us.ihmc.mecano.multiBodySystem.interfaces.MultiBodySystemReadOnly;
-import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointBasics;
-import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointReadOnly;
-import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
-import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyReadOnly;
+import us.ihmc.mecano.multiBodySystem.interfaces.*;
 import us.ihmc.mecano.spatial.SpatialAcceleration;
 import us.ihmc.mecano.spatial.SpatialImpulse;
 import us.ihmc.mecano.spatial.Twist;
@@ -47,12 +28,14 @@ import us.ihmc.mecano.spatial.interfaces.SpatialForceReadOnly;
 import us.ihmc.mecano.spatial.interfaces.SpatialVectorReadOnly;
 import us.ihmc.mecano.spatial.interfaces.TwistReadOnly;
 import us.ihmc.mecano.spatial.interfaces.WrenchReadOnly;
-import us.ihmc.mecano.tools.JointStateType;
-import us.ihmc.mecano.tools.MecanoRandomTools;
-import us.ihmc.mecano.tools.MecanoTestTools;
-import us.ihmc.mecano.tools.MultiBodySystemRandomTools;
+import us.ihmc.mecano.tools.*;
 import us.ihmc.mecano.tools.MultiBodySystemRandomTools.RandomFloatingRevoluteJointChain;
-import us.ihmc.mecano.tools.MultiBodySystemTools;
+
+import java.util.*;
+import java.util.Map.Entry;
+import java.util.stream.Collectors;
+
+import static org.junit.jupiter.api.Assertions.*;
 
 public class MultiBodyResponseCalculatorTest
 {
@@ -320,8 +303,11 @@ public class MultiBodyResponseCalculatorTest
       assertApplySingleRigidBodyWrench(random, iteration, joints, Collections.emptyMap(), Collections.emptyList(), epsilon);
    }
 
-   private static void assertApplySingleRigidBodyWrench(Random random, int iteration, List<? extends JointBasics> joints,
-                                                        Map<RigidBodyReadOnly, WrenchReadOnly> externalWrenches, List<? extends JointReadOnly> jointsToIgnore,
+   private static void assertApplySingleRigidBodyWrench(Random random,
+                                                        int iteration,
+                                                        List<? extends JointBasics> joints,
+                                                        Map<RigidBodyReadOnly, WrenchReadOnly> externalWrenches,
+                                                        List<? extends JointReadOnly> jointsToIgnore,
                                                         double epsilon)
    {
       for (JointStateType state : JointStateType.values())
@@ -362,8 +348,11 @@ public class MultiBodyResponseCalculatorTest
       assertApplySingleRigidBodyImpulse(random, iteration, joints, Collections.emptyMap(), Collections.emptyList(), epsilon);
    }
 
-   private static void assertApplySingleRigidBodyImpulse(Random random, int iteration, List<? extends JointBasics> joints,
-                                                         Map<RigidBodyReadOnly, WrenchReadOnly> externalWrenches, List<? extends JointReadOnly> jointsToIgnore,
+   private static void assertApplySingleRigidBodyImpulse(Random random,
+                                                         int iteration,
+                                                         List<? extends JointBasics> joints,
+                                                         Map<RigidBodyReadOnly, WrenchReadOnly> externalWrenches,
+                                                         List<? extends JointReadOnly> jointsToIgnore,
                                                          double epsilon)
    {
       for (JointStateType state : JointStateType.values())
@@ -399,15 +388,22 @@ public class MultiBodyResponseCalculatorTest
                                           Math.max(1.0, CommonOps_DDRM.elementMaxAbs(qdd_expected)) * epsilon);
    }
 
-   private static void assertApplySingleRigidBodyImpulseViaIntegration(Random random, int iteration, List<? extends JointBasics> joints, double dt,
+   private static void assertApplySingleRigidBodyImpulseViaIntegration(Random random,
+                                                                       int iteration,
+                                                                       List<? extends JointBasics> joints,
+                                                                       double dt,
                                                                        double epsilon)
    {
       assertApplySingleRigidBodyImpulseViaIntegration(random, iteration, joints, dt, Collections.emptyMap(), Collections.emptyList(), epsilon);
    }
 
-   private static void assertApplySingleRigidBodyImpulseViaIntegration(Random random, int iteration, List<? extends JointBasics> joints, double dt,
+   private static void assertApplySingleRigidBodyImpulseViaIntegration(Random random,
+                                                                       int iteration,
+                                                                       List<? extends JointBasics> joints,
+                                                                       double dt,
                                                                        Map<RigidBodyReadOnly, WrenchReadOnly> externalWrenches,
-                                                                       List<? extends JointReadOnly> jointsToIgnore, double epsilon)
+                                                                       List<? extends JointReadOnly> jointsToIgnore,
+                                                                       double epsilon)
    {
       double gravity = EuclidCoreRandomTools.nextDouble(random, -10.0, -1.0);
 
@@ -447,7 +443,8 @@ public class MultiBodyResponseCalculatorTest
 
       TwistReadOnly targetTwistChangeActual = multiBodyResponseCalculator.getTwistChangeProvider().getTwistOfBody(target);
       Twist targetTwistOld = new Twist(target.getBodyFixedFrame().getTwistOfFrame());
-      Twist targetAccelerationIntegrated = new Twist(multiBodyResponseCalculator.getForwardDynamicsCalculator().getAccelerationProvider(false)
+      Twist targetAccelerationIntegrated = new Twist(multiBodyResponseCalculator.getForwardDynamicsCalculator()
+                                                                                .getAccelerationProvider(false)
                                                                                 .getRelativeAcceleration(rootBody, target));
       targetAccelerationIntegrated.scale(dt);
 
@@ -472,9 +469,12 @@ public class MultiBodyResponseCalculatorTest
       assertRigidBodyApparentInertiaInverse(random, iteration, joints, Collections.emptyMap(), Collections.emptyList(), epsilon);
    }
 
-   private static void assertRigidBodyApparentInertiaInverse(Random random, int iteration, List<? extends JointBasics> joints,
+   private static void assertRigidBodyApparentInertiaInverse(Random random,
+                                                             int iteration,
+                                                             List<? extends JointBasics> joints,
                                                              Map<RigidBodyReadOnly, WrenchReadOnly> externalWrenches,
-                                                             List<? extends JointReadOnly> jointsToIgnore, double epsilon)
+                                                             List<? extends JointReadOnly> jointsToIgnore,
+                                                             double epsilon)
    {
       for (JointStateType state : JointStateType.values())
          MultiBodySystemRandomTools.nextState(random, state, joints);
@@ -516,9 +516,12 @@ public class MultiBodyResponseCalculatorTest
       assertRigidBodyApparentLinearInertiaInverse(random, iteration, joints, Collections.emptyMap(), Collections.emptyList(), epsilon);
    }
 
-   private static void assertRigidBodyApparentLinearInertiaInverse(Random random, int iteration, List<? extends JointBasics> joints,
+   private static void assertRigidBodyApparentLinearInertiaInverse(Random random,
+                                                                   int iteration,
+                                                                   List<? extends JointBasics> joints,
                                                                    Map<RigidBodyReadOnly, WrenchReadOnly> externalWrenches,
-                                                                   List<? extends JointReadOnly> jointsToIgnore, double epsilon)
+                                                                   List<? extends JointReadOnly> jointsToIgnore,
+                                                                   double epsilon)
    {
       for (JointStateType state : JointStateType.values())
          MultiBodySystemRandomTools.nextState(random, state, joints);
@@ -549,8 +552,8 @@ public class MultiBodyResponseCalculatorTest
                                                                                                           .getAccelerationOfBody(target));
       expectedAccelerationChange.changeFrame(testWrenchFrame);
       EuclidFrameTestTools.assertEquals(expectedAccelerationChange.getLinearPart(),
-                                                    actualLinearAccelerationChange,
-                                                    Math.max(1.0, expectedAccelerationChange.getLinearPart().norm()) * epsilon);
+                                        actualLinearAccelerationChange,
+                                        Math.max(1.0, expectedAccelerationChange.getLinearPart().norm()) * epsilon);
    }
 
    private static void assertApplySingleJointWrench(Random random, int iteration, List<? extends JointBasics> joints, double epsilon)
@@ -558,8 +561,11 @@ public class MultiBodyResponseCalculatorTest
       assertApplySingleJointWrench(random, iteration, joints, Collections.emptyMap(), Collections.emptyList(), epsilon);
    }
 
-   private static void assertApplySingleJointWrench(Random random, int iteration, List<? extends JointBasics> joints,
-                                                    Map<RigidBodyReadOnly, WrenchReadOnly> externalWrenches, List<? extends JointReadOnly> jointsToIgnore,
+   private static void assertApplySingleJointWrench(Random random,
+                                                    int iteration,
+                                                    List<? extends JointBasics> joints,
+                                                    Map<RigidBodyReadOnly, WrenchReadOnly> externalWrenches,
+                                                    List<? extends JointReadOnly> jointsToIgnore,
                                                     double epsilon)
    {
       for (JointStateType state : JointStateType.values())
@@ -602,8 +608,11 @@ public class MultiBodyResponseCalculatorTest
       assertApplySingleJointImpulse(random, iteration, joints, Collections.emptyMap(), Collections.emptyList(), epsilon);
    }
 
-   private static void assertApplySingleJointImpulse(Random random, int iteration, List<? extends JointBasics> joints,
-                                                     Map<RigidBodyReadOnly, WrenchReadOnly> externalWrenches, List<? extends JointReadOnly> jointsToIgnore,
+   private static void assertApplySingleJointImpulse(Random random,
+                                                     int iteration,
+                                                     List<? extends JointBasics> joints,
+                                                     Map<RigidBodyReadOnly, WrenchReadOnly> externalWrenches,
+                                                     List<? extends JointReadOnly> jointsToIgnore,
                                                      double epsilon)
    {
       for (JointStateType state : JointStateType.values())
@@ -646,9 +655,13 @@ public class MultiBodyResponseCalculatorTest
       assertApplySingleJointImpulseViaIntegration(random, iteration, joints, dt, Collections.emptyMap(), Collections.emptyList(), epsilon);
    }
 
-   private static void assertApplySingleJointImpulseViaIntegration(Random random, int iteration, List<? extends JointBasics> joints, double dt,
+   private static void assertApplySingleJointImpulseViaIntegration(Random random,
+                                                                   int iteration,
+                                                                   List<? extends JointBasics> joints,
+                                                                   double dt,
                                                                    Map<RigidBodyReadOnly, WrenchReadOnly> externalWrenches,
-                                                                   List<? extends JointReadOnly> jointsToIgnore, double epsilon)
+                                                                   List<? extends JointReadOnly> jointsToIgnore,
+                                                                   double epsilon)
    {
       double gravity = EuclidCoreRandomTools.nextDouble(random, -10.0, -1.0);
 
@@ -692,8 +705,11 @@ public class MultiBodyResponseCalculatorTest
       assertJointApparentInertiaInverse(random, iteration, joints, Collections.emptyMap(), Collections.emptyList(), epsilon);
    }
 
-   private static void assertJointApparentInertiaInverse(Random random, int iteration, List<? extends JointBasics> joints,
-                                                         Map<RigidBodyReadOnly, WrenchReadOnly> externalWrenches, List<? extends JointReadOnly> jointsToIgnore,
+   private static void assertJointApparentInertiaInverse(Random random,
+                                                         int iteration,
+                                                         List<? extends JointBasics> joints,
+                                                         Map<RigidBodyReadOnly, WrenchReadOnly> externalWrenches,
+                                                         List<? extends JointReadOnly> jointsToIgnore,
                                                          double epsilon)
    {
       for (JointStateType state : JointStateType.values())
@@ -735,8 +751,11 @@ public class MultiBodyResponseCalculatorTest
       assertApplyMultipleWrenches(random, iteration, joints, Collections.emptyMap(), Collections.emptyList(), epsilon);
    }
 
-   private static void assertApplyMultipleWrenches(Random random, int iteration, List<? extends JointBasics> joints,
-                                                   Map<RigidBodyReadOnly, WrenchReadOnly> externalWrenches, List<? extends JointReadOnly> jointsToIgnore,
+   private static void assertApplyMultipleWrenches(Random random,
+                                                   int iteration,
+                                                   List<? extends JointBasics> joints,
+                                                   Map<RigidBodyReadOnly, WrenchReadOnly> externalWrenches,
+                                                   List<? extends JointReadOnly> jointsToIgnore,
                                                    double epsilon)
    {
       for (JointStateType state : JointStateType.values())
@@ -797,8 +816,11 @@ public class MultiBodyResponseCalculatorTest
       assertApplyMultipleImpulse(random, iteration, joints, Collections.emptyMap(), Collections.emptyList(), epsilon);
    }
 
-   private static void assertApplyMultipleImpulse(Random random, int iteration, List<? extends JointBasics> joints,
-                                                  Map<RigidBodyReadOnly, WrenchReadOnly> externalWrenches, List<? extends JointReadOnly> jointsToIgnore,
+   private static void assertApplyMultipleImpulse(Random random,
+                                                  int iteration,
+                                                  List<? extends JointBasics> joints,
+                                                  Map<RigidBodyReadOnly, WrenchReadOnly> externalWrenches,
+                                                  List<? extends JointReadOnly> jointsToIgnore,
                                                   double epsilon)
    {
       for (JointStateType state : JointStateType.values())
@@ -854,7 +876,10 @@ public class MultiBodyResponseCalculatorTest
                                           Math.max(1.0, CommonOps_DDRM.elementMaxAbs(qdd_expected)) * epsilon);
    }
 
-   private static void runAssertionViaTwistProvider(Random random, int iteration, List<? extends JointBasics> joints, double epsilon,
+   private static void runAssertionViaTwistProvider(Random random,
+                                                    int iteration,
+                                                    List<? extends JointBasics> joints,
+                                                    double epsilon,
                                                     ForwardDynamicsCalculator forwardDynamicsCalculator,
                                                     MultiBodyResponseCalculator multiBodyResponseCalculator)
    {
@@ -876,7 +901,10 @@ public class MultiBodyResponseCalculatorTest
       }
    }
 
-   private static void runAssertionsViaAccelerationProvider(Random random, int iteration, List<? extends JointBasics> joints, double epsilon,
+   private static void runAssertionsViaAccelerationProvider(Random random,
+                                                            int iteration,
+                                                            List<? extends JointBasics> joints,
+                                                            double epsilon,
                                                             ForwardDynamicsCalculator forwardDynamicsCalculator,
                                                             MultiBodyResponseCalculator multiBodyResponseCalculator)
    {
@@ -922,13 +950,14 @@ public class MultiBodyResponseCalculatorTest
       assertTrue(areEqual);
    }
 
-   private static ForwardDynamicsCalculator setupForwardDynamicsCalculator(MultiBodySystemReadOnly input, double gravity,
+   private static ForwardDynamicsCalculator setupForwardDynamicsCalculator(MultiBodySystemReadOnly input,
+                                                                           double gravity,
                                                                            Map<RigidBodyReadOnly, WrenchReadOnly> externalWrenches,
                                                                            Map<? extends RigidBodyReadOnly, ? extends SpatialForceReadOnly> testRigidBodyDisturbances,
                                                                            Map<? extends JointReadOnly, DMatrixRMaj> testJointDisturbances)
    {
       ForwardDynamicsCalculator calculator = new ForwardDynamicsCalculator(input);
-      calculator.setGravitionalAcceleration(gravity);
+      calculator.setGravitationalAcceleration(gravity);
       calculator.setExternalWrenchesToZero();
       externalWrenches.forEach(calculator::setExternalWrench);
       testRigidBodyDisturbances.forEach((body, disturbance) -> calculator.getExternalWrench(body).add(disturbance));
@@ -951,12 +980,13 @@ public class MultiBodyResponseCalculatorTest
       return calculator;
    }
 
-   private static MultiBodyResponseCalculator setupMultiBodyResponseCalculator(MultiBodySystemReadOnly input, double gravity,
+   private static MultiBodyResponseCalculator setupMultiBodyResponseCalculator(MultiBodySystemReadOnly input,
+                                                                               double gravity,
                                                                                Map<RigidBodyReadOnly, WrenchReadOnly> externalWrenches)
    {
       MultiBodyResponseCalculator multiBodyResponseCalculator = new MultiBodyResponseCalculator(input);
       ForwardDynamicsCalculator forwardDynamicsCalculator = multiBodyResponseCalculator.getForwardDynamicsCalculator();
-      forwardDynamicsCalculator.setGravitionalAcceleration(gravity);
+      forwardDynamicsCalculator.setGravitationalAcceleration(gravity);
 
       forwardDynamicsCalculator.setExternalWrenchesToZero();
       externalWrenches.forEach(forwardDynamicsCalculator::setExternalWrench);
@@ -964,8 +994,12 @@ public class MultiBodyResponseCalculatorTest
       return multiBodyResponseCalculator;
    }
 
-   private static void assertJointAccelerationMatrixEquals(MultiBodySystemReadOnly input, int iteration, DMatrixRMaj qdd_expected,
-                                                           DMatrixRMaj qdd_original, DMatrixRMaj qdd_change, double epsilon)
+   private static void assertJointAccelerationMatrixEquals(MultiBodySystemReadOnly input,
+                                                           int iteration,
+                                                           DMatrixRMaj qdd_expected,
+                                                           DMatrixRMaj qdd_original,
+                                                           DMatrixRMaj qdd_change,
+                                                           double epsilon)
    {
       DMatrixRMaj qdd_actual = new DMatrixRMaj(qdd_change.getNumRows(), 1);
       CommonOps_DDRM.add(qdd_original, qdd_change, qdd_actual);

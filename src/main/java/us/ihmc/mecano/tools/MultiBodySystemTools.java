@@ -1,22 +1,17 @@
 package us.ihmc.mecano.tools;
 
+import org.ejml.data.DMatrix;
+import us.ihmc.mecano.frames.MovingReferenceFrame;
+import us.ihmc.mecano.multiBodySystem.interfaces.*;
+import us.ihmc.mecano.multiBodySystem.iterators.SubtreeStreams;
+import us.ihmc.mecano.spatial.SpatialInertia;
+
 import java.lang.reflect.Array;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
-
-import org.ejml.data.DMatrix;
-
-import us.ihmc.mecano.frames.MovingReferenceFrame;
-import us.ihmc.mecano.multiBodySystem.interfaces.JointBasics;
-import us.ihmc.mecano.multiBodySystem.interfaces.JointReadOnly;
-import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointBasics;
-import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
-import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyReadOnly;
-import us.ihmc.mecano.multiBodySystem.iterators.SubtreeStreams;
-import us.ihmc.mecano.spatial.SpatialInertia;
 
 /**
  * This class provides a variety of tools to facilitate operations that need to navigate through a
@@ -130,7 +125,7 @@ public class MultiBodySystemTools
     * @param start the rigid-body from where to begin the collection of joints.
     * @param end   the rigid-body where to stop the collection of joints.
     * @return the array of joints representing the path from {@code start} to {@code end}, or
-    *         {@code null} if the given rigid-bodies are not part of the same multi-body system.
+    *       {@code null} if the given rigid-bodies are not part of the same multi-body system.
     */
    public static JointBasics[] createJointPath(RigidBodyBasics start, RigidBodyBasics end)
    {
@@ -149,7 +144,7 @@ public class MultiBodySystemTools
     * @param start the rigid-body from where to begin the collection of joints.
     * @param end   the rigid-body where to stop the collection of joints.
     * @return the array of joints representing the path from {@code start} to {@code end}, or
-    *         {@code null} if the given rigid-bodies are not part of the same multi-body system.
+    *       {@code null} if the given rigid-bodies are not part of the same multi-body system.
     */
    public static JointReadOnly[] createJointPath(RigidBodyReadOnly start, RigidBodyReadOnly end)
    {
@@ -402,7 +397,7 @@ public class MultiBodySystemTools
     * @param ancestor            the query for the ancestor. A rigid-body is the ancestor of another
     *                            rigid-body if it is between the other rigid-body and the root body.
     * @return {@code true} if {@code candidateDescendant} is a descendant of {@code ancestor},
-    *         {@code false} otherwise.
+    *       {@code false} otherwise.
     */
    public static boolean isAncestor(RigidBodyReadOnly candidateDescendant, RigidBodyReadOnly ancestor)
    {
@@ -424,7 +419,7 @@ public class MultiBodySystemTools
     *
     * @param rigidBody the query.
     * @return the distance in number of joints between the {@code rigidBody} and the root body. This
-    *         method returns {@code 0} if the {@code rigidBody} is the root body.
+    *       method returns {@code 0} if the {@code rigidBody} is the root body.
     */
    public static int computeDistanceToRoot(RigidBodyReadOnly rigidBody)
    {
@@ -450,9 +445,9 @@ public class MultiBodySystemTools
     * @param descendant the descendant, often it is the end-effector.
     * @param ancestor   the ancestor of the descendant, often it is the root body.
     * @return the distance in number of joints between the {@code descendant} and the {@code ancestor}.
-    *         This method returns {@code 0} if the two rigid-bodies are the same. This method returns
-    *         {@code -1} if the given {@code ancestor} is not located between the {@code descendant}
-    *         and the root body.
+    *       This method returns {@code 0} if the two rigid-bodies are the same. This method returns
+    *       {@code -1} if the given {@code ancestor} is not located between the {@code descendant}
+    *       and the root body.
     */
    public static int computeDistanceToAncestor(RigidBodyReadOnly descendant, RigidBodyReadOnly ancestor)
    {
@@ -482,9 +477,9 @@ public class MultiBodySystemTools
     * @param firstBody  the first end of the kinematic chain to compute the distance of.
     * @param secondBody the second end of the kinematic chain to compute the distance of.
     * @return the distance in number of joints between the {@code firstBody} and the
-    *         {@code secondBody}. This method returns {@code 0} if the two rigid-bodies are the same.
+    *       {@code secondBody}. This method returns {@code 0} if the two rigid-bodies are the same.
     * @throws IllegalArgumentException if the two rigid-bodies do not belong to the same multi-body
-    *                                  system.
+    *       system.
     */
    public static int computeDistance(RigidBodyReadOnly firstBody, RigidBodyReadOnly secondBody)
    {
@@ -500,7 +495,7 @@ public class MultiBodySystemTools
     * @param secondBody the second end of the kinematic chain.
     * @return the number of degrees of freedom.
     * @throws IllegalArgumentException if the two rigid-bodies do not belong to the same multi-body
-    *                                  system.
+    *       system.
     */
    public static int computeDegreesOfFreedom(RigidBodyReadOnly firstBody, RigidBodyReadOnly secondBody)
    {
@@ -577,7 +572,7 @@ public class MultiBodySystemTools
     * @param secondBody the second rigid-body of the query.
     * @return the nearest common ancestor.
     * @throws IllegalArgumentException if the two rigid-bodies do not belong to the same multi-body
-    *                                  system.
+    *       system.
     */
    public static RigidBodyBasics computeNearestCommonAncestor(RigidBodyBasics firstBody, RigidBodyBasics secondBody)
    {
@@ -596,7 +591,7 @@ public class MultiBodySystemTools
     * @param secondBody the second rigid-body of the query.
     * @return the nearest common ancestor.
     * @throws IllegalArgumentException if the two rigid-bodies do not belong to the same multi-body
-    *                                  system.
+    *       system.
     */
    public static RigidBodyReadOnly computeNearestCommonAncestor(RigidBodyReadOnly firstBody, RigidBodyReadOnly secondBody)
    {
@@ -651,8 +646,9 @@ public class MultiBodySystemTools
       }
 
       // We are at the root and the ancestors still do not match => we are dealing with 2 distinct multi-body systems.
-      throw new IllegalArgumentException("The two rigid-bodies are not part of the same multi-body system: first root: " + firstAncestor.getName()
-            + ", second root: " + secondAncestor.getName());
+      throw new IllegalArgumentException(
+            "The two rigid-bodies are not part of the same multi-body system: first root: " + firstAncestor.getName() + ", second root: "
+            + secondAncestor.getName());
    }
 
    /**
@@ -1028,8 +1024,7 @@ public class MultiBodySystemTools
     */
    public static <T extends JointReadOnly> T[] filterJoints(JointReadOnly[] source, Class<T> clazz)
    {
-      @SuppressWarnings("unchecked")
-      T[] retArray = (T[]) Array.newInstance(clazz, computeNumberOfJointsOfType(clazz, source));
+      @SuppressWarnings("unchecked") T[] retArray = (T[]) Array.newInstance(clazz, computeNumberOfJointsOfType(clazz, source));
       filterJoints(source, retArray, clazz);
       return retArray;
    }
@@ -1067,12 +1062,12 @@ public class MultiBodySystemTools
    /**
     * Finds and returns the first joint contained in the subtree starting at the given rigid-body which
     * name matches the given name.
-    * 
+    *
     * @param start     where to start the search, if unsure, the root body should be given. Not
     *                  modified.
     * @param jointName the name of the joint to be found.
     * @return the joint matching the given name, or {@code null} if no joint with such name could be
-    *         found.
+    *       found.
     */
    public static JointReadOnly findJoint(RigidBodyReadOnly start, String jointName)
    {
@@ -1082,14 +1077,14 @@ public class MultiBodySystemTools
    /**
     * Finds and returns the first joint contained in the subtree starting at the given rigid-body which
     * name matches the given name.
-    * 
+    *
     * @param start      where to start the search, if unsure, the root body should be given. Not
     *                   modified.
     * @param jointName  the name of the joint to be found.
     * @param ignoreCase whether to ignore the case when comparing the name, see
     *                   {@link String#equalsIgnoreCase(String)}.
     * @return the joint matching the given name, or {@code null} if no joint with such name could be
-    *         found.
+    *       found.
     */
    public static JointReadOnly findJoint(RigidBodyReadOnly start, String jointName, boolean ignoreCase)
    {
@@ -1124,12 +1119,12 @@ public class MultiBodySystemTools
    /**
     * Finds and returns the first joint contained in the subtree starting at the given rigid-body which
     * name matches the given name.
-    * 
+    *
     * @param start     where to start the search, if unsure, the root body should be given. Not
     *                  modified.
     * @param jointName the name of the joint to be found.
     * @return the joint matching the given name, or {@code null} if no joint with such name could be
-    *         found.
+    *       found.
     */
    public static JointBasics findJoint(RigidBodyBasics start, String jointName)
    {
@@ -1139,14 +1134,14 @@ public class MultiBodySystemTools
    /**
     * Finds and returns the first joint contained in the subtree starting at the given rigid-body which
     * name matches the given name.
-    * 
+    *
     * @param start      where to start the search, if unsure, the root body should be given. Not
     *                   modified.
     * @param jointName  the name of the joint to be found.
     * @param ignoreCase whether to ignore the case when comparing the name, see
     *                   {@link String#equalsIgnoreCase(String)}.
     * @return the joint matching the given name, or {@code null} if no joint with such name could be
-    *         found.
+    *       found.
     */
    public static JointBasics findJoint(RigidBodyBasics start, String jointName, boolean ignoreCase)
    {
@@ -1156,12 +1151,12 @@ public class MultiBodySystemTools
    /**
     * Finds and returns the first rigid-body contained in the subtree (including {@code start})
     * starting at the given rigid-body which name matches the given name.
-    * 
+    *
     * @param start         where to start the search, if unsure, the root body should be given. Not
     *                      modified.
     * @param rigidBodyName the name of the rigid-body to be found.
     * @return the rigid-body matching the given name, or {@code null} if no rigid-body with such name
-    *         could be found.
+    *       could be found.
     */
    public static RigidBodyReadOnly findRigidBody(RigidBodyReadOnly start, String rigidBodyName)
    {
@@ -1171,14 +1166,14 @@ public class MultiBodySystemTools
    /**
     * Finds and returns the first rigid-body contained in the subtree (including {@code start})
     * starting at the given rigid-body which name matches the given name.
-    * 
+    *
     * @param start         where to start the search, if unsure, the root body should be given. Not
     *                      modified.
     * @param rigidBodyName the name of the rigid-body to be found.
     * @param ignoreCase    whether to ignore the case when comparing the name, see
     *                      {@link String#equalsIgnoreCase(String)}.
     * @return the rigid-body matching the given name, or {@code null} if no rigid-body with such name
-    *         could be found.
+    *       could be found.
     */
    public static RigidBodyReadOnly findRigidBody(RigidBodyReadOnly start, String rigidBodyName, boolean ignoreCase)
    {
@@ -1211,12 +1206,12 @@ public class MultiBodySystemTools
    /**
     * Finds and returns the first rigid-body contained in the subtree (including {@code start})
     * starting at the given rigid-body which name matches the given name.
-    * 
+    *
     * @param start         where to start the search, if unsure, the root body should be given. Not
     *                      modified.
     * @param rigidBodyName the name of the rigid-body to be found.
     * @return the rigid-body matching the given name, or {@code null} if no rigid-body with such name
-    *         could be found.
+    *       could be found.
     */
    public static RigidBodyBasics findRigidBody(RigidBodyBasics start, String rigidBodyName)
    {
@@ -1226,14 +1221,14 @@ public class MultiBodySystemTools
    /**
     * Finds and returns the first rigid-body contained in the subtree (including {@code start})
     * starting at the given rigid-body which name matches the given name.
-    * 
+    *
     * @param start         where to start the search, if unsure, the root body should be given. Not
     *                      modified.
     * @param rigidBodyName the name of the rigid-body to be found.
     * @param ignoreCase    whether to ignore the case when comparing the name, see
     *                      {@link String#equalsIgnoreCase(String)}.
     * @return the rigid-body matching the given name, or {@code null} if no rigid-body with such name
-    *         could be found.
+    *       could be found.
     */
    public static RigidBodyBasics findRigidBody(RigidBodyBasics start, String rigidBodyName, boolean ignoreCase)
    {
@@ -1259,7 +1254,7 @@ public class MultiBodySystemTools
     *
     * @param joints the query. Not modified.
     * @return {@code true} if the joints are stored in a continuous manner from root to leaf,
-    *         {@code false} otherwise.
+    *       {@code false} otherwise.
     */
    public static boolean areJointsInContinuousOrder(JointReadOnly[] joints)
    {
@@ -1291,7 +1286,7 @@ public class MultiBodySystemTools
     *
     * @param joints the query. Not modified.
     * @return {@code true} if the joints are stored in a continuous manner from root to leaf,
-    *         {@code false} otherwise.
+    *       {@code false} otherwise.
     */
    public static boolean areJointsInContinuousOrder(List<? extends JointReadOnly> joints)
    {
@@ -1307,10 +1302,10 @@ public class MultiBodySystemTools
    /**
     * Tests whether the subtree starting at the given rigid-body contains at least one loop closure or
     * not.
-    * 
+    *
     * @param start the rigid-body from which the subtree to test starts.
     * @return {@code true} if the subtree contains one or more loop closure, {@code false} if there is
-    *         no loop closure.
+    *       no loop closure.
     * @see JointReadOnly#isLoopClosure()
     */
    public static boolean doesSubtreeContainLoopClosure(RigidBodyReadOnly start)
@@ -1713,5 +1708,32 @@ public class MultiBodySystemTools
       }
 
       return startIndex;
+   }
+
+   /**
+    * Returns a list of the children joints of the given {@code rigidBody} sorted such that the joints that are part of a loop closure are treated last.
+    *
+    * @param rigidBody the query. Not modified.
+    * @return the list of children joints sorted such that the joints that are part of a loop closure are treated last.
+    */
+   public static List<JointReadOnly> sortLoopClosureInChildrenJoints(RigidBodyReadOnly rigidBody)
+   {
+      List<JointReadOnly> childrenJoints = new ArrayList<>(rigidBody.getChildrenJoints());
+
+      if (childrenJoints.size() > 1)
+      { // Reorganize the joints in the children to ensure that loop closures are treated last.
+         List<JointReadOnly> loopClosureAncestors = new ArrayList<>();
+
+         for (int i = 0; i < childrenJoints.size(); )
+         {
+            if (doesSubtreeContainLoopClosure(childrenJoints.get(i).getSuccessor()))
+               loopClosureAncestors.add(childrenJoints.remove(i));
+            else
+               i++;
+         }
+
+         childrenJoints.addAll(loopClosureAncestors);
+      }
+      return childrenJoints;
    }
 }
