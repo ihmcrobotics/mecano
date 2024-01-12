@@ -12,11 +12,21 @@ import us.ihmc.euclid.transform.interfaces.RigidBodyTransformReadOnly;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple3D.interfaces.Vector3DReadOnly;
 import us.ihmc.mecano.frames.MovingReferenceFrame;
-import us.ihmc.mecano.multiBodySystem.interfaces.*;
+import us.ihmc.mecano.multiBodySystem.interfaces.JointReadOnly;
+import us.ihmc.mecano.multiBodySystem.interfaces.RevoluteJointBasics;
+import us.ihmc.mecano.multiBodySystem.interfaces.RevoluteJointReadOnly;
+import us.ihmc.mecano.multiBodySystem.interfaces.RevoluteTwinsJointBasics;
+import us.ihmc.mecano.multiBodySystem.interfaces.RevoluteTwinsJointReadOnly;
+import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
+import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyReadOnly;
 import us.ihmc.mecano.spatial.SpatialAcceleration;
 import us.ihmc.mecano.spatial.Twist;
 import us.ihmc.mecano.spatial.Wrench;
-import us.ihmc.mecano.spatial.interfaces.*;
+import us.ihmc.mecano.spatial.interfaces.SpatialAccelerationBasics;
+import us.ihmc.mecano.spatial.interfaces.SpatialAccelerationReadOnly;
+import us.ihmc.mecano.spatial.interfaces.TwistBasics;
+import us.ihmc.mecano.spatial.interfaces.TwistReadOnly;
+import us.ihmc.mecano.spatial.interfaces.WrenchReadOnly;
 import us.ihmc.mecano.tools.MecanoFactories;
 import us.ihmc.mecano.tools.MultiBodySystemFactories;
 import us.ihmc.mecano.tools.MultiBodySystemTools;
@@ -54,9 +64,7 @@ public class RevoluteTwinsJoint implements RevoluteTwinsJointBasics
    private final MovingReferenceFrame beforeJointFrame;
    private final MovingReferenceFrame afterJointFrame;
    private final RevoluteJointBasics jointA, jointB;
-   /**
-    * The actuated joint is the torque source and is either {@link #jointA} or {@link #jointB}.
-    */
+   /** The actuated joint is the torque source and is either {@link #jointA} or {@link #jointB}. */
    private final RevoluteJointBasics actuatedJoint;
    /**
     * The constrained joint is the joint that is not the torque source, its state is constrained by the state of the {@link #actuatedJoint}, and it is either
@@ -81,15 +89,14 @@ public class RevoluteTwinsJoint implements RevoluteTwinsJointBasics
 
    private final int actuatedJointIndex;
    private final DMatrixRMaj constraintJacobian;
-   /**
-    * Because the constraint ratio is constant, there is no convective term for this joint.
-    */
+   /** Because the constraint ratio is constant, there is no convective term for this joint. */
    private final DMatrixRMaj constraintConvectiveTerm = new DMatrixRMaj(2, 1);
-   private final double constraintRatio, constraintOffset;
+   /** The constraint ratio of the constrained joint with respect to the actuated joint. */
+   private double constraintRatio;
+   /** The constraint offset of the constrained joint with respect to the actuated joint. */
+   private double constraintOffset;
 
-   /**
-    * Variable to store intermediate results for garbage-free operations.
-    */
+   /** Variable to store intermediate results for garbage-free operations. */
    private final Vector3D rotationVector = new Vector3D();
 
    /**
@@ -434,9 +441,7 @@ public class RevoluteTwinsJoint implements RevoluteTwinsJointBasics
       }
    }
 
-   /**
-    * {@inheritDoc}
-    */
+   /** {@inheritDoc} */
    @Override
    public void setSuccessor(RigidBodyBasics successor)
    {
@@ -444,9 +449,7 @@ public class RevoluteTwinsJoint implements RevoluteTwinsJointBasics
       jointWrench = MecanoFactories.newWrenchReadOnly(this::getTau, unitJointWrench);
    }
 
-   /**
-    * {@inheritDoc}
-    */
+   /** {@inheritDoc} */
    @Override
    public void updateFrame()
    {
@@ -471,9 +474,7 @@ public class RevoluteTwinsJoint implements RevoluteTwinsJointBasics
    private final Twist deltaTwist = new Twist();
    private final Twist bodyTwist = new Twist();
 
-   /**
-    * {@inheritDoc}
-    */
+   /** {@inheritDoc} */
    @Override
    public void updateMotionSubspace()
    {
@@ -571,162 +572,126 @@ public class RevoluteTwinsJoint implements RevoluteTwinsJointBasics
       jointBiasAcceleration.setBodyFrame(joint.getFrameAfterJoint());
    }
 
-   /**
-    * {@inheritDoc}
-    */
+   /** {@inheritDoc} */
    @Override
    public RevoluteJointBasics getActuatedJoint()
    {
       return actuatedJoint;
    }
 
-   /**
-    * {@inheritDoc}
-    */
+   /** {@inheritDoc} */
    @Override
    public RevoluteJointBasics getConstrainedJoint()
    {
       return constrainedJoint;
    }
 
-   /**
-    * {@inheritDoc}
-    */
+   /** {@inheritDoc} */
    @Override
    public RevoluteJointBasics getJointA()
    {
       return jointA;
    }
 
-   /**
-    * {@inheritDoc}
-    */
+   /** {@inheritDoc} */
    @Override
    public RevoluteJointBasics getJointB()
    {
       return jointB;
    }
 
-   /**
-    * {@inheritDoc}
-    */
+   /** {@inheritDoc} */
    @Override
    public int getActuatedJointIndex()
    {
       return actuatedJointIndex;
    }
 
-   /**
-    * {@inheritDoc}
-    */
+   /** {@inheritDoc} */
    @Override
    public double getConstraintRatio()
    {
       return constraintRatio;
    }
 
-   /**
-    * {@inheritDoc}
-    */
+   /** {@inheritDoc} */
    @Override
    public double getConstraintOffset()
    {
       return constraintOffset;
    }
 
-   /**
-    * {@inheritDoc}
-    */
+   /** {@inheritDoc} */
    @Override
    public DMatrixRMaj getConstraintJacobian()
    {
       return constraintJacobian;
    }
 
-   /**
-    * {@inheritDoc}
-    */
+   /** {@inheritDoc} */
    @Override
    public DMatrixRMaj getConstraintConvectiveTerm()
    {
       return constraintConvectiveTerm;
    }
 
-   /**
-    * {@inheritDoc}
-    */
+   /** {@inheritDoc} */
    @Override
    public MovingReferenceFrame getFrameBeforeJoint()
    {
       return beforeJointFrame;
    }
 
-   /**
-    * {@inheritDoc}
-    */
+   /** {@inheritDoc} */
    @Override
    public MovingReferenceFrame getFrameAfterJoint()
    {
       return afterJointFrame;
    }
 
-   /**
-    * {@inheritDoc}
-    */
+   /** {@inheritDoc} */
    @Override
    public RigidBodyBasics getPredecessor()
    {
       return predecessor;
    }
 
-   /**
-    * {@inheritDoc}
-    */
+   /** {@inheritDoc} */
    @Override
    public RigidBodyBasics getSuccessor()
    {
       return successor;
    }
 
-   /**
-    * {@inheritDoc}
-    */
+   /** {@inheritDoc} */
    @Override
    public MovingReferenceFrame getLoopClosureFrame()
    {
       return null;
    }
 
-   /**
-    * {@inheritDoc}
-    */
+   /** {@inheritDoc} */
    @Override
    public String getName()
    {
       return name;
    }
 
-   /**
-    * {@inheritDoc}
-    */
+   /** {@inheritDoc} */
    @Override
    public String getNameId()
    {
       return nameId;
    }
 
-   /**
-    * This feature is not supported.
-    */
+   /** This feature is not supported. */
    @Override
    public void setupLoopClosure(RigidBodyBasics successor, RigidBodyTransformReadOnly transformFromSuccessorParentJoint)
    {
       throw new UnsupportedOperationException("Loop closure using a four bar joint has not been implemented.");
    }
 
-   /**
-    * {@inheritDoc}
-    */
+   /** {@inheritDoc} */
    @Override
    public double getTau()
    {
@@ -734,117 +699,91 @@ public class RevoluteTwinsJoint implements RevoluteTwinsJointBasics
       return actuatedJoint.getTau() / (1.0 + constraintRatio);
    }
 
-   /**
-    * {@inheritDoc}
-    */
+   /** {@inheritDoc} */
    @Override
    public TwistReadOnly getUnitJointTwist()
    {
       return unitJointTwist;
    }
 
-   /**
-    * {@inheritDoc}
-    */
+   /** {@inheritDoc} */
    @Override
    public TwistReadOnly getUnitSuccessorTwist()
    {
       return unitSuccessorTwist;
    }
 
-   /**
-    * {@inheritDoc}
-    */
+   /** {@inheritDoc} */
    @Override
    public TwistReadOnly getUnitPredecessorTwist()
    {
       return unitPredecessorTwist;
    }
 
-   /**
-    * {@inheritDoc}
-    */
+   /** {@inheritDoc} */
    @Override
    public SpatialAccelerationReadOnly getUnitJointAcceleration()
    {
       return unitJointAcceleration;
    }
 
-   /**
-    * {@inheritDoc}
-    */
+   /** {@inheritDoc} */
    @Override
    public SpatialAccelerationReadOnly getUnitSuccessorAcceleration()
    {
       return unitSuccessorAcceleration;
    }
 
-   /**
-    * {@inheritDoc}
-    */
+   /** {@inheritDoc} */
    @Override
    public SpatialAccelerationReadOnly getUnitPredecessorAcceleration()
    {
       return unitPredecessorAcceleration;
    }
 
-   /**
-    * {@inheritDoc}
-    */
+   /** {@inheritDoc} */
    @Override
    public void getJointConfiguration(RigidBodyTransform jointConfigurationToPack)
    {
       afterJointFrame.getTransformToDesiredFrame(jointConfigurationToPack, beforeJointFrame);
    }
 
-   /**
-    * {@inheritDoc}
-    */
+   /** {@inheritDoc} */
    @Override
    public TwistReadOnly getJointTwist()
    {
       return jointTwist;
    }
 
-   /**
-    * {@inheritDoc}
-    */
+   /** {@inheritDoc} */
    @Override
    public List<TwistReadOnly> getUnitTwists()
    {
       return unitTwists;
    }
 
-   /**
-    * {@inheritDoc}
-    */
+   /** {@inheritDoc} */
    @Override
    public SpatialAccelerationReadOnly getJointAcceleration()
    {
       return jointAcceleration;
    }
 
-   /**
-    * {@inheritDoc}
-    */
+   /** {@inheritDoc} */
    @Override
    public SpatialAccelerationReadOnly getJointBiasAcceleration()
    {
       return jointBiasAcceleration;
    }
 
-   /**
-    * {@inheritDoc}
-    */
+   /** {@inheritDoc} */
    @Override
    public SpatialAccelerationReadOnly getSuccessorBiasAcceleration()
    {
       return successorBiasAcceleration;
    }
 
-   /**
-    * This feature is not implemented.
-    */
+   /** This feature is not implemented. */
    @Override
    public void getPredecessorAcceleration(SpatialAccelerationBasics accelerationToPack)
    {
@@ -853,9 +792,7 @@ public class RevoluteTwinsJoint implements RevoluteTwinsJointBasics
       throw new UnsupportedOperationException("Implement me!");
    }
 
-   /**
-    * This feature is not implemented.
-    */
+   /** This feature is not implemented. */
    @Override
    public SpatialAccelerationReadOnly getPredecessorBiasAcceleration()
    {
@@ -864,18 +801,28 @@ public class RevoluteTwinsJoint implements RevoluteTwinsJointBasics
       throw new UnsupportedOperationException("Implement me!");
    }
 
-   /**
-    * {@inheritDoc}
-    */
+   /** {@inheritDoc} */
    @Override
    public WrenchReadOnly getJointWrench()
    {
       return jointWrench;
    }
 
-   /**
-    * {@inheritDoc}
-    */
+   /** {@inheritDoc} */
+   @Override
+   public void setConstraintRatio(double constraintRatio)
+   {
+      this.constraintRatio = constraintRatio;
+   }
+
+   /** {@inheritDoc} */
+   @Override
+   public void setConstraintOffset(double constraintOffset)
+   {
+      this.constraintOffset = constraintOffset;
+   }
+
+   /** {@inheritDoc} */
    @Override
    public void setJointOrientation(Orientation3DReadOnly jointOrientation)
    {
@@ -883,63 +830,49 @@ public class RevoluteTwinsJoint implements RevoluteTwinsJointBasics
       setQ(rotationVector.dot(getJointAxis()));
    }
 
-   /**
-    * {@inheritDoc}
-    */
+   /** {@inheritDoc} */
    @Override
    public void setJointLimitLower(double jointLimitLower)
    {
       this.jointLimitLower = jointLimitLower;
    }
 
-   /**
-    * {@inheritDoc}
-    */
+   /** {@inheritDoc} */
    @Override
    public void setJointLimitUpper(double jointLimitUpper)
    {
       this.jointLimitUpper = jointLimitUpper;
    }
 
-   /**
-    * {@inheritDoc}
-    */
+   /** {@inheritDoc} */
    @Override
    public void setVelocityLimitLower(double velocityLimitLower)
    {
       this.velocityLimitLower = velocityLimitLower;
    }
 
-   /**
-    * {@inheritDoc}
-    */
+   /** {@inheritDoc} */
    @Override
    public void setVelocityLimitUpper(double velocityLimitUpper)
    {
       this.velocityLimitUpper = velocityLimitUpper;
    }
 
-   /**
-    * {@inheritDoc}
-    */
+   /** {@inheritDoc} */
    @Override
    public void setEffortLimitLower(double effortLimitLower)
    {
       this.effortLimitLower = effortLimitLower;
    }
 
-   /**
-    * {@inheritDoc}
-    */
+   /** {@inheritDoc} */
    @Override
    public void setEffortLimitUpper(double effortLimitUpper)
    {
       this.effortLimitUpper = effortLimitUpper;
    }
 
-   /**
-    * {@inheritDoc}
-    */
+   /** {@inheritDoc} */
    @Override
    public double getJointLimitLower()
    {
@@ -947,9 +880,7 @@ public class RevoluteTwinsJoint implements RevoluteTwinsJointBasics
       return Math.max(jointLimitLower, jointInternalLimitLower);
    }
 
-   /**
-    * {@inheritDoc}
-    */
+   /** {@inheritDoc} */
    @Override
    public double getJointLimitUpper()
    {
@@ -957,9 +888,7 @@ public class RevoluteTwinsJoint implements RevoluteTwinsJointBasics
       return Math.min(jointLimitUpper, jointInternalLimitUpper);
    }
 
-   /**
-    * {@inheritDoc}
-    */
+   /** {@inheritDoc} */
    @Override
    public double getVelocityLimitLower()
    {
@@ -967,9 +896,7 @@ public class RevoluteTwinsJoint implements RevoluteTwinsJointBasics
       return Math.max(velocityLimitLower, jointInternalVelocityLimitLower);
    }
 
-   /**
-    * {@inheritDoc}
-    */
+   /** {@inheritDoc} */
    @Override
    public double getVelocityLimitUpper()
    {
@@ -977,27 +904,21 @@ public class RevoluteTwinsJoint implements RevoluteTwinsJointBasics
       return Math.min(velocityLimitUpper, jointInternalVelocityLimitUpper);
    }
 
-   /**
-    * {@inheritDoc}
-    */
+   /** {@inheritDoc} */
    @Override
    public double getEffortLimitLower()
    {
       return Math.max(RevoluteTwinsJointBasics.super.getEffortLimitLower(), effortLimitLower);
    }
 
-   /**
-    * {@inheritDoc}
-    */
+   /** {@inheritDoc} */
    @Override
    public double getEffortLimitUpper()
    {
       return Math.min(RevoluteTwinsJointBasics.super.getEffortLimitUpper(), effortLimitUpper);
    }
 
-   /**
-    * Returns the implementation name of this joint and the joint name.
-    */
+   /** Returns the implementation name of this joint and the joint name. */
    @Override
    public String toString()
    {
