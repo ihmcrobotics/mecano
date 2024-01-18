@@ -1,23 +1,10 @@
 package us.ihmc.mecano.algorithms;
 
-import static org.junit.jupiter.api.Assertions.assertFalse;
-import static org.junit.jupiter.api.Assertions.assertNull;
-import static org.junit.jupiter.api.Assertions.assertTrue;
-import static us.ihmc.mecano.tools.MecanoRandomTools.nextWrench;
-
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
-import java.util.Map;
-import java.util.Random;
-import java.util.stream.Collectors;
-
 import org.ejml.data.DMatrixRMaj;
 import org.ejml.dense.row.CommonOps_DDRM;
 import org.ejml.dense.row.MatrixFeatures_DDRM;
 import org.ejml.dense.row.RandomMatrices_DDRM;
 import org.junit.jupiter.api.Test;
-
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.tools.EuclidCoreIOTools;
 import us.ihmc.euclid.tools.EuclidCoreRandomTools;
@@ -32,14 +19,18 @@ import us.ihmc.mecano.multiBodySystem.RevoluteJoint;
 import us.ihmc.mecano.multiBodySystem.interfaces.*;
 import us.ihmc.mecano.spatial.SpatialAcceleration;
 import us.ihmc.mecano.spatial.SpatialVector;
+import us.ihmc.mecano.spatial.Wrench;
 import us.ihmc.mecano.spatial.interfaces.SpatialAccelerationReadOnly;
 import us.ihmc.mecano.spatial.interfaces.WrenchReadOnly;
-import us.ihmc.mecano.tools.JointStateType;
-import us.ihmc.mecano.tools.MecanoRandomTools;
-import us.ihmc.mecano.tools.MecanoTestTools;
-import us.ihmc.mecano.tools.MultiBodySystemRandomTools;
+import us.ihmc.mecano.tools.*;
 import us.ihmc.mecano.tools.MultiBodySystemRandomTools.RandomFloatingRevoluteJointChain;
-import us.ihmc.mecano.tools.MultiBodySystemTools;
+
+import java.util.*;
+import java.util.stream.Collectors;
+
+import static org.junit.jupiter.api.Assertions.*;
+import static us.ihmc.mecano.tools.MecanoRandomTools.nextWrench;
+import static us.ihmc.mecano.tools.MecanoTestTools.assertWrenchEquals;
 
 public class ForwardDynamicsCalculatorTest
 {
@@ -313,7 +304,7 @@ public class ForwardDynamicsCalculatorTest
          jointsToLock.forEach(j -> j.setJointAccelerationToZero());
 
          InverseDynamicsCalculator invDyn = new InverseDynamicsCalculator(input);
-         invDyn.setGravitionalAcceleration(-9.81);
+         invDyn.setGravitationalAcceleration(-9.81);
          invDyn.compute();
          invDyn.writeComputedJointWrenches(joints);
 
@@ -323,13 +314,13 @@ public class ForwardDynamicsCalculatorTest
          MultiBodySystemTools.extractJointsState(joints, JointStateType.EFFORT, expected_tau);
 
          ForwardDynamicsCalculator fwdDyn = new ForwardDynamicsCalculator(input);
-         fwdDyn.setGravitionalAcceleration(-9.81);
+         fwdDyn.setGravitationalAcceleration(-9.81);
 
          jointsToLock.forEach(j ->
-         {
-            j.setJointTauToZero(); // Make sure the forward dynamics calculator does not use that info.
-            fwdDyn.setJointSourceMode(j, JointSourceMode.ACCELERATION_SOURCE);
-         });
+                              {
+                                 j.setJointTauToZero(); // Make sure the forward dynamics calculator does not use that info.
+                                 fwdDyn.setJointSourceMode(j, JointSourceMode.ACCELERATION_SOURCE);
+                              });
 
          fwdDyn.compute();
 
@@ -410,7 +401,7 @@ public class ForwardDynamicsCalculatorTest
          MultiBodySystemRandomTools.nextState(random, JointStateType.ACCELERATION, joints);
 
          InverseDynamicsCalculator invDyn = new InverseDynamicsCalculator(input);
-         invDyn.setGravitionalAcceleration(-9.81);
+         invDyn.setGravitationalAcceleration(-9.81);
          invDyn.compute();
          invDyn.writeComputedJointWrenches(joints);
 
@@ -420,7 +411,7 @@ public class ForwardDynamicsCalculatorTest
          MultiBodySystemTools.extractJointsState(joints, JointStateType.EFFORT, expected_tau);
 
          ForwardDynamicsCalculator fwdDyn = new ForwardDynamicsCalculator(input);
-         fwdDyn.setGravitionalAcceleration(-9.81);
+         fwdDyn.setGravitationalAcceleration(-9.81);
 
          int numberOfLockedJoints = numberOfJoints == 1 ? 1 : random.nextInt(numberOfJoints - 1) + 1;
          List<JointBasics> jointsToLock = new ArrayList<>(joints);
@@ -428,10 +419,10 @@ public class ForwardDynamicsCalculatorTest
          while (jointsToLock.size() > numberOfLockedJoints)
             jointsToLock.remove(jointsToLock.size() - 1);
          jointsToLock.forEach(j ->
-         {
-            j.setJointTauToZero(); // Make sure the forward dynamics calculator does not use that info.
-            fwdDyn.setJointSourceMode(j, JointSourceMode.ACCELERATION_SOURCE);
-         });
+                              {
+                                 j.setJointTauToZero(); // Make sure the forward dynamics calculator does not use that info.
+                                 fwdDyn.setJointSourceMode(j, JointSourceMode.ACCELERATION_SOURCE);
+                              });
 
          fwdDyn.compute();
 
@@ -790,9 +781,9 @@ public class ForwardDynamicsCalculatorTest
 
       double gravity = EuclidCoreRandomTools.nextDouble(random, -10.0, -1.0);
       InverseDynamicsCalculator inverseDynamicsCalculator = new InverseDynamicsCalculator(multiBodySystemInput);
-      inverseDynamicsCalculator.setGravitionalAcceleration(gravity);
+      inverseDynamicsCalculator.setGravitationalAcceleration(gravity);
       ForwardDynamicsCalculator forwardDynamicsCalculator = new ForwardDynamicsCalculator(multiBodySystemInput);
-      forwardDynamicsCalculator.setGravitionalAcceleration(gravity);
+      forwardDynamicsCalculator.setGravitationalAcceleration(gravity);
 
       compareAgainstExistingInverseDynamicsCalculator(random, iteration, joints, externalWrenches, epsilon, forwardDynamicsCalculator, inverseDynamicsCalculator);
    }
@@ -856,6 +847,7 @@ public class ForwardDynamicsCalculatorTest
       RigidBodyBasics rootBody = MultiBodySystemTools.getRootBody(joints.get(0).getPredecessor());
       List<? extends RigidBodyBasics> allRigidBodies = rootBody.subtreeList();
 
+      // Test the acceleration of each body.
       for (RigidBodyReadOnly rigidBody : allRigidBodies)
       {
          SpatialAccelerationReadOnly expectedAccelerationOfBody = inverseDynamicsCalculator.getAccelerationProvider().getAccelerationOfBody(rigidBody);
@@ -886,6 +878,25 @@ public class ForwardDynamicsCalculatorTest
                   assertAccelerationEquals(expectedRelativeAcceleration, actualRelativeAcceleration, epsilon);
                }
             }
+         }
+      }
+
+      List<JointReadOnly> reverseJointList = new ArrayList<>(joints);
+      Collections.reverse(reverseJointList);
+
+      // Test the wrench of each joint.
+      for (JointReadOnly joint : joints)
+      {
+         WrenchReadOnly expectedWrench = inverseDynamicsCalculator.getComputedJointWrench(joint);
+         if (expectedWrench == null)
+         {
+            assertNull(forwardDynamicsCalculator.getJointWrench(joint));
+         }
+         else
+         {
+            Wrench actualWrench = new Wrench(forwardDynamicsCalculator.getJointWrench(joint));
+            actualWrench.changeFrame(expectedWrench.getReferenceFrame());
+            assertWrenchEquals(expectedWrench, actualWrench, Math.max(1.0, expectedWrench.length()) * epsilon);
          }
       }
    }
@@ -1057,7 +1068,8 @@ public class ForwardDynamicsCalculatorTest
             SpatialAcceleration actualAccelerationOfBody = new SpatialAcceleration(fwdDynAccelerationProvider.getAccelerationOfBody(rigidBody));
             assertAccelerationEquals(expectedAccelerationOfBody, actualAccelerationOfBody, epsilon);
 
-            SpatialAcceleration actualZeroVelocityAccelerationOfBody = new SpatialAcceleration(fwdDynZeroVelocityAccelerationProvider.getAccelerationOfBody(rigidBody));
+            SpatialAcceleration actualZeroVelocityAccelerationOfBody = new SpatialAcceleration(fwdDynZeroVelocityAccelerationProvider.getAccelerationOfBody(
+                  rigidBody));
             assertAccelerationEquals(expectedZeroVelocityAccelerationOfBody, actualZeroVelocityAccelerationOfBody, epsilon);
 
             for (int i = 0; i < 5; i++)
@@ -1096,7 +1108,9 @@ public class ForwardDynamicsCalculatorTest
 
    public static Map<RigidBodyReadOnly, WrenchReadOnly> nextExternalWrenches(Random random, List<? extends JointReadOnly> joints)
    {
-      return joints.stream().filter(j -> random.nextBoolean()).map(j -> j.getSuccessor())
+      return joints.stream()
+                   .filter(j -> random.nextBoolean())
+                   .map(j -> j.getSuccessor())
                    .collect(Collectors.toMap(b -> b, b -> nextWrench(random, b.getBodyFixedFrame(), b.getBodyFixedFrame())));
    }
 }

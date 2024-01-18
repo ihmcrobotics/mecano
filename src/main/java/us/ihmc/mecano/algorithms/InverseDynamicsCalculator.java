@@ -1,16 +1,8 @@
 package us.ihmc.mecano.algorithms;
 
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.LinkedHashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.function.Function;
-
 import org.ejml.data.DMatrix;
 import org.ejml.data.DMatrixRMaj;
 import org.ejml.dense.row.CommonOps_DDRM;
-
 import us.ihmc.euclid.referenceFrame.exceptions.ReferenceFrameMismatchException;
 import us.ihmc.euclid.referenceFrame.interfaces.FrameTuple3DReadOnly;
 import us.ihmc.euclid.tools.EuclidCoreIOTools;
@@ -22,11 +14,7 @@ import us.ihmc.mecano.multiBodySystem.interfaces.JointMatrixIndexProvider;
 import us.ihmc.mecano.multiBodySystem.interfaces.JointReadOnly;
 import us.ihmc.mecano.multiBodySystem.interfaces.MultiBodySystemReadOnly;
 import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyReadOnly;
-import us.ihmc.mecano.spatial.SpatialAcceleration;
-import us.ihmc.mecano.spatial.SpatialForce;
-import us.ihmc.mecano.spatial.SpatialInertia;
-import us.ihmc.mecano.spatial.Twist;
-import us.ihmc.mecano.spatial.Wrench;
+import us.ihmc.mecano.spatial.*;
 import us.ihmc.mecano.spatial.interfaces.FixedFrameWrenchBasics;
 import us.ihmc.mecano.spatial.interfaces.SpatialAccelerationReadOnly;
 import us.ihmc.mecano.spatial.interfaces.SpatialVectorReadOnly;
@@ -34,6 +22,9 @@ import us.ihmc.mecano.spatial.interfaces.TwistReadOnly;
 import us.ihmc.mecano.spatial.interfaces.WrenchReadOnly;
 import us.ihmc.mecano.tools.JointStateType;
 import us.ihmc.mecano.tools.MultiBodySystemTools;
+
+import java.util.*;
+import java.util.function.Function;
 
 /**
  * Computes joint efforts based on joint accelerations.
@@ -102,11 +93,11 @@ public class InverseDynamicsCalculator
     *                                             accelerations should be considered.
     * @deprecated Use the following code snippet instead:
     *
-    *             <pre>
-    *             InverseDynamicsCalculator calculator = new InverseDynamicsCalculator(rootBody);
-    *             calculator.setConsiderCoriolisAndCentrifugalForces(considerCoriolisAndCentrifugalForces);
-    *             calculator.setConsiderJointAccelerations(considerJointAccelerations);
-    *             </pre>
+    *       <pre>
+    *                                                                                                                                     InverseDynamicsCalculator calculator = new InverseDynamicsCalculator(rootBody);
+    *                                                                                                                                     calculator.setConsiderCoriolisAndCentrifugalForces(considerCoriolisAndCentrifugalForces);
+    *                                                                                                                                     calculator.setConsiderJointAccelerations(considerJointAccelerations);
+    *                                                                                                                                     </pre>
     */
    @Deprecated
    public InverseDynamicsCalculator(RigidBodyReadOnly rootBody, boolean considerCoriolisAndCentrifugalForces, boolean considerJointAccelerations)
@@ -132,11 +123,11 @@ public class InverseDynamicsCalculator
     *                                             accelerations should be considered.
     * @deprecated Use the following code snippet instead:
     *
-    *             <pre>
-    *             InverseDynamicsCalculator calculator = new InverseDynamicsCalculator(input);
-    *             calculator.setConsiderCoriolisAndCentrifugalForces(considerCoriolisAndCentrifugalForces);
-    *             calculator.setConsiderJointAccelerations(considerJointAccelerations);
-    *             </pre>
+    *       <pre>
+    *                                                                                                                                     InverseDynamicsCalculator calculator = new InverseDynamicsCalculator(input);
+    *                                                                                                                                     calculator.setConsiderCoriolisAndCentrifugalForces(considerCoriolisAndCentrifugalForces);
+    *                                                                                                                                     calculator.setConsiderJointAccelerations(considerJointAccelerations);
+    *                                                                                                                                     </pre>
     */
    @Deprecated
    public InverseDynamicsCalculator(MultiBodySystemReadOnly input, boolean considerCoriolisAndCentrifugalForces, boolean considerJointAccelerations)
@@ -172,11 +163,11 @@ public class InverseDynamicsCalculator
     *                                             performance improvement.
     * @deprecated Use the following code snippet instead:
     *
-    *             <pre>
-    *             InverseDynamicsCalculator calculator = new InverseDynamicsCalculator(input, considerIgnoredSubtreesInertia);
-    *             calculator.setConsiderCoriolisAndCentrifugalForces(considerCoriolisAndCentrifugalForces);
-    *             calculator.setConsiderJointAccelerations(considerJointAccelerations);
-    *             </pre>
+    *       <pre>
+    *                                                                                                                                     InverseDynamicsCalculator calculator = new InverseDynamicsCalculator(input, considerIgnoredSubtreesInertia);
+    *                                                                                                                                     calculator.setConsiderCoriolisAndCentrifugalForces(considerCoriolisAndCentrifugalForces);
+    *                                                                                                                                     calculator.setConsiderJointAccelerations(considerJointAccelerations);
+    *                                                                                                                                     </pre>
     */
    @Deprecated
    public InverseDynamicsCalculator(MultiBodySystemReadOnly input,
@@ -269,22 +260,7 @@ public class InverseDynamicsCalculator
 
    private void buildMultiBodyTree(RecursionStep parent, Collection<? extends JointReadOnly> jointsToIgnore)
    {
-      List<JointReadOnly> childrenJoints = new ArrayList<>(parent.rigidBody.getChildrenJoints());
-
-      if (childrenJoints.size() > 1)
-      { // Reorganize the joints in the children to ensure that loop closures are treated last.
-         List<JointReadOnly> loopClosureAncestors = new ArrayList<>();
-
-         for (int i = 0; i < childrenJoints.size();)
-         {
-            if (MultiBodySystemTools.doesSubtreeContainLoopClosure(childrenJoints.get(i).getSuccessor()))
-               loopClosureAncestors.add(childrenJoints.remove(i));
-            else
-               i++;
-         }
-
-         childrenJoints.addAll(loopClosureAncestors);
-      }
+      List<JointReadOnly> childrenJoints = MultiBodySystemTools.sortLoopClosureInChildrenJoints(parent.rigidBody);
 
       for (JointReadOnly childJoint : childrenJoints)
       {
@@ -347,10 +323,19 @@ public class InverseDynamicsCalculator
     * @param gravity the gravitational linear acceleration, it is usually equal to
     *                {@code (0, 0, -9.81)}.
     */
-   public void setGravitionalAcceleration(FrameTuple3DReadOnly gravity)
+   public void setGravitationalAcceleration(FrameTuple3DReadOnly gravity)
    {
       gravity.checkReferenceFrameMatch(input.getInertialFrame());
-      setGravitionalAcceleration((Tuple3DReadOnly) gravity);
+      setGravitationalAcceleration((Tuple3DReadOnly) gravity);
+   }
+
+   /**
+    * @deprecated Use {@link #setGravitationalAcceleration(FrameTuple3DReadOnly)} instead.
+    */
+   @Deprecated
+   public void setGravitionalAcceleration(FrameTuple3DReadOnly gravity)
+   {
+      setGravitationalAcceleration((Tuple3DReadOnly) gravity);
    }
 
    /**
@@ -363,11 +348,20 @@ public class InverseDynamicsCalculator
     * @param gravity the gravitational linear acceleration, it is usually equal to
     *                {@code (0, 0, -9.81)}.
     */
-   public void setGravitionalAcceleration(Tuple3DReadOnly gravity)
+   public void setGravitationalAcceleration(Tuple3DReadOnly gravity)
    {
       SpatialAcceleration rootAcceleration = initialRecursionStep.rigidBodyAcceleration;
       rootAcceleration.setToZero();
       rootAcceleration.getLinearPart().setAndNegate(gravity);
+   }
+
+   /**
+    * @deprecated Use {@link #setGravitationalAcceleration(Tuple3DReadOnly)} instead.
+    */
+   @Deprecated
+   public void setGravitionalAcceleration(Tuple3DReadOnly gravity)
+   {
+      setGravitationalAcceleration(gravity);
    }
 
    /**
@@ -380,9 +374,18 @@ public class InverseDynamicsCalculator
     * @param gravity the gravitational linear acceleration along the z-axis, it is usually equal to
     *                {@code -9.81}.
     */
+   public void setGravitationalAcceleration(double gravity)
+   {
+      setGravitationalAcceleration(0.0, 0.0, gravity);
+   }
+
+   /**
+    * @deprecated Use {@link #setGravitationalAcceleration(double)} instead.
+    */
+   @Deprecated
    public void setGravitionalAcceleration(double gravity)
    {
-      setGravitionalAcceleration(0.0, 0.0, gravity);
+      setGravitationalAcceleration(gravity);
    }
 
    /**
@@ -399,12 +402,21 @@ public class InverseDynamicsCalculator
     * @param gravityZ the gravitational linear acceleration along the z-axis, it is usually equal to
     *                 {@code -9.81}.
     */
-   public void setGravitionalAcceleration(double gravityX, double gravityY, double gravityZ)
+   public void setGravitationalAcceleration(double gravityX, double gravityY, double gravityZ)
    {
       SpatialAcceleration rootAcceleration = initialRecursionStep.rigidBodyAcceleration;
       rootAcceleration.setToZero();
       rootAcceleration.getLinearPart().set(gravityX, gravityY, gravityZ);
       rootAcceleration.negate();
+   }
+
+   /**
+    * @deprecated Use {@link #setGravitationalAcceleration(double, double, double)} instead.
+    */
+   @Deprecated
+   public void setGravitionalAcceleration(double gravityX, double gravityY, double gravityZ)
+   {
+      setGravitationalAcceleration(gravityX, gravityY, gravityZ);
    }
 
    /**
@@ -414,8 +426,8 @@ public class InverseDynamicsCalculator
     *
     * @param newRootAcceleration the new spatial acceleration of the root.
     * @throws ReferenceFrameMismatchException if any of the reference frames of
-    *                                         {@code newRootAcceleration} does not match this
-    *                                         calculator's root spatial acceleration's frames.
+    *       {@code newRootAcceleration} does not match this
+    *       calculator's root spatial acceleration's frames.
     */
    public void setRootAcceleration(SpatialAccelerationReadOnly newRootAcceleration)
    {
@@ -534,7 +546,7 @@ public class InverseDynamicsCalculator
     * not.
     *
     * @return {@code true} if this calculator is accounting for joint accelerations, {@code false}
-    *         otherwise.
+    *       otherwise.
     * @see #setConsiderJointAccelerations(boolean)
     */
    public boolean areJointAccelerationsConsidered()
@@ -547,7 +559,7 @@ public class InverseDynamicsCalculator
     * centrifugal effects or not.
     *
     * @return {@code true} if this calculator is accounting for Coriolis and centrifugal forces,
-    *         {@code false} otherwise.
+    *       {@code false} otherwise.
     * @see #setConsiderCoriolisAndCentrifugalForces(boolean)
     */
    public boolean areCoriolisAndCentrifugalForcesConsidered()
@@ -839,14 +851,14 @@ public class InverseDynamicsCalculator
             {
                if (input.getJointsToIgnore().contains(childJoint))
                {
-                  SpatialInertia subtreeIneria = MultiBodySystemTools.computeSubtreeInertia(childJoint);
-                  subtreeIneria.changeFrame(getBodyFixedFrame());
+                  SpatialInertia subtreeInertia = MultiBodySystemTools.computeSubtreeInertia(childJoint);
+                  subtreeInertia.changeFrame(getBodyFixedFrame());
                   if (bodySubtreeInertia == null)
                   {
                      bodyInertia = new SpatialInertia(getBodyFixedFrame(), getBodyFixedFrame());
                      bodySubtreeInertia = new SpatialInertia(getBodyFixedFrame(), getBodyFixedFrame());
                   }
-                  bodySubtreeInertia.add(subtreeIneria);
+                  bodySubtreeInertia.add(subtreeInertia);
                }
             }
          }

@@ -1,11 +1,6 @@
 package us.ihmc.mecano.tools;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-
-import java.util.Random;
-
 import org.junit.jupiter.api.Test;
-
 import us.ihmc.euclid.geometry.Pose3D;
 import us.ihmc.euclid.geometry.interfaces.Pose3DBasics;
 import us.ihmc.euclid.matrix.Matrix3D;
@@ -30,6 +25,10 @@ import us.ihmc.mecano.spatial.SpatialVector;
 import us.ihmc.mecano.spatial.Twist;
 import us.ihmc.mecano.spatial.interfaces.FixedFrameSpatialAccelerationBasics;
 import us.ihmc.mecano.spatial.interfaces.FixedFrameTwistBasics;
+
+import java.util.Random;
+
+import static org.junit.jupiter.api.Assertions.*;
 
 public class MultiBodySystemStateIntegratorTest
 {
@@ -184,10 +183,7 @@ public class MultiBodySystemStateIntegratorTest
             EuclidFrameTestTools.assertEquals(messagePrefix, angularVelocityFD, jointTwist.getAngularPart(), LARGE_EPSILON);
             EuclidFrameTestTools.assertEquals(messagePrefix, linearVelocityFD, jointTwist.getLinearPart(), LARGE_EPSILON);
 
-            EuclidFrameTestTools.assertEquals(messagePrefix,
-                                                          initialAcceleration.getAngularPart(),
-                                                          jointAcceleration.getAngularPart(),
-                                                          LARGE_EPSILON);
+            EuclidFrameTestTools.assertEquals(messagePrefix, initialAcceleration.getAngularPart(), jointAcceleration.getAngularPart(), LARGE_EPSILON);
             actualLinearAccelerationInWorld.setMatchingFrame(jointAcceleration.getLinearPart());
             EuclidFrameTestTools.assertEquals(messagePrefix, expectedLinearAccelerationInWorld, actualLinearAccelerationInWorld, EPSILON);
 
@@ -237,7 +233,7 @@ public class MultiBodySystemStateIntegratorTest
          double zd0 = expectedLinearVelocity.getZ();
 
          ForwardDynamicsCalculator calculator = new ForwardDynamicsCalculator(root);
-         calculator.setGravitionalAcceleration(gravity);
+         calculator.setGravitationalAcceleration(gravity);
 
          FrameVector3D actualLinearVelocity = new FrameVector3D();
          FrameVector3D actualLinearAcceleration = new FrameVector3D();
@@ -419,10 +415,7 @@ public class MultiBodySystemStateIntegratorTest
             EuclidFrameTestTools.assertEquals(messagePrefix, angularVelocityFD, jointTwist.getAngularPart(), LARGE_EPSILON);
             EuclidFrameTestTools.assertEquals(messagePrefix, linearVelocityFD, jointTwist.getLinearPart(), LARGE_EPSILON);
 
-            EuclidFrameTestTools.assertEquals(messagePrefix,
-                                                          initialAcceleration.getAngularPart(),
-                                                          jointAcceleration.getAngularPart(),
-                                                          LARGE_EPSILON);
+            EuclidFrameTestTools.assertEquals(messagePrefix, initialAcceleration.getAngularPart(), jointAcceleration.getAngularPart(), LARGE_EPSILON);
             actualLinearAccelerationInWorld.setMatchingFrame(jointAcceleration.getLinearPart());
             EuclidFrameTestTools.assertEquals(messagePrefix, expectedLinearAccelerationInWorld, actualLinearAccelerationInWorld, EPSILON);
 
@@ -472,7 +465,7 @@ public class MultiBodySystemStateIntegratorTest
          double zd0 = expectedLinearVelocity.getZ();
 
          ForwardDynamicsCalculator calculator = new ForwardDynamicsCalculator(root);
-         calculator.setGravitionalAcceleration(gravity);
+         calculator.setGravitationalAcceleration(gravity);
 
          FrameVector3D actualLinearVelocity = new FrameVector3D();
          FrameVector3D actualLinearAcceleration = new FrameVector3D();

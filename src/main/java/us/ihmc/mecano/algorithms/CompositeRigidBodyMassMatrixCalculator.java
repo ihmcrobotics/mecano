@@ -1,28 +1,22 @@
 package us.ihmc.mecano.algorithms;
 
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.List;
-
 import org.ejml.data.DMatrix;
 import org.ejml.data.DMatrixRMaj;
-
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.mecano.frames.MovingReferenceFrame;
 import us.ihmc.mecano.multiBodySystem.interfaces.JointReadOnly;
 import us.ihmc.mecano.multiBodySystem.interfaces.MultiBodySystemReadOnly;
 import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyReadOnly;
-import us.ihmc.mecano.spatial.Momentum;
-import us.ihmc.mecano.spatial.SpatialAcceleration;
-import us.ihmc.mecano.spatial.SpatialForce;
-import us.ihmc.mecano.spatial.SpatialInertia;
-import us.ihmc.mecano.spatial.Twist;
-import us.ihmc.mecano.spatial.Wrench;
+import us.ihmc.mecano.spatial.*;
 import us.ihmc.mecano.spatial.interfaces.SpatialForceReadOnly;
 import us.ihmc.mecano.spatial.interfaces.SpatialInertiaReadOnly;
 import us.ihmc.mecano.spatial.interfaces.TwistReadOnly;
 import us.ihmc.mecano.tools.MultiBodySystemTools;
+
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.List;
 
 /**
  * This calculator computes:
@@ -242,22 +236,7 @@ public class CompositeRigidBodyMassMatrixCalculator
    {
       List<CompositeRigidBodyInertia> inertiaList = new ArrayList<>();
 
-      List<JointReadOnly> childrenJoints = new ArrayList<>(parent.rigidBody.getChildrenJoints());
-
-      if (childrenJoints.size() > 1)
-      { // Reorganize the joints in the children to ensure that loop closures are treated last.
-         List<JointReadOnly> loopClosureAncestors = new ArrayList<>();
-
-         for (int i = 0; i < childrenJoints.size();)
-         {
-            if (MultiBodySystemTools.doesSubtreeContainLoopClosure(childrenJoints.get(i).getSuccessor()))
-               loopClosureAncestors.add(childrenJoints.remove(i));
-            else
-               i++;
-         }
-
-         childrenJoints.addAll(loopClosureAncestors);
-      }
+      List<JointReadOnly> childrenJoints = MultiBodySystemTools.sortLoopClosureInChildrenJoints(parent.rigidBody);
 
       for (JointReadOnly childJoint : childrenJoints)
       {
@@ -292,7 +271,7 @@ public class CompositeRigidBodyMassMatrixCalculator
     * Note that enabling the calculation of the Coriolis and centrifugal matrix will increase the
     * computational load when updating the mass matrix.
     * </p>
-    * 
+    *
     * @param enableCoriolisMatrixCalculation whether to enable or disable the calculation of the
     *                                        Coriolis and centrifugal matrix. Disabled by default.
     */
@@ -370,10 +349,10 @@ public class CompositeRigidBodyMassMatrixCalculator
 
    /**
     * Gets the Coriolis and centrifugal matrix for this multi-body system.
-    * 
+    *
     * @return the Coriolis and centrifugal matrix.
     * @throws UnsupportedOperationException if the calculation of the Coriolis and centrifugal matrix
-    *                                       was not enabled.
+    *       was not enabled.
     * @see #setEnableCoriolisMatrixCalculation(boolean)
     */
    public DMatrixRMaj getCoriolisMatrix()

@@ -72,6 +72,42 @@ public interface RevoluteTwinsJointBasics extends RevoluteTwinsJointReadOnly, On
    void updateMotionSubspace();
 
    /**
+    * Set the ratio between the actuated joint and the constrained joint, such that:
+    * <pre>
+    *    q_constrained     = constraintRatio * q_actuated    + constraintOffset
+    *    qDot_constrained  = constraintRatio * qDot_actuated
+    *    qDDot_constrained = constraintRatio * qDDot_actuated
+    * </pre>
+    * <p>
+    * The constrained joint is the joint that is not actuated, i.e. the joint that is not a torque source.
+    * </p>
+    * <p>
+    * Note that this method does not update the joint state.
+    * </p>
+    *
+    * @param constraintRatio the ratio between the actuated joint and the constrained joint.
+    */
+   void setConstraintRatio(double constraintRatio);
+
+   /**
+    * Set the offset between the actuated joint and the constrained joint, such that:
+    * <pre>
+    *    q_constrained     = constraintRatio * q_actuated    + constraintOffset
+    *    qDot_constrained  = constraintRatio * qDot_actuated
+    *    qDDot_constrained = constraintRatio * qDDot_actuated
+    * </pre>
+    * <p>
+    * The constrained joint is the joint that is not actuated, i.e. the joint that is not a torque source.
+    * </p>
+    * <p>
+    * Note that this method does not update the joint state.
+    * </p>
+    *
+    * @param constraintOffset the offset between the actuated joint and the constrained joint.
+    */
+   void setConstraintOffset(double constraintOffset);
+
+   /**
     * {@inheritDoc}
     */
    @Override

@@ -1,25 +1,19 @@
 package us.ihmc.mecano.algorithms;
 
+import org.ejml.data.DMatrixRMaj;
+import org.ejml.dense.row.CommonOps_DDRM;
+import org.junit.jupiter.api.Test;
+import us.ihmc.euclid.referenceFrame.ReferenceFrame;
+import us.ihmc.mecano.algorithms.TablePrinter.Alignment;
+import us.ihmc.mecano.multiBodySystem.interfaces.*;
+import us.ihmc.mecano.spatial.Wrench;
+import us.ihmc.mecano.tools.*;
+
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Random;
 import java.util.function.Function;
-
-import org.ejml.data.DMatrixRMaj;
-import org.ejml.dense.row.CommonOps_DDRM;
-import org.junit.jupiter.api.Test;
-
-import us.ihmc.euclid.referenceFrame.ReferenceFrame;
-import us.ihmc.mecano.algorithms.TablePrinter.Alignment;
-import us.ihmc.mecano.multiBodySystem.interfaces.*;
-import us.ihmc.mecano.spatial.Wrench;
-import us.ihmc.mecano.tools.JointStateType;
-import us.ihmc.mecano.tools.MecanoRandomTools;
-import us.ihmc.mecano.tools.MecanoTestTools;
-import us.ihmc.mecano.tools.MultiBodySystemRandomTools;
-import us.ihmc.mecano.tools.MultiBodySystemStateIntegrator;
-import us.ihmc.mecano.tools.MultiBodySystemTools;
 
 public class MultiBodyGravityGradientCalculatorTest
 {
@@ -41,7 +35,7 @@ public class MultiBodyGravityGradientCalculatorTest
          MultiBodySystemBasics input = MultiBodySystemBasics.toMultiBodySystemBasics(joints);
 
          InverseDynamicsCalculator inverseDynamics = new InverseDynamicsCalculator(input);
-         inverseDynamics.setGravitionalAcceleration(-GRAVITY);
+         inverseDynamics.setGravitationalAcceleration(-GRAVITY);
          inverseDynamics.setConsiderCoriolisAndCentrifugalForces(false);
          inverseDynamics.setConsiderJointAccelerations(false);
 
@@ -323,7 +317,7 @@ public class MultiBodyGravityGradientCalculatorTest
             RigidBodyBasics body = joints.get(jointIndex).getSuccessor();
             Wrench wrench = MecanoRandomTools.nextWrench(random, body.getBodyFixedFrame(), body.getBodyFixedFrame(), 10.0, 10.0);
             wrench.getLinearPart().setToZero();
-//            wrench.getAngularPart().setToZero();
+            //            wrench.getAngularPart().setToZero();
             wrenches.put(body, wrench);
          }
       }
@@ -618,16 +612,16 @@ public class MultiBodyGravityGradientCalculatorTest
       // Remember the wrenches in world, so we can re-apply them after integration.
       Map<RigidBodyBasics, Wrench> externalWrenchesWorld = new HashMap<>();
       externalWrenches.forEach((body, wrench) ->
-      {
-         Wrench wrenchInWorld = new Wrench(wrench);
-         wrenchInWorld.changeFrame(worldFrame);
-         externalWrenchesWorld.put(body, wrenchInWorld);
-      });
+                               {
+                                  Wrench wrenchInWorld = new Wrench(wrench);
+                                  wrenchInWorld.changeFrame(worldFrame);
+                                  externalWrenchesWorld.put(body, wrenchInWorld);
+                               });
 
       InverseDynamicsCalculator calculator = new InverseDynamicsCalculator(input);
       calculator.setConsiderCoriolisAndCentrifugalForces(false);
       calculator.setConsiderJointAccelerations(false);
-      calculator.setGravitionalAcceleration(-GRAVITY);
+      calculator.setGravitationalAcceleration(-GRAVITY);
       externalWrenches.forEach((body, wrench) -> calculator.getExternalWrench(body).set(wrench));
       calculator.compute();
       prevGravity.set(calculator.getJointTauMatrix());
@@ -688,16 +682,16 @@ public class MultiBodyGravityGradientCalculatorTest
       // Remember the wrenches in world, so we can re-apply them after integration.
       Map<RigidBodyBasics, Wrench> externalWrenchesWorld = new HashMap<>();
       externalWrenches.forEach((body, wrench) ->
-      {
-         Wrench wrenchInWorld = new Wrench(wrench);
-         wrenchInWorld.changeFrame(worldFrame);
-         externalWrenchesWorld.put(body, wrenchInWorld);
-      });
+                               {
+                                  Wrench wrenchInWorld = new Wrench(wrench);
+                                  wrenchInWorld.changeFrame(worldFrame);
+                                  externalWrenchesWorld.put(body, wrenchInWorld);
+                               });
 
       InverseDynamicsCalculator calculator = new InverseDynamicsCalculator(input);
       calculator.setConsiderCoriolisAndCentrifugalForces(false);
       calculator.setConsiderJointAccelerations(false);
-      calculator.setGravitionalAcceleration(-GRAVITY);
+      calculator.setGravitationalAcceleration(-GRAVITY);
       MultiBodySystemStateIntegrator integrator = new MultiBodySystemStateIntegrator(dq);
 
       int nDoFs = input.getNumberOfDoFs();
