@@ -1335,16 +1335,23 @@ public class ForwardDynamicsCalculator
             {
                MovingReferenceFrame frameAfterJoint = getFrameAfterJoint();
 
-         rigidBodyAcceleration.changeFrame(getBodyFixedFrame());
+               rigidBodyAcceleration.changeFrame(getBodyFixedFrame());
 
-         if (bodyInertia != null)
-            bodyInertia.computeDynamicWrench(rigidBodyAcceleration, null, jointWrench);
-         else
-            rigidBody.getInertia().computeDynamicWrench(rigidBodyAcceleration, null, jointWrench);
-
-         jointWrench.sub(externalWrench);
-         jointWrench.changeFrame(frameAfterJoint);
-         jointWrench.add(biasWrench);
+               SpatialInertiaReadOnly inertia = bodyInertia == null ? rigidBody.getInertia() : bodyInertia;
+               if (inertia.isCenterOfMassOffsetZero())
+               {
+                  // The interaction with the velocity can be decoupled from the acceleration, we just need to add the already computed bias wrench.
+                  inertia.computeDynamicWrench(rigidBodyAcceleration, null, jointWrench);
+                  jointWrench.changeFrame(frameAfterJoint);
+                  jointWrench.add(biasWrench);
+               }
+               else
+               {
+                  // The interaction with the velocity needs to be accounted for directly in the dynamic wrench.
+                  inertia.computeDynamicWrench(rigidBodyAcceleration, getBodyTwist(), jointWrench);
+                  jointWrench.sub(externalWrench);
+                  jointWrench.changeFrame(frameAfterJoint);
+               }
 
                for (int childIndex = 0; childIndex < children.size(); childIndex++)
                   addJointWrenchFromChild(children.get(childIndex));
