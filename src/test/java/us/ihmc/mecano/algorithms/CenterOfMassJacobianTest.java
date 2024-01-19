@@ -12,6 +12,8 @@ import org.junit.jupiter.api.Test;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
+import us.ihmc.euclid.referenceFrame.interfaces.FramePoint3DReadOnly;
+import us.ihmc.euclid.referenceFrame.interfaces.FrameVector3DReadOnly;
 import us.ihmc.euclid.referenceFrame.tools.EuclidFrameTestTools;
 import us.ihmc.euclid.tools.EuclidCoreTestTools;
 import us.ihmc.euclid.tuple3D.Vector3D;
@@ -19,9 +21,7 @@ import us.ihmc.mecano.multiBodySystem.OneDoFJoint;
 import us.ihmc.mecano.multiBodySystem.interfaces.JointBasics;
 import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
 import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyReadOnly;
-import us.ihmc.mecano.tools.JointStateType;
-import us.ihmc.mecano.tools.MultiBodySystemRandomTools;
-import us.ihmc.mecano.tools.MultiBodySystemTools;
+import us.ihmc.mecano.tools.*;
 
 public class CenterOfMassJacobianTest
 {
@@ -193,6 +193,120 @@ public class CenterOfMassJacobianTest
       }
    }
 
+   @Test
+   public void testModifiedRigidBodyParameters()
+   {
+      Random random = new Random(23);
+
+      // Center of mass position, Jacobian calculator in world frame
+      for (int i = 0; i < ITERATIONS; i++)
+      {
+         int numberOfJoints = random.nextInt(50) + 1;
+
+         List<JointBasics> joints = MultiBodySystemRandomTools.nextJointChain(random, numberOfJoints);
+         MultiBodySystemRandomTools.nextState(random, JointStateType.CONFIGURATION, joints);
+         MultiBodySystemRandomTools.nextState(random, JointStateType.VELOCITY, joints);
+
+         RigidBodyBasics rootBody = joints.get(0).getPredecessor();
+         rootBody.updateFramesRecursively();
+
+         CenterOfMassJacobian centerOfMassJacobian = new CenterOfMassJacobian(rootBody, worldFrame);
+         CenterOfMassCalculator centerOfMassCalculator = new CenterOfMassCalculator(rootBody, worldFrame);
+
+         FramePoint3DReadOnly expectedCenterOfMassBeforeUpdate = new FramePoint3D(centerOfMassCalculator.getCenterOfMass());
+         EuclidFrameTestTools.assertEquals(expectedCenterOfMassBeforeUpdate, centerOfMassJacobian.getCenterOfMass(), EPSILON);
+
+         RigidBodyBasics body = joints.get(random.nextInt(numberOfJoints)).getSuccessor();
+         body.getInertia().set(MecanoRandomTools.nextSpatialInertia(random, body.getInertia().getBodyFrame(), body.getInertia().getReferenceFrame()));
+
+         centerOfMassCalculator.reset();
+         centerOfMassJacobian.reset();
+
+         FramePoint3DReadOnly expectedCenterOfMassAfterUpdate = new FramePoint3D(centerOfMassCalculator.getCenterOfMass());
+         EuclidFrameTestTools.assertEquals(expectedCenterOfMassAfterUpdate, centerOfMassJacobian.getCenterOfMass(), EPSILON);
+      }
+
+      // Center of mass position, Jacobian calculator in center of mass frame
+      for (int i = 0; i < ITERATIONS; i++)
+      {
+         int numberOfJoints = random.nextInt(50) + 1;
+
+         List<JointBasics> joints = MultiBodySystemRandomTools.nextJointChain(random, numberOfJoints);
+         MultiBodySystemRandomTools.nextState(random, JointStateType.CONFIGURATION, joints);
+         MultiBodySystemRandomTools.nextState(random, JointStateType.VELOCITY, joints);
+
+         RigidBodyBasics rootBody = joints.get(0).getPredecessor();
+         rootBody.updateFramesRecursively();
+
+         CenterOfMassJacobian centerOfMassJacobian = new CenterOfMassJacobian(rootBody, "centerOfMassFrame");
+         CenterOfMassCalculator centerOfMassCalculator = new CenterOfMassCalculator(rootBody, worldFrame);
+
+         FramePoint3DReadOnly expectedCenterOfMassBeforeUpdate = new FramePoint3D(centerOfMassCalculator.getCenterOfMass());
+         EuclidFrameTestTools.assertEquals(expectedCenterOfMassBeforeUpdate, centerOfMassJacobian.getCenterOfMass(), EPSILON);
+
+         RigidBodyBasics body = joints.get(random.nextInt(numberOfJoints)).getSuccessor();
+         body.getInertia().set(MecanoRandomTools.nextSpatialInertia(random, body.getInertia().getBodyFrame(), body.getInertia().getReferenceFrame()));
+
+         centerOfMassCalculator.reset();
+         centerOfMassJacobian.reset();
+
+         FramePoint3DReadOnly expectedCenterOfMassAfterUpdate = new FramePoint3D(centerOfMassCalculator.getCenterOfMass());
+         EuclidFrameTestTools.assertEquals(expectedCenterOfMassAfterUpdate, centerOfMassJacobian.getCenterOfMass(), EPSILON);
+      }
+
+      // Center of mass velocity, Jacobian calculator in world frame
+      for (int i = 0; i < ITERATIONS; i++)
+      {
+         int numberOfJoints = random.nextInt(50) + 1;
+
+         List<JointBasics> joints = MultiBodySystemRandomTools.nextJointChain(random, numberOfJoints);
+         MultiBodySystemRandomTools.nextState(random, JointStateType.CONFIGURATION, joints);
+         MultiBodySystemRandomTools.nextState(random, JointStateType.VELOCITY, joints);
+
+         RigidBodyBasics rootBody = joints.get(0).getPredecessor();
+         rootBody.updateFramesRecursively();
+
+         CenterOfMassJacobian centerOfMassJacobian = new CenterOfMassJacobian(rootBody, worldFrame);
+
+         FrameVector3DReadOnly expectedCenterOfMassVelocityBeforeUpdate = new FrameVector3D(computeCenterOfMassVelocity(rootBody, centerOfMassJacobian.getReferenceFrame()));
+         EuclidFrameTestTools.assertEquals(expectedCenterOfMassVelocityBeforeUpdate, centerOfMassJacobian.getCenterOfMassVelocity(), EPSILON);
+
+         RigidBodyBasics body = joints.get(random.nextInt(numberOfJoints)).getSuccessor();
+         body.getInertia().set(MecanoRandomTools.nextSpatialInertia(random, body.getInertia().getBodyFrame(), body.getInertia().getReferenceFrame()));
+
+         centerOfMassJacobian.reset();
+
+         FrameVector3DReadOnly expectedCenterOfMassVelocityAfterUpdate = new FrameVector3D(computeCenterOfMassVelocity(rootBody, centerOfMassJacobian.getReferenceFrame()));
+         EuclidFrameTestTools.assertEquals(expectedCenterOfMassVelocityAfterUpdate, centerOfMassJacobian.getCenterOfMassVelocity(), EPSILON);
+      }
+
+      // Center of mass velocity, Jacobian calculator in center of mass frame
+      for (int i = 0; i < ITERATIONS; i++)
+      {
+         int numberOfJoints = random.nextInt(50) + 1;
+
+         List<JointBasics> joints = MultiBodySystemRandomTools.nextJointChain(random, numberOfJoints);
+         MultiBodySystemRandomTools.nextState(random, JointStateType.CONFIGURATION, joints);
+         MultiBodySystemRandomTools.nextState(random, JointStateType.VELOCITY, joints);
+
+         RigidBodyBasics rootBody = joints.get(0).getPredecessor();
+         rootBody.updateFramesRecursively();
+
+         CenterOfMassJacobian centerOfMassJacobian = new CenterOfMassJacobian(rootBody, "centerOfMassFrame");
+
+         FrameVector3DReadOnly expectedCenterOfMassVelocityBeforeUpdate = new FrameVector3D(computeCenterOfMassVelocity(rootBody, centerOfMassJacobian.getReferenceFrame()));
+         EuclidFrameTestTools.assertEquals(expectedCenterOfMassVelocityBeforeUpdate, centerOfMassJacobian.getCenterOfMassVelocity(), EPSILON);
+
+         RigidBodyBasics body = joints.get(random.nextInt(numberOfJoints)).getSuccessor();
+         body.getInertia().set(MecanoRandomTools.nextSpatialInertia(random, body.getInertia().getBodyFrame(), body.getInertia().getReferenceFrame()));
+
+         centerOfMassJacobian.reset();
+
+         FrameVector3DReadOnly expectedCenterOfMassVelocityAfterUpdate = new FrameVector3D(computeCenterOfMassVelocity(rootBody, centerOfMassJacobian.getReferenceFrame()));
+         EuclidFrameTestTools.assertEquals(expectedCenterOfMassVelocityAfterUpdate, centerOfMassJacobian.getCenterOfMassVelocity(), EPSILON);
+      }
+   }
+
    private FrameVector3D computeCenterOfMassVelocity(RigidBodyReadOnly rootBody, ReferenceFrame referenceFrame)
    {
       FrameVector3D centerOfMassVelocity = new FrameVector3D(referenceFrame);
@@ -201,7 +315,10 @@ public class CenterOfMassJacobianTest
       {
          if (rigidBody.getInertia() == null)
             continue;
-         FrameVector3D bodyLinearMomentum = new FrameVector3D(rigidBody.getBodyFixedFrame().getTwistOfFrame().getLinearPart());
+         FramePoint3D com = new FramePoint3D(rigidBody.getInertia().getCenterOfMassOffset());
+         com.changeFrame(rigidBody.getBodyFixedFrame());
+         FrameVector3D bodyLinearMomentum = new FrameVector3D();
+         rigidBody.getBodyFixedFrame().getTwistOfFrame().getLinearVelocityAt(com, bodyLinearMomentum);
          bodyLinearMomentum.scale(rigidBody.getInertia().getMass());
          bodyLinearMomentum.changeFrame(referenceFrame);
          centerOfMassVelocity.add(bodyLinearMomentum);

@@ -17,6 +17,7 @@ import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyReadOnly;
 import us.ihmc.mecano.spatial.Momentum;
 import us.ihmc.mecano.spatial.interfaces.MomentumReadOnly;
 import us.ihmc.mecano.tools.JointStateType;
+import us.ihmc.mecano.tools.MecanoRandomTools;
 import us.ihmc.mecano.tools.MecanoTestTools;
 import us.ihmc.mecano.tools.MultiBodySystemRandomTools;
 
@@ -116,6 +117,46 @@ public class CentroidalMomentumCalculatorTest
          assertEquals(centerOfMassJacobian.getTotalMass(), centroidalMomentumCalculator.getTotalMass(), EPSILON);
          FrameVector3DReadOnly expectedCenterOfMassVelocity = centerOfMassJacobian.getCenterOfMassVelocity();
          EuclidFrameTestTools.assertEquals(expectedCenterOfMassVelocity, actualCenterOfMassVelocity, EPSILON);
+      }
+   }
+
+   @Test
+   public void testModifiedRigidBodyParameters()
+   {
+      Random random = new Random(4875349);
+
+      for (int i = 0; i < ITERATIONS; i++)
+      {
+         int numberOfJoints = random.nextInt(50) + 1;
+         List<JointBasics> joints = MultiBodySystemRandomTools.nextJointChain(random, numberOfJoints);
+         MultiBodySystemRandomTools.nextState(random, JointStateType.CONFIGURATION, joints);
+         MultiBodySystemRandomTools.nextState(random, JointStateType.VELOCITY, joints);
+
+         RigidBodyBasics rootBody = joints.get(0).getPredecessor();
+         rootBody.updateFramesRecursively();
+
+         CentroidalMomentumCalculator centroidalMomentumCalculator = new CentroidalMomentumCalculator(rootBody, worldFrame);
+         CenterOfMassJacobian centerOfMassJacobian = new CenterOfMassJacobian(rootBody, worldFrame);
+
+         Momentum expectedMomentumBeforeUpdate = computeMomentum(rootBody, centroidalMomentumCalculator.getReferenceFrame());
+         MecanoTestTools.assertMomentumEquals(expectedMomentumBeforeUpdate, centroidalMomentumCalculator.getMomentum(), EPSILON);
+
+         assertEquals(centerOfMassJacobian.getTotalMass(), centroidalMomentumCalculator.getTotalMass(), EPSILON);
+         FrameVector3DReadOnly expectedCenterOfMassVelocityBeforeUpdate = centerOfMassJacobian.getCenterOfMassVelocity();
+         EuclidFrameTestTools.assertEquals(expectedCenterOfMassVelocityBeforeUpdate, centroidalMomentumCalculator.getCenterOfMassVelocity(), EPSILON);
+
+         RigidBodyBasics body = joints.get(random.nextInt(numberOfJoints)).getSuccessor();
+         body.getInertia().set(MecanoRandomTools.nextSpatialInertia(random, body.getInertia().getBodyFrame(), body.getInertia().getReferenceFrame()));
+
+         centroidalMomentumCalculator.reset();
+         centerOfMassJacobian.reset();
+
+         Momentum expectedMomentumAfterUpdate = computeMomentum(rootBody, centroidalMomentumCalculator.getReferenceFrame());
+         MecanoTestTools.assertMomentumEquals(expectedMomentumAfterUpdate, centroidalMomentumCalculator.getMomentum(), EPSILON);
+
+         assertEquals(centerOfMassJacobian.getTotalMass(), centroidalMomentumCalculator.getTotalMass(), EPSILON);
+         FrameVector3DReadOnly expectedCenterOfMassVelocityAfterUpdate = centerOfMassJacobian.getCenterOfMassVelocity();
+         EuclidFrameTestTools.assertEquals(expectedCenterOfMassVelocityAfterUpdate, centroidalMomentumCalculator.getCenterOfMassVelocity(), EPSILON);
       }
    }
 

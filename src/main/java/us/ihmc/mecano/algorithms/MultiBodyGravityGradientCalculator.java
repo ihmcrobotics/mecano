@@ -100,7 +100,7 @@ public class MultiBodyGravityGradientCalculator
       initialStep = new AlgorithmStep(input.getRootBody(), null, null);
       rigidBodyToAlgorithmStepMap.put(input.getRootBody(), initialStep);
       buildMultiBodyTree(initialStep, input.getJointsToIgnore());
-      initialStep.includeIgnoredSubtreeInertia();
+      initialStep.updateIgnoredSubtreeInertia();
 
       gravitationalAcceleration.setToZero(input.getInertialFrame());
    }
@@ -324,11 +324,15 @@ public class MultiBodyGravityGradientCalculator
       /** The rigid-body for which this step is for. */
       private final RigidBodyReadOnly rigidBody;
       /**
-       * Body inertia: usually equal to {@code rigidBody.getInertial()}. However, if at least one child of
-       * {@code rigidBody} is ignored, it is equal to this rigid-body inertia and the subtree inertia
-       * attached to the ignored joint.
+       * Used for storing intermediate result when part of the subtree is ignored but the subtree inertia
+       * is still to be considered.
        */
-      private final SpatialInertia bodyInertia;
+      private SpatialInertia bodyInertia;
+      /**
+       * Combined inertia of the subtree that is ignored but inertia is still to be considered for this
+       * recursion step.
+       */
+      private SpatialInertia bodySubtreeInertia;
       /** The corresponding matrix indices for each of this step's joint degree of freedom. */
       private final int[] jointIndices;
       /** The algorithm step for the parent of this step's rigid-body. */
@@ -376,34 +380,43 @@ public class MultiBodyGravityGradientCalculator
 
          if (isRoot())
          {
-            bodyInertia = null;
             externalWrench = null;
          }
          else
          {
             parent.children.add(this);
-            bodyInertia = new SpatialInertia(rigidBody.getInertia());
             externalWrench = new Wrench(getBodyFixedFrame(), getBodyFixedFrame());
          }
       }
 
-      public void includeIgnoredSubtreeInertia()
+      private void updateIgnoredSubtreeInertia()
       {
+         if (bodySubtreeInertia != null)
+         {
+            bodyInertia.setToZero();
+            bodySubtreeInertia.setToZero();
+         }
+
          if (!isRoot() && children.size() != rigidBody.getChildrenJoints().size())
          {
             for (JointReadOnly childJoint : rigidBody.getChildrenJoints())
             {
                if (input.getJointsToIgnore().contains(childJoint))
                {
-                  SpatialInertia subtreeIneria = MultiBodySystemTools.computeSubtreeInertia(childJoint);
-                  subtreeIneria.changeFrame(rigidBody.getBodyFixedFrame());
-                  bodyInertia.add(subtreeIneria);
+                  SpatialInertia subtreeInertia = MultiBodySystemTools.computeSubtreeInertia(childJoint);
+                  subtreeInertia.changeFrame(rigidBody.getBodyFixedFrame());
+                  if (bodySubtreeInertia == null)
+                  {
+                     bodyInertia = new SpatialInertia(getBodyFixedFrame(), getBodyFixedFrame());
+                     bodySubtreeInertia = new SpatialInertia(getBodyFixedFrame(), getBodyFixedFrame());
+                  }
+                  bodySubtreeInertia.add(subtreeInertia);
                }
             }
          }
 
          for (int childIndex = 0; childIndex < children.size(); childIndex++)
-            children.get(childIndex).includeIgnoredSubtreeInertia();
+            children.get(childIndex).updateIgnoredSubtreeInertia();
       }
 
       public void setExternalWrenchToZeroRecursive()
@@ -429,6 +442,23 @@ public class MultiBodyGravityGradientCalculator
 
          // Update the subtree mass and external wrenches
          subTreeMass = bodyInertia == null ? 0.0 : bodyInertia.getMass();
+
+         SpatialInertia inertia = new SpatialInertia(getBodyFixedFrame(), getBodyFixedFrame());
+         if (!isRoot())
+         {
+            if (bodyInertia != null)
+            {
+               bodyInertia.setIncludingFrame(rigidBody.getInertia());
+               bodyInertia.add(bodySubtreeInertia);
+               inertia.setIncludingFrame(bodyInertia);
+               subTreeMass = bodyInertia.getMass();
+            }
+            else
+            {
+               inertia.setIncludingFrame(rigidBody.getInertia());
+               subTreeMass = inertia.getMass();
+            }
+         }
 
          for (int i = 0; i < children.size(); i++)
          {
@@ -463,15 +493,15 @@ public class MultiBodyGravityGradientCalculator
          gravityForceAtCoM.changeFrame(frameToUse);
 
          // Update the center of mass position of the subtree in local coordinates.
-         if (bodyInertia == null)
+         if (!isRoot())
          {
-            subTreeCoM.setToZero(getBodyFixedFrame());
+            subTreeCoM.setIncludingFrame(inertia.getCenterOfMassOffset());
+            subTreeCoM.changeFrame(frameToUse);
+            subTreeCoM.scale(inertia.getMass());
          }
          else
          {
-            subTreeCoM.setIncludingFrame(bodyInertia.getCenterOfMassOffset());
-            subTreeCoM.changeFrame(frameToUse);
-            subTreeCoM.scale(bodyInertia.getMass());
+            subTreeCoM.setToZero(getBodyFixedFrame());
          }
 
          for (int i = 0; i < children.size(); i++)
@@ -606,6 +636,7 @@ public class MultiBodyGravityGradientCalculator
             AlgorithmStep child = start_k.children.get(i);
             gradientElement += computeSubTreeExtWrenchGradientElement(unitTwist_i, unitTwist_j, child);
          }
+
          return gradientElement;
       }
 

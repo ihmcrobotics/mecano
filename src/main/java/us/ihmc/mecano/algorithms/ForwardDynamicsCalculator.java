@@ -160,7 +160,7 @@ public class ForwardDynamicsCalculator
       rigidBodyToRecursionStepMap.put(rootBody, initialRecursionStep);
       buildMultiBodyTree(initialRecursionStep, input.getJointsToIgnore());
       if (considerIgnoredSubtreesInertia)
-         initialRecursionStep.includeIgnoredSubtreeInertia();
+         initialRecursionStep.updateIgnoredSubtreeInertia();
       articulatedBodyRecursionSteps = rigidBodyToRecursionStepMap.values().toArray(new ArticulatedBodyRecursionStep[rigidBodyToRecursionStepMap.size()]);
 
       totalDoFs = input.getNumberOfDoFs();
@@ -746,11 +746,15 @@ public class ForwardDynamicsCalculator
        */
       final RigidBodyReadOnly rigidBody;
       /**
-       * Body inertia: usually equal to {@code rigidBody.getInertial()}. However, if at least one child of
-       * {@code rigidBody} is ignored, it is equal to this rigid-body inertia and the subtree inertia
-       * attached to the ignored joint.
+       * Used for storing intermediate result when part of the subtree is ignored but the subtree inertia
+       * is still to be considered.
        */
-      final SpatialInertia bodyInertia;
+      private SpatialInertia bodyInertia;
+      /**
+       * Combined inertia of the subtree that is ignored but inertia is still to be considered for this
+       * recursion step.
+       */
+      private SpatialInertia bodySubtreeInertia;
       /**
        * User input: external wrench to be applied to this body.
        */
@@ -979,7 +983,6 @@ public class ForwardDynamicsCalculator
 
          if (parent == null)
          {
-            bodyInertia = null;
             biasAcceleration = null;
             biasWrench = null;
             spatialInertia = null;
@@ -1013,7 +1016,6 @@ public class ForwardDynamicsCalculator
             parent.children.add(this);
             int nDoFs = getJoint().getDegreesOfFreedom();
 
-            bodyInertia = new SpatialInertia(rigidBody.getInertia());
             biasAcceleration = new SpatialAcceleration();
             biasWrench = new Wrench();
             spatialInertia = new SpatialInertia();
@@ -1044,8 +1046,14 @@ public class ForwardDynamicsCalculator
          }
       }
 
-      public void includeIgnoredSubtreeInertia()
+      private void updateIgnoredSubtreeInertia()
       {
+         if (bodySubtreeInertia != null)
+         {
+            bodyInertia.setToZero();
+            bodySubtreeInertia.setToZero();
+         }
+
          if (!isRoot() && children.size() != rigidBody.getChildrenJoints().size())
          {
             for (JointReadOnly childJoint : rigidBody.getChildrenJoints())
@@ -1054,13 +1062,18 @@ public class ForwardDynamicsCalculator
                {
                   SpatialInertia subtreeInertia = MultiBodySystemTools.computeSubtreeInertia(childJoint);
                   subtreeInertia.changeFrame(getBodyFixedFrame());
-                  bodyInertia.add(subtreeInertia);
+                  if (bodySubtreeInertia == null)
+                  {
+                     bodyInertia = new SpatialInertia(getBodyFixedFrame(), getBodyFixedFrame());
+                     bodySubtreeInertia = new SpatialInertia(getBodyFixedFrame(), getBodyFixedFrame());
+                  }
+                  bodySubtreeInertia.add(subtreeInertia);
                }
             }
          }
 
          for (int childIndex = 0; childIndex < children.size(); childIndex++)
-            children.get(childIndex).includeIgnoredSubtreeInertia();
+            children.get(childIndex).updateIgnoredSubtreeInertia();
       }
 
       /**
@@ -1085,7 +1098,16 @@ public class ForwardDynamicsCalculator
             else
                frameAfterJoint.getTransformToDesiredFrame(transformToParentJointFrame, parent.getFrameAfterJoint());
 
-            bodyInertia.computeDynamicWrench(null, getBodyTwist(), biasWrench);
+            if (bodyInertia != null)
+            {
+               bodyInertia.setIncludingFrame(rigidBody.getInertia());
+               bodyInertia.add(bodySubtreeInertia);
+               bodyInertia.computeDynamicWrench(null, getBodyTwist(), biasWrench);
+            }
+            else
+            {
+               rigidBody.getInertia().computeDynamicWrench(null, getBodyTwist(), biasWrench);
+            }
             biasWrench.sub(externalWrench);
             biasWrench.changeFrame(frameAfterJoint);
 
@@ -1121,7 +1143,10 @@ public class ForwardDynamicsCalculator
 
          MovingReferenceFrame frameAfterJoint = getFrameAfterJoint();
 
-         spatialInertia.setIncludingFrame(bodyInertia);
+         if (bodyInertia != null)
+            spatialInertia.setIncludingFrame(bodyInertia);
+         else
+            spatialInertia.setIncludingFrame(rigidBody.getInertia());
          spatialInertia.changeFrame(frameAfterJoint);
          articulatedInertia.setIncludingFrame(spatialInertia);
 
@@ -1311,15 +1336,19 @@ public class ForwardDynamicsCalculator
                MovingReferenceFrame frameAfterJoint = getFrameAfterJoint();
 
                rigidBodyAcceleration.changeFrame(getBodyFixedFrame());
-               if (bodyInertia.isCenterOfMassOffsetZero())
-               { // The interaction with the velocity can be decoupled from the acceleration, we just need to add the already computed bias wrench.
-                  bodyInertia.computeDynamicWrench(rigidBodyAcceleration, null, jointWrench);
+
+               SpatialInertiaReadOnly inertia = bodyInertia == null ? rigidBody.getInertia() : bodyInertia;
+               if (inertia.isCenterOfMassOffsetZero())
+               {
+                  // The interaction with the velocity can be decoupled from the acceleration, we just need to add the already computed bias wrench.
+                  inertia.computeDynamicWrench(rigidBodyAcceleration, null, jointWrench);
                   jointWrench.changeFrame(frameAfterJoint);
                   jointWrench.add(biasWrench);
                }
                else
-               { // The interaction with the velocity needs to be accounted for directly in the dynamic wrench.
-                  bodyInertia.computeDynamicWrench(rigidBodyAcceleration, getBodyTwist(), jointWrench);
+               {
+                  // The interaction with the velocity needs to be accounted for directly in the dynamic wrench.
+                  inertia.computeDynamicWrench(rigidBodyAcceleration, getBodyTwist(), jointWrench);
                   jointWrench.sub(externalWrench);
                   jointWrench.changeFrame(frameAfterJoint);
                }

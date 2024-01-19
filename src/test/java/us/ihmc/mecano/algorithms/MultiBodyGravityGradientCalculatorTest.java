@@ -221,6 +221,34 @@ public class MultiBodyGravityGradientCalculatorTest
       }
    }
 
+   @Test
+   public void testModifiedRigidBodyParameters()
+   {
+      Random random = new Random(70689L);
+
+      double dt = 1.0e-8;
+
+      for (int i = 0; i < ITERATIONS; i++)
+      {
+         int numberOfJoints = 10;
+         List<? extends JointBasics> joints = MultiBodySystemRandomTools.nextJointTree(random, numberOfJoints);
+         Map<RigidBodyBasics, Wrench> externalWrenches = nextExternalWrenches(random, joints);
+
+         MultiBodyGravityGradientCalculator calculator = new MultiBodyGravityGradientCalculator(MultiBodySystemBasics.toMultiBodySystemBasics(joints));
+         calculator.setGravitionalAcceleration(-GRAVITY);
+         calculator.reset();
+
+         testCalculatorAgainstFiniteDifference(random, joints, externalWrenches, dt, input->calculator.getTauGradientMatrix(), 5.0e-7, i);
+
+         RigidBodyBasics body = joints.get(random.nextInt(numberOfJoints)).getSuccessor();
+         body.getInertia().set(MecanoRandomTools.nextSpatialInertia(random, body.getInertia().getBodyFrame(), body.getInertia().getReferenceFrame()));
+
+         calculator.reset();
+
+         testCalculatorAgainstFiniteDifference(random, joints, externalWrenches, dt, input->calculator.getTauGradientMatrix(), 5.0e-7, i);
+      }
+   }
+
    private static Map<RigidBodyBasics, Wrench> nextExternalWrenches(Random random, List<? extends JointBasics> joints)
    {
       Map<RigidBodyBasics, Wrench> wrenches = new HashMap<>();

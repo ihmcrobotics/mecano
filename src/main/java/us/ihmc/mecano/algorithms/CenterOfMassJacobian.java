@@ -8,12 +8,14 @@ import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.referenceFrame.interfaces.*;
 import us.ihmc.euclid.transform.RigidBodyTransform;
+import us.ihmc.mecano.frames.MovingReferenceFrame;
 import us.ihmc.mecano.multiBodySystem.interfaces.JointMatrixIndexProvider;
 import us.ihmc.mecano.multiBodySystem.interfaces.JointReadOnly;
 import us.ihmc.mecano.multiBodySystem.interfaces.MultiBodySystemReadOnly;
 import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyReadOnly;
 import us.ihmc.mecano.spatial.SpatialInertia;
 import us.ihmc.mecano.spatial.Twist;
+import us.ihmc.mecano.spatial.interfaces.SpatialInertiaReadOnly;
 import us.ihmc.mecano.tools.JointStateType;
 import us.ihmc.mecano.tools.MecanoFactories;
 import us.ihmc.mecano.tools.MultiBodySystemTools;
@@ -214,7 +216,7 @@ public class CenterOfMassJacobian implements ReferenceFrameHolder
       recursionSteps = buildMultiBodyTree(initialRecursionStep, input.getJointsToIgnore()).toArray(new RecursionStep[0]);
 
       if (considerIgnoredSubtreesInertia)
-         initialRecursionStep.includeIgnoredSubtreeInertia();
+         initialRecursionStep.updateIgnoredSubtreeInertia();
 
       jacobianColumn = new FrameVector3D(this.jacobianFrame);
 
@@ -436,11 +438,15 @@ public class CenterOfMassJacobian implements ReferenceFrameHolder
        */
       private final RigidBodyReadOnly rigidBody;
       /**
-       * Body inertia: usually equal to {@code rigidBody.getInertial()}. However, if at least one child of
-       * {@code rigidBody} is ignored, it is equal to this rigid-body inertia and the subtree inertia
-       * attached to the ignored joint.
+       * Used for storing intermediate result when part of the subtree is ignored but the subtree inertia
+       * is still to be considered.
        */
-      private final SpatialInertia bodyInertia;
+      private SpatialInertia bodyInertia;
+      /**
+       * Combined inertia of the subtree that is ignored but inertia is still to be considered for this
+       * recursion step.
+       */
+      private SpatialInertia bodySubtreeInertia;
 
       /**
        * The total mass of this rigid-body and all its descendant.
@@ -474,90 +480,97 @@ public class CenterOfMassJacobian implements ReferenceFrameHolder
          this.jointIndices = jointIndices;
 
          if (isRoot())
-         {
-            bodyInertia = null;
             jacobianJointBlock = null;
-         }
          else
-         {
-            bodyInertia = new SpatialInertia(rigidBody.getInertia());
             jacobianJointBlock = new DMatrixRMaj(3, getJoint().getDegreesOfFreedom());
-         }
       }
 
-      public void includeIgnoredSubtreeInertia()
+      private void updateIgnoredSubtreeInertia()
       {
+         if (bodySubtreeInertia != null)
+         {
+            bodyInertia.setToZero();
+            bodySubtreeInertia.setToZero();
+         }
+
          if (!isRoot() && children.size() != rigidBody.getChildrenJoints().size())
          {
             for (JointReadOnly childJoint : rigidBody.getChildrenJoints())
             {
                if (input.getJointsToIgnore().contains(childJoint))
                {
-                  SpatialInertia subtreeIneria = MultiBodySystemTools.computeSubtreeInertia(childJoint);
-                  subtreeIneria.changeFrame(rigidBody.getBodyFixedFrame());
-                  bodyInertia.add(subtreeIneria);
+                  SpatialInertia subtreeInertia = MultiBodySystemTools.computeSubtreeInertia(childJoint);
+                  subtreeInertia.changeFrame(getBodyFixedFrame());
+                  if (bodySubtreeInertia == null)
+                  {
+                     bodyInertia = new SpatialInertia(getBodyFixedFrame(), getBodyFixedFrame());
+                     bodySubtreeInertia = new SpatialInertia(getBodyFixedFrame(), getBodyFixedFrame());
+                  }
+                  bodySubtreeInertia.add(subtreeInertia);
                }
             }
          }
 
          for (int childIndex = 0; childIndex < children.size(); childIndex++)
-            children.get(childIndex).includeIgnoredSubtreeInertia();
+            children.get(childIndex).updateIgnoredSubtreeInertia();
       }
 
       /**
        * First pass going from the leaves to the root.
        * <p>
-       * Here the subtree mass and center of mass is computed for each rigid-body.
+       * Here the frame to perform operations in as well as the spatial inertia to use are determined, and then passed to an inner method
+       * {@link #passOneInner(ReferenceFrame, SpatialInertiaReadOnly)}. The spatial inertia to use can vary depending on whether some subtree joints of the
+       * given rigid body are being ignored, in which case the ignored subtree inertias are lumped in with the given rigid body's spatial inertia.
        * </p>
        */
       public void passOne()
       {
          ReferenceFrame frameToUse = isJacobianFrameAtCenterOfMass ? rootFrame : jacobianFrame;
 
-         if (isRoot())
+         if (bodyInertia != null)
          {
-            // Update the total mass
-            subTreeMass = bodyInertia == null ? 0.0 : bodyInertia.getMass();
-            for (int i = 0; i < children.size(); i++)
-               subTreeMass += children.get(i).subTreeMass;
-
-            // The centerOfMassTimesMass can be used to obtain the overall center of mass position.
-            if (bodyInertia == null)
-            {
-               centerOfMassTimesMass.setToZero(frameToUse);
-            }
-            else
-            {
-               centerOfMassTimesMass.setIncludingFrame(bodyInertia.getCenterOfMassOffset());
-               centerOfMassTimesMass.changeFrame(frameToUse);
-               centerOfMassTimesMass.scale(bodyInertia.getMass());
-            }
-
-            for (int i = 0; i < children.size(); i++)
-            {
-               centerOfMassTimesMass.add(children.get(i).centerOfMassTimesMass);
-            }
+            bodyInertia.setIncludingFrame(rigidBody.getInertia());
+            bodyInertia.add(bodySubtreeInertia);
+            passOneInner(frameToUse, bodyInertia);
          }
          else
          {
-            // Update the sub-tree mass
-            subTreeMass = bodyInertia.getMass();
-            for (int i = 0; i < children.size(); i++)
-               subTreeMass += children.get(i).subTreeMass;
-
-            // Update the sub-tree center of mass
-            centerOfMassTimesMass.setIncludingFrame(bodyInertia.getCenterOfMassOffset());
-            centerOfMassTimesMass.changeFrame(frameToUse);
-            centerOfMassTimesMass.scale(bodyInertia.getMass());
-
-            for (int i = 0; i < children.size(); i++)
-            {
-               centerOfMassTimesMass.add(children.get(i).centerOfMassTimesMass);
-            }
+            passOneInner(frameToUse, rigidBody.getInertia());
          }
+
+         for (int i = 0; i < children.size(); i++)
+            centerOfMassTimesMass.add(children.get(i).centerOfMassTimesMass);
 
          centerOfMass.setIncludingFrame(centerOfMassTimesMass);
          centerOfMass.scale(1.0 / subTreeMass);
+      }
+
+      /**
+       * Inner logic of {@link #passOne()}.
+       * <p>
+       * Here the subtree mass and center of mass is computed for each rigid-body.
+       * </p>
+       * @param frameToUse the frame to use for subtree mass and center of mass calculations.
+       * @param inertiaToUse the spatial inertia for subtree mass and center of mass calculations.
+       */
+      private void passOneInner(ReferenceFrame frameToUse, SpatialInertiaReadOnly inertiaToUse)
+      {
+         if (inertiaToUse == null)
+         {
+            // Update the total mass
+            subTreeMass = 0.0;
+            centerOfMassTimesMass.setToZero(frameToUse);
+         }
+         else
+         {
+            subTreeMass = inertiaToUse.getMass();
+            centerOfMassTimesMass.setIncludingFrame(inertiaToUse.getCenterOfMassOffset());
+            centerOfMassTimesMass.changeFrame(frameToUse);
+            centerOfMassTimesMass.scale(inertiaToUse.getMass());
+         }
+
+         for (int i = 0; i < children.size(); i++)
+            subTreeMass += children.get(i).subTreeMass;
       }
 
       /**
@@ -618,6 +631,11 @@ public class CenterOfMassJacobian implements ReferenceFrameHolder
       public JointReadOnly getJoint()
       {
          return rigidBody.getParentJoint();
+      }
+
+      public MovingReferenceFrame getBodyFixedFrame()
+      {
+         return rigidBody.getBodyFixedFrame();
       }
    }
 }
