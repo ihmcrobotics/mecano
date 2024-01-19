@@ -499,14 +499,14 @@ public class CenterOfMassJacobian implements ReferenceFrameHolder
             {
                if (input.getJointsToIgnore().contains(childJoint))
                {
-                  SpatialInertia subtreeIneria = MultiBodySystemTools.computeSubtreeInertia(childJoint);
-                  subtreeIneria.changeFrame(getBodyFixedFrame());
+                  SpatialInertia subtreeInertia = MultiBodySystemTools.computeSubtreeInertia(childJoint);
+                  subtreeInertia.changeFrame(getBodyFixedFrame());
                   if (bodySubtreeInertia == null)
                   {
                      bodyInertia = new SpatialInertia(getBodyFixedFrame(), getBodyFixedFrame());
                      bodySubtreeInertia = new SpatialInertia(getBodyFixedFrame(), getBodyFixedFrame());
                   }
-                  bodySubtreeInertia.add(subtreeIneria);
+                  bodySubtreeInertia.add(subtreeInertia);
                }
             }
          }
@@ -539,9 +539,7 @@ public class CenterOfMassJacobian implements ReferenceFrameHolder
          }
 
          for (int i = 0; i < children.size(); i++)
-         {
             centerOfMassTimesMass.add(children.get(i).centerOfMassTimesMass);
-         }
 
          centerOfMass.setIncludingFrame(centerOfMassTimesMass);
          centerOfMass.scale(1.0 / subTreeMass);

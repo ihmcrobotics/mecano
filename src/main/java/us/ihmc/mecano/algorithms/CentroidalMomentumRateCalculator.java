@@ -679,14 +679,14 @@ public class CentroidalMomentumRateCalculator implements ReferenceFrameHolder
             {
                if (input.getJointsToIgnore().contains(childJoint))
                {
-                  SpatialInertia subtreeIneria = MultiBodySystemTools.computeSubtreeInertia(childJoint);
-                  subtreeIneria.changeFrame(getBodyFixedFrame());
+                  SpatialInertia subtreeInertia = MultiBodySystemTools.computeSubtreeInertia(childJoint);
+                  subtreeInertia.changeFrame(getBodyFixedFrame());
                   if (bodySubtreeInertia == null)
                   {
                      bodyInertia = new SpatialInertia(getBodyFixedFrame(), getBodyFixedFrame());
                      bodySubtreeInertia = new SpatialInertia(getBodyFixedFrame(), getBodyFixedFrame());
                   }
-                  bodySubtreeInertia.add(subtreeIneria);
+                  bodySubtreeInertia.add(subtreeInertia);
                }
             }
          }

@@ -566,14 +566,14 @@ public class CompositeRigidBodyMassMatrixCalculator
             {
                if (input.getJointsToIgnore().contains(childJoint))
                {
-                  SpatialInertia subtreeIneria = MultiBodySystemTools.computeSubtreeInertia(childJoint);
-                  subtreeIneria.changeFrame(getBodyFixedFrame());
+                  SpatialInertia subtreeInertia = MultiBodySystemTools.computeSubtreeInertia(childJoint);
+                  subtreeInertia.changeFrame(getBodyFixedFrame());
                   if (bodySubtreeInertia == null)
                   {
                      bodyInertia = new SpatialInertia(getBodyFixedFrame(), getBodyFixedFrame());
                      bodySubtreeInertia = new SpatialInertia(getBodyFixedFrame(), getBodyFixedFrame());
                   }
-                  bodySubtreeInertia.add(subtreeIneria);
+                  bodySubtreeInertia.add(subtreeInertia);
                }
             }
          }
@@ -635,7 +635,6 @@ public class CompositeRigidBodyMassMatrixCalculator
 
          if (isRoot())
             return;
-
 
          if (bodyInertia != null)
          {
@@ -821,7 +820,9 @@ public class CompositeRigidBodyMassMatrixCalculator
                inertia = bodyInertia;
             }
             else
+            {
                inertia = rigidBody.getInertia();
+            }
 
             coriolisBodyAcceleration.setIncludingFrame(parent.coriolisBodyAcceleration);
             getJoint().getPredecessorTwist(intermediateTwist);

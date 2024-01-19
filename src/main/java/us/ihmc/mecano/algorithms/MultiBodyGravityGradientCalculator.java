@@ -14,7 +14,6 @@ import us.ihmc.mecano.multiBodySystem.interfaces.MultiBodySystemReadOnly;
 import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyReadOnly;
 import us.ihmc.mecano.spatial.*;
 import us.ihmc.mecano.spatial.interfaces.FixedFrameWrenchBasics;
-import us.ihmc.mecano.spatial.interfaces.SpatialInertiaReadOnly;
 import us.ihmc.mecano.spatial.interfaces.TwistReadOnly;
 import us.ihmc.mecano.spatial.interfaces.WrenchReadOnly;
 import us.ihmc.mecano.tools.MultiBodySystemTools;
@@ -380,7 +379,9 @@ public class MultiBodyGravityGradientCalculator
          this.jointIndices = jointIndices;
 
          if (isRoot())
+         {
             externalWrench = null;
+         }
          else
          {
             parent.children.add(this);
@@ -402,14 +403,14 @@ public class MultiBodyGravityGradientCalculator
             {
                if (input.getJointsToIgnore().contains(childJoint))
                {
-                  SpatialInertia subtreeIneria = MultiBodySystemTools.computeSubtreeInertia(childJoint);
-                  subtreeIneria.changeFrame(rigidBody.getBodyFixedFrame());
+                  SpatialInertia subtreeInertia = MultiBodySystemTools.computeSubtreeInertia(childJoint);
+                  subtreeInertia.changeFrame(rigidBody.getBodyFixedFrame());
                   if (bodySubtreeInertia == null)
                   {
                      bodyInertia = new SpatialInertia(getBodyFixedFrame(), getBodyFixedFrame());
                      bodySubtreeInertia = new SpatialInertia(getBodyFixedFrame(), getBodyFixedFrame());
                   }
-                  bodySubtreeInertia.add(subtreeIneria);
+                  bodySubtreeInertia.add(subtreeInertia);
                }
             }
          }
@@ -484,7 +485,6 @@ public class MultiBodyGravityGradientCalculator
 
          // Update the force due gravity in local coordinates.
          ReferenceFrame frameToUse = isRoot() ? getBodyFixedFrame() : getFrameAfterJoint();
-         gravityForceAtCoM.setMatchingFrame(inertia.getCenterOfMassOffset());
          gravityForceAtCoM.setIncludingFrame(gravitationalAcceleration);
          gravityForceAtCoM.scale(subTreeMass);
          gravityForceAtCoM.changeFrame(frameToUse);
@@ -500,7 +500,6 @@ public class MultiBodyGravityGradientCalculator
          {
             subTreeCoM.setToZero(getBodyFixedFrame());
          }
-
 
          for (int i = 0; i < children.size(); i++)
          {
@@ -566,7 +565,6 @@ public class MultiBodyGravityGradientCalculator
                   tauGradientMatrix.set(index_j, index_i, gradient_ji);
                }
             }
-
             ancestor = ancestor.parent;
          }
       }

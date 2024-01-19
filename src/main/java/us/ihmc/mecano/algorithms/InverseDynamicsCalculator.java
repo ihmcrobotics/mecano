@@ -9,17 +9,9 @@ import us.ihmc.euclid.tools.EuclidCoreIOTools;
 import us.ihmc.euclid.tuple3D.interfaces.Tuple3DReadOnly;
 import us.ihmc.mecano.algorithms.interfaces.RigidBodyAccelerationProvider;
 import us.ihmc.mecano.frames.MovingReferenceFrame;
-import us.ihmc.mecano.multiBodySystem.interfaces.JointBasics;
-import us.ihmc.mecano.multiBodySystem.interfaces.JointMatrixIndexProvider;
-import us.ihmc.mecano.multiBodySystem.interfaces.JointReadOnly;
-import us.ihmc.mecano.multiBodySystem.interfaces.MultiBodySystemReadOnly;
-import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyReadOnly;
+import us.ihmc.mecano.multiBodySystem.interfaces.*;
 import us.ihmc.mecano.spatial.*;
-import us.ihmc.mecano.spatial.interfaces.FixedFrameWrenchBasics;
-import us.ihmc.mecano.spatial.interfaces.SpatialAccelerationReadOnly;
-import us.ihmc.mecano.spatial.interfaces.SpatialVectorReadOnly;
-import us.ihmc.mecano.spatial.interfaces.TwistReadOnly;
-import us.ihmc.mecano.spatial.interfaces.WrenchReadOnly;
+import us.ihmc.mecano.spatial.interfaces.*;
 import us.ihmc.mecano.tools.JointStateType;
 import us.ihmc.mecano.tools.MultiBodySystemTools;
 
@@ -1063,8 +1055,8 @@ public class InverseDynamicsCalculator
       {
          this.parent = parent;
          if (loopClosureJoint.getSuccessor() != successorRecursion.rigidBody)
-            throw new IllegalArgumentException("Rigid-body mismatch. Joint's successor: " + loopClosureJoint.getSuccessor() + ", recursion body: "
-                                               + successorRecursion.rigidBody);
+            throw new IllegalArgumentException(
+                  "Rigid-body mismatch. Joint's successor: " + loopClosureJoint.getSuccessor() + ", recursion body: " + successorRecursion.rigidBody);
          if (loopClosureJoint == successorRecursion.joint)
             throw new IllegalArgumentException("This recursion joint should not be equal to the successor joint, joint: " + loopClosureJoint);
 
