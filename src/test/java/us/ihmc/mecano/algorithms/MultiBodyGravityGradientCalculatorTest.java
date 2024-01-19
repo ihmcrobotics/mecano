@@ -15,6 +15,8 @@ import java.util.Map;
 import java.util.Random;
 import java.util.function.Function;
 
+import static org.junit.jupiter.api.Assertions.*;
+
 public class MultiBodyGravityGradientCalculatorTest
 {
    private static final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
@@ -236,124 +238,30 @@ public class MultiBodyGravityGradientCalculatorTest
    }
 
    @Test
-   public void testModifiedRigidBodyParametersBlah()
-   {
-      Random random = new Random(2342350);
-
-      double dt = 1.0e-6;
-      double dq = 1.0e-7;
-
-      for (int i = 0; i < 1; i++)
-      {
-         System.out.println("Iteration: " + i);
-
-         int numberOfJoints = 10;
-         List<? extends JointBasics> joints = MultiBodySystemRandomTools.nextRevoluteJointChain(random, numberOfJoints);
-         Map<RigidBodyBasics, Wrench> externalWrenches = nextExternalWrenches(random, joints);
-
-         MultiBodyGravityGradientCalculator calculator = new MultiBodyGravityGradientCalculator(MultiBodySystemBasics.toMultiBodySystemBasics(joints));
-
-         System.out.println("============================================ BEFORE ============================================");
-         compareAgainstFiniteDifference(random, joints, externalWrenches, dq, 2.0e-5, i, calculator);
-         testMultiBodyGravityGradientCalculator(random, joints, externalWrenches, dt, 1.0e-9, i);
-
-         calculator.reset();
-
-//         int bodyIndex = random.nextInt(numberOfJoints);
-         RigidBodyBasics body = joints.get(0).getSuccessor();
-//         body.getInertia().set(MecanoRandomTools.nextSpatialInertia(random, body.getInertia().getBodyFrame(), body.getInertia().getReferenceFrame()));
-//         body.getInertia().setMass(random.nextDouble());
-//         body.getInertia().setMomentOfInertia(random.nextDouble(),
-//                                              random.nextDouble(),
-//                                              random.nextDouble(),
-//                                              random.nextDouble(),
-//                                              random.nextDouble(),
-//                                              random.nextDouble());
-         body.getInertia().setCenterOfMassOffset(random.nextDouble(), random.nextDouble(), random.nextDouble());
-
-         System.out.println("============================================ AFTER ============================================");
-         compareAgainstFiniteDifference(random, joints, externalWrenches, dq, 2.0e-5, i, calculator);
-         testMultiBodyGravityGradientCalculator(random, joints, externalWrenches, dt, 1.0e-9, i);
-         System.out.println("Blah");
-      }
-   }
-
-   @Test
    public void testModifiedRigidBodyParameters()
    {
-      Random random = new Random(345345780);
+      Random random = new Random(70689L);
+
+      double dt = 1.0e-8;
 
       for (int i = 0; i < ITERATIONS; i++)
       {
-         System.out.println("Iteration: " + i);
-         int numberOfJoints = 20;
-         List<? extends JointBasics> joints = MultiBodySystemRandomTools.nextRevoluteJointChain(random, numberOfJoints);
-         MultiBodySystemRandomTools.nextState(random, JointStateType.CONFIGURATION, joints);
-         MultiBodySystemBasics input = MultiBodySystemBasics.toMultiBodySystemBasics(joints);
+         int numberOfJoints = 10;
+         List<? extends JointBasics> joints = MultiBodySystemRandomTools.nextJointTree(random, numberOfJoints);
+         Map<RigidBodyBasics, Wrench> externalWrenches = nextExternalWrenches(random, joints);
 
-         InverseDynamicsCalculator inverseDynamics = new InverseDynamicsCalculator(input);
-         inverseDynamics.setGravitionalAcceleration(-GRAVITY);
-         inverseDynamics.setConsiderCoriolisAndCentrifugalForces(false);
-         inverseDynamics.setConsiderJointAccelerations(false);
-
-         MultiBodyGravityGradientCalculator calculator = new MultiBodyGravityGradientCalculator(input);
+         MultiBodyGravityGradientCalculator calculator = new MultiBodyGravityGradientCalculator(MultiBodySystemBasics.toMultiBodySystemBasics(joints));
          calculator.setGravitionalAcceleration(-GRAVITY);
-
-         if (ADD_EXT_WRENCHES)
-         {
-            if (random.nextBoolean())
-            { // Add external wrench
-               int numberOfWrenches = random.nextInt(3) + 1;
-               for (int j = 0; j < numberOfWrenches; j++)
-               {
-                  int bodyIndex = random.nextInt(joints.size());
-                  RigidBodyBasics bodyToApply = joints.get(bodyIndex).getSuccessor();
-
-                  Wrench wrench = MecanoRandomTools.nextWrench(random, bodyToApply.getBodyFixedFrame(), bodyToApply.getBodyFixedFrame(), 10.0, 10.0);
-                  inverseDynamics.getExternalWrench(bodyToApply).set(wrench);
-                  calculator.getExternalWrench(bodyToApply).set(wrench);
-               }
-            }
-         }
-
-         inverseDynamics.compute();
          calculator.reset();
 
-         MecanoTestTools.assertDMatrixEquals("Iteration: " + i, inverseDynamics.getJointTauMatrix(), calculator.getTauMatrix(), 1.0e-12);
+         testCalculatorAgainstFiniteDifference(random, joints, externalWrenches, dt, input->calculator.getTauGradientMatrix(), 5.0e-7, i);
 
-         // TODO: cannot get test to pass when changing center of mass offset
          RigidBodyBasics body = joints.get(random.nextInt(numberOfJoints)).getSuccessor();
          body.getInertia().set(MecanoRandomTools.nextSpatialInertia(random, body.getInertia().getBodyFrame(), body.getInertia().getReferenceFrame()));
-//         body.getInertia().setMass(random.nextDouble());
-//         body.getInertia().setMomentOfInertia(random.nextDouble(),
-//                                              random.nextDouble(),
-//                                              random.nextDouble(),
-//                                              random.nextDouble(),
-//                                              random.nextDouble(),
-//                                              random.nextDouble());
-//         body.getInertia().setCenterOfMassOffset(random.nextDouble(), random.nextDouble(), random.nextDouble());
 
-         if (ADD_EXT_WRENCHES)
-         {
-            if (random.nextBoolean())
-            { // Add external wrench
-               int numberOfWrenches = random.nextInt(3) + 1;
-               for (int j = 0; j < numberOfWrenches; j++)
-               {
-                  int bodyIndex = random.nextInt(joints.size());
-                  RigidBodyBasics bodyToApply = joints.get(bodyIndex).getSuccessor();
-
-                  Wrench wrench = MecanoRandomTools.nextWrench(random, bodyToApply.getBodyFixedFrame(), bodyToApply.getBodyFixedFrame(), 10.0, 10.0);
-                  inverseDynamics.getExternalWrench(bodyToApply).set(wrench);
-                  calculator.getExternalWrench(bodyToApply).set(wrench);
-               }
-            }
-         }
-
-         inverseDynamics.compute();
          calculator.reset();
 
-         MecanoTestTools.assertDMatrixEquals("Iteration: " + i, inverseDynamics.getJointTauMatrix(), calculator.getTauMatrix(), 1.0e-12);
+         testCalculatorAgainstFiniteDifference(random, joints, externalWrenches, dt, input->calculator.getTauGradientMatrix(), 5.0e-7, i);
       }
    }
 
