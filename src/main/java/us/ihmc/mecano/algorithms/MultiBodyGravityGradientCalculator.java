@@ -390,6 +390,12 @@ public class MultiBodyGravityGradientCalculator
 
       private void updateIgnoredSubtreeInertia()
       {
+         if (bodySubtreeInertia != null)
+         {
+            bodyInertia.setToZero();
+            bodySubtreeInertia.setToZero();
+         }
+
          if (!isRoot() && children.size() != rigidBody.getChildrenJoints().size())
          {
             for (JointReadOnly childJoint : rigidBody.getChildrenJoints())
@@ -425,32 +431,108 @@ public class MultiBodyGravityGradientCalculator
 
       private final Twist unitTwist_i = new Twist();
 
-      /**
-       * From leaves to root, updates the forces needed to calculate the effort matrix and its gradient.
-       */
+//      /**
+//       * From leaves to root, updates the forces needed to calculate the effort matrix and its gradient.
+//       */
+//      public void passOne()
+//      {
+//         for (int i = 0; i < children.size(); i++)
+//            children.get(i).passOne();
+//
+//         ReferenceFrame frameToUse = isRoot() ? getBodyFixedFrame() : getFrameAfterJoint();
+//
+//         if (bodyInertia != null)
+//         {
+//            bodyInertia.setIncludingFrame(rigidBody.getInertia());
+//            bodyInertia.add(bodySubtreeInertia);
+//            passOneInner(frameToUse, bodyInertia);
+//         }
+//         else
+//            passOneInner(frameToUse, rigidBody.getInertia());
+//
+//         subTreeCoM.scale(1.0 / subTreeMass);
+//      }
+//
+//      private void passOneInner(ReferenceFrame frameToUse, SpatialInertiaReadOnly inertiaToUse)
+//      {
+//         // Update the subtree mass and external wrenches
+//         subTreeMass = inertiaToUse == null ? 0.0 : inertiaToUse.getMass();
+//
+//         for (int i = 0; i < children.size(); i++)
+//         {
+//            subTreeMass += children.get(i).subTreeMass;
+//         }
+//
+//         if (!isRoot())
+//         {
+//            hasExternalWrench = externalWrench.getLinearPartX() != 0.0 || externalWrench.getLinearPartY() != 0.0 || externalWrench.getLinearPartZ() != 0.0
+//                                || externalWrench.getAngularPartX() != 0.0 || externalWrench.getAngularPartY() != 0.0
+//                                || externalWrench.getAngularPartZ() != 0.0;
+//            hasSubTreeExternalWrench = hasExternalWrench;
+//            subTreeExternalSpatialForce.setIncludingFrame(externalWrench);
+//            subTreeExternalSpatialForce.changeFrame(getFrameAfterJoint());
+//
+//            for (int i = 0; i < children.size(); i++)
+//            {
+//               if (children.get(i).hasSubTreeExternalWrench)
+//               {
+//                  childExternalSpatialForce.setIncludingFrame(children.get(i).subTreeExternalSpatialForce);
+//                  childExternalSpatialForce.changeFrame(getFrameAfterJoint());
+//                  subTreeExternalSpatialForce.add(childExternalSpatialForce);
+//                  hasSubTreeExternalWrench = true;
+//               }
+//            }
+//         }
+//
+//         // Update the force due gravity in local coordinates.
+//         gravityForceAtCoM.setIncludingFrame(gravitationalAcceleration);
+//         gravityForceAtCoM.scale(subTreeMass);
+//         gravityForceAtCoM.changeFrame(frameToUse);
+//
+//         // Update the center of mass position of the subtree in local coordinates.
+//         if (inertiaToUse == null)
+//         {
+//            subTreeCoM.setToZero(getBodyFixedFrame());
+//         }
+//         else
+//         {
+//            subTreeCoM.setIncludingFrame(inertiaToUse.getCenterOfMassOffset());
+//            subTreeCoM.changeFrame(frameToUse);
+//            subTreeCoM.scale(inertiaToUse.getMass());
+//         }
+//
+//         for (int i = 0; i < children.size(); i++)
+//         {
+//            childCoM.setIncludingFrame(children.get(i).subTreeCoM);
+//            childCoM.changeFrame(frameToUse);
+//            subTreeCoM.scaleAdd(children.get(i).subTreeMass, childCoM, subTreeCoM);
+//         }
+//      }
+
       public void passOne()
       {
          for (int i = 0; i < children.size(); i++)
             children.get(i).passOne();
 
-         ReferenceFrame frameToUse = isRoot() ? getBodyFixedFrame() : getFrameAfterJoint();
-
-         if (bodyInertia != null)
-         {
-            bodyInertia.setIncludingFrame(rigidBody.getInertia());
-            bodyInertia.add(bodySubtreeInertia);
-            passOneInner(frameToUse, bodyInertia);
-         }
-         else
-            passOneInner(frameToUse, rigidBody.getInertia());
-
-         subTreeCoM.scale(1.0 / subTreeMass);
-      }
-
-      private void passOneInner(ReferenceFrame frameToUse, SpatialInertiaReadOnly inertiaToUse)
-      {
          // Update the subtree mass and external wrenches
-         subTreeMass = inertiaToUse == null ? 0.0 : inertiaToUse.getMass();
+         subTreeMass = bodyInertia == null ? 0.0 : bodyInertia.getMass();
+
+         SpatialInertia inertia = new SpatialInertia(getBodyFixedFrame(), getBodyFixedFrame());
+         if (!isRoot())
+         {
+            if (bodyInertia != null)
+            {
+               bodyInertia.setIncludingFrame(rigidBody.getInertia());
+               bodyInertia.add(bodySubtreeInertia);
+               inertia.setIncludingFrame(bodyInertia);
+               subTreeMass = bodyInertia.getMass();
+            }
+            else
+            {
+               inertia.setIncludingFrame(rigidBody.getInertia());
+               subTreeMass = inertia.getMass();
+            }
+         }
 
          for (int i = 0; i < children.size(); i++)
          {
@@ -479,21 +561,36 @@ public class MultiBodyGravityGradientCalculator
          }
 
          // Update the force due gravity in local coordinates.
+         ReferenceFrame frameToUse = isRoot() ? getBodyFixedFrame() : getFrameAfterJoint();
+         gravityForceAtCoM.setMatchingFrame(inertia.getCenterOfMassOffset());
          gravityForceAtCoM.setIncludingFrame(gravitationalAcceleration);
          gravityForceAtCoM.scale(subTreeMass);
          gravityForceAtCoM.changeFrame(frameToUse);
 
          // Update the center of mass position of the subtree in local coordinates.
-         if (inertiaToUse == null)
+         if (!isRoot())
          {
-            subTreeCoM.setToZero(getBodyFixedFrame());
+//            if (bodyInertia != null)
+//            {
+//               subTreeCoM.setIncludingFrame(bodyInertia.getCenterOfMassOffset());
+//               subTreeCoM.changeFrame(frameToUse);
+//               subTreeCoM.scale(bodyInertia.getMass());
+//            }
+//            else
+//            {
+//               subTreeCoM.setIncludingFrame(rigidBody.getInertia().getCenterOfMassOffset());
+//               subTreeCoM.changeFrame(frameToUse);
+//               subTreeCoM.scale(rigidBody.getInertia().getMass());
+//            }
+            subTreeCoM.setIncludingFrame(inertia.getCenterOfMassOffset());
+            subTreeCoM.changeFrame(frameToUse);
+            subTreeCoM.scale(inertia.getMass());
          }
          else
          {
-            subTreeCoM.setIncludingFrame(inertiaToUse.getCenterOfMassOffset());
-            subTreeCoM.changeFrame(frameToUse);
-            subTreeCoM.scale(inertiaToUse.getMass());
+            subTreeCoM.setToZero(getBodyFixedFrame());
          }
+
 
          for (int i = 0; i < children.size(); i++)
          {
@@ -501,6 +598,12 @@ public class MultiBodyGravityGradientCalculator
             childCoM.changeFrame(frameToUse);
             subTreeCoM.scaleAdd(children.get(i).subTreeMass, childCoM, subTreeCoM);
          }
+
+         subTreeCoM.scale(1.0 / subTreeMass);
+         System.out.println("subTreeMass = " + subTreeMass);
+         System.out.println("subTreeCoM = " + subTreeCoM);
+
+         System.out.println("gravityCoM = " + gravityForceAtCoM);
       }
 
       /** From leaves to root, compute the elements of the gradient matrix. */
@@ -519,6 +622,7 @@ public class MultiBodyGravityGradientCalculator
             TwistReadOnly unitTwist_i = getUnitTwist(i);
             tauMatrix.set(index_i, 0, computeTauElement(unitTwist_i));
             double gradient_ii = computeGravityGradientElement(unitTwist_i, unitTwist_i);
+            System.out.println("Gradient ii = " + gradient_ii);
             tauGradientMatrix.set(index_i, index_i, gradient_ii);
 
             for (int j = 0; j < i; j++)
@@ -527,8 +631,10 @@ public class MultiBodyGravityGradientCalculator
                TwistReadOnly unitTwist_j = getUnitTwist(j);
 
                double n_gravity_ij = computeGravityGradientElement(unitTwist_i, unitTwist_j);
+               System.out.println("Gradient ji 1 = " + n_gravity_ij);
                double n_gravity_ji = computeGravityGradientElement(unitTwist_j, unitTwist_i);
                double n_extWrench_ij = computeSubTreeExtWrenchGradientElement(unitTwist_i, unitTwist_j, this);
+               System.out.println("External wrench gradient element 1 = " + n_extWrench_ij);
                tauGradientMatrix.set(index_i, index_j, n_gravity_ij + n_extWrench_ij);
                tauGradientMatrix.set(index_j, index_i, n_gravity_ji - n_extWrench_ij);
             }
@@ -551,8 +657,10 @@ public class MultiBodyGravityGradientCalculator
                   unitTwist_i.changeFrame(getFrameAfterJoint());
 
                   double gradient_ji = computeGravityGradientElement(unitTwist_j, unitTwist_i);
+                  System.out.println("Gradient ji 2 = " + gradient_ji);
                   double gradient_ij = gradient_ji;
                   gradient_ji += computeSubTreeExtWrenchGradientElement(unitTwist_j, unitTwist_i, this);
+                  System.out.println("External wrench gradient element 2 = " + gradient_ji);
                   tauGradientMatrix.set(index_i, index_j, gradient_ij);
                   tauGradientMatrix.set(index_j, index_i, gradient_ji);
                }
@@ -625,6 +733,7 @@ public class MultiBodyGravityGradientCalculator
             AlgorithmStep child = start_k.children.get(i);
             gradientElement += computeSubTreeExtWrenchGradientElement(unitTwist_i, unitTwist_j, child);
          }
+
          return gradientElement;
       }
 
