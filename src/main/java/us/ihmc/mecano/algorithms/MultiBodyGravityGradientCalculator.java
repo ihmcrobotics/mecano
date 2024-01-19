@@ -432,6 +432,9 @@ public class MultiBodyGravityGradientCalculator
 
       private final Twist unitTwist_i = new Twist();
 
+      /**
+       * From leaves to root, updates the forces needed to calculate the effort matrix and its gradient.
+       */
       public void passOne()
       {
          for (int i = 0; i < children.size(); i++)
@@ -565,6 +568,7 @@ public class MultiBodyGravityGradientCalculator
                   tauGradientMatrix.set(index_j, index_i, gradient_ji);
                }
             }
+
             ancestor = ancestor.parent;
          }
       }
