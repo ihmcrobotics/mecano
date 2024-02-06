@@ -543,7 +543,7 @@ public class JointTorqueRegressorCalculator
          if (rigidBody.getInertia() != null)
          {
             markUpstreamAsModifiedRecursively();
-            for (SpatialInertiaBasisOption basis : SpatialInertiaBasisOption.values())
+            for (SpatialInertiaBasisOption basis : SpatialInertiaBasisOption.values)
             {
                // Set spatial inertia of this rigid body to be the desired basis
                spatialInertiaParameterBasis.setBasis(basis);
