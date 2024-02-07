@@ -291,6 +291,26 @@ public class JointTorqueRegressorCalculator
    }
 
    /**
+    * Set whether to consider joint accelerations in the internal inverse dynamics calculations.
+    *
+    * @param considerJointAccelerations whether to consider joint accelerations in the internal inverse dynamics calculations.
+    */
+   public void setConsiderJointAccelerations(boolean considerJointAccelerations)
+   {
+      this.inverseDynamicsCalculator.setConsiderJointAccelerations(considerJointAccelerations);
+   }
+
+   /**
+    * Set whether to consider Coriolis and centrifugal forces in the internal inverse dynamics calculations.
+    *
+    * @param considerCoriolisAndCentrifugalForces whether to consider Coriolis and centrifugal forces in the internal inverse dynamics calculations.
+    */
+   public void setConsiderCoriolisAndCentrifugalForces(boolean considerCoriolisAndCentrifugalForces)
+   {
+      this.inverseDynamicsCalculator.setConsiderCoriolisAndCentrifugalForces(considerCoriolisAndCentrifugalForces);
+   }
+
+   /**
     * A {@code SpatialInertia} object is linear with respect to the ten inertial parameters that constitute it.
     * Therefore, we can create a basis for all spatial inertias with respect to these inertial parameters. This
     * enum represents the unit vectors of this basis:

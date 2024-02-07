@@ -472,6 +472,90 @@ public class JointTorqueRegressorCalculatorTest
    }
 
    @Test
+   public void testRegressorAndParametersMatchInverseDynamicsNoAccelerations()
+   {
+      Random random = new Random(25);
+
+      for (int i = 0; i < SYSTEM_ITERATIONS; i++)
+      {
+         // Randomise the number of joints in the system
+         int numberOfJoints = random.nextInt(30) + 1;  // to avoid zero
+         List<OneDoFJoint> joints = MultiBodySystemRandomTools.nextOneDoFJointChain(random, numberOfJoints);
+         MultiBodySystemBasics system = MultiBodySystemBasics.toMultiBodySystemBasics(joints);
+
+         for (int j = 0; j < STATE_ITERATIONS; j++)
+         {
+            // Randomise the state of the system
+            for (JointStateType stateToRandomize : JointStateType.values())
+               MultiBodySystemRandomTools.nextState(random, stateToRandomize, system.getAllJoints());
+
+            // Create an inverse dynamics calculator to compare torque results to
+            InverseDynamicsCalculator inverseDynamicsCalculator = new InverseDynamicsCalculator(system);
+            inverseDynamicsCalculator.setGravitationalAcceleration(-9.81);
+            inverseDynamicsCalculator.setConsiderJointAccelerations(false);  // no consideration of joint accelerations
+            inverseDynamicsCalculator.compute();
+            DMatrixRMaj expectedjointTau = inverseDynamicsCalculator.getJointTauMatrix();
+
+            // We want the product of the regressor matrix and the parameter vector to equal the expected joint torques
+            JointTorqueRegressorCalculator regressorCalculator = new JointTorqueRegressorCalculator(system);
+            DMatrixRMaj parameterVector = regressorCalculator.getParameterVector();
+            regressorCalculator.setConsiderJointAccelerations(false);  // no consideration of joint accelerations
+            regressorCalculator.setGravitationalAcceleration(-9.81);
+            regressorCalculator.compute();
+            DMatrixRMaj regressorMatrix = regressorCalculator.getJointTorqueRegressorMatrix();
+
+            // Compare results
+            DMatrixRMaj actualJointTau = new DMatrixRMaj(numberOfJoints, 1);
+            CommonOps_DDRM.mult(regressorMatrix, parameterVector, actualJointTau);
+            assertEquals(expectedjointTau.getData().length, actualJointTau.getData().length);
+            assertArrayEquals(expectedjointTau.getData(), actualJointTau.getData(), EPSILON);
+         }
+      }
+   }
+
+   @Test
+   public void testRegressorAndParametersMatchInverseDynamicsNoCoriolisOrCentrifugal()
+   {
+      Random random = new Random(25);
+
+      for (int i = 0; i < SYSTEM_ITERATIONS; i++)
+      {
+         // Randomise the number of joints in the system
+         int numberOfJoints = random.nextInt(30) + 1;  // to avoid zero
+         List<OneDoFJoint> joints = MultiBodySystemRandomTools.nextOneDoFJointChain(random, numberOfJoints);
+         MultiBodySystemBasics system = MultiBodySystemBasics.toMultiBodySystemBasics(joints);
+
+         for (int j = 0; j < STATE_ITERATIONS; j++)
+         {
+            // Randomise the state of the system
+            for (JointStateType stateToRandomize : JointStateType.values())
+               MultiBodySystemRandomTools.nextState(random, stateToRandomize, system.getAllJoints());
+
+            // Create an inverse dynamics calculator to compare torque results to
+            InverseDynamicsCalculator inverseDynamicsCalculator = new InverseDynamicsCalculator(system);
+            inverseDynamicsCalculator.setGravitationalAcceleration(-9.81);
+            inverseDynamicsCalculator.setConsiderCoriolisAndCentrifugalForces(false);  // no consideration of Coriolis and centrifugal forces
+            inverseDynamicsCalculator.compute();
+            DMatrixRMaj expectedjointTau = inverseDynamicsCalculator.getJointTauMatrix();
+
+            // We want the product of the regressor matrix and the parameter vector to equal the expected joint torques
+            JointTorqueRegressorCalculator regressorCalculator = new JointTorqueRegressorCalculator(system);
+            DMatrixRMaj parameterVector = regressorCalculator.getParameterVector();
+            regressorCalculator.setConsiderCoriolisAndCentrifugalForces(false);  // no consideration of Coriolis and centrifugal forces
+            regressorCalculator.setGravitationalAcceleration(-9.81);
+            regressorCalculator.compute();
+            DMatrixRMaj regressorMatrix = regressorCalculator.getJointTorqueRegressorMatrix();
+
+            // Compare results
+            DMatrixRMaj actualJointTau = new DMatrixRMaj(numberOfJoints, 1);
+            CommonOps_DDRM.mult(regressorMatrix, parameterVector, actualJointTau);
+            assertEquals(expectedjointTau.getData().length, actualJointTau.getData().length);
+            assertArrayEquals(expectedjointTau.getData(), actualJointTau.getData(), EPSILON);
+         }
+      }
+   }
+
+   @Test
    public void testSpatialInertiaParameterBasis()
    {
       DMatrixRMaj expectedBasis = new DMatrixRMaj(6, 6);
