@@ -13,6 +13,7 @@ import us.ihmc.mecano.spatial.Wrench;
 import us.ihmc.mecano.tools.JointStateType;
 import us.ihmc.mecano.tools.MecanoRandomTools;
 import us.ihmc.mecano.tools.MultiBodySystemRandomTools;
+import us.ihmc.mecano.tools.MultiBodySystemTools;
 
 import java.util.*;
 
@@ -24,6 +25,9 @@ public class JointTorqueRegressorCalculatorTest
    private static final int SYSTEM_ITERATIONS = 5;
 
    private static final double EPSILON = 1.0e-12;
+
+   private static final double GRAVITY_Z = -9.81;
+   private static final int PARAMETERS_PER_BODY = 10;
 
    private static final int WARMUP_ITERATIONS = 100;
    private static final int ITERATIONS = 1000;
@@ -43,14 +47,14 @@ public class JointTorqueRegressorCalculatorTest
 
       // Create an inverse dynamics calculator to compare torque results to
       InverseDynamicsCalculator inverseDynamicsCalculator = new InverseDynamicsCalculator(system);
-      inverseDynamicsCalculator.setGravitationalAcceleration(-9.81);
+      inverseDynamicsCalculator.setGravitationalAcceleration(GRAVITY_Z);
       inverseDynamicsCalculator.compute();
       DMatrixRMaj expectedjointTau = inverseDynamicsCalculator.getJointTauMatrix();
 
       // We want the product of the regressor matrix and the parameter vector to equal the expected joint torques
       JointTorqueRegressorCalculator regressorCalculator = new JointTorqueRegressorCalculator(system);
       DMatrixRMaj parameterVector = regressorCalculator.getParameterVector();
-      regressorCalculator.setGravitationalAcceleration(-9.81);
+      regressorCalculator.setGravitationalAcceleration(GRAVITY_Z);
       regressorCalculator.compute();
       DMatrixRMaj regressorMatrix = regressorCalculator.getJointTorqueRegressorMatrix();
 
@@ -110,14 +114,14 @@ public class JointTorqueRegressorCalculatorTest
 
             // Create an inverse dynamics calculator to compare torque results to
             InverseDynamicsCalculator inverseDynamicsCalculator = new InverseDynamicsCalculator(system);
-            inverseDynamicsCalculator.setGravitationalAcceleration(-9.81);
+            inverseDynamicsCalculator.setGravitationalAcceleration(GRAVITY_Z);
             inverseDynamicsCalculator.compute();
             DMatrixRMaj expectedjointTau = inverseDynamicsCalculator.getJointTauMatrix();
 
             // We want the product of the regressor matrix and the parameter vector to equal the expected joint torques
             JointTorqueRegressorCalculator regressorCalculator = new JointTorqueRegressorCalculator(system);
             DMatrixRMaj parameterVector = regressorCalculator.getParameterVector();
-            regressorCalculator.setGravitationalAcceleration(-9.81);
+            regressorCalculator.setGravitationalAcceleration(GRAVITY_Z);
             regressorCalculator.compute();
             DMatrixRMaj regressorMatrix = regressorCalculator.getJointTorqueRegressorMatrix();
 
@@ -139,7 +143,7 @@ public class JointTorqueRegressorCalculatorTest
       MultiBodySystemBasics system = MultiBodySystemBasics.toMultiBodySystemBasics(joints);
 
       JointTorqueRegressorCalculator calculator = new JointTorqueRegressorCalculator(system);
-      calculator.setGravitationalAcceleration(-9.81);
+      calculator.setGravitationalAcceleration(GRAVITY_Z);
 
       long totalTime = 0L;
 
@@ -189,14 +193,14 @@ public class JointTorqueRegressorCalculatorTest
 
             // Create an inverse dynamics calculator to compare torque results to
             InverseDynamicsCalculator inverseDynamicsCalculator = new InverseDynamicsCalculator(system);
-            inverseDynamicsCalculator.setGravitationalAcceleration(-9.81);
+            inverseDynamicsCalculator.setGravitationalAcceleration(GRAVITY_Z);
             inverseDynamicsCalculator.compute();
             DMatrixRMaj expectedjointTau = inverseDynamicsCalculator.getJointTauMatrix();
 
             // We want the product of the regressor matrix and the parameter vector to equal the expected joint torques
             JointTorqueRegressorCalculator regressorCalculator = new JointTorqueRegressorCalculator(system);
             DMatrixRMaj parameterVector = regressorCalculator.getParameterVector();
-            regressorCalculator.setGravitationalAcceleration(-9.81);
+            regressorCalculator.setGravitationalAcceleration(GRAVITY_Z);
             regressorCalculator.compute();
             DMatrixRMaj regressorMatrix = regressorCalculator.getJointTorqueRegressorMatrix();
 
@@ -222,7 +226,7 @@ public class JointTorqueRegressorCalculatorTest
       MultiBodySystemBasics system = MultiBodySystemBasics.toMultiBodySystemBasics(joints);
 
       JointTorqueRegressorCalculator calculator = new JointTorqueRegressorCalculator(system);
-      calculator.setGravitationalAcceleration(-9.81);
+      calculator.setGravitationalAcceleration(GRAVITY_Z);
 
       long totalTime = 0L;
 
@@ -267,14 +271,14 @@ public class JointTorqueRegressorCalculatorTest
 
             // Create an inverse dynamics calculator to compare torque results to
             InverseDynamicsCalculator inverseDynamicsCalculator = new InverseDynamicsCalculator(system);
-            inverseDynamicsCalculator.setGravitationalAcceleration(-9.81);
+            inverseDynamicsCalculator.setGravitationalAcceleration(GRAVITY_Z);
             inverseDynamicsCalculator.compute();
             DMatrixRMaj expectedjointTau = inverseDynamicsCalculator.getJointTauMatrix();
 
             // We want the product of the regressor matrix and the parameter vector to equal the expected joint torques
             JointTorqueRegressorCalculator regressorCalculator = new JointTorqueRegressorCalculator(system);
             DMatrixRMaj parameterVector = regressorCalculator.getParameterVector();
-            regressorCalculator.setGravitationalAcceleration(-9.81);
+            regressorCalculator.setGravitationalAcceleration(GRAVITY_Z);
             regressorCalculator.compute();
             DMatrixRMaj regressorMatrix = regressorCalculator.getJointTorqueRegressorMatrix();
 
@@ -296,7 +300,7 @@ public class JointTorqueRegressorCalculatorTest
       MultiBodySystemBasics system = MultiBodySystemBasics.toMultiBodySystemBasics(joints);
 
       JointTorqueRegressorCalculator calculator = new JointTorqueRegressorCalculator(system);
-      calculator.setGravitationalAcceleration(-9.81);
+      calculator.setGravitationalAcceleration(GRAVITY_Z);
 
       long totalTime = 0L;
 
@@ -346,14 +350,14 @@ public class JointTorqueRegressorCalculatorTest
 
             // Create an inverse dynamics calculator to compare torque results to
             InverseDynamicsCalculator inverseDynamicsCalculator = new InverseDynamicsCalculator(system);
-            inverseDynamicsCalculator.setGravitationalAcceleration(-9.81);
+            inverseDynamicsCalculator.setGravitationalAcceleration(GRAVITY_Z);
             inverseDynamicsCalculator.compute();
             DMatrixRMaj expectedjointTau = inverseDynamicsCalculator.getJointTauMatrix();
 
             // We want the product of the regressor matrix and the parameter vector to equal the expected joint torques
             JointTorqueRegressorCalculator regressorCalculator = new JointTorqueRegressorCalculator(system);
             DMatrixRMaj parameterVector = regressorCalculator.getParameterVector();
-            regressorCalculator.setGravitationalAcceleration(-9.81);
+            regressorCalculator.setGravitationalAcceleration(GRAVITY_Z);
             regressorCalculator.compute();
             DMatrixRMaj regressorMatrix = regressorCalculator.getJointTorqueRegressorMatrix();
 
@@ -379,7 +383,7 @@ public class JointTorqueRegressorCalculatorTest
       MultiBodySystemBasics system = MultiBodySystemBasics.toMultiBodySystemBasics(joints);
 
       JointTorqueRegressorCalculator calculator = new JointTorqueRegressorCalculator(system);
-      calculator.setGravitationalAcceleration(-9.81);
+      calculator.setGravitationalAcceleration(GRAVITY_Z);
 
       long totalTime = 0L;
 
@@ -424,7 +428,7 @@ public class JointTorqueRegressorCalculatorTest
 
             // Create an inverse dynamics calculator to compare torque results to
             InverseDynamicsCalculator inverseDynamicsCalculator = new InverseDynamicsCalculator(system);
-            inverseDynamicsCalculator.setGravitationalAcceleration(-9.81);
+            inverseDynamicsCalculator.setGravitationalAcceleration(GRAVITY_Z);
             // Randomly pick rigid bodies to apply external wrenches to
             Map<RigidBodyReadOnly, Wrench> rigidBodiesToExternalWrenchMap = new LinkedHashMap<>();
             for (RigidBodyBasics body : system.getRootBody().subtreeArray())
@@ -442,7 +446,7 @@ public class JointTorqueRegressorCalculatorTest
             // We want the product of the regressor matrix and the parameter vector to equal the expected joint torques
             JointTorqueRegressorCalculator regressorCalculator = new JointTorqueRegressorCalculator(system);
             DMatrixRMaj parameterVector = regressorCalculator.getParameterVector();
-            regressorCalculator.setGravitationalAcceleration(-9.81);
+            regressorCalculator.setGravitationalAcceleration(GRAVITY_Z);
             // Need to add in the contribution of the external wrenches we applied to the inverse dynamics calculator
             Map<RigidBodyReadOnly, DMatrixRMaj> rigidBodyToContactJacobianMap = new LinkedHashMap<>();
             GeometricJacobianCalculator jacobianCalculator = new GeometricJacobianCalculator();
@@ -491,7 +495,7 @@ public class JointTorqueRegressorCalculatorTest
 
             // Create an inverse dynamics calculator to compare torque results to
             InverseDynamicsCalculator inverseDynamicsCalculator = new InverseDynamicsCalculator(system);
-            inverseDynamicsCalculator.setGravitationalAcceleration(-9.81);
+            inverseDynamicsCalculator.setGravitationalAcceleration(GRAVITY_Z);
             inverseDynamicsCalculator.setConsiderJointAccelerations(false);  // no consideration of joint accelerations
             inverseDynamicsCalculator.compute();
             DMatrixRMaj expectedjointTau = inverseDynamicsCalculator.getJointTauMatrix();
@@ -500,7 +504,7 @@ public class JointTorqueRegressorCalculatorTest
             JointTorqueRegressorCalculator regressorCalculator = new JointTorqueRegressorCalculator(system);
             DMatrixRMaj parameterVector = regressorCalculator.getParameterVector();
             regressorCalculator.setConsiderJointAccelerations(false);  // no consideration of joint accelerations
-            regressorCalculator.setGravitationalAcceleration(-9.81);
+            regressorCalculator.setGravitationalAcceleration(GRAVITY_Z);
             regressorCalculator.compute();
             DMatrixRMaj regressorMatrix = regressorCalculator.getJointTorqueRegressorMatrix();
 
@@ -533,7 +537,7 @@ public class JointTorqueRegressorCalculatorTest
 
             // Create an inverse dynamics calculator to compare torque results to
             InverseDynamicsCalculator inverseDynamicsCalculator = new InverseDynamicsCalculator(system);
-            inverseDynamicsCalculator.setGravitationalAcceleration(-9.81);
+            inverseDynamicsCalculator.setGravitationalAcceleration(GRAVITY_Z);
             inverseDynamicsCalculator.setConsiderCoriolisAndCentrifugalForces(false);  // no consideration of Coriolis and centrifugal forces
             inverseDynamicsCalculator.compute();
             DMatrixRMaj expectedjointTau = inverseDynamicsCalculator.getJointTauMatrix();
@@ -542,7 +546,7 @@ public class JointTorqueRegressorCalculatorTest
             JointTorqueRegressorCalculator regressorCalculator = new JointTorqueRegressorCalculator(system);
             DMatrixRMaj parameterVector = regressorCalculator.getParameterVector();
             regressorCalculator.setConsiderCoriolisAndCentrifugalForces(false);  // no consideration of Coriolis and centrifugal forces
-            regressorCalculator.setGravitationalAcceleration(-9.81);
+            regressorCalculator.setGravitationalAcceleration(GRAVITY_Z);
             regressorCalculator.compute();
             DMatrixRMaj regressorMatrix = regressorCalculator.getJointTorqueRegressorMatrix();
 
@@ -552,6 +556,145 @@ public class JointTorqueRegressorCalculatorTest
             assertEquals(expectedjointTau.getData().length, actualJointTau.getData().length);
             assertArrayEquals(expectedjointTau.getData(), actualJointTau.getData(), EPSILON);
          }
+      }
+   }
+
+   @Test
+   public void testMixOfInverseDynamicsAndRegressorSimple()
+   {
+      Random random = new Random(3987L);
+
+      int numberOfJoints = 3;
+      List<OneDoFJoint> joints = MultiBodySystemRandomTools.nextOneDoFJointChain(random, numberOfJoints);
+
+      // Three systems:
+      // * original (to get expected results from)
+      // * nominal (where the body to estimate will be zeroed)
+      // * regressor (for use in the regressor calculator)
+      MultiBodySystemBasics system = MultiBodySystemBasics.toMultiBodySystemBasics(joints);
+      MultiBodySystemBasics systemNominal = MultiBodySystemBasics.clone(system, ReferenceFrame.getWorldFrame());
+      MultiBodySystemBasics systemRegressor = MultiBodySystemBasics.clone(system, ReferenceFrame.getWorldFrame());
+
+      // Randomise the state of the original system, and copy over the values to the nominal and regressor systems
+      for (JointStateType type : JointStateType.values())
+      {
+         MultiBodySystemRandomTools.nextState(random, type, system.getAllJoints());
+         MultiBodySystemTools.copyJointsState(system.getAllJoints(), systemNominal.getAllJoints(), type);
+         MultiBodySystemTools.copyJointsState(system.getAllJoints(), systemRegressor.getAllJoints(), type);
+      }
+
+      // Get expected result from original system
+      InverseDynamicsCalculator inverseDynamicsCalculator = new InverseDynamicsCalculator(system);
+      inverseDynamicsCalculator.setGravitationalAcceleration(GRAVITY_Z);
+      inverseDynamicsCalculator.compute();
+      DMatrixRMaj expectedTau = inverseDynamicsCalculator.getJointTauMatrix();
+
+      // Choose a body (here the second joint -- 0-indexed), and zero it in the nominal system
+      int jointIndexToZero = 1;
+      systemNominal.getAllJoints().get(jointIndexToZero).getSuccessor().getInertia().setToZero();
+
+      // Get the joint torque contribution from the nominal system with zeroed inertial parameters of interest
+      InverseDynamicsCalculator inverseDynamicsCalculatorNominal = new InverseDynamicsCalculator(systemNominal);
+      inverseDynamicsCalculatorNominal.setGravitationalAcceleration(GRAVITY_Z);
+      inverseDynamicsCalculatorNominal.compute();
+      DMatrixRMaj nominalTau = inverseDynamicsCalculatorNominal.getJointTauMatrix();
+
+      // Get the joint torque contribution from the regressor calculation of the body of interest
+      JointTorqueRegressorCalculator regressorCalculator = new JointTorqueRegressorCalculator(systemRegressor);
+      DMatrixRMaj parameterVector = regressorCalculator.getParameterVector();
+      regressorCalculator.setGravitationalAcceleration(GRAVITY_Z);
+      regressorCalculator.compute();
+      DMatrixRMaj regressorMatrix = regressorCalculator.getJointTorqueRegressorMatrix();
+
+      int nDoFs = MultiBodySystemTools.computeDegreesOfFreedom(system.getAllJoints());
+      DMatrixRMaj regressorBlock = new DMatrixRMaj(nDoFs, PARAMETERS_PER_BODY);
+      // Get regressor block corresponding to body of interest
+      CommonOps_DDRM.extract(regressorMatrix, 0, jointIndexToZero * PARAMETERS_PER_BODY, regressorBlock);
+      DMatrixRMaj parameterBlock = new DMatrixRMaj(PARAMETERS_PER_BODY, 1);
+      // Get slice of parameter vector corresponding to body of interest
+      CommonOps_DDRM.extract(parameterVector, jointIndexToZero * PARAMETERS_PER_BODY, 0, parameterBlock);
+
+      DMatrixRMaj regressorTau = new DMatrixRMaj(nDoFs, 1);
+      CommonOps_DDRM.mult(regressorBlock, parameterBlock, regressorTau);
+
+      // Compare results
+      DMatrixRMaj actualJointTau = new DMatrixRMaj(nDoFs, 1);
+      CommonOps_DDRM.add(nominalTau, regressorTau, actualJointTau);
+      assertEquals(nominalTau.getData().length, actualJointTau.getData().length);
+      assertArrayEquals(expectedTau.getData(), actualJointTau.getData(), EPSILON);
+   }
+
+   @Test
+   public void testMixOfInverseDynamicsAndRegressor()
+   {
+      Random random = new Random(45376L);
+
+      for (int i = 0; i < ITERATIONS; ++i)
+      {
+         // Randomise the number of joints in the system
+         int numberOfJoints = random.nextInt(30) + 1;  // to avoid zero
+
+         List<Joint> joints = new ArrayList<>();
+         RigidBody elevator = new RigidBody("elevator", ReferenceFrame.getWorldFrame());
+         joints.add(new SixDoFJoint("floating", elevator));
+         RigidBody floatingBody = MultiBodySystemRandomTools.nextRigidBody(random, "floatingBody", joints.get(0));
+         joints.addAll(MultiBodySystemRandomTools.nextOneDoFJointTree(random, floatingBody, numberOfJoints));
+
+         // Three systems:
+         // * original (to get expected results from)
+         // * nominal (where the body to estimate will be zeroed)
+         // * regressor (for use in the regressor calculator)
+         MultiBodySystemBasics system = MultiBodySystemBasics.toMultiBodySystemBasics(joints);
+         MultiBodySystemBasics systemNominal = MultiBodySystemBasics.clone(system, ReferenceFrame.getWorldFrame());
+         MultiBodySystemBasics systemRegressor = MultiBodySystemBasics.clone(system, ReferenceFrame.getWorldFrame());
+
+         // Randomise the state of the original system, and copy over the values to the nominal and regressor systems
+         for (JointStateType type : JointStateType.values())
+         {
+            MultiBodySystemRandomTools.nextState(random, type, system.getAllJoints());
+            MultiBodySystemTools.copyJointsState(system.getAllJoints(), systemNominal.getAllJoints(), type);
+            MultiBodySystemTools.copyJointsState(system.getAllJoints(), systemRegressor.getAllJoints(), type);
+         }
+
+         // Get expected result from original system
+         InverseDynamicsCalculator inverseDynamicsCalculator = new InverseDynamicsCalculator(system);
+         inverseDynamicsCalculator.setGravitationalAcceleration(GRAVITY_Z);
+         inverseDynamicsCalculator.compute();
+         DMatrixRMaj expectedTau = inverseDynamicsCalculator.getJointTauMatrix();
+
+         // Randomly choose a body of interest by joint index, and zero it in the nominal system
+         int jointIndexToZero = random.nextInt(numberOfJoints);
+         systemNominal.getAllJoints().get(jointIndexToZero).getSuccessor().getInertia().setToZero();
+
+         // Get the joint torque contribution from the nominal system with zeroed inertial parameters of interest
+         InverseDynamicsCalculator inverseDynamicsCalculatorNominal = new InverseDynamicsCalculator(systemNominal);
+         inverseDynamicsCalculatorNominal.setGravitationalAcceleration(GRAVITY_Z);
+         inverseDynamicsCalculatorNominal.compute();
+         DMatrixRMaj nominalTau = inverseDynamicsCalculatorNominal.getJointTauMatrix();
+
+         // Get the joint torque contribution from the regressor calculation of the body of interest
+         JointTorqueRegressorCalculator regressorCalculator = new JointTorqueRegressorCalculator(systemRegressor);
+         DMatrixRMaj parameterVector = regressorCalculator.getParameterVector();
+         regressorCalculator.setGravitationalAcceleration(GRAVITY_Z);
+         regressorCalculator.compute();
+         DMatrixRMaj regressorMatrix = regressorCalculator.getJointTorqueRegressorMatrix();
+
+         int nDoFs = MultiBodySystemTools.computeDegreesOfFreedom(system.getAllJoints());
+         DMatrixRMaj regressorBlock = new DMatrixRMaj(nDoFs, PARAMETERS_PER_BODY);
+         // Get regressor block corresponding to body of interest
+         CommonOps_DDRM.extract(regressorMatrix, 0, jointIndexToZero * PARAMETERS_PER_BODY, regressorBlock);
+         DMatrixRMaj parameterBlock = new DMatrixRMaj(PARAMETERS_PER_BODY, 1);
+         // Get slice of parameter vector corresponding to body of interest
+         CommonOps_DDRM.extract(parameterVector, jointIndexToZero * PARAMETERS_PER_BODY, 0, parameterBlock);
+
+         DMatrixRMaj regressorTau = new DMatrixRMaj(nDoFs, 1);
+         CommonOps_DDRM.mult(regressorBlock, parameterBlock, regressorTau);  // pack result
+
+         // Compare results
+         DMatrixRMaj actualJointTau = new DMatrixRMaj(nDoFs, 1);
+         CommonOps_DDRM.add(nominalTau, regressorTau, actualJointTau);
+         assertEquals(nominalTau.getData().length, actualJointTau.getData().length);
+         assertArrayEquals(expectedTau.getData(), actualJointTau.getData(), EPSILON);
       }
    }
 
