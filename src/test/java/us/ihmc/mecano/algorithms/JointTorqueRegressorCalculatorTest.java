@@ -42,8 +42,8 @@ public class JointTorqueRegressorCalculatorTest
       List<OneDoFJoint> joints = MultiBodySystemRandomTools.nextOneDoFJointChain(random, numberOfJoints);
       MultiBodySystemBasics system = MultiBodySystemBasics.toMultiBodySystemBasics(joints);
 
-      for (JointStateType stateToRandomize : JointStateType.values())
-         MultiBodySystemRandomTools.nextState(random, stateToRandomize, system.getAllJoints());
+      for (JointStateType type : JointStateType.values())
+         MultiBodySystemRandomTools.nextState(random, type, system.getAllJoints());
 
       // Create an inverse dynamics calculator to compare torque results to
       InverseDynamicsCalculator inverseDynamicsCalculator = new InverseDynamicsCalculator(system);
@@ -109,8 +109,8 @@ public class JointTorqueRegressorCalculatorTest
          for (int j = 0; j < STATE_ITERATIONS; j++)
          {
             // Randomise the state of the system
-            for (JointStateType stateToRandomize : JointStateType.values())
-               MultiBodySystemRandomTools.nextState(random, stateToRandomize, system.getAllJoints());
+            for (JointStateType type : JointStateType.values())
+               MultiBodySystemRandomTools.nextState(random, type, system.getAllJoints());
 
             // Create an inverse dynamics calculator to compare torque results to
             InverseDynamicsCalculator inverseDynamicsCalculator = new InverseDynamicsCalculator(system);
@@ -149,16 +149,16 @@ public class JointTorqueRegressorCalculatorTest
 
       for (int i = 0; i < WARMUP_ITERATIONS; i++)
       {
-         for (JointStateType stateToRandomize : JointStateType.values())
-            MultiBodySystemRandomTools.nextState(random, stateToRandomize, joints);
+         for (JointStateType type : JointStateType.values())
+            MultiBodySystemRandomTools.nextState(random, type, joints);
 
          calculator.compute();
       }
 
       for (int i = 0; i < ITERATIONS; i++)
       {
-         for (JointStateType stateToRandomize : JointStateType.values())
-            MultiBodySystemRandomTools.nextState(random, stateToRandomize, joints);
+         for (JointStateType type : JointStateType.values())
+            MultiBodySystemRandomTools.nextState(random, type, joints);
 
          long startTime = System.nanoTime();
          calculator.compute();
@@ -188,8 +188,8 @@ public class JointTorqueRegressorCalculatorTest
          for (int j = 0; j < STATE_ITERATIONS; j++)
          {
             // Randomise the state of the system
-            for (JointStateType stateToRandomize : JointStateType.values())
-               MultiBodySystemRandomTools.nextState(random, stateToRandomize, system.getAllJoints());
+            for (JointStateType type : JointStateType.values())
+               MultiBodySystemRandomTools.nextState(random, type, system.getAllJoints());
 
             // Create an inverse dynamics calculator to compare torque results to
             InverseDynamicsCalculator inverseDynamicsCalculator = new InverseDynamicsCalculator(system);
@@ -232,16 +232,16 @@ public class JointTorqueRegressorCalculatorTest
 
       for (int i = 0; i < WARMUP_ITERATIONS; i++)
       {
-         for (JointStateType stateToRandomize : JointStateType.values())
-            MultiBodySystemRandomTools.nextState(random, stateToRandomize, joints);
+         for (JointStateType type : JointStateType.values())
+            MultiBodySystemRandomTools.nextState(random, type, joints);
 
          calculator.compute();
       }
 
       for (int i = 0; i < ITERATIONS; i++)
       {
-         for (JointStateType stateToRandomize : JointStateType.values())
-            MultiBodySystemRandomTools.nextState(random, stateToRandomize, joints);
+         for (JointStateType type : JointStateType.values())
+            MultiBodySystemRandomTools.nextState(random, type, joints);
 
          long startTime = System.nanoTime();
          calculator.compute();
@@ -266,8 +266,8 @@ public class JointTorqueRegressorCalculatorTest
          for (int j = 0; j < STATE_ITERATIONS; j++)
          {
             // Randomise the state of the system
-            for (JointStateType stateToRandomize : JointStateType.values())
-               MultiBodySystemRandomTools.nextState(random, stateToRandomize, system.getAllJoints());
+            for (JointStateType type : JointStateType.values())
+               MultiBodySystemRandomTools.nextState(random, type, system.getAllJoints());
 
             // Create an inverse dynamics calculator to compare torque results to
             InverseDynamicsCalculator inverseDynamicsCalculator = new InverseDynamicsCalculator(system);
@@ -306,16 +306,16 @@ public class JointTorqueRegressorCalculatorTest
 
       for (int i = 0; i < WARMUP_ITERATIONS; i++)
       {
-         for (JointStateType stateToRandomize : JointStateType.values())
-            MultiBodySystemRandomTools.nextState(random, stateToRandomize, joints);
+         for (JointStateType type : JointStateType.values())
+            MultiBodySystemRandomTools.nextState(random, type, joints);
 
          calculator.compute();
       }
 
       for (int i = 0; i < ITERATIONS; i++)
       {
-         for (JointStateType stateToRandomize : JointStateType.values())
-            MultiBodySystemRandomTools.nextState(random, stateToRandomize, joints);
+         for (JointStateType type : JointStateType.values())
+            MultiBodySystemRandomTools.nextState(random, type, joints);
 
          long startTime = System.nanoTime();
          calculator.compute();
@@ -345,8 +345,8 @@ public class JointTorqueRegressorCalculatorTest
          for (int j = 0; j < STATE_ITERATIONS; j++)
          {
             // Randomise the state of the system
-            for (JointStateType stateToRandomize : JointStateType.values())
-               MultiBodySystemRandomTools.nextState(random, stateToRandomize, system.getAllJoints());
+            for (JointStateType type : JointStateType.values())
+               MultiBodySystemRandomTools.nextState(random, type, system.getAllJoints());
 
             // Create an inverse dynamics calculator to compare torque results to
             InverseDynamicsCalculator inverseDynamicsCalculator = new InverseDynamicsCalculator(system);
@@ -389,16 +389,16 @@ public class JointTorqueRegressorCalculatorTest
 
       for (int i = 0; i < WARMUP_ITERATIONS; i++)
       {
-         for (JointStateType stateToRandomize : JointStateType.values())
-            MultiBodySystemRandomTools.nextState(random, stateToRandomize, joints);
+         for (JointStateType type : JointStateType.values())
+            MultiBodySystemRandomTools.nextState(random, type, joints);
 
          calculator.compute();
       }
 
       for (int i = 0; i < ITERATIONS; i++)
       {
-         for (JointStateType stateToRandomize : JointStateType.values())
-            MultiBodySystemRandomTools.nextState(random, stateToRandomize, joints);
+         for (JointStateType type : JointStateType.values())
+            MultiBodySystemRandomTools.nextState(random, type, joints);
 
          long startTime = System.nanoTime();
          calculator.compute();
@@ -423,8 +423,8 @@ public class JointTorqueRegressorCalculatorTest
          for (int j = 0; j < STATE_ITERATIONS; j++)
          {
             // Randomise the state of the system
-            for (JointStateType stateToRandomize : JointStateType.values())
-               MultiBodySystemRandomTools.nextState(random, stateToRandomize, system.getAllJoints());
+            for (JointStateType type : JointStateType.values())
+               MultiBodySystemRandomTools.nextState(random, type, system.getAllJoints());
 
             // Create an inverse dynamics calculator to compare torque results to
             InverseDynamicsCalculator inverseDynamicsCalculator = new InverseDynamicsCalculator(system);
@@ -490,8 +490,8 @@ public class JointTorqueRegressorCalculatorTest
          for (int j = 0; j < STATE_ITERATIONS; j++)
          {
             // Randomise the state of the system
-            for (JointStateType stateToRandomize : JointStateType.values())
-               MultiBodySystemRandomTools.nextState(random, stateToRandomize, system.getAllJoints());
+            for (JointStateType type : JointStateType.values())
+               MultiBodySystemRandomTools.nextState(random, type, system.getAllJoints());
 
             // Create an inverse dynamics calculator to compare torque results to
             InverseDynamicsCalculator inverseDynamicsCalculator = new InverseDynamicsCalculator(system);
@@ -532,8 +532,8 @@ public class JointTorqueRegressorCalculatorTest
          for (int j = 0; j < STATE_ITERATIONS; j++)
          {
             // Randomise the state of the system
-            for (JointStateType stateToRandomize : JointStateType.values())
-               MultiBodySystemRandomTools.nextState(random, stateToRandomize, system.getAllJoints());
+            for (JointStateType type : JointStateType.values())
+               MultiBodySystemRandomTools.nextState(random, type, system.getAllJoints());
 
             // Create an inverse dynamics calculator to compare torque results to
             InverseDynamicsCalculator inverseDynamicsCalculator = new InverseDynamicsCalculator(system);
@@ -590,8 +590,11 @@ public class JointTorqueRegressorCalculatorTest
       DMatrixRMaj expectedTau = inverseDynamicsCalculator.getJointTauMatrix();
 
       // Choose a body (here the second joint -- 0-indexed), and zero it in the nominal system
+      // Keep track of the corresponding body in the regressor system
       int jointIndexToZero = 1;
-      systemNominal.getAllJoints().get(jointIndexToZero).getSuccessor().getInertia().setToZero();
+      RigidBodyBasics bodyToZeroNominal = systemNominal.getAllJoints().get(jointIndexToZero).getSuccessor();
+      bodyToZeroNominal.getInertia().setToZero();
+      RigidBodyReadOnly bodyToZeroRegressor = systemRegressor.getAllJoints().get(jointIndexToZero).getSuccessor();
 
       // Get the joint torque contribution from the nominal system with zeroed inertial parameters of interest
       InverseDynamicsCalculator inverseDynamicsCalculatorNominal = new InverseDynamicsCalculator(systemNominal);
@@ -601,19 +604,15 @@ public class JointTorqueRegressorCalculatorTest
 
       // Get the joint torque contribution from the regressor calculation of the body of interest
       JointTorqueRegressorCalculator regressorCalculator = new JointTorqueRegressorCalculator(systemRegressor);
-      DMatrixRMaj parameterVector = regressorCalculator.getParameterVector();
       regressorCalculator.setGravitationalAcceleration(GRAVITY_Z);
-      regressorCalculator.compute();
-      DMatrixRMaj regressorMatrix = regressorCalculator.getJointTorqueRegressorMatrix();
+      regressorCalculator.compute(bodyToZeroRegressor);
+
+      // Get regressor block corresponding to body of interest
+      DMatrixRMaj regressorBlock = regressorCalculator.getJointTorqueRegressorMatrixBlock(bodyToZeroRegressor);
+      // Get slice of parameter vector corresponding to body of interest
+      DMatrixRMaj parameterBlock = regressorCalculator.getParameterVectorSlice(bodyToZeroRegressor);
 
       int nDoFs = MultiBodySystemTools.computeDegreesOfFreedom(system.getAllJoints());
-      DMatrixRMaj regressorBlock = new DMatrixRMaj(nDoFs, PARAMETERS_PER_BODY);
-      // Get regressor block corresponding to body of interest
-      CommonOps_DDRM.extract(regressorMatrix, 0, jointIndexToZero * PARAMETERS_PER_BODY, regressorBlock);
-      DMatrixRMaj parameterBlock = new DMatrixRMaj(PARAMETERS_PER_BODY, 1);
-      // Get slice of parameter vector corresponding to body of interest
-      CommonOps_DDRM.extract(parameterVector, jointIndexToZero * PARAMETERS_PER_BODY, 0, parameterBlock);
-
       DMatrixRMaj regressorTau = new DMatrixRMaj(nDoFs, 1);
       CommonOps_DDRM.mult(regressorBlock, parameterBlock, regressorTau);
 
@@ -663,8 +662,11 @@ public class JointTorqueRegressorCalculatorTest
          DMatrixRMaj expectedTau = inverseDynamicsCalculator.getJointTauMatrix();
 
          // Randomly choose a body of interest by joint index, and zero it in the nominal system
+         // Keep track of the corresponding body in the regressor system
          int jointIndexToZero = random.nextInt(numberOfJoints);
-         systemNominal.getAllJoints().get(jointIndexToZero).getSuccessor().getInertia().setToZero();
+         RigidBodyBasics bodyToZeroNominal = systemNominal.getAllJoints().get(jointIndexToZero).getSuccessor();
+         bodyToZeroNominal.getInertia().setToZero();
+         RigidBodyReadOnly bodyToZeroRegressor = systemRegressor.getAllJoints().get(jointIndexToZero).getSuccessor();
 
          // Get the joint torque contribution from the nominal system with zeroed inertial parameters of interest
          InverseDynamicsCalculator inverseDynamicsCalculatorNominal = new InverseDynamicsCalculator(systemNominal);
@@ -674,19 +676,15 @@ public class JointTorqueRegressorCalculatorTest
 
          // Get the joint torque contribution from the regressor calculation of the body of interest
          JointTorqueRegressorCalculator regressorCalculator = new JointTorqueRegressorCalculator(systemRegressor);
-         DMatrixRMaj parameterVector = regressorCalculator.getParameterVector();
          regressorCalculator.setGravitationalAcceleration(GRAVITY_Z);
-         regressorCalculator.compute();
-         DMatrixRMaj regressorMatrix = regressorCalculator.getJointTorqueRegressorMatrix();
+         regressorCalculator.compute(bodyToZeroRegressor);
+
+         // Get regressor block corresponding to body of interest
+         DMatrixRMaj regressorBlock = regressorCalculator.getJointTorqueRegressorMatrixBlock(bodyToZeroRegressor);
+         // Get slice of parameter vector corresponding to body of interest
+         DMatrixRMaj parameterBlock = regressorCalculator.getParameterVectorSlice(bodyToZeroRegressor);
 
          int nDoFs = MultiBodySystemTools.computeDegreesOfFreedom(system.getAllJoints());
-         DMatrixRMaj regressorBlock = new DMatrixRMaj(nDoFs, PARAMETERS_PER_BODY);
-         // Get regressor block corresponding to body of interest
-         CommonOps_DDRM.extract(regressorMatrix, 0, jointIndexToZero * PARAMETERS_PER_BODY, regressorBlock);
-         DMatrixRMaj parameterBlock = new DMatrixRMaj(PARAMETERS_PER_BODY, 1);
-         // Get slice of parameter vector corresponding to body of interest
-         CommonOps_DDRM.extract(parameterVector, jointIndexToZero * PARAMETERS_PER_BODY, 0, parameterBlock);
-
          DMatrixRMaj regressorTau = new DMatrixRMaj(nDoFs, 1);
          CommonOps_DDRM.mult(regressorBlock, parameterBlock, regressorTau);  // pack result
 
@@ -696,6 +694,63 @@ public class JointTorqueRegressorCalculatorTest
          assertEquals(nominalTau.getData().length, actualJointTau.getData().length);
          assertArrayEquals(expectedTau.getData(), actualJointTau.getData(), EPSILON);
       }
+   }
+
+   @Test
+   public void benchmarkMixOfInverseDynamicsWithRegressorForFloatingOneDoFJointTree()
+   {
+      Random random = new Random(25);
+
+      List<Joint> joints = new ArrayList<>();
+      RigidBody elevator = new RigidBody("elevator", ReferenceFrame.getWorldFrame());
+      joints.add(new SixDoFJoint("floating", elevator));
+      RigidBody floatingBody = MultiBodySystemRandomTools.nextRigidBody(random, "floatingBody", joints.get(0));
+      int numberOfJoints = 30;
+      joints.addAll(MultiBodySystemRandomTools.nextOneDoFJointTree(random, floatingBody, numberOfJoints));
+
+      MultiBodySystemBasics systemNominal = MultiBodySystemBasics.toMultiBodySystemBasics(joints);
+      MultiBodySystemBasics systemRegressor = MultiBodySystemBasics.clone(systemNominal, ReferenceFrame.getWorldFrame());
+
+      InverseDynamicsCalculator inverseDynamicsCalculator = new InverseDynamicsCalculator(systemNominal);
+      inverseDynamicsCalculator.setGravitationalAcceleration(GRAVITY_Z);
+
+      JointTorqueRegressorCalculator regressorCalculator = new JointTorqueRegressorCalculator(systemRegressor);
+      regressorCalculator.setGravitationalAcceleration(GRAVITY_Z);
+
+      int jointIndexToZero = random.nextInt(numberOfJoints);
+      RigidBodyBasics bodyToZeroNominal = systemNominal.getAllJoints().get(jointIndexToZero).getSuccessor();
+      bodyToZeroNominal.getInertia().setToZero();
+      RigidBodyReadOnly bodyToZeroRegressor = systemRegressor.getAllJoints().get(jointIndexToZero).getSuccessor();
+
+      long totalTime = 0L;
+
+      for (int i = 0; i < WARMUP_ITERATIONS; i++)
+      {
+         for (JointStateType type : JointStateType.values())
+         {
+            MultiBodySystemRandomTools.nextState(random, type, systemNominal.getAllJoints());
+            MultiBodySystemTools.copyJointsState(systemNominal.getAllJoints(), systemRegressor.getAllJoints(), type);
+         }
+
+         inverseDynamicsCalculator.compute();
+         regressorCalculator.compute(bodyToZeroRegressor);
+      }
+
+      for (int i = 0; i < ITERATIONS; i++)
+      {
+         for (JointStateType type : JointStateType.values())
+         {
+            MultiBodySystemRandomTools.nextState(random, type, systemNominal.getAllJoints());
+            MultiBodySystemTools.copyJointsState(systemNominal.getAllJoints(), systemRegressor.getAllJoints(), type);
+         }
+
+         long startTime = System.nanoTime();
+         inverseDynamicsCalculator.compute();
+         regressorCalculator.compute(bodyToZeroRegressor);
+         totalTime += System.nanoTime() - startTime;
+      }
+
+      LogTools.info("Floating 1-DoF tree: Took on average per iteration: " + totalTime / 1e9 / ITERATIONS + " seconds");
    }
 
    @Test
