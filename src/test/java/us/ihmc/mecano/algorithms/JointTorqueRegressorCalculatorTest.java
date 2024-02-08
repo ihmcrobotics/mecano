@@ -815,7 +815,9 @@ public class JointTorqueRegressorCalculatorTest
 
       // Iterate over all the spatial inertia parameter bases for the chosen body, and check if an ID + Regressor mix
       // for each parameter matches the results of full ID for the original system
-      compareMixedIDAndParameterwiseRegressor(system, systemNominal, systemRegressor,
+      compareMixedIDAndParameterwiseRegressor(system,
+                                              systemNominal,
+                                              systemRegressor,
                                               List.of(jointIndexToModify),
                                               List.of(Arrays.asList(JointTorqueRegressorCalculator.SpatialInertiaBasisOption.values)));
    }
@@ -852,7 +854,8 @@ public class JointTorqueRegressorCalculatorTest
             MultiBodySystemTools.copyJointsState(system.getAllJoints(), systemRegressor.getAllJoints(), type);
          }
 
-         int nParametersToProcessWithRegressor = (numberOfJoints * PARAMETERS_PER_BODY) / 20;  // typically only want to actively estimate very few parameters, upper bound by 5%
+         int nParametersToProcessWithRegressor =
+               (numberOfJoints * PARAMETERS_PER_BODY) / 20;  // typically only want to actively estimate very few parameters, upper bound by 5%
          List<Integer> jointIndices = new ArrayList<>();
          List<List<JointTorqueRegressorCalculator.SpatialInertiaBasisOption>> listOfBasesPerBody = new ArrayList<>();
 
@@ -860,10 +863,11 @@ public class JointTorqueRegressorCalculatorTest
          while (j < nParametersToProcessWithRegressor)
          {
             int jointIndex = random.nextInt(numberOfJoints);
-            if(!jointIndices.contains(jointIndex))
+            if (!jointIndices.contains(jointIndex))
             {
                jointIndices.add(jointIndex);
-               List<JointTorqueRegressorCalculator.SpatialInertiaBasisOption> bases = JointTorqueRegressorCalculator.SpatialInertiaBasisOption.generateRandomBases(random);
+               List<JointTorqueRegressorCalculator.SpatialInertiaBasisOption> bases = JointTorqueRegressorCalculator.SpatialInertiaBasisOption.generateRandomBases(
+                     random);
                listOfBasesPerBody.add(bases);
                j += bases.size();
             }
@@ -894,7 +898,8 @@ public class JointTorqueRegressorCalculatorTest
       JointTorqueRegressorCalculator regressorCalculator = new JointTorqueRegressorCalculator(systemRegressor);
       regressorCalculator.setGravitationalAcceleration(GRAVITY_Z);
 
-      int nParametersToProcessWithRegressor = (numberOfJoints * PARAMETERS_PER_BODY) / 20;  // typically only want to actively estimate very few parameters, upper bound by 5%
+      int nParametersToProcessWithRegressor =
+            (numberOfJoints * PARAMETERS_PER_BODY) / 20;  // typically only want to actively estimate very few parameters, upper bound by 5%
       List<Integer> jointIndices = new ArrayList<>();
       List<List<JointTorqueRegressorCalculator.SpatialInertiaBasisOption>> listOfBasesPerBody = new ArrayList<>();
 
@@ -902,10 +907,11 @@ public class JointTorqueRegressorCalculatorTest
       while (j < nParametersToProcessWithRegressor)
       {
          int jointIndex = random.nextInt(numberOfJoints);
-         if(!jointIndices.contains(jointIndex))
+         if (!jointIndices.contains(jointIndex))
          {
             jointIndices.add(jointIndex);
-            List<JointTorqueRegressorCalculator.SpatialInertiaBasisOption> bases = JointTorqueRegressorCalculator.SpatialInertiaBasisOption.generateRandomBases(random);
+            List<JointTorqueRegressorCalculator.SpatialInertiaBasisOption> bases = JointTorqueRegressorCalculator.SpatialInertiaBasisOption.generateRandomBases(
+                  random);
             listOfBasesPerBody.add(bases);
 
             for (JointTorqueRegressorCalculator.SpatialInertiaBasisOption basis : bases)
@@ -959,8 +965,11 @@ public class JointTorqueRegressorCalculatorTest
       LogTools.info("Floating 1-DoF tree: Took on average per iteration: " + totalTime / 1e9 / ITERATIONS + " seconds");
    }
 
-   private static void compareMixedIDAndParameterwiseRegressor(MultiBodySystemBasics system, MultiBodySystemBasics systemNominal, MultiBodySystemBasics systemRegressor,
-                                                               List<Integer> jointIndicesList, List<List<JointTorqueRegressorCalculator.SpatialInertiaBasisOption>> listOfBasesList)
+   private static void compareMixedIDAndParameterwiseRegressor(MultiBodySystemBasics system,
+                                                               MultiBodySystemBasics systemNominal,
+                                                               MultiBodySystemBasics systemRegressor,
+                                                               List<Integer> jointIndicesList,
+                                                               List<List<JointTorqueRegressorCalculator.SpatialInertiaBasisOption>> listOfBasesList)
    {
       if (jointIndicesList.size() != listOfBasesList.size())
          throw new IllegalArgumentException("jointIndicesList and basesList must have the same size");
@@ -972,7 +981,7 @@ public class JointTorqueRegressorCalculatorTest
       DMatrixRMaj expectedTau = inverseDynamicsCalculator.getJointTauMatrix();
 
       List<RigidBodyReadOnly> groundTruthBodies = new ArrayList<>();
-      for (int  i = 0; i < jointIndicesList.size(); ++i)
+      for (int i = 0; i < jointIndicesList.size(); ++i)
       {
          groundTruthBodies.add(system.getAllJoints().get(jointIndicesList.get(i)).getSuccessor());
          // Zero the relevant parameters in the nominal system
@@ -1000,8 +1009,7 @@ public class JointTorqueRegressorCalculatorTest
          RigidBodyReadOnly bodyToModifyRegressor = systemRegressor.getAllJoints().get(jointIndicesList.get(i)).getSuccessor();
          List<JointTorqueRegressorCalculator.SpatialInertiaBasisOption> basisList = listOfBasesList.get(i);
          // Computing parameter-wise for a certain body with an array of basis options
-         regressorCalculator.compute(bodyToModifyRegressor,
-                                     basisList.toArray(new JointTorqueRegressorCalculator.SpatialInertiaBasisOption[0]));
+         regressorCalculator.compute(bodyToModifyRegressor, basisList.toArray(new JointTorqueRegressorCalculator.SpatialInertiaBasisOption[0]));
 
          for (JointTorqueRegressorCalculator.SpatialInertiaBasisOption basis : basisList)
          {

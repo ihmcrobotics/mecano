@@ -210,7 +210,6 @@ public class JointTorqueRegressorCalculator
 
       rigidBodyToRecursionStepMap.get(body).markUpstreamAsModifiedRecursively();
 
-
       // Perform the needed backward passes just for this rigid body
       rigidBodyToRecursionStepMap.get(body).calculateRegressor();
 
@@ -252,7 +251,7 @@ public class JointTorqueRegressorCalculator
     * The result is stored in the recursion step, see {@link #getJointTorqueRegressorMatrixSlice(RigidBodyReadOnly, SpatialInertiaBasisOption)}
     * </p>
     *
-    * @param body the rigid body to compute the joint torque regressor matrix slice for.
+    * @param body  the rigid body to compute the joint torque regressor matrix slice for.
     * @param basis the basis to compute the joint torque regressor matrix slice for.
     */
    public void compute(RigidBodyReadOnly body, SpatialInertiaBasisOption basis)
@@ -281,7 +280,7 @@ public class JointTorqueRegressorCalculator
     * The results are stored in the recursion steps, see {@link #getJointTorqueRegressorMatrixSlice(RigidBodyReadOnly, SpatialInertiaBasisOption)}
     * </p>
     *
-    * @param body the rigid body to compute the joint torque regressor matrix slices for.
+    * @param body  the rigid body to compute the joint torque regressor matrix slices for.
     * @param bases the bases to compute the joint torque regressor matrix slices for.
     */
    public void compute(RigidBodyReadOnly body, SpatialInertiaBasisOption[] bases)
@@ -297,7 +296,7 @@ public class JointTorqueRegressorCalculator
       rigidBodyToRecursionStepMap.get(body).markUpstreamAsModifiedRecursively();
 
       // Perform the needed backward passes just for the parameters under consideration
-      for (int i = 0 ; i < bases.length ; ++i)
+      for (int i = 0; i < bases.length; ++i)
          rigidBodyToRecursionStepMap.get(body).calculateRegressorColumn(bases[i]);
 
       rigidBodyToRecursionStepMap.get(body).clearModifiedMarkersRecursively();
@@ -417,7 +416,7 @@ public class JointTorqueRegressorCalculator
     * meaningless (e.g. zero).
     * </p>
     *
-    * @param body the rigid body to get the inertial parameter for.
+    * @param body  the rigid body to get the inertial parameter for.
     * @param basis the basis to get the inertial parameter for.
     * @return the inertial parameter.
     */
@@ -453,14 +452,15 @@ public class JointTorqueRegressorCalculator
     * Gets the computed n-dimensional joint torque regressor matrix slice corresponding to {@code body} and {@code basis}, where n is the number of
     * DoFs.
     *
-    * @param body the rigid body to get the joint torque regressor matrix slice for.
+    * @param body  the rigid body to get the joint torque regressor matrix slice for.
     * @param basis the basis to get the joint torque regressor matrix slice for.
     * @return the n-dimensional joint torque regressor matrix slice.
     */
    public DMatrixRMaj getJointTorqueRegressorMatrixSlice(RigidBodyReadOnly body, SpatialInertiaBasisOption basis)
    {
       CommonOps_DDRM.extract(rigidBodyToRecursionStepMap.get(body).regressorMatrixBlock,
-                             0, basis.ordinal(),
+                             0,
+                             basis.ordinal(),
                              rigidBodyToRecursionStepMap.get(body).regressorColumn);
       return rigidBodyToRecursionStepMap.get(body).regressorColumn;
    }
@@ -499,7 +499,9 @@ public class JointTorqueRegressorCalculator
    {
       M, MCOM_X, MCOM_Y, MCOM_Z, I_XX, I_XY, I_XZ, I_YY, I_YZ, I_ZZ;
 
-      /** Utility method to get all the basis options, for use in loops. */
+      /**
+       * Utility method to get all the basis options, for use in loops.
+       */
       public static final SpatialInertiaBasisOption[] values = values();
 
       /**
