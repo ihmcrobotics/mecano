@@ -82,7 +82,7 @@ public class JointTorqueRegressorCalculator
    /**
     * If computing blocks of the joint torque regressor matrix for individual bodies, this map can be used to perform body-wise computations.
     */
-   private final Map<RigidBodyReadOnly, JointTorqueRegressorRecursionStep> rigidBodyToRecursionStepMap = new LinkedHashMap<>();
+   private final Map<RigidBodyReadOnly, JointTorqueRegressorRecursionStep> rigidBodyToRecursionStepMap = new HashMap<>();
 
    /**
     * Static convenience variable for the number of inertial parameters in a rigid body.
@@ -208,14 +208,16 @@ public class JointTorqueRegressorCalculator
       inverseDynamicsCalculator.initializeJointAccelerationMatrix(null);
       inverseDynamicsCalculator.initialRecursionStep.passOneRecursive();
 
-      rigidBodyToRecursionStepMap.get(body).markUpstreamAsModifiedRecursively();
+      JointTorqueRegressorRecursionStep recursionStep = rigidBodyToRecursionStepMap.get(body);
+
+      recursionStep.markUpstreamAsModifiedRecursively();
 
       // Perform the needed backward passes just for this rigid body
-      rigidBodyToRecursionStepMap.get(body).calculateRegressor();
+      recursionStep.calculateRegressor();
 
       // After finishing with this body, clear the modified markers and mark as stale
-      rigidBodyToRecursionStepMap.get(body).clearModifiedMarkersRecursively();
-      rigidBodyToRecursionStepMap.get(body).isUpToDate = false;
+      recursionStep.clearModifiedMarkersRecursively();
+      recursionStep.isUpToDate = false;
    }
 
    /**
@@ -236,12 +238,14 @@ public class JointTorqueRegressorCalculator
 
       for (int i = 0; i < bodies.length; ++i)
       {
-         rigidBodyToRecursionStepMap.get(bodies[i]).markUpstreamAsModifiedRecursively();
+         JointTorqueRegressorRecursionStep recursionStep = rigidBodyToRecursionStepMap.get(bodies[i]);
+         recursionStep.markUpstreamAsModifiedRecursively();
 
          // Perform the needed backward passes just for this rigid body
-         rigidBodyToRecursionStepMap.get(bodies[i]).calculateRegressor();
-         rigidBodyToRecursionStepMap.get(bodies[i]).clearModifiedMarkersRecursively();
-         rigidBodyToRecursionStepMap.get(bodies[i]).isUpToDate = false;
+         recursionStep.calculateRegressor();
+
+         recursionStep.clearModifiedMarkersRecursively();
+         recursionStep.isUpToDate = false;
       }
    }
 
@@ -264,13 +268,15 @@ public class JointTorqueRegressorCalculator
       inverseDynamicsCalculator.initializeJointAccelerationMatrix(null);
       inverseDynamicsCalculator.initialRecursionStep.passOneRecursive();
 
-      rigidBodyToRecursionStepMap.get(body).markUpstreamAsModifiedRecursively();
+      JointTorqueRegressorRecursionStep recursionStep = rigidBodyToRecursionStepMap.get(body);
+
+      recursionStep.markUpstreamAsModifiedRecursively();
 
       // Perform the needed backward passes just for this rigid body
-      rigidBodyToRecursionStepMap.get(body).calculateRegressorColumn(basis);
+      recursionStep.calculateRegressorColumn(basis);
 
       initialRecursionStep.clearModifiedMarkersRecursively();
-      rigidBodyToRecursionStepMap.get(body).isUpToDate = false;
+      recursionStep.isUpToDate = false;
    }
 
    /**
@@ -293,14 +299,16 @@ public class JointTorqueRegressorCalculator
       inverseDynamicsCalculator.initializeJointAccelerationMatrix(null);
       inverseDynamicsCalculator.initialRecursionStep.passOneRecursive();
 
-      rigidBodyToRecursionStepMap.get(body).markUpstreamAsModifiedRecursively();
+      JointTorqueRegressorRecursionStep recursionStep = rigidBodyToRecursionStepMap.get(body);
+
+      recursionStep.markUpstreamAsModifiedRecursively();
 
       // Perform the needed backward passes just for the parameters under consideration
       for (int i = 0; i < bases.length; ++i)
-         rigidBodyToRecursionStepMap.get(body).calculateRegressorColumn(bases[i]);
+         recursionStep.calculateRegressorColumn(bases[i]);
 
-      rigidBodyToRecursionStepMap.get(body).clearModifiedMarkersRecursively();
-      rigidBodyToRecursionStepMap.get(body).isUpToDate = false;
+      recursionStep.clearModifiedMarkersRecursively();
+      recursionStep.isUpToDate = false;
    }
 
    /**
@@ -406,7 +414,11 @@ public class JointTorqueRegressorCalculator
     */
    public DMatrixRMaj getParameterVectorSlice(RigidBodyReadOnly body)
    {
-      return rigidBodyToRecursionStepMap.get(body).parameterVector;
+      JointTorqueRegressorRecursionStep step = rigidBodyToRecursionStepMap.get(body);
+      if (step != null)
+         return step.parameterVector;
+      else
+         return null;
    }
 
    /**
@@ -422,7 +434,11 @@ public class JointTorqueRegressorCalculator
     */
    public double getParameter(RigidBodyReadOnly body, SpatialInertiaBasisOption basis)
    {
-      return rigidBodyToRecursionStepMap.get(body).parameterVector.get(basis.ordinal());
+      JointTorqueRegressorRecursionStep step = rigidBodyToRecursionStepMap.get(body);
+      if (step != null)
+         return step.parameterVector.get(basis.ordinal());
+      else
+         return Double.NaN;
    }
 
    /**
