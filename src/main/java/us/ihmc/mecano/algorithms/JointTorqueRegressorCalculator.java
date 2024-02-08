@@ -3,19 +3,13 @@ package us.ihmc.mecano.algorithms;
 import org.ejml.data.DMatrix;
 import org.ejml.data.DMatrixRMaj;
 import org.ejml.dense.row.CommonOps_DDRM;
-import us.ihmc.mecano.multiBodySystem.interfaces.JointReadOnly;
-import us.ihmc.mecano.multiBodySystem.interfaces.MultiBodySystemBasics;
-import us.ihmc.mecano.multiBodySystem.interfaces.MultiBodySystemReadOnly;
-import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
+import us.ihmc.mecano.multiBodySystem.interfaces.*;
 import us.ihmc.mecano.spatial.SpatialInertia;
 import us.ihmc.mecano.spatial.interfaces.SpatialInertiaBasics;
 import us.ihmc.mecano.tools.MecanoTools;
 import us.ihmc.mecano.tools.MultiBodySystemTools;
 
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.List;
-import java.util.Random;
+import java.util.*;
 
 /**
  * Computes the joint torque regressor matrix of a rigid body system based on joint acceleration.
@@ -86,6 +80,11 @@ public class JointTorqueRegressorCalculator
    private final JointTorqueRegressorRecursionStep[] jointTorqueRegressorRecursionSteps;
 
    /**
+    * If computing blocks of the joint torque regressor matrix for individual bodies, this map can be used to perform body-wise computations.
+    */
+   private final Map<RigidBodyReadOnly, JointTorqueRegressorRecursionStep> rigidBodyToRecursionStepMap = new HashMap<>();
+
+   /**
     * Static convenience variable for the number of inertial parameters in a rigid body.
     */
    private static final int PARAMETERS_PER_BODY = 10;
@@ -120,8 +119,9 @@ public class JointTorqueRegressorCalculator
 
       RigidBodyBasics rootBody = input.getRootBody();
       initialRecursionStep = new JointTorqueRegressorRecursionStep(rootBody, null, inverseDynamicsCalculator, null);
-      jointTorqueRegressorRecursionSteps = buildMultiBodyTree(initialRecursionStep,
-                                                              input.getJointsToIgnore()).toArray(new JointTorqueRegressorRecursionStep[0]);
+      rigidBodyToRecursionStepMap.put(rootBody, initialRecursionStep);
+      buildMultiBodyTree(initialRecursionStep, input.getJointsToIgnore());
+      jointTorqueRegressorRecursionSteps = rigidBodyToRecursionStepMap.values().toArray(new JointTorqueRegressorRecursionStep[0]);
 
       int nDoFs = MultiBodySystemTools.computeDegreesOfFreedom(input.getJointsToConsider());
       int nBodies = jointTorqueRegressorRecursionSteps.length;
@@ -132,8 +132,7 @@ public class JointTorqueRegressorCalculator
       collectParameterVectorFromRecursionSteps();
    }
 
-   private List<JointTorqueRegressorRecursionStep> buildMultiBodyTree(JointTorqueRegressorRecursionStep parent,
-                                                                      Collection<? extends JointReadOnly> jointsToIgnore)
+   private void buildMultiBodyTree(JointTorqueRegressorRecursionStep parent, Collection<? extends JointReadOnly> jointsToIgnore)
    {
       List<JointTorqueRegressorRecursionStep> recursionSteps = new ArrayList<>();
       // Omit root bodies and elevators from list of recursion steps, we don't want to calculate the regressor with respect to them
@@ -158,11 +157,10 @@ public class JointTorqueRegressorCalculator
          {
             int[] jointIndices = input.getJointMatrixIndexProvider().getJointDoFIndices(childJoint);
             JointTorqueRegressorRecursionStep child = new JointTorqueRegressorRecursionStep(childBody, parent, inverseDynamicsCalculator, jointIndices);
-            recursionSteps.addAll(buildMultiBodyTree(child, jointsToIgnore));
+            rigidBodyToRecursionStepMap.put(childBody, child);
+            buildMultiBodyTree(child, jointsToIgnore);
          }
       }
-
-      return recursionSteps;
    }
 
    /**
@@ -192,10 +190,132 @@ public class JointTorqueRegressorCalculator
    }
 
    /**
+    * Computes the n-by-10 block of the joint torque regressor matrix corresponding to {@code body} for the current state of the multi-body system
+    * {@code input}, where n is the number of DoFs.
+    * <p>
+    * The position, velocity, and acceleration of the joints are extracted directly from the joint state.
+    * </p>
+    *
+    * @param body the rigid body to compute the joint torque regressor matrix block for.
+    */
+   public void compute(RigidBodyReadOnly body)
+   {
+      // Set all spatial inertias to zero
+      initialRecursionStep.setSpatialInertiasToZeroRecursively();
+
+      // Perform an initial forward pass of the inverse dynamics calculator (which roughly corresponds to the forward
+      // kinematics)
+      inverseDynamicsCalculator.initializeJointAccelerationMatrix(null);
+      inverseDynamicsCalculator.initialRecursionStep.passOneRecursive();
+
+      JointTorqueRegressorRecursionStep recursionStep = rigidBodyToRecursionStepMap.get(body);
+
+      recursionStep.markUpstreamAsModifiedRecursively();
+
+      // Perform the needed backward passes just for this rigid body
+      recursionStep.calculateRegressor();
+
+      // After finishing with this body, clear the modified markers and mark as stale
+      recursionStep.clearModifiedMarkersRecursively();
+      recursionStep.isUpToDate = false;
+   }
+
+   /**
+    * Compute the joint torque regressor matrix blocks for the rigid bodies in {@code bodies}.
+    * <p>
+    * The results will be stored in the recursion steps, see {@link #getJointTorqueRegressorMatrixBlock(RigidBodyReadOnly)}
+    * </p>
+    *
+    * @param bodies the rigid bodies to compute the joint torque regressor matrix blocks for.
+    */
+   public void compute(RigidBodyReadOnly[] bodies)
+   {
+      initialRecursionStep.setSpatialInertiasToZeroRecursively();
+      // Perform an initial forward pass of the inverse dynamics calculator (which roughly corresponds to the forward
+      // kinematics)
+      inverseDynamicsCalculator.initializeJointAccelerationMatrix(null);
+      inverseDynamicsCalculator.initialRecursionStep.passOneRecursive();
+
+      for (int i = 0; i < bodies.length; ++i)
+      {
+         JointTorqueRegressorRecursionStep recursionStep = rigidBodyToRecursionStepMap.get(bodies[i]);
+         recursionStep.markUpstreamAsModifiedRecursively();
+
+         // Perform the needed backward passes just for this rigid body
+         recursionStep.calculateRegressor();
+
+         recursionStep.clearModifiedMarkersRecursively();
+         recursionStep.isUpToDate = false;
+      }
+   }
+
+   /**
+    * Computes the joint torque regressor matrix slice corresponding to the rigid body / parameter combination given by {@code body} and {@code basis}.
+    * <p>
+    * The result is stored in the recursion step, see {@link #getJointTorqueRegressorMatrixSlice(RigidBodyReadOnly, SpatialInertiaBasisOption)}
+    * </p>
+    *
+    * @param body  the rigid body to compute the joint torque regressor matrix slice for.
+    * @param basis the basis to compute the joint torque regressor matrix slice for.
+    */
+   public void compute(RigidBodyReadOnly body, SpatialInertiaBasisOption basis)
+   {
+      // Set all spatial inertias to zero
+      initialRecursionStep.setSpatialInertiasToZeroRecursively();
+
+      // Perform an initial forward pass of the inverse dynamics calculator (which roughly corresponds to the forward
+      // kinematics)
+      inverseDynamicsCalculator.initializeJointAccelerationMatrix(null);
+      inverseDynamicsCalculator.initialRecursionStep.passOneRecursive();
+
+      JointTorqueRegressorRecursionStep recursionStep = rigidBodyToRecursionStepMap.get(body);
+
+      recursionStep.markUpstreamAsModifiedRecursively();
+
+      // Perform the needed backward passes just for this rigid body
+      recursionStep.calculateRegressorColumn(basis);
+
+      initialRecursionStep.clearModifiedMarkersRecursively();
+      recursionStep.isUpToDate = false;
+   }
+
+   /**
+    * Sequentially computes the joint torque regressor matrix slices corresponding to the rigid body / parameter combinations given by {@code body} and the
+    * array {@code bases}.
+    * <p>
+    * The results are stored in the recursion steps, see {@link #getJointTorqueRegressorMatrixSlice(RigidBodyReadOnly, SpatialInertiaBasisOption)}
+    * </p>
+    *
+    * @param body  the rigid body to compute the joint torque regressor matrix slices for.
+    * @param bases the bases to compute the joint torque regressor matrix slices for.
+    */
+   public void compute(RigidBodyReadOnly body, SpatialInertiaBasisOption[] bases)
+   {
+      // Set all spatial inertias to zero
+      initialRecursionStep.setSpatialInertiasToZeroRecursively();
+
+      // Perform an initial forward pass of the inverse dynamics calculator (which roughly corresponds to the forward
+      // kinematics)
+      inverseDynamicsCalculator.initializeJointAccelerationMatrix(null);
+      inverseDynamicsCalculator.initialRecursionStep.passOneRecursive();
+
+      JointTorqueRegressorRecursionStep recursionStep = rigidBodyToRecursionStepMap.get(body);
+
+      recursionStep.markUpstreamAsModifiedRecursively();
+
+      // Perform the needed backward passes just for the parameters under consideration
+      for (int i = 0; i < bases.length; ++i)
+         recursionStep.calculateRegressorColumn(bases[i]);
+
+      recursionStep.clearModifiedMarkersRecursively();
+      recursionStep.isUpToDate = false;
+   }
+
+   /**
     * Assuming all the recursion steps of the algorithm have been run through, this method will collect the results
     * into the overall joint torque regressor matrix.
     */
-   public void collectJointTorqueRegressorFromRecursionSteps()
+   private void collectJointTorqueRegressorFromRecursionSteps()
    {
       int i = 0;
       for (JointTorqueRegressorRecursionStep step : jointTorqueRegressorRecursionSteps)
@@ -214,7 +334,7 @@ public class JointTorqueRegressorCalculator
     * initial input state. For that reason, only use this method before any regressor calculation, preferably as soon
     * as possible after the constructor.
     */
-   public void collectParameterVectorFromRecursionSteps()
+   private void collectParameterVectorFromRecursionSteps()
    {
       int i = 0;
       for (JointTorqueRegressorRecursionStep step : jointTorqueRegressorRecursionSteps)
@@ -280,6 +400,48 @@ public class JointTorqueRegressorCalculator
    }
 
    /**
+    * Gets the 10-by-1 slice of the inertial parameter vector corresponding to {@code body}.
+    * <p>
+    * In general, this should mostly be used for debugging purposes, and if called, should be called soon after the
+    * constructor, else the result wil be meaningless (e.g. set to all zeros, or all zeros with a few ones).
+    * </p>
+    * <p>
+    * For more details, see {@link JointTorqueRegressorRecursionStep#parameterVector}.
+    * </p>
+    *
+    * @param body the rigid body to get the inertial parameter vector slice for.
+    * @return the 10-by-1 vector of inertial parameters.
+    */
+   public DMatrixRMaj getParameterVectorSlice(RigidBodyReadOnly body)
+   {
+      JointTorqueRegressorRecursionStep step = rigidBodyToRecursionStepMap.get(body);
+      if (step != null)
+         return step.parameterVector;
+      else
+         return null;
+   }
+
+   /**
+    * Gets the inertial parameter corresponding to {@code body} and {@code basis}.
+    * <p>
+    * In general, this should mostly be used for debugging purposes, and if called, should be called soon after the constructor, else the result wil be
+    * meaningless (e.g. zero).
+    * </p>
+    *
+    * @param body  the rigid body to get the inertial parameter for.
+    * @param basis the basis to get the inertial parameter for.
+    * @return the inertial parameter.
+    */
+   public double getParameter(RigidBodyReadOnly body, SpatialInertiaBasisOption basis)
+   {
+      JointTorqueRegressorRecursionStep step = rigidBodyToRecursionStepMap.get(body);
+      if (step != null)
+         return step.parameterVector.get(basis.ordinal());
+      else
+         return Double.NaN;
+   }
+
+   /**
     * Gets the computed n-by-10N joint torque regressor matrix of the multi-body system {@code input}, where n is the
     * number of DoFs and N is the number of rigid bodies in the multi-body system.
     *
@@ -288,6 +450,55 @@ public class JointTorqueRegressorCalculator
    public DMatrixRMaj getJointTorqueRegressorMatrix()
    {
       return jointTorqueRegressorMatrix;
+   }
+
+   /**
+    * Gets the computed n-by-10 block of the joint torque regressor matrix corresponding to {@code body}, where n is the number of
+    * DoFs.
+    *
+    * @param body the rigid body to get the joint torque regressor matrix block for.
+    * @return the n-by-10 joint torque regressor matrix.
+    */
+   public DMatrixRMaj getJointTorqueRegressorMatrixBlock(RigidBodyReadOnly body)
+   {
+      return rigidBodyToRecursionStepMap.get(body).regressorMatrixBlock;
+   }
+
+   /**
+    * Gets the computed n-dimensional joint torque regressor matrix slice corresponding to {@code body} and {@code basis}, where n is the number of
+    * DoFs.
+    *
+    * @param body  the rigid body to get the joint torque regressor matrix slice for.
+    * @param basis the basis to get the joint torque regressor matrix slice for.
+    * @return the n-dimensional joint torque regressor matrix slice.
+    */
+   public DMatrixRMaj getJointTorqueRegressorMatrixSlice(RigidBodyReadOnly body, SpatialInertiaBasisOption basis)
+   {
+      CommonOps_DDRM.extract(rigidBodyToRecursionStepMap.get(body).regressorMatrixBlock,
+                             0,
+                             basis.ordinal(),
+                             rigidBodyToRecursionStepMap.get(body).regressorColumn);
+      return rigidBodyToRecursionStepMap.get(body).regressorColumn;
+   }
+
+   /**
+    * Set whether to consider joint accelerations in the internal inverse dynamics calculations.
+    *
+    * @param considerJointAccelerations whether to consider joint accelerations in the internal inverse dynamics calculations.
+    */
+   public void setConsiderJointAccelerations(boolean considerJointAccelerations)
+   {
+      this.inverseDynamicsCalculator.setConsiderJointAccelerations(considerJointAccelerations);
+   }
+
+   /**
+    * Set whether to consider Coriolis and centrifugal forces in the internal inverse dynamics calculations.
+    *
+    * @param considerCoriolisAndCentrifugalForces whether to consider Coriolis and centrifugal forces in the internal inverse dynamics calculations.
+    */
+   public void setConsiderCoriolisAndCentrifugalForces(boolean considerCoriolisAndCentrifugalForces)
+   {
+      this.inverseDynamicsCalculator.setConsiderCoriolisAndCentrifugalForces(considerCoriolisAndCentrifugalForces);
    }
 
    /**
@@ -304,7 +515,9 @@ public class JointTorqueRegressorCalculator
    {
       M, MCOM_X, MCOM_Y, MCOM_Z, I_XX, I_XY, I_XZ, I_YY, I_YZ, I_ZZ;
 
-      /** Utility method to get all the basis options, for use in loops. */
+      /**
+       * Utility method to get all the basis options, for use in loops.
+       */
       public static final SpatialInertiaBasisOption[] values = values();
 
       /**
@@ -530,7 +743,7 @@ public class JointTorqueRegressorCalculator
       }
 
       /**
-       * Second pass: for each rigid body, iterate over and perform inverse dynamics for all the spatial inertia
+       * Second pass: for each rigid body starting from the leaves to the root, iterate over and perform inverse dynamics for all the spatial inertia
        * parameter bases.
        */
       public void calculateRegressorRecursively()
@@ -539,31 +752,57 @@ public class JointTorqueRegressorCalculator
          {
             child.calculateRegressorRecursively();
          }
+
+         calculateRegressor();
+
+         // When finished iterating over this link, clear all rigid bodies of modification markers, starting from
+         // the root body
+         initialRecursionStep.clearModifiedMarkersRecursively();
+         // This rigid body is now stale, and requires one more solve to get it up to date
+         isUpToDate = false;
+      }
+
+      /**
+       * Inner loop of second pass specific to a given rigid body.
+       * <p>
+       * Also used independently of its recursive parent method {@link #calculateRegressorRecursively()} in order to calculate regressor blocks for specific
+       * rigid bodies, see {@link #compute(RigidBodyReadOnly)}.
+       * </p>
+       */
+      public void calculateRegressor()
+      {
          // Only calculate if the rigid body of concern isn't a null body like the root / elevator
          if (rigidBody.getInertia() != null)
          {
             markUpstreamAsModifiedRecursively();
-            for (SpatialInertiaBasisOption basis : SpatialInertiaBasisOption.values())
-            {
-               // Set spatial inertia of this rigid body to be the desired basis
-               spatialInertiaParameterBasis.setBasis(basis);
-               rigidBody.getInertia().set(spatialInertiaParameterBasis);
+            for (SpatialInertiaBasisOption basis : SpatialInertiaBasisOption.values)
+               calculateRegressorColumn(basis);
 
-               // The forward pass of the inverse dynamics has already been called, only call the backward pass
-               rigidBody.getInertia().set(spatialInertiaParameterBasis);
-               initialRecursionStep.calculateInverseDynamicsToRootRecursively();
-               regressorColumn.set(inverseDynamicsCalculator.getJointTauMatrix());
-               setRegressorMatrixColumn(regressorColumn, basis);
-
-               // Set the spatial inertia of the rigid body back to zero for subsequent iterations / recursions
-               rigidBody.getInertia().setToZero();
-            }
-            // When finished iterating over this link, clear all rigid bodies of modification markers, starting from
-            // the root body
-            initialRecursionStep.clearModifiedMarkersRecursively();
-            // This rigid body is now stale, and requires one more solve to get it up to date
-            isUpToDate = false;
+            // When done with this rigid body, set the spatial inertia back to zero for subsequent iterations / recursions
+            rigidBody.getInertia().setToZero();
          }
+      }
+
+      /**
+       * Inner loop of second pass specific to a given rigid body and parameter combination.
+       * <p>
+       * Also used independently of its recursive parent method {@link #calculateRegressorRecursively()} and {@link #compute(RigidBodyReadOnly)} in order to
+       * calculate regressor slices for specific spatial inertia basis options, see {@link #compute(RigidBodyReadOnly, SpatialInertiaBasisOption)}.
+       * </p>
+       *
+       * @param basis the {@code SpatialInertiaBasisOption} to calculate the regressor column for.
+       */
+      public void calculateRegressorColumn(SpatialInertiaBasisOption basis)
+      {
+         // Set spatial inertia of this rigid body to be the desired basis
+         spatialInertiaParameterBasis.setBasis(basis);
+         rigidBody.getInertia().set(spatialInertiaParameterBasis);
+
+         // The forward pass of the inverse dynamics has already been called, only call the backward pass
+         rigidBody.getInertia().set(spatialInertiaParameterBasis);
+         initialRecursionStep.calculateInverseDynamicsToRootRecursively();
+         regressorColumn.set(inverseDynamicsCalculator.getJointTauMatrix());
+         setRegressorMatrixColumn(regressorColumn, basis);
       }
 
       public void calculateInverseDynamicsToRootRecursively()
