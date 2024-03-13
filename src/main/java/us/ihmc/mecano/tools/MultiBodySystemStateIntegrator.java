@@ -1,7 +1,5 @@
 package us.ihmc.mecano.tools;
 
-import java.util.List;
-
 import us.ihmc.euclid.geometry.interfaces.Pose3DBasics;
 import us.ihmc.euclid.geometry.interfaces.Pose3DReadOnly;
 import us.ihmc.euclid.orientation.interfaces.Orientation3DBasics;
@@ -11,24 +9,16 @@ import us.ihmc.euclid.referenceFrame.exceptions.ReferenceFrameMismatchException;
 import us.ihmc.euclid.referenceFrame.interfaces.FixedFrameVector3DBasics;
 import us.ihmc.euclid.referenceFrame.interfaces.FrameVector3DReadOnly;
 import us.ihmc.euclid.tuple3D.Vector3D;
-import us.ihmc.euclid.tuple3D.interfaces.Point3DBasics;
-import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
-import us.ihmc.euclid.tuple3D.interfaces.Tuple3DBasics;
-import us.ihmc.euclid.tuple3D.interfaces.Tuple3DReadOnly;
-import us.ihmc.euclid.tuple3D.interfaces.Vector3DBasics;
-import us.ihmc.euclid.tuple3D.interfaces.Vector3DReadOnly;
+import us.ihmc.euclid.tuple3D.interfaces.*;
 import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.euclid.tuple4D.interfaces.QuaternionBasics;
 import us.ihmc.euclid.tuple4D.interfaces.QuaternionReadOnly;
-import us.ihmc.mecano.multiBodySystem.interfaces.FixedJointBasics;
-import us.ihmc.mecano.multiBodySystem.interfaces.FloatingJointBasics;
-import us.ihmc.mecano.multiBodySystem.interfaces.JointBasics;
-import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointBasics;
-import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
-import us.ihmc.mecano.multiBodySystem.interfaces.SphericalJointBasics;
+import us.ihmc.mecano.multiBodySystem.interfaces.*;
 import us.ihmc.mecano.spatial.interfaces.FixedFrameSpatialAccelerationBasics;
 import us.ihmc.mecano.spatial.interfaces.FixedFrameTwistBasics;
 import us.ihmc.mecano.spatial.interfaces.TwistReadOnly;
+
+import java.util.List;
 
 /**
  * This class provides tools to integrate the state of a multi-body system.
@@ -264,7 +254,7 @@ public class MultiBodySystemStateIntegrator
     * </pre>
     * </p>
     *
-    * @param angularVelocity        the angular velocity to integrate. Not modified.
+    * @param angularVelocity        the angular velocity, expressed in local frame, to integrate. Not modified.
     * @param orientationToIntegrate the orientation to update. Modified.
     */
    public void integrate(Vector3DReadOnly angularVelocity, Orientation3DBasics orientationToIntegrate)
@@ -284,7 +274,7 @@ public class MultiBodySystemStateIntegrator
     * </pre>
     * </p>
     *
-    * @param angularVelocity    the angular velocity to integrate. Not modified.
+    * @param angularVelocity    the angular velocity, expressed in local frame, to integrate. Not modified.
     * @param initialOrientation the initial orientation to append the integrated angular velocity to.
     *                           Not modified.
     * @param finalOrientation   the estimated orientation after integration. Modified.
@@ -311,7 +301,7 @@ public class MultiBodySystemStateIntegrator
     * @param orientation         the orientation describing the frame in which the velocity is
     *                            expressed. If equal to {@code null}, the orientation is assumed to be
     *                            identity. Not modified.
-    * @param linearVelocity      the linear velocity to integrate. Not modified.
+    * @param linearVelocity      the linear velocity, expressed in local frame, to integrate. Not modified.
     * @param positionToIntegrate the position to update. Modified.
     */
    public void integrate(Orientation3DReadOnly orientation, Vector3DReadOnly linearVelocity, Tuple3DBasics positionToIntegrate)
@@ -333,7 +323,7 @@ public class MultiBodySystemStateIntegrator
     * @param orientation     the orientation describing the frame in which the velocity is expressed.
     *                        If equal to {@code null}, the orientation is assumed to be identity. Not
     *                        modified.
-    * @param linearVelocity  the linear velocity to integrate. Not modified.
+    * @param linearVelocity  the linear velocity, expressed in local frame, to integrate. Not modified.
     * @param initialPosition the initial position to add the integrated velocity to. Not modified.
     * @param finalPosition   the estimated position after integration. Modified.
     */
