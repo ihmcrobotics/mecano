@@ -82,8 +82,8 @@ public class YoSpatialInertia implements SpatialInertiaBasics, Settable<SpatialI
       this.expressedInFrame = expressedInFrame;
 
       mass = new YoDouble(bodyFrame.getName() + "_mass" + nameSuffix, registry);
-      centerOfMassOffset = new YoFrameVector3D(bodyFrame.getName() + "_centerOfMassOffset" + nameSuffix, expressedInFrame, registry);
-      momentOfInertia = new YoMatrix3D(bodyFrame.getName() + "_momentOfInertia", registry);
+      centerOfMassOffset = new YoFrameVector3D(bodyFrame.getName() + "_centerOfMassOffset", nameSuffix, expressedInFrame, registry);
+      momentOfInertia = new YoMatrix3D(bodyFrame.getName() + "_momentOfInertia", nameSuffix, registry);
    }
 
    /** {@inheritDoc} */
