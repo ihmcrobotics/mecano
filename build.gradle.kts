@@ -44,8 +44,8 @@ graphvizDependencies {
    api("guru.nidi:graphviz-java:0.5.4")
 }
 
-yovariablesDependencies {
+Dependencies {
    api(ihmc.sourceSetProject("main"))
 
-   api("us.ihmc:ihmc-yovariables:0.11.1")
+   api("us.ihmc:ihmc-yovariables:0.12.0")
 }
