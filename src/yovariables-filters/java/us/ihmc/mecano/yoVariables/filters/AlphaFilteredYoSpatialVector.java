@@ -1,36 +1,36 @@
-package us.ihmc.robotics.math.filters;
+package us.ihmc.mecano.yoVariables.filters;
 
 import us.ihmc.euclid.referenceFrame.interfaces.FrameVector3DReadOnly;
 import us.ihmc.euclid.tuple3D.interfaces.Vector3DReadOnly;
 import us.ihmc.mecano.yoVariables.spatial.YoFixedFrameSpatialVector;
-import us.ihmc.robotics.dataStructures.YoMutableFrameSpatialVector;
+import us.ihmc.yoVariables.euclid.filters.AlphaFilteredYoFrameVector3D;
 import us.ihmc.yoVariables.providers.DoubleProvider;
 import us.ihmc.yoVariables.registry.YoRegistry;
 
-public class AlphaFilteredYoMutableFrameSpatialVector extends YoMutableFrameSpatialVector
+public class AlphaFilteredYoSpatialVector extends YoFixedFrameSpatialVector
 {
-   private final AlphaFilteredYoMutableFrameVector3D alphaFilteredAngularPart;
-   private final AlphaFilteredYoMutableFrameVector3D alphaFilteredLinearPart;
+   private final AlphaFilteredYoFrameVector3D alphaFilteredAngularPart;
+   private final AlphaFilteredYoFrameVector3D alphaFilteredLinearPart;
 
-   public AlphaFilteredYoMutableFrameSpatialVector(String namePrefix, String nameSuffix, YoRegistry registry, DoubleProvider alphaAngularPart,
+   public AlphaFilteredYoSpatialVector(String namePrefix, String nameSuffix, YoRegistry registry, DoubleProvider alphaAngularPart,
                                        DoubleProvider alphaLinearPart, FrameVector3DReadOnly rawAngularPart, FrameVector3DReadOnly rawLinearPart)
    {
-      super(new AlphaFilteredYoMutableFrameVector3D(namePrefix, nameSuffix, registry, alphaAngularPart, rawAngularPart),
-            new AlphaFilteredYoMutableFrameVector3D(namePrefix, nameSuffix, registry, alphaLinearPart, rawLinearPart));
-      this.alphaFilteredAngularPart = (AlphaFilteredYoMutableFrameVector3D) getAngularPart();
-      this.alphaFilteredLinearPart = (AlphaFilteredYoMutableFrameVector3D) getLinearPart();
+      super(new AlphaFilteredYoFrameVector3D(namePrefix + "AngularPart", nameSuffix, registry, alphaAngularPart, rawAngularPart),
+            new AlphaFilteredYoFrameVector3D(namePrefix + "LinearPart", nameSuffix, registry, alphaLinearPart, rawLinearPart));
+      this.alphaFilteredAngularPart = (AlphaFilteredYoFrameVector3D) getAngularPart();
+      this.alphaFilteredLinearPart = (AlphaFilteredYoFrameVector3D) getLinearPart();
    }
 
-   public AlphaFilteredYoMutableFrameSpatialVector(String namePrefix, String nameSuffix, YoRegistry registry, DoubleProvider alphaAngularPart,
+   public AlphaFilteredYoSpatialVector(String namePrefix, String nameSuffix, YoRegistry registry, DoubleProvider alphaAngularPart,
                                        DoubleProvider alphaLinearPart, YoFixedFrameSpatialVector rawSpatialVector)
    {
-      super(new AlphaFilteredYoMutableFrameVector3D(namePrefix, nameSuffix, registry, alphaAngularPart, rawSpatialVector.getAngularPart()),
-            new AlphaFilteredYoMutableFrameVector3D(namePrefix, nameSuffix, registry, alphaLinearPart, rawSpatialVector.getLinearPart()));
-      this.alphaFilteredAngularPart = (AlphaFilteredYoMutableFrameVector3D) getAngularPart();
-      this.alphaFilteredLinearPart = (AlphaFilteredYoMutableFrameVector3D) getLinearPart();
+      super(new AlphaFilteredYoFrameVector3D(namePrefix + "AngularPart", nameSuffix, registry, alphaAngularPart, rawSpatialVector.getAngularPart()),
+            new AlphaFilteredYoFrameVector3D(namePrefix + "LinearPart", nameSuffix, registry, alphaLinearPart, rawSpatialVector.getLinearPart()));
+      this.alphaFilteredAngularPart = (AlphaFilteredYoFrameVector3D) getAngularPart();
+      this.alphaFilteredLinearPart = (AlphaFilteredYoFrameVector3D) getLinearPart();
    }
 
-   public AlphaFilteredYoMutableFrameSpatialVector(AlphaFilteredYoMutableFrameVector3D yoAngularPart, AlphaFilteredYoMutableFrameVector3D yoLinearPart)
+   public AlphaFilteredYoSpatialVector(AlphaFilteredYoFrameVector3D yoAngularPart, AlphaFilteredYoFrameVector3D yoLinearPart)
    {
       super(yoAngularPart, yoLinearPart);
       this.alphaFilteredAngularPart = yoAngularPart;

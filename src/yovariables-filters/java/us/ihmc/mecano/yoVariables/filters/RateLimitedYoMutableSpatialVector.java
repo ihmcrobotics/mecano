@@ -1,9 +1,10 @@
-package us.ihmc.robotics.math.filters;
+package us.ihmc.mecano.yoVariables.filters;
 
 import us.ihmc.euclid.referenceFrame.interfaces.FrameVector3DReadOnly;
 import us.ihmc.euclid.tuple3D.interfaces.Vector3DReadOnly;
 import us.ihmc.mecano.yoVariables.spatial.YoFixedFrameSpatialVector;
-import us.ihmc.robotics.dataStructures.YoMutableFrameSpatialVector;
+import us.ihmc.mecano.yoVariables.spatial.YoMutableFrameSpatialVector;
+import us.ihmc.yoVariables.euclid.filters.RateLimitedYoMutableFrameVector3D;
 import us.ihmc.yoVariables.providers.DoubleProvider;
 import us.ihmc.yoVariables.registry.YoRegistry;
 

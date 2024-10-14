@@ -1,4 +1,4 @@
-package us.ihmc.robotics.dataStructures;
+package us.ihmc.mecano.yoVariables.spatial;
 
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.referenceFrame.interfaces.FixedFrameVector3DBasics;

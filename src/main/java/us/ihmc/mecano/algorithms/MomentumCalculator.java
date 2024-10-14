@@ -1,4 +1,4 @@
-package us.ihmc.robotics.screwTheory;
+package us.ihmc.mecano.algorithms;
 
 import java.util.stream.Stream;
 
@@ -11,6 +11,10 @@ import us.ihmc.mecano.spatial.Twist;
 import us.ihmc.mecano.spatial.interfaces.FixedFrameMomentumBasics;
 import us.ihmc.mecano.spatial.interfaces.SpatialInertiaReadOnly;
 
+/**
+ * This class is designed to calculate the momentum of a subtree. This is useful when looking at the specific momentum contributions of independent parts of the
+ * rigid body system.
+ */
 public class MomentumCalculator
 {
    private final RigidBodyReadOnly[] rigidBodiesInOrders;

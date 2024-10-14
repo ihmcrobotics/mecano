@@ -1,11 +1,10 @@
-package us.ihmc.robotics.screwTheory;
+package us.ihmc.mecano.algorithms;
 
 import org.ejml.data.DMatrixRMaj;
 import org.ejml.dense.row.CommonOps_DDRM;
 import org.ejml.dense.row.MatrixFeatures_DDRM;
 import org.ejml.dense.row.factory.LinearSolverFactory_DDRM;
 import org.ejml.interfaces.linsol.LinearSolverDense;
-import us.ihmc.robotics.MatrixMissingTools;
 
 public class FloatingBaseRigidBodyDynamicsCalculator
 {

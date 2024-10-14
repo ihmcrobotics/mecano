@@ -1,4 +1,4 @@
-package us.ihmc.robotics.screwTheory;
+package us.ihmc.mecano.algorithms;
 
 import java.util.LinkedHashMap;
 
@@ -6,14 +6,14 @@ import org.ejml.data.DMatrixRMaj;
 import org.ejml.dense.row.CommonOps_DDRM;
 
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
-import us.ihmc.matrixlib.MatrixTools;
-import us.ihmc.mecano.algorithms.InverseDynamicsCalculator;
+import us.ihmc.mecano.algorithms.interfaces.MassMatrixCalculator;
 import us.ihmc.mecano.multiBodySystem.interfaces.JointBasics;
 import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
-import us.ihmc.mecano.spatial.SpatialAcceleration;
 import us.ihmc.mecano.spatial.SpatialForce;
 import us.ihmc.mecano.spatial.Wrench;
+import us.ihmc.mecano.spatial.interfaces.SpatialAccelerationReadOnly;
 import us.ihmc.mecano.tools.JointStateType;
+import us.ihmc.mecano.tools.MecanoFactories;
 import us.ihmc.mecano.tools.MultiBodySystemTools;
 
 /**
@@ -34,9 +34,11 @@ public class DifferentialIDMassMatrixCalculator implements MassMatrixCalculator
 
    public DifferentialIDMassMatrixCalculator(ReferenceFrame inertialFrame, RigidBodyBasics rootBody)
    {
-      SpatialAcceleration zeroRootAcceleration = ScrewTools.createGravitationalSpatialAcceleration(rootBody, 0.0);
+      SpatialAccelerationReadOnly zeroRootAcceleration = MecanoFactories.newGravitationalSpatialAcceleration(rootBody, 0.0);
       
-      idCalculator = new InverseDynamicsCalculator(rootBody, false, true);
+      idCalculator = new InverseDynamicsCalculator(rootBody);
+      idCalculator.setConsiderCoriolisAndCentrifugalForces(false);
+      idCalculator.setConsiderJointAccelerations(true);
       idCalculator.setRootAcceleration(zeroRootAcceleration);
       jointsInOrder = MultiBodySystemTools.collectSubtreeJoints(rootBody);
       totalNumberOfDoFs = MultiBodySystemTools.computeDegreesOfFreedom(jointsInOrder);
@@ -70,7 +72,7 @@ public class DifferentialIDMassMatrixCalculator implements MassMatrixCalculator
          
          idCalculator.compute();
          tmpTauMatrix.set(idCalculator.getJointTauMatrix());
-         MatrixTools.setMatrixBlock(massMatrix, 0, column, tmpTauMatrix, 0, 0, totalNumberOfDoFs, 1, 1.0);
+         CommonOps_DDRM.extract(tmpTauMatrix, 0, totalNumberOfDoFs, 0, 1, massMatrix, 0, column);
          column++;
          
          tmpDesiredJointAccelerationsMatrix.set(i, 0, 0.0);

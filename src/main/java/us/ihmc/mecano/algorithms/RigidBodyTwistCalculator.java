@@ -1,4 +1,4 @@
-package us.ihmc.robotics.screwTheory;
+package us.ihmc.mecano.algorithms;
 
 import org.ejml.data.DMatrix;
 import org.ejml.data.DMatrixRMaj;
@@ -22,7 +22,7 @@ import java.util.*;
  * TODO This class should migrate to the Mecano library.
  * </p>
  * <p>
- * Unlike {@link TwistCalculator} or {@link MovingReferenceFrame}, this class allows to use any type of data for the joint velocities through the interface {@link JointVelocityAccessor}.
+ * Unlike {@link MovingReferenceFrame}, this class allows to use any type of data for the joint velocities through the interface {@link JointVelocityAccessor}.
  * </p>
  */
 public class RigidBodyTwistCalculator implements RigidBodyTwistProvider

@@ -1,4 +1,9 @@
+# Top level files to ignore
+gradlew
+gradlew.bat
+
 # Top level directories to ignore
+/gradle
 /build
 /classes
 /bin
