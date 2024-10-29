@@ -17,9 +17,9 @@ mainDependencies {
    api("org.ejml:ejml-core:0.39")
    api("org.ejml:ejml-ddense:0.39")
 
-   api("us.ihmc:euclid:0.22.0")
-   api("us.ihmc:euclid-frame:0.22.0")
-   api("us.ihmc:euclid-geometry:0.22.0")
+   api("us.ihmc:euclid:0.22.2")
+   api("us.ihmc:euclid-frame:0.22.2")
+   api("us.ihmc:euclid-geometry:0.22.2")
 }
 
 testDependencies {
@@ -47,11 +47,11 @@ graphvizDependencies {
 yovariablesDependencies {
    api(ihmc.sourceSetProject("main"))
 
-   api("us.ihmc:ihmc-yovariables:0.13.2")
+   api("us.ihmc:ihmc-yovariables:0.13.3")
 }
 
 yovariablesFiltersDependencies {
    api(ihmc.sourceSetProject("yovariables"))
 
-   api("us.ihmc:ihmc-yovariables-filters:0.13.2")
+   api("us.ihmc:ihmc-yovariables-filters:0.13.3")
 }
