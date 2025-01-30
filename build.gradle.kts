@@ -47,5 +47,5 @@ graphvizDependencies {
 yovariablesDependencies {
    api(ihmc.sourceSetProject("main"))
 
-   api("us.ihmc:ihmc-yovariables:0.11.1")
+   api("us.ihmc:ihmc-yovariables:0.13.4")
 }
