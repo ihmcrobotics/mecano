@@ -1,6 +1,6 @@
 # ![Mecano](logo/Mecano.png)
 ![mecano](https://maven-badges.herokuapp.com/maven-central/us.ihmc/mecano/badge.svg?style=plastic)
-![buildstatus](https://github.com/ihmcrobotics/mecano/actions/workflows/gradle.yml/badge.svg)
+![buildstatus](https://github.com/ihmcrobotics/mecano/actions/workflows/gradle-test.yml/badge.svg)
 
 
 ## Minutiae
