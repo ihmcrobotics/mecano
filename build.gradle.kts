@@ -28,7 +28,7 @@ testDependencies {
    api("org.ejml:ejml-ddense:0.39")
    api("org.ejml:ejml-simple:0.39")
 
-   api("us.ihmc:log-tools:0.6.4")
+   api("us.ihmc:log-tools:0.6.5")
 
    var javaFXVersion = "17.0.2"
    api(ihmc.javaFXModule("base", javaFXVersion))
