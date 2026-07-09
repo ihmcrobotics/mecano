@@ -65,6 +65,45 @@ public class JointTorqueRegressorCalculatorTest
       assertArrayEquals(expectedjointTau.getData(), actualJointTau.getData(), EPSILON);
    }
 
+   /**
+    * Companion to {@link #testRegressorAndParametersMatchInverseDynamicsSimple()} but with a DISTAL centre of mass
+    * (nonzero CoM offset) on every body, which exercises the first-moment (MCOM) regressor columns. The random chain
+    * builder places every CoM at the link-frame origin, so those columns are never tested there. With a nonzero first
+    * moment m*c, Y*theta must still equal inverse dynamics. It does not when the first-moment basis is built with
+    * mass=0 and computeDynamicWrench scales the CoM terms by mass (annihilating the first moment's dynamic wrench).
+    */
+   @Test
+   public void testRegressorMatchesInverseDynamicsWithDistalCenterOfMass()
+   {
+      Random random = new Random(25);
+
+      int numberOfJoints = 2;
+      List<OneDoFJoint> joints = MultiBodySystemRandomTools.nextOneDoFJointChain(random, numberOfJoints);
+      MultiBodySystemBasics system = MultiBodySystemBasics.toMultiBodySystemBasics(joints);
+
+      // Relocate each body's CoM away from the link-frame origin so the first moment m*c is nonzero.
+      for (OneDoFJoint joint : joints)
+         joint.getSuccessor().getInertia().setCenterOfMassOffset(0.15, -0.10, 0.20);
+
+      for (JointStateType type : JointStateType.values())
+         MultiBodySystemRandomTools.nextState(random, type, system.getAllJoints());
+
+      InverseDynamicsCalculator inverseDynamicsCalculator = new InverseDynamicsCalculator(system);
+      inverseDynamicsCalculator.setGravitationalAcceleration(GRAVITY_Z);
+      inverseDynamicsCalculator.compute();
+      DMatrixRMaj expectedJointTau = inverseDynamicsCalculator.getJointTauMatrix();
+
+      JointTorqueRegressorCalculator regressorCalculator = new JointTorqueRegressorCalculator(system);
+      DMatrixRMaj parameterVector = regressorCalculator.getParameterVector();
+      regressorCalculator.setGravitationalAcceleration(GRAVITY_Z);
+      regressorCalculator.compute();
+      DMatrixRMaj regressorMatrix = regressorCalculator.getJointTorqueRegressorMatrix();
+
+      DMatrixRMaj actualJointTau = new DMatrixRMaj(numberOfJoints, 1);
+      CommonOps_DDRM.mult(regressorMatrix, parameterVector, actualJointTau);
+      assertArrayEquals(expectedJointTau.getData(), actualJointTau.getData(), EPSILON);
+   }
+
    @Test
    public void testThrowsUnsupportedOperationExceptionWithKinematicLoop()
    {

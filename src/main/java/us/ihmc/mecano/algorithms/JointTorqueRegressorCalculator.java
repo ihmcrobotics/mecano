@@ -678,6 +678,12 @@ public class JointTorqueRegressorCalculator
       private DMatrixRMaj regressorColumn;
 
       /**
+       * Scratch column holding the pure-mass basis torque, used to subtract the mass contribution when recovering
+       * the first-moment (MCOM) columns by linearity. See {@link #calculateRegressorColumn(SpatialInertiaBasisOption)}.
+       */
+      private DMatrixRMaj massBasisColumn;
+
+      /**
        * Intermediate variable the block of the regressor matrix corresponding to this {@code rigidBody}. It is an
        * n-by-10 matrix, where n is the number of DoFs of the multi-body system {@code input}.
        */
@@ -720,6 +726,7 @@ public class JointTorqueRegressorCalculator
             this.inverseDynamicsCalculator = inverseDynamicsCalculator;
             spatialInertiaParameterBasis = new SpatialInertiaParameterBasis(this.rigidBody);
             regressorColumn = new DMatrixRMaj(inverseDynamicsCalculator.getJointTauMatrix().numRows, 1);
+            massBasisColumn = new DMatrixRMaj(inverseDynamicsCalculator.getJointTauMatrix().numRows, 1);
             this.inverseDynamicsRecursionStep = inverseDynamicsCalculator.rigidBodyToRecursionStepMap.get(rigidBody);
             regressorMatrixBlock = new DMatrixRMaj(inverseDynamicsCalculator.getJointTauMatrix().numRows, PARAMETERS_PER_BODY);
             isOnModifiedBranch = false;
@@ -794,15 +801,65 @@ public class JointTorqueRegressorCalculator
        */
       public void calculateRegressorColumn(SpatialInertiaBasisOption basis)
       {
-         // Set spatial inertia of this rigid body to be the desired basis
-         spatialInertiaParameterBasis.setBasis(basis);
-         rigidBody.getInertia().set(spatialInertiaParameterBasis);
+         switch (basis)
+         {
+            case MCOM_X, MCOM_Y, MCOM_Z ->
+            {
+               // The first-moment parameter is h = m*c. A basis element for h alone cannot be stored as a
+               // SpatialInertia (the stored first moment is mass * comOffset, so setting mass = 0 with comOffset = e_i
+               // gives first moment zero, and computeDynamicWrench then scales the CoM terms by that zero mass,
+               // dropping the first moment's whole dynamic wrench -- gravity moment and the m*(wDot x c) inertial
+               // force -- from every row including the floating base). Recover the pure first-moment column by the
+               // exact linearity of the joint torques in the inertial parameters [m, h, I_origin]:
+               //    column(h_i) = tau(mass = 1, comOffset = e_i, I_origin = 0) - tau(mass = 1, comOffset = 0, I_origin = 0).
+               // getMomentOfInertia() is the inertia about the body-frame origin, so setToZero() leaves I_origin = 0
+               // for both terms and no parallel-axis inertia leaks into the column.
+               spatialInertiaParameterBasis.setBasis(SpatialInertiaBasisOption.M);
+               solveInverseDynamicsForCurrentBasis();
+               massBasisColumn.set(inverseDynamicsCalculator.getJointTauMatrix());
 
-         // The forward pass of the inverse dynamics has already been called, only call the backward pass
+               setUnitMassAtFirstMomentDirection(basis);
+               solveInverseDynamicsForCurrentBasis();
+               regressorColumn.set(inverseDynamicsCalculator.getJointTauMatrix());
+               CommonOps_DDRM.subtractEquals(regressorColumn, massBasisColumn);
+            }
+            default ->
+            {
+               spatialInertiaParameterBasis.setBasis(basis);
+               solveInverseDynamicsForCurrentBasis();
+               regressorColumn.set(inverseDynamicsCalculator.getJointTauMatrix());
+            }
+         }
+         setRegressorMatrixColumn(regressorColumn, basis);
+      }
+
+      /**
+       * Set the current parameter basis to a unit point mass located a unit distance along the axis of the given
+       * first-moment basis option, i.e. mass = 1 and comOffset = e_i (so first moment h = m*c = e_i), with zero
+       * inertia about the body-frame origin. Used to recover the first-moment columns by linearity (see
+       * {@link #calculateRegressorColumn(SpatialInertiaBasisOption)}).
+       */
+      private void setUnitMassAtFirstMomentDirection(SpatialInertiaBasisOption basis)
+      {
+         spatialInertiaParameterBasis.setToZero();
+         spatialInertiaParameterBasis.setMass(1.0);
+         switch (basis)
+         {
+            case MCOM_X -> spatialInertiaParameterBasis.setCenterOfMassOffset(1.0, 0.0, 0.0);
+            case MCOM_Y -> spatialInertiaParameterBasis.setCenterOfMassOffset(0.0, 1.0, 0.0);
+            case MCOM_Z -> spatialInertiaParameterBasis.setCenterOfMassOffset(0.0, 0.0, 1.0);
+            default -> throw new IllegalArgumentException("Not a first-moment basis option: " + basis);
+         }
+      }
+
+      /**
+       * Apply the current parameter basis to this rigid body and run the inverse-dynamics backward pass to the root.
+       * The forward pass has already been run for the current state.
+       */
+      private void solveInverseDynamicsForCurrentBasis()
+      {
          rigidBody.getInertia().set(spatialInertiaParameterBasis);
          initialRecursionStep.calculateInverseDynamicsToRootRecursively();
-         regressorColumn.set(inverseDynamicsCalculator.getJointTauMatrix());
-         setRegressorMatrixColumn(regressorColumn, basis);
       }
 
       public void calculateInverseDynamicsToRootRecursively()
@@ -876,10 +933,14 @@ public class JointTorqueRegressorCalculator
        */
       private void spatialInertiaToParameterVector(SpatialInertiaBasics spatialInertia, DMatrixRMaj parameterVectorToPack)
       {
-         parameterVectorToPack.set(0, 0, spatialInertia.getMass());
-         parameterVectorToPack.set(1, 0, spatialInertia.getCenterOfMassOffset().getX());
-         parameterVectorToPack.set(2, 0, spatialInertia.getCenterOfMassOffset().getY());
-         parameterVectorToPack.set(3, 0, spatialInertia.getCenterOfMassOffset().getZ());
+         // Parameters are [m, h, I_origin] with h = m*c the FIRST MASS MOMENT (mass times CoM offset), matching the
+         // regressor's MCOM columns and the Rucker & Wensing pi convention. Emitting the raw CoM offset here would be
+         // off by a factor of mass and only agree with the regressor at unit mass.
+         double mass = spatialInertia.getMass();
+         parameterVectorToPack.set(0, 0, mass);
+         parameterVectorToPack.set(1, 0, mass * spatialInertia.getCenterOfMassOffset().getX());
+         parameterVectorToPack.set(2, 0, mass * spatialInertia.getCenterOfMassOffset().getY());
+         parameterVectorToPack.set(3, 0, mass * spatialInertia.getCenterOfMassOffset().getZ());
          parameterVectorToPack.set(4, 0, spatialInertia.getMomentOfInertia().getM00());  // Ixx
          parameterVectorToPack.set(5, 0, spatialInertia.getMomentOfInertia().getM01());  // Ixy
          parameterVectorToPack.set(6, 0, spatialInertia.getMomentOfInertia().getM02());  // Ixz
